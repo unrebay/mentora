@@ -15,6 +15,87 @@ interface Props {
   initialHistory: { role: string; content: string }[];
 }
 
+// Inline text: **bold** and *italic*
+function parseInline(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith("**") && part.endsWith("**")) {
+          return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>;
+        }
+        if (part.startsWith("*") && part.endsWith("*")) {
+          return <em key={i}>{part.slice(1, -1)}</em>;
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </>
+  );
+}
+
+// Full markdown block renderer
+function MarkdownMessage({ content }: { content: string }) {
+  const lines = content.split("\n");
+  const elements: React.ReactNode[] = [];
+  let listBuffer: string[] = [];
+  let keyIdx = 0;
+
+  const flushList = () => {
+    if (listBuffer.length === 0) return;
+    elements.push(
+      <ul key={`list-${keyIdx++}`} className="space-y-1.5 my-2 ml-1">
+        {listBuffer.map((item, i) => (
+          <li key={i} className="flex gap-2 items-start">
+            <span className="mt-1 w-1.5 h-1.5 rounded-full bg-brand-400 shrink-0" />
+            <span>{parseInline(item)}</span>
+          </li>
+        ))}
+      </ul>
+    );
+    listBuffer = [];
+  };
+
+  for (const line of lines) {
+    // List item
+    if (line.match(/^[-•*] /)) {
+      listBuffer.push(line.slice(2));
+      continue;
+    }
+
+    flushList();
+
+    // Skip markdown headers — treat as bold paragraph
+    if (line.match(/^#{1,3} /)) {
+      const text = line.replace(/^#{1,3} /, "");
+      elements.push(
+        <p key={keyIdx++} className="font-semibold mt-3 mb-1">
+          {parseInline(text)}
+        </p>
+      );
+      continue;
+    }
+
+    // Empty line — spacer
+    if (line.trim() === "") {
+      if (elements.length > 0) {
+        elements.push(<div key={keyIdx++} className="h-2" />);
+      }
+      continue;
+    }
+
+    // Regular paragraph
+    elements.push(
+      <p key={keyIdx++} className="leading-relaxed">
+        {parseInline(line)}
+      </p>
+    );
+  }
+
+  flushList();
+
+  return <div className="space-y-0.5 text-[15px]">{elements}</div>;
+}
+
 export default function ChatInterface({ subject, subjectTitle, initialHistory }: Props) {
   const [messages, setMessages] = useState<Message[]>(
     initialHistory.map((m) => ({ role: m.role as MessageRole, content: m.content }))
@@ -67,7 +148,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory }:
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3">
-        <Link href="/dashboard" className="text-gray-400 hover:text-gray-600 transition-colors">
+        <Link href="/dashboard" className="text-gray-400 hover:text-gray-600 transition-colors text-lg">
           ←
         </Link>
         <div>
@@ -77,21 +158,21 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory }:
       </header>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-5">
         {isEmpty && (
           <div className="text-center pt-12">
             <div className="text-5xl mb-4">🏰</div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
               Привет! Я твой ментор по теме «{subjectTitle}»
             </h2>
-            <p className="text-gray-500 text-sm max-w-sm mx-auto">
-              Спроси меня о любом периоде, событии или личности. Я объясню и задам вопрос для закрепления.
+            <p className="text-gray-500 text-sm max-w-sm mx-auto leading-relaxed">
+              Спроси меня о любом периоде, событии или личности. Я расскажу живо — и задам вопрос для закрепления.
             </p>
             <div className="mt-6 flex flex-wrap gap-2 justify-center">
               {["С чего начать изучение?", "Расскажи о Петре I", "Что такое Смутное время?"].map((q) => (
                 <button
                   key={q}
-                  onClick={() => { setInput(q); }}
+                  onClick={() => setInput(q)}
                   className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-600 hover:border-brand-300 hover:text-brand-600 transition-colors"
                 >
                   {q}
@@ -106,26 +187,38 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory }:
             key={i}
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
+            {msg.role === "assistant" && (
+              <div className="w-7 h-7 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-xs font-bold mr-2 mt-0.5 shrink-0">
+                М
+              </div>
+            )}
             <div
-              className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+              className={`max-w-[82%] rounded-2xl px-4 py-3 ${
                 msg.role === "user"
-                  ? "bg-brand-600 text-white"
-                  : "bg-white border border-gray-100 text-gray-800"
+                  ? "bg-brand-600 text-white text-[15px] leading-relaxed"
+                  : "bg-white border border-gray-100 text-gray-800 shadow-sm"
               }`}
             >
-              {msg.content}
+              {msg.role === "assistant" ? (
+                <MarkdownMessage content={msg.content} />
+              ) : (
+                msg.content
+              )}
             </div>
           </div>
         ))}
 
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-white border border-gray-100 rounded-2xl px-4 py-3">
-              <div className="flex gap-1">
+            <div className="w-7 h-7 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-xs font-bold mr-2 shrink-0">
+              М
+            </div>
+            <div className="bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm">
+              <div className="flex gap-1 items-center">
                 {[0, 1, 2].map((i) => (
                   <div
                     key={i}
-                    className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"
+                    className="w-2 h-2 bg-brand-300 rounded-full animate-bounce"
                     style={{ animationDelay: `${i * 0.15}s` }}
                   />
                 ))}
@@ -145,7 +238,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory }:
             onChange={(e) => setInput(e.target.value)}
             placeholder="Задай вопрос..."
             disabled={loading}
-            className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition text-sm disabled:opacity-50"
+            className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition text-[15px] disabled:opacity-50 bg-gray-50"
           />
           <button
             type="submit"
