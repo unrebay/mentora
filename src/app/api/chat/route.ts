@@ -131,15 +131,11 @@ ${ragContext}
       messages_date: today,
     }).eq("id", user.id);
 
-    // Update XP
-    await supabase.from("user_progress").upsert({
-      user_id: user.id,
-      subject,
-      xp_total: 10,
-      last_active_at: new Date().toISOString(),
-    }, {
-      onConflict: "user_id,subject",
-      ignoreDuplicates: false,
+    // Update XP atomically (+10 per message)
+    await supabase.rpc("increment_xp", {
+      p_user_id: user.id,
+      p_subject: subject,
+      p_amount: 10,
     });
 
     const messagesRemaining = isPro ? null : DAILY_LIMIT - newUsedToday;

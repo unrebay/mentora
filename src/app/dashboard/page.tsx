@@ -4,6 +4,24 @@ import { redirect } from "next/navigation";
 import { SUBJECTS } from "@/lib/types";
 import Link from "next/link";
 
+const XP_LEVELS = [
+  { name: "Новичок",     minXP: 0,    maxXP: 100,  color: "bg-gray-400" },
+  { name: "Исследователь", minXP: 100,  maxXP: 300,  color: "bg-blue-500" },
+  { name: "Знаток",      minXP: 300,  maxXP: 600,  color: "bg-brand-500" },
+  { name: "Историк",     minXP: 600,  maxXP: 1000, color: "bg-purple-500" },
+  { name: "Эксперт",     minXP: 1000, maxXP: Infinity, color: "bg-amber-500" },
+];
+
+function getLevel(xp: number) {
+  const level = XP_LEVELS.slice().reverse().find((l) => xp >= l.minXP) ?? XP_LEVELS[0];
+  const idx = XP_LEVELS.indexOf(level);
+  const next = XP_LEVELS[idx + 1];
+  const progress = next
+    ? Math.min(100, Math.round(((xp - level.minXP) / (next.minXP - level.minXP)) * 100))
+    : 100;
+  return { ...level, idx, next, progress };
+}
+
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
@@ -92,15 +110,26 @@ export default async function DashboardPage() {
                     <div className="text-3xl mb-3">{subject.emoji}</div>
                     <div className="font-semibold text-sm text-gray-900 mb-0.5">{subject.title}</div>
                     <div className="text-xs text-gray-400">{subject.description}</div>
-                    {progress && (
-                      <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2 text-xs">
-                        <span className="text-brand-600 font-medium">⚡ {progress.xp_total} XP</span>
-                        {progress.streak_days > 0 && (
-                          <span className="text-orange-500">🔥 {progress.streak_days}д</span>
-                        )}
-                      </div>
-                    )}
-                    {!progress && (
+                    {progress ? (() => {
+                      const lvl = getLevel(progress.xp_total ?? 0);
+                      return (
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] font-semibold text-gray-500">{lvl.name}</span>
+                            <span className="text-[10px] text-brand-600 font-medium">⚡ {progress.xp_total} XP</span>
+                          </div>
+                          <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${lvl.color}`}
+                              style={{ width: `${lvl.progress}%` }}
+                            />
+                          </div>
+                          {progress.streak_days > 0 && (
+                            <div className="mt-1.5 text-[10px] text-orange-500 font-medium">🔥 {progress.streak_days} дней подряд</div>
+                          )}
+                        </div>
+                      );
+                    })() : (
                       <div className="mt-3">
                         <span className="text-xs font-medium text-brand-600">Начать →</span>
                       </div>

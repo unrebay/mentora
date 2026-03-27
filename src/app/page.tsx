@@ -1,10 +1,5 @@
 import Link from "next/link";
-
-const DEMO_MESSAGES = [
-  { role: "assistant", text: "Привет! Я твой AI-ментор по истории. С чего начнём — хочешь пройти базу с нуля или погрузимся в конкретную эпоху?" },
-  { role: "user", text: "Расскажи про реформы Петра I" },
-  { role: "assistant", text: "Пётр I понимал: Россия отстаёт от Европы на десятилетия. Без жёстких мер — никакого эффекта. Именно поэтому реформы шли «сверху» с огромным принуждением. Хочешь разберём конкретно флот, армию или государственное управление?" },
-];
+import DemoChat from "@/components/DemoChat";
 
 const SUBJECTS = [
   { id: "russian-history", emoji: "📜", title: "История России", desc: "51 тема · 5 уровней", live: true },
@@ -89,41 +84,9 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Demo chat widget */}
-          <div id="demo" className="bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden">
-            <div className="bg-gray-50 border-b border-gray-100 px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold">М</div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-800">Ментор · История</p>
-                  <p className="text-[10px] text-green-500 font-medium">● онлайн сейчас</p>
-                </div>
-              </div>
-              <span className="text-xs text-gray-400 bg-white border border-gray-100 px-2 py-1 rounded-lg">📜 История России</span>
-            </div>
-            <div className="p-4 space-y-3">
-              {DEMO_MESSAGES.map((m, i) => (
-                <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"} gap-2`}>
-                  {m.role === "assistant" && (
-                    <div className="w-6 h-6 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">М</div>
-                  )}
-                  <div className={`max-w-[80%] px-3 py-2 rounded-xl text-xs leading-relaxed ${
-                    m.role === "user"
-                      ? "bg-gray-900 text-white"
-                      : "bg-gray-50 border border-gray-100 text-gray-700"
-                  }`}>
-                    {m.text}
-                  </div>
-                  {m.role === "user" && (
-                    <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">Я</div>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="border-t border-gray-100 px-4 py-3 flex gap-2 items-center">
-              <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-400">Почему реформы были такими жёсткими?</div>
-              <div className="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center text-white text-xs shrink-0">↑</div>
-            </div>
+          {/* Live demo chat */}
+          <div id="demo">
+            <DemoChat />
           </div>
         </div>
       </section>

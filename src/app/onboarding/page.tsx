@@ -132,8 +132,8 @@ export default function OnboardingPage() {
           })
           .eq("id", user.id);
       }
-      router.push("/dashboard");
-      router.refresh();
+      // Redirect directly to chat — full navigation to avoid stale server cache
+      window.location.href = "/learn/russian-history";
     } else {
       setCurrentStep((s) => s + 1);
       setSelected(null);
@@ -243,7 +243,7 @@ export default function OnboardingPage() {
                 .update({ onboarding_completed: true })
                 .eq("id", user.id);
             }
-            router.push("/dashboard");
+            window.location.href = "/learn/russian-history";
           }}
           className="w-full mt-4 text-center text-sm text-gray-400 hover:text-gray-600 transition-colors"
         >
