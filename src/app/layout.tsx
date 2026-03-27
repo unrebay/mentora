@@ -52,6 +52,21 @@ export const metadata: Metadata = {
       "Учи историю в диалоге с AI-ментором. Персонально. Живо. Интересно.",
     images: ["/opengraph-image"],
   },
+  icons: {
+    icon: [
+      { url: "/favicon.ico",         sizes: "any" },
+      { url: "/favicon-16x16.png",   sizes: "16x16",  type: "image/png" },
+      { url: "/favicon-32x32.png",   sizes: "32x32",  type: "image/png" },
+      { url: "/favicon-48x48.png",   sizes: "48x48",  type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      { rel: "mask-icon", url: "/logo.svg", color: "#3b5bdb" },
+    ],
+  },
+  manifest: "/site.webmanifest",
   robots: {
     index: true,
     follow: true,
@@ -72,6 +87,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru">
+      <head>
+        <meta name="theme-color" content="#3b5bdb" />
+        <meta name="msapplication-TileColor" content="#3b5bdb" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
+      </head>
       <body className={`${golos.variable} font-sans`}>{children}</body>
     </html>
   );

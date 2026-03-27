@@ -1,5 +1,6 @@
 import Link from "next/link";
 import DemoChat from "@/components/DemoChat";
+import Logo from "@/components/Logo";
 
 const SUBJECTS = [
   { id: "russian-history", emoji: "📜", title: "История России", desc: "51 тема · 5 уровней", live: true },
@@ -34,9 +35,7 @@ export default function HomePage() {
       {/* NAV */}
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <span className="text-xl font-bold tracking-tight">
-            M<span className="font-normal">entora</span>
-          </span>
+          <Logo size="sm" />
           <div className="hidden md:flex items-center gap-8 text-sm text-gray-500">
             <a href="#subjects" className="hover:text-gray-900 transition-colors">Предметы</a>
             <a href="#how" className="hover:text-gray-900 transition-colors">Как работает</a>

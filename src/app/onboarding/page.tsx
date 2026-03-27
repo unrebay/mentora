@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Logo from "@/components/Logo";
 
 const STEPS = [
   {
@@ -143,8 +144,8 @@ export default function OnboardingPage() {
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-12">
       {/* Logo */}
-      <div className="mb-10 text-2xl font-bold text-gray-900">
-        M<span className="text-brand-600">entora</span>
+      <div className="mb-10">
+        <Logo size="md" />
       </div>
 
       {/* Progress dots */}

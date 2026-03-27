@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { SUBJECTS } from "@/lib/types";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 const XP_LEVELS = [
   { name: "Новичок",     minXP: 0,    maxXP: 100,  color: "bg-gray-400" },
@@ -63,9 +64,7 @@ export default async function DashboardPage() {
       {/* Nav */}
       <nav className="bg-white border-b border-gray-100 px-6 py-4 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <span className="text-xl font-bold tracking-tight">
-            M<span className="font-normal">entora</span>
-          </span>
+          <Logo size="sm" />
           <div className="flex items-center gap-6">
             {totalXP > 0 && (
               <div className="flex items-center gap-4 text-sm">

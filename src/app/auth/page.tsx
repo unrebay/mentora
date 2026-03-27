@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 export default function AuthPage() {
   const [email, setEmail] = useState("");
@@ -44,7 +45,7 @@ export default function AuthPage() {
     <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-brand-600">Mentora</Link>
+          <Logo size="md" />
           <p className="text-gray-500 mt-2">
             {mode === "signin" ? "Войди в свой аккаунт" : "Создай аккаунт"}
           </p>
