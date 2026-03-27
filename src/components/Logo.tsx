@@ -2,6 +2,7 @@ import Link from "next/link";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg";
+  fontSize?: string;
   href?: string;
   className?: string;
 }
@@ -12,8 +13,8 @@ const sizes = {
   lg: { fontSize: "2.125rem" },  // ~34px
 };
 
-export default function Logo({ size = "md", href = "/", className = "" }: LogoProps) {
-  const { fontSize } = sizes[size];
+export default function Logo({ size = "md", fontSize: fontSizeOverride, href = "/", className = "" }: LogoProps) {
+  const fontSize = fontSizeOverride ?? sizes[size].fontSize;
 
   const mark = (
     <span
