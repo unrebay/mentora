@@ -71,7 +71,7 @@ function AuthPageContent() {
   }, [mode]);
 
   // ── OAuth ─────────────────────────────────────────────────────────────
-  async function handleOAuth(provider: "google" | "apple") {
+  async function handleOAuth(provider: "google") {
     setOauthLoading(provider);
     setError(null);
     const { error } = await supabase.auth.signInWithOAuth({
