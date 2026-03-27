@@ -35,7 +35,7 @@ export default function HomePage() {
       {/* NAV */}
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Logo size="sm" />
+          <Logo size="sm" fontSize="1.44rem" />
           <div className="hidden md:flex items-center gap-8 text-sm text-gray-500">
             <a href="#subjects" className="hover:text-gray-900 transition-colors">Предметы</a>
             <a href="#how" className="hover:text-gray-900 transition-colors">Как работает</a>
