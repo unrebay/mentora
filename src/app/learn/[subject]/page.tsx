@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { SUBJECTS } from "@/lib/types";
 import ChatInterface from "@/components/chat/ChatInterface";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 const DAILY_LIMIT = 30;
 
