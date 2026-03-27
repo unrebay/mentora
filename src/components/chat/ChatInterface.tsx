@@ -16,6 +16,7 @@ interface Props {
   subjectTitle: string;
   initialHistory: { role: string; content: string }[];
   initialMessagesRemaining: number | null; // null = Pro (unlimited)
+  initialTopic?: string; // pre-fill input from topics map
 }
 
 // Inline text: **bold** and *italic*
@@ -83,11 +84,11 @@ function MarkdownMessage({ content }: { content: string }) {
   return <div className="space-y-0.5 text-[15px]">{elements}</div>;
 }
 
-export default function ChatInterface({ subject, subjectTitle, initialHistory, initialMessagesRemaining }: Props) {
+export default function ChatInterface({ subject, subjectTitle, initialHistory, initialMessagesRemaining, initialTopic }: Props) {
   const [messages, setMessages] = useState<Message[]>(
     initialHistory.map((m) => ({ role: m.role as MessageRole, content: m.content }))
   );
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(initialTopic ? `Расскажи про: ${initialTopic}` : "");
   const [loading, setLoading] = useState(false);
   const [messagesRemaining, setMessagesRemaining] = useState<number | null>(initialMessagesRemaining);
   const bottomRef = useRef<HTMLDivElement>(null);

@@ -12,10 +12,12 @@ const DAILY_LIMIT = 30;
 
 interface Props {
   params: Promise<{ subject: string }>;
+  searchParams: Promise<{ topic?: string }>;
 }
 
-export default async function LearnPage({ params }: Props) {
+export default async function LearnPage({ params, searchParams }: Props) {
   const { subject } = await params;
+  const { topic } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -49,12 +51,16 @@ export default async function LearnPage({ params }: Props) {
     initialMessagesRemaining = Math.max(0, DAILY_LIMIT - usedToday);
   }
 
+  // If topic passed from topics map — prepend as initial message
+  const initialTopic = topic ? decodeURIComponent(topic) : undefined;
+
   return (
     <ChatInterface
       subject={subject}
       subjectTitle={subjectData.title}
       initialHistory={history ?? []}
       initialMessagesRemaining={initialMessagesRemaining}
+      initialTopic={initialTopic}
     />
   );
 }

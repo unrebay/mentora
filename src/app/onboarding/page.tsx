@@ -133,6 +133,9 @@ export default function OnboardingPage() {
           })
           .eq("id", user.id);
       }
+      // Send welcome email (fire-and-forget, don't block redirect)
+      fetch("/api/email/welcome", { method: "POST" }).catch(() => {});
+
       // Redirect directly to chat — full navigation to avoid stale server cache
       window.location.href = "/learn/russian-history";
     } else {
