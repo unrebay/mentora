@@ -11,7 +11,7 @@ interface Message {
 const INITIAL_MESSAGE: Message = {
   role: "assistant",
   content:
-    "Привет! Я Mentora — персональный AI-ментор по истории. Спроси меня про любую эпоху, личность или событие — расскажу так, что запомнишь надолго.",
+    "Привет! Я Mentora — твой персональный AI-ментор по истории. Спроси меня про любую эпоху, личность или событие — расскажу так, что запомнишь надолго.",
 };
 
 const DEMO_LIMIT = 5;
@@ -199,7 +199,7 @@ export default function DemoChat() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKey}
-            placeholder="Спроси про любую эпоху..."
+            placeholder="Напиши Менторе про любую эпоху..."
             disabled={loading}
             className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:border-brand-300 disabled:opacity-50 transition-colors"
           />
