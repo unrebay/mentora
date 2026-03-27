@@ -11,7 +11,7 @@ interface Message {
 const INITIAL_MESSAGE: Message = {
   role: "assistant",
   content:
-    "Привет! Я Алексей — AI-ментор по истории. Спроси меня про любую эпоху, личность или событие — расскажу так, что запомнишь надолго.",
+    "Привет! Я Mentora — персональный AI-ментор по истории. Спроси меня про любую эпоху, личность или событие — расскажу так, что запомнишь надолго.",
 };
 
 const DEMO_LIMIT = 5;
@@ -103,7 +103,7 @@ export default function DemoChat() {
             М
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-800">Алексей · AI-ментор</p>
+            <p className="text-xs font-semibold text-gray-800">Mentora · персональный AI-ментор</p>
             <p className="text-[10px] text-green-500 font-medium">● онлайн сейчас</p>
           </div>
         </div>
