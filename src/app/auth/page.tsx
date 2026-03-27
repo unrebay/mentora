@@ -25,7 +25,8 @@ export default function AuthPage() {
       if (error) {
         setError(error.message);
       } else {
-        setSuccess("Проверь почту — отправили ссылку для подтверждения.");
+        router.push("/onboarding");
+        router.refresh();
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });

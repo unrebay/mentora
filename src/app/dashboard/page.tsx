@@ -9,6 +9,15 @@ export default async function DashboardPage() {
 
   if (!user) redirect("/auth");
 
+  // Redirect to onboarding if not completed
+  const { data: profile } = await supabase
+    .from("users")
+    .select("onboarding_completed")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile?.onboarding_completed) redirect("/onboarding");
+
   const { data: progressData } = await supabase
     .from("user_progress")
     .select("*")

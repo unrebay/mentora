@@ -27,11 +27,13 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Protect dashboard and learn routes
-  if (!user && (
-    request.nextUrl.pathname.startsWith("/dashboard") ||
-    request.nextUrl.pathname.startsWith("/learn")
-  )) {
+  const protectedPaths = ["/dashboard", "/learn", "/onboarding"];
+  const isProtected = protectedPaths.some((p) =>
+    request.nextUrl.pathname.startsWith(p)
+  );
+
+  // Redirect unauthenticated users to auth
+  if (!user && isProtected) {
     return NextResponse.redirect(new URL("/auth", request.url));
   }
 
