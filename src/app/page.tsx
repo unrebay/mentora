@@ -89,6 +89,17 @@ export default function HomePage() {
             <DemoChat />
           </div>
         </div>
+
+        {/* CTA after demo */}
+        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 py-8 border-t border-gray-100">
+          <p className="text-gray-500 text-sm">Понравилось? Начни учиться бесплатно — без карты.</p>
+          <Link
+            href="/auth"
+            className="px-6 py-3 bg-brand-600 text-white font-medium rounded-xl hover:bg-brand-700 transition-colors whitespace-nowrap"
+          >
+            Создать аккаунт →
+          </Link>
+        </div>
       </section>
 
       {/* STATS */}
@@ -182,8 +193,14 @@ export default function HomePage() {
         </Link>
       </section>
 
-      <footer className="py-8 text-center text-xs text-gray-400 border-t border-gray-100">
-        © 2026 Mentora
+      <footer className="py-8 border-t border-gray-100">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-400">
+          <span>© 2026 Mentora</span>
+          <div className="flex gap-6">
+            <Link href="/privacy" className="hover:text-gray-700 transition-colors">Конфиденциальность</Link>
+            <Link href="/terms" className="hover:text-gray-700 transition-colors">Условия использования</Link>
+          </div>
+        </div>
       </footer>
     </div>
   );
