@@ -1,11 +1,18 @@
 import type { Metadata } from "next";
-import { Golos_Text } from "next/font/google";
+import { Golos_Text, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
 const golos = Golos_Text({
   subsets: ["latin", "cyrillic"],
   variable: "--font-golos",
   weight: ["400", "500", "600", "700"],
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  weight: ["700"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -92,7 +99,7 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#3b5bdb" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
-      <body className={`${golos.variable} font-sans`}>{children}</body>
+      <body className={`${golos.variable} ${playfair.variable} font-sans`}>{children}</body>
     </html>
   );
 }
