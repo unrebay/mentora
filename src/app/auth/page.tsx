@@ -28,7 +28,7 @@ function AuthPageContent() {
   const [password, setPassword] = useState("");
   const [mode, setMode]         = useState<"signin" | "signup">("signin");
   const [loading, setLoading]   = useState(false);
-  const [oauthLoading, setOauthLoading] = useState<"google" | "apple" | null>(null);
+  const [oauthLoading, setOauthLoading] = useState<"google" | null>(null);
   const [error, setError]       = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
@@ -169,20 +169,6 @@ function AuthPageContent() {
               )}
               {isSignup ? "Зарегистрироваться через Google" : "Войти через Google"}
             </button>
-
-            <button
-              type="button"
-              onClick={() => handleOAuth("apple")}
-              disabled={oauthLoading !== null}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-60"
-            >
-              {oauthLoading === "apple" ? (
-                <span className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
-              ) : (
-                <AppleIcon />
-              )}
-              {isSignup ? "Зарегистрироваться через Apple" : "Войти через Apple"}
-            </button>
           </div>
 
           {/* ── Divider ── */}
@@ -290,14 +276,6 @@ function GoogleIcon() {
       <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
       <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
       <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
-    </svg>
-  );
-}
-
-function AppleIcon() {
-  return (
-    <svg width="17" height="18" viewBox="0 0 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M14.045 9.58c-.023-2.285 1.866-3.395 1.951-3.448-1.063-1.554-2.717-1.768-3.305-1.79-1.403-.143-2.748.83-3.46.83-.72 0-1.822-.814-2.998-.79-1.535.022-2.954.897-3.744 2.27C.808 9.32 1.922 13.9 3.55 16.4c.815 1.172 1.783 2.487 3.046 2.44 1.228-.05 1.688-.786 3.171-.786 1.476 0 1.896.786 3.18.76 1.316-.022 2.148-1.19 2.955-2.366a11.26 11.26 0 0 0 1.347-2.737c-.03-.012-2.577-.988-2.604-3.931zM11.718 3.013c.66-.804 1.107-1.911.985-3.013-.953.04-2.13.64-2.815 1.427-.608.695-1.147 1.835-1.005 2.908 1.073.08 2.168-.546 2.835-1.322z" fill="#000"/>
     </svg>
   );
 }
