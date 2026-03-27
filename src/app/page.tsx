@@ -39,6 +39,7 @@ export default function HomePage() {
           <div className="hidden md:flex items-center gap-8 text-sm text-gray-500">
             <a href="#subjects" className="hover:text-gray-900 transition-colors">Предметы</a>
             <a href="#how" className="hover:text-gray-900 transition-colors">Как работает</a>
+            <Link href="/pricing" className="hover:text-gray-900 transition-colors">Тарифы</Link>
           </div>
           <Link
             href="/auth"
