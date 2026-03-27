@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { MessageRole } from "@/lib/types";
 
+const DAILY_LIMIT = 30;
+
 interface Message {
   role: MessageRole;
   content: string;
@@ -13,6 +15,7 @@ interface Props {
   subject: string;
   subjectTitle: string;
   initialHistory: { role: string; content: string }[];
+  initialMessagesRemaining: number | null; // null = Pro (unlimited)
 }
 
 // Inline text: **bold** and *italic*
@@ -56,53 +59,42 @@ function MarkdownMessage({ content }: { content: string }) {
   };
 
   for (const line of lines) {
-    // List item
     if (line.match(/^[-•*] /)) {
       listBuffer.push(line.slice(2));
       continue;
     }
-
     flushList();
-
-    // Skip markdown headers — treat as bold paragraph
     if (line.match(/^#{1,3} /)) {
       const text = line.replace(/^#{1,3} /, "");
       elements.push(
-        <p key={keyIdx++} className="font-semibold mt-3 mb-1">
-          {parseInline(text)}
-        </p>
+        <p key={keyIdx++} className="font-semibold mt-3 mb-1">{parseInline(text)}</p>
       );
       continue;
     }
-
-    // Empty line — spacer
     if (line.trim() === "") {
-      if (elements.length > 0) {
-        elements.push(<div key={keyIdx++} className="h-2" />);
-      }
+      if (elements.length > 0) elements.push(<div key={keyIdx++} className="h-2" />);
       continue;
     }
-
-    // Regular paragraph
     elements.push(
-      <p key={keyIdx++} className="leading-relaxed">
-        {parseInline(line)}
-      </p>
+      <p key={keyIdx++} className="leading-relaxed">{parseInline(line)}</p>
     );
   }
-
   flushList();
-
   return <div className="space-y-0.5 text-[15px]">{elements}</div>;
 }
 
-export default function ChatInterface({ subject, subjectTitle, initialHistory }: Props) {
+export default function ChatInterface({ subject, subjectTitle, initialHistory, initialMessagesRemaining }: Props) {
   const [messages, setMessages] = useState<Message[]>(
     initialHistory.map((m) => ({ role: m.role as MessageRole, content: m.content }))
   );
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [messagesRemaining, setMessagesRemaining] = useState<number | null>(initialMessagesRemaining);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const isLimited = messagesRemaining !== null; // false = Pro
+  const limitReached = isLimited && messagesRemaining !== null && messagesRemaining <= 0;
+  const showCounter = isLimited && messagesRemaining !== null && messagesRemaining <= 5 && !limitReached;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -110,7 +102,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory }:
 
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
-    if (!input.trim() || loading) return;
+    if (!input.trim() || loading || limitReached) return;
 
     const userMessage = input.trim();
     setInput("");
@@ -129,8 +121,20 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory }:
       });
 
       const data = await res.json();
+
+      if (res.status === 429) {
+        setMessagesRemaining(0);
+        // Remove the optimistically added user message since it wasn't processed
+        setMessages((prev) => prev.slice(0, -1));
+        setInput(userMessage);
+        return;
+      }
+
       if (data.message) {
         setMessages((prev) => [...prev, { role: "assistant", content: data.message }]);
+      }
+      if (data.messagesRemaining !== undefined) {
+        setMessagesRemaining(data.messagesRemaining);
       }
     } catch {
       setMessages((prev) => [
@@ -151,10 +155,19 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory }:
         <Link href="/dashboard" className="text-gray-400 hover:text-gray-600 transition-colors text-lg">
           ←
         </Link>
-        <div>
+        <div className="flex-1">
           <h1 className="font-semibold text-gray-900 text-sm">{subjectTitle}</h1>
           <p className="text-xs text-gray-400">AI-ментор · Mentora</p>
         </div>
+        {/* Counter badge — only when ≤5 remaining */}
+        {showCounter && (
+          <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-full px-3 py-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            <span className="text-xs font-medium text-amber-700">
+              осталось {messagesRemaining} из {DAILY_LIMIT}
+            </span>
+          </div>
+        )}
       </header>
 
       {/* Messages */}
@@ -230,24 +243,40 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory }:
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
+      {/* Input area */}
       <div className="bg-white border-t border-gray-100 px-4 py-4">
-        <form onSubmit={sendMessage} className="flex gap-3">
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Задай вопрос..."
-            disabled={loading}
-            className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition text-[15px] disabled:opacity-50 bg-gray-50"
-          />
-          <button
-            type="submit"
-            disabled={loading || !input.trim()}
-            className="px-5 py-3 bg-brand-600 text-white rounded-xl font-medium hover:bg-brand-700 transition-colors disabled:opacity-40 text-sm"
-          >
-            →
-          </button>
-        </form>
+        {limitReached ? (
+          /* Limit reached block */
+          <div className="rounded-xl bg-gray-50 border border-gray-200 p-4 text-center">
+            <p className="text-sm font-semibold text-gray-800 mb-1">
+              Лимит на сегодня исчерпан
+            </p>
+            <p className="text-xs text-gray-500 mb-3">
+              Возвращайся завтра — счётчик сбросится автоматически
+            </p>
+            <div className="inline-flex items-center gap-2 bg-brand-600 text-white text-xs font-semibold px-4 py-2 rounded-xl opacity-60 cursor-not-allowed">
+              ⚡ Pro — безлимитный доступ
+              <span className="bg-white/20 text-white text-[10px] px-2 py-0.5 rounded-full">скоро</span>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={sendMessage} className="flex gap-3">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Задай вопрос..."
+              disabled={loading}
+              className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition text-[15px] disabled:opacity-50 bg-gray-50"
+            />
+            <button
+              type="submit"
+              disabled={loading || !input.trim()}
+              className="px-5 py-3 bg-brand-600 text-white rounded-xl font-medium hover:bg-brand-700 transition-colors disabled:opacity-40 text-sm"
+            >
+              →
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

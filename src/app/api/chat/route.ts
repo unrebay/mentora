@@ -7,6 +7,8 @@ import { NextRequest, NextResponse } from "next/server";
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+const DAILY_LIMIT = 30;
+
 export async function POST(req: NextRequest) {
   try {
     const { message, subject, history } = await req.json();
@@ -22,12 +24,25 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    // Get user profile for personalization
+    // Get user profile
     const { data: profile } = await supabase
       .from("users")
-      .select("onboarding_style, onboarding_level, onboarding_goal")
+      .select("onboarding_style, onboarding_level, onboarding_goal, plan, messages_today, messages_date")
       .eq("id", user.id)
       .single();
+
+    // --- Daily limit check ---
+    const isPro = profile?.plan === "pro";
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const isNewDay = profile?.messages_date !== today;
+    const usedToday = isNewDay ? 0 : (profile?.messages_today ?? 0);
+
+    if (!isPro && usedToday >= DAILY_LIMIT) {
+      return NextResponse.json(
+        { error: "limit_reached", messagesRemaining: 0 },
+        { status: 429 }
+      );
+    }
 
     // Get user memory for this subject
     const { data: memory } = await supabase
@@ -58,9 +73,9 @@ export async function POST(req: NextRequest) {
     const systemPrompt = `Ты — Алексей, AI-ментор по истории на платформе Mentora. Ты увлечённый историк-рассказчик: говоришь как умный друг, а не как учебник. Умеешь превратить любую эпоху в живую картину — с характерами людей, деталями быта, запахом эпохи.
 
 Профиль ученика:
-- Стиль: ${profile?.onboarding_style ?? "simple"}
-- Уровень: ${profile?.onboarding_level ?? "beginner"}
-- Цель: ${profile?.onboarding_goal ?? "изучить предмет"}
+- Стиль: ${profile?.onboarding_style ?? "storytelling"}
+- Уровень: ${profile?.onboarding_level ?? "adult"}
+- Цель: ${profile?.onboarding_goal ?? "general"}
 
 Память о пользователе:
 ${JSON.stringify(memory?.memory_json ?? {})}
@@ -77,7 +92,7 @@ ${ragContext}
 6. Начинай сразу с сути — без "Конечно!", "Отличный вопрос!" и прочих пустых фраз
 7. Пиши по-русски`;
 
-    // Save user message to DB
+    // Save user message
     await supabase.from("chat_messages").insert({
       user_id: user.id,
       subject,
@@ -85,7 +100,7 @@ ${ragContext}
       content: message,
     });
 
-    // Get AI response (Haiku for speed/cost)
+    // Get AI response
     const response = await anthropic.messages.create({
       model: "claude-haiku-4-5",
       max_tokens: 1024,
@@ -100,7 +115,7 @@ ${ragContext}
       ? response.content[0].text
       : "";
 
-    // Save assistant response to DB
+    // Save assistant response
     await supabase.from("chat_messages").insert({
       user_id: user.id,
       subject,
@@ -109,7 +124,14 @@ ${ragContext}
       tokens_used: response.usage.input_tokens + response.usage.output_tokens,
     });
 
-    // Upsert user progress (XP +10 per message)
+    // Update message counter
+    const newUsedToday = usedToday + 1;
+    await supabase.from("users").update({
+      messages_today: newUsedToday,
+      messages_date: today,
+    }).eq("id", user.id);
+
+    // Update XP
     await supabase.from("user_progress").upsert({
       user_id: user.id,
       subject,
@@ -120,7 +142,9 @@ ${ragContext}
       ignoreDuplicates: false,
     });
 
-    return NextResponse.json({ message: assistantMessage });
+    const messagesRemaining = isPro ? null : DAILY_LIMIT - newUsedToday;
+
+    return NextResponse.json({ message: assistantMessage, messagesRemaining });
   } catch (err) {
     console.error("Chat API error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
