@@ -46,5 +46,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api).*)"],
+  // Exclude static assets, API routes, and the OAuth callback route (it sets
+  // session cookies itself — running the middleware getUser() first would
+  // interfere with cookie propagation).
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api|auth/callback).*)"],
 };

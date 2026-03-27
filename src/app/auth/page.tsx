@@ -1,30 +1,114 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import Link from "next/link";
 import Logo from "@/components/Logo";
 
-export default function AuthPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const router = useRouter();
-  const supabase = createClient();
+// ── Type augmentation for hCaptcha on window ──────────────────────────────
+declare global {
+  interface Window {
+    onMentoraCaptchaSuccess?: (token: string) => void;
+    onMentoraCaptchaExpired?: () => void;
+  }
+}
 
+const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? "";
+
+export default function AuthPage() {
+  const [email, setEmail]       = useState("");
+  const [password, setPassword] = useState("");
+  const [mode, setMode]         = useState<"signin" | "signup">("signin");
+  const [loading, setLoading]   = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<"google" | "apple" | null>(null);
+  const [error, setError]       = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+
+  const router      = useRouter();
+  const searchParams = useSearchParams();
+  const supabase    = createClient();
+  const captchaRef  = useRef<HTMLDivElement>(null);
+
+  // Show OAuth errors from callback redirect
+  useEffect(() => {
+    const oauthError = searchParams.get("error");
+    if (oauthError) setError("Ошибка входа через внешний сервис. Попробуй снова.");
+  }, [searchParams]);
+
+  // Register hCaptcha callbacks on window
+  useEffect(() => {
+    window.onMentoraCaptchaSuccess = (token: string) => setCaptchaToken(token);
+    window.onMentoraCaptchaExpired = () => setCaptchaToken(null);
+    return () => {
+      delete window.onMentoraCaptchaSuccess;
+      delete window.onMentoraCaptchaExpired;
+    };
+  }, []);
+
+  // Load hCaptcha script once
+  useEffect(() => {
+    if (!HCAPTCHA_SITE_KEY) return;
+    if (document.getElementById("hcaptcha-script")) return;
+    const script = document.createElement("script");
+    script.id    = "hcaptcha-script";
+    script.src   = "https://js.hcaptcha.com/1/api.js";
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+  }, []);
+
+  // Reset captcha when switching modes
+  useEffect(() => {
+    setCaptchaToken(null);
+  }, [mode]);
+
+  // ── OAuth ─────────────────────────────────────────────────────────────
+  async function handleOAuth(provider: "google" | "apple") {
+    setOauthLoading(provider);
+    setError(null);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: provider === "google"
+          ? { access_type: "offline", prompt: "consent" }
+          : undefined,
+      },
+    });
+    if (error) {
+      setError("Не удалось подключиться. Попробуй ещё раз.");
+      setOauthLoading(null);
+    }
+    // On success browser will redirect — no need to reset state
+  }
+
+  // ── Email/Password ────────────────────────────────────────────────────
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
     if (mode === "signup") {
-      const { error } = await supabase.auth.signUp({ email, password });
+      if (HCAPTCHA_SITE_KEY && !captchaToken) {
+        setError("Пожалуйста, подтверди, что ты не робот.");
+        setLoading(false);
+        return;
+      }
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          captchaToken: captchaToken ?? undefined,
+        },
+      });
       if (error) {
-        setError(error.message);
+        if (error.message.includes("already registered")) {
+          setError("Этот email уже зарегистрирован. Войди или восстанови пароль.");
+        } else if (error.message.includes("captcha")) {
+          setError("Не прошла проверка капчи. Попробуй снова.");
+        } else {
+          setError(error.message);
+        }
       } else {
         router.push("/onboarding");
         router.refresh();
@@ -32,7 +116,7 @@ export default function AuthPage() {
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        setError("Неверный email или пароль");
+        setError("Неверный email или пароль.");
       } else {
         router.push("/dashboard");
         router.refresh();
@@ -41,79 +125,171 @@ export default function AuthPage() {
     setLoading(false);
   }
 
+  function switchMode(next: "signin" | "signup") {
+    setMode(next);
+    setError(null);
+  }
+
+  const isSignup = mode === "signup";
+
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
+
+        {/* Logo */}
         <div className="text-center mb-8">
-          <Logo size="md" />
-          <p className="text-gray-500 mt-2">
-            {mode === "signin" ? "Войди в свой аккаунт" : "Создай аккаунт"}
+          <Logo size="md" href="/" />
+          <p className="text-gray-500 mt-2 text-sm">
+            {isSignup ? "Создай бесплатный аккаунт" : "Войди в свой аккаунт"}
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          {success ? (
-            <div className="text-center">
-              <div className="text-4xl mb-4">📬</div>
-              <p className="text-gray-700">{success}</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition"
-                  placeholder="you@example.com"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Пароль</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition"
-                  placeholder="минимум 6 символов"
-                />
-              </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-4">
 
-              {error && (
-                <p className="text-red-500 text-sm text-center">{error}</p>
+          {/* ── OAuth buttons ── */}
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={() => handleOAuth("google")}
+              disabled={oauthLoading !== null}
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-60"
+            >
+              {oauthLoading === "google" ? (
+                <span className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+              ) : (
+                <GoogleIcon />
               )}
+              {isSignup ? "Зарегистрироваться через Google" : "Войти через Google"}
+            </button>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold hover:bg-brand-700 transition-colors disabled:opacity-50"
-              >
-                {loading ? "..." : mode === "signin" ? "Войти" : "Создать аккаунт"}
-              </button>
-            </form>
-          )}
+            <button
+              type="button"
+              onClick={() => handleOAuth("apple")}
+              disabled={oauthLoading !== null}
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-60"
+            >
+              {oauthLoading === "apple" ? (
+                <span className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+              ) : (
+                <AppleIcon />
+              )}
+              {isSignup ? "Зарегистрироваться через Apple" : "Войти через Apple"}
+            </button>
+          </div>
+
+          {/* ── Divider ── */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-100" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-white px-3 text-gray-400">или через email</span>
+            </div>
+          </div>
+
+          {/* ── Email / Password form ── */}
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm transition"
+                placeholder="you@example.com"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Пароль</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                autoComplete={isSignup ? "new-password" : "current-password"}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm transition"
+                placeholder={isSignup ? "минимум 6 символов" : "••••••••"}
+              />
+            </div>
+
+            {/* hCaptcha — only for signup & when site key is set */}
+            {isSignup && HCAPTCHA_SITE_KEY && (
+              <div className="flex justify-center py-1">
+                <div
+                  ref={captchaRef}
+                  className="h-captcha"
+                  data-sitekey={HCAPTCHA_SITE_KEY}
+                  data-callback="onMentoraCaptchaSuccess"
+                  data-expired-callback="onMentoraCaptchaExpired"
+                  data-theme="light"
+                />
+              </div>
+            )}
+
+            {error && (
+              <p className="text-red-500 text-xs text-center bg-red-50 rounded-lg py-2 px-3">
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading || oauthLoading !== null}
+              className="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold hover:bg-brand-700 transition-colors disabled:opacity-50 text-sm"
+            >
+              {loading
+                ? <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    Загрузка...
+                  </span>
+                : isSignup ? "Создать аккаунт" : "Войти"
+              }
+            </button>
+          </form>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
-          {mode === "signin" ? (
-            <>Нет аккаунта?{" "}
-              <button onClick={() => setMode("signup")} className="text-brand-600 font-medium hover:underline">
-                Зарегистрироваться
+        {/* Switch mode */}
+        <p className="text-center text-sm text-gray-500 mt-5">
+          {isSignup ? (
+            <>Уже есть аккаунт?{" "}
+              <button onClick={() => switchMode("signin")} className="text-brand-600 font-medium hover:underline">
+                Войти
               </button>
             </>
           ) : (
-            <>Уже есть аккаунт?{" "}
-              <button onClick={() => setMode("signin")} className="text-brand-600 font-medium hover:underline">
-                Войти
+            <>Нет аккаунта?{" "}
+              <button onClick={() => switchMode("signup")} className="text-brand-600 font-medium hover:underline">
+                Зарегистрироваться бесплатно
               </button>
             </>
           )}
         </p>
+
       </div>
     </main>
+  );
+}
+
+// ── Icons ────────────────────────────────────────────────────────────────
+
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+      <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+      <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+    </svg>
+  );
+}
+
+function AppleIcon() {
+  return (
+    <svg width="17" height="18" viewBox="0 0 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14.045 9.58c-.023-2.285 1.866-3.395 1.951-3.448-1.063-1.554-2.717-1.768-3.305-1.79-1.403-.143-2.748.83-3.46.83-.72 0-1.822-.814-2.998-.79-1.535.022-2.954.897-3.744 2.27C.808 9.32 1.922 13.9 3.55 16.4c.815 1.172 1.783 2.487 3.046 2.44 1.228-.05 1.688-.786 3.171-.786 1.476 0 1.896.786 3.18.76 1.316-.022 2.148-1.19 2.955-2.366a11.26 11.26 0 0 0 1.347-2.737c-.03-.012-2.577-.988-2.604-3.931zM11.718 3.013c.66-.804 1.107-1.911.985-3.013-.953.04-2.13.64-2.815 1.427-.608.695-1.147 1.835-1.005 2.908 1.073.08 2.168-.546 2.835-1.322z" fill="#000"/>
+    </svg>
   );
 }
