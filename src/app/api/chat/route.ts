@@ -27,12 +27,15 @@ export async function POST(req: NextRequest) {
     // Get user profile
     const { data: profile } = await supabase
       .from("users")
-      .select("onboarding_style, onboarding_level, onboarding_goal, plan, messages_today, messages_date")
+      .select("onboarding_style, onboarding_level, onboarding_goal, plan, messages_today, messages_date, trial_expires_at")
       .eq("id", user.id)
       .single();
 
     // --- Daily limit check ---
-    const isPro = profile?.plan === "pro";
+    const isTrialActive = profile?.trial_expires_at
+      ? new Date(profile.trial_expires_at) > new Date()
+      : false;
+    const isPro = profile?.plan === "pro" || isTrialActive;
     const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
     const isNewDay = profile?.messages_date !== today;
     const usedToday = isNewDay ? 0 : (profile?.messages_today ?? 0);
@@ -156,16 +159,24 @@ ${ragContext}
       last_active_at: new Date().toISOString(),
     }).eq("id", user.id);
 
-    // Update XP atomically (+10 per message)
-    await supabase.rpc("increment_xp", {
-      p_user_id: user.id,
-      p_subject: subject,
-      p_amount: 10,
-    });
+    // Update XP atomically (+10 per message) — non-blocking
+    try {
+      await supabase.rpc("increment_xp", {
+        p_user_id: user.id,
+        p_subject: subject,
+        p_amount: 10,
+      });
+    } catch (xpErr) {
+      console.error("XP update failed (non-blocking):", xpErr);
+    }
 
     const messagesRemaining = isPro ? null : DAILY_LIMIT - newUsedToday;
 
-    return NextResponse.json({ message: assistantMessage, messagesRemaining });
+    return NextResponse.json({
+      message: assistantMessage,
+      messagesRemaining,
+      trialExpiresAt: profile?.trial_expires_at ?? null,
+    });
   } catch (err) {
     console.error("Chat API error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
