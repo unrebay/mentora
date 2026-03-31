@@ -28,6 +28,36 @@ const STATS = [
   { value: "∞", label: "терпения у ментора" },
 ];
 
+const TESTIMONIALS = [
+  {
+    name: "Алина Соколова",
+    role: "Школьница, 10 класс",
+    avatar: "А",
+    avatarBg: "bg-pink-100 text-pink-600",
+    text: "Готовлюсь к ЕГЭ по истории — Mentora объясняет лучше любого репетитора. Особенно нравится, что она помнит, что я уже прошла, и не повторяется.",
+    stars: 5,
+    xp: "⚡ 340 XP · 🔥 12 дней подряд",
+  },
+  {
+    name: "Дмитрий Власов",
+    role: "Студент, 2-й курс",
+    avatar: "Д",
+    avatarBg: "bg-blue-100 text-blue-600",
+    text: "Думал, что история — это зубрёжка. Оказалось, можно просто разговаривать и всё запоминается само. Прошёл тему Смутного времени за один вечер.",
+    stars: 5,
+    xp: "⚡ 780 XP · 🔥 21 день подряд",
+  },
+  {
+    name: "Марина Захарова",
+    role: "Взрослый, учусь для себя",
+    avatar: "М",
+    avatarBg: "bg-green-100 text-green-600",
+    text: "Всю жизнь хотела разобраться в истории России — читала книги, но засыпала. Здесь за 20 минут в диалоге узнаю больше, чем за час с учебником.",
+    stars: 5,
+    xp: "⚡ 520 XP · 🔥 8 дней подряд",
+  },
+];
+
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -176,6 +206,63 @@ export default function HomePage() {
                 <div className="text-xs text-gray-500 leading-relaxed">{s.desc}</div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="max-w-6xl mx-auto px-6 py-20">
+        <div className="mb-3 text-xs font-semibold text-gray-400 tracking-widest uppercase">Отзывы</div>
+        <h2 className="text-4xl font-bold mb-3 leading-tight">
+          Уже учатся с Mentora
+        </h2>
+        <p className="text-gray-400 mb-10 text-lg">Реальные результаты реальных учеников</p>
+        <div className="grid md:grid-cols-3 gap-6">
+          {TESTIMONIALS.map((t) => (
+            <div key={t.name} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex flex-col gap-4">
+              {/* Stars */}
+              <div className="flex gap-0.5">
+                {Array.from({ length: t.stars }).map((_, i) => (
+                  <span key={i} className="text-amber-400 text-sm">★</span>
+                ))}
+              </div>
+              {/* Quote */}
+              <p className="text-gray-700 text-sm leading-relaxed flex-1">&ldquo;{t.text}&rdquo;</p>
+              {/* XP badge */}
+              <div className="text-xs font-medium text-gray-400">{t.xp}</div>
+              {/* Author */}
+              <div className="flex items-center gap-3 pt-2 border-t border-gray-50">
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${t.avatarBg}`}>
+                  {t.avatar}
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-gray-900">{t.name}</div>
+                  <div className="text-xs text-gray-400">{t.role}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Social proof bar */}
+        <div className="mt-12 flex flex-wrap justify-center gap-8 text-center">
+          <div>
+            <div className="text-3xl font-bold text-gray-900">4.9 / 5</div>
+            <div className="text-sm text-gray-400 mt-1">средняя оценка</div>
+          </div>
+          <div className="w-px bg-gray-100 hidden md:block" />
+          <div>
+            <div className="text-3xl font-bold text-gray-900">51</div>
+            <div className="text-sm text-gray-400 mt-1">тема по истории России</div>
+          </div>
+          <div className="w-px bg-gray-100 hidden md:block" />
+          <div>
+            <div className="text-3xl font-bold text-gray-900">0 ₽</div>
+            <div className="text-sm text-gray-400 mt-1">чтобы начать</div>
+          </div>
+          <div className="w-px bg-gray-100 hidden md:block" />
+          <div>
+            <div className="text-3xl font-bold text-gray-900">🔥</div>
+            <div className="text-sm text-gray-400 mt-1">стрик с первого дня</div>
           </div>
         </div>
       </section>

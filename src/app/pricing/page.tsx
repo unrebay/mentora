@@ -151,6 +151,17 @@ export default function PricingPage() {
           </div>
         </div>
 
+        {/* Streak reward callout */}
+        <div className="max-w-3xl mx-auto mt-8 flex items-center gap-4 bg-orange-50 border border-orange-200 rounded-2xl px-6 py-5">
+          <div className="text-3xl shrink-0">🔥</div>
+          <div>
+            <p className="font-semibold text-orange-900 text-sm mb-1">Стрик 7 дней → 3 дня Pro бесплатно</p>
+            <p className="text-xs text-orange-700 leading-relaxed">
+              Учись 7 дней подряд — и получи 3 дня Pro без карты. Один раз на аккаунт. Это наш способ сказать «спасибо» за привычку.
+            </p>
+          </div>
+        </div>
+
         {/* B2B note */}
         <p className="text-center text-sm text-gray-400 mt-8">
           Нужна лицензия для школы или компании?{" "}
