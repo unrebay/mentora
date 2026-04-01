@@ -137,7 +137,7 @@ export default function OnboardingPage() {
       fetch("/api/email/welcome", { method: "POST" }).catch(() => {});
 
       // Redirect directly to chat — full navigation to avoid stale server cache
-      window.location.href = "/learn/russian-history";
+      window.location.href = "/dashboard";
     } else {
       setCurrentStep((s) => s + 1);
       setSelected(null);
@@ -247,7 +247,7 @@ export default function OnboardingPage() {
                 .update({ onboarding_completed: true })
                 .eq("id", user.id);
             }
-            window.location.href = "/learn/russian-history";
+            window.location.href = "/dashboard";
           }}
           className="w-full mt-4 text-center text-sm text-gray-400 hover:text-gray-600 transition-colors"
         >
