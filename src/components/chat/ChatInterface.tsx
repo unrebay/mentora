@@ -19,17 +19,20 @@ interface Props {
   initialTopic?: string; // pre-fill input from topics map
 }
 
-// Inline text: **bold** and *italic*
+// Inline text: **bold**, *italic*, `code`
 function parseInline(text: string): React.ReactNode {
-  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g);
   return (
     <>
       {parts.map((part, i) => {
-        if (part.startsWith("**") && part.endsWith("**")) {
+        if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
           return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>;
         }
-        if (part.startsWith("*") && part.endsWith("*")) {
+        if (part.startsWith("*") && part.endsWith("*") && part.length > 2) {
           return <em key={i}>{part.slice(1, -1)}</em>;
+        }
+        if (part.startsWith("`") && part.endsWith("`") && part.length > 2) {
+          return <code key={i} className="bg-gray-100 text-gray-800 rounded px-1 text-sm font-mono">{part.slice(1, -1)}</code>;
         }
         return <span key={i}>{part}</span>;
       })}
@@ -42,45 +45,63 @@ function MarkdownMessage({ content }: { content: string }) {
   const lines = content.split("\n");
   const elements: React.ReactNode[] = [];
   let listBuffer: string[] = [];
+  let orderedBuffer: string[] = [];
   let keyIdx = 0;
 
-  const flushList = () => {
-    if (listBuffer.length === 0) return;
-    elements.push(
-      <ul key={`list-${keyIdx++}`} className="space-y-1.5 my-2 ml-1">
-        {listBuffer.map((item, i) => (
-          <li key={i} className="flex gap-2 items-start">
-            <span className="mt-1 w-1.5 h-1.5 rounded-full bg-brand-400 shrink-0" />
-            <span>{parseInline(item)}</span>
-          </li>
-        ))}
-      </ul>
-    );
-    listBuffer = [];
+  const flushLists = () => {
+    if (listBuffer.length > 0) {
+      elements.push(
+        <ul key={`ul-${keyIdx++}`} className="space-y-1.5 my-2 ml-1">
+          {listBuffer.map((item, i) => (
+            <li key={i} className="flex gap-2 items-start">
+              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-brand-400 shrink-0" />
+              <span className="flex-1">{parseInline(item)}</span>
+            </li>
+          ))}
+        </ul>
+      );
+      listBuffer = [];
+    }
+    if (orderedBuffer.length > 0) {
+      elements.push(
+        <ol key={`ol-${keyIdx++}`} className="space-y-1.5 my-2 ml-1">
+          {orderedBuffer.map((item, i) => (
+            <li key={i} className="flex gap-2 items-start">
+              <span className="shrink-0 text-brand-500 font-semibold text-sm min-w-[18px]">{i + 1}.</span>
+              <span className="flex-1">{parseInline(item)}</span>
+            </li>
+          ))}
+        </ol>
+      );
+      orderedBuffer = [];
+    }
   };
 
   for (const line of lines) {
-    if (line.match(/^[-•*] /)) {
+    if (line.match(/^[-•*—] /)) {
+      if (orderedBuffer.length > 0) flushLists();
       listBuffer.push(line.slice(2));
       continue;
     }
-    flushList();
+    const orderedMatch = line.match(/^\d+\.\s+(.+)/);
+    if (orderedMatch) {
+      if (listBuffer.length > 0) flushLists();
+      orderedBuffer.push(orderedMatch[1]);
+      continue;
+    }
+    flushLists();
     if (line.match(/^#{1,3} /)) {
       const text = line.replace(/^#{1,3} /, "");
-      elements.push(
-        <p key={keyIdx++} className="font-semibold mt-3 mb-1">{parseInline(text)}</p>
-      );
+      elements.push(<p key={keyIdx++} className="font-semibold mt-3 mb-1">{parseInline(text)}</p>);
       continue;
     }
     if (line.trim() === "") {
       if (elements.length > 0) elements.push(<div key={keyIdx++} className="h-2" />);
       continue;
     }
-    elements.push(
-      <p key={keyIdx++} className="leading-relaxed">{parseInline(line)}</p>
-    );
+    elements.push(<p key={keyIdx++} className="leading-relaxed">{parseInline(line)}</p>);
   }
-  flushList();
+  flushLists();
   return <div className="space-y-0.5 text-[15px]">{elements}</div>;
 }
 
