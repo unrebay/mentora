@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+export const dynamic = "force-dynamic"
 import Link from "next/link";
 import DemoChat from "@/components/DemoChat";
 import Logo from "@/components/Logo";
