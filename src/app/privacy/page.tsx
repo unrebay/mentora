@@ -2,7 +2,7 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 
 export const metadata = {
-  title: "Политика конфиденциальности | Mentora",
+  title: "Политика конфиденциальности",
   description: "Политика конфиденциальности образовательной платформы Mentora",
 };
 
