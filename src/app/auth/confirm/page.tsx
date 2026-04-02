@@ -6,25 +6,25 @@ export default function AuthConfirm() {
   useEffect(() => {
     const supabase = createClient();
 
-    // Supabase client automatically parses #access_token from hash
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && session) {
-          subscription.unsubscribe();
-          window.location.href = "/dashboard";
-        }
-      }
-    );
+    // Parse tokens from URL hash fragment
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const access_token = params.get("access_token");
+    const refresh_token = params.get("refresh_token");
 
-    // Also check if session is already set
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        subscription.unsubscribe();
-        window.location.href = "/dashboard";
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    if (access_token && refresh_token) {
+      supabase.auth
+        .setSession({ access_token, refresh_token })
+        .then(({ error }) => {
+          if (error) {
+            window.location.href = "/auth?error=session_failed";
+          } else {
+            window.location.href = "/dashboard";
+          }
+        });
+    } else {
+      window.location.href = "/auth?error=no_token";
+    }
   }, []);
 
   return (
