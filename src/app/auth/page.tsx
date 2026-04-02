@@ -281,6 +281,7 @@ function AuthPageContent() {
               }
             </button>
           </form>
+          )}
 
           <div className="mt-3">
             <a href="https://t.me/MentoraBot?start=auth" target="_blank" rel="noopener noreferrer"
