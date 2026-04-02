@@ -38,6 +38,8 @@ const FAQ = [
   },
 ];
 
+export const metadata={title:"Тарифы",description:"Тарифы Mentora"};
+
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -203,6 +205,8 @@ export default function PricingPage() {
         </div>
       </section>
 
+      {/* FOOTER */}
+      <footer className="py-8 border-t border-gray-100"><div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-400"><span>© 2026 Mentora</span><div className="flex gap-6"><Link href="/privacy" className="hover:text-gray-700 transition-colors">Конфиденциальность</Link><Link href="/terms" className="hover:text-gray-700 transition-colors">Условия</Link></div></div></footer>
     </div>
   );
 }
