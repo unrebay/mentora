@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Logo from "@/components/Logo";
+import posthog from "posthog-js";
 
 // ── Type augmentation for hCaptcha on window ──────────────────────────────
 declare global {
@@ -146,7 +147,7 @@ function AuthPageContent() {
         setLoading(false);
         return;
       }
-      const { error } = await supabase.auth.signUp({
+      const { data: signUpData, error } = await supabase.auth.signUp({
         email,
         password,
         options: {

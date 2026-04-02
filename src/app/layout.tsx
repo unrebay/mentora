@@ -103,7 +103,9 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#3b5bdb" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
+      <PostHogProvider>
       <body className={`${golos.variable} ${playfair.variable} font-sans`}>{children}</body>
+    </PostHogProvider>
     </html>
   );
 }

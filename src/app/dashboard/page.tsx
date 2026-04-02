@@ -6,6 +6,8 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import { RUSSIAN_HISTORY_TOPICS, TOTAL_TOPICS } from "@/lib/topics";
 import TopicsMap from "@/components/TopicsMap";
+import { PostHogIdentify } from "@/components/PostHogIdentify";
+import { PaymentSuccessTracker } from "@/components/PaymentSuccessTracker";
 
 const XP_LEVELS = [
   { name: "Новичок",     minXP: 0,    maxXP: 100,  color: "bg-gray-400" },

@@ -1,4 +1,5 @@
-"use client";
+"use client"
+import posthog from "posthog-js";
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
@@ -130,6 +131,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     setInput("");
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setLoading(true);
+
+    // Аналитика
+    const isFirst = messages.filter(m => m.role === "user").length === 0;
+    if (isFirst) posthog.capture("first_message_sent", { subject });
+    posthog.capture("message_sent", { subject });
 
     try {
       const res = await fetch("/api/chat", {
