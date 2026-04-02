@@ -26,6 +26,28 @@ export default function AuthPage() {
 function AuthPageContent() {
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
+
+  const [authMode, setAuthMode] = useState<'email' | 'phone'>('email')
+  const [phone, setPhone] = useState('')
+  const [otp, setOtp] = useState('')
+  const [otpSent, setOtpSent] = useState(false)
+  const [phoneLoading, setPhoneLoading] = useState(false)
+
+  const sendOtp = async () => {
+    setPhoneLoading(true)
+    const fmt = phone.startsWith('+') ? phone : `+7${phone.replace(/\D/g,'').slice(-10)}`
+    const { error } = await supabase.auth.signInWithOtp({ phone: fmt })
+    if (error) { alert(error.message); setPhoneLoading(false); return }
+    setOtpSent(true); setPhoneLoading(false)
+  }
+  const verifyOtp = async () => {
+    setPhoneLoading(true)
+    const fmt = phone.startsWith('+') ? phone : `+7${phone.replace(/\D/g,'').slice(-10)}`
+    const { error } = await supabase.auth.verifyOtp({ phone: fmt, token: otp, type: 'sms' })
+    if (error) { alert(error.message); setPhoneLoading(false); return }
+    setPhoneLoading(false); router.push('/dashboard')
+  }
+
   const [mode, setMode]         = useState<"signin" | "signup">("signin");
   const [loading, setLoading]   = useState(false);
   const [oauthLoading, setOauthLoading] = useState<"google" | null>(null);
