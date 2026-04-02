@@ -1,6 +1,7 @@
 import Link from "next/link";
 import DemoChat from "@/components/DemoChat";
 import Logo from "@/components/Logo";
+import { createClient } from "@/lib/supabase/server";
 
 const SUBJECTS = [
   { id: "russian-history", emoji: "📜", title: "История России", desc: "51 тема · 5 уровней", live: true },
@@ -58,7 +59,10 @@ const TESTIMONIALS = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
 
@@ -72,15 +76,26 @@ export default function HomePage() {
             <Link href="/pricing" className="hover:text-gray-900 transition-colors">Тарифы</Link>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/auth" className="px-4 py-2 text-sm text-gray-600 font-medium hover:text-gray-900 transition-colors">
-              Войти
-            </Link>
-            <Link
-              href="/auth"
-              className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-700 transition-colors"
-            >
-              Попробовать бесплатно →
-            </Link>
+            {user ? (
+              <Link
+                href="/dashboard"
+                className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-700 transition-colors"
+              >
+                Мой кабинет →
+              </Link>
+            ) : (
+              <>
+                <Link href="/auth" className="px-4 py-2 text-sm text-gray-600 font-medium hover:text-gray-900 transition-colors">
+                  Войти
+                </Link>
+                <Link
+                  href="/auth"
+                  className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-700 transition-colors"
+                >
+                  Попробовать бесплатно →
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
