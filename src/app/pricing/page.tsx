@@ -1,5 +1,8 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import BuyProButton from "@/components/BuyProButton";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 const FREE_FEATURES = [
   "30 сообщений с ментором в день",
@@ -38,9 +41,31 @@ const FAQ = [
   },
 ];
 
-export const metadata={title:"Тарифы",description:"Тарифы Mentora"};
+export const metadata = {
+  title: "Тарифы — Mentora AI-репетитор",
+  description: "Начни бесплатно — 30 сообщений в день без карты. Pro за 499 ₽/мес снимает все лимиты и открывает все предметы.",
+  alternates: { canonical: "https://mentora.su/pricing" },
+};
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+  );
+  const { data: { user } } = await supabase.auth.getUser();
+  const isLoggedIn = !!user;
+
+  let isPro = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("users")
+      .select("plan")
+      .eq("id", user.id)
+      .single();
+    isPro = profile?.plan === "pro";
+  }
   return (
     <div className="min-h-screen bg-white text-gray-900">
 
@@ -131,12 +156,9 @@ export default function PricingPage() {
               </p>
             </div>
 
-            <Link
-              href="/auth"
-              className="block text-center py-3 px-6 bg-brand-600 text-white font-semibold rounded-xl hover:bg-brand-700 transition-colors mb-8"
-            >
-              Попробовать Pro →
-            </Link>
+            <div className="mb-8">
+              <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} />
+            </div>
 
             <ul className="space-y-3 flex-1">
               {PRO_FEATURES.map((f) => (
