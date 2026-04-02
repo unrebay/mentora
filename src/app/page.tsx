@@ -71,12 +71,17 @@ export default function HomePage() {
             <a href="#how" className="hover:text-gray-900 transition-colors">Как работает</a>
             <Link href="/pricing" className="hover:text-gray-900 transition-colors">Тарифы</Link>
           </div>
-          <Link
-            href="/auth"
-            className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-700 transition-colors"
-          >
-            Попробовать бесплатно →
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/auth" className="px-4 py-2 text-sm text-gray-600 font-medium hover:text-gray-900 transition-colors">
+              Войти
+            </Link>
+            <Link
+              href="/auth"
+              className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-700 transition-colors"
+            >
+              Попробовать бесплатно →
+            </Link>
+          </div>
         </div>
       </nav>
 
