@@ -74,6 +74,9 @@ export const metadata: Metadata = {
     ],
   },
   manifest: "/site.webmanifest",
+  verification: {
+    yandex: "0909de11a605c969",
+  },
   robots: {
     index: true,
     follow: true,
