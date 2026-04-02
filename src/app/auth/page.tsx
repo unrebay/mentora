@@ -306,7 +306,7 @@ function AuthPageContent() {
           )}
 
           <div className="mt-3">
-            <a href="https://t.me/MentoraBot?start=auth" target="_blank" rel="noopener noreferrer"
+            <a href="https://t.me/mentora_su_bot?start=auth" target="_blank" rel="noopener noreferrer"
               className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors">
               <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#2AABEE]"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/></svg>
               Войти через Telegram
