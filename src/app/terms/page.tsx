@@ -157,6 +157,16 @@ export default function TermsPage() {
           </div>
         </div>
       </footer>
+      <section className="max-w-3xl mx-auto px-6 py-8 border-t border-gray-100">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Реквизиты</h2>
+        <div className="text-sm text-gray-500 space-y-1">
+          <p>Исполнитель: Белашов Андрей Владимирович</p>
+          <p>ИНН: 325005748248</p>
+          <p>Статус: Самозанятый (НПД)</p>
+          <p>Email: <a href="mailto:hi@mentora.su" className="text-indigo-600 hover:underline">hi@mentora.su</a></p>
+          <p>Сайт: <a href="https://mentora.su" className="text-indigo-600 hover:underline">mentora.su</a></p>
+        </div>
+      </section>
     </div>
   );
 }
