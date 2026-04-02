@@ -249,14 +249,17 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
               М
             </div>
             <div className="bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm">
-              <div className="flex gap-1 items-center">
-                {[0, 1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className="w-2 h-2 bg-brand-300 rounded-full animate-bounce"
-                    style={{ animationDelay: `${i * 0.15}s` }}
-                  />
-                ))}
+              <div className="flex gap-2 items-center">
+                <div className="flex gap-1 items-center">
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className="w-1.5 h-1.5 bg-brand-300 rounded-full animate-bounce"
+                      style={{ animationDelay: `${i * 0.15}s` }}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs text-gray-400 italic">Думаю...</span>
               </div>
             </div>
           </div>
