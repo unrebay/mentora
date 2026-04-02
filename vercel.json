@@ -1,8 +1,10 @@
 {
-  "crons": [
+  "redirects": [
     {
-      "path": "/api/cron/reengagement",
-      "schedule": "0 10 * * *"
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "www.mentora.su" }],
+      "destination": "https://mentora.su/$1",
+      "permanent": true
     }
   ]
 }
