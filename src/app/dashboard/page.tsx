@@ -98,13 +98,7 @@ export default async function DashboardPage() {
               </div>
             )}
             {!isPro && (
-              <Link href="/dashboard/analytics"
-            className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
-          >
-            Аналитика
-          </Link>
-          <Link
-            href="/pricing" className="hidden sm:inline-flex text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors">
+              <Link href="/pricing" className="hidden sm:inline-flex text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors">
                 Тарифы
               </Link>
             )}
@@ -115,7 +109,8 @@ export default async function DashboardPage() {
             </form>
           </div>
         </div>
-      </nav>
+        <a href="/dashboard/analytics" className="text-sm text-gray-500 hover:text-gray-900 transition-colors px-3 py-2 rounded-lg hover:bg-gray-100">Аналитика</a>
+        </nav>
 
       <div className="max-w-5xl mx-auto px-6 py-10">
 
