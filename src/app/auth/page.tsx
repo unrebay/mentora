@@ -10,6 +10,7 @@ declare global {
   interface Window {
     onMentoraCaptchaSuccess?: (token: string) => void;
     onMentoraCaptchaExpired?: () => void;
+    onTelegramAuth?: (user: Record<string, string>) => void;
   }
 }
 
@@ -27,26 +28,7 @@ function AuthPageContent() {
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
 
-  const [authMode, setAuthMode] = useState<'email' | 'phone'>('email')
-  const [phone, setPhone] = useState('')
-  const [otp, setOtp] = useState('')
-  const [otpSent, setOtpSent] = useState(false)
-  const [phoneLoading, setPhoneLoading] = useState(false)
-
-  const sendOtp = async () => {
-    setPhoneLoading(true)
-    const fmt = phone.startsWith('+') ? phone : `+7${phone.replace(/\D/g,'').slice(-10)}`
-    const { error } = await supabase.auth.signInWithOtp({ phone: fmt })
-    if (error) { alert(error.message); setPhoneLoading(false); return }
-    setOtpSent(true); setPhoneLoading(false)
-  }
-  const verifyOtp = async () => {
-    setPhoneLoading(true)
-    const fmt = phone.startsWith('+') ? phone : `+7${phone.replace(/\D/g,'').slice(-10)}`
-    const { error } = await supabase.auth.verifyOtp({ phone: fmt, token: otp, type: 'sms' })
-    if (error) { alert(error.message); setPhoneLoading(false); return }
-    setPhoneLoading(false); router.push('/dashboard')
-  }
+  const [tgLoading, setTgLoading] = useState(false);
 
   const [mode, setMode]         = useState<"signin" | "signup">("signin");
   const [loading, setLoading]   = useState(false);
@@ -91,6 +73,50 @@ function AuthPageContent() {
   useEffect(() => {
     setCaptchaToken(null);
   }, [mode]);
+
+  // Telegram Login Widget
+  useEffect(() => {
+    const supabaseClient = createClient();
+    window.onTelegramAuth = async (user) => {
+      setTgLoading(true);
+      try {
+        const res = await fetch("/api/auth/telegram", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(user),
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error);
+        const { error } = await supabaseClient.auth.verifyOtp({
+          email: json.email,
+          token: json.token_hash,
+          type: "email",
+        });
+        if (error) throw error;
+        window.location.href = "/dashboard";
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : "попробуй снова";
+        alert("Ошибка входа через Telegram: " + msg);
+        setTgLoading(false);
+      }
+    };
+
+    const container = document.getElementById("telegram-login-widget");
+    if (container && !container.querySelector("script")) {
+      const script = document.createElement("script");
+      script.src = "https://telegram.org/js/telegram-widget.js?22";
+      script.setAttribute("data-telegram-login", "mentora_su_bot");
+      script.setAttribute("data-size", "large");
+      script.setAttribute("data-radius", "10");
+      script.setAttribute("data-onauth", "onTelegramAuth(user)");
+      script.setAttribute("data-request-access", "write");
+      script.setAttribute("data-userpic", "false");
+      script.async = true;
+      container.appendChild(script);
+    }
+
+    return () => { delete window.onTelegramAuth; };
+  }, []);
 
   // ── OAuth ─────────────────────────────────────────────────────────────
   async function handleOAuth(provider: "google") {
@@ -204,45 +230,8 @@ function AuthPageContent() {
           </div>
 
           {/* ── Email / Password form ── */}
-          
-          <div className="flex gap-1 p-1 bg-gray-100 rounded-xl mb-5">
-            {(['email','phone'] as const).map(m => (
-              <button key={m} onClick={() => setAuthMode(m)}
-                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${authMode===m?'bg-white text-gray-900 shadow-sm':'text-gray-500 hover:text-gray-700'}`}>
-                {m==='email'?'📧 Email':'📱 Телефон'}
-              </button>
-            ))}
-          </div>
-          {authMode==='phone' && (
-            <div className="space-y-3">
-              {!otpSent ? (
-                <>
-                  <input type="tel" value={phone} onChange={e=>setPhone(e.target.value)}
-                    placeholder="+7 999 000-00-00"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" />
-                  <button onClick={sendOtp} disabled={phoneLoading||phone.length<10}
-                    className="w-full py-3 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 disabled:opacity-50">
-                    {phoneLoading?'Отправляем…':'Получить код SMS'}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm text-gray-500 text-center">Код отправлен на {phone}</p>
-                  <input type="text" inputMode="numeric" value={otp}
-                    onChange={e=>setOtp(e.target.value.replace(/\D/g,'').slice(0,6))}
-                    placeholder="000000"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-center text-2xl tracking-widest text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" />
-                  <button onClick={verifyOtp} disabled={phoneLoading||otp.length<4}
-                    className="w-full py-3 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 disabled:opacity-50">
-                    {phoneLoading?'Проверяем…':'Войти'}
-                  </button>
-                  <button onClick={()=>{setOtpSent(false);setOtp('')}} className="w-full text-sm text-gray-400 hover:text-gray-600">Изменить номер</button>
-                </>
-              )}
-            </div>
-          )}
-          {authMode==='email' && (
-<form onSubmit={handleSubmit} className="space-y-3">
+
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
               <input
@@ -303,14 +292,16 @@ function AuthPageContent() {
               }
             </button>
           </form>
-          )}
 
           <div className="mt-3">
-            <a href="https://t.me/mentora_su_bot?start=auth" target="_blank" rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors">
-              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#2AABEE]"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/></svg>
-              Войти через Telegram
-            </a>
+            {tgLoading ? (
+              <div className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 rounded-xl text-sm text-gray-500">
+                <span className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                Входим через Telegram...
+              </div>
+            ) : (
+              <div id="telegram-login-widget" className="flex justify-center" />
+            )}
           </div>
         </div>
 
