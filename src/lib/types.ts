@@ -1,5 +1,5 @@
-export type OnboardingStyle = "simple" | "detailed" | "socratic";
-export type OnboardingLevel = "beginner" | "intermediate" | "advanced";
+export type OnboardingStyle = "storytelling" | "facts" | "practice";
+export type OnboardingLevel = "school" | "student" | "adult" | "expert";
 export type MessageRole = "user" | "assistant";
 
 export interface User {
