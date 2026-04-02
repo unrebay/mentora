@@ -94,6 +94,7 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-6">
             <Logo size="sm" />
             <a href="/dashboard/analytics" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Аналитика</a>
+            <a href="/profile" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Профиль</a>
           </div>
           <div className="flex items-center gap-4 md:gap-6">
             {totalXP > 0 && (
