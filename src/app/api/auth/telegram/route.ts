@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     await supabaseAdmin.auth.admin.generateLink({
       type: "magiclink",
       email: telegramEmail,
-      options: { redirectTo: "https://mentora.su/auth/callback?next=/dashboard" },
+      options: { redirectTo: "https://mentora.su/auth/confirm" },
     });
 
   if (linkErr) {
