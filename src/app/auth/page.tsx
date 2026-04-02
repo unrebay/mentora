@@ -91,7 +91,7 @@ function AuthPageContent() {
         const { error } = await supabaseClient.auth.verifyOtp({
           email: json.email,
           token: json.token_hash,
-          type: "email",
+          type: "magiclink",
         });
         if (error) throw error;
         window.location.href = "/dashboard";
