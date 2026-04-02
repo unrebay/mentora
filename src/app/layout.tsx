@@ -98,6 +98,7 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
+        <meta name="yandex-verification" content="0909de11a605c969" />
         <meta name="theme-color" content="#3b5bdb" />
         <meta name="msapplication-TileColor" content="#3b5bdb" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
