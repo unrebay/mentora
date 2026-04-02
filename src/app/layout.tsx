@@ -75,7 +75,7 @@ export const metadata: Metadata = {
   },
   manifest: "/site.webmanifest",
   verification: {
-    yandex: "0909de11a605c969",
+    yandex: "673fbfbebc45f7aa",
   },
   robots: {
     index: true,
@@ -98,7 +98,7 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
-        <meta name="yandex-verification" content="0909de11a605c969" />
+        <meta name="yandex-verification" content="673fbfbebc45f7aa" />
         <meta name="theme-color" content="#3b5bdb" />
         <meta name="msapplication-TileColor" content="#3b5bdb" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
