@@ -11,6 +11,7 @@ declare global {
     onMentoraCaptchaSuccess?: (token: string) => void;
     onMentoraCaptchaExpired?: () => void;
     onTelegramAuth?: (user: Record<string, string>) => void;
+    Telegram?: { Login?: { auth: (opts: Record<string, unknown>, cb: (u: Record<string, string>) => void) => void } };
   }
 }
 
@@ -293,15 +294,36 @@ function AuthPageContent() {
             </button>
           </form>
 
+          {/* Hidden widget: loads Telegram.Login API */}
+          <div id="telegram-login-widget" style={{position:"absolute",opacity:0,width:1,height:1,overflow:"hidden",pointerEvents:"none"}} />
+
           <div className="mt-3">
-            {tgLoading ? (
-              <div className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 rounded-xl text-sm text-gray-500">
-                <span className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
-                Входим через Telegram...
-              </div>
-            ) : (
-              <div id="telegram-login-widget" className="flex justify-center" />
-            )}
+            <button
+              type="button"
+              disabled={tgLoading}
+              onClick={() => {
+                const tg = window.Telegram;
+                if (tg?.Login?.auth) {
+                  tg.Login.auth(
+                    { bot_id: 8558784965, request_access: "write" },
+                    (user) => { if (user && window.onTelegramAuth) window.onTelegramAuth(user); }
+                  );
+                }
+              }}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-60"
+            >
+              {tgLoading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                  Входим через Telegram...
+                </>
+              ) : (
+                <>
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#2AABEE]"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/></svg>
+                  Войти через Telegram
+                </>
+              )}
+            </button>
           </div>
         </div>
 
