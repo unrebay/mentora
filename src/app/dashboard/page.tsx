@@ -211,6 +211,15 @@ export default async function DashboardPage() {
           )}
         </div>
 
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Предметы</h2>
+          <a
+            href="mailto:hi@mentora.su?subject=Предложить предмет"
+            className="flex items-center gap-1.5 text-xs font-medium text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 transition-colors px-3 py-1.5 rounded-lg"
+          >
+            <span className="text-base leading-none">+</span> Предложить предмет
+          </a>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {SUBJECTS.map((subject) => {
             const progress = progressMap.get(subject.id);
