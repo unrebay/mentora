@@ -55,11 +55,12 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Generate magic link token
+  // Generate magic link — redirect through our callback
   const { data: linkData, error: linkErr } =
     await supabaseAdmin.auth.admin.generateLink({
       type: "magiclink",
       email: telegramEmail,
+      options: { redirectTo: "https://mentora.su/auth/callback?next=/dashboard" },
     });
 
   if (linkErr) {
@@ -67,7 +68,6 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({
-    token_hash: linkData.properties.hashed_token,
-    email: telegramEmail,
+    action_link: linkData.properties.action_link,
   });
 }

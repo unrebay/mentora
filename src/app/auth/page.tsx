@@ -88,13 +88,8 @@ function AuthPageContent() {
         });
         const json = await res.json();
         if (!res.ok) throw new Error(json.error);
-        const { error } = await supabaseClient.auth.verifyOtp({
-          email: json.email,
-          token: json.token_hash,
-          type: "magiclink",
-        });
-        if (error) throw error;
-        window.location.href = "/dashboard";
+        // Redirect to Supabase magic link — it verifies and sends to /auth/callback
+        window.location.href = json.action_link;
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : "попробуй снова";
         alert("Ошибка входа через Telegram: " + msg);
