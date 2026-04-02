@@ -125,13 +125,13 @@ export default function OnboardingPage() {
       if (user) {
         await supabase
           .from("users")
-          .update({
+          .upsert({
+            id: user.id,
             onboarding_style: newAnswers.onboarding_style,
             onboarding_level: newAnswers.onboarding_level,
             onboarding_goal: newAnswers.onboarding_goal,
             onboarding_completed: true,
-          })
-          .eq("id", user.id);
+          });
       }
       // Send welcome email (fire-and-forget, don't block redirect)
       fetch("/api/email/welcome", { method: "POST" }).catch(() => {});
@@ -244,8 +244,7 @@ export default function OnboardingPage() {
             if (user) {
               await supabase
                 .from("users")
-                .update({ onboarding_completed: true })
-                .eq("id", user.id);
+                .upsert({ id: user.id, onboarding_completed: true });
             }
             window.location.href = "/dashboard";
           }}
