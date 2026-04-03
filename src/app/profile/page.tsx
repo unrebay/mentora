@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { ProfileNameEditor } from "@/components/ProfileNameEditor";
 import Logo from "@/components/Logo";
 
 export const metadata = { title: "Профиль — Mentora" };
@@ -64,7 +65,7 @@ export default async function ProfilePage() {
   if (!user) redirect("/auth");
 
   const [{ data: profile }, { data: progressData }, { count: msgCount }] = await Promise.all([
-    supabase.from("users").select("plan, created_at").eq("id", user.id).single(),
+    supabase.from("users").select("plan, created_at, display_name, name_changes_count").eq("id", user.id).single(),
     supabase.from("user_progress").select("xp_total, streak_days").eq("user_id", user.id),
     supabase.from("chat_messages").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("role", "user"),
   ]);
@@ -79,7 +80,8 @@ export default async function ProfilePage() {
 
   const stats: Stats = { totalXP, maxStreak, totalMessages, isPro, joinedDaysAgo };
   const lvl = getLevel(totalXP);
-  const name = user.email?.split("@")[0] ?? "Пользователь";
+  const changesLeft = Math.max(0, 2 - (profile?.name_changes_count ?? 0));
+  const name = profile?.display_name ?? user.email?.split("@")[0] ?? "Пользователь";
   const initial = name[0].toUpperCase();
 
   const earned = BADGES.filter(b => b.check(stats));
@@ -104,7 +106,12 @@ export default async function ProfilePage() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xl font-bold text-gray-900 truncate">{name}</p>
-            <p className="text-sm text-gray-400 truncate mb-3">{user.email}</p>
+            <p className="text-sm text-gray-400 truncate">{user.email}</p>
+          <ProfileNameEditor
+            currentName={profile?.display_name ?? null}
+            changesLeft={changesLeft}
+          />
+          <div className="mt-3 flex items-center gap-2">
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
                     style={{ background: lvl.bg, color: lvl.color }}>{lvl.name}</span>
