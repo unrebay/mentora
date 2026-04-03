@@ -29,6 +29,14 @@ function getLevel(xp: number) {
   return { ...level, idx, next, progress };
 }
 
+function pluralDays(n: number): string {
+  const m10 = n % 10, m100 = n % 100;
+  if (m100 >= 11 && m100 <= 14) return "дней";
+  if (m10 === 1) return "день";
+  if (m10 >= 2 && m10 <= 4) return "дня";
+  return "дней";
+}
+
 function getFirstName(fullName?: string | null, email?: string | null): string {
   if (fullName) return fullName.split(" ")[0];
   if (email) return email.split("@")[0];
@@ -100,7 +108,7 @@ export default async function DashboardPage() {
             {totalXP > 0 && (
               <div className="hidden sm:flex items-center gap-4 text-sm">
                 <span className="text-brand-600 font-semibold">⚡ {totalXP} XP</span>
-                {maxStreak > 0 && <span className="text-orange-500 font-semibold">🔥 {maxStreak} дней</span>}
+                {maxStreak > 0 && <span className="text-orange-500 font-semibold">🔥 {maxStreak} {pluralDays(maxStreak)}</span>}
               </div>
             )}
             {!isPro && (
@@ -189,7 +197,7 @@ export default async function DashboardPage() {
               {maxStreak > 0 && (
                 <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm">
                   <span>🔥</span>
-                  <span className="text-gray-600">Стрик: <span className="font-semibold text-orange-500">{maxStreak} дней</span></span>
+                  <span className="text-gray-600">Стрик: <span className="font-semibold text-orange-500">{maxStreak} {pluralDays(maxStreak)}</span></span>
                 </div>
               )}
               <Link href="/pricing" className="flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-xl px-4 py-2.5 text-sm text-brand-700 font-medium hover:bg-brand-100 transition-colors">
@@ -250,7 +258,7 @@ export default async function DashboardPage() {
                             <div className={`h-full rounded-full transition-all ${lvl.color}`} style={{ width: `${lvl.progress}%` }} />
                           </div>
                           {progress.streak_days > 0 && (
-                            <div className="mt-1.5 text-[10px] text-orange-500 font-medium">🔥 {progress.streak_days} дней подряд</div>
+                            <div className="mt-1.5 text-[10px] text-orange-500 font-medium">🔥 {progress.streak_days} {pluralDays(progress.streak_days ?? 0)} подряд</div>
                           )}
                         </div>
                       );
