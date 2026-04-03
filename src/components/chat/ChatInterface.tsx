@@ -7,6 +7,7 @@ import { MessageRole } from "@/lib/types";
 
 const DAILY_LIMIT = 30;
 
+
 interface Message {
   role: MessageRole;
   content: string;
@@ -184,7 +185,12 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           ←
         </Link>
         <div className="flex-1">
-          <h1 className="font-semibold text-gray-900 text-sm">{subjectTitle}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="font-semibold text-gray-900 text-sm">{subjectTitle}</h1>
+            {initialMessagesRemaining === null && (
+              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-purple-100 text-purple-600">👑 Pro</span>
+            )}
+          </div>
           <p className="text-xs text-gray-400">AI-ментор · Mentora</p>
         </div>
         {/* Counter badge — only when ≤5 remaining */}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Golos_Text, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { PostHogProvider } from "@/components/PostHogProvider";
+import { SplashScreen } from "@/components/SplashScreen";
 
 const golos = Golos_Text({
   subsets: ["latin", "cyrillic"],
@@ -105,6 +106,7 @@ export default function RootLayout({
         <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
       <PostHogProvider>
+      <SplashScreen />
       <body className={`${golos.variable} ${playfair.variable} font-sans`}>{children}</body>
     </PostHogProvider>
     </html>

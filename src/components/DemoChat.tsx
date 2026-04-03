@@ -16,6 +16,13 @@ const INITIAL_MESSAGE: Message = {
 
 const DEMO_LIMIT = 5;
 
+function renderMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/`(.*?)`/g, "<code>$1</code>");
+}
+
 export default function DemoChat() {
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
@@ -133,9 +140,9 @@ export default function DemoChat() {
                   ? "bg-gray-900 text-white"
                   : "bg-gray-50 border border-gray-100 text-gray-700"
               }`}
-            >
-              {m.content}
-            </div>
+            
+              dangerouslySetInnerHTML={{ __html: renderMarkdown(m.content) }}
+            />
             {m.role === "user" && (
               <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
                 Я

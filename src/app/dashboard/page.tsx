@@ -200,6 +200,10 @@ export default async function DashboardPage() {
 
           {isPro && (
             <div className="flex flex-wrap gap-3">
+              <div className="flex items-center gap-2 bg-purple-50 border border-purple-200 rounded-xl px-4 py-2.5 text-sm">
+                <span>👑</span>
+                <span className="text-purple-700 font-semibold">Pro</span>
+              </div>
               <div className="flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-xl px-4 py-2.5 text-sm">
                 <span>♾️</span>
                 <span className="text-brand-700 font-medium">Безлимитные сообщения</span>
@@ -265,6 +269,16 @@ export default async function DashboardPage() {
               </div>
             );
           })}
+          {/* Добавить предмет */}
+          
+            href="mailto:hi@mentora.su?subject=Хочу предмет"
+            className="relative rounded-2xl border-2 border-dashed border-gray-200 bg-white hover:border-brand-300 hover:bg-brand-50 transition-all cursor-pointer flex flex-col items-center justify-center p-5 min-h-[140px] gap-2 group"
+          >
+            <div className="w-10 h-10 rounded-full bg-gray-100 group-hover:bg-brand-100 flex items-center justify-center transition-colors">
+              <span className="text-2xl text-gray-400 group-hover:text-brand-500 leading-none">+</span>
+            </div>
+            <span className="text-xs font-medium text-gray-400 group-hover:text-brand-600 text-center transition-colors">Добавить предмет</span>
+          </a>
         </div>
 
         <div className="mt-16">
