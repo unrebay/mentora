@@ -188,7 +188,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           <div className="flex items-center gap-2">
             <h1 className="font-semibold text-gray-900 text-sm">{subjectTitle}</h1>
             {initialMessagesRemaining === null && (
-              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-purple-100 text-purple-600">👑 Pro</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded tracking-wide" style={{ background: "#111", color: "#fff" }}>PRO</span>
             )}
           </div>
           <p className="text-xs text-gray-400">AI-ментор · Mentora</p>
@@ -235,8 +235,10 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             {msg.role === "assistant" && (
-              <div className="w-7 h-7 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-xs font-bold mr-2 mt-0.5 shrink-0">
-                М
+              <div className="w-8 h-8 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-2 mt-0.5 shrink-0 select-none">
+                <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, fontSize: "13px", lineHeight: 1, color: "#121212", letterSpacing: "-0.02em" }}>
+                  M<span style={{ color: "#4561E8", fontStyle: "italic" }}>e</span>
+                </span>
               </div>
             )}
             <div
@@ -257,21 +259,17 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
 
         {loading && (
           <div className="flex justify-start">
-            <div className="w-7 h-7 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-xs font-bold mr-2 shrink-0">
-              М
+            <div className="w-8 h-8 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center mr-2 shrink-0 select-none">
+              <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, fontSize: "13px", lineHeight: 1, color: "#121212", letterSpacing: "-0.02em" }}>
+                M<span style={{ color: "#4561E8", fontStyle: "italic" }}>e</span>
+              </span>
             </div>
-            <div className="bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm">
-              <div className="flex gap-2 items-center">
-                <div className="flex gap-1 items-center">
-                  {[0, 1, 2].map((i) => (
-                    <div
-                      key={i}
-                      className="w-1.5 h-1.5 bg-brand-300 rounded-full animate-bounce"
-                      style={{ animationDelay: `${i * 0.15}s` }}
-                    />
-                  ))}
-                </div>
-                <span className="text-xs text-gray-400 italic">Думаю...</span>
+            <div className="bg-white border border-gray-100 rounded-2xl px-4 py-4 shadow-sm">
+              <div className="flex gap-1.5 items-end h-4">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="w-2 h-2 rounded-full"
+                    style={{ background: "#4561E8", opacity: 0.7, animation: "mentoraDot 1.3s ease-in-out infinite", animationDelay: `${i * 0.18}s` }} />
+                ))}
               </div>
             </div>
           </div>

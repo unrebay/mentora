@@ -201,7 +201,7 @@ export default async function DashboardPage() {
           {isPro && (
             <div className="flex flex-wrap gap-3">
               <div className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm"
-                   style={{ background: "#111", color: "#fff", boxShadow: "0 0 0 1.5px #b8860b, 0 0 8px 1px rgba(184,134,11,0.35)" }}>
+                   style={{ background: "#111", color: "#fff" }}>
                 <span className="font-bold tracking-wide">PRO</span>
               </div>
               <div className="flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-xl px-4 py-2.5 text-sm">

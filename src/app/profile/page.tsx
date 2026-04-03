@@ -65,7 +65,7 @@ export default async function ProfilePage() {
   if (!user) redirect("/auth");
 
   const [{ data: profile }, { data: progressData }, { count: msgCount }] = await Promise.all([
-    supabase.from("users").select("plan, created_at, display_name, name_changes_count").eq("id", user.id).single(),
+    supabase.from("users").select("plan, created_at, display_name, name_changes_count, full_name, age, phone").eq("id", user.id).single(),
     supabase.from("user_progress").select("xp_total, streak_days").eq("user_id", user.id),
     supabase.from("chat_messages").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("role", "user"),
   ]);
@@ -81,7 +81,7 @@ export default async function ProfilePage() {
   const stats: Stats = { totalXP, maxStreak, totalMessages, isPro, joinedDaysAgo };
   const lvl = getLevel(totalXP);
   const changesLeft = Math.max(0, 2 - (profile?.name_changes_count ?? 0));
-  const name = profile?.display_name ?? user.email?.split("@")[0] ?? "Пользователь";
+  const name = profile?.full_name ?? profile?.display_name ?? user.email?.split("@")[0] ?? "Пользователь";
   const initial = name[0].toUpperCase();
 
   const earned = BADGES.filter(b => b.check(stats));
@@ -108,13 +108,16 @@ export default async function ProfilePage() {
             <p className="text-xl font-bold text-gray-900 truncate">{name}</p>
             <p className="text-sm text-gray-400 truncate">{user.email}</p>
             <ProfileNameEditor
-              currentName={profile?.display_name ?? null}
+              currentNickname={profile?.display_name ?? null}
               changesLeft={changesLeft}
+              currentFullName={profile?.full_name ?? null}
+              currentAge={profile?.age ?? null}
+              currentPhone={profile?.phone ?? null}
             />
             <div className="mt-3 flex items-center gap-2">
               <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
                     style={{ background: lvl.bg, color: lvl.color }}>{lvl.name}</span>
-              {isPro && <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-50 text-purple-600">👑 Pro</span>}
+              {isPro && <span className="text-xs font-bold px-2.5 py-1 rounded-full tracking-wide" style={{ background: "#111", color: "#fff" }}>PRO</span>}
             </div>
           </div>
         </div>
