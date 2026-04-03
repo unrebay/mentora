@@ -270,7 +270,7 @@ export default async function DashboardPage() {
             );
           })}
           {/* Добавить предмет */}
-          
+          <a
             href="mailto:hi@mentora.su?subject=Хочу предмет"
             className="relative rounded-2xl border-2 border-dashed border-gray-200 bg-white hover:border-brand-300 hover:bg-brand-50 transition-all cursor-pointer flex flex-col items-center justify-center p-5 min-h-[140px] gap-2 group"
           >

@@ -107,12 +107,11 @@ export default async function ProfilePage() {
           <div className="flex-1 min-w-0">
             <p className="text-xl font-bold text-gray-900 truncate">{name}</p>
             <p className="text-sm text-gray-400 truncate">{user.email}</p>
-          <ProfileNameEditor
-            currentName={profile?.display_name ?? null}
-            changesLeft={changesLeft}
-          />
-          <div className="mt-3 flex items-center gap-2">
-            <div className="flex items-center gap-2">
+            <ProfileNameEditor
+              currentName={profile?.display_name ?? null}
+              changesLeft={changesLeft}
+            />
+            <div className="mt-3 flex items-center gap-2">
               <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
                     style={{ background: lvl.bg, color: lvl.color }}>{lvl.name}</span>
               {isPro && <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-50 text-purple-600">👑 Pro</span>}
