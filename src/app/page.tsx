@@ -152,22 +152,24 @@ export default async function HomePage() {
           </div>
         </div>
 
-                {/* Floating questions block */}
-        <div className="mt-20 max-w-4xl mx-auto px-4">
-          <p className="text-[11px] font-semibold text-gray-300 tracking-[0.2em] uppercase mb-16 text-center">Например, вот так</p>
-          <div className="mb-24 space-y-10">
-            <p className="text-2xl font-semibold text-gray-800 w-fit">
-              Подожди, а почему именно 1941-й?
-            </p>
-            <p className="text-lg font-medium text-gray-500 w-fit ml-auto mr-[8%]">
-              Это вообще базово знать или нет?
-            </p>
-            <p className="text-3xl font-bold text-gray-900 w-fit ml-[14%]">
-              Объясни ещё раз, другими словами.
-            </p>
-            <p className="text-xl font-medium text-gray-400 w-fit ml-[52%]">
-              А зачем это вообще учить?
-            </p>
+        {/* Shy questions block */}
+        <div className="mt-20 max-w-2xl mx-auto">
+          <p className="text-center text-[11px] font-semibold text-gray-300 tracking-[0.2em] uppercase mb-14">Например, вот так</p>
+          <div className="space-y-3 mb-20">
+            {[
+              { q: "Подожди, а почему именно 1941-й?", sub: "Я не понял предыдущую часть" },
+              { q: "Это вообще базово знать или нет?", sub: "Боюсь спросить" },
+              { q: "Объясни ещё раз, другими словами", sub: "Я снова не понял" },
+              { q: "А зачем это вообще учить?", sub: "Это правда важно?" },
+            ].map((item, i) => (
+              <div key={i} className="group flex items-start gap-4 px-5 py-4 rounded-2xl hover:bg-gray-50 transition-colors cursor-default">
+                <div className="w-0.5 h-full min-h-[36px] bg-brand-200 group-hover:bg-brand-400 rounded-full shrink-0 transition-colors mt-1" />
+                <div>
+                  <p className="text-gray-800 font-medium text-base leading-snug">{item.q}</p>
+                  <p className="text-gray-400 text-sm mt-0.5">{item.sub}</p>
+                </div>
+              </div>
+            ))}
           </div>
           <div className="text-center">
             <p className="text-2xl font-semibold text-gray-900 mb-1">Учитель объясняет классу.</p>
