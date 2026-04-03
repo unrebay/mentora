@@ -13,16 +13,17 @@ export function SplashScreen() {
         }
         @keyframes mentoraSplashBg {
           0%, 80% { opacity: 1; }
-          100%    { opacity: 0; }
+          100%     { opacity: 0; }
         }
         .mentora-splash {
-          animation: mentoraSplashBg 1.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          animation: mentoraSplashBg 1.6s cubic-bezier(0.4,0,0.2,1) forwards;
+          pointer-events: none;
         }
         .mentora-splash-logo {
-          animation: mentoraSplashLogo 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          animation: mentoraSplashLogo 1.5s cubic-bezier(0.4,0,0.2,1) forwards;
         }
       `}</style>
-      <div className="mentora-splash fixed inset-0 z-[9999] flex items-center justify-center bg-white pointer-events-none">
+      <div className="mentora-splash fixed inset-0 z-[9999] flex items-center justify-center bg-white">
         <div className="mentora-splash-logo">
           <Logo size="lg" href="" />
         </div>
