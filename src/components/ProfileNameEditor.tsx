@@ -73,7 +73,7 @@ export function ProfileNameEditor({ currentName, changesLeft }: Props) {
       ) : (
         <div className="space-y-2">
           <input value={value} onChange={e => { setValue(e.target.value.toLowerCase()); setError(""); }}
-            placeholder="имя123" maxLength={20}
+            placeholder="andy123" maxLength={20}
             className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 w-48 focus:outline-none focus:border-brand-400"/>
           <p className="text-[11px] text-gray-400">{RULES}</p>
           <p className="text-[11px] text-gray-400">Осталось изменений: <strong>{left}</strong> из 2</p>

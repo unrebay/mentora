@@ -1,39 +1,35 @@
 "use client";
 import { useEffect, useState } from "react";
+import Logo from "@/components/Logo";
 
 export function SplashScreen() {
-  const [visible, setVisible] = useState(true);
-  const [fading, setFading] = useState(false);
+  const [mounted, setMounted] = useState(true);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setFading(true), 600);
-    const t2 = setTimeout(() => setVisible(false), 900);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    const t = setTimeout(() => setMounted(false), 1500);
+    return () => clearTimeout(t);
   }, []);
 
-  if (!visible) return null;
+  if (!mounted) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-white transition-opacity duration-300"
-      style={{ opacity: fading ? 0 : 1, pointerEvents: fading ? "none" : "auto" }}
-    >
-      <div className="flex items-center gap-2 select-none">
-        <div style={{
-          background: "linear-gradient(135deg,#4f6ef7,#3b5bdb)",
-          borderRadius: "10px",
-          width: "40px",
-          height: "40px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}>
-          <span style={{ color: "white", fontSize: "22px", fontWeight: 800, lineHeight: 1 }}>M</span>
+    <>
+      <style>{`
+        @keyframes mentoraSplash {
+          0%   { opacity: 0; transform: scale(0.94); }
+          18%  { opacity: 1; transform: scale(1); }
+          75%  { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: scale(1.03); }
+        }
+        .mentora-splash-logo {
+          animation: mentoraSplash 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+      `}</style>
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white pointer-events-none">
+        <div className="mentora-splash-logo">
+          <Logo size="lg" href="" />
         </div>
-        <span style={{ fontSize: "1.6rem", fontWeight: 700, letterSpacing: "-0.5px", color: "#111827" }}>
-          <span style={{ color: "#3b5bdb", fontStyle: "italic" }}>e</span>ntora
-        </span>
       </div>
-    </div>
+    </>
   );
 }
