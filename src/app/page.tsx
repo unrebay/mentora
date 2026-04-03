@@ -154,23 +154,26 @@ export default async function HomePage() {
 
         {/* Shy questions block */}
         <div className="mt-20 max-w-2xl mx-auto">
-          <p className="text-center text-[11px] font-semibold text-gray-300 tracking-[0.2em] uppercase mb-12">Вопросы, которые не задают вслух</p>
-          <div className="space-y-5 mb-16">
+          <p className="text-center text-[11px] font-semibold text-gray-300 tracking-[0.2em] uppercase mb-14">Например, вот так</p>
+          <div className="space-y-3 mb-20">
             {[
-              "Подожди, а почему именно 1941-й? Я не понял предыдущую часть",
-              "Это вообще базово знать или нет? Боюсь спросить",
-              "Объясни ещё раз, другими словами — я снова не понял",
-              "А зачем это вообще учить? Это правда важно?",
-            ].map((q, i) => (
-              <div key={i} className="relative pl-8">
-                <span className="absolute left-0 top-0 text-3xl leading-none text-gray-100 font-serif select-none">&ldquo;</span>
-                <p className="text-base text-gray-500 italic leading-relaxed">{q}</p>
+              { q: "Подожди, а почему именно 1941-й?", sub: "Я не понял предыдущую часть" },
+              { q: "Это вообще базово знать или нет?", sub: "Боюсь спросить" },
+              { q: "Объясни ещё раз, другими словами", sub: "Я снова не понял" },
+              { q: "А зачем это вообще учить?", sub: "Это правда важно?" },
+            ].map((item, i) => (
+              <div key={i} className="group flex items-start gap-4 px-5 py-4 rounded-2xl hover:bg-gray-50 transition-colors cursor-default">
+                <div className="w-0.5 h-full min-h-[36px] bg-brand-200 group-hover:bg-brand-400 rounded-full shrink-0 transition-colors mt-1" />
+                <div>
+                  <p className="text-gray-800 font-medium text-base leading-snug">{item.q}</p>
+                  <p className="text-gray-400 text-sm mt-0.5">{item.sub}</p>
+                </div>
               </div>
             ))}
           </div>
-          <div className="border-t border-gray-100 pt-12 text-center">
-            <p className="text-xl font-semibold text-gray-900 mb-2">Учитель объясняет классу.</p>
-            <p className="text-xl text-brand-600 italic font-semibold mb-10">Mentora — только тебе.</p>
+          <div className="text-center">
+            <p className="text-2xl font-semibold text-gray-900 mb-1">Учитель объясняет классу.</p>
+            <p className="text-2xl font-semibold text-brand-600 mb-12">Mentora — только тебе.</p>
             <Link
               href="/auth"
               className="inline-flex px-7 py-3.5 bg-brand-600 text-white font-medium rounded-xl hover:bg-brand-700 transition-colors"
@@ -326,7 +329,7 @@ export default async function HomePage() {
         </h2>
         <p className="text-gray-400 text-lg mb-12 max-w-md mx-auto leading-relaxed">
           В своём темпе. Задавай любые вопросы.<br />
-          Никто не смотрит — только ты и знание.
+          Твои вопросы видишь только ты.
         </p>
         <Link
           href="/auth"
