@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const DAILY_LIMIT = 30;
+const DAILY_LIMIT = 20;
 
 export async function POST(req: NextRequest) {
   try {
