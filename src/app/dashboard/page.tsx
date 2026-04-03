@@ -17,7 +17,7 @@ const XP_LEVELS = [
   { name: "Эксперт",     minXP: 1000, maxXP: Infinity, color: "bg-amber-500" },
 ];
 
-const DAILY_LIMIT = 30;
+const DAILY_LIMIT = 20;
 
 function getLevel(xp: number) {
   const level = XP_LEVELS.slice().reverse().find((l) => xp >= l.minXP) ?? XP_LEVELS[0];
