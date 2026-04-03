@@ -122,12 +122,12 @@ export default async function HomePage() {
             <p className="text-lg text-gray-500 leading-relaxed mb-6">
               AI-ментор, который знает твой уровень, помнит тебя и объясняет так, как тебе удобно. По истории, математике, биологии и многому другому.
             </p>
-            {/* Marketing phrase */}
-            <div className="inline-flex items-start gap-3 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 mb-8">
-              <span className="text-2xl leading-none mt-0.5">💬</span>
-              <p className="text-gray-700 text-base leading-snug font-medium">
-                Задай вопрос, который ты не решаешься{" "}
-                <span className="text-brand-600 italic">произнести вслух</span>
+            {/* Marketing phrase — cinematic right-aligned */}
+            <div className="flex justify-end mb-8 mt-1">
+              <p className="text-sm text-gray-400 italic text-right leading-relaxed max-w-[260px]">
+                Задай вопрос, который ты<br />
+                не решаешься{" "}
+                <span className="text-brand-600 not-italic font-medium">произнести вслух</span>
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -153,32 +153,29 @@ export default async function HomePage() {
         </div>
 
         {/* Shy questions block */}
-        <div className="mt-14 max-w-3xl mx-auto">
-          <p className="text-center text-xs font-semibold text-gray-400 tracking-widest uppercase mb-6">Вопросы, которые не задают учителю</p>
-          <div className="grid sm:grid-cols-2 gap-3 mb-8">
+        <div className="mt-20 max-w-2xl mx-auto">
+          <p className="text-center text-[11px] font-semibold text-gray-300 tracking-[0.2em] uppercase mb-12">Вопросы, которые не задают вслух</p>
+          <div className="space-y-5 mb-16">
             {[
               "Подожди, а почему именно 1941-й? Я не понял предыдущую часть",
               "Это вообще базово знать или нет? Боюсь спросить",
               "Объясни ещё раз, другими словами — я снова не понял",
               "А зачем это вообще учить? Это правда важно?",
             ].map((q, i) => (
-              <div key={i} className="flex gap-3 bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
-                <span className="text-xl shrink-0">🙊</span>
-                <p className="text-sm text-gray-600 leading-relaxed italic">&ldquo;{q}&rdquo;</p>
+              <div key={i} className="relative pl-8">
+                <span className="absolute left-0 top-0 text-3xl leading-none text-gray-100 font-serif select-none">&ldquo;</span>
+                <p className="text-base text-gray-500 italic leading-relaxed">{q}</p>
               </div>
             ))}
           </div>
-          <p className="text-center text-gray-400 text-sm mb-3">
-            Учитель объясняет классу.{" "}
-            <span className="text-gray-700 font-semibold">Mentora объясняет только тебе.</span>
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <p className="text-gray-400 text-sm">Начни бесплатно — без карты.</p>
+          <div className="border-t border-gray-100 pt-12 text-center">
+            <p className="text-xl font-semibold text-gray-900 mb-2">Учитель объясняет классу.</p>
+            <p className="text-xl text-brand-600 italic font-semibold mb-10">Mentora — только тебе.</p>
             <Link
               href="/auth"
-              className="px-6 py-3 bg-brand-600 text-white font-medium rounded-xl hover:bg-brand-700 transition-colors whitespace-nowrap"
+              className="inline-flex px-7 py-3.5 bg-brand-600 text-white font-medium rounded-xl hover:bg-brand-700 transition-colors"
             >
-              Создать аккаунт →
+              Начать бесплатно →
             </Link>
           </div>
         </div>
@@ -320,17 +317,24 @@ export default async function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-gray-900 text-white px-6 py-20 text-center">
-        <p className="text-brand-400 text-sm font-semibold tracking-widest uppercase mb-4">Без осуждения · Без стыда · 24/7</p>
-        <h2 className="text-4xl font-bold mb-3">Задай вопрос, который ты не решаешься произнести вслух.</h2>
-        <p className="text-2xl font-medium text-gray-300 italic mb-2">Ментора слушает. Всегда.</p>
-        <p className="text-gray-500 mb-10 text-base">Регистрация не нужна. Первые уроки — бесплатно.</p>
+      <section className="bg-gray-900 text-white px-6 py-24 text-center">
+        <p className="text-gray-500 text-xs font-semibold tracking-[0.2em] uppercase mb-8">Твой персональный AI-ментор</p>
+        <h2 className="text-5xl font-bold mb-5 leading-tight">
+          Учись так,<br />
+          как тебе{" "}
+          <span className="text-brand-400 italic">удобно.</span>
+        </h2>
+        <p className="text-gray-400 text-lg mb-12 max-w-md mx-auto leading-relaxed">
+          В своём темпе. Задавай любые вопросы.<br />
+          Никто не смотрит — только ты и знание.
+        </p>
         <Link
           href="/auth"
           className="inline-flex items-center gap-2 px-8 py-4 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors text-sm"
         >
-          Начать учиться →
+          Начать бесплатно →
         </Link>
+        <p className="text-gray-600 text-xs mt-5">Без карты. Без обязательств.</p>
       </section>
 
       <footer className="py-8 border-t border-gray-100">
