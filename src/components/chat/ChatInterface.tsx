@@ -178,7 +178,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col bg-gray-50" style={{ height: '100dvh' }}>
       {/* Header */}
       <header className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3">
         <Link href="/dashboard" className="text-gray-400 hover:text-gray-600 transition-colors text-lg">

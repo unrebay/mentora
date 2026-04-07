@@ -1,7 +1,17 @@
 "use client";
+import { useState, useEffect } from "react";
 import Logo from "@/components/Logo";
 
 export function SplashScreen() {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(false), 1650);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!visible) return null;
+
   return (
     <>
       <style>{`
