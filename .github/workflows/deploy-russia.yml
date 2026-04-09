@@ -35,11 +35,9 @@ jobs:
             echo "==> npm run build"
             npm run build
 
-            echo "==> copy static assets for standalone mode"
+            echo "==> copy assets for standalone"
             cp -r public .next/standalone/
             cp -r .next/static .next/standalone/.next/
-            mkdir -p .next/standalone/.next/server
-            cp -r .next/server/. .next/standalone/.next/server/
 
             echo "==> pm2 restart"
             pm2 restart mentora --update-env || pm2 start .next/standalone/server.js --name mentora --update-env
@@ -47,4 +45,4 @@ jobs:
             pm2 status
 
             sleep 5
-            curl -sf http://localhost:3000 > /dev/null && echo "✅ App is up" || (echo "❌ App health check failed"; pm2 logs mentora --lines 30 --nostream; exit 1)
+            curl -sf http://localhost:3000 > /dev/null && echo "✅ App is up" || (echo "❌ App health check failed"; pm2 logs mentora --lines 50 --nostream; exit 1)
