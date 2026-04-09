@@ -1,80 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import { cookies } from "next/headers";
-import OpenAI from "openai";
+import { requireAdmin, createAdminSupabase, getEmbedding } from "@/lib/admin";
 
-const ADMIN_EMAIL = "unrebay@gmail.com";
+const CHUNK_SELECT = "id, subject, topic, content, source, language, created_at";
 
-function createAdminSupabase() {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { cookies: { getAll: () => [], setAll: () => {} } }
-  );
-}
-
-async function getAuthUser() {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll(); },
-        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
-}
-
+// PUT /api/admin/knowledge/[id] — update chunk + regenerate embedding
 export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const user = await getAuthUser();
-  if (!user || user.email !== ADMIN_EMAIL) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-  const { id } = params;
-  const body = await req.json();
-  const { subject, topic, content, source, language } = body;
-  if (!content) {
+  const forbidden = await requireAdmin();
+  if (forbidden) return forbidden;
+
+  const { subject, topic, content, source, language } = await req.json();
+  if (!content)
     return NextResponse.json({ error: "content is required" }, { status: 400 });
-  }
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const embeddingResp = await openai.embeddings.create({
-    model: "text-embedding-3-small",
-    input: content,
-  });
-  const embedding = embeddingResp.data[0].embedding;
+
+  const embedding = await getEmbedding(content);
+
   const admin = createAdminSupabase();
   const { data, error } = await admin
     .from("knowledge_chunks")
     .update({ subject, topic, content, source, language, embedding })
-    .eq("id", id)
-    .select("id, subject, topic, content, source, language, created_at")
+    .eq("id", params.id)
+    .select(CHUNK_SELECT)
     .single();
+
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ data });
 }
 
+// DELETE /api/admin/knowledge/[id] — delete single chunk
 export async function DELETE(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const user = await getAuthUser();
-  if (!user || user.email !== ADMIN_EMAIL) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-  const { id } = params;
+  const forbidden = await requireAdmin();
+  if (forbidden) return forbidden;
+
   const admin = createAdminSupabase();
-  const { error } = await admin.from("knowledge_chunks").delete().eq("id", id);
+  const { error } = await admin
+    .from("knowledge_chunks")
+    .delete()
+    .eq("id", params.id);
+
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ deleted: 1 });
 }
