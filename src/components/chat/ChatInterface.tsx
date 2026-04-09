@@ -6,6 +6,7 @@ import { MessageRole } from "@/lib/types";
 
 const DAILY_LIMIT = 30;
 
+import ChatParticles from "@/components/ChatParticles";
 const SUBJECT_CONFIG: Record<string, { emoji: string; hint: string; quickQuestions: string[] }> = {
   "russian-history": {
     emoji: "🏰",
@@ -279,7 +280,8 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-5">
         {isEmpty && (
-          <div className="text-center pt-12">
+          <div className="relative text-center pt-12">
+              <ChatParticles subject={subject} />
             <div className="text-5xl mb-4">{config.emoji}</div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
               Привет! Я твой ментор по теме «{subjectTitle}»
