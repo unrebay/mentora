@@ -47,9 +47,11 @@ export interface Subject {
   description: string;
   emoji: string;
   available: boolean;
+  beta: boolean;
+  verified: boolean;
 }
 
-// Available subjects for MVP
+// Available subjects
 export const SUBJECTS: Subject[] = [
   {
     id: "russian-history",
@@ -57,12 +59,115 @@ export const SUBJECTS: Subject[] = [
     description: "От Рюрика до наших дней",
     emoji: "🏰",
     available: true,
+    beta: true,
+    verified: false,
   },
   {
     id: "world-history",
     title: "Всемирная история",
     description: "История цивилизаций мира",
     emoji: "🌍",
-    available: false, // coming soon
+    available: true,
+    beta: true,
+    verified: false,
+  },
+  {
+    id: "mathematics",
+    title: "Математика",
+    description: "Алгебра, геометрия, анализ",
+    emoji: "📐",
+    available: true,
+    beta: true,
+    verified: false,
+  },
+  {
+    id: "physics",
+    title: "Физика",
+    description: "От механики до квантового мира",
+    emoji: "⚡",
+    available: true,
+    beta: true,
+    verified: false,
+  },
+  {
+    id: "chemistry",
+    title: "Химия",
+    description: "Вещества, реакции, законы",
+    emoji: "🧪",
+    available: true,
+    beta: true,
+    verified: false,
+  },
+  {
+    id: "biology",
+    title: "Биология",
+    description: "Живые организмы и их законы",
+    emoji: "🧬",
+    available: true,
+    beta: true,
+    verified: false,
+  },
+  {
+    id: "russian-language",
+    title: "Русский язык",
+    description: "Грамматика, орфография, стилистика",
+    emoji: "📝",
+    available: true,
+    beta: true,
+    verified: false,
+  },
+  {
+    id: "literature",
+    title: "Литература",
+    description: "Классика и современная проза",
+    emoji: "📚",
+    available: true,
+    beta: true,
+    verified: false,
+  },
+  {
+    id: "english",
+    title: "Английский язык",
+    description: "Grammar, vocabulary, speaking",
+    emoji: "🇬🇧",
+    available: true,
+    beta: true,
+    verified: false,
+  },
+  {
+    id: "social-studies",
+    title: "Обществознание",
+    description: "Право, экономика, социология",
+    emoji: "🏛️",
+    available: true,
+    beta: true,
+    verified: false,
+  },
+  {
+    id: "geography",
+    title: "География",
+    description: "Природа, страны, климат",
+    emoji: "🗺️",
+    available: true,
+    beta: true,
+    verified: false,
+  },
+  {
+    id: "computer-science",
+    title: "Информатика",
+    description: "Алгоритмы, программирование, системы",
+    emoji: "💻",
+    available: true,
+    beta: true,
+    verified: false,
+  },
+  {
+    id: "astronomy",
+    title: "Астрономия",
+    description: "Звёзды, планеты, вселенная",
+    emoji: "🔭",
+    available: true,
+    beta: true,
+    verified: false,
   },
 ];
