@@ -38,7 +38,8 @@ jobs:
             echo "==> copy static assets for standalone mode"
             cp -r public .next/standalone/
             cp -r .next/static .next/standalone/.next/
-            cp -r .next/server .next/standalone/.next/
+            mkdir -p .next/standalone/.next/server
+            cp -r .next/server/. .next/standalone/.next/server/
 
             echo "==> pm2 restart"
             pm2 restart mentora --update-env || pm2 start .next/standalone/server.js --name mentora --update-env
