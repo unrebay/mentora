@@ -22,8 +22,12 @@ jobs:
             set -e
             cd /var/www/mentora
 
-            echo "==> git pull"
-            git pull origin main
+            echo "==> git fetch"
+            git fetch origin main
+
+            echo "==> clean untracked & reset to origin"
+            git clean -fd
+            git reset --hard origin/main
 
             echo "==> npm install"
             npm install
@@ -31,7 +35,7 @@ jobs:
             echo "==> npm run build"
             npm run build
 
-            echo "==> copy static assets"
+            echo "==> copy static assets for standalone mode"
             cp -r public .next/standalone/
             cp -r .next/static .next/standalone/.next/
 
@@ -40,4 +44,4 @@ jobs:
 
             echo "==> health check"
             sleep 3
-            curl -sf http://localhost:3000 > /dev/null && echo "OK" || echo "FAIL"
+            curl -sf http://localhost:3000 > /dev/null && echo "✅ App is up" || echo "❌ App health check failed"
