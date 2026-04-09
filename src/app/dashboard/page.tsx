@@ -37,6 +37,20 @@ function pluralDays(n: number): string {
   return "дней";
 }
 
+// Russian pluralization: 1 мента, 2-4 менты, 5+ мент
+function pluralMenty(n: number): string {
+  const m10 = n % 10, m100 = n % 100;
+  if (m100 >= 11 && m100 <= 14) return "мент";
+  if (m10 === 1) return "мента";
+  if (m10 >= 2 && m10 <= 4) return "менты";
+  return "мент";
+}
+
+// Mentora logo "е" — italic, Playfair, brand blue
+const MentoraE = () => (
+  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", fontWeight: 700 }}>е</span>
+);
+
 function getFirstName(fullName?: string | null, email?: string | null): string {
   if (fullName) return fullName.split(" ")[0];
   if (email) return email.split("@")[0];
@@ -118,8 +132,8 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-4 md:gap-6">
             {totalXP > 0 && (
               <div className="hidden sm:flex items-center gap-4 text-sm">
-                <span className="font-semibold" style={{ color: "#4561E8" }}>
-                  ✦ {totalXP} м<span style={{ color: "#4561E8", fontStyle: "italic" }}>е</span>нтов
+                <span className="font-semibold text-gray-700">
+                  <MentoraE /> {totalXP} {pluralMenty(totalXP)}
                 </span>
                 {maxStreak > 0 && (
                   <span className="text-orange-500 font-semibold">
@@ -233,12 +247,8 @@ export default async function DashboardPage() {
                 </span>
               </div>
               {totalXP > 0 && (
-                <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm">
-                  <span style={{ color: "#4561E8", fontStyle: "italic", fontWeight: 700 }}>✦</span>
-                  <span className="text-gray-600">
-                    М<span style={{ color: "#4561E8", fontStyle: "italic" }}>е</span>нты:{" "}
-                    <span className="font-semibold text-gray-900">{totalXP}</span>
-                  </span>
+                <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700">
+                  <MentoraE /> {totalXP} {pluralMenty(totalXP)}
                 </div>
               )}
               {maxStreak > 0 && (
@@ -274,12 +284,8 @@ export default async function DashboardPage() {
                 <span className="text-brand-700 font-medium">Безлимитные сообщения</span>
               </div>
               {totalXP > 0 && (
-                <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm">
-                  <span style={{ color: "#4561E8", fontStyle: "italic", fontWeight: 700 }}>✦</span>
-                  <span className="text-gray-600">
-                    М<span style={{ color: "#4561E8", fontStyle: "italic" }}>е</span>нты:{" "}
-                    <span className="font-semibold text-gray-900">{totalXP}</span>
-                  </span>
+                <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700">
+                  <MentoraE /> {totalXP} {pluralMenty(totalXP)}
                 </div>
               )}
             </div>
@@ -343,6 +349,7 @@ export default async function DashboardPage() {
                     {progress ? (
                       (() => {
                         const lvl = getLevel(progress.xp_total ?? 0);
+                        const xp = progress.xp_total ?? 0;
                         return (
                           <div
                             className={`mt-3 pt-3 border-t ${
@@ -358,11 +365,11 @@ export default async function DashboardPage() {
                                 {lvl.name}
                               </span>
                               <span
-                                className={`text-[10px] font-medium ${
+                                className={`text-[10px] font-semibold ${
                                   isVerified ? "text-white" : "text-brand-600"
                                 }`}
                               >
-                                ✦ {progress.xp_total} м.
+                                {xp} {pluralMenty(xp)}
                               </span>
                             </div>
                             <div
