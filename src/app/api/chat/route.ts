@@ -9,6 +9,39 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const DAILY_LIMIT = 20;
 
+// --- Personalization guides (module-level constants, not recreated per request) ---
+
+const STYLE_GUIDE: Record<string, string> = {
+  storytelling:
+    "Рассказывай через живые образы и истории: характеры людей, детали быта, запах эпохи. Сначала — захватывающий момент или деталь, потом — объяснение.",
+  facts:
+    "Структурируй ответ чётко: причины → события → следствия → даты. Акцент на хронологии и причинно-следственных связях. Минимум лирики — максимум точности.",
+  practice:
+    "Чередуй краткое объяснение с вопросом-заданием. После ответа пользователя — оценивай, поправляй, углубляй. Твоя главная задача — проверить понимание, а не просто рассказать.",
+};
+
+const LEVEL_GUIDE: Record<string, string> = {
+  school:
+    "Ученик — школьник, готовится к урокам или ЕГЭ/ОГЭ. Используй простой язык, школьную терминологию. Привязывай к кодификатору ЕГЭ: упоминай номера периодов, типовые формулировки заданий, ключевые понятия из критериев.",
+  student:
+    "Ученик — студент вуза. Можно использовать академическую лексику, упоминать историографические дискуссии, называть исследователей. Ожидает глубины, а не упрощений.",
+  adult:
+    "Ученик — взрослый, учится для себя. Говори как с умным человеком без научного снобизма. Проводи параллели с современностью и личным опытом — это цепляет.",
+  expert:
+    "Ученик — историк или глубокий знаток. Веди как с коллегой: полемизируй, указывай на дискуссионные вопросы, называй конкретные источники и историков. Не разжёвывай очевидное.",
+};
+
+const GOAL_GUIDE: Record<string, string> = {
+  exam:
+    "Цель — сдать ЕГЭ/ОГЭ. В конце каждого ответа добавляй блок '📝 Для экзамена:' с 1-2 ключевыми фактами/датами в формате, удобном для запоминания.",
+  general:
+    "Цель — общее развитие. Показывай связи между эпохами, глобальный контекст. Объясняй, почему это важно понимать сегодня.",
+  professional:
+    "Цель — профессиональная. Акцентируй аналитику, источниковедение, историографию. Давай ссылки на конкретные труды и дискуссии.",
+  curiosity:
+    "Цель — просто интересно. Выделяй самые неожиданные, малоизвестные или парадоксальные детали. Люби историю вслух — заражай интересом.",
+};
+
 export async function POST(req: NextRequest) {
   try {
     const { message, subject, history } = await req.json();
@@ -36,15 +69,12 @@ export async function POST(req: NextRequest) {
       ? new Date(profile.trial_expires_at) > new Date()
       : false;
     const isPro = profile?.plan === "pro" || isTrialActive;
-    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const today = new Date().toISOString().slice(0, 10);
     const isNewDay = profile?.messages_date !== today;
     const usedToday = isNewDay ? 0 : (profile?.messages_today ?? 0);
 
     if (!isPro && usedToday >= DAILY_LIMIT) {
-      return NextResponse.json(
-        { error: "limit_reached", messagesRemaining: 0 },
-        { status: 429 }
-      );
+      return NextResponse.json({ error: "limit_reached", messagesRemaining: 0 }, { status: 429 });
     }
 
     // Get user memory for this subject
@@ -73,36 +103,16 @@ export async function POST(req: NextRequest) {
       : "База знаний пока пуста. Отвечай на основе своих знаний, но предупреди об этом.";
 
     // Build personalized system prompt
-    const style  = profile?.onboarding_style ?? "storytelling";
-    const level  = profile?.onboarding_level ?? "adult";
-    const goal   = profile?.onboarding_goal  ?? "general";
-
-    const styleGuide: Record<string, string> = {
-      storytelling: "Рассказывай через живые образы и истории: характеры людей, детали быта, запах эпохи. Сначала — захватывающий момент или деталь, потом — объяснение.",
-      facts:        "Структурируй ответ чётко: причины → события → следствия → даты. Акцент на хронологии и причинно-следственных связях. Минимум лирики — максимум точности.",
-      practice:     "Чередуй краткое объяснение с вопросом-заданием. После ответа пользователя — оценивай, поправляй, углубляй. Твоя главная задача — проверить понимание, а не просто рассказать.",
-    };
-
-    const levelGuide: Record<string, string> = {
-      school:  "Ученик — школьник, готовится к урокам или ЕГЭ/ОГЭ. Используй простой язык, школьную терминологию. Привязывай к кодификатору ЕГЭ: упоминай номера периодов, типовые формулировки заданий, ключевые понятия из критериев.",
-      student: "Ученик — студент вуза. Можно использовать академическую лексику, упоминать историографические дискуссии, называть исследователей. Ожидает глубины, а не упрощений.",
-      adult:   "Ученик — взрослый, учится для себя. Говори как с умным человеком без научного снобизма. Проводи параллели с современностью и личным опытом — это цепляет.",
-      expert:  "Ученик — историк или глубокий знаток. Веди как с коллегой: полемизируй, указывай на дискуссионные вопросы, называй конкретные источники и историков. Не разжёвывай очевидное.",
-    };
-
-    const goalGuide: Record<string, string> = {
-      exam:         "Цель — сдать ЕГЭ/ОГЭ. В конце каждого ответа добавляй блок '📝 Для экзамена:' с 1-2 ключевыми фактами/датами в формате, удобном для запоминания.",
-      general:      "Цель — общее развитие. Показывай связи между эпохами, глобальный контекст. Объясняй, почему это важно понимать сегодня.",
-      professional: "Цель — профессиональная. Акцентируй аналитику, источниковедение, историографию. Давай ссылки на конкретные труды и дискуссии.",
-      curiosity:    "Цель — просто интересно. Выделяй самые неожиданные, малоизвестные или парадоксальные детали. Люби историю вслух — заражай интересом.",
-    };
+    const style = profile?.onboarding_style ?? "storytelling";
+    const level = profile?.onboarding_level ?? "adult";
+    const goal  = profile?.onboarding_goal  ?? "general";
 
     const systemPrompt = `Ты — Mentora, персональный AI-ментор по истории. Твоё имя женского рода — всегда говори о себе в женском роде: «я рассказала», «я думаю», «мне кажется», «я изучила». Говоришь как умная подруга, а не как учебник.
 
 ПРОФИЛЬ УЧЕНИКА:
-- Стиль подачи: ${styleGuide[style]}
-- Уровень: ${levelGuide[level]}
-- Цель: ${goalGuide[goal]}
+- Стиль подачи: ${STYLE_GUIDE[style]}
+- Уровень: ${LEVEL_GUIDE[level]}
+- Цель: ${GOAL_GUIDE[goal]}
 
 ПАМЯТЬ О ПОЛЬЗОВАТЕЛЕ:
 ${JSON.stringify(memory?.memory_json ?? {})}
@@ -130,10 +140,7 @@ ${ragContext}
 
     // Save user message
     await supabase.from("chat_messages").insert({
-      user_id: user.id,
-      subject,
-      role: "user",
-      content: message,
+      user_id: user.id, subject, role: "user", content: message,
     });
 
     // Get AI response
@@ -147,9 +154,8 @@ ${ragContext}
       ],
     });
 
-    const assistantMessage = response.content[0].type === "text"
-      ? response.content[0].text
-      : "";
+    const assistantMessage =
+      response.content[0].type === "text" ? response.content[0].text : "";
 
     // Save assistant response
     await supabase.from("chat_messages").insert({
@@ -179,11 +185,9 @@ ${ragContext}
       console.error("XP update failed (non-blocking):", xpErr);
     }
 
-    const messagesRemaining = isPro ? null : DAILY_LIMIT - newUsedToday;
-
     return NextResponse.json({
       message: assistantMessage,
-      messagesRemaining,
+      messagesRemaining: isPro ? null : DAILY_LIMIT - newUsedToday,
       trialExpiresAt: profile?.trial_expires_at ?? null,
     });
   } catch (err) {
