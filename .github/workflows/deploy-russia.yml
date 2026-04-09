@@ -38,13 +38,12 @@ jobs:
             echo "==> copy static assets for standalone mode"
             cp -r public .next/standalone/
             cp -r .next/static .next/standalone/.next/
+            cp -r .next/server .next/standalone/.next/
 
             echo "==> pm2 restart"
             pm2 restart mentora --update-env || pm2 start .next/standalone/server.js --name mentora --update-env
 
-            echo "==> pm2 status"
             pm2 status
 
-            echo "==> health check"
             sleep 5
             curl -sf http://localhost:3000 > /dev/null && echo "✅ App is up" || (echo "❌ App health check failed"; pm2 logs mentora --lines 30 --nostream; exit 1)
