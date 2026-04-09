@@ -23,10 +23,19 @@ function getLevel(xp: number) {
   return { ...lvl, idx, next, progress };
 }
 
-// Styled brand "е" — matches the italic blue "e" in the Mentora logo
-function BrandE() {
-  return <span style={{ color: "#4561E8", fontStyle: "italic" }}>е</span>;
+// Russian pluralization: 1 мента, 2-4 менты, 5+ мент
+function pluralMenty(n: number): string {
+  const m10 = n % 10, m100 = n % 100;
+  if (m100 >= 11 && m100 <= 14) return "мент";
+  if (m10 === 1) return "мента";
+  if (m10 >= 2 && m10 <= 4) return "менты";
+  return "мент";
 }
+
+// Mentora logo "е" — italic, Playfair, brand blue
+const MentoraE = () => (
+  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", fontWeight: 700 }}>е</span>
+);
 
 type BadgeDef = {
   id: string;
@@ -133,18 +142,18 @@ export default async function ProfilePage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
             {
-              label: <span>Мои м<BrandE />нты</span>,
-              value: totalXP,
-              icon: "✦",
-              iconStyle: { color: "#4561E8", fontSize: "1.5rem", fontStyle: "italic", fontWeight: 700 },
+              label: "Менты",
+              value: <span className="text-2xl font-bold text-gray-900">{totalXP} <span className="text-lg font-medium text-gray-500">{pluralMenty(totalXP)}</span></span>,
+              icon: <MentoraE />,
+              iconClass: "text-2xl mb-1",
             },
-            { label: "Макс. стрик", value: `${maxStreak}д`, icon: "🔥", iconStyle: {} },
-            { label: "Сообщений", value: totalMessages, icon: "💬", iconStyle: {} },
-            { label: "Достижений", value: earned.length, icon: "🏅", iconStyle: {} },
+            { label: "Макс. стрик", value: <span className="text-2xl font-bold text-gray-900">{maxStreak}<span className="text-lg font-medium text-gray-500">д</span></span>, icon: "🔥", iconClass: "text-2xl mb-1" },
+            { label: "Сообщений", value: <span className="text-2xl font-bold text-gray-900">{totalMessages}</span>, icon: "💬", iconClass: "text-2xl mb-1" },
+            { label: "Достижений", value: <span className="text-2xl font-bold text-gray-900">{earned.length}</span>, icon: "🏅", iconClass: "text-2xl mb-1" },
           ].map((s, i) => (
             <div key={i} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm text-center">
-              <div className="text-2xl mb-1" style={s.iconStyle}>{s.icon}</div>
-              <div className="text-2xl font-bold text-gray-900">{s.value}</div>
+              <div className={s.iconClass}>{s.icon}</div>
+              <div>{s.value}</div>
               <div className="text-xs text-gray-400 mt-1">{s.label}</div>
             </div>
           ))}
@@ -156,7 +165,7 @@ export default async function ProfilePage() {
             <span className="font-semibold text-gray-900">{lvl.name}</span>
             {lvl.next && (
               <span className="text-sm text-gray-400">
-                {lvl.next.name} через {(lvl.next.minXP - totalXP)} м<BrandE />нтов
+                {lvl.next.name} через {lvl.next.minXP - totalXP} {pluralMenty(lvl.next.minXP - totalXP)}
               </span>
             )}
           </div>
@@ -167,7 +176,7 @@ export default async function ProfilePage() {
             />
           </div>
           <p className="text-xs text-gray-400 mt-2">
-            {totalXP} / {lvl.next?.minXP ?? totalXP} м<BrandE />нтов
+            {totalXP} / {lvl.next?.minXP ?? totalXP} {pluralMenty(lvl.next?.minXP ?? totalXP)}
           </p>
         </div>
 
