@@ -56,7 +56,7 @@ export default function AdminPage() {
 
   const bulkDelete = async () => {
     if (!selected.size || !confirm(`Удалить ${selected.size} записей?`)) return;
-    await fetch("/api/admin/knowledge", { method: "DELETE", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ ids: [...selected] }) });
+    await fetch("/api/admin/knowledge", { method: "DELETE", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ ids: Array.from(selected) }) });
     setSelected(new Set());
     flash(`Удалено ${selected.size} записей`);
     load();
