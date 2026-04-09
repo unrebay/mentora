@@ -2,42 +2,42 @@ name: Deploy to Russian VPS
 
 on:
   push:
-      branches:
-            - main
+    branches:
+      - main
 
-            jobs:
-              deploy:
-                  name: Deploy to mentora.su (Russia)
-                      runs-on: ubuntu-latest
+jobs:
+  deploy:
+    name: Deploy to mentora.su (Russia)
+    runs-on: ubuntu-latest
 
-                          steps:
-                                - name: Deploy via SSH
-                                        uses: appleboy/ssh-action@v1.0.3
-                                                with:
-                                                          host: ${{ secrets.VPS_HOST }}
-                                                                    username: ${{ secrets.VPS_USER }}
-                                                                              key: ${{ secrets.VPS_SSH_KEY }}
-                                                                                        command_timeout: 15m
-                                                                                                  script: |
-                                                                                                              set -e
-                                                                                                                          cd /var/www/mentora
-                                                                                                                          
-                                                                                                                                      echo "==> git pull"
-                                                                                                                                                  git pull origin main
-                                                                                                                                                  
-                                                                                                                                                              echo "==> npm install"
-                                                                                                                                                                          npm install --omit=dev
-                                                                                                                                                                          
-                                                                                                                                                                                      echo "==> npm run build"
-                                                                                                                                                                                                  npm run build
-                                                                                                                                                                                                  
-                                                                                                                                                                                                              echo "==> copy static assets"
-                                                                                                                                                                                                                          cp -r public .next/standalone/
-                                                                                                                                                                                                                                      cp -r .next/static .next/standalone/.next/
-                                                                                                                                                                                                                                      
-                                                                                                                                                                                                                                                  echo "==> pm2 restart"
-                                                                                                                                                                                                                                                              pm2 restart mentora --update-env
-                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                          echo "==> health check"
-                                                                                                                                                                                                                                                                                      sleep 3
-                                                                                                                                                                                                                                                                                                  curl -sf http://localhost:3000 > /dev/null && echo "OK" || echo "FAIL"
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 15m
+          script: |
+            set -e
+            cd /var/www/mentora
+
+            echo "==> git pull"
+            git pull origin main
+
+            echo "==> npm install"
+            npm install --omit=dev
+
+            echo "==> npm run build"
+            npm run build
+
+            echo "==> copy static assets"
+            cp -r public .next/standalone/
+            cp -r .next/static .next/standalone/.next/
+
+            echo "==> pm2 restart"
+            pm2 restart mentora --update-env
+
+            echo "==> health check"
+            sleep 3
+            curl -sf http://localhost:3000 > /dev/null && echo "OK" || echo "FAIL"
