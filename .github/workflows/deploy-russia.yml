@@ -26,7 +26,7 @@ jobs:
             git pull origin main
 
             echo "==> npm install"
-            npm install --omit=dev
+            npm install
 
             echo "==> npm run build"
             npm run build
