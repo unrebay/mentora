@@ -52,6 +52,7 @@ export default async function DashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
   if (!user) redirect("/auth");
 
   const { data: profile } = await supabase
@@ -87,8 +88,7 @@ export default async function DashboardPage() {
 
   const progressMap = new Map(progressData?.map((p) => [p.subject, p]) ?? []);
   const totalXP = progressData?.reduce((sum, p) => sum + (p.xp_total ?? 0), 0) ?? 0;
-  const maxStreak =
-    progressData?.reduce((max, p) => Math.max(max, p.streak_days ?? 0), 0) ?? 0;
+  const maxStreak = progressData?.reduce((max, p) => Math.max(max, p.streak_days ?? 0), 0) ?? 0;
 
   const firstName = getFirstName(
     user.user_metadata?.full_name ?? user.user_metadata?.name,
@@ -108,23 +108,19 @@ export default async function DashboardPage() {
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Logo size="sm" />
-            <a
-              href="/dashboard/analytics"
-              className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
-            >
+            <a href="/dashboard/analytics" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
               Аналитика
             </a>
-            <a
-              href="/profile"
-              className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
-            >
+            <a href="/profile" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
               Профиль
             </a>
           </div>
           <div className="flex items-center gap-4 md:gap-6">
             {totalXP > 0 && (
               <div className="hidden sm:flex items-center gap-4 text-sm">
-                <span className="text-brand-600 font-semibold">⚡ {totalXP} XP</span>
+                <span className="font-semibold" style={{ color: "#4561E8" }}>
+                  ✦ {totalXP} м<span style={{ color: "#4561E8", fontStyle: "italic" }}>е</span>нтов
+                </span>
                 {maxStreak > 0 && (
                   <span className="text-orange-500 font-semibold">
                     🔥 {maxStreak} {pluralDays(maxStreak)}
@@ -161,8 +157,7 @@ export default async function DashboardPage() {
                 Pro активен до {trialExpiresDate}!
               </p>
               <p className="text-xs text-brand-600 mt-0.5">
-                Ты собрал 7-дневный стрик — и получил 3 дня Pro. Безлимитные сообщения уже
-                работают.
+                Ты собрал 7-дневный стрик — и получил 3 дня Pro. Безлимитные сообщения уже работают.
               </p>
             </div>
           </div>
@@ -179,8 +174,7 @@ export default async function DashboardPage() {
               </p>
               <p className="text-xs text-orange-600 mt-0.5">
                 Учись {7 - maxStreak}{" "}
-                {7 - maxStreak === 1 ? "день" : 7 - maxStreak < 5 ? "дня" : "дней"} подряд и
-                получи 3 дня Pro без карты.
+                {7 - maxStreak === 1 ? "день" : 7 - maxStreak < 5 ? "дня" : "дней"} подряд и получи 3 дня Pro без карты.
               </p>
               <div className="mt-2 h-1.5 rounded-full bg-orange-100 overflow-hidden w-full max-w-xs">
                 <div
@@ -218,6 +212,7 @@ export default async function DashboardPage() {
             Привет, {firstName}! 👋
           </h1>
           <p className="text-gray-400 mb-6">Начни учиться в диалоге с AI-ментором</p>
+
           {!isPro && (
             <div className="flex flex-wrap gap-3">
               <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm">
@@ -239,9 +234,10 @@ export default async function DashboardPage() {
               </div>
               {totalXP > 0 && (
                 <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm">
-                  <span>⚡</span>
+                  <span style={{ color: "#4561E8", fontStyle: "italic", fontWeight: 700 }}>✦</span>
                   <span className="text-gray-600">
-                    XP: <span className="font-semibold text-gray-900">{totalXP}</span>
+                    М<span style={{ color: "#4561E8", fontStyle: "italic" }}>е</span>нты:{" "}
+                    <span className="font-semibold text-gray-900">{totalXP}</span>
                   </span>
                 </div>
               )}
@@ -264,6 +260,7 @@ export default async function DashboardPage() {
               </Link>
             </div>
           )}
+
           {isPro && (
             <div className="flex flex-wrap gap-3">
               <div
@@ -278,9 +275,10 @@ export default async function DashboardPage() {
               </div>
               {totalXP > 0 && (
                 <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm">
-                  <span>⚡</span>
+                  <span style={{ color: "#4561E8", fontStyle: "italic", fontWeight: 700 }}>✦</span>
                   <span className="text-gray-600">
-                    XP: <span className="font-semibold text-gray-900">{totalXP}</span>
+                    М<span style={{ color: "#4561E8", fontStyle: "italic" }}>е</span>нты:{" "}
+                    <span className="font-semibold text-gray-900">{totalXP}</span>
                   </span>
                 </div>
               )}
@@ -296,7 +294,8 @@ export default async function DashboardPage() {
             href="mailto:hi@mentora.su?subject=Предложить предмет"
             className="flex items-center gap-1.5 text-xs font-medium text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 transition-colors px-3 py-1.5 rounded-lg"
           >
-            <span className="text-base leading-none">+</span> Предложить предмет
+            <span className="text-base leading-none">+</span>
+            Предложить предмет
           </a>
         </div>
 
@@ -306,6 +305,7 @@ export default async function DashboardPage() {
             const isVerified = subject.verified;
             const isBeta = subject.beta && !isVerified;
             const isActive = subject.available && (isBeta || isVerified);
+
             return (
               <div
                 key={subject.id}
@@ -337,9 +337,7 @@ export default async function DashboardPage() {
                     >
                       {subject.title}
                     </div>
-                    <div
-                      className={`text-xs ${isVerified ? "text-white/70" : "text-gray-400"}`}
-                    >
+                    <div className={`text-xs ${isVerified ? "text-white/70" : "text-gray-400"}`}>
                       {subject.description}
                     </div>
                     {progress ? (
@@ -364,7 +362,7 @@ export default async function DashboardPage() {
                                   isVerified ? "text-white" : "text-brand-600"
                                 }`}
                               >
-                                ⚡ {progress.xp_total} XP
+                                ✦ {progress.xp_total} м.
                               </span>
                             </div>
                             <div
@@ -419,6 +417,7 @@ export default async function DashboardPage() {
               </div>
             );
           })}
+
           {/* Добавить предмет */}
           <a
             href="mailto:hi@mentora.su?subject=Хочу предмет"
