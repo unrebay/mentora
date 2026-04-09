@@ -1,12 +1,84 @@
 "use client"
 import posthog from "posthog-js";
-
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { MessageRole } from "@/lib/types";
 
 const DAILY_LIMIT = 30;
 
+const SUBJECT_CONFIG: Record<string, { emoji: string; hint: string; quickQuestions: string[] }> = {
+  "russian-history": {
+    emoji: "🏰",
+    hint: "Спроси о любом периоде истории России — от древней Руси до современности",
+    quickQuestions: ["Расскажи о Петре I и его реформах", "Что такое Смутное время?", "Как началась Великая Отечественная война?"],
+  },
+  "world-history": {
+    emoji: "🌍",
+    hint: "Спроси о любом историческом событии или эпохе мировой истории",
+    quickQuestions: ["Расскажи о Первой мировой войне", "Что такое эпоха Возрождения?", "Как возникла Римская империя?"],
+  },
+  "mathematics": {
+    emoji: "📐",
+    hint: "Задай вопрос по алгебре, геометрии, математическому анализу или теории вероятностей",
+    quickQuestions: ["Объясни теорему Пифагора", "Как решать квадратные уравнения?", "Что такое производная?"],
+  },
+  "physics": {
+    emoji: "⚛️",
+    hint: "Спроси про законы физики, явления природы или реши задачу вместе со мной",
+    quickQuestions: ["Объясни законы Ньютона", "Что такое электромагнитная индукция?", "Как работает ядерный реактор?"],
+  },
+  "chemistry": {
+    emoji: "🧪",
+    hint: "Спроси про химические реакции, элементы таблицы Менделеева или органическую химию",
+    quickQuestions: ["Объясни строение атома", "Что такое окислительно-восстановительные реакции?", "Как работает таблица Менделеева?"],
+  },
+  "biology": {
+    emoji: "🧬",
+    hint: "Спроси про живые организмы, эволюцию, генетику или экосистемы",
+    quickQuestions: ["Объясни строение клетки", "Как работает ДНК?", "Что такое естественный отбор?"],
+  },
+  "russian-language": {
+    emoji: "📝",
+    hint: "Спроси про правила орфографии, пунктуации или грамматики русского языка",
+    quickQuestions: ["Объясни правила написания НЕ с разными частями речи", "Как правильно расставлять запятые?", "Что такое причастный оборот?"],
+  },
+  "literature": {
+    emoji: "📚",
+    hint: "Обсудим произведения русской и мировой литературы, авторов и их эпохи",
+    quickQuestions: ["Расскажи о романе «Война и мир»", "Кто такой Достоевский и что читать первым?", "Помоги с анализом стихотворения"],
+  },
+  "english": {
+    emoji: "🇬🇧",
+    hint: "Let's practice English — grammar, vocabulary, speaking or writing",
+    quickQuestions: ["Explain Present Perfect vs Past Simple", "How to use articles in English?", "Help me write a letter in English"],
+  },
+  "social-studies": {
+    emoji: "🏛️",
+    hint: "Спроси про государство, право, экономику или социальные явления",
+    quickQuestions: ["Что такое разделение властей?", "Объясни основы рыночной экономики", "Как устроена Конституция РФ?"],
+  },
+  "geography": {
+    emoji: "🗺️",
+    hint: "Спроси про страны, климат, рельеф, природные зоны или экономическую географию",
+    quickQuestions: ["Расскажи о климатических поясах Земли", "Что такое тектоника плит?", "Какие природные ресурсы есть в России?"],
+  },
+  "computer-science": {
+    emoji: "💻",
+    hint: "Спроси про алгоритмы, программирование, сети или информационные технологии",
+    quickQuestions: ["Что такое алгоритм и зачем он нужен?", "Как работает интернет?", "С чего начать учить программирование?"],
+  },
+  "astronomy": {
+    emoji: "🔭",
+    hint: "Спроси про планеты, звёзды, галактики или историю изучения космоса",
+    quickQuestions: ["Расскажи о Солнечной системе", "Что такое чёрная дыра?", "Как происходит жизненный цикл звезды?"],
+  },
+};
+
+const DEFAULT_CONFIG = {
+  emoji: "🎓",
+  hint: "Задай любой вопрос — я помогу разобраться",
+  quickQuestions: ["С чего начать изучение?", "Объясни основные понятия", "Дай план изучения"],
+};
 
 interface Message {
   role: MessageRole;
@@ -116,6 +188,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const [messagesRemaining, setMessagesRemaining] = useState<number | null>(initialMessagesRemaining);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  const config = SUBJECT_CONFIG[subject] ?? DEFAULT_CONFIG;
   const isLimited = messagesRemaining !== null; // false = Pro
   const limitReached = isLimited && messagesRemaining !== null && messagesRemaining <= 0;
   const showCounter = isLimited && messagesRemaining !== null && messagesRemaining <= 5 && !limitReached;
@@ -153,7 +226,6 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
 
       if (res.status === 429) {
         setMessagesRemaining(0);
-        // Remove the optimistically added user message since it wasn't processed
         setMessages((prev) => prev.slice(0, -1));
         setInput(userMessage);
         return;
@@ -208,15 +280,15 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-5">
         {isEmpty && (
           <div className="text-center pt-12">
-            <div className="text-5xl mb-4">🏰</div>
+            <div className="text-5xl mb-4">{config.emoji}</div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
               Привет! Я твой ментор по теме «{subjectTitle}»
             </h2>
             <p className="text-gray-500 text-sm max-w-sm mx-auto leading-relaxed">
-              Спроси меня о любом периоде, событии или личности. Я расскажу живо — и задам вопрос для закрепления.
+              {config.hint}
             </p>
             <div className="mt-6 flex flex-wrap gap-2 justify-center">
-              {["С чего начать изучение?", "Расскажи о Петре I", "Что такое Смутное время?"].map((q) => (
+              {config.quickQuestions.map((q) => (
                 <button
                   key={q}
                   onClick={() => setInput(q)}
@@ -267,14 +339,21 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             <div className="bg-white border border-gray-100 rounded-2xl px-4 py-4 shadow-sm">
               <div className="flex gap-1.5 items-end h-4">
                 {[0, 1, 2].map((i) => (
-                  <div key={i} className="w-2 h-2 rounded-full"
-                    style={{ background: "#4561E8", opacity: 0.7, animation: "mentoraDot 1.3s ease-in-out infinite", animationDelay: `${i * 0.18}s` }} />
+                  <div
+                    key={i}
+                    className="w-2 h-2 rounded-full"
+                    style={{
+                      background: "#4561E8",
+                      opacity: 0.7,
+                      animation: "mentoraDot 1.3s ease-in-out infinite",
+                      animationDelay: `${i * 0.18}s`,
+                    }}
+                  />
                 ))}
               </div>
             </div>
           </div>
         )}
-
         <div ref={bottomRef} />
       </div>
 
