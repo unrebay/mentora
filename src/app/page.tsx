@@ -8,13 +8,19 @@ import ParticleHero from "@/components/ParticleHero";
 import ThemeToggle from "@/components/ThemeToggle";
 
 const SUBJECTS = [
-  { id: "russian-history", emoji: "📜", title: "История России", desc: "51 тема · 5 уровней", live: true },
-  { id: "world-history", emoji: "🌍", title: "История мира", desc: "60 тем · 5 уровней", live: true, comingSoon: true },
-  { id: "math", emoji: "🧮", title: "Математика", desc: "Алгебра, геометрия", comingSoon: true },
-  { id: "bio", emoji: "🌿", title: "Биология", desc: "Клетка до экосистем", comingSoon: true },
-  { id: "english", emoji: "💬", title: "Английский", desc: "A1 — C2, разговорный", comingSoon: true },
-  { id: "chemistry", emoji: "⚗️", title: "Химия", desc: "В разработке", comingSoon: true },
-  { id: "physics", emoji: "⚡", title: "Физика", desc: "В разработке", comingSoon: true },
+  { id: "russian-history", emoji: "🏰", title: "История России", desc: "51 тема · 5 уровней", live: true },
+  { id: "world-history", emoji: "🌍", title: "Всемирная история", desc: "60 тем · 5 уровней", live: true },
+  { id: "mathematics", emoji: "📐", title: "Математика", desc: "Алгебра, геометрия, анализ", comingSoon: true },
+  { id: "physics", emoji: "⚡", title: "Физика", desc: "Механика до квантового мира", comingSoon: true },
+  { id: "chemistry", emoji: "🧪", title: "Химия", desc: "Вещества, реакции, законы", comingSoon: true },
+  { id: "biology", emoji: "🧬", title: "Биология", desc: "Клетка до экосистем", comingSoon: true },
+  { id: "russian-language", emoji: "📝", title: "Русский язык", desc: "Грамматика и орфография", comingSoon: true },
+  { id: "literature", emoji: "📚", title: "Литература", desc: "Классика и современная проза", comingSoon: true },
+  { id: "english", emoji: "🇬🇧", title: "Английский язык", desc: "A1 — C2, разговорный", comingSoon: true },
+  { id: "social-studies", emoji: "🏛️", title: "Обществознание", desc: "Право, экономика, социология", comingSoon: true },
+  { id: "geography", emoji: "🗺️", title: "География", desc: "Природа, страны, климат", comingSoon: true },
+  { id: "computer-science", emoji: "💻", title: "Информатика", desc: "Алгоритмы, программирование", comingSoon: true },
+  { id: "astronomy", emoji: "🔭", title: "Астрономия", desc: "Звёзды, планеты, вселенная", comingSoon: true },
   { id: "suggest", emoji: "+", title: "Предложить тему", desc: "Голосуй за предмет", suggest: true },
 ];
 
@@ -182,7 +188,7 @@ export default async function HomePage() {
           Выбери, что хочешь<br />
           изучить <span className="text-brand-600 dark:text-brand-500 italic">сегодня</span>
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {SUBJECTS.map((s) => (
             <div key={s.id}
               className={`relative p-4 rounded-2xl border transition-all ${
