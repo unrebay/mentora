@@ -62,3 +62,14 @@
 nav, .card, section, main, aside, header, footer {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
+
+@keyframes gradientDrift {
+  0% {
+    opacity: 0.7;
+    transform: scale(1) translate(0%, 0%);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.12) translate(2%, 1.5%);
+  }
+}
