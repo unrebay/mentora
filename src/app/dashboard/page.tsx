@@ -11,25 +11,7 @@ import { PaymentSuccessTracker } from "@/components/PaymentSuccessTracker";
 import ThemeToggle from "@/components/ThemeToggle";
 import SubjectLibrarySection from "@/components/SubjectLibrarySection";
 
-const XP_LEVELS = [
-  { name: "Новичок", minXP: 0, maxXP: 100, color: "bg-gray-400" },
-  { name: "Исследователь", minXP: 100, maxXP: 300, color: "bg-blue-500" },
-  { name: "Знаток", minXP: 300, maxXP: 600, color: "bg-brand-500" },
-  { name: "Историк", minXP: 600, maxXP: 1000, color: "bg-purple-500" },
-  { name: "Эксперт", minXP: 1000, maxXP: Infinity, color: "bg-amber-500" },
-];
-
 const DAILY_LIMIT = 20;
-
-function getLevel(xp: number) {
-  const level = XP_LEVELS.slice().reverse().find((l) => xp >= l.minXP) ?? XP_LEVELS[0];
-  const idx = XP_LEVELS.indexOf(level);
-  const next = XP_LEVELS[idx + 1];
-  const progress = next
-    ? Math.min(100, Math.round(((xp - level.minXP) / (next.minXP - level.minXP)) * 100))
-    : 100;
-  return { ...level, idx, next, progress };
-}
 
 function pluralDays(n: number): string {
   const m10 = n % 10, m100 = n % 100;
@@ -63,16 +45,12 @@ export const metadata: Metadata = {
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth");
 
   const { data: profile } = await supabase
     .from("users")
-    .select(
-      "onboarding_completed, plan, trial_expires_at, streak_reward_claimed, messages_today, messages_date"
-    )
+    .select("onboarding_completed, plan, trial_expires_at, streak_reward_claimed, messages_today, messages_date")
     .eq("id", user.id)
     .single();
 
@@ -84,10 +62,7 @@ export default async function DashboardPage() {
   const isPro = profile?.plan === "pro" || isTrialActive;
 
   const trialExpiresDate = profile?.trial_expires_at
-    ? new Date(profile.trial_expires_at).toLocaleDateString("ru-RU", {
-        day: "numeric",
-        month: "long",
-      })
+    ? new Date(profile.trial_expires_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })
     : null;
 
   const today = new Date().toISOString().slice(0, 10);
@@ -100,11 +75,10 @@ export default async function DashboardPage() {
     .select("*")
     .eq("user_id", user.id);
 
-  const progressMap = new Map(progressData?.map((p) => [p.subject, p]) ?? []);
-  const totalXP = progressData?.reduce((sum, p) => sum + (p.xp_total ?? 0), 0) ?? 0;
+  const totalXP  = progressData?.reduce((sum, p) => sum + (p.xp_total   ?? 0), 0) ?? 0;
   const maxStreak = progressData?.reduce((max, p) => Math.max(max, p.streak_days ?? 0), 0) ?? 0;
 
-  // Fetch user subjects library
+  // Personal subject library
   const { data: userSubjectRows } = await supabase
     .from("user_subjects")
     .select("subject_id")
@@ -113,14 +87,10 @@ export default async function DashboardPage() {
   let userSubjectIds: string[] =
     userSubjectRows?.map((r: { subject_id: string }) => r.subject_id) ?? [];
 
-  // Seed with russian-history if empty
   if (userSubjectIds.length === 0) {
     await supabase
       .from("user_subjects")
-      .upsert(
-        { user_id: user.id, subject_id: "russian-history" },
-        { onConflict: "user_id,subject_id" }
-      );
+      .upsert({ user_id: user.id, subject_id: "russian-history" }, { onConflict: "user_id,subject_id" });
     userSubjectIds = ["russian-history"];
   }
 
@@ -145,7 +115,8 @@ export default async function DashboardPage() {
         className="fixed inset-0 -z-10 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 100% 70% at 15% 10%, rgba(69,97,232,0.06) 0%, transparent 55%), radial-gradient(ellipse 80% 60% at 85% 90%, rgba(91,119,255,0.04) 0%, transparent 55%)",
+            "radial-gradient(ellipse 100% 70% at 15% 10%, rgba(69,97,232,0.06) 0%, transparent 55%), " +
+            "radial-gradient(ellipse 80% 60% at 85% 90%, rgba(91,119,255,0.04) 0%, transparent 55%)",
           animation: "gradientDrift 10s ease-in-out infinite alternate",
         }}
       />
@@ -160,22 +131,13 @@ export default async function DashboardPage() {
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Logo size="sm" />
-            <a
-              href="/dashboard/analytics"
-              className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors"
-            >
+            <a href="/dashboard/analytics" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">
               Аналитика
             </a>
-            <a
-              href="/knowledge"
-              className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors"
-            >
+            <a href="/knowledge" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">
               База знаний
             </a>
-            <a
-              href="/profile"
-              className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors"
-            >
+            <a href="/profile" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">
               Профиль
             </a>
           </div>
@@ -194,18 +156,12 @@ export default async function DashboardPage() {
               </div>
             )}
             {!isPro && (
-              <Link
-                href="/pricing"
-                className="hidden sm:inline-flex text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors"
-              >
+              <Link href="/pricing" className="hidden sm:inline-flex text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors">
                 Тарифы
               </Link>
             )}
             <form action={handleLogout}>
-              <button
-                type="submit"
-                className="text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
-              >
+              <button type="submit" className="text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
                 Выйти
               </button>
             </form>
@@ -242,15 +198,10 @@ export default async function DashboardPage() {
                 {7 - maxStreak === 1 ? "день" : 7 - maxStreak < 5 ? "дня" : "дней"} подряд и получи 3 дня Pro без карты.
               </p>
               <div className="mt-2 h-1.5 rounded-full bg-orange-100 overflow-hidden w-full max-w-xs">
-                <div
-                  className="h-full rounded-full bg-orange-400 transition-all"
-                  style={{ width: `${Math.round((maxStreak / 7) * 100)}%` }}
-                />
+                <div className="h-full rounded-full bg-orange-400 transition-all" style={{ width: `${Math.round((maxStreak / 7) * 100)}%` }} />
               </div>
             </div>
-            <div className="text-right text-sm font-bold text-orange-500 shrink-0">
-              {maxStreak}/7
-            </div>
+            <div className="text-right text-sm font-bold text-orange-500 shrink-0">{maxStreak}/7</div>
           </div>
         )}
 
@@ -261,9 +212,7 @@ export default async function DashboardPage() {
               <p className="font-semibold text-[var(--text)] text-sm">Pro trial использован</p>
               <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                 Понравилось? Оформи полную подписку и учись без лимитов.{" "}
-                <a href="/pricing" className="text-brand-600 font-medium hover:underline">
-                  Посмотреть тарифы →
-                </a>
+                <a href="/pricing" className="text-brand-600 font-medium hover:underline">Посмотреть тарифы →</a>
               </p>
             </div>
           </div>
@@ -277,21 +226,14 @@ export default async function DashboardPage() {
             Привет, {firstName}! 👋
           </h1>
           <p className="text-[var(--text-muted)] mb-6">Начни учиться в диалоге с AI-ментором</p>
+
           {!isPro && (
             <div className="flex flex-wrap gap-3">
               <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm">
                 <span className="text-base">💬</span>
                 <span className="text-[var(--text-secondary)]">
                   Сообщений сегодня:{" "}
-                  <span
-                    className={`font-semibold ${
-                      messagesRemaining === 0
-                        ? "text-red-500"
-                        : messagesRemaining !== null && messagesRemaining <= 5
-                        ? "text-orange-500"
-                        : "text-[var(--text)]"
-                    }`}
-                  >
+                  <span className={`font-semibold ${messagesRemaining === 0 ? "text-red-500" : messagesRemaining !== null && messagesRemaining <= 5 ? "text-orange-500" : "text-[var(--text)]"}`}>
                     {messagesRemaining} / {DAILY_LIMIT}
                   </span>
                 </span>
@@ -306,26 +248,19 @@ export default async function DashboardPage() {
                   <span>🔥</span>
                   <span className="text-[var(--text-secondary)]">
                     Стрик:{" "}
-                    <span className="font-semibold text-orange-500">
-                      {maxStreak} {pluralDays(maxStreak)}
-                    </span>
+                    <span className="font-semibold text-orange-500">{maxStreak} {pluralDays(maxStreak)}</span>
                   </span>
                 </div>
               )}
-              <Link
-                href="/pricing"
-                className="flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-xl px-4 py-2.5 text-sm text-brand-700 font-medium hover:bg-brand-100 transition-colors"
-              >
+              <Link href="/pricing" className="flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-xl px-4 py-2.5 text-sm text-brand-700 font-medium hover:bg-brand-100 transition-colors">
                 ✨ Убрать лимит
               </Link>
             </div>
           )}
+
           {isPro && (
             <div className="flex flex-wrap gap-3">
-              <div
-                className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm"
-                style={{ background: "#111", color: "#fff" }}
-              >
+              <div className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm" style={{ background: "#111", color: "#fff" }}>
                 <span className="font-bold tracking-wide">PRO</span>
               </div>
               <div className="flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-xl px-4 py-2.5 text-sm">
@@ -358,10 +293,7 @@ export default async function DashboardPage() {
                 История России · {TOTAL_TOPICS} тем
               </h2>
             </div>
-            <Link
-              href="/learn/russian-history"
-              className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-xl hover:bg-brand-700 transition-colors"
-            >
+            <Link href="/learn/russian-history" className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-xl hover:bg-brand-700 transition-colors">
               Начать учиться →
             </Link>
           </div>
@@ -369,10 +301,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className="mt-8 md:hidden">
-          <Link
-            href="/learn/russian-history"
-            className="flex items-center justify-center gap-2 w-full px-6 py-3.5 bg-brand-600 text-white text-sm font-semibold rounded-2xl hover:bg-brand-700 transition-colors"
-          >
+          <Link href="/learn/russian-history" className="flex items-center justify-center gap-2 w-full px-6 py-3.5 bg-brand-600 text-white text-sm font-semibold rounded-2xl hover:bg-brand-700 transition-colors">
             Начать учиться →
           </Link>
         </div>
