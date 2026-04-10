@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -12,24 +11,9 @@ const STEPS = [
     subtitle: "Подберём стиль подачи материала под тебя",
     field: "onboarding_style",
     options: [
-      {
-        value: "storytelling",
-        emoji: "📖",
-        label: "Через истории",
-        desc: "Живые рассказы, образы, детали эпохи",
-      },
-      {
-        value: "facts",
-        emoji: "📅",
-        label: "Факты и хронология",
-        desc: "Чёткие даты, события, причинно-следственные связи",
-      },
-      {
-        value: "practice",
-        emoji: "✍️",
-        label: "Вопросы и задания",
-        desc: "Учусь через практику и проверку знаний",
-      },
+      { value: "storytelling", emoji: "📖", label: "Через истории", desc: "Живые рассказы, образы, детали эпохи" },
+      { value: "facts", emoji: "📅", label: "Факты и хронология", desc: "Чёткие даты, события, причинно-следственные связи" },
+      { value: "practice", emoji: "✍️", label: "Вопросы и задания", desc: "Учусь через практику и проверку знаний" },
     ],
   },
   {
@@ -38,30 +22,10 @@ const STEPS = [
     subtitle: "Ментор адаптирует сложность объяснений",
     field: "onboarding_level",
     options: [
-      {
-        value: "school",
-        emoji: "🎒",
-        label: "Школьник",
-        desc: "Готовлюсь к урокам, ОГЭ или ЕГЭ",
-      },
-      {
-        value: "student",
-        emoji: "🎓",
-        label: "Студент",
-        desc: "Учусь в вузе или колледже",
-      },
-      {
-        value: "adult",
-        emoji: "💼",
-        label: "Взрослый",
-        desc: "Изучаю историю для себя",
-      },
-      {
-        value: "expert",
-        emoji: "🔬",
-        label: "Историк / профи",
-        desc: "Глубокие знания, хочу детали",
-      },
+      { value: "school", emoji: "🎒", label: "Школьник", desc: "Готовлюсь к урокам, ОГЭ или ЕГЭ" },
+      { value: "student", emoji: "🎓", label: "Студент", desc: "Учусь в вузе или колледже" },
+      { value: "adult", emoji: "💼", label: "Взрослый", desc: "Изучаю историю для себя" },
+      { value: "expert", emoji: "🔬", label: "Историк / профи", desc: "Глубокие знания, хочу детали" },
     ],
   },
   {
@@ -70,30 +34,10 @@ const STEPS = [
     subtitle: "Поможет нам расставить акценты",
     field: "onboarding_goal",
     options: [
-      {
-        value: "exam",
-        emoji: "📝",
-        label: "Сдать ЕГЭ / ОГЭ",
-        desc: "Нужна подготовка к экзамену",
-      },
-      {
-        value: "general",
-        emoji: "🌍",
-        label: "Общее развитие",
-        desc: "Хочу понимать историю страны и мира",
-      },
-      {
-        value: "professional",
-        emoji: "📊",
-        label: "Работа / профессия",
-        desc: "История нужна для карьеры",
-      },
-      {
-        value: "curiosity",
-        emoji: "✨",
-        label: "Просто интересно",
-        desc: "Люблю историю, хочу узнать больше",
-      },
+      { value: "exam", emoji: "📝", label: "Сдать ЕГЭ / ОГЭ", desc: "Нужна подготовка к экзамену" },
+      { value: "general", emoji: "🌍", label: "Общее развитие", desc: "Хочу понимать историю страны и мира" },
+      { value: "professional", emoji: "📊", label: "Работа / профессия", desc: "История нужна для карьеры" },
+      { value: "curiosity", emoji: "✨", label: "Просто интересно", desc: "Люблю историю, хочу узнать больше" },
     ],
   },
 ];
@@ -115,7 +59,6 @@ export default function OnboardingPage() {
 
   async function handleNext() {
     if (!selected) return;
-
     const newAnswers = { ...answers, [step.field]: selected };
     setAnswers(newAnswers);
 
@@ -123,20 +66,15 @@ export default function OnboardingPage() {
       setSaving(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await supabase
-          .from("users")
-          .upsert({
-            id: user.id,
-            onboarding_style: newAnswers.onboarding_style,
-            onboarding_level: newAnswers.onboarding_level,
-            onboarding_goal: newAnswers.onboarding_goal,
-            onboarding_completed: true,
-          });
+        await supabase.from("users").upsert({
+          id: user.id,
+          onboarding_style: newAnswers.onboarding_style,
+          onboarding_level: newAnswers.onboarding_level,
+          onboarding_goal: newAnswers.onboarding_goal,
+          onboarding_completed: true,
+        });
       }
-      // Send welcome email (fire-and-forget, don't block redirect)
       fetch("/api/email/welcome", { method: "POST" }).catch(() => {});
-
-      // Redirect directly to chat — full navigation to avoid stale server cache
       window.location.href = "/dashboard";
     } else {
       setCurrentStep((s) => s + 1);
@@ -145,7 +83,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-12">
+    <main className="min-h-screen bg-[var(--bg)] flex flex-col items-center justify-center px-4 py-12">
       {/* Logo */}
       <div className="mb-10">
         <Logo size="md" />
@@ -157,11 +95,7 @@ export default function OnboardingPage() {
           <div
             key={i}
             className={`h-2 rounded-full transition-all duration-300 ${
-              i < currentStep
-                ? "w-8 bg-brand-600"
-                : i === currentStep
-                ? "w-8 bg-brand-600"
-                : "w-2 bg-gray-200"
+              i <= currentStep ? "w-8 bg-brand-600" : "w-2 bg-[var(--border)]"
             }`}
           />
         ))}
@@ -169,16 +103,14 @@ export default function OnboardingPage() {
 
       {/* Card */}
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <div className="bg-[var(--bg-card)] rounded-2xl shadow-sm border border-[var(--border)] p-8">
           {/* Step header */}
           <div className="mb-6">
-            <p className="text-xs font-semibold text-brand-600 uppercase tracking-wider mb-1">
+            <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 uppercase tracking-wider mb-1">
               Шаг {step.step} из {STEPS.length}
             </p>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">
-              {step.title}
-            </h1>
-            <p className="text-gray-500 text-sm">{step.subtitle}</p>
+            <h1 className="text-2xl font-bold text-[var(--text)] mb-1">{step.title}</h1>
+            <p className="text-[var(--text-secondary)] text-sm">{step.subtitle}</p>
           </div>
 
           {/* Options */}
@@ -189,8 +121,8 @@ export default function OnboardingPage() {
                 onClick={() => handleSelect(opt.value)}
                 className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-150 ${
                   selected === opt.value
-                    ? "border-brand-600 bg-brand-50"
-                    : "border-gray-100 bg-gray-50 hover:border-gray-200 hover:bg-white"
+                    ? "border-brand-600 bg-brand-50 dark:bg-brand-900/20"
+                    : "border-[var(--border)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-card)]"
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -199,15 +131,13 @@ export default function OnboardingPage() {
                     <div
                       className={`font-semibold text-sm ${
                         selected === opt.value
-                          ? "text-brand-700"
-                          : "text-gray-800"
+                          ? "text-brand-700 dark:text-brand-300"
+                          : "text-[var(--text)]"
                       }`}
                     >
                       {opt.label}
                     </div>
-                    <div className="text-gray-500 text-xs mt-0.5">
-                      {opt.desc}
-                    </div>
+                    <div className="text-[var(--text-secondary)] text-xs mt-0.5">{opt.desc}</div>
                   </div>
                   {selected === opt.value && (
                     <div className="ml-auto mt-0.5">
@@ -229,11 +159,7 @@ export default function OnboardingPage() {
             disabled={!selected || saving}
             className="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold hover:bg-brand-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {saving
-              ? "Сохраняем..."
-              : isLast
-              ? "Начать учиться →"
-              : "Далее →"}
+            {saving ? "Сохраняем..." : isLast ? "Начать учиться →" : "Далее →"}
           </button>
         </div>
 
@@ -242,13 +168,11 @@ export default function OnboardingPage() {
           onClick={async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-              await supabase
-                .from("users")
-                .upsert({ id: user.id, onboarding_completed: true });
+              await supabase.from("users").upsert({ id: user.id, onboarding_completed: true });
             }
             window.location.href = "/dashboard";
           }}
-          className="w-full mt-4 text-center text-sm text-gray-400 hover:text-gray-600 transition-colors"
+          className="w-full mt-4 text-center text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
         >
           Пропустить
         </button>
