@@ -134,7 +134,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                               {lvl.name}
                             </span>
                             <span className={`text-[10px] font-semibold ${isVerified ? "text-white" : "text-brand-600"}`}>
-                              {xp} {pluralMenty(xp)}
+                              <MentoraE />{xp} {pluralMenty(xp)}
                             </span>
                           </div>
                           <div className={`h-1.5 rounded-full overflow-hidden ${isVerified ? "bg-white/20" : "bg-[var(--bg-secondary)]"}`}>
