@@ -8,6 +8,7 @@ import { RUSSIAN_HISTORY_TOPICS, TOTAL_TOPICS } from "@/lib/topics";
 import TopicsMap from "@/components/TopicsMap";
 import { PostHogIdentify } from "@/components/PostHogIdentify";
 import { PaymentSuccessTracker } from "@/components/PaymentSuccessTracker";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const XP_LEVELS = [
   { name: "Новичок", minXP: 0, maxXP: 100, color: "bg-gray-400" },
@@ -48,7 +49,7 @@ function pluralMenty(n: number): string {
 
 // Mentora logo "е" — italic, Playfair, brand blue
 const MentoraE = () => (
-  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", fontWeight: 700 }}>е</span>
+  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", fontWeight: 700, fontSize: "1.5em", lineHeight: 1 }}>е</span>
 );
 
 function getFirstName(fullName?: string | null, email?: string | null): string {
