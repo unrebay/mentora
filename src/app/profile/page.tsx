@@ -34,7 +34,7 @@ function pluralMenty(n: number): string {
 
 // Mentora logo "е" — italic, Playfair, brand blue
 const MentoraE = () => (
-  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", fontWeight: 700 }}>е</span>
+  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", fontWeight: 700, fontSize: "1.5em", lineHeight: 1 }}>е</span>
 );
 
 type BadgeDef = {
