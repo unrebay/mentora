@@ -8,12 +8,17 @@ interface LogoProps {
 }
 
 const sizes = {
-  sm: { fontSize: "1.25rem" },   // ~20px
-  md: { fontSize: "1.625rem" },  // ~26px
-  lg: { fontSize: "2.125rem" },  // ~34px
+  sm: { fontSize: "1.25rem" },  // ~20px
+  md: { fontSize: "1.625rem" }, // ~26px
+  lg: { fontSize: "2.125rem" }, // ~34px
 };
 
-export default function Logo({ size = "md", fontSize: fontSizeOverride, href = "/", className = "" }: LogoProps) {
+export default function Logo({
+  size = "md",
+  fontSize: fontSizeOverride,
+  href = "/",
+  className = "",
+}: LogoProps) {
   const fontSize = fontSizeOverride ?? sizes[size].fontSize;
 
   const mark = (
@@ -25,7 +30,7 @@ export default function Logo({ size = "md", fontSize: fontSizeOverride, href = "
         fontWeight: 700,
         letterSpacing: "-0.01em",
         lineHeight: 1,
-        color: "#121212",
+        color: "var(--text)",
       }}
     >
       M
