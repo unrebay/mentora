@@ -159,13 +159,13 @@ export default async function ProfilePage() {
           {[
             {
               label: "Менты",
-              value: <span className="text-2xl font-bold text-gray-900">{totalXP} <span className="text-lg font-medium text-gray-500">{pluralMenty(totalXP)}</span></span>,
+              value: <span className="text-2xl font-bold text-[var(--text)]">{totalXP} <span className="text-lg font-medium text-[var(--text-muted)]">{pluralMenty(totalXP)}</span></span>,
               icon: <MentoraE />,
               iconClass: "text-2xl mb-1",
             },
-            { label: "Макс. стрик", value: <span className="text-2xl font-bold text-gray-900">{maxStreak}<span className="text-lg font-medium text-gray-500">д</span></span>, icon: "🔥", iconClass: "text-2xl mb-1" },
-            { label: "Сообщений", value: <span className="text-2xl font-bold text-gray-900">{totalMessages}</span>, icon: "💬", iconClass: "text-2xl mb-1" },
-            { label: "Достижений", value: <span className="text-2xl font-bold text-gray-900">{earned.length}</span>, icon: "🏅", iconClass: "text-2xl mb-1" },
+            { label: "Макс. стрик", value: <span className="text-2xl font-bold text-[var(--text)]">{maxStreak}<span className="text-lg font-medium text-[var(--text-muted)]">д</span></span>, icon: "🔥", iconClass: "text-2xl mb-1" },
+            { label: "Сообщений", value: <span className="text-2xl font-bold text-[var(--text)]">{totalMessages}</span>, icon: "💬", iconClass: "text-2xl mb-1" },
+            { label: "Достижений", value: <span className="text-2xl font-bold text-[var(--text)]">{earned.length}</span>, icon: "🏅", iconClass: "text-2xl mb-1" },
           ].map((s, i) => (
             <div key={i} className="bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border)] shadow-sm text-center">
               <div className={s.iconClass}>{s.icon}</div>
@@ -178,14 +178,14 @@ export default async function ProfilePage() {
         {/* Прогресс уровня */}
         <div className="bg-[var(--bg-card)] rounded-2xl p-6 border border-[var(--border)] shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <span className="font-semibold text-gray-900">{lvl.name}</span>
+            <span className="font-semibold text-[var(--text)]">{lvl.name}</span>
             {lvl.next && (
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-[var(--text-muted)]">
                 {lvl.next.name} через {lvl.next.minXP - totalXP} {pluralMenty(lvl.next.minXP - totalXP)}
               </span>
             )}
           </div>
-          <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-3 bg-[var(--border)] rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{ width: `${lvl.progress}%`, background: lvl.color }}
@@ -207,10 +207,10 @@ export default async function ProfilePage() {
                   <div
                     key={b.id}
                     className="bg-[var(--bg-card)] rounded-2xl p-5 border-2 shadow-sm flex flex-col items-center text-center gap-2"
-                    style={{ borderColor: ts.border, background: ts.bg }}
+                    style={{ borderColor: ts.border, background: ts.border + "18" }}
                   >
                     <span className="text-4xl">{b.icon}</span>
-                    <span className="font-bold text-sm text-gray-900">{b.name}</span>
+                    <span className="font-bold text-sm text-[var(--text)]">{b.name}</span>
                     <span className="text-xs text-gray-500">{b.desc}</span>
                     <span
                       className="text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1"
@@ -233,8 +233,8 @@ export default async function ProfilePage() {
               {locked.map(b => (
                 <div key={b.id} className="bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border)] flex flex-col items-center text-center gap-2 opacity-50">
                   <span className="text-4xl grayscale">{b.icon}</span>
-                  <span className="font-bold text-sm text-gray-500">{b.name}</span>
-                  <span className="text-xs text-gray-400">{b.desc}</span>
+                  <span className="font-bold text-sm text-[var(--text-secondary)]">{b.name}</span>
+                  <span className="text-xs text-[var(--text-muted)]">{b.desc}</span>
                 </div>
               ))}
             </div>
