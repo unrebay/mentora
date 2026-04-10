@@ -104,17 +104,17 @@ export default async function ProfilePage() {
   const locked = BADGES.filter(b => !b.check(stats));
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100 px-6 py-4">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
+      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-[var(--border)] px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <Logo size="sm" />
-          <Link href="/dashboard" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">← Назад</Link>
+          <Link href="/dashboard" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">← Назад</Link>
         </div>
       </nav>
 
       <main className="max-w-3xl mx-auto px-6 py-10 space-y-8">
         {/* Шапка профиля */}
-        <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm flex items-center gap-6">
+        <div className="bg-[var(--bg-card)] rounded-2xl p-8 border border-[var(--border)] shadow-sm flex items-center gap-6">
           <div
             className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold text-white shrink-0"
             style={{ background: `linear-gradient(135deg, ${lvl.color}, ${lvl.color}99)` }}
@@ -122,8 +122,8 @@ export default async function ProfilePage() {
             {initial}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xl font-bold text-gray-900 truncate">{name}</p>
-            <p className="text-sm text-gray-400 truncate">{user.email}</p>
+            <p className="text-xl font-bold text-[var(--text)] truncate">{name}</p>
+            <p className="text-sm text-[var(--text-muted)] truncate">{user.email}</p>
             <ProfileNameEditor
               currentNickname={profile?.display_name ?? null}
               changesLeft={changesLeft}
@@ -151,16 +151,16 @@ export default async function ProfilePage() {
             { label: "Сообщений", value: <span className="text-2xl font-bold text-gray-900">{totalMessages}</span>, icon: "💬", iconClass: "text-2xl mb-1" },
             { label: "Достижений", value: <span className="text-2xl font-bold text-gray-900">{earned.length}</span>, icon: "🏅", iconClass: "text-2xl mb-1" },
           ].map((s, i) => (
-            <div key={i} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm text-center">
+            <div key={i} className="bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border)] shadow-sm text-center">
               <div className={s.iconClass}>{s.icon}</div>
               <div>{s.value}</div>
-              <div className="text-xs text-gray-400 mt-1">{s.label}</div>
+              <div className="text-xs text-[var(--text-muted)] mt-1">{s.label}</div>
             </div>
           ))}
         </div>
 
         {/* Прогресс уровня */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+        <div className="bg-[var(--bg-card)] rounded-2xl p-6 border border-[var(--border)] shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <span className="font-semibold text-gray-900">{lvl.name}</span>
             {lvl.next && (
@@ -175,7 +175,7 @@ export default async function ProfilePage() {
               style={{ width: `${lvl.progress}%`, background: lvl.color }}
             />
           </div>
-          <p className="text-xs text-gray-400 mt-2">
+          <p className="text-xs text-[var(--text-muted)] mt-2">
             {totalXP} / {lvl.next?.minXP ?? totalXP} {pluralMenty(lvl.next?.minXP ?? totalXP)}
           </p>
         </div>
@@ -183,14 +183,14 @@ export default async function ProfilePage() {
         {/* Бейджи — заработанные */}
         {earned.length > 0 && (
           <div>
-            <h2 className="text-lg font-bold text-gray-900 mb-4">🏅 Достижения ({earned.length})</h2>
+            <h2 className="text-lg font-bold text-[var(--text)] mb-4">🏅 Достижения ({earned.length})</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {earned.map(b => {
                 const ts = TIER_STYLE[b.tier];
                 return (
                   <div
                     key={b.id}
-                    className="bg-white rounded-2xl p-5 border-2 shadow-sm flex flex-col items-center text-center gap-2"
+                    className="bg-[var(--bg-card)] rounded-2xl p-5 border-2 shadow-sm flex flex-col items-center text-center gap-2"
                     style={{ borderColor: ts.border, background: ts.bg }}
                   >
                     <span className="text-4xl">{b.icon}</span>
@@ -212,10 +212,10 @@ export default async function ProfilePage() {
         {/* Бейджи — заблокированные */}
         {locked.length > 0 && (
           <div>
-            <h2 className="text-lg font-bold text-gray-400 mb-4">🔒 Ещё не разблокировано</h2>
+            <h2 className="text-lg font-bold text-[var(--text-muted)] mb-4">🔒 Ещё не разблокировано</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {locked.map(b => (
-                <div key={b.id} className="bg-white rounded-2xl p-5 border border-gray-200 flex flex-col items-center text-center gap-2 opacity-50">
+                <div key={b.id} className="bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border)] flex flex-col items-center text-center gap-2 opacity-50">
                   <span className="text-4xl grayscale">{b.icon}</span>
                   <span className="font-bold text-sm text-gray-500">{b.name}</span>
                   <span className="text-xs text-gray-400">{b.desc}</span>
