@@ -32,7 +32,7 @@ const fmtShort = (iso: string) =>
   new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
 
 export default function AnalyticsInvitePage() {
-  const { token } = useParams<{ token: string }>()
+  const { token } = useParams<{ token: string }>() ?? {}
   const [data, setData] = useState<AnalyticsData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)

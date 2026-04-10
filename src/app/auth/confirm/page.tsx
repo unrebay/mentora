@@ -6,7 +6,25 @@ export default function AuthConfirm() {
   useEffect(() => {
     const supabase = createClient();
 
-    // Parse tokens from URL hash fragment
+    // PKCE flow: token_hash arrives as query param (Supabase SSR default)
+    const searchParams = new URLSearchParams(window.location.search);
+    const token_hash = searchParams.get("token_hash");
+    const type = searchParams.get("type");
+
+    if (token_hash && type) {
+      supabase.auth
+        .verifyOtp({ token_hash, type: type as "magiclink" | "email" })
+        .then(({ error }) => {
+          if (error) {
+            window.location.href = "/auth?error=verify_failed";
+          } else {
+            window.location.href = "/dashboard";
+          }
+        });
+      return;
+    }
+
+    // Legacy implicit flow: tokens in URL hash fragment (fallback)
     const hash = window.location.hash.substring(1);
     const params = new URLSearchParams(hash);
     const access_token = params.get("access_token");
@@ -28,10 +46,10 @@ export default function AuthConfirm() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <main className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
       <div className="text-center">
         <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-gray-500 text-sm">Входим через Telegram...</p>
+        <p className="text-[var(--text-secondary)] text-sm">Входим...</p>
       </div>
     </main>
   );

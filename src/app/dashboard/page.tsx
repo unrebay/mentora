@@ -8,26 +8,10 @@ import { RUSSIAN_HISTORY_TOPICS, TOTAL_TOPICS } from "@/lib/topics";
 import TopicsMap from "@/components/TopicsMap";
 import { PostHogIdentify } from "@/components/PostHogIdentify";
 import { PaymentSuccessTracker } from "@/components/PaymentSuccessTracker";
-
-const XP_LEVELS = [
-  { name: "Новичок",     minXP: 0,    maxXP: 100,  color: "bg-gray-400" },
-  { name: "Исследователь", minXP: 100,  maxXP: 300,  color: "bg-blue-500" },
-  { name: "Знаток",      minXP: 300,  maxXP: 600,  color: "bg-brand-500" },
-  { name: "Историк",     minXP: 600,  maxXP: 1000, color: "bg-purple-500" },
-  { name: "Эксперт",     minXP: 1000, maxXP: Infinity, color: "bg-amber-500" },
-];
+import ThemeToggle from "@/components/ThemeToggle";
+import SubjectLibrarySection from "@/components/SubjectLibrarySection";
 
 const DAILY_LIMIT = 20;
-
-function getLevel(xp: number) {
-  const level = XP_LEVELS.slice().reverse().find((l) => xp >= l.minXP) ?? XP_LEVELS[0];
-  const idx = XP_LEVELS.indexOf(level);
-  const next = XP_LEVELS[idx + 1];
-  const progress = next
-    ? Math.min(100, Math.round(((xp - level.minXP) / (next.minXP - level.minXP)) * 100))
-    : 100;
-  return { ...level, idx, next, progress };
-}
 
 function pluralDays(n: number): string {
   const m10 = n % 10, m100 = n % 100;
@@ -36,6 +20,18 @@ function pluralDays(n: number): string {
   if (m10 >= 2 && m10 <= 4) return "дня";
   return "дней";
 }
+
+function pluralMenty(n: number): string {
+  const m10 = n % 10, m100 = n % 100;
+  if (m100 >= 11 && m100 <= 14) return "мент";
+  if (m10 === 1) return "мента";
+  if (m10 >= 2 && m10 <= 4) return "менты";
+  return "мент";
+}
+
+const MentoraE = () => (
+  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", fontWeight: 700, fontSize: "1.5em", lineHeight: 1 }}>е</span>
+);
 
 function getFirstName(fullName?: string | null, email?: string | null): string {
   if (fullName) return fullName.split(" ")[0];
@@ -50,7 +46,6 @@ export const metadata: Metadata = {
 export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
   if (!user) redirect("/auth");
 
   const { data: profile } = await supabase
@@ -65,6 +60,7 @@ export default async function DashboardPage() {
     ? new Date(profile.trial_expires_at) > new Date()
     : false;
   const isPro = profile?.plan === "pro" || isTrialActive;
+
   const trialExpiresDate = profile?.trial_expires_at
     ? new Date(profile.trial_expires_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })
     : null;
@@ -79,9 +75,26 @@ export default async function DashboardPage() {
     .select("*")
     .eq("user_id", user.id);
 
-  const progressMap = new Map(progressData?.map((p) => [p.subject, p]) ?? []);
-  const totalXP = progressData?.reduce((sum, p) => sum + (p.xp_total ?? 0), 0) ?? 0;
+  const totalXP  = progressData?.reduce((sum, p) => sum + (p.xp_total   ?? 0), 0) ?? 0;
   const maxStreak = progressData?.reduce((max, p) => Math.max(max, p.streak_days ?? 0), 0) ?? 0;
+
+  // Personal subject library
+  const { data: userSubjectRows } = await supabase
+    .from("user_subjects")
+    .select("subject_id")
+    .eq("user_id", user.id);
+
+  let userSubjectIds: string[] =
+    userSubjectRows?.map((r: { subject_id: string }) => r.subject_id) ?? [];
+
+  if (userSubjectIds.length === 0) {
+    await supabase
+      .from("user_subjects")
+      .upsert({ user_id: user.id, subject_id: "russian-history" }, { onConflict: "user_id,subject_id" });
+    userSubjectIds = ["russian-history"];
+  }
+
+  const userSubjects = SUBJECTS.filter((s) => userSubjectIds.includes(s.id));
 
   const firstName = getFirstName(
     user.user_metadata?.full_name ?? user.user_metadata?.name,
@@ -96,19 +109,50 @@ export default async function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-100 px-6 py-4 sticky top-0 z-10">
+    <main className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
+      {/* Subtle animated gradient background */}
+      <div
+        className="fixed inset-0 -z-10 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 100% 70% at 15% 10%, rgba(69,97,232,0.06) 0%, transparent 55%), " +
+            "radial-gradient(ellipse 80% 60% at 85% 90%, rgba(91,119,255,0.04) 0%, transparent 55%)",
+          animation: "gradientDrift 10s ease-in-out infinite alternate",
+        }}
+      />
+
+      <PostHogIdentify userId={user.id} email={user.email ?? ""} />
+      <PaymentSuccessTracker />
+
+      <nav
+        className="sticky top-0 z-10 border-b border-[var(--border)] px-6 py-4"
+        style={{ background: "var(--bg-nav)", backdropFilter: "blur(12px)" }}
+      >
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Logo size="sm" />
-            <a href="/dashboard/analytics" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Аналитика</a>
-            <a href="/profile" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Профиль</a>
+            <a href="/dashboard/analytics" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">
+              Аналитика
+            </a>
+            <a href="/knowledge" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">
+              База знаний
+            </a>
+            <a href="/profile" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">
+              Профиль
+            </a>
           </div>
           <div className="flex items-center gap-4 md:gap-6">
+            <ThemeToggle />
             {totalXP > 0 && (
               <div className="hidden sm:flex items-center gap-4 text-sm">
-                <span className="text-brand-600 font-semibold">⚡ {totalXP} XP</span>
-                {maxStreak > 0 && <span className="text-orange-500 font-semibold">🔥 {maxStreak} {pluralDays(maxStreak)}</span>}
+                <span className="font-semibold text-[var(--text)]">
+                  <MentoraE /> {totalXP} {pluralMenty(totalXP)}
+                </span>
+                {maxStreak > 0 && (
+                  <span className="text-orange-500 font-semibold">
+                    🔥 {maxStreak} {pluralDays(maxStreak)}
+                  </span>
+                )}
               </div>
             )}
             {!isPro && (
@@ -117,22 +161,25 @@ export default async function DashboardPage() {
               </Link>
             )}
             <form action={handleLogout}>
-              <button type="submit" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
+              <button type="submit" className="text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
                 Выйти
               </button>
             </form>
           </div>
         </div>
-        </nav>
+      </nav>
 
       <div className="max-w-5xl mx-auto px-6 py-10">
-
         {isTrialActive && (
           <div className="mb-6 flex items-center gap-3 bg-brand-50 border border-brand-200 rounded-2xl px-5 py-4">
             <span className="text-2xl">🎉</span>
             <div className="flex-1">
-              <p className="font-semibold text-brand-800 text-sm">Pro активен до {trialExpiresDate}!</p>
-              <p className="text-xs text-brand-600 mt-0.5">Ты собрал 7-дневный стрик — и получил 3 дня Pro. Безлимитные сообщения уже работают.</p>
+              <p className="font-semibold text-brand-800 text-sm">
+                Pro активен до {trialExpiresDate}!
+              </p>
+              <p className="text-xs text-brand-600 mt-0.5">
+                Ты собрал 7-дневный стрик — и получил 3 дня Pro. Безлимитные сообщения уже работают.
+              </p>
             </div>
           </div>
         )}
@@ -147,7 +194,8 @@ export default async function DashboardPage() {
                   : `${maxStreak} из 7 дней → 3 дня Pro`}
               </p>
               <p className="text-xs text-orange-600 mt-0.5">
-                Учись {7 - maxStreak} {7 - maxStreak === 1 ? "день" : 7 - maxStreak < 5 ? "дня" : "дней"} подряд и получи 3 дня Pro без карты.
+                Учись {7 - maxStreak}{" "}
+                {7 - maxStreak === 1 ? "день" : 7 - maxStreak < 5 ? "дня" : "дней"} подряд и получи 3 дня Pro без карты.
               </p>
               <div className="mt-2 h-1.5 rounded-full bg-orange-100 overflow-hidden w-full max-w-xs">
                 <div className="h-full rounded-full bg-orange-400 transition-all" style={{ width: `${Math.round((maxStreak / 7) * 100)}%` }} />
@@ -158,11 +206,11 @@ export default async function DashboardPage() {
         )}
 
         {!isPro && profile?.streak_reward_claimed && !isTrialActive && (
-          <div className="mb-6 flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4">
+          <div className="mb-6 flex items-center gap-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl px-5 py-4">
             <span className="text-2xl">⭐</span>
             <div>
-              <p className="font-semibold text-gray-700 text-sm">Pro trial использован</p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="font-semibold text-[var(--text)] text-sm">Pro trial использован</p>
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                 Понравилось? Оформи полную подписку и учись без лимитов.{" "}
                 <a href="/pricing" className="text-brand-600 font-medium hover:underline">Посмотреть тарифы →</a>
               </p>
@@ -171,33 +219,37 @@ export default async function DashboardPage() {
         )}
 
         <div className="mb-10">
-          <div className="mb-1 text-xs font-semibold text-gray-400 tracking-widest uppercase">Библиотека знаний</div>
+          <div className="mb-1 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">
+            Библиотека знаний
+          </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-2 leading-tight">
             Привет, {firstName}! 👋
           </h1>
-          <p className="text-gray-400 mb-6">Начни учиться в диалоге с AI-ментором</p>
+          <p className="text-[var(--text-muted)] mb-6">Начни учиться в диалоге с AI-ментором</p>
 
           {!isPro && (
             <div className="flex flex-wrap gap-3">
-              <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm">
+              <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm">
                 <span className="text-base">💬</span>
-                <span className="text-gray-600">
+                <span className="text-[var(--text-secondary)]">
                   Сообщений сегодня:{" "}
-                  <span className={`font-semibold ${messagesRemaining === 0 ? "text-red-500" : messagesRemaining !== null && messagesRemaining <= 5 ? "text-orange-500" : "text-gray-900"}`}>
+                  <span className={`font-semibold ${messagesRemaining === 0 ? "text-red-500" : messagesRemaining !== null && messagesRemaining <= 5 ? "text-orange-500" : "text-[var(--text)]"}`}>
                     {messagesRemaining} / {DAILY_LIMIT}
                   </span>
                 </span>
               </div>
               {totalXP > 0 && (
-                <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm">
-                  <span>⚡</span>
-                  <span className="text-gray-600">XP: <span className="font-semibold text-gray-900">{totalXP}</span></span>
+                <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm font-semibold text-[var(--text)]">
+                  <MentoraE /> {totalXP} {pluralMenty(totalXP)}
                 </div>
               )}
               {maxStreak > 0 && (
-                <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm">
+                <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm">
                   <span>🔥</span>
-                  <span className="text-gray-600">Стрик: <span className="font-semibold text-orange-500">{maxStreak} {pluralDays(maxStreak)}</span></span>
+                  <span className="text-[var(--text-secondary)]">
+                    Стрик:{" "}
+                    <span className="font-semibold text-orange-500">{maxStreak} {pluralDays(maxStreak)}</span>
+                  </span>
                 </div>
               )}
               <Link href="/pricing" className="flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-xl px-4 py-2.5 text-sm text-brand-700 font-medium hover:bg-brand-100 transition-colors">
@@ -208,8 +260,7 @@ export default async function DashboardPage() {
 
           {isPro && (
             <div className="flex flex-wrap gap-3">
-              <div className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm"
-                   style={{ background: "#111", color: "#fff" }}>
+              <div className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm" style={{ background: "#111", color: "#fff" }}>
                 <span className="font-bold tracking-wide">PRO</span>
               </div>
               <div className="flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-xl px-4 py-2.5 text-sm">
@@ -217,83 +268,30 @@ export default async function DashboardPage() {
                 <span className="text-brand-700 font-medium">Безлимитные сообщения</span>
               </div>
               {totalXP > 0 && (
-                <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm">
-                  <span>⚡</span>
-                  <span className="text-gray-600">XP: <span className="font-semibold text-gray-900">{totalXP}</span></span>
+                <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm font-semibold text-[var(--text)]">
+                  <MentoraE /> {totalXP} {pluralMenty(totalXP)}
                 </div>
               )}
             </div>
           )}
         </div>
 
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Предметы</h2>
-          <a
-            href="mailto:hi@mentora.su?subject=Предложить предмет"
-            className="flex items-center gap-1.5 text-xs font-medium text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 transition-colors px-3 py-1.5 rounded-lg"
-          >
-            <span className="text-base leading-none">+</span> Предложить предмет
-          </a>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {SUBJECTS.map((subject) => {
-            const progress = progressMap.get(subject.id);
-            return (
-              <div key={subject.id} className={`relative rounded-2xl border transition-all overflow-hidden ${subject.available ? "bg-white border-gray-200 hover:border-brand-300 hover:shadow-md cursor-pointer" : "bg-gray-50 border-gray-100 opacity-60"}`}>
-                {subject.available ? (
-                  <Link href={`/learn/${subject.id}`} className="block p-5">
-                    <span className="absolute top-3 right-3 text-[10px] font-bold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-md">LIVE</span>
-                    <div className="text-3xl mb-3">{subject.emoji}</div>
-                    <div className="font-semibold text-sm text-gray-900 mb-0.5">{subject.title}</div>
-                    <div className="text-xs text-gray-400">{subject.description}</div>
-                    {progress ? (() => {
-                      const lvl = getLevel(progress.xp_total ?? 0);
-                      return (
-                        <div className="mt-3 pt-3 border-t border-gray-100">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-[10px] font-semibold text-gray-500">{lvl.name}</span>
-                            <span className="text-[10px] text-brand-600 font-medium">⚡ {progress.xp_total} XP</span>
-                          </div>
-                          <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
-                            <div className={`h-full rounded-full transition-all ${lvl.color}`} style={{ width: `${lvl.progress}%` }} />
-                          </div>
-                          {progress.streak_days > 0 && (
-                            <div className="mt-1.5 text-[10px] text-orange-500 font-medium">🔥 {progress.streak_days} {pluralDays(progress.streak_days ?? 0)} подряд</div>
-                          )}
-                        </div>
-                      );
-                    })() : (
-                      <div className="mt-3"><span className="text-xs font-medium text-brand-600">Начать →</span></div>
-                    )}
-                  </Link>
-                ) : (
-                  <div className="block p-5">
-                    <span className="absolute top-3 right-3 text-[10px] font-medium bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-md">СКОРО</span>
-                    <div className="text-3xl mb-3">{subject.emoji}</div>
-                    <div className="font-semibold text-sm text-gray-500 mb-0.5">{subject.title}</div>
-                    <div className="text-xs text-gray-400">{subject.description}</div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-          {/* Добавить предмет */}
-          <a
-            href="mailto:hi@mentora.su?subject=Хочу предмет"
-            className="relative rounded-2xl border-2 border-dashed border-gray-200 bg-white hover:border-brand-300 hover:bg-brand-50 transition-all cursor-pointer flex flex-col items-center justify-center p-5 min-h-[140px] gap-2 group"
-          >
-            <div className="w-10 h-10 rounded-full bg-gray-100 group-hover:bg-brand-100 flex items-center justify-center transition-colors">
-              <span className="text-2xl text-gray-400 group-hover:text-brand-500 leading-none">+</span>
-            </div>
-            <span className="text-xs font-medium text-gray-400 group-hover:text-brand-600 text-center transition-colors">Добавить предмет</span>
-          </a>
-        </div>
+        <SubjectLibrarySection
+          userSubjects={userSubjects}
+          existingSubjectIds={userSubjectIds}
+          userId={user.id}
+          progressEntries={progressData ?? []}
+        />
 
         <div className="mt-16">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <div className="mb-1 text-xs font-semibold text-gray-400 tracking-widest uppercase">Карта знаний</div>
-              <h2 className="text-2xl font-bold text-gray-900">История России · {TOTAL_TOPICS} тем</h2>
+              <div className="mb-1 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">
+                Карта знаний
+              </div>
+              <h2 className="text-2xl font-bold text-[var(--text)]">
+                История России · {TOTAL_TOPICS} тем
+              </h2>
             </div>
             <Link href="/learn/russian-history" className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-xl hover:bg-brand-700 transition-colors">
               Начать учиться →
@@ -307,7 +305,6 @@ export default async function DashboardPage() {
             Начать учиться →
           </Link>
         </div>
-
       </div>
     </main>
   );

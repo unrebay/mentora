@@ -3,6 +3,7 @@ import { Golos_Text, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import { SplashScreen } from "@/components/SplashScreen";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const golos = Golos_Text({
   subsets: ["latin", "cyrillic"],
@@ -72,7 +73,7 @@ export const metadata: Metadata = {
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
     other: [
-      { rel: "mask-icon", url: "/logo.svg", color: "#3b5bdb" },
+      { rel: "mask-icon", url: "/logo.svg", color: "#4561E8" },
     ],
   },
   manifest: "/site.webmanifest",
@@ -82,34 +83,37 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-    },
+    googleBot: { index: true, follow: true },
   },
   alternates: {
     canonical: "https://mentora.su",
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru">
+    <html lang="ru" suppressHydrationWarning>
       <head>
+        {/* Prevent flash of wrong theme */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          try {
+            var t = localStorage.getItem('mentora-theme');
+            if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            if (t === 'dark') document.documentElement.classList.add('dark');
+          } catch(e){}
+        ` }} />
         <meta name="yandex-verification" content="673fbfbebc45f7aa" />
-        <meta name="theme-color" content="#3b5bdb" />
-        <meta name="msapplication-TileColor" content="#3b5bdb" />
+        <meta name="theme-color" content="#4561E8" />
+        <meta name="msapplication-TileColor" content="#4561E8" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
       <body className={`${golos.variable} ${playfair.variable} font-sans`}>
-        <PostHogProvider>
-          <SplashScreen />
-          {children}
-        </PostHogProvider>
+        <ThemeProvider>
+          <PostHogProvider>
+            <SplashScreen />
+            {children}
+          </PostHogProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

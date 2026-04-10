@@ -4,16 +4,72 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Light theme */
+    --bg: #ffffff;
+    --bg-secondary: #f9fafb;
+    --bg-card: #ffffff;
+    --bg-nav: rgba(255,255,255,0.92);
+    --text: #111827;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --border: #e5e7eb;
+    --border-light: #f3f4f6;
+    --brand: #4561E8;
+    --brand-hover: #3451d1;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .dark {
+    /* Dark theme */
+    --bg: #07070f;
+    --bg-secondary: #0f0f1a;
+    --bg-card: #111120;
+    --bg-nav: rgba(7,7,15,0.92);
+    --text: #f1f1f5;
+    --text-secondary: #8b8ba7;
+    --text-muted: #5c5c78;
+    --border: #1e1e30;
+    --border-light: #181828;
+    --brand: #5b77ff;
+    --brand-hover: #4561E8;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+
+  html {
+    color-scheme: light dark;
   }
 
   body {
-    @apply bg-white text-gray-900 antialiased;
+    background-color: var(--bg);
+    color: var(--text);
+    @apply antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .dark ::-webkit-scrollbar-thumb { background: #2a2a40; }
 }
 
 @keyframes mentoraDot {
   0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
   30% { transform: translateY(-5px); opacity: 1; }
+}
+
+/* Smooth theme transitions for key elements */
+nav, .card, section, main, aside, header, footer {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+@keyframes gradientDrift {
+  0% {
+    opacity: 0.7;
+    transform: scale(1) translate(0%, 0%);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.12) translate(2%, 1.5%);
+  }
 }
