@@ -34,33 +34,33 @@ export async function POST(req: NextRequest) {
 
   const telegramEmail = `tg_${userData.id}@mentora.su`;
 
-  // Find or create user
-  const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-  const existing = existingUsers?.users?.find((u) => u.email === telegramEmail);
+  // Ensure user exists — try to create, ignore "already registered" error
+  const { error: createErr } = await supabaseAdmin.auth.admin.createUser({
+    email: telegramEmail,
+    email_confirm: true,
+    user_metadata: {
+      telegram_id: userData.id,
+      full_name: [userData.first_name, userData.last_name]
+        .filter(Boolean)
+        .join(" "),
+      username: userData.username,
+      avatar_url: userData.photo_url,
+      provider: "telegram",
+    },
+  });
 
-  if (!existing) {
-    const { error: createErr } = await supabaseAdmin.auth.admin.createUser({
-      email: telegramEmail,
-      email_confirm: true,
-      user_metadata: {
-        telegram_id: userData.id,
-        full_name: [userData.first_name, userData.last_name].filter(Boolean).join(" "),
-        username: userData.username,
-        avatar_url: userData.photo_url,
-        provider: "telegram",
-      },
-    });
-    if (createErr) {
-      return NextResponse.json({ error: createErr.message }, { status: 500 });
-    }
+  if (createErr && !createErr.message.toLowerCase().includes("already")) {
+    return NextResponse.json({ error: createErr.message }, { status: 500 });
   }
 
-  // Generate magic link — redirect through our callback
+  // Generate magic link — redirects through PKCE callback handler
   const { data: linkData, error: linkErr } =
     await supabaseAdmin.auth.admin.generateLink({
       type: "magiclink",
       email: telegramEmail,
-      options: { redirectTo: "https://mentora.su/auth/confirm" },
+      options: {
+        redirectTo: "https://mentora.su/auth/callback",
+      },
     });
 
   if (linkErr) {
