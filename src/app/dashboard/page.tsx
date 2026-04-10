@@ -125,6 +125,9 @@ export default async function DashboardPage() {
             <a href="/dashboard/analytics" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">
               Аналитика
             </a>
+            <a href="/knowledge" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">
+              База знаний
+            </a>
             <a href="/profile" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">
               Профиль
             </a>
