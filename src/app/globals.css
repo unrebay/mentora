@@ -17,6 +17,7 @@
     --brand: #4561E8;
     --brand-hover: #3451d1;
     --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    color-scheme: light;
   }
 
   .dark {
@@ -33,10 +34,7 @@
     --brand: #5b77ff;
     --brand-hover: #4561E8;
     --shadow: 0 1px 3px rgba(0,0,0,0.4);
-  }
-
-  html {
-    color-scheme: light dark;
+    color-scheme: dark;
   }
 
   body {
