@@ -113,6 +113,15 @@ export default async function ProfilePage() {
       </nav>
 
       <main className="max-w-3xl mx-auto px-6 py-10 space-y-8">
+      {/* Animated gradient background */}
+      <div
+        className="fixed inset-0 -z-10 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 100% 70% at 15% 10%, rgba(69,97,232,0.06) 0%, transparent 55%), radial-gradient(ellipse 80% 60% at 85% 90%, rgba(91,119,255,0.04) 0%, transparent 55%)",
+          animation: "gradientDrift 10s ease-in-out infinite alternate",
+        }}
+      />
         {/* Шапка профиля */}
         <div className="bg-[var(--bg-card)] rounded-2xl p-8 border border-[var(--border)] shadow-sm flex items-center gap-6">
           <div
