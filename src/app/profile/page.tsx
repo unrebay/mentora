@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ProfileNameEditor } from "@/components/ProfileNameEditor";
 import Logo from "@/components/Logo";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export const metadata = { title: "Профиль — Mentora" };
 
@@ -105,10 +106,16 @@ export default async function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
-      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-[var(--border)] px-6 py-4">
+      <nav
+        className="sticky top-0 z-10 border-b border-[var(--border)] px-6 py-4"
+        style={{ background: "var(--bg-nav)", backdropFilter: "blur(12px)" }}
+      >
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <Logo size="sm" />
-          <Link href="/dashboard" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">← Назад</Link>
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <Link href="/dashboard" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">← Назад</Link>
+          </div>
         </div>
       </nav>
 
