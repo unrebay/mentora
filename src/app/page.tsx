@@ -153,7 +153,7 @@ export default async function HomePage() {
             <p className="text-xl font-medium text-[var(--text-muted)] w-fit ml-[52%]">А зачем это вообще учить?</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-semibold text-[var(--text)] mb-1">Учитель объясняет классу.</p>
+            <p className="text-2xl font-semibold text-[var(--text)] mb-1">Преподаватель объясняет всем.</p>
             <p className="text-2xl font-semibold text-brand-600 dark:text-brand-500 mb-12">Mentora — только тебе.</p>
             <Link href="/auth"
               className="inline-flex px-7 py-3.5 bg-brand-600 text-white font-medium rounded-xl hover:bg-brand-700 transition-colors">
