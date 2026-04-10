@@ -12,7 +12,7 @@ declare global {
     onMentoraCaptchaSuccess?: (token: string) => void;
     onMentoraCaptchaExpired?: () => void;
     onTelegramAuth?: (user: Record<string, string>) => void;
-    Telegram?: { Login?: { auth: (opts: Record<string, unknown>, cb: (u: Record<string, string>) => void) => void } };
+    Telegram?: { Login?: { auth: (opts: Record<string, unknown>, cb: (u: Record<string, string> | null) => void) => void } };
   }
 }
 
@@ -31,6 +31,8 @@ function AuthPageContent() {
   const [password, setPassword] = useState("");
 
   const [tgLoading, setTgLoading] = useState(false);
+  // null = loading widget, true = available, false = blocked/unavailable
+  const [tgAvailable, setTgAvailable] = useState<null | boolean>(null);
 
   const [mode, setMode]         = useState<"signin" | "signup">("signin");
   const [loading, setLoading]   = useState(false);
@@ -78,7 +80,6 @@ function AuthPageContent() {
 
   // Telegram Login Widget
   useEffect(() => {
-    const supabaseClient = createClient();
     window.onTelegramAuth = async (user) => {
       setTgLoading(true);
       try {
@@ -93,7 +94,7 @@ function AuthPageContent() {
         window.location.href = json.action_link;
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : "попробуй снова";
-        alert("Ошибка входа через Telegram: " + msg);
+        setError("Ошибка входа через Telegram: " + msg);
         setTgLoading(false);
       }
     };
@@ -109,6 +110,8 @@ function AuthPageContent() {
       script.setAttribute("data-request-access", "write");
       script.setAttribute("data-userpic", "false");
       script.async = true;
+      script.onload = () => setTgAvailable(true);
+      script.onerror = () => setTgAvailable(false);
       container.appendChild(script);
     }
 
@@ -293,33 +296,55 @@ function AuthPageContent() {
           {/* Hidden widget: loads Telegram.Login API */}
           <div id="telegram-login-widget" style={{position:"absolute",opacity:0,width:1,height:1,overflow:"hidden",pointerEvents:"none"}} />
 
+          {/* Telegram button — shown always, state reflects availability */}
           <div className="mt-3">
-            <button
-              type="button"
-              disabled={tgLoading}
-              onClick={() => {
-                const tg = window.Telegram;
-                if (tg?.Login?.auth) {
-                  tg.Login.auth(
-                    { bot_id: 8558784965, request_access: "write" },
-                    (user) => { if (user && window.onTelegramAuth) window.onTelegramAuth(user); }
-                  );
-                }
-              }}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-60"
-            >
-              {tgLoading ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
-                  Входим через Telegram...
-                </>
-              ) : (
-                <>
-                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#2AABEE]"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/></svg>
-                  Войти через Telegram
-                </>
-              )}
-            </button>
+            {tgAvailable === false ? (
+              // Telegram is blocked (e.g. in Russia) — show notice instead of broken button
+              <div className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-gray-100 rounded-xl text-sm text-gray-400 bg-gray-50">
+                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-gray-300 shrink-0"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/></svg>
+                Telegram недоступен без VPN
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={tgLoading || tgAvailable === null}
+                onClick={() => {
+                  const tg = window.Telegram;
+                  if (tg?.Login?.auth) {
+                    tg.Login.auth(
+                      { bot_id: 8558784965, request_access: "write" },
+                      (user) => {
+                        if (user && window.onTelegramAuth) {
+                          window.onTelegramAuth(user);
+                        } else if (!user) {
+                          setError("Не удалось войти через Telegram. Попробуй ещё раз.");
+                        }
+                      }
+                    );
+                  } else {
+                    setError("Telegram недоступен. Попробуй обновить страницу или использовать VPN.");
+                  }
+                }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-60"
+              >
+                {tgLoading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                    Входим через Telegram...
+                  </>
+                ) : tgAvailable === null ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-gray-200 border-t-gray-400 rounded-full animate-spin" />
+                    Проверяем Telegram...
+                  </>
+                ) : (
+                  <>
+                    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#2AABEE]"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/></svg>
+                    Войти через Telegram
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
 

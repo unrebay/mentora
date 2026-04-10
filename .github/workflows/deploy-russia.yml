@@ -17,10 +17,20 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          envs: TELEGRAM_BOT_TOKEN,SUPABASE_SERVICE_ROLE_KEY,ANTHROPIC_API_KEY,OPENAI_API_KEY,NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,NEXT_PUBLIC_HCAPTCHA_SITE_KEY
           command_timeout: 15m
           script: |
             set -e
             cd /var/www/mentora
+
+            # Expose env vars so Next.js build and PM2 can use them
+            export TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN"
+            export SUPABASE_SERVICE_ROLE_KEY="$SUPABASE_SERVICE_ROLE_KEY"
+            export ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY"
+            export OPENAI_API_KEY="$OPENAI_API_KEY"
+            export NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL"
+            export NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY"
+            export NEXT_PUBLIC_HCAPTCHA_SITE_KEY="$NEXT_PUBLIC_HCAPTCHA_SITE_KEY"
 
             echo "==> git fetch"
             git fetch origin main
@@ -39,8 +49,10 @@ jobs:
             cp -r public .next/standalone/
             cp -r .next/static .next/standalone/.next/
 
-            echo "==> pm2 restart"
-            pm2 restart mentora --update-env || pm2 start .next/standalone/server.js --name mentora --update-env
+            echo "==> pm2 restart (with updated env)"
+            pm2 restart mentora --update-env || pm2 start .next/standalone/server.js --name mentora
+
+            pm2 save
 
             pm2 status
 
