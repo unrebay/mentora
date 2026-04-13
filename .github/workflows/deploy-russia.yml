@@ -38,7 +38,6 @@ jobs:
             set -e
             cd /var/www/mentora
 
-            # Expose env vars so Next.js build and PM2 can use them
             export TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN"
             export SUPABASE_SERVICE_ROLE_KEY="$SUPABASE_SERVICE_ROLE_KEY"
             export ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY"
@@ -62,22 +61,22 @@ jobs:
             git reset --hard origin/main
 
             echo "==> Write fresh .env.local (overwrite any stale VPS copy)"
-            cat > .env.local << ENVEOF
-TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-OPENAI_API_KEY=${OPENAI_API_KEY}
-NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-NEXT_PUBLIC_HCAPTCHA_SITE_KEY=${NEXT_PUBLIC_HCAPTCHA_SITE_KEY}
-NEXT_PUBLIC_POSTHOG_KEY=${NEXT_PUBLIC_POSTHOG_KEY}
-NEXT_PUBLIC_POSTHOG_HOST=${NEXT_PUBLIC_POSTHOG_HOST}
-YOOKASSA_SECRET_KEY=${YOOKASSA_SECRET_KEY}
-YOOKASSA_SHOP_ID=${YOOKASSA_SHOP_ID}
-RESEND_API_KEY=${RESEND_API_KEY}
-CRON_SECRET=${CRON_SECRET}
-NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
-ENVEOF
+            printf "%s\n" \
+              "TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN" \
+              "SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY" \
+              "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY" \
+              "OPENAI_API_KEY=$OPENAI_API_KEY" \
+              "NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL" \
+              "NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+              "NEXT_PUBLIC_HCAPTCHA_SITE_KEY=$NEXT_PUBLIC_HCAPTCHA_SITE_KEY" \
+              "NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY" \
+              "NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST" \
+              "YOOKASSA_SECRET_KEY=$YOOKASSA_SECRET_KEY" \
+              "YOOKASSA_SHOP_ID=$YOOKASSA_SHOP_ID" \
+              "RESEND_API_KEY=$RESEND_API_KEY" \
+              "CRON_SECRET=$CRON_SECRET" \
+              "NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL" \
+              > .env.local
 
             echo "==> npm install"
             npm install
@@ -93,7 +92,6 @@ ENVEOF
             pm2 restart mentora --update-env || pm2 start .next/standalone/server.js --name mentora
 
             pm2 save
-
             pm2 status
 
             sleep 5
