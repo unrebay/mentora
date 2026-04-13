@@ -91,11 +91,11 @@ export default async function HomePage() {
             <ThemeToggle />
             <>
               <Link href="/auth"
-                className="px-4 py-2 text-sm text-[var(--text-secondary)] font-medium hover:text-[var(--text)] transition-colors">
+                className="hidden sm:inline px-4 py-2 text-sm text-[var(--text-secondary)] font-medium hover:text-[var(--text)] transition-colors">
                 Войти
               </Link>
               <Link href="/auth"
-                className="px-5 py-2.5 bg-brand-600 dark:bg-brand-600 text-white text-sm font-medium rounded-xl hover:bg-brand-700 transition-colors">
+                className="hidden sm:inline-flex px-5 py-2.5 bg-brand-600 dark:bg-brand-600 text-white text-sm font-medium rounded-xl hover:bg-brand-700 transition-colors">
                 Попробовать бесплатно →
               </Link>
             </>
