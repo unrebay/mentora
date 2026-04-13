@@ -13,8 +13,8 @@ type Chunk = {
   created_at: string;
 };
 
-const SUBJECTS = ["history", "math", "physics", "chemistry", "biology", "literature", "geography", "english"];
-const emptyForm = { subject: "history", topic: "", content: "", source: "", language: "ru" };
+const SUBJECTS = ["russian-history", "world-history", "mathematics", "physics", "chemistry", "biology", "russian-language", "literature", "english", "social-studies", "geography", "computer-science", "astronomy"];
+const emptyForm = { subject: "russian-history", topic: "", content: "", source: "", language: "ru" };
 
 export default function AdminPage() {
   const router = useRouter();
@@ -29,7 +29,7 @@ export default function AdminPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [bulkText, setBulkText] = useState("");
-  const [bulkSubject, setBulkSubject] = useState("history");
+  const [bulkSubject, setBulkSubject] = useState("russian-history");
   const [bulkImporting, setBulkImporting] = useState(false);
   const [tab, setTab] = useState<"list" | "add" | "bulk">("list");
   const [msg, setMsg] = useState("");
