@@ -16,14 +16,17 @@ async function checkAnthropic() {
     };
     const bypassSecret = process.env.VERCEL_BYPASS_SECRET;
     if (bypassSecret) headers["x-vercel-protection-bypass"] = bypassSecret;
-    const res = await fetch(`${baseURL}/v1/models`, {
+    headers["content-type"] = "application/json";
+    const res = await fetch(`${baseURL}/v1/messages`, {
+      method: "POST",
       headers,
+      body: JSON.stringify({ model: "claude-haiku-4-5-20251001", max_tokens: 1, messages: [{ role: "user", content: "hi" }] }),
       signal: AbortSignal.timeout(8000),
     });
     const latencyMs = Date.now() - start;
     if (res.status === 401) return { ok: false, latencyMs, error: "Неверный ключ (401)" };
     if (res.status === 403) return { ok: false, latencyMs, error: "Нет доступа (403)" };
-    if (!res.ok) return { ok: false, latencyMs, error: `HTTP ${res.status}` };
+    if (!res.ok && res.status !== 529) return { ok: false, latencyMs, error: `HTTP ${res.status}` };
     return { ok: true, latencyMs };
   } catch (e: unknown) {
     return { ok: false, latencyMs: Date.now() - start, error: e instanceof Error ? e.message : "Timeout" };
