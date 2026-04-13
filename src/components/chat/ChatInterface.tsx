@@ -179,9 +179,6 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       const filtered = prev.filter(m => !m.isError);
       return retryMsg ? filtered : [...filtered, { role: "user", content: userMessage }];
     });
-    if (!retryMsg) {
-      setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
-    }
     setLoading(true);
 
     const isFirst = messages.filter(m => m.role === "user" && !m.isError).length === 0;
