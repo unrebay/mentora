@@ -19,7 +19,7 @@ export async function POST(
   const beta = req.headers.get("anthropic-beta");
   if (beta) headers["anthropic-beta"] = beta;
 
-  const upstream = await fetch(`https://api.anthropic.com/v1/${pathStr}`, {
+  const upstream = await fetch(`https://api.anthropic.com/${pathStr}`, {
     method: "POST",
     headers,
     body,
