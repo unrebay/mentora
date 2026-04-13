@@ -182,7 +182,7 @@ ${ragContext}
     const response = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 1024,
-      system: [{ type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } }],
+      system: systemPrompt,
       messages: [
         ...((history ?? []).slice(-10)),
         { role: "user", content: message },
@@ -229,7 +229,8 @@ ${ragContext}
       trialExpiresAt: profile?.trial_expires_at ?? null,
     });
   } catch (err) {
-    console.error("Chat API error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    const errMsg = err instanceof Error ? err.message : String(err);
+    console.error("Chat API error:", errMsg);
+    return NextResponse.json({ error: "Internal server error", detail: errMsg }, { status: 500 });
   }
 }
