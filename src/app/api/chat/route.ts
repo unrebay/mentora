@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
   ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}),
+  ...(process.env.VERCEL_BYPASS_SECRET ? { defaultHeaders: { "x-vercel-protection-bypass": process.env.VERCEL_BYPASS_SECRET } } : {}),
 });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
