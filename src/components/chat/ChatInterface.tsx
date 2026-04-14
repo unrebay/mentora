@@ -272,7 +272,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             {msg.role === "assistant" && (
               <div className="w-8 h-8 rounded-full bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border)] shadow-sm flex items-center justify-center mr-2 mt-0.5 shrink-0 select-none">
                 <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, fontSize: "13px", lineHeight: 1, color: "currentColor", letterSpacing: "-0.02em" }}>
-                  M<span style={{ color: "var(--brand)", fontStyle: "italic", display: "inline-block", verticalAlign: "baseline", position: "relative", top: "0.03em", marginRight: "0.03em" }}>e</span>
+                  M<span style={{ color: "var(--brand)", fontStyle: "italic", marginRight: "0.03em" }}>e</span>
                 </span>
               </div>
             )}
