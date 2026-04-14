@@ -84,13 +84,11 @@ jobs:
               "VERCEL_BYPASS_SECRET=$VERCEL_BYPASS_SECRET" \
               > .env.local
 
-            echo "==> npm install (first pass)"
-            npm install
-            echo "==> npm install (second pass — ensures @next/swc is present)"
+            echo "==> npm install"
             npm install
 
-            echo "==> npm run build"
-            npm run build
+            echo "==> npm run build (auto-recover from missing @next/swc)"
+            npm run build || (npm install && npm run build)
 
             echo "==> copy assets for standalone"
             cp -r public .next/standalone/
