@@ -189,18 +189,18 @@ function AuthPageContent() {
   const isSignup = mode === "signup";
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+    <main className="min-h-screen s-page flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
 
         {/* Logo */}
         <div className="text-center mb-8">
           <Logo size="md" href="/" />
-          <p className="text-gray-500 mt-2 text-sm">
+          <p className="t-secondary mt-2 text-sm">
             {isSignup ? "Создай бесплатный аккаунт" : "Войди в свой аккаунт"}
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-4">
+        <div className="s-raised rounded-2xl shadow-sm border p-8 space-y-4" style={{borderColor:"var(--border-light)"}}>
 
           {/* ── OAuth buttons ── */}
           <div className="space-y-3">
@@ -208,10 +208,10 @@ function AuthPageContent() {
               type="button"
               onClick={() => handleOAuth("google")}
               disabled={oauthLoading !== null}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 border rounded-xl text-sm font-medium t-secondary s-raised hover:s-input transition-colors disabled:opacity-60" style={{borderColor:"var(--border)"}}
             >
               {oauthLoading === "google" ? (
-                <span className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                <span className="w-4 h-4 border-2 rounded-full animate-spin" style={{borderColor:"var(--border)",borderTopColor:"var(--text-secondary)"}} />
               ) : (
                 <GoogleIcon />
               )}
@@ -222,10 +222,10 @@ function AuthPageContent() {
           {/* ── Divider ── */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-100" />
+              <div className="w-full border-t" style={{borderColor:"var(--border-light)"}} />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-3 text-gray-400">или через email</span>
+              <span className="s-raised px-3 t-muted">или через email</span>
             </div>
           </div>
 
@@ -233,19 +233,19 @@ function AuthPageContent() {
 
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-xs font-medium t-secondary mb-1">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm transition"
+                className="w-full px-4 py-3 rounded-xl border t-primary s-input focus:outline-none focus:ring-2 focus:ring-[var(--brand)] text-sm transition" style={{borderColor:"var(--border)",background:"var(--bg-secondary)",color:"var(--text)"}}
                 placeholder="you@example.com"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Пароль</label>
+              <label className="block text-xs font-medium t-secondary mb-1">Пароль</label>
               <input
                 type="password"
                 value={password}
@@ -253,7 +253,7 @@ function AuthPageContent() {
                 required
                 minLength={6}
                 autoComplete={isSignup ? "new-password" : "current-password"}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm transition"
+                className="w-full px-4 py-3 rounded-xl border t-primary s-input focus:outline-none focus:ring-2 focus:ring-[var(--brand)] text-sm transition" style={{borderColor:"var(--border)",background:"var(--bg-secondary)",color:"var(--text)"}}
                 placeholder={isSignup ? "минимум 6 символов" : "••••••••"}
               />
             </div>
@@ -267,13 +267,13 @@ function AuthPageContent() {
                   data-sitekey={HCAPTCHA_SITE_KEY}
                   data-callback="onMentoraCaptchaSuccess"
                   data-expired-callback="onMentoraCaptchaExpired"
-                  data-theme="light"
+                  data-theme="auto"
                 />
               </div>
             )}
 
             {error && (
-              <p className="text-red-500 text-xs text-center bg-red-50 rounded-lg py-2 px-3">
+              <p className="text-red-500 dark:text-red-400 text-xs text-center bg-red-50 dark:bg-red-950/40 rounded-lg py-2 px-3">
                 {error}
               </p>
             )}
@@ -300,8 +300,8 @@ function AuthPageContent() {
           <div className="mt-3">
             {tgAvailable === false ? (
               // Telegram is blocked (e.g. in Russia) — show notice instead of broken button
-              <div className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-gray-100 rounded-xl text-sm text-gray-400 bg-gray-50">
-                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-gray-300 shrink-0"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/></svg>
+              <div className="w-full flex items-center justify-center gap-2 px-4 py-3 border rounded-xl text-sm t-muted s-input" style={{borderColor:"var(--border-light)"}}>
+                <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" style={{fill:"var(--text-muted)"}}><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/></svg>
                 Telegram недоступен без VPN
               </div>
             ) : (
@@ -325,16 +325,16 @@ function AuthPageContent() {
                     setError("Telegram недоступен. Попробуй обновить страницу или использовать VPN.");
                   }
                 }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-60"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 border rounded-xl text-sm font-medium t-secondary s-raised hover:s-input transition-colors disabled:opacity-60" style={{borderColor:"var(--border)"}}
               >
                 {tgLoading ? (
                   <>
-                    <span className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                    <span className="w-4 h-4 border-2 rounded-full animate-spin" style={{borderColor:"var(--border)",borderTopColor:"var(--text-secondary)"}} />
                     Входим через Telegram...
                   </>
                 ) : tgAvailable === null ? (
                   <>
-                    <span className="w-4 h-4 border-2 border-gray-200 border-t-gray-400 rounded-full animate-spin" />
+                    <span className="w-4 h-4 border-2 rounded-full animate-spin" style={{borderColor:"var(--border-light)",borderTopColor:"var(--text-muted)"}} />
                     Проверяем Telegram...
                   </>
                 ) : (
@@ -349,7 +349,7 @@ function AuthPageContent() {
         </div>
 
         {/* Switch mode */}
-        <p className="text-center text-sm text-gray-500 mt-5">
+        <p className="text-center text-sm t-muted mt-5">
           {isSignup ? (
             <>Уже есть аккаунт?{" "}
               <button onClick={() => switchMode("signin")} className="text-brand-600 font-medium hover:underline">
