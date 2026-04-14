@@ -1,8 +1,16 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import Logo from "@/components/Logo";
+
+async function completeOnboarding(answers: Record<string, string>): Promise<boolean> {
+  try {
+    const res = await fetch("/api/onboarding/complete", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(answers),
+    });
+    return res.ok;
+  } catch { return false; }
+}
 
 const STEPS = [
   {
@@ -43,12 +51,11 @@ const STEPS = [
 ];
 
 export default function OnboardingPage() {
-  const router = useRouter();
-  const supabase = createClient();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [selected, setSelected] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const step = STEPS[currentStep];
   const isLast = currentStep === STEPS.length - 1;
@@ -58,28 +65,27 @@ export default function OnboardingPage() {
   }
 
   async function handleNext() {
-    if (!selected) return;
+    if (!selected || saving) return;
     const newAnswers = { ...answers, [step.field]: selected };
     setAnswers(newAnswers);
-
     if (isLast) {
-      setSaving(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from("users").upsert({
-          id: user.id,
-          onboarding_style: newAnswers.onboarding_style,
-          onboarding_level: newAnswers.onboarding_level,
-          onboarding_goal: newAnswers.onboarding_goal,
-          onboarding_completed: true,
-        });
-      }
-      fetch("/api/email/welcome", { method: "POST" }).catch(() => {});
-      window.location.href = "/dashboard";
-    } else {
-      setCurrentStep((s) => s + 1);
-      setSelected(null);
-    }
+      setSaving(true); setError(null);
+      const ok = await completeOnboarding(newAnswers);
+      if (ok) { fetch("/api/email/welcome", { method: "POST" }).catch(() => {}); window.location.href = "/dashboard"; }
+      else { setError("Не удалось сохранить. Попробуй ещё раз."); setSaving(false); }
+    } else { setCurrentStep((s) => s + 1); setSelected(null); }
+  }
+
+  async function handleSkip() {
+    if (saving) return;
+    setSaving(true); setError(null);
+    const ok = await completeOnboarding({
+      style: answers.onboarding_style ?? "storytelling",
+      level: answers.onboarding_level ?? "adult",
+      goal: answers.onboarding_goal ?? "general",
+    });
+    if (ok) { window.location.href = "/dashboard"; }
+    else { setError("Не удалось пропустить. Попробуй ещё раз."); setSaving(false); }
   }
 
   return (
@@ -153,6 +159,8 @@ export default function OnboardingPage() {
             ))}
           </div>
 
+          {error && <p className="text-red-500 dark:text-red-400 text-sm text-center mb-4">{error}</p>}
+
           {/* Next button */}
           <button
             onClick={handleNext}
@@ -165,16 +173,11 @@ export default function OnboardingPage() {
 
         {/* Skip */}
         <button
-          onClick={async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-              await supabase.from("users").upsert({ id: user.id, onboarding_completed: true });
-            }
-            window.location.href = "/dashboard";
-          }}
-          className="w-full mt-4 text-center text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+          onClick={handleSkip}
+          disabled={saving}
+          className="w-full mt-4 text-center text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors disabled:opacity-50"
         >
-          Пропустить
+          {saving ? "Подождите..." : "Пропустить →"}
         </button>
       </div>
     </main>
