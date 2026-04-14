@@ -1,32 +1,40 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
-import Link from "next/link";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { SUBJECTS } from "@/lib/types";
-import { RUSSIAN_HISTORY_TOPICS } from "@/lib/topics";
+
+const PAL = {
+  active: { core: "#ffa040", glow: "rgba(255,160,64,0.80)",  ring: "rgba(255,160,64,0.25)", label: "Изучается" },
+  full:   { core: "#6b8fff", glow: "rgba(107,143,255,0.70)", ring: "rgba(107,143,255,0.22)", label: "Полный" },
+  beta:   { core: "#c8d4ff", glow: "rgba(200,212,255,0.55)", ring: "rgba(200,212,255,0.18)", label: "Бета" },
+  locked: { core: "#232338", glow: "rgba(80,80,120,0.18)",   ring: "rgba(80,80,120,0.06)",  label: "Скоро" },
+};
+type Status = "active" | "full" | "beta" | "locked";
 
 const LAYOUT: Record<string, { cx: number; cy: number }> = {
-  "russian-history":  { cx: 0.50, cy: 0.40 },
-  "world-history":    { cx: 0.24, cy: 0.28 },
-  "mathematics":      { cx: 0.73, cy: 0.27 },
-  "physics":          { cx: 0.84, cy: 0.50 },
-  "chemistry":        { cx: 0.74, cy: 0.68 },
-  "biology":          { cx: 0.52, cy: 0.76 },
-  "russian-language": { cx: 0.27, cy: 0.68 },
-  "literature":       { cx: 0.14, cy: 0.50 },
-  "english":          { cx: 0.18, cy: 0.35 },
-  "social-studies":   { cx: 0.37, cy: 0.18 },
-  "geography":        { cx: 0.63, cy: 0.16 },
-  "computer-science": { cx: 0.82, cy: 0.32 },
-  "astronomy":        { cx: 0.62, cy: 0.82 },
+  "russian-history":  { cx: 0.50, cy: 0.42 }, "world-history":    { cx: 0.24, cy: 0.28 },
+  "mathematics":      { cx: 0.73, cy: 0.27 }, "physics":          { cx: 0.84, cy: 0.51 },
+  "chemistry":        { cx: 0.73, cy: 0.70 }, "biology":          { cx: 0.50, cy: 0.76 },
+  "russian-language": { cx: 0.27, cy: 0.70 }, "literature":       { cx: 0.15, cy: 0.51 },
+  "english":          { cx: 0.20, cy: 0.34 }, "social-studies":   { cx: 0.36, cy: 0.18 },
+  "geography":        { cx: 0.63, cy: 0.17 }, "computer-science": { cx: 0.82, cy: 0.34 },
+  "astronomy":        { cx: 0.62, cy: 0.83 },
 };
 
-type Status = "active" | "full" | "beta" | "locked";
-const STATUS: Record<Status, { core: string; glow: string; label: string }> = {
-  active: { core: "#ffa040", glow: "rgba(255,160,64,0.75)", label: "Изучается" },
-  full:   { core: "#a0c4ff", glow: "rgba(160,196,255,0.70)", label: "Полный" },
-  beta:   { core: "#6b8fff", glow: "rgba(107,143,255,0.60)", label: "Бета" },
-  locked: { core: "#3a3a58", glow: "rgba(80,80,140,0.20)",  label: "Скоро" },
+const TOPICS: Record<string, string[]> = {
+  "russian-history":  ["Древняя Русь","Монголы","Иван IV","Смута","Романовы","Пётр I","XIX век","Революция","СССР"],
+  "world-history":    ["Античность","Средневековье","Ренессанс","Новое время","XX век","Холодная война"],
+  "mathematics":      ["Алгебра","Геометрия","Анализ","Вероятность"],
+  "physics":          ["Механика","Термодинамика","Электро","Квантовая"],
+  "chemistry":        ["Атом","Реакции","Органика","Металлы"],
+  "biology":          ["Клетка","Генетика","Эволюция","Экология","Анатомия"],
+  "russian-language": ["Орфография","Пунктуация","Морфология","Синтаксис"],
+  "literature":       ["Классика","XIX век","XX век","Современная","Анализ"],
+  "english":          ["Грамматика","Лексика","Говорение","Письмо"],
+  "social-studies":   ["Право","Экономика","Политика","Общество"],
+  "geography":        ["Физическая","Климат","Страны","Экономическая"],
+  "computer-science": ["Алгоритмы","Языки","Сети","БД","ИИ"],
+  "astronomy":        ["Солнечная","Звёзды","Галактики","Космонавтика"],
 };
 
 interface UserProgress { subject: string; xp_total: number }
@@ -39,217 +47,187 @@ function getStatus(id: string, progress: UserProgress[]): Status {
     "russian-language","literature","english","social-studies",
     "geography","computer-science","astronomy"].includes(id) ? "beta" : "locked";
 }
-function getRadius(s: Status) {
-  return s === "full" ? 3.0 : s === "active" ? 2.8 : s === "beta" ? 2.1 : 1.4;
+function getR(s: Status) { return s==="full"?28:s==="active"?26:s==="beta"?20:14; }
+
+interface GNode {
+  id:string; label:string; emoji:string; status:Status;
+  x:number; y:number; r:number; phase:number;
+  topics:{x:number;y:number;label:string;phase:number}[];
 }
 
-export default function KnowledgeGraph({ className = "", userProgress = [] }: Props) {
-  const [selected, setSelected] = useState<string | null>("russian-history");
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const isDragging = useRef(false);
-  const lastPos = useRef({ x: 0, y: 0 });
-  const lastDist = useRef<number | null>(null);
-  const clickPos = useRef({ x: 0, y: 0 });
-  const svgRef = useRef<SVGSVGElement>(null);
+function buildGraph(W:number, H:number, progress:UserProgress[]): GNode[] {
+  return SUBJECTS.map(s => {
+    const status=getStatus(s.id,progress), r=getR(status);
+    const pos=LAYOUT[s.id]??{cx:0.5,cy:0.5};
+    const cx=pos.cx*W, cy=pos.cy*H;
+    const tops=(TOPICS[s.id]??[]).map((label,i,arr)=>{
+      const orbitR=r*2.6+(arr.length>6?14:10);
+      const angle=(i/arr.length)*Math.PI*2-Math.PI/2+(s.id.length%3)*0.4;
+      return {x:cx+Math.cos(angle)*orbitR,y:cy+Math.sin(angle)*orbitR,label,phase:Math.random()*Math.PI*2};
+    });
+    return {id:s.id,label:s.title,emoji:s.emoji,status,x:cx,y:cy,r,phase:Math.random()*Math.PI*2,topics:tops};
+  });
+}
 
-  const vbSize = 100 / zoom;
-  const vbX = 50 - vbSize / 2 - pan.x;
-  const vbY = 50 - vbSize / 2 - pan.y;
-  const viewBox = `${vbX.toFixed(2)} ${vbY.toFixed(2)} ${vbSize.toFixed(2)} ${vbSize.toFixed(2)}`;
+const BG_STARS=Array.from({length:120},(_,i)=>({
+  x:((i*137.5)%1000)/10, y:((i*97.3+17)%1000)/10,
+  r:0.15+(i%3)*0.1, a:0.2+(i%4)*0.1,
+}));
 
-  const onMouseDown = useCallback((e: React.MouseEvent) => {
-    isDragging.current = true;
-    lastPos.current = { x: e.clientX, y: e.clientY };
-  }, []);
-  const onMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDragging.current || !svgRef.current) return;
-    const rect = svgRef.current.getBoundingClientRect();
-    const scale = vbSize / rect.width;
-    setPan(p => ({
-      x: p.x + (e.clientX - lastPos.current.x) * scale,
-      y: p.y + (e.clientY - lastPos.current.y) * scale,
-    }));
-    lastPos.current = { x: e.clientX, y: e.clientY };
-  }, [vbSize]);
-  const onMouseUp = useCallback(() => { isDragging.current = false; }, []);
+function drawBg(ctx:CanvasRenderingContext2D,W:number,H:number){
+  for(const s of BG_STARS){
+    ctx.fillStyle=`rgba(255,255,255,${s.a})`;
+    ctx.beginPath(); ctx.arc((s.x/100)*W,(s.y/100)*H,s.r,0,Math.PI*2); ctx.fill();
+  }
+}
 
-  const onWheel = useCallback((e: WheelEvent) => {
-    e.preventDefault();
-    setZoom(z => Math.min(4, Math.max(0.5, z * (e.deltaY < 0 ? 1.12 : 0.89))));
-  }, []);
-  useEffect(() => {
-    const el = svgRef.current;
-    if (!el) return;
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
-  }, [onWheel]);
-
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
-      isDragging.current = true;
-      lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    } else if (e.touches.length === 2) {
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      lastDist.current = Math.sqrt(dx*dx + dy*dy);
+function render(ctx:CanvasRenderingContext2D,nodes:GNode[],hov:string|null,t:number,W:number,H:number){
+  ctx.clearRect(0,0,W,H); drawBg(ctx,W,H);
+  // Constellation connections
+  for(const n of nodes){
+    if(n.status==="locked")continue;
+    const pal=PAL[n.status], isH=n.id===hov;
+    for(const tp of n.topics){
+      ctx.save(); ctx.strokeStyle=pal.ring.replace(/[\d.]+\)$/,`${isH?0.3:0.08})`);
+      ctx.lineWidth=isH?0.8:0.35;
+      ctx.beginPath(); ctx.moveTo(n.x,n.y); ctx.lineTo(tp.x,tp.y); ctx.stroke(); ctx.restore();
     }
-  }, []);
-  const onTouchMove = useCallback((e: React.TouchEvent) => {
-    e.preventDefault();
-    if (e.touches.length === 1 && isDragging.current && svgRef.current) {
-      const rect = svgRef.current.getBoundingClientRect();
-      const scale = vbSize / rect.width;
-      setPan(p => ({
-        x: p.x + (e.touches[0].clientX - lastPos.current.x) * scale,
-        y: p.y + (e.touches[0].clientY - lastPos.current.y) * scale,
-      }));
-      lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    } else if (e.touches.length === 2 && lastDist.current) {
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const d = Math.sqrt(dx*dx+dy*dy);
-      setZoom(z => Math.min(4, Math.max(0.5, z * d / lastDist.current!)));
-      lastDist.current = d;
+  }
+  // Topic dots
+  for(const n of nodes){
+    if(n.status==="locked")continue;
+    const pal=PAL[n.status], isH=n.id===hov;
+    for(const tp of n.topics){
+      const sh=0.5+0.5*Math.sin(t*0.0006+tp.phase);
+      const tr=isH?3.5+1.5*sh:2.2+0.8*sh, op=isH?(0.6+0.4*sh):(0.22+0.12*sh);
+      ctx.save();
+      const g=ctx.createRadialGradient(tp.x,tp.y,0,tp.x,tp.y,tr*2.5);
+      g.addColorStop(0,pal.glow.replace(/[\d.]+\)$/,`${op*0.8})`)); g.addColorStop(1,"rgba(0,0,0,0)");
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(tp.x,tp.y,tr*2.5,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=isH?8:4; ctx.shadowColor=pal.glow; ctx.fillStyle=pal.core; ctx.globalAlpha=op;
+      ctx.beginPath(); ctx.arc(tp.x,tp.y,tr*0.45,0,Math.PI*2); ctx.fill(); ctx.restore();
+      if(isH){
+        ctx.save(); ctx.font="9px system-ui"; ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.fillStyle=pal.core; ctx.globalAlpha=0.85*sh; ctx.shadowColor="rgba(0,0,0,0.9)"; ctx.shadowBlur=6;
+        const dx=tp.x-n.x,dy=tp.y-n.y,len=Math.sqrt(dx*dx+dy*dy)||1;
+        ctx.fillText(tp.label,tp.x+dx/len*8,tp.y+dy/len*8); ctx.restore();
+      }
     }
-  }, [vbSize]);
-  const onTouchEnd = useCallback(() => { isDragging.current = false; lastDist.current = null; }, []);
+  }
+  // Subject nodes
+  for(const n of [...nodes].sort((a,b)=>a.r-b.r)){
+    const isH=n.id===hov, sh=0.7+0.3*Math.sin(t*0.0007+n.phase);
+    const pal=PAL[n.status], gR=n.r*(isH?3.8:2.4)*sh, cR=n.r*(isH?1.22:1)*sh;
+    ctx.save();
+    if(n.status!=="locked"||isH){
+      const g=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,gR);
+      g.addColorStop(0,pal.glow); g.addColorStop(1,"rgba(0,0,0,0)");
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(n.x,n.y,gR,0,Math.PI*2); ctx.fill();
+    }
+    ctx.shadowBlur=isH?22*sh:14*sh; ctx.shadowColor=pal.glow; ctx.fillStyle=pal.core;
+    ctx.beginPath(); ctx.arc(n.x,n.y,cR,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=pal.ring; ctx.lineWidth=isH?1.5:0.8; ctx.shadowBlur=8;
+    ctx.beginPath(); ctx.arc(n.x,n.y,cR+4*sh,0,Math.PI*2); ctx.stroke(); ctx.restore();
+    ctx.save(); ctx.font=isH?"bold 12px system-ui":"10px system-ui";
+    ctx.textAlign="center"; ctx.textBaseline="top";
+    ctx.fillStyle=isH?"#fff":pal.core;
+    ctx.globalAlpha=isH?1:(n.status==="locked"?0.3:0.65+0.35*sh);
+    ctx.shadowColor="rgba(0,0,0,0.95)"; ctx.shadowBlur=10;
+    ctx.fillText(n.label,n.x,n.y+cR+7); ctx.restore();
+  }
+}
 
-  const onNodeDown = useCallback((e: React.MouseEvent) => { clickPos.current = { x: e.clientX, y: e.clientY }; }, []);
-  const onNodeClick = useCallback((id: string, e: React.MouseEvent) => {
-    if (Math.hypot(e.clientX - clickPos.current.x, e.clientY - clickPos.current.y) > 6) return;
-    setSelected(p => p === id ? null : id);
-  }, []);
+export default function KnowledgeGraph({ className="", userProgress=[] }: Props) {
+  const canvasRef=useRef<HTMLCanvasElement>(null);
+  const nodesRef=useRef<GNode[]>([]);
+  const hoverRef=useRef<string|null>(null);
+  const rafRef=useRef<number>(0);
+  const [hoverId,setHoverId]=useState<string|null>(null);
 
-  const nodes = SUBJECTS.map(s => ({
-    id: s.id, label: s.title, emoji: s.emoji,
-    status: getStatus(s.id, userProgress),
-    cx: (LAYOUT[s.id]?.cx ?? 0.5) * 100,
-    cy: (LAYOUT[s.id]?.cy ?? 0.5) * 100,
-    r: getRadius(getStatus(s.id, userProgress)),
-  }));
+  const init=useCallback(()=>{
+    const canvas=canvasRef.current; if(!canvas)return;
+    const p=canvas.parentElement!;
+    const W=p.clientWidth||800, H=p.clientHeight||600, dpr=window.devicePixelRatio||1;
+    canvas.width=W*dpr; canvas.height=H*dpr;
+    canvas.style.width=`${W}px`; canvas.style.height=`${H}px`;
+    canvas.getContext("2d")!.scale(dpr,dpr);
+    nodesRef.current=buildGraph(W,H,userProgress);
+  },[userProgress]);
 
-  const selNode = nodes.find(n => n.id === selected);
-  const selSubject = SUBJECTS.find(s => s.id === selected);
-  const selTopics = selected === "russian-history" ? RUSSIAN_HISTORY_TOPICS : null;
+  useEffect(()=>{
+    init(); window.addEventListener("resize",init);
+    const t0=performance.now();
+    function loop(now:number){
+      const c=canvasRef.current,s=nodesRef.current;
+      if(c&&s.length){
+        render(c.getContext("2d")!,s,hoverRef.current,now-t0,c.clientWidth,c.clientHeight);
+      }
+      rafRef.current=requestAnimationFrame(loop);
+    }
+    rafRef.current=requestAnimationFrame(loop);
+    return()=>{ cancelAnimationFrame(rafRef.current); window.removeEventListener("resize",init); };
+  },[init]);
+
+  const onMM=useCallback((e:React.MouseEvent<HTMLCanvasElement>)=>{
+    const c=canvasRef.current; if(!c)return;
+    const r=c.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+    let cl:GNode|null=null, cd=55;
+    for(const n of nodesRef.current){ const d=Math.hypot(n.x-mx,n.y-my); if(d<cd){cd=d;cl=n;} }
+    const id=cl?.id??null;
+    if(id!==hoverRef.current){hoverRef.current=id;setHoverId(id);}
+  },[]);
+
+  const onML=useCallback(()=>{hoverRef.current=null;setHoverId(null);},[]);
+
+  const onCk=useCallback((e:React.MouseEvent<HTMLCanvasElement>)=>{
+    const c=canvasRef.current; if(!c)return;
+    const r=c.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+    for(const n of nodesRef.current){
+      if(Math.hypot(n.x-mx,n.y-my)<n.r*2){ window.location.href=`/learn/${n.id}`; return; }
+    }
+  },[]);
+
+  const tPos=useRef({x:0,y:0});
+  const onTS=useCallback((e:React.TouchEvent)=>{tPos.current={x:e.touches[0].clientX,y:e.touches[0].clientY};},[]);
+  const onTM=useCallback((e:React.TouchEvent)=>{
+    const c=canvasRef.current; if(!c)return;
+    const r=c.getBoundingClientRect(),mx=e.touches[0].clientX-r.left,my=e.touches[0].clientY-r.top;
+    let cl:GNode|null=null,cd=65;
+    for(const n of nodesRef.current){const d=Math.hypot(n.x-mx,n.y-my);if(d<cd){cd=d;cl=n;}}
+    const id=cl?.id??null;
+    if(id!==hoverRef.current){hoverRef.current=id;setHoverId(id);}
+  },[]);
+  const onTE=useCallback((e:React.TouchEvent)=>{
+    const dx=e.changedTouches[0].clientX-tPos.current.x, dy=e.changedTouches[0].clientY-tPos.current.y;
+    if(Math.hypot(dx,dy)<10&&hoverRef.current){ window.location.href=`/learn/${hoverRef.current}`; }
+  },[]);
+
+  const hoverNode=nodesRef.current.find(n=>n.id===hoverId);
 
   return (
-    <div className={`relative w-full h-full flex flex-col select-none ${className}`}
-      style={{ background: "#06060f" }}>
-
-      {/* Legend + reset */}
-      <div className="absolute top-3 right-3 z-20 flex flex-col gap-1.5">
-        {(Object.entries(STATUS) as [Status, {core:string;glow:string;label:string}][]).map(([k,v]) => (
-          <div key={k} className="flex items-center gap-1.5 pointer-events-none">
-            <span className="w-2 h-2 rounded-full" style={{ background: v.core, boxShadow: `0 0 5px ${v.core}` }} />
-            <span className="text-[10px] text-white/40">{v.label}</span>
+    <div className={`relative w-full h-full ${className}`} style={{background:"#06060f",borderRadius:"inherit"}}>
+      <div className="absolute top-4 right-4 flex flex-col gap-1.5 z-10 pointer-events-none">
+        {(Object.entries(PAL) as [Status,typeof PAL[Status]][]).map(([k,v])=>(
+          <div key={k} className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{background:v.core,boxShadow:`0 0 5px ${v.core}`}}/>
+            <span className="text-[10px] text-white/40 font-medium">{v.label}</span>
           </div>
         ))}
-        <button onClick={() => { setPan({x:0,y:0}); setZoom(1); }}
-          className="mt-1 text-[10px] text-white/30 hover:text-white/60 transition-colors text-left">
-          ↺ сброс
-        </button>
       </div>
-
-      {/* Mobile hint */}
-      <p className="absolute top-3 left-3 z-20 text-[10px] text-white/25 pointer-events-none md:hidden">
-        Тяни · Нажми на звезду
-      </p>
-
-      {/* SVG */}
-      <div className="flex-1 relative overflow-hidden cursor-grab active:cursor-grabbing"
-        style={{ minHeight: selNode ? 280 : 460 }}>
-        <svg ref={svgRef} viewBox={viewBox} preserveAspectRatio="xMidYMid meet"
-          className="w-full h-full absolute inset-0 touch-none"
-          onMouseDown={onMouseDown} onMouseMove={onMouseMove}
-          onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
-          onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
-          <defs>
-            {nodes.map(n => (
-              <radialGradient key={n.id} id={`g-${n.id}`} cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor={STATUS[n.status].glow} />
-                <stop offset="100%" stopColor="rgba(0,0,0,0)" />
-              </radialGradient>
-            ))}
-          </defs>
-          {Array.from({length:80},(_,i) => (
-            <circle key={i}
-              cx={((i*137.5)%100).toFixed(2)} cy={((i*97.3+17)%100).toFixed(2)}
-              r="0.22" fill={`rgba(255,255,255,${0.15+(i%4)*0.08})`} />
-          ))}
-          {selected && nodes.filter(n=>n.id!==selected&&n.status!=="locked").map(n => {
-            const s=nodes.find(x=>x.id===selected)!;
-            return <line key={n.id} x1={s.cx} y1={s.cy} x2={n.cx} y2={n.cy}
-              stroke="rgba(107,143,255,0.07)" strokeWidth="0.4"/>;
-          })}
-          {nodes.map(n => {
-            const st=STATUS[n.status]; const isSel=n.id===selected;
-            return (
-              <g key={n.id} style={{cursor:"pointer"}}
-                onMouseDown={onNodeDown} onClick={e=>onNodeClick(n.id,e)}>
-                <circle cx={n.cx} cy={n.cy} r={n.r*3.5*(isSel?1.7:1)} fill={`url(#g-${n.id})`}/>
-                {isSel && <circle cx={n.cx} cy={n.cy} r={n.r*2.0}
-                  fill="none" stroke={st.core} strokeWidth="0.4" strokeDasharray="1.5 1" opacity="0.55"/>}
-                <circle cx={n.cx} cy={n.cy} r={n.r*(isSel?1.35:1)} fill={st.core}
-                  style={{filter:`drop-shadow(0 0 ${isSel?5:2.5}px ${st.core})`}}/>
-                <text x={n.cx} y={n.cy+n.r+3.8} textAnchor="middle"
-                  fontSize={isSel?"3.6":"2.8"} fill={isSel?"#fff":st.core}
-                  opacity={isSel?1:0.65} fontWeight={isSel?"bold":"normal"}
-                  style={{fontFamily:"system-ui",pointerEvents:"none"}}>
-                  {n.label.split(" ")[0]}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
-      </div>
-
-      {/* Detail panel */}
-      {selNode && selSubject && (
-        <div className="border-t border-white/10 flex-shrink-0"
-          style={{background:"rgba(8,8,20,0.97)",backdropFilter:"blur(16px)"}}>
-          <div className="max-w-3xl mx-auto px-4 py-3">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{selSubject.emoji}</span>
-                <div>
-                  <h3 className="font-bold text-white leading-tight">{selSubject.title}</h3>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
-                      style={{background:STATUS[selNode.status].core+"30",color:STATUS[selNode.status].core}}>
-                      {STATUS[selNode.status].label.toUpperCase()}
-                    </span>
-                    <span className="text-xs text-white/40">{selSubject.description}</span>
-                  </div>
-                </div>
-              </div>
-              <Link href={`/learn/${selNode.id}`}
-                className="flex-shrink-0 px-3 py-2 bg-brand-600 text-white text-sm font-semibold rounded-xl hover:bg-brand-700 transition-colors">
-                Учиться →
-              </Link>
-            </div>
-            {selTopics ? (
-              <div className="overflow-x-auto scrollbar-none -mx-4 px-4">
-                <div className="flex gap-2 pb-2" style={{width:"max-content"}}>
-                  {selTopics.map(p => (
-                    <div key={p.id} className="flex-shrink-0 bg-white/5 border border-white/10 rounded-xl px-3 py-2 hover:bg-white/10 transition-colors" style={{width:120}}>
-                      <div className="text-base mb-1">{p.emoji}</div>
-                      <div className="text-xs font-medium text-white/80 leading-tight line-clamp-2">{p.title}</div>
-                      <div className="text-[10px] text-white/30 mt-1">{p.years} · {p.topics.length} тем</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <p className="text-xs text-white/30">
-                {selNode.status==="active"
-                  ? "Ты уже изучаешь этот предмет. Продолжай!"
-                  : "Начни учиться — Mentora адаптируется под тебя с первого сообщения."}
-              </p>
-            )}
-          </div>
+      <p className="absolute top-4 left-4 z-10 text-[10px] text-white/25 pointer-events-none md:hidden">Нажми на звезду</p>
+      {hoverId && hoverNode && (
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3 px-4 py-2.5 rounded-xl border border-white/15"
+          style={{background:"rgba(6,6,15,0.90)",backdropFilter:"blur(12px)"}}>
+          <span className="text-lg">{hoverNode.emoji}</span>
+          <span className="text-sm font-semibold text-white">{hoverNode.label}</span>
+          <a href={`/learn/${hoverId}`} className="text-xs font-bold px-2.5 py-1 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">
+            Учиться →
+          </a>
         </div>
       )}
+      <canvas ref={canvasRef} onMouseMove={onMM} onMouseLeave={onML} onClick={onCk}
+        onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}
+        className="block w-full h-full" style={{cursor:hoverId?"pointer":"default"}}/>
     </div>
   );
 }
