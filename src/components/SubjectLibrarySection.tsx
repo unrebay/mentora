@@ -3,6 +3,8 @@ import { useState } from "react";
 import Link from "next/link";
 import AddSubjectModal from "@/components/AddSubjectModal";
 import SubjectSuggestionModal from "@/components/SubjectSuggestionModal";
+import TopicsMap from "@/components/TopicsMap";
+import { RUSSIAN_HISTORY_TOPICS, TOTAL_TOPICS } from "@/lib/topics";
 
 const XP_LEVELS = [
   { name: "Новичок", minXP: 0, maxXP: 100, color: "bg-gray-400" },
@@ -68,6 +70,11 @@ interface Props {
 export default function SubjectLibrarySection({ userSubjects, existingSubjectIds, userId, progressEntries }: Props) {
   const [addOpen, setAddOpen] = useState(false);
   const [suggestOpen, setSuggestOpen] = useState(false);
+  const activeSubjects = userSubjects.filter(s => s.available && (s.beta || s.verified));
+  const [selectedId, setSelectedId] = useState<string>(activeSubjects[0]?.id ?? "russian-history");
+  const selectedSubject = userSubjects.find(s => s.id === selectedId) ?? activeSubjects[0];
+  const selectedProgress = progressMap.get(selectedId);
+  const selectedLevel = getLevel(selectedProgress?.xp_total ?? 0);
 
   const progressMap = new Map(progressEntries.map((p) => [p.subject, p]));
 
@@ -92,21 +99,18 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
           const isVerified = subject.verified;
           const isBeta = subject.beta && !isVerified;
           const isActive = subject.available && (isBeta || isVerified);
+          const isSelected = subject.id === selectedId;
+          const xp = progress?.xp_total ?? 0;
 
           return (
             <div
               key={subject.id}
-              className={`relative rounded-2xl border transition-all overflow-hidden ${
-                isVerified
-                  ? "border-[#4561E8] hover:shadow-lg cursor-pointer"
-                  : isActive
-                  ? "border-[var(--border)] hover:border-brand-300 hover:shadow-md cursor-pointer"
-                  : "bg-[var(--bg-secondary)] border-[var(--border)] opacity-60"
-              }`}
+              className={`relative rounded-2xl border transition-all overflow-hidden ${isActive ? "cursor-pointer" : "opacity-60"} ${isSelected && isActive ? "ring-2 ring-brand-500 shadow-[0_0_24px_rgba(70,97,232,0.25)] border-brand-400" : isVerified ? "border-[#4561E8] hover:shadow-lg" : "border-[var(--border)] hover:border-brand-300 hover:shadow-md"}`}
               style={isVerified ? { background: "#4561E8" } : { background: "var(--bg-card)" }}
+              onClick={() => isActive && setSelectedId(subject.id)}
             >
               {isActive ? (
-                <Link href={`/learn/${subject.id}`} className="block p-5">
+                <div className="block p-5">
                   {isVerified ? (
                     <span className="absolute top-3 right-3 text-[10px] font-bold bg-white/25 text-white px-1.5 py-0.5 rounded-md">
                       ✶ verified
@@ -153,12 +157,13 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                     })()
                   ) : (
                     <div className="mt-3">
-                      <span className={`text-xs font-medium ${isVerified ? "text-white" : "text-brand-600"}`}>
+                      <Link href={`/learn/${subject.id}`} onClick={e => e.stopPropagation()}
+                        className={`text-xs font-semibold ${isVerified ? "text-white hover:text-white/80" : "text-brand-600 hover:text-brand-700"} transition-colors`}>
                         Начать →
-                      </span>
+                      </Link>
                     </div>
                   )}
-                </Link>
+                </div>
               ) : (
                 <div className="block p-5">
                   <span className="absolute top-3 right-3 text-[10px] font-medium bg-[var(--bg-secondary)] text-[var(--text-muted)] px-1.5 py-0.5 rounded-md">
@@ -188,6 +193,72 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
           </span>
         </button>
       </div>
+
+      
+      {/* ── Knowledge Map — dynamic per selected subject ─ */}
+      {selectedSubject && (
+        <div className="mt-12">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <div className="mb-1 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">Карта знаний</div>
+              <h2 className="text-2xl font-bold text-[var(--text)] flex items-center gap-2">
+                <span>{selectedSubject.emoji}</span>
+                <span>{selectedSubject.title}</span>
+                {selectedId === "russian-history" && <span className="text-[var(--text-muted)] font-normal text-lg">· {TOTAL_TOPICS} тем</span>}
+              </h2>
+              {selectedProgress && (
+                <div className="mt-2 flex items-center gap-3">
+                  <span className="text-xs text-[var(--text-muted)]">{selectedLevel.name}</span>
+                  <div className="w-32 h-1.5 bg-[var(--bg-secondary)] rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full ${selectedLevel.color}`} style={{ width: `${selectedLevel.progress}%` }} />
+                  </div>
+                  <span className="text-xs font-bold text-brand-600">
+                    {selectedProgress.xp_total} {selectedProgress.xp_total === 1 ? "мента" : selectedProgress.xp_total < 5 ? "менты" : "мент"}
+                  </span>
+                </div>
+              )}
+            </div>
+            <Link href={`/learn/${selectedId}`}
+              className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-xl hover:bg-brand-700 transition-colors">
+              {selectedProgress ? "Продолжить →" : "Начать учиться →"}
+            </Link>
+          </div>
+          {selectedId === "russian-history" ? (
+            <TopicsMap periods={RUSSIAN_HISTORY_TOPICS} />
+          ) : (
+            <div className="rounded-2xl border border-[var(--border)] p-6" style={{background:"var(--bg-card)"}}>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="text-4xl">{selectedSubject.emoji}</div>
+                <div>
+                  <p className="font-semibold text-[var(--text)]">{selectedSubject.title}</p>
+                  <p className="text-sm text-[var(--text-secondary)]">{selectedSubject.description}</p>
+                </div>
+              </div>
+              {selectedProgress ? (
+                <div className="space-y-2 pt-3 border-t border-[var(--border)]">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-[var(--text-secondary)]">Прогресс</span>
+                    <span className="font-bold text-[var(--text)]">{selectedLevel.name} · {selectedLevel.progress}%</span>
+                  </div>
+                  <div className="h-2 bg-[var(--bg-secondary)] rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full ${selectedLevel.color}`} style={{ width: `${selectedLevel.progress}%` }} />
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-[var(--text-secondary)] pt-3 border-t border-[var(--border)]">
+                  Ещё не начинал этот предмет. Первый разговор займёт несколько минут.
+                </p>
+              )}
+            </div>
+          )}
+          <div className="mt-6 md:hidden">
+            <Link href={`/learn/${selectedId}`}
+              className="flex items-center justify-center gap-2 w-full px-6 py-3.5 bg-brand-600 text-white text-sm font-semibold rounded-2xl hover:bg-brand-700 transition-colors">
+              {selectedProgress ? "Продолжить →" : "Начать учиться →"}
+            </Link>
+          </div>
+        </div>
+      )}
 
       <AddSubjectModal
         open={addOpen}
