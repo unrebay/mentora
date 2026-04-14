@@ -8,14 +8,14 @@ export const metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen s-page t-primary">
       {/* NAV */}
-      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100 px-6 py-4">
+      <nav className="sticky top-0 z-50 s-page/90 backdrop-blur border-b b-subtle px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Logo size="sm" fontSize="1.44rem" />
           <Link
             href="/auth"
-            className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-700 transition-colors"
+            className="px-5 py-2.5 bg-gray-900 dark:bg-[var(--bg-secondary)] dark:bg-[var(--bg)] text-white text-sm font-medium rounded-xl hover:bg-gray-700 dark:bg-[var(--border)] transition-colors"
           >
             Попробовать бесплатно →
           </Link>
@@ -24,12 +24,12 @@ export default function PrivacyPage() {
 
       <main className="max-w-3xl mx-auto px-6 py-16">
         <h1 className="text-3xl font-bold mb-2">Политика конфиденциальности</h1>
-        <p className="text-gray-400 text-sm mb-12">Последнее обновление: 28 марта 2026 г.</p>
+        <p className="t-muted text-sm mb-12">Последнее обновление: 28 марта 2026 г.</p>
 
-        <div className="prose prose-gray max-w-none space-y-10 text-gray-700 leading-relaxed">
+        <div className="prose prose-gray max-w-none space-y-10 t-secondary leading-relaxed">
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">1. Общие положения</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">1. Общие положения</h2>
             <p>
               Настоящая Политика конфиденциальности (далее — «Политика») описывает, как ИП Андрей Унребай
               (далее — «Mentora», «мы», «нас») собирает, использует и защищает персональные данные
@@ -43,7 +43,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">2. Какие данные мы собираем</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">2. Какие данные мы собираем</h2>
             <p>При использовании платформы мы можем собирать следующие данные:</p>
             <ul className="list-disc pl-6 mt-3 space-y-2">
               <li><strong>Данные аккаунта:</strong> адрес электронной почты, имя (при указании), фотография профиля (при входе через Google).</li>
@@ -54,7 +54,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">3. Как мы используем данные</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">3. Как мы используем данные</h2>
             <ul className="list-disc pl-6 space-y-2">
               <li>Предоставление и улучшение образовательных услуг платформы.</li>
               <li>Персонализация обучения: адаптация стиля и подачи материала под вас.</li>
@@ -65,7 +65,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">4. Передача данных третьим лицам</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">4. Передача данных третьим лицам</h2>
             <p>Мы не продаём ваши персональные данные. Мы можем передавать данные только:</p>
             <ul className="list-disc pl-6 mt-3 space-y-2">
               <li><strong>Supabase</strong> — хранение базы данных и аутентификация (серверы в ЕС).</li>
@@ -77,7 +77,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">5. Хранение и защита данных</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">5. Хранение и защита данных</h2>
             <p>
               Ваши данные хранятся на защищённых серверах. Мы используем шифрование HTTPS,
               ограниченный доступ к данным и регулярный аудит безопасности. Данные хранятся
@@ -86,7 +86,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">6. Ваши права</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">6. Ваши права</h2>
             <p>В соответствии с Федеральным законом № 152-ФЗ «О персональных данных» вы вправе:</p>
             <ul className="list-disc pl-6 mt-3 space-y-2">
               <li>Получить информацию о том, какие данные мы храним о вас.</li>
@@ -102,7 +102,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">7. Cookies</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">7. Cookies</h2>
             <p>
               Мы используем cookies для обеспечения работы платформы (авторизация, сессии)
               и аналитики (анонимизированная статистика посещений). Вы можете отключить cookies
@@ -111,7 +111,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">8. Дети</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">8. Дети</h2>
             <p>
               Платформа предназначена для пользователей от 14 лет. Мы не собираем намеренно
               данные детей младше 14 лет. Если вам стало известно о таком случае,
@@ -121,7 +121,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">9. Изменения Политики</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">9. Изменения Политики</h2>
             <p>
               Мы можем обновлять настоящую Политику. О существенных изменениях уведомим
               по email или через уведомление на платформе. Продолжение использования платформы
@@ -130,7 +130,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">10. Контакты</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">10. Контакты</h2>
             <p>По вопросам конфиденциальности обращайтесь:</p>
             <ul className="list-none mt-3 space-y-1">
               <li>Email: <a href="mailto:hello@mentora.su" className="text-blue-600 hover:underline">hello@mentora.su</a></li>
@@ -142,12 +142,12 @@ export default function PrivacyPage() {
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t border-gray-100 py-8 mt-16">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-400">
+      <footer className="border-t b-subtle py-8 mt-16">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm t-muted">
           <span>© 2026 Mentora</span>
           <div className="flex gap-6">
-            <Link href="/privacy" className="text-gray-900 font-medium">Конфиденциальность</Link>
-            <Link href="/terms" className="hover:text-gray-700 transition-colors">Условия</Link>
+            <Link href="/privacy" className="t-primary font-medium">Конфиденциальность</Link>
+            <Link href="/terms" className="hover:t-secondary transition-colors">Условия</Link>
           </div>
         </div>
       </footer>
