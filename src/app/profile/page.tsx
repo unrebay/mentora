@@ -151,7 +151,12 @@ export default async function ProfilePage() {
             />
             <div className="mt-3 flex items-center gap-2">
               <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: lvl.bg, color: lvl.color }}>{lvl.name}</span>
-              {isPro && <span className="text-xs font-bold px-2.5 py-1 rounded-full tracking-wide" style={{ background: "#111", color: "#fff" }}>PRO</span>}
+              {isPro && (
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full tracking-wide"
+                  style={{ background: isUltima ? "#0f0f1e" : "#4561E8", color: "#fff", border: isUltima ? "1px solid #28284a" : "none" }}>
+                  {isUltima ? "✦ ULTIMA" : "PRO"}
+                </span>
+              )}
             </div>
           </div>
         </div>
