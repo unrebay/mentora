@@ -73,18 +73,18 @@ export default async function PricingPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#fafafa] text-gray-900">
+    <div className="min-h-screen s-page t-primary">
 
       {/* NAV */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4">
+      <nav className="sticky top-0 z-50 backdrop-blur-md border-b px-6 py-4" style={{background:"var(--bg-nav)",borderColor:"var(--border-light)"}}>
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <Logo size="sm" fontSize="1.44rem" />
-          <div className="hidden md:flex items-center gap-8 text-sm text-gray-500">
-            <Link href="/#subjects" className="hover:text-gray-900 transition-colors">Предметы</Link>
-            <Link href="/#how" className="hover:text-gray-900 transition-colors">Как работает</Link>
-            <Link href="/pricing" className="text-gray-900 font-medium">Тарифы</Link>
+          <div className="hidden md:flex items-center gap-8 text-sm t-secondary">
+            <Link href="/#subjects" className="hover:t-primary transition-colors">Предметы</Link>
+            <Link href="/#how" className="hover:t-primary transition-colors">Как работает</Link>
+            <Link href="/pricing" className="t-primary font-medium">Тарифы</Link>
           </div>
-          <Link href="/auth" className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-700 transition-colors">
+          <Link href="/auth" className="px-5 py-2.5 text-white text-sm font-medium rounded-xl transition-colors" style={{background:"var(--text)",color:"var(--bg)"}}>
             Попробовать бесплатно →
           </Link>
         </div>
@@ -100,7 +100,7 @@ export default async function PricingPage() {
           Расти{" "}
           <span className="text-brand-600 italic">без ограничений.</span>
         </h1>
-        <p className="text-lg text-gray-400 max-w-lg mx-auto leading-relaxed">
+        <p className="text-lg t-muted max-w-lg mx-auto leading-relaxed">
           Бесплатный план без карты. Pro открывает все предметы. Ultima добавляет фото, презентации и аудио.
         </p>
       </section>
@@ -110,20 +110,20 @@ export default async function PricingPage() {
         <div className="grid md:grid-cols-3 gap-4 items-stretch">
 
           {/* FREE */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-7 flex flex-col">
+          <div className="s-raised border rounded-2xl p-7 flex flex-col" style={{borderColor:"var(--border)"}}>
             <div className="mb-6">
-              <p className="text-[11px] font-bold text-gray-400 tracking-[0.15em] uppercase mb-4">Бесплатно</p>
+              <p className="text-[11px] font-bold t-muted tracking-[0.15em] uppercase mb-4">Бесплатно</p>
               <div className="flex items-end gap-1.5">
-                <span className="text-5xl font-bold tracking-tight text-gray-900">0 ₽</span>
+                <span className="text-5xl font-bold tracking-tight t-primary">0 ₽</span>
               </div>
-              <p className="text-sm text-gray-400 mt-2">Навсегда · без карты</p>
+              <p className="text-sm t-muted mt-2">Навсегда · без карты</p>
             </div>
-            <Link href="/auth" className="block text-center py-3 px-5 border border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-colors mb-8 text-sm">
+            <Link href="/auth" className="block text-center py-3 px-5 border t-secondary font-semibold rounded-xl hover:s-input transition-colors mb-8 text-sm" style={{borderColor:"var(--border)"}}>
               Начать бесплатно
             </Link>
             <ul className="space-y-3 flex-1">
               {FREE_FEATURES.map(f => (
-                <li key={f} className="flex items-start gap-2.5 text-sm text-gray-500">
+                <li key={f} className="flex items-start gap-2.5 text-sm t-secondary">
                   <Check color="gray" />{f}
                 </li>
               ))}
@@ -131,7 +131,7 @@ export default async function PricingPage() {
           </div>
 
           {/* PRO */}
-          <div className="relative bg-white border-2 border-brand-500 rounded-2xl p-7 flex flex-col shadow-xl shadow-brand-100/50">
+          <div className="relative s-raised border-2 border-brand-500 rounded-2xl p-7 flex flex-col shadow-xl shadow-brand-100/20 dark:shadow-brand-900/20">
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
               <span className="bg-brand-600 text-white text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase">Популярный</span>
             </div>
@@ -139,12 +139,12 @@ export default async function PricingPage() {
               <p className="text-[11px] font-bold text-brand-500 tracking-[0.15em] uppercase mb-4">Pro</p>
               <div className="flex items-end gap-1.5">
                 <span className="text-5xl font-bold tracking-tight">399 ₽</span>
-                <span className="text-gray-400 text-sm mb-2">/мес</span>
+                <span className="t-muted text-sm mb-2">/мес</span>
               </div>
-              <div className="flex items-center gap-2 mt-3 bg-gray-50 rounded-xl px-3 py-2.5">
-                <span className="text-sm font-semibold text-gray-700">2 990 ₽ / год</span>
-                <span className="text-gray-300 text-xs">·</span>
-                <span className="text-xs text-gray-400">249 ₽/мес</span>
+              <div className="flex items-center gap-2 mt-3 s-input rounded-xl px-3 py-2.5">
+                <span className="text-sm font-semibold t-secondary">2 990 ₽ / год</span>
+                <span className="t-muted text-xs">·</span>
+                <span className="text-xs t-muted">249 ₽/мес</span>
                 <span className="ml-auto text-[11px] font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded-lg">−37%</span>
               </div>
             </div>
@@ -154,7 +154,7 @@ export default async function PricingPage() {
             </div>
             <ul className="space-y-3 flex-1">
               {PRO_FEATURES.map(f => (
-                <li key={f} className="flex items-start gap-2.5 text-sm text-gray-700">
+                <li key={f} className="flex items-start gap-2.5 text-sm t-secondary">
                   <Check color="brand" />{f}
                 </li>
               ))}
@@ -167,10 +167,10 @@ export default async function PricingPage() {
               <span className="bg-gray-700 text-white text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase">Новинка</span>
             </div>
             <div className="mb-6">
-              <p className="text-[11px] font-bold text-gray-500 tracking-[0.15em] uppercase mb-4">Ultima</p>
+              <p className="text-[11px] font-bold text-gray-400 tracking-[0.15em] uppercase mb-4">Ultima</p>
               <div className="flex items-end gap-1.5">
                 <span className="text-5xl font-bold tracking-tight text-white">799 ₽</span>
-                <span className="text-gray-500 text-sm mb-2">/мес</span>
+                <span className="text-gray-400 text-sm mb-2">/мес</span>
               </div>
               <div className="flex items-center gap-2 mt-3 bg-white/5 rounded-xl px-3 py-2.5">
                 <span className="text-sm font-semibold text-white/80">5 990 ₽ / год</span>
@@ -181,10 +181,10 @@ export default async function PricingPage() {
             </div>
             <div className="space-y-2 mb-7">
               <a href="mailto:hello@mentora.su?subject=Ultima — ранний доступ"
-                className="block text-center py-3 px-5 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors text-sm">
+                className="block text-center py-3 px-5 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 dark:hover:bg-gray-200 transition-colors text-sm">
                 Получить ранний доступ →
               </a>
-              <p className="text-center text-xs text-gray-500 pt-1">Открываем доступ волнами</p>
+              <p className="text-center text-xs text-gray-400 pt-1">Открываем доступ волнами</p>
             </div>
             <ul className="space-y-3 flex-1">
               {ULTIMA_FEATURES.map(f => (
@@ -207,7 +207,7 @@ export default async function PricingPage() {
         </div>
 
         {/* SCHOOL CALLOUT */}
-        <div className="mt-4 border border-gray-200 bg-white rounded-2xl px-7 py-6">
+        <div className="mt-4 border s-raised rounded-2xl px-7 py-6" style={{borderColor:"var(--border)"}}>
           <div className="flex flex-col md:flex-row md:items-center gap-5">
             <div className="flex items-center gap-3 shrink-0">
               <div className="w-10 h-10 rounded-xl bg-gray-900 flex items-center justify-center shrink-0">
