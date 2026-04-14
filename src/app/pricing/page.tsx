@@ -57,9 +57,11 @@ export default async function PricingPage() {
   const { data: { user } } = await supabase.auth.getUser();
   const isLoggedIn = !!user;
   let isPro = false;
+  let isUltima = false;
   if (user) {
     const { data: profile } = await supabase.from("users").select("plan").eq("id", user.id).single();
-    isPro = profile?.plan === "pro";
+    isUltima = profile?.plan === "ultima";
+    isPro = isUltima || profile?.plan === "pro";
   }
 
   const Check = ({ color }: { color: "gray" | "brand" | "white" }) => (
@@ -180,11 +182,17 @@ export default async function PricingPage() {
               </div>
             </div>
             <div className="space-y-2 mb-7">
-              <a href="mailto:hello@mentora.su?subject=Ultima — ранний доступ"
-                className="block text-center py-3 px-5 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 dark:hover:bg-gray-200 transition-colors text-sm">
-                Получить ранний доступ →
-              </a>
-              <p className="text-center text-xs text-gray-400 pt-1">Открываем доступ волнами</p>
+              {isUltima ? (
+                <div className="block text-center py-3 px-5 bg-emerald-800/60 text-emerald-300 font-semibold rounded-xl border border-emerald-700/50 text-sm">
+                  ✓ Ultima активна
+                </div>
+              ) : (
+                <a href="mailto:hello@mentora.su?subject=Ultima — ранний доступ"
+                  className="block text-center py-3 px-5 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors text-sm">
+                  Получить ранний доступ →
+                </a>
+              )}
+              {!isUltima && <p className="text-center text-xs text-gray-400 pt-1">Открываем доступ волнами</p>}
             </div>
             <ul className="space-y-3 flex-1">
               {ULTIMA_FEATURES.map(f => (
