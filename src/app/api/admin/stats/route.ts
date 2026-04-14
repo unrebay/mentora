@@ -20,6 +20,7 @@ export async function GET() {
   ] = await Promise.all([
     sb.from("users").select("*", { count: "exact", head: true }),
     sb.from("users").select("*", { count: "exact", head: true }).eq("plan", "pro"),
+    sb.from("users").select("*", { count: "exact", head: true }).eq("plan", "ultima"),
     sb.from("users").select("*", { count: "exact", head: true }).gte("created_at", todayStart),
     sb.from("users").select("*", { count: "exact", head: true }).gte("last_active_at", todayStart),
     sb.from("users").select("*", { count: "exact", head: true }).gte("last_active_at", weekAgo),
