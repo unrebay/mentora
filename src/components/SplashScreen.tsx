@@ -33,9 +33,9 @@ export function SplashScreen() {
           animation: mentoraSplashLogo 1.5s cubic-bezier(0.4,0,0.2,1) forwards;
         }
       `}</style>
-      <div className="mentora-splash fixed inset-0 z-[9999] flex items-center justify-center bg-white">
+      <div className="mentora-splash fixed inset-0 z-[9999] flex items-center justify-center" style={{ background: "var(--bg)" }}>
         <div className="mentora-splash-logo">
-          <Logo size="lg" href="" />
+          <Logo size="lg" href={undefined} />
         </div>
       </div>
     </>
