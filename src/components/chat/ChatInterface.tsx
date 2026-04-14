@@ -59,7 +59,7 @@ function parseInline(text: string): React.ReactNode {
         if (part.startsWith("*") && part.endsWith("*") && part.length > 2)
           return <em key={i}>{part.slice(1, -1)}</em>;
         if (part.startsWith("`") && part.endsWith("`") && part.length > 2)
-          return <code key={i} className="rounded px-1 text-sm font-mono" style={{background:"var(--bg-secondary)",color:"var(--text)",border:"1px solid var(--border-light)"}}>{part.slice(1, -1)}</code>;
+          return <code key={i} className="bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-800 dark:text-[var(--text)] rounded px-1 text-sm font-mono">{part.slice(1, -1)}</code>;
         return <span key={i}>{part}</span>;
       })}
     </>
@@ -227,23 +227,23 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="flex flex-col s-page" style={{ height: "100dvh" }}>
+    <div className="flex flex-col bg-gray-50 dark:bg-[var(--bg)]" style={{ height: "100dvh" }}>
       {/* Header */}
-      <header className="s-raised border-b px-4 py-3 flex items-center gap-3" style={{borderColor:"var(--border-light)"}}>
-        <Link href="/dashboard" className="t-muted hover:t-secondary transition-colors text-lg">←</Link>
+      <header className="bg-white dark:bg-[var(--bg-card)] border-b border-gray-100 dark:border-[var(--border-light)] px-4 py-3 flex items-center gap-3">
+        <Link href="/dashboard" className="text-gray-400 dark:text-[var(--text-muted)] hover:text-gray-600 dark:hover:text-[var(--text-secondary)] transition-colors text-lg">←</Link>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h1 className="font-semibold t-primary text-sm">{subjectTitle}</h1>
+            <h1 className="font-semibold text-gray-900 dark:text-[var(--text)] text-sm">{subjectTitle}</h1>
             {initialMessagesRemaining === null && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded tracking-wide" style={{ background: "var(--brand)", color: "#fff" }}>PRO</span>
             )}
           </div>
-          <p className="text-xs t-muted">AI-ментор · Mentora</p>
+          <p className="text-xs text-gray-400 dark:text-[var(--text-muted)]">AI-ментор · Mentora</p>
         </div>
         {showCounter && (
-          <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 rounded-full px-3 py-1">
+          <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-full px-3 py-1">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            <span className="text-xs font-medium text-amber-700 dark:text-amber-400">осталось {messagesRemaining} из {DAILY_LIMIT}</span>
+            <span className="text-xs font-medium text-amber-700">осталось {messagesRemaining} из {DAILY_LIMIT}</span>
           </div>
         )}
       </header>
@@ -254,12 +254,12 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           <div className="relative text-center pt-12">
             <ChatParticles subject={subject} />
             <div className="text-5xl mb-4">{config.emoji}</div>
-            <h2 className="text-xl font-semibold t-primary mb-2">Привет! Я твой ментор по теме «{subjectTitle}»</h2>
-            <p className="t-secondary text-sm max-w-sm mx-auto leading-relaxed">{config.hint}</p>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-[var(--text)] mb-2">Привет! Я твой ментор по теме «{subjectTitle}»</h2>
+            <p className="text-gray-500 dark:text-[var(--text-secondary)] text-sm max-w-sm mx-auto leading-relaxed">{config.hint}</p>
             <div className="mt-6 flex flex-wrap gap-2 justify-center">
               {config.quickQuestions.map((q) => (
                 <button key={q} onClick={() => setInput(q)}
-                  className="px-4 py-2 s-raised border rounded-xl text-sm t-secondary hover:border-[var(--brand)] hover:text-[var(--brand)] transition-colors" style={{borderColor:"var(--border)"}}>
+                  className="px-4 py-2 bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border)] rounded-xl text-sm text-gray-600 dark:text-[var(--text-secondary)] hover:border-brand-300 hover:text-brand-600 transition-colors">
                   {q}
                 </button>
               ))}
@@ -270,8 +270,8 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             {msg.role === "assistant" && (
-              <div className="w-8 h-8 rounded-full flex items-center justify-center mr-2 mt-0.5 shrink-0 select-none" style={{background:"var(--bg-card)",border:"1px solid var(--border)",boxShadow:"var(--shadow)"}}>
-                <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, fontSize: "13px", lineHeight: 1, color: "var(--text)", letterSpacing: "-0.02em" }}>
+              <div className="w-8 h-8 rounded-full bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border)] shadow-sm flex items-center justify-center mr-2 mt-0.5 shrink-0 select-none">
+                <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, fontSize: "13px", lineHeight: 1, color: "currentColor", letterSpacing: "-0.02em" }}>
                   M<span style={{ color: "var(--brand)", fontStyle: "italic" }}>e</span>
                 </span>
               </div>
@@ -280,18 +280,16 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
               msg.role === "user"
                 ? "bg-brand-600 text-white text-[15px] leading-relaxed"
                 : msg.isError
-                  ? "bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/50 text-red-700 dark:text-red-400"
-                  : "s-raised t-primary border"
-            }`}
-            style={msg.role === "assistant" && !msg.isError ? {borderColor:"var(--border-light)",boxShadow:"var(--shadow)"} : undefined}
-          >
+                  ? "bg-red-50 border border-red-100 text-red-700"
+                  : "bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-light)] text-gray-800 dark:text-[var(--text)] shadow-sm"
+            }`}>
               {msg.role === "assistant" ? (
                 <>
                   <MarkdownMessage content={msg.content} />
                   {msg.isError && (
                     <button
                       onClick={(e) => sendMessage(e as unknown as React.FormEvent, lastUserMsg)}
-                      className="mt-2 text-xs text-red-600 dark:text-red-400 underline hover:opacity-80"
+                      className="mt-2 text-xs text-red-600 underline hover:text-red-800"
                     >
                       Повторить запрос
                     </button>
@@ -304,12 +302,12 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
 
         {loading && (
           <div className="flex justify-start">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center mr-2 shrink-0 select-none" style={{background:"var(--bg-card)",border:"1px solid var(--border)",boxShadow:"var(--shadow)"}}>
+            <div className="w-8 h-8 rounded-full bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border)] shadow-sm flex items-center justify-center mr-2 shrink-0 select-none">
               <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, fontSize: "13px", lineHeight: 1, color: "var(--text)", letterSpacing: "-0.02em" }}>
                 M<span style={{ color: "var(--brand)", fontStyle: "italic" }}>e</span>
               </span>
             </div>
-            <div className="s-raised border rounded-2xl px-4 py-4" style={{borderColor:"var(--border-light)",boxShadow:"var(--shadow)"}}>
+            <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-light)] rounded-2xl px-4 py-4 shadow-sm">
               <div className="flex gap-1.5 items-end h-4">
                 {[0, 1, 2].map((i) => (
                   <div key={i} className="w-2 h-2 rounded-full"
@@ -323,11 +321,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       </div>
 
       {/* Input */}
-      <div className="s-raised border-t px-4 py-4" style={{borderColor:"var(--border-light)"}}>
+      <div className="bg-white dark:bg-[var(--bg-card)] border-t border-gray-100 dark:border-[var(--border-light)] px-4 py-4">
         {limitReached ? (
-          <div className="rounded-xl s-input border p-4 text-center" style={{borderColor:"var(--border)}}>
-            <p className="text-sm font-semibold t-primary mb-1">Лимит на сегодня исчерпан</p>
-            <p className="text-xs t-secondary mb-3">Возвращайся завтра — счётчик сбросится автоматически</p>
+          <div className="rounded-xl bg-gray-50 dark:bg-[var(--bg-secondary)] border border-gray-200 dark:border-[var(--border)] p-4 text-center">
+            <p className="text-sm font-semibold text-gray-800 dark:text-[var(--text)] mb-1">Лимит на сегодня исчерпан</p>
+            <p className="text-xs text-gray-500 dark:text-[var(--text-secondary)] mb-3">Возвращайся завтра — счётчик сбросится автоматически</p>
             <Link href="/pricing" className="inline-flex items-center gap-2 bg-brand-600 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-brand-700 transition-colors">
               ⚡ Pro — безлимитный доступ
             </Link>
@@ -336,7 +334,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           <form onSubmit={sendMessage} className="flex gap-3">
             <input value={input} onChange={(e) => setInput(e.target.value)}
               placeholder="Задай вопрос..." disabled={loading}
-              className="flex-1 px-4 py-3 rounded-xl border t-primary s-input focus:outline-none focus:ring-2 focus:ring-[var(--brand)] transition text-[15px] disabled:opacity-50 placeholder:t-muted" style={{borderColor:"var(--border)",background:"var(--bg-secondary)",color:"var(--text)"}} />
+              className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-brand-500 transition text-[15px] disabled:opacity-50 bg-gray-50 dark:bg-[var(--bg-secondary)] text-gray-900 dark:text-[var(--text)]" />
             <button type="submit" disabled={loading || !input.trim()}
               className="px-5 py-3 bg-brand-600 text-white rounded-xl font-medium hover:bg-brand-700 transition-colors disabled:opacity-40 text-sm">
               →
