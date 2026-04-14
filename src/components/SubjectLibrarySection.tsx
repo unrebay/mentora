@@ -39,7 +39,7 @@ function pluralMenty(n: number): string {
 }
 
 const MentoraE = () => (
-  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", fontWeight: 700, fontSize: "1.5em", lineHeight: 1 }}>е</span>
+  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", fontWeight: 700, fontSize: "1.2em", lineHeight: 1, display: "inline-block", verticalAlign: "-0.08em", marginRight: "0.1em" }}>е</span>
 );
 
 interface SubjectItem {
