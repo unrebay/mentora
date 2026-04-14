@@ -30,7 +30,7 @@ function pluralMenty(n: number): string {
 }
 
 const MentoraE = () => (
-  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", fontWeight: 700, fontSize: "1.5em", lineHeight: 1 }}>е</span>
+  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", fontWeight: 700, fontSize: "1.2em", lineHeight: 1, display: "inline-block", verticalAlign: "-0.08em", marginRight: "0.1em" }}>е</span>
 );
 
 function getFirstName(fullName?: string | null, email?: string | null): string {
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("onboarding_completed, plan, trial_expires_at, streak_reward_claimed, messages_today, messages_date")
+    .select("onboarding_completed, plan, trial_expires_at, streak_reward_claimed, messages_today, messages_date, ultima_expires_at")
     .eq("id", user.id)
     .single();
 
@@ -59,7 +59,8 @@ export default async function DashboardPage() {
   const isTrialActive = profile?.trial_expires_at
     ? new Date(profile.trial_expires_at) > new Date()
     : false;
-  const isPro = profile?.plan === "pro" || isTrialActive;
+  const isUltima = profile?.plan === "ultima";
+  const isPro = isUltima || profile?.plan === "pro" || isTrialActive;
 
   const trialExpiresDate = profile?.trial_expires_at
     ? new Date(profile.trial_expires_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })
