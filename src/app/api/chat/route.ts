@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
     const isTrialActive = profile?.trial_expires_at
       ? new Date(profile.trial_expires_at) > new Date()
       : false;
-    const isPro = profile?.plan === "pro" || isTrialActive;
+    const isPro = profile?.plan === "pro" || profile?.plan === "ultima" || isTrialActive;
     const today = new Date().toISOString().slice(0, 10);
     const isNewDay = profile?.messages_date !== today;
     const usedToday = isNewDay ? 0 : (profile?.messages_today ?? 0);
