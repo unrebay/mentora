@@ -2,6 +2,7 @@
 # Mentora Pre-Deploy Health Check
 # Usage: bash scripts/check_deploy.sh [BASE_URL]
 BASE="${1:-https://mentora.su}"
+BASE_HOST=$(echo "$BASE" | sed "s|https://||" | sed "s|http://||" | cut -d/ -f1)
 FAIL=0; PASS=0
 ok()   { echo "  ✅ $1"; PASS=$((PASS+1)); }
 fail() { echo "  ❌ $1"; FAIL=$((FAIL+1)); }
@@ -9,7 +10,7 @@ h()    { echo ""; echo "━━━ $1 ━━━"; }
 
 check_http() {
   local label="$1" url="$2" expected="$3"
-  local code; code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$url")
+  local code; code=$(NO_PROXY="$BASE_HOST" NO_PROXY="$BASE_HOST" curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$url")
   if [[ "$code" == "$expected" || ("$expected" == "3xx" && "$code" =~ ^3) ]]; then
     ok "$label → $code"
   else
@@ -35,7 +36,7 @@ check_http "/learn/russian-history" "$BASE/learn/russian-history" "3xx"
 
 h "3. API auth guard (401)"
 for ep in "/api/chat" "/api/payments/create" "/api/onboarding/complete"; do
-  code=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" \
+  code=$(NO_PROXY="$BASE_HOST" curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" \
     -d '{}' --max-time 8 "$BASE$ep")
   [[ "$code" == "401" || "$code" == "403" ]] && ok "$ep → $code" || fail "$ep → $code"
 done
