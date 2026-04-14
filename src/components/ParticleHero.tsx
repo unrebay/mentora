@@ -174,7 +174,7 @@ export default function ParticleHero({ className = "" }: { className?: string })
   return (
     <canvas
       ref={canvasRef}
-      className={`absolute inset-0 w-full h-full pointer-events-auto ${className}`}
+      className={`absolute inset-0 w-full h-full pointer-events-none md:pointer-events-auto ${className}`}
     />
   );
 }
