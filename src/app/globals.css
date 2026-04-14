@@ -4,37 +4,42 @@
 
 @layer base {
   :root {
-    /* Light theme */
-    --bg: #ffffff;
-    --bg-secondary: #f9fafb;
-    --bg-card: #ffffff;
-    --bg-nav: rgba(255,255,255,0.92);
-    --text: #111827;
-    --text-secondary: #6b7280;
-    --text-muted: #9ca3af;
-    --border: #e5e7eb;
-    --border-light: #f3f4f6;
-    --brand: #4561E8;
-    --brand-hover: #3451d1;
-    --shadow: 0 1px 3px rgba(0,0,0,0.08);
-    color-scheme: light;
+    /* ── Light theme ────────────────────────────────────────────────── */
+    --bg:            #ffffff;
+    --bg-secondary:  #f5f5fa;
+    --bg-card:       #ffffff;
+    --bg-nav:        rgba(255,255,255,0.92);
+    --text:          #111827;
+    --text-secondary:#374151;
+    --text-muted:    #6b7280;
+    --border:        #e5e7eb;
+    --border-light:  #f0f0f5;
+    --brand:         #4561E8;
+    --brand-hover:   #3451d1;
+    --shadow:        0 1px 3px rgba(0,0,0,0.08);
+    color-scheme:    light;
   }
 
   .dark {
-    /* Dark theme */
-    --bg: #07070f;
-    --bg-secondary: #0f0f1a;
-    --bg-card: #111120;
-    --bg-nav: rgba(7,7,15,0.92);
-    --text: #f1f1f5;
-    --text-secondary: #8b8ba7;
-    --text-muted: #5c5c78;
-    --border: #1e1e30;
-    --border-light: #181828;
-    --brand: #5b77ff;
-    --brand-hover: #4561E8;
-    --shadow: 0 1px 3px rgba(0,0,0,0.4);
-    color-scheme: dark;
+    /* ── Dark theme — calibrated contrast ratios vs #0a0a18 ─────────
+       --text:           #eeeef8  → 17:1  ✅ WCAG AAA
+       --text-secondary: #b0b0d0  →  9:1  ✅ WCAG AAA
+       --text-muted:     #7878a8  → 4.5:1 ✅ WCAG AA  (was #5c5c78 → 2.3:1 ❌)
+       --bg-card: #16162c — clearly distinct from --bg: #0a0a18
+    ─────────────────────────────────────────────────────────────────── */
+    --bg:            #0a0a18;
+    --bg-secondary:  #0f0f22;
+    --bg-card:       #16162c;
+    --bg-nav:        rgba(10,10,24,0.94);
+    --text:          #eeeef8;
+    --text-secondary:#b0b0d0;
+    --text-muted:    #7878a8;
+    --border:        #28284a;
+    --border-light:  #1e1e3a;
+    --brand:         #6b87ff;
+    --brand-hover:   #5570f0;
+    --shadow:        0 1px 4px rgba(0,0,0,0.5);
+    color-scheme:    dark;
   }
 
   body {
@@ -45,29 +50,61 @@
   }
 
   /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg-secondary); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-  .dark ::-webkit-scrollbar-thumb { background: #2a2a40; }
+  ::-webkit-scrollbar         { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track   { background: var(--bg-secondary); }
+  ::-webkit-scrollbar-thumb   { background: var(--border); border-radius: 3px; }
+  .dark ::-webkit-scrollbar-thumb { background: #323258; }
 }
 
-@keyframes mentoraDot {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-  30% { transform: translateY(-5px); opacity: 1; }
-}
-
-/* Smooth theme transitions for key elements */
+/* ── Smooth theme transitions ─────────────────────────────────────────────── */
 nav, .card, section, main, aside, header, footer {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
+/* ── Semantic utility classes ─────────────────────────────────────────────────
+   Use these instead of hardcoded text-gray-* / bg-white etc.
+   They automatically adapt to both light and dark themes.
+
+   TEXT           SURFACE          BORDER
+   .t-primary     .s-page          .b-default
+   .t-secondary   .s-raised        .b-subtle
+   .t-muted       .s-input
+
+   Usage:
+     BAD:  <p className="text-gray-500">…</p>
+     GOOD: <p className="t-secondary">…</p>
+──────────────────────────────────────────────────────────────────────────── */
+@layer utilities {
+  .t-primary   { color: var(--text); }
+  .t-secondary { color: var(--text-secondary); }
+  .t-muted     { color: var(--text-muted); }
+
+  .s-page      { background-color: var(--bg); }
+  .s-raised    { background-color: var(--bg-card); }
+  .s-input     { background-color: var(--bg-secondary); }
+
+  .b-default   { border-color: var(--border); }
+  .b-subtle    { border-color: var(--border-light); }
+}
+
+/* ── Inline code — adapts to theme automatically ──────────────────────────── */
+code:not([class]) {
+  background-color: var(--bg-secondary);
+  color: var(--text);
+  padding: 0.125em 0.375em;
+  border-radius: 0.3em;
+  font-size: 0.875em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  border: 1px solid var(--border-light);
+}
+
+/* ── Animations ────────────────────────────────────────────────────────────── */
+@keyframes mentoraDot {
+  0%, 60%, 100% { transform: translateY(0);    opacity: 0.4; }
+  30%           { transform: translateY(-5px); opacity: 1;   }
+}
+
 @keyframes gradientDrift {
-  0% {
-    opacity: 0.7;
-    transform: scale(1) translate(0%, 0%);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1.12) translate(2%, 1.5%);
-  }
+  0%   { opacity: 0.7; transform: scale(1)    translate(0%,   0%); }
+  100% { opacity: 1;   transform: scale(1.12) translate(2%, 1.5%); }
 }
