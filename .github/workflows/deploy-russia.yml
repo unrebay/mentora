@@ -84,21 +84,13 @@ jobs:
               "VERCEL_BYPASS_SECRET=$VERCEL_BYPASS_SECRET" \
               > .env.local
 
-            echo "==> npm install"
+            echo "==> npm install (first pass)"
+            npm install
+            echo "==> npm install (second pass — ensures @next/swc is present)"
             npm install
 
-            echo "==> npm run build (with SWC check)"
-            # If next/swc deps missing, npm install again to fetch them
-            npm run build 2>&1 | tee /tmp/build_out.txt || {
-              if grep -q "swc dependencies" /tmp/build_out.txt; then
-                echo "==> SWC deps missing - reinstalling..."
-                npm install
-                npm run build
-              else
-                cat /tmp/build_out.txt
-                exit 1
-              fi
-            }
+            echo "==> npm run build"
+            npm run build
 
             echo "==> copy assets for standalone"
             cp -r public .next/standalone/
