@@ -1,5 +1,43 @@
 # Changelog — Mentora AI Platform
 
+## [4.0.0] — 2026-04-14  ★ Major Release
+
+### Семантика версий
+- `X.0.0` — крупный знаковый апдейт
+- `0.X.0` — добавление незначительных функций  
+- `0.0.X` — исправление ошибок
+
+---
+
+### Добавлено
+
+- **Тариф Ultima** — новый максимальный план (799 ₽/мес, 5990 ₽/год). Включает всё из Pro + распознавание фото, генерация презентаций, аудио-разборы. Полная интеграция во все файлы и API (chat, learn, dashboard, profile, pricing, payments).
+- **API `/api/onboarding/complete`** — надёжный серверный маршрут для завершения онбординга через service role (обходит RLS). Кнопка «Пропустить» теперь всегда работает.
+- **Тёмная тема** — полная поддержка dark mode: ChatInterface, auth, pricing, profile, dashboard, privacy, terms. CSS переменные с правильными контрастными соотношениями (WCAG AA).
+- **Семантические CSS-утилиты** — `.t-primary`, `.t-secondary`, `.t-muted`, `.s-page`, `.s-raised`, `.s-input` в `@layer utilities`.
+- **Защита `/profile`** — маршрут добавлен в middleware `protectedPaths`.
+
+### Исправлено
+
+- **`[4.0.0]` Буква «е» в логотипе** — убран `display: inline-block` и `position: relative` из логотипа; теперь `inline-flex items-baseline` контейнера корректно выравнивает по базовой линии без дополнительных трюков.
+- **`[3.0.2]` SplashScreen белый фон** — `bg-white` → `style={{ background: "var(--bg)" }}`; экран загрузки теперь тёмный в тёмной теме.
+- **`[3.0.2]` Онбординг бесконечный цикл** — `ultima_expires_at` в SELECT несуществующей колонки давал `profile=null` → редирект обратно в /onboarding. Колонка убрана.
+- **`[3.0.2]` Онбординг поля** — STEPS.field исправлены с `onboarding_style` → `style` чтобы совпадать с API.
+- **`[3.0.1]` PostHogProvider двойная инициализация** — добавлена проверка `if (!posthog.__loaded)`.
+- **`[3.0.1]` Admin health HTTP 405** — `checkAnthropic()` переведён с `GET /v1/models` → `POST /v1/messages`.
+- **`[3.0.1]` Demo API** — исправлено имя модели (`claude-haiku-4-5` → `claude-haiku-4-5-20251001`) и добавлена поддержка Vercel-прокси.
+- **`[3.0.1]` Дублирование сообщений в чате** — удалён двойной `setMessages()` вызов.
+- **`[3.0.1]` Admin SUBJECTS** — устаревшие слаги обновлены (`history` → `russian-history`, etc.).
+- **`[3.0.1]` Дублирующийся knowledge route** — удалён ошибочно вложенный файл.
+
+### Инфраструктура
+
+- **Vercel прокси** (`/api/anthropic-proxy/[...path]`) — обход гео-блокировки Anthropic для российского VPS.
+- **SWC авто-восстановление** — `npm run build || (npm install && npm run build)` в deploy скрипте для исправления пропавших `@next/swc` бинарей.
+- **Vercel Protection Bypass** — заголовок `x-vercel-protection-bypass` для автоматического доступа VPS к защищённому Vercel деплою.
+
+---
+
 ## [3.0.1] — 2026-04-14
 
 ### Исправлено
