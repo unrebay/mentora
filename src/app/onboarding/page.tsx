@@ -17,7 +17,7 @@ const STEPS = [
     step: 1,
     title: "Как тебе удобнее учиться?",
     subtitle: "Подберём стиль подачи материала под тебя",
-    field: "onboarding_style",
+    field: "style",
     options: [
       { value: "storytelling", emoji: "📖", label: "Через истории", desc: "Живые рассказы, образы, детали эпохи" },
       { value: "facts", emoji: "📅", label: "Факты и хронология", desc: "Чёткие даты, события, причинно-следственные связи" },
@@ -28,7 +28,7 @@ const STEPS = [
     step: 2,
     title: "Какой у тебя уровень?",
     subtitle: "Ментор адаптирует сложность объяснений",
-    field: "onboarding_level",
+    field: "level",
     options: [
       { value: "school", emoji: "🎒", label: "Школьник", desc: "Готовлюсь к урокам, ОГЭ или ЕГЭ" },
       { value: "student", emoji: "🎓", label: "Студент", desc: "Учусь в вузе или колледже" },
@@ -40,7 +40,7 @@ const STEPS = [
     step: 3,
     title: "Что хочешь получить?",
     subtitle: "Поможет нам расставить акценты",
-    field: "onboarding_goal",
+    field: "goal",
     options: [
       { value: "exam", emoji: "📝", label: "Сдать ЕГЭ / ОГЭ", desc: "Нужна подготовка к экзамену" },
       { value: "general", emoji: "🌍", label: "Общее развитие", desc: "Хочу понимать историю страны и мира" },
@@ -60,9 +60,6 @@ export default function OnboardingPage() {
   const step = STEPS[currentStep];
   const isLast = currentStep === STEPS.length - 1;
 
-  function handleSelect(value: string) {
-    setSelected(value);
-  }
 
   async function handleNext() {
     if (!selected || saving) return;
@@ -80,9 +77,9 @@ export default function OnboardingPage() {
     if (saving) return;
     setSaving(true); setError(null);
     const ok = await completeOnboarding({
-      style: answers.onboarding_style ?? "storytelling",
-      level: answers.onboarding_level ?? "adult",
-      goal: answers.onboarding_goal ?? "general",
+      style: answers.style ?? "storytelling",
+      level: answers.level ?? "adult",
+      goal: answers.goal ?? "general",
     });
     if (ok) { window.location.href = "/dashboard"; }
     else { setError("Не удалось пропустить. Попробуй ещё раз."); setSaving(false); }
