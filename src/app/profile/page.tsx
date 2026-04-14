@@ -35,7 +35,7 @@ function pluralMenty(n: number): string {
 
 // Mentora logo "е" — italic, Playfair, brand blue
 const MentoraE = () => (
-  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", fontWeight: 700, fontSize: "1.5em", lineHeight: 1 }}>е</span>
+  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", fontWeight: 700, fontSize: "1.2em", lineHeight: 1, display: "inline-block", verticalAlign: "-0.08em", marginRight: "0.1em" }}>е</span>
 );
 
 type BadgeDef = {
@@ -46,7 +46,7 @@ type BadgeDef = {
   tier: "bronze" | "silver" | "gold" | "special";
   check: (s: Stats) => boolean;
 };
-type Stats = { totalXP: number; maxStreak: number; totalMessages: number; isPro: boolean; joinedDaysAgo: number };
+type Stats = { totalXP: number; maxStreak: number; totalMessages: number; isPro: boolean; isUltima: boolean; joinedDaysAgo: number };
 
 const BADGES: BadgeDef[] = [
   { id: "first_message", icon: "💬", name: "Первый вопрос", desc: "Отправил первое сообщение", tier: "bronze", check: s => s.totalMessages >= 1 },
@@ -61,6 +61,7 @@ const BADGES: BadgeDef[] = [
   { id: "xp1000", icon: "💎", name: "Мастер", desc: "Набрал 1000 ментов", tier: "gold", check: s => s.totalXP >= 1000 },
   { id: "early_bird", icon: "🦅", name: "Первопроходец", desc: "Присоединился в первые 30 дней", tier: "special", check: s => s.joinedDaysAgo <= 90 },
   { id: "pro", icon: "👑", name: "Pro подписчик", desc: "Поддержал развитие Mentora", tier: "special", check: s => s.isPro },
+  { id: "ultima", icon: "💎", name: "Ultima", desc: "Максимальный план Mentora", tier: "special", check: s => s.isUltima },
 ];
 
 const TIER_STYLE: Record<string, { border: string; bg: string; label: string }> = {
@@ -90,12 +91,13 @@ export default async function ProfilePage() {
   const totalXP = progressData?.reduce((s, p) => s + (p.xp_total ?? 0), 0) ?? 0;
   const maxStreak = progressData?.reduce((m, p) => Math.max(m, p.streak_days ?? 0), 0) ?? 0;
   const totalMessages = msgCount ?? 0;
-  const isPro = profile?.plan === "pro";
+  const isUltima = profile?.plan === "ultima";
+  const isPro = isUltima || profile?.plan === "pro";
   const joinedDaysAgo = profile?.created_at
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 86400000)
     : 999;
 
-  const stats: Stats = { totalXP, maxStreak, totalMessages, isPro, joinedDaysAgo };
+  const stats: Stats = { totalXP, maxStreak, totalMessages, isPro, isUltima, joinedDaysAgo };
   const lvl = getLevel(totalXP);
   const changesLeft = Math.max(0, 2 - (profile?.name_changes_count ?? 0));
   const name = profile?.full_name ?? profile?.display_name ?? user.email?.split("@")[0] ?? "Пользователь";
