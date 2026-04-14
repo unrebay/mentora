@@ -50,7 +50,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("onboarding_completed, plan, trial_expires_at, streak_reward_claimed, messages_today, messages_date, ultima_expires_at")
+    .select("onboarding_completed, plan, trial_expires_at, streak_reward_claimed, messages_today, messages_date")
     .eq("id", user.id)
     .single();
 
