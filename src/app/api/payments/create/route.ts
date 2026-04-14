@@ -8,14 +8,18 @@ const YOOKASSA_SECRET_KEY = process.env.YOOKASSA_SECRET_KEY!;
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://mentora.su";
 
 const PLANS = {
-  monthly: { amount: "399.00",  amountInt: 39900,  label: "Mentora Pro — подписка на 1 месяц" },
-  annual:  { amount: "2990.00", amountInt: 299000, label: "Mentora Pro — подписка на 1 год"   },
+  monthly:        { amount: "399.00",  amountInt: 39900,  label: "Mentora Pro — подписка на 1 месяц",    tier: "pro"    },
+  annual:         { amount: "2990.00", amountInt: 299000, label: "Mentora Pro — подписка на 1 год",        tier: "pro"    },
+  ultima_monthly: { amount: "799.00",  amountInt: 79900,  label: "Mentora Ultima — подписка на 1 месяц", tier: "ultima" },
+  ultima_annual:  { amount: "5990.00", amountInt: 599000, label: "Mentora Ultima — подписка на 1 год",    tier: "ultima" },
 } as const;
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const planKey: "monthly" | "annual" = body.plan === "annual" ? "annual" : "monthly";
+    type PlanKey = "monthly" | "annual" | "ultima_monthly" | "ultima_annual";
+    const validPlans: PlanKey[] = ["monthly", "annual", "ultima_monthly", "ultima_annual"];
+    const planKey: PlanKey = validPlans.includes(body.plan) ? body.plan as PlanKey : "monthly";
     const plan = PLANS[planKey];
 
     const cookieStore = await cookies();
