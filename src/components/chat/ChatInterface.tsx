@@ -281,11 +281,10 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                 ? "bg-brand-600 text-white text-[15px] leading-relaxed"
                 : msg.isError
                   ? "bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/50 text-red-700 dark:text-red-400"
-                  : "s-raised t-primary border shadow-sm"
-            }`}>
-              {msg.role === "assistant" ? (
-                <>
-                  <MarkdownMessage content={msg.content} />
+                  : "s-raised t-primary border"
+            }`}
+            style={msg.role === "assistant" && !msg.isError ? {borderColor:"var(--border-light)",boxShadow:"var(--shadow)"} : undefined}
+          > />
                   {msg.isError && (
                     <button
                       onClick={(e) => sendMessage(e as unknown as React.FormEvent, lastUserMsg)}
