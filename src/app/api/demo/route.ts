@@ -1,7 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}),
+  ...(process.env.VERCEL_BYPASS_SECRET ? { defaultHeaders: { "x-vercel-protection-bypass": process.env.VERCEL_BYPASS_SECRET } } : {}),
+});
 
 const DEMO_LIMIT = 5;
 const COOKIE_NAME = "demo_count";
@@ -37,7 +41,7 @@ export async function POST(req: NextRequest) {
 
     // Get AI response
     const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 800,
       system: SYSTEM_PROMPT,
       messages: [
