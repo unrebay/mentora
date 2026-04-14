@@ -8,14 +8,14 @@ export const metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen s-page t-primary">
       {/* NAV */}
-      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100 px-6 py-4">
+      <nav className="sticky top-0 z-50 s-page/90 backdrop-blur border-b b-subtle px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Logo size="sm" fontSize="1.44rem" />
           <Link
             href="/auth"
-            className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-700 transition-colors"
+            className="px-5 py-2.5 bg-gray-900 dark:bg-[var(--bg-secondary)] dark:bg-[var(--bg-secondary)] text-white text-sm font-medium rounded-xl hover:bg-gray-700 dark:bg-[var(--border)] dark:bg-[var(--border)] transition-colors"
           >
             Попробовать бесплатно →
           </Link>
@@ -24,12 +24,12 @@ export default function TermsPage() {
 
       <main className="max-w-3xl mx-auto px-6 py-16">
         <h1 className="text-3xl font-bold mb-2">Условия использования</h1>
-        <p className="text-gray-400 text-sm mb-12">Последнее обновление: 28 марта 2026 г.</p>
+        <p className="t-muted text-sm mb-12">Последнее обновление: 28 марта 2026 г.</p>
 
-        <div className="prose prose-gray max-w-none space-y-10 text-gray-700 leading-relaxed">
+        <div className="prose prose-gray max-w-none space-y-10 t-secondary leading-relaxed">
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">1. Общие положения</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">1. Общие положения</h2>
             <p>
               Настоящие Условия использования (далее — «Условия») регулируют отношения между
               ИП Андрей Унребай (далее — «Mentora», «мы») и пользователем (далее — «вы»)
@@ -43,7 +43,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">2. Описание услуги</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">2. Описание услуги</h2>
             <p>
               Mentora — образовательная платформа на основе искусственного интеллекта,
               которая предоставляет персонализированное обучение по различным предметам
@@ -53,7 +53,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">3. Регистрация и аккаунт</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">3. Регистрация и аккаунт</h2>
             <ul className="list-disc pl-6 space-y-2">
               <li>Для полного доступа к платформе необходима регистрация.</li>
               <li>Вы обязаны предоставить достоверные данные при регистрации.</li>
@@ -64,7 +64,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">4. Тарифы и оплата</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">4. Тарифы и оплата</h2>
             <ul className="list-disc pl-6 space-y-2">
               <li><strong>Бесплатный план (Free):</strong> ограниченный доступ к функциям платформы без оплаты.</li>
               <li><strong>Pro-план:</strong> расширенный доступ за 399 ₽/месяц или 2 990 ₽/год.</li>
@@ -75,7 +75,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">5. Правила использования</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">5. Правила использования</h2>
             <p>При использовании платформы запрещается:</p>
             <ul className="list-disc pl-6 mt-3 space-y-2">
               <li>Использовать платформу для создания вредоносного, незаконного или оскорбительного контента.</li>
@@ -87,7 +87,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">6. Контент и интеллектуальная собственность</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">6. Контент и интеллектуальная собственность</h2>
             <p>
               Весь контент платформы (тексты, логотипы, интерфейс, учебные материалы) является
               интеллектуальной собственностью Mentora и защищён законодательством РФ об авторских правах.
@@ -100,7 +100,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">7. Ограничение ответственности</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">7. Ограничение ответственности</h2>
             <p>
               AI-ментор предоставляет образовательную информацию в учебных целях.
               Ответы AI могут содержать неточности — всегда проверяйте важную информацию
@@ -114,7 +114,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">8. Прекращение доступа</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">8. Прекращение доступа</h2>
             <p>
               Мы оставляем за собой право приостановить или удалить аккаунт при нарушении
               настоящих Условий. При удалении платного аккаунта по нашей инициативе
@@ -127,7 +127,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">9. Применимое право</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">9. Применимое право</h2>
             <p>
               Настоящие Условия регулируются законодательством Российской Федерации.
               Все споры решаются в досудебном порядке, а при невозможности — в суде
@@ -136,7 +136,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">10. Контакты</h2>
+            <h2 className="text-xl font-semibold t-primary mb-3">10. Контакты</h2>
             <p>По вопросам, связанным с настоящими Условиями:</p>
             <ul className="list-none mt-3 space-y-1">
               <li>Email: <a href="mailto:hello@mentora.su" className="text-blue-600 hover:underline">hello@mentora.su</a></li>
@@ -148,18 +148,18 @@ export default function TermsPage() {
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t border-gray-100 py-8 mt-16">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-400">
+      <footer className="border-t b-subtle py-8 mt-16">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm t-muted">
           <span>© 2026 Mentora</span>
           <div className="flex gap-6">
-            <Link href="/privacy" className="hover:text-gray-700 transition-colors">Конфиденциальность</Link>
-            <Link href="/terms" className="text-gray-900 font-medium">Условия</Link>
+            <Link href="/privacy" className="hover:t-secondary transition-colors">Конфиденциальность</Link>
+            <Link href="/terms" className="t-primary font-medium">Условия</Link>
           </div>
         </div>
       </footer>
-      <section className="max-w-3xl mx-auto px-6 py-8 border-t border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Реквизиты</h2>
-        <div className="text-sm text-gray-500 space-y-1">
+      <section className="max-w-3xl mx-auto px-6 py-8 border-t b-subtle">
+        <h2 className="text-lg font-semibold t-primary mb-4">Реквизиты</h2>
+        <div className="text-sm t-secondary space-y-1">
           <p>Исполнитель: Белашов Андрей Владимирович</p>
           <p>ИНН: 325005748248</p>
           <p>Статус: Самозанятый (НПД)</p>
