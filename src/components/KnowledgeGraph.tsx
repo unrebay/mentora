@@ -1,155 +1,201 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import { SUBJECTS } from "@/lib/types";
 import { RUSSIAN_HISTORY_TOPICS } from "@/lib/topics";
 
-// ── Fixed orbital layout — no physics simulation ──────────────────────────
 const LAYOUT: Record<string, { cx: number; cy: number }> = {
-  "russian-history":  { cx: 0.50, cy: 0.42 },
-  "world-history":    { cx: 0.25, cy: 0.30 },
-  "mathematics":      { cx: 0.73, cy: 0.28 },
-  "physics":          { cx: 0.82, cy: 0.52 },
-  "chemistry":        { cx: 0.72, cy: 0.70 },
-  "biology":          { cx: 0.50, cy: 0.75 },
-  "russian-language": { cx: 0.28, cy: 0.70 },
-  "literature":       { cx: 0.16, cy: 0.52 },
-  "english":          { cx: 0.20, cy: 0.56 },
-  "social-studies":   { cx: 0.35, cy: 0.20 },
-  "geography":        { cx: 0.62, cy: 0.18 },
-  "computer-science": { cx: 0.80, cy: 0.38 },
-  "astronomy":        { cx: 0.60, cy: 0.82 },
+  "russian-history":  { cx: 0.50, cy: 0.40 },
+  "world-history":    { cx: 0.24, cy: 0.28 },
+  "mathematics":      { cx: 0.73, cy: 0.27 },
+  "physics":          { cx: 0.84, cy: 0.50 },
+  "chemistry":        { cx: 0.74, cy: 0.68 },
+  "biology":          { cx: 0.52, cy: 0.76 },
+  "russian-language": { cx: 0.27, cy: 0.68 },
+  "literature":       { cx: 0.14, cy: 0.50 },
+  "english":          { cx: 0.18, cy: 0.35 },
+  "social-studies":   { cx: 0.37, cy: 0.18 },
+  "geography":        { cx: 0.63, cy: 0.16 },
+  "computer-science": { cx: 0.82, cy: 0.32 },
+  "astronomy":        { cx: 0.62, cy: 0.82 },
 };
 
-const STATUS_STYLE = {
-  beta:   { core: "#6b8fff", glow: "rgba(107,143,255,0.6)", label: "Бета" },
-  full:   { core: "#a0c4ff", glow: "rgba(160,196,255,0.7)", label: "Полный" },
+type Status = "active" | "full" | "beta" | "locked";
+const STATUS: Record<Status, { core: string; glow: string; label: string }> = {
   active: { core: "#ffa040", glow: "rgba(255,160,64,0.75)", label: "Изучается" },
-  locked: { core: "#3a3a58", glow: "rgba(80,80,140,0.2)",  label: "Скоро" },
+  full:   { core: "#a0c4ff", glow: "rgba(160,196,255,0.70)", label: "Полный" },
+  beta:   { core: "#6b8fff", glow: "rgba(107,143,255,0.60)", label: "Бета" },
+  locked: { core: "#3a3a58", glow: "rgba(80,80,140,0.20)",  label: "Скоро" },
 };
 
-type Status = "beta" | "full" | "active" | "locked";
+interface UserProgress { subject: string; xp_total: number }
+interface Props { className?: string; userProgress?: UserProgress[] }
 
-function getStatus(id: string): Status {
+function getStatus(id: string, progress: UserProgress[]): Status {
+  if (progress.find(x => x.subject === id && x.xp_total > 0)) return "active";
   if (id === "russian-history") return "full";
-  const beta = ["world-history","mathematics","physics","chemistry","biology",
+  return ["world-history","mathematics","physics","chemistry","biology",
     "russian-language","literature","english","social-studies",
-    "geography","computer-science","astronomy"];
-  return beta.includes(id) ? "beta" : "locked";
+    "geography","computer-science","astronomy"].includes(id) ? "beta" : "locked";
+}
+function getRadius(s: Status) {
+  return s === "full" ? 3.0 : s === "active" ? 2.8 : s === "beta" ? 2.1 : 1.4;
 }
 
-function getRadius(status: Status): number {
-  return status === "full" ? 28 : status === "beta" ? 20 : 14;
-}
-
-export default function KnowledgeGraph({ className = "" }: { className?: string }) {
+export default function KnowledgeGraph({ className = "", userProgress = [] }: Props) {
   const [selected, setSelected] = useState<string | null>("russian-history");
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const isDragging = useRef(false);
+  const lastPos = useRef({ x: 0, y: 0 });
+  const lastDist = useRef<number | null>(null);
+  const clickPos = useRef({ x: 0, y: 0 });
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  const vbSize = 100 / zoom;
+  const vbX = 50 - vbSize / 2 - pan.x;
+  const vbY = 50 - vbSize / 2 - pan.y;
+  const viewBox = `${vbX.toFixed(2)} ${vbY.toFixed(2)} ${vbSize.toFixed(2)} ${vbSize.toFixed(2)}`;
+
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    isDragging.current = true;
+    lastPos.current = { x: e.clientX, y: e.clientY };
+  }, []);
+  const onMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging.current || !svgRef.current) return;
+    const rect = svgRef.current.getBoundingClientRect();
+    const scale = vbSize / rect.width;
+    setPan(p => ({
+      x: p.x + (e.clientX - lastPos.current.x) * scale,
+      y: p.y + (e.clientY - lastPos.current.y) * scale,
+    }));
+    lastPos.current = { x: e.clientX, y: e.clientY };
+  }, [vbSize]);
+  const onMouseUp = useCallback(() => { isDragging.current = false; }, []);
+
+  const onWheel = useCallback((e: WheelEvent) => {
+    e.preventDefault();
+    setZoom(z => Math.min(4, Math.max(0.5, z * (e.deltaY < 0 ? 1.12 : 0.89))));
+  }, []);
+  useEffect(() => {
+    const el = svgRef.current;
+    if (!el) return;
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [onWheel]);
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      isDragging.current = true;
+      lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    } else if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      lastDist.current = Math.sqrt(dx*dx + dy*dy);
+    }
+  }, []);
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    if (e.touches.length === 1 && isDragging.current && svgRef.current) {
+      const rect = svgRef.current.getBoundingClientRect();
+      const scale = vbSize / rect.width;
+      setPan(p => ({
+        x: p.x + (e.touches[0].clientX - lastPos.current.x) * scale,
+        y: p.y + (e.touches[0].clientY - lastPos.current.y) * scale,
+      }));
+      lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    } else if (e.touches.length === 2 && lastDist.current) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const d = Math.sqrt(dx*dx+dy*dy);
+      setZoom(z => Math.min(4, Math.max(0.5, z * d / lastDist.current!)));
+      lastDist.current = d;
+    }
+  }, [vbSize]);
+  const onTouchEnd = useCallback(() => { isDragging.current = false; lastDist.current = null; }, []);
+
+  const onNodeDown = useCallback((e: React.MouseEvent) => { clickPos.current = { x: e.clientX, y: e.clientY }; }, []);
+  const onNodeClick = useCallback((id: string, e: React.MouseEvent) => {
+    if (Math.hypot(e.clientX - clickPos.current.x, e.clientY - clickPos.current.y) > 6) return;
+    setSelected(p => p === id ? null : id);
+  }, []);
 
   const nodes = SUBJECTS.map(s => ({
     id: s.id, label: s.title, emoji: s.emoji,
-    status: getStatus(s.id),
-    cx: LAYOUT[s.id]?.cx ?? 0.5,
-    cy: LAYOUT[s.id]?.cy ?? 0.5,
-    r: getRadius(getStatus(s.id)),
+    status: getStatus(s.id, userProgress),
+    cx: (LAYOUT[s.id]?.cx ?? 0.5) * 100,
+    cy: (LAYOUT[s.id]?.cy ?? 0.5) * 100,
+    r: getRadius(getStatus(s.id, userProgress)),
   }));
 
-  const selectedNode = nodes.find(n => n.id === selected);
-  const selectedSubject = SUBJECTS.find(s => s.id === selected);
-  const selectedTopics = selected === "russian-history" ? RUSSIAN_HISTORY_TOPICS : null;
-
-  const handleSelect = useCallback((id: string) => {
-    setSelected(prev => prev === id ? null : id);
-  }, []);
+  const selNode = nodes.find(n => n.id === selected);
+  const selSubject = SUBJECTS.find(s => s.id === selected);
+  const selTopics = selected === "russian-history" ? RUSSIAN_HISTORY_TOPICS : null;
 
   return (
-    <div className={`relative w-full h-full flex flex-col ${className}`}
-      style={{ minHeight: 520, background: "#06060f" }}>
+    <div className={`relative w-full h-full flex flex-col select-none ${className}`}
+      style={{ background: "#06060f" }}>
 
-      {/* Legend */}
-      <div className="absolute top-4 right-4 flex flex-col gap-1.5 z-20 pointer-events-none">
-        {(Object.entries(STATUS_STYLE) as [Status, typeof STATUS_STYLE[Status]][]).map(([key, val]) => (
-          <div key={key} className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full flex-shrink-0"
-              style={{ background: val.core, boxShadow: `0 0 6px ${val.core}` }} />
-            <span className="text-[10px] text-white/40 font-medium">{val.label}</span>
+      {/* Legend + reset */}
+      <div className="absolute top-3 right-3 z-20 flex flex-col gap-1.5">
+        {(Object.entries(STATUS) as [Status, {core:string;glow:string;label:string}][]).map(([k,v]) => (
+          <div key={k} className="flex items-center gap-1.5 pointer-events-none">
+            <span className="w-2 h-2 rounded-full" style={{ background: v.core, boxShadow: `0 0 5px ${v.core}` }} />
+            <span className="text-[10px] text-white/40">{v.label}</span>
           </div>
         ))}
+        <button onClick={() => { setPan({x:0,y:0}); setZoom(1); }}
+          className="mt-1 text-[10px] text-white/30 hover:text-white/60 transition-colors text-left">
+          ↺ сброс
+        </button>
       </div>
 
       {/* Mobile hint */}
-      <div className="absolute top-4 left-4 z-20 pointer-events-none">
-        <p className="text-[10px] text-white/30 md:hidden">Нажми на звезду</p>
-      </div>
+      <p className="absolute top-3 left-3 z-20 text-[10px] text-white/25 pointer-events-none md:hidden">
+        Тяни · Нажми на звезду
+      </p>
 
-      {/* SVG Star Map */}
-      <div className="flex-1 relative" style={{ minHeight: selected ? 300 : 480 }}>
-        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
-          className="w-full h-full absolute inset-0" style={{ minHeight: selected ? 300 : 480 }}>
+      {/* SVG */}
+      <div className="flex-1 relative overflow-hidden cursor-grab active:cursor-grabbing"
+        style={{ minHeight: selNode ? 280 : 460 }}>
+        <svg ref={svgRef} viewBox={viewBox} preserveAspectRatio="xMidYMid meet"
+          className="w-full h-full absolute inset-0 touch-none"
+          onMouseDown={onMouseDown} onMouseMove={onMouseMove}
+          onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
+          onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
           <defs>
-            {nodes.map(n => {
-              const s = STATUS_STYLE[n.status];
-              return (
-                <radialGradient key={n.id} id={`g-${n.id}`} cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor={s.glow} />
-                  <stop offset="100%" stopColor="rgba(0,0,0,0)" />
-                </radialGradient>
-              );
-            })}
+            {nodes.map(n => (
+              <radialGradient key={n.id} id={`g-${n.id}`} cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor={STATUS[n.status].glow} />
+                <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+              </radialGradient>
+            ))}
           </defs>
-
-          {/* Background stars */}
-          {Array.from({ length: 60 }, (_, i) => (
+          {Array.from({length:80},(_,i) => (
             <circle key={i}
-              cx={((i * 137.5) % 100).toFixed(1)}
-              cy={((i * 97.3 + 17) % 100).toFixed(1)}
-              r="0.25" fill="rgba(255,255,255,0.35)" />
+              cx={((i*137.5)%100).toFixed(2)} cy={((i*97.3+17)%100).toFixed(2)}
+              r="0.22" fill={`rgba(255,255,255,${0.15+(i%4)*0.08})`} />
           ))}
-
-          {/* Connection lines from selected to others */}
-          {selected && nodes.filter(n => n.id !== selected && n.status !== "locked").map(n => {
-            const sel = nodes.find(x => x.id === selected)!;
-            return (
-              <line key={n.id}
-                x1={sel.cx * 100} y1={sel.cy * 100}
-                x2={n.cx * 100} y2={n.cy * 100}
-                stroke="rgba(107,143,255,0.08)" strokeWidth="0.3" />
-            );
+          {selected && nodes.filter(n=>n.id!==selected&&n.status!=="locked").map(n => {
+            const s=nodes.find(x=>x.id===selected)!;
+            return <line key={n.id} x1={s.cx} y1={s.cy} x2={n.cx} y2={n.cy}
+              stroke="rgba(107,143,255,0.07)" strokeWidth="0.4"/>;
           })}
-
-          {/* Subject nodes */}
           {nodes.map(n => {
-            const s = STATUS_STYLE[n.status];
-            const isSel = n.id === selected;
-            const cr = n.r / 100;
-            const gr = cr * 3.5;
+            const st=STATUS[n.status]; const isSel=n.id===selected;
             return (
-              <g key={n.id} style={{ cursor: "pointer" }}
-                onClick={() => handleSelect(n.id)}>
-                {/* Glow */}
-                <circle cx={n.cx * 100} cy={n.cy * 100}
-                  r={gr * (isSel ? 1.6 : 1)}
-                  fill={`url(#g-${n.id})`} />
-                {/* Selection ring */}
-                {isSel && (
-                  <circle cx={n.cx * 100} cy={n.cy * 100}
-                    r={cr * 1.9} fill="none"
-                    stroke={s.core} strokeWidth="0.4"
-                    strokeDasharray="1.5 1" opacity="0.6" />
-                )}
-                {/* Core */}
-                <circle cx={n.cx * 100} cy={n.cy * 100}
-                  r={cr * (isSel ? 1.3 : 1)}
-                  fill={s.core}
-                  style={{ filter: `drop-shadow(0 0 ${isSel ? 4 : 2}px ${s.core})` }} />
-                {/* Label */}
-                <text x={n.cx * 100} y={n.cy * 100 + cr + 3.5}
-                  textAnchor="middle"
-                  fontSize={isSel ? "3.5" : "2.8"}
-                  fill={isSel ? "#fff" : s.core}
-                  opacity={isSel ? 1 : 0.7}
-                  fontWeight={isSel ? "bold" : "normal"}
-                  style={{ fontFamily: "system-ui", pointerEvents: "none" }}>
+              <g key={n.id} style={{cursor:"pointer"}}
+                onMouseDown={onNodeDown} onClick={e=>onNodeClick(n.id,e)}>
+                <circle cx={n.cx} cy={n.cy} r={n.r*3.5*(isSel?1.7:1)} fill={`url(#g-${n.id})`}/>
+                {isSel && <circle cx={n.cx} cy={n.cy} r={n.r*2.0}
+                  fill="none" stroke={st.core} strokeWidth="0.4" strokeDasharray="1.5 1" opacity="0.55"/>}
+                <circle cx={n.cx} cy={n.cy} r={n.r*(isSel?1.35:1)} fill={st.core}
+                  style={{filter:`drop-shadow(0 0 ${isSel?5:2.5}px ${st.core})`}}/>
+                <text x={n.cx} y={n.cy+n.r+3.8} textAnchor="middle"
+                  fontSize={isSel?"3.6":"2.8"} fill={isSel?"#fff":st.core}
+                  opacity={isSel?1:0.65} fontWeight={isSel?"bold":"normal"}
+                  style={{fontFamily:"system-ui",pointerEvents:"none"}}>
                   {n.label.split(" ")[0]}
                 </text>
               </g>
@@ -159,54 +205,46 @@ export default function KnowledgeGraph({ className = "" }: { className?: string 
       </div>
 
       {/* Detail panel */}
-      {selectedNode && selectedSubject && (
-        <div className="border-t border-white/10"
-          style={{ background: "rgba(10,10,24,0.95)", backdropFilter: "blur(12px)" }}>
-          <div className="max-w-3xl mx-auto px-4 py-4">
+      {selNode && selSubject && (
+        <div className="border-t border-white/10 flex-shrink-0"
+          style={{background:"rgba(8,8,20,0.97)",backdropFilter:"blur(16px)"}}>
+          <div className="max-w-3xl mx-auto px-4 py-3">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
-                <span className="text-2xl">{selectedSubject.emoji}</span>
+                <span className="text-2xl">{selSubject.emoji}</span>
                 <div>
-                  <h3 className="font-bold text-white">{selectedSubject.title}</h3>
+                  <h3 className="font-bold text-white leading-tight">{selSubject.title}</h3>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
-                      style={{
-                        background: STATUS_STYLE[selectedNode.status].core + "33",
-                        color: STATUS_STYLE[selectedNode.status].core,
-                      }}>
-                      {STATUS_STYLE[selectedNode.status].label.toUpperCase()}
+                      style={{background:STATUS[selNode.status].core+"30",color:STATUS[selNode.status].core}}>
+                      {STATUS[selNode.status].label.toUpperCase()}
                     </span>
-                    <span className="text-xs text-white/40">{selectedSubject.description}</span>
+                    <span className="text-xs text-white/40">{selSubject.description}</span>
                   </div>
                 </div>
               </div>
-              <Link href={`/learn/${selectedNode.id}`}
-                className="flex-shrink-0 px-4 py-2 bg-brand-600 text-white text-sm font-semibold rounded-xl hover:bg-brand-700 transition-colors">
+              <Link href={`/learn/${selNode.id}`}
+                className="flex-shrink-0 px-3 py-2 bg-brand-600 text-white text-sm font-semibold rounded-xl hover:bg-brand-700 transition-colors">
                 Учиться →
               </Link>
             </div>
-
-            {/* Russian History topics */}
-            {selectedTopics && (
+            {selTopics ? (
               <div className="overflow-x-auto scrollbar-none -mx-4 px-4">
-                <div className="flex gap-2 min-w-max pb-2">
-                  {selectedTopics.map(period => (
-                    <div key={period.id}
-                      className="flex-shrink-0 bg-white/5 border border-white/10 rounded-xl px-3 py-2 hover:bg-white/10 transition-colors"
-                      style={{ minWidth: 110 }}>
-                      <div className="text-sm mb-0.5">{period.emoji}</div>
-                      <div className="text-xs font-medium text-white/80 leading-tight">{period.title}</div>
-                      <div className="text-[10px] text-white/30 mt-0.5">{period.years} · {period.topics.length} тем</div>
+                <div className="flex gap-2 pb-2" style={{width:"max-content"}}>
+                  {selTopics.map(p => (
+                    <div key={p.id} className="flex-shrink-0 bg-white/5 border border-white/10 rounded-xl px-3 py-2 hover:bg-white/10 transition-colors" style={{width:120}}>
+                      <div className="text-base mb-1">{p.emoji}</div>
+                      <div className="text-xs font-medium text-white/80 leading-tight line-clamp-2">{p.title}</div>
+                      <div className="text-[10px] text-white/30 mt-1">{p.years} · {p.topics.length} тем</div>
                     </div>
                   ))}
                 </div>
               </div>
-            )}
-
-            {/* Other subjects */}
-            {!selectedTopics && (
+            ) : (
               <p className="text-xs text-white/30">
-                Полная карта тем появится при запуске предмета. Пока можно начать учиться — Mentora адаптируется под тебя.
+                {selNode.status==="active"
+                  ? "Ты уже изучаешь этот предмет. Продолжай!"
+                  : "Начни учиться — Mentora адаптируется под тебя с первого сообщения."}
               </p>
             )}
           </div>
