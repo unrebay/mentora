@@ -57,32 +57,32 @@ export function ProfileNameEditor({ currentNickname, changesLeft, currentFullNam
       ) : (
         <div className="mt-3 space-y-3">
           <div>
-            <label className="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1 block">Имя</label>
+            <label className="text-[11px] font-medium t-secondary uppercase tracking-wide mb-1 block">Имя</label>
             <input value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Иван Иванов" maxLength={60}
-              className="text-sm border border-gray-200 rounded-xl px-3 py-2 w-full max-w-xs focus:outline-none focus:border-brand-400 bg-gray-50 focus:bg-white transition-colors" />
+              className="text-sm border b-default rounded-xl px-3 py-2 w-full max-w-xs focus:outline-none focus:border-brand-400 s-input focus:bg-white transition-colors" />
           </div>
           <div>
-            <label className="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1 block">
+            <label className="text-[11px] font-medium t-secondary uppercase tracking-wide mb-1 block">
               Никнейм{" "}
-              {left > 0 ? <span className="normal-case font-normal text-gray-400">({left} из 2 изменений)</span>
+              {left > 0 ? <span className="normal-case font-normal t-muted">({left} из 2 изменений)</span>
                         : <span className="normal-case font-normal text-orange-400">(лимит исчерпан)</span>}
             </label>
             <input value={nickname} onChange={e => { setNickname(e.target.value.toLowerCase()); setError(""); }}
               placeholder="andy123" maxLength={20} disabled={left === 0}
-              className="text-sm border border-gray-200 rounded-xl px-3 py-2 w-full max-w-xs focus:outline-none focus:border-brand-400 bg-gray-50 focus:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed" />
-            <p className="text-[10px] text-gray-400 mt-0.5">Только строчные a–z и 0–9, от 3 до 20 символов</p>
+              className="text-sm border b-default rounded-xl px-3 py-2 w-full max-w-xs focus:outline-none focus:border-brand-400 s-input focus:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed" />
+            <p className="text-[10px] t-muted mt-0.5">Только строчные a–z и 0–9, от 3 до 20 символов</p>
           </div>
           <div>
-            <label className="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1 block">Возраст</label>
+            <label className="text-[11px] font-medium t-secondary uppercase tracking-wide mb-1 block">Возраст</label>
             <input value={age} onChange={e => { setAge(e.target.value); setError(""); }} type="number" min={1} max={119} placeholder="25"
-              className="text-sm border border-gray-200 rounded-xl px-3 py-2 w-24 focus:outline-none focus:border-brand-400 bg-gray-50 focus:bg-white transition-colors" />
+              className="text-sm border b-default rounded-xl px-3 py-2 w-24 focus:outline-none focus:border-brand-400 s-input focus:bg-white transition-colors" />
           </div>
           <div>
-            <label className="text-[11px] font-medium text-gray-500 uppercase tracking-wide mb-1 block">
-              Телефон <span className="normal-case font-normal text-gray-400">(необязательно)</span>
+            <label className="text-[11px] font-medium t-secondary uppercase tracking-wide mb-1 block">
+              Телефон <span className="normal-case font-normal t-muted">(необязательно)</span>
             </label>
             <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+7 900 000 00 00" maxLength={20}
-              className="text-sm border border-gray-200 rounded-xl px-3 py-2 w-full max-w-xs focus:outline-none focus:border-brand-400 bg-gray-50 focus:bg-white transition-colors" />
+              className="text-sm border b-default rounded-xl px-3 py-2 w-full max-w-xs focus:outline-none focus:border-brand-400 s-input focus:bg-white transition-colors" />
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-2 pt-1">
@@ -91,7 +91,7 @@ export function ProfileNameEditor({ currentNickname, changesLeft, currentFullNam
               {loading ? "Сохраняю..." : "Сохранить"}
             </button>
             <button onClick={() => { setEditing(false); setError(""); }}
-              className="text-sm px-5 py-2 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors">
+              className="text-sm px-5 py-2 s-input t-secondary rounded-xl hover:s-input transition-colors">
               Отмена
             </button>
           </div>
