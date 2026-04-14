@@ -126,48 +126,47 @@ export default async function DashboardPage() {
       <PaymentSuccessTracker />
 
       <nav
-        className="sticky top-0 z-10 border-b border-[var(--border)] px-6 py-4"
+        className="sticky top-0 z-10 border-b border-[var(--border)]"
         style={{ background: "var(--bg-nav)", backdropFilter: "blur(12px)" }}
       >
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3 md:gap-6">
+        {/* Row 1: Logo + desktop links + actions */}
+        <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3">
             <Logo size="sm" />
-            <div className="hidden md:flex items-center gap-6">
-            <a href="/dashboard/analytics" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">
-              Аналитика
-            </a>
-            <a href="/knowledge" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">
-              Галактика знаний
-            </a>
-            <a href="/profile" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">
-              Профиль
-            </a>
+            <div className="hidden md:flex items-center gap-5 ml-2">
+              <a href="/dashboard/analytics" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">Аналитика</a>
+              <a href="/knowledge" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">Галактика знаний</a>
+              <a href="/profile" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">Профиль</a>
             </div>
           </div>
-          <div className="flex items-center gap-4 md:gap-6">
+          <div className="flex items-center gap-3">
             <ThemeToggle />
             {totalXP > 0 && (
-              <div className="hidden sm:flex items-center gap-4 text-sm">
-                <span className="font-semibold text-[var(--text)]">
-                  <MentoraE /> {totalXP} {pluralMenty(totalXP)}
-                </span>
-                {maxStreak > 0 && (
-                  <span className="text-orange-500 font-semibold">
-                    🔥 {maxStreak} {pluralDays(maxStreak)}
-                  </span>
-                )}
+              <div className="hidden sm:flex items-center gap-3 text-sm">
+                <span className="font-semibold text-[var(--text)]"><MentoraE />{totalXP} {pluralMenty(totalXP)}</span>
+                {maxStreak > 0 && <span className="text-orange-500 font-semibold">🔥 {maxStreak} {pluralDays(maxStreak)}</span>}
               </div>
             )}
-            {!isPro && (
-              <Link href="/pricing" className="hidden sm:inline-flex text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors">
-                Тарифы
-              </Link>
-            )}
+            {!isPro && <Link href="/pricing" className="hidden sm:inline-flex text-xs font-semibold px-3 py-1.5 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">Тарифы</Link>}
             <form action={handleLogout}>
-              <button type="submit" className="text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
-                Выйти
-              </button>
+              <button type="submit" className="text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">Выйти</button>
             </form>
+          </div>
+        </div>
+        {/* Row 2: Mobile-only tabs */}
+        <div className="md:hidden border-t border-[var(--border-light)] overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+          <div className="flex min-w-max px-2">
+            {[
+              { href: "/dashboard/analytics", label: "Аналитика" },
+              { href: "/knowledge", label: "🌌 Галактика" },
+              { href: "/profile", label: "Профиль" },
+              ...(!isPro ? [{ href: "/pricing", label: "✨ Тарифы" }] : []),
+            ].map(({ href, label }) => (
+              <a key={href} href={href}
+                className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors whitespace-nowrap px-3 py-2 border-b-2 border-transparent hover:border-brand-500">
+                {label}
+              </a>
+            ))}
           </div>
         </div>
       </nav>
