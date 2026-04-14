@@ -211,7 +211,7 @@ export default async function ProfilePage() {
                   >
                     <span className="text-4xl">{b.icon}</span>
                     <span className="font-bold text-sm text-[var(--text)]">{b.name}</span>
-                    <span className="text-xs text-gray-500">{b.desc}</span>
+                    <span className="text-xs t-secondary">{b.desc}</span>
                     <span
                       className="text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1"
                       style={{ background: ts.border + "22", color: ts.border }}
