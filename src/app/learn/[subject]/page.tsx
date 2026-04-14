@@ -44,7 +44,7 @@ export default async function LearnPage({ params, searchParams }: Props) {
 
   let initialMessagesRemaining: number | null = null;
 
-  if (profile?.plan !== "pro") {
+  if (profile?.plan !== "pro" && profile?.plan !== "ultima") {
     const today = new Date().toISOString().slice(0, 10);
     const isNewDay = profile?.messages_date !== today;
     const usedToday = isNewDay ? 0 : (profile?.messages_today ?? 0);
