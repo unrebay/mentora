@@ -37,13 +37,6 @@ export default function Logo({
       <span style={{
         color: "#4561E8",
         fontStyle: "italic",
-        // Lock the italic 'e' to the text baseline.
-        // top: 0.03em compensates for Playfair italic optical rise.
-        // marginRight: 0.05em adds a hair-space before 'ntora'.
-        display: "inline-block",
-        verticalAlign: "baseline",
-        position: "relative",
-        top: "0.03em",
         marginRight: "0.05em",
       }}>e</span>
       ntora
