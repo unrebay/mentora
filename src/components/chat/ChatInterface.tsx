@@ -284,7 +284,10 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                   : "s-raised t-primary border"
             }`}
             style={msg.role === "assistant" && !msg.isError ? {borderColor:"var(--border-light)",boxShadow:"var(--shadow)"} : undefined}
-          > />
+          >
+              {msg.role === "assistant" ? (
+                <>
+                  <MarkdownMessage content={msg.content} />
                   {msg.isError && (
                     <button
                       onClick={(e) => sendMessage(e as unknown as React.FormEvent, lastUserMsg)}
