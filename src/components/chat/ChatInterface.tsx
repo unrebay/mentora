@@ -162,6 +162,20 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      const base64 = dataUrl.split(",")[1];
+      setPendingImage({ data: base64, mimeType: file.type, preview: dataUrl });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
   const config = SUBJECT_CONFIG[subject] ?? DEFAULT_CONFIG;
   const isLimited = messagesRemaining !== null;
   const limitReached = isLimited && messagesRemaining !== null && messagesRemaining <= 0;
@@ -234,22 +248,6 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   }
 
   const isEmpty = messages.length === 0;
-
-  // Handle image file selection for Ultima
-  function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      const base64 = dataUrl.split(",")[1];
-      setPendingImage({ data: base64, mimeType: file.type, preview: dataUrl });
-    };
-    reader.readAsDataURL(file);
-    // Reset input so same file can be selected again
-    e.target.value = "";
-  }
 
   return (
     <div className="flex flex-col bg-gray-50 dark:bg-[var(--bg)]" style={{ height: "100dvh" }}>
@@ -356,15 +354,15 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             </Link>
           </div>
         ) : (
-          {/* Ultima: pending image preview */}
-          {pendingImage && (
-            <div className="flex items-center gap-2 mb-2 p-2 bg-gray-50 dark:bg-[var(--bg-secondary)] rounded-xl border border-gray-200 dark:border-[var(--border)]">
-              <img src={pendingImage.preview} alt="Фото задачи" className="w-12 h-12 rounded-lg object-cover shrink-0" />
-              <span className="text-xs text-gray-500 dark:text-[var(--text-secondary)] flex-1">Фото прикреплено — напиши вопрос или отправь сразу</span>
-              <button type="button" onClick={() => setPendingImage(null)} className="text-gray-400 hover:text-gray-600 text-lg leading-none px-1">×</button>
-            </div>
-          )}
-          <form onSubmit={sendMessage} className="flex gap-2">
+          <>
+            {pendingImage && (
+              <div className="flex items-center gap-2 mb-2 p-2 bg-gray-50 dark:bg-[var(--bg-secondary)] rounded-xl border border-gray-200 dark:border-[var(--border)]">
+                <img src={pendingImage.preview} alt="Фото задачи" className="w-12 h-12 rounded-lg object-cover shrink-0" />
+                <span className="text-xs text-gray-500 dark:text-[var(--text-secondary)] flex-1">Фото прикреплено — напиши вопрос или отправь сразу</span>
+                <button type="button" onClick={() => setPendingImage(null)} className="text-gray-400 hover:text-gray-600 text-lg leading-none px-1">×</button>
+              </div>
+            )}
+            <form onSubmit={sendMessage} className="flex gap-2">
             {/* Hidden file input for Ultima */}
             {isUltima && (
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
@@ -387,7 +385,8 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
               className="px-5 py-3 bg-brand-600 text-white rounded-xl font-medium hover:bg-brand-700 transition-colors disabled:opacity-40 text-sm">
               →
             </button>
-          </form>
+            </form>
+          </>
         )}
       </div>
     </div>
