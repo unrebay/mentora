@@ -114,11 +114,17 @@ export async function POST(req: NextRequest) {
     // Wrapped in try/catch — if OpenAI or search_knowledge fails, fall back to empty context
     let ragContext = "База знаний пока пуста. Отвечай на основе своих знаний.";
     try {
-      const embeddingResponse = await openai.embeddings.create({
-        model: "text-embedding-3-small",
-        input: message,
+      // Use Supabase Edge Function for embeddings (avoids OpenAI geo-blocking)
+      const embedResp = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/embed`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        },
+        body: JSON.stringify({ input: message }),
       });
-      const queryEmbedding = embeddingResponse.data[0].embedding;
+      const embedData = await embedResp.json();
+      const queryEmbedding = embedData.embedding as number[];
 
       const { data: chunks } = await supabase.rpc("search_knowledge", {
         query_embedding: queryEmbedding,

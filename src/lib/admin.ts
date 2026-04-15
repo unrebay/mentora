@@ -1,7 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
 
 export const ADMIN_EMAIL = "unrebay@gmail.com";
 
@@ -42,10 +41,21 @@ export async function requireAdmin() {
 }
 
 export async function getEmbedding(content: string): Promise<number[]> {
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const resp = await openai.embeddings.create({
-    model: "text-embedding-3-small",
-    input: content,
+  // Use Supabase Edge Function with gte-small (384-dim) — avoids OpenAI geo-blocking
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  const resp = await fetch(`${supabaseUrl}/functions/v1/embed`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${serviceKey}`,
+    },
+    body: JSON.stringify({ input: content }),
   });
-  return resp.data[0].embedding;
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error(`Embedding failed: ${resp.status} ${err}`);
+  }
+  const data = await resp.json();
+  return data.embedding as number[];
 }
