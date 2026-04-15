@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, createAdminSupabase, getEmbedding } from "@/lib/admin";
 
+export const maxDuration = 30; // Extend timeout for OpenAI embedding calls
+
 const CHUNK_SELECT = "id, subject, topic, content, source, language, created_at";
 
 // GET /api/admin/knowledge — list chunks (paginated)
