@@ -182,17 +182,8 @@ export default async function PricingPage() {
               </div>
             </div>
             <div className="space-y-2 mb-7">
-              {isUltima ? (
-                <div className="block text-center py-3 px-5 bg-emerald-800/60 text-emerald-300 font-semibold rounded-xl border border-emerald-700/50 text-sm">
-                  ✓ Ultima активна
-                </div>
-              ) : (
-                <a href="mailto:hello@mentora.su?subject=Ultima — ранний доступ"
-                  className="block text-center py-3 px-5 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors text-sm">
-                  Получить ранний доступ →
-                </a>
-              )}
-              {!isUltima && <p className="text-center text-xs text-gray-400 pt-1">Открываем доступ волнами</p>}
+              <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_monthly" />
+              <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_annual" />
             </div>
             <ul className="space-y-3 flex-1">
               {ULTIMA_FEATURES.map(f => (

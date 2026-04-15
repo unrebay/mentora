@@ -2,17 +2,31 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+type PlanKey = "monthly" | "annual" | "ultima_monthly" | "ultima_annual";
+
 interface Props {
   isLoggedIn: boolean;
   isPro: boolean;
-  plan: "monthly" | "annual";
+  isUltima?: boolean;
+  plan: PlanKey;
 }
 
-export default function BuyProButton({ isLoggedIn, isPro, plan }: Props) {
+export default function BuyProButton({ isLoggedIn, isPro, isUltima = false, plan }: Props) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  if (isPro) {
+  const isUltimaPlan = plan.startsWith("ultima");
+  const isAnnual = plan.endsWith("annual");
+
+  // Already on correct or higher plan
+  if (isUltimaPlan && isUltima) {
+    return (
+      <div className="block text-center py-2.5 px-5 bg-emerald-800/60 text-emerald-300 font-semibold rounded-xl border border-emerald-700/50 text-sm">
+        ✓ Ultima активна
+      </div>
+    );
+  }
+  if (!isUltimaPlan && isPro) {
     return (
       <div className="block text-center py-2.5 px-5 bg-green-50 text-green-700 font-semibold rounded-xl border-2 border-green-200 text-sm">
         ✓ Подписка активна
@@ -41,11 +55,25 @@ export default function BuyProButton({ isLoggedIn, isPro, plan }: Props) {
     finally { setLoading(false); }
   };
 
+  const label = loading
+    ? "Переходим к оплате..."
+    : isAnnual
+      ? (isUltimaPlan ? "Оформить Ultima на год →" : "Оформить годовой план →")
+      : (isUltimaPlan ? "Получить Ultima →" : "Попробовать Pro →");
+
+  const buttonStyle = isUltimaPlan
+    ? "bg-white text-gray-900 hover:bg-gray-100"
+    : isAnnual
+      ? "bg-gray-800 text-white hover:bg-gray-900"
+      : "bg-brand-600 text-white hover:bg-brand-700";
+
   return (
-    <button onClick={handleClick} disabled={loading}
-      className={"block w-full text-center py-2.5 px-5 font-semibold rounded-xl transition-colors disabled:opacity-60 disabled:cursor-not-allowed text-sm " +
-        (plan === "annual" ? "bg-gray-800 text-white hover:bg-gray-900" : "bg-brand-600 text-white hover:bg-brand-700")}>
-      {loading ? "Переходим к оплате..." : plan === "annual" ? "Оформить годовой план →" : "Попробовать Pro →"}
+    <button
+      onClick={handleClick}
+      disabled={loading}
+      className={`block w-full text-center py-2.5 px-5 font-semibold rounded-xl transition-colors disabled:opacity-60 disabled:cursor-not-allowed text-sm ${buttonStyle}`}
+    >
+      {label}
     </button>
   );
 }
