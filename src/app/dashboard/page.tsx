@@ -132,6 +132,7 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-3">
             <Logo size="sm" />
             <div className="hidden md:flex items-center gap-5 ml-2">
+              <a href="/dashboard/progress" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">Прогресс</a>
               <a href="/dashboard/analytics" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">Аналитика</a>
               <a href="/knowledge" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">Галактика знаний</a>
               <a href="/profile" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">Профиль</a>
@@ -155,6 +156,7 @@ export default async function DashboardPage() {
         <div className="md:hidden border-t border-[var(--border-light)] overflow-x-auto" style={{ scrollbarWidth: "none" }}>
           <div className="flex min-w-max px-2">
             {[
+              { href: "/dashboard/progress", label: "Прогресс" },
               { href: "/dashboard/analytics", label: "Аналитика" },
               { href: "/knowledge", label: "🌌 Галактика" },
               { href: "/profile", label: "Профиль" },
