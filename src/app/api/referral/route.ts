@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
-import { nanoid } from "nanoid";
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -24,7 +23,7 @@ export async function GET() {
 
   if (!existing || existing.length === 0) {
     // Create a referral code for this user
-    const code = nanoid(8).toUpperCase();
+    const code = Array.from(crypto.getRandomValues(new Uint8Array(6))).map(b => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[b % 32]).join("");
     const { data: newRef } = await admin.from("referrals")
       .insert({ referrer_id: user.id, code })
       .select()
