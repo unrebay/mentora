@@ -4,8 +4,6 @@ import { redirect } from "next/navigation";
 import { SUBJECTS } from "@/lib/types";
 import Link from "next/link";
 import Logo from "@/components/Logo";
-import { RUSSIAN_HISTORY_TOPICS, TOTAL_TOPICS } from "@/lib/topics";
-import TopicsMap from "@/components/TopicsMap";
 import { PostHogIdentify } from "@/components/PostHogIdentify";
 import { PaymentSuccessTracker } from "@/components/PaymentSuccessTracker";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -286,28 +284,6 @@ export default async function DashboardPage() {
           progressEntries={progressData ?? []}
         />
 
-        <div className="mt-16">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <div className="mb-1 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">
-                Карта знаний
-              </div>
-              <h2 className="text-2xl font-bold text-[var(--text)]">
-                История России · {TOTAL_TOPICS} тем
-              </h2>
-            </div>
-            <Link href="/learn/russian-history" className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-xl hover:bg-brand-700 transition-colors">
-              Начать учиться →
-            </Link>
-          </div>
-          <TopicsMap periods={RUSSIAN_HISTORY_TOPICS} />
-        </div>
-
-        <div className="mt-8 md:hidden">
-          <Link href="/learn/russian-history" className="flex items-center justify-center gap-2 w-full px-6 py-3.5 bg-brand-600 text-white text-sm font-semibold rounded-2xl hover:bg-brand-700 transition-colors">
-            Начать учиться →
-          </Link>
-        </div>
       </div>
     </main>
   );
