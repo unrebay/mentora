@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ProfileNameEditor } from "@/components/ProfileNameEditor";
+import ReferralWidget from "@/components/ReferralWidget";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -247,6 +248,11 @@ export default async function ProfilePage() {
             </div>
           </div>
         )}
+
+        {/* Referral widget */}
+        <div className="px-5 pb-8">
+          <ReferralWidget />
+        </div>
       </main>
     </div>
   );

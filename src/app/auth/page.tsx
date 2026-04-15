@@ -167,6 +167,15 @@ function AuthPageContent() {
           setError(error.message);
         }
       } else {
+        // Track referral if ref code in URL
+        const refCode = searchParams.get("ref");
+        if (refCode && signUpData.user?.id) {
+          fetch("/api/referral", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code: refCode, newUserId: signUpData.user.id }),
+          }).catch(() => {}); // non-blocking
+        }
         // If no session → email confirmation required
         if (!signUpData.session) {
           setEmailSent(email);
