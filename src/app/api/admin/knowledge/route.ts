@@ -35,24 +35,32 @@ export async function GET(req: NextRequest) {
 
 // POST /api/admin/knowledge — create chunk + generate embedding
 export async function POST(req: NextRequest) {
-  const forbidden = await requireAdmin();
-  if (forbidden) return forbidden;
+  try {
+    const forbidden = await requireAdmin();
+    if (forbidden) return forbidden;
 
-  const { subject, topic, content, source, language = "ru" } = await req.json();
-  if (!subject || !content)
-    return NextResponse.json({ error: "subject and content are required" }, { status: 400 });
+    const body = await req.json();
+    const { subject, topic, source, language = "ru" } = body;
+    const content = body.content;
+    if (!subject || !content)
+      return NextResponse.json({ error: "subject and content are required" }, { status: 400 });
 
-  const embedding = await getEmbedding(content);
+    const embedding = await getEmbedding(content);
 
-  const admin = createAdminSupabase();
-  const { data, error } = await admin
-    .from("knowledge_chunks")
-    .insert({ subject, topic, content, source, language, embedding })
-    .select(CHUNK_SELECT)
-    .single();
+    const admin = createAdminSupabase();
+    const { data, error } = await admin
+      .from("knowledge_chunks")
+      .insert({ subject, topic, content, source, language, embedding })
+      .select(CHUNK_SELECT)
+      .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ data }, { status: 201 });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ data }, { status: 201 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("admin knowledge POST error:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
 
 // DELETE /api/admin/knowledge — bulk delete by IDs array
