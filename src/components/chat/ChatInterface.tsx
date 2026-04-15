@@ -25,7 +25,7 @@ const SUBJECT_CONFIG: Record<string, { emoji: string; hint: string; quickQuestio
 const DEFAULT_CONFIG = { emoji: "🎓", hint: "Задай любой вопрос — я помогу разобраться", quickQuestions: ["С чего начать изучение?", "Объясни основные понятия", "Дай план изучения"] };
 
 interface Message { role: MessageRole; content: string; isError?: boolean }
-interface Props { subject: string; subjectTitle: string; initialHistory: { role: string; content: string }[]; initialMessagesRemaining: number | null; initialTopic?: string }
+interface Props { subject: string; subjectTitle: string; initialHistory: { role: string; content: string }[]; initialMessagesRemaining: number | null; initialTopic?: string; isUltima?: boolean }
 
 // ─── Math rendering (KaTeX via CDN injected by layout) ─────────────────────
 function renderMath(formula: string, display: boolean): React.ReactNode {
@@ -149,7 +149,7 @@ function MarkdownMessage({ content }: { content: string }) {
 }
 
 // ─── Main Component ────────────────────────────────────────────────────────
-export default function ChatInterface({ subject, subjectTitle, initialHistory, initialMessagesRemaining, initialTopic }: Props) {
+export default function ChatInterface({ subject, subjectTitle, initialHistory, initialMessagesRemaining, initialTopic, isUltima = false }: Props) {
   const [messages, setMessages] = useState<Message[]>(
     initialHistory.map((m) => ({ role: m.role as MessageRole, content: m.content }))
   );
@@ -157,6 +157,9 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const [loading, setLoading] = useState(false);
   const [messagesRemaining, setMessagesRemaining] = useState<number | null>(initialMessagesRemaining);
   const [lastUserMsg, setLastUserMsg] = useState("");
+  // Ultima image upload state
+  const [pendingImage, setPendingImage] = useState<{ data: string; mimeType: string; preview: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const config = SUBJECT_CONFIG[subject] ?? DEFAULT_CONFIG;
@@ -189,8 +192,14 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage, subject, history: messages.filter(m => !m.isError).slice(-10) }),
+        body: JSON.stringify({
+          message: userMessage,
+          subject,
+          history: messages.filter(m => !m.isError).slice(-10),
+          ...(pendingImage ? { imageData: pendingImage.data, imageMimeType: pendingImage.mimeType } : {}),
+        }),
       });
+      setPendingImage(null);
 
       const data = await res.json();
 
@@ -225,6 +234,22 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   }
 
   const isEmpty = messages.length === 0;
+
+  // Handle image file selection for Ultima
+  function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      const base64 = dataUrl.split(",")[1];
+      setPendingImage({ data: base64, mimeType: file.type, preview: dataUrl });
+    };
+    reader.readAsDataURL(file);
+    // Reset input so same file can be selected again
+    e.target.value = "";
+  }
 
   return (
     <div className="flex flex-col bg-gray-50 dark:bg-[var(--bg)]" style={{ height: "100dvh" }}>
@@ -331,11 +356,34 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             </Link>
           </div>
         ) : (
-          <form onSubmit={sendMessage} className="flex gap-3">
+          {/* Ultima: pending image preview */}
+          {pendingImage && (
+            <div className="flex items-center gap-2 mb-2 p-2 bg-gray-50 dark:bg-[var(--bg-secondary)] rounded-xl border border-gray-200 dark:border-[var(--border)]">
+              <img src={pendingImage.preview} alt="Фото задачи" className="w-12 h-12 rounded-lg object-cover shrink-0" />
+              <span className="text-xs text-gray-500 dark:text-[var(--text-secondary)] flex-1">Фото прикреплено — напиши вопрос или отправь сразу</span>
+              <button type="button" onClick={() => setPendingImage(null)} className="text-gray-400 hover:text-gray-600 text-lg leading-none px-1">×</button>
+            </div>
+          )}
+          <form onSubmit={sendMessage} className="flex gap-2">
+            {/* Hidden file input for Ultima */}
+            {isUltima && (
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
+            )}
+            {/* Camera button — only for Ultima */}
+            {isUltima && (
+              <button type="button" onClick={() => fileInputRef.current?.click()} title="Сфотографировать задачу"
+                className="px-3 py-3 rounded-xl border border-gray-200 dark:border-[var(--border)] text-gray-500 dark:text-[var(--text-secondary)] hover:bg-gray-50 dark:hover:bg-[var(--bg-secondary)] transition-colors shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+              </button>
+            )}
             <input value={input} onChange={(e) => setInput(e.target.value)}
-              placeholder="Задай вопрос..." disabled={loading}
+              placeholder={pendingImage ? "Задай вопрос к фото (или отправь без текста)..." : "Задай вопрос..."}
+              disabled={loading}
               className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-brand-500 transition text-[15px] disabled:opacity-50 bg-gray-50 dark:bg-[var(--bg-secondary)] text-gray-900 dark:text-[var(--text)]" />
-            <button type="submit" disabled={loading || !input.trim()}
+            <button type="submit" disabled={loading || (!input.trim() && !pendingImage)}
               className="px-5 py-3 bg-brand-600 text-white rounded-xl font-medium hover:bg-brand-700 transition-colors disabled:opacity-40 text-sm">
               →
             </button>

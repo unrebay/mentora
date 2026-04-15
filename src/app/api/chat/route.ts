@@ -63,7 +63,7 @@ const GOAL_GUIDE: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { message, subject, history } = await req.json();
+    const { message, subject, history, imageData, imageMimeType } = await req.json();
 
     // Auth check
     const cookieStore = await cookies();
@@ -91,6 +91,7 @@ export async function POST(req: NextRequest) {
       ? new Date(profile.trial_expires_at) > new Date()
       : false;
     const isPro = profile?.plan === "pro" || profile?.plan === "ultima" || isTrialActive;
+    const isUltima = profile?.plan === "ultima";
     const today = new Date().toISOString().slice(0, 10);
     const isNewDay = profile?.messages_date !== today;
     const usedToday = isNewDay ? 0 : (profile?.messages_today ?? 0);
@@ -182,14 +183,29 @@ ${ragContext}
       content: message,
     });
 
-    // Get AI response
+    // Get AI response — use vision model if Ultima user sends an image
+    const hasImage = isUltima && imageData && imageMimeType;
+    const userTurnContent = hasImage
+      ? [
+          {
+            type: "image" as const,
+            source: {
+              type: "base64" as const,
+              media_type: imageMimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+              data: imageData,
+            },
+          },
+          { type: "text" as const, text: message || "Объясни решение задачи на фотографии. Разбери подробно, шаг за шагом." },
+        ]
+      : message;
+
     const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 1024,
+      model: hasImage ? "claude-sonnet-4-6" : "claude-haiku-4-5-20251001",
+      max_tokens: hasImage ? 2048 : 1024,
       system: systemPrompt,
       messages: [
         ...((history ?? []).slice(-10)),
-        { role: "user", content: message },
+        { role: "user", content: userTurnContent },
       ],
     });
 

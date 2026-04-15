@@ -42,6 +42,7 @@ export default async function LearnPage({ params, searchParams }: Props) {
     .eq("id", user.id)
     .single();
 
+  const isUltima = profile?.plan === "ultima";
   let initialMessagesRemaining: number | null = null;
 
   if (profile?.plan !== "pro" && profile?.plan !== "ultima") {
@@ -61,6 +62,7 @@ export default async function LearnPage({ params, searchParams }: Props) {
       initialHistory={history ?? []}
       initialMessagesRemaining={initialMessagesRemaining}
       initialTopic={initialTopic}
+      isUltima={isUltima}
     />
   );
 }
