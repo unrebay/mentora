@@ -39,6 +39,7 @@ function AuthPageContent() {
   const [oauthLoading, setOauthLoading] = useState<"google" | null>(null);
   const [error, setError]       = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [emailSent, setEmailSent] = useState<string | null>(null); // email address after signup
 
   const router      = useRouter();
   const searchParams = useSearchParams();
@@ -166,8 +167,13 @@ function AuthPageContent() {
           setError(error.message);
         }
       } else {
-        router.push("/onboarding");
-        router.refresh();
+        // If no session → email confirmation required
+        if (!signUpData.session) {
+          setEmailSent(email);
+        } else {
+          router.push("/onboarding");
+          router.refresh();
+        }
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -187,6 +193,44 @@ function AuthPageContent() {
   }
 
   const isSignup = mode === "signup";
+
+  // ── Email confirmation screen ──────────────────────────────────────────
+  if (emailSent) {
+    return (
+      <main className="min-h-screen s-page flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-sm text-center">
+          <div className="text-center mb-8">
+            <Logo size="md" href="/" />
+          </div>
+          <div className="s-raised rounded-2xl shadow-sm border p-8 space-y-5" style={{borderColor:"var(--border-light)"}}>
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto" style={{background:"rgba(69,97,232,0.1)"}}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4561E8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold t-primary mb-2">Проверь почту</h2>
+              <p className="t-secondary text-sm leading-relaxed">
+                Мы отправили письмо на{" "}
+                <span className="font-semibold t-primary">{emailSent}</span>.
+                Перейди по ссылке в письме, чтобы активировать аккаунт.
+              </p>
+            </div>
+            <div className="rounded-xl p-3 text-xs t-muted" style={{background:"var(--bg-secondary)"}}>
+              Не получил письмо? Проверь папку «Спам» или{" "}
+              <button
+                className="text-brand-600 hover:underline font-medium"
+                onClick={() => setEmailSent(null)}
+              >
+                попробуй снова
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen s-page flex items-center justify-center px-4 py-12">
