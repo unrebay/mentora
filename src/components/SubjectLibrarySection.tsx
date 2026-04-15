@@ -3,7 +3,8 @@ import { useState } from "react";
 import Link from "next/link";
 import AddSubjectModal from "@/components/AddSubjectModal";
 import SubjectSuggestionModal from "@/components/SubjectSuggestionModal";
-import TopicsMap from "@/components/TopicsMap";
+import dynamic from "next/dynamic";
+const TopicsMap = dynamic(() => import("@/components/TopicsMap"), { ssr: false });
 import { RUSSIAN_HISTORY_TOPICS, TOTAL_TOPICS } from "@/lib/topics";
 
 const XP_LEVELS = [
