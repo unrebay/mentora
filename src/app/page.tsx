@@ -355,6 +355,46 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* HOW TO LEARN */}
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-3xl p-8 md:p-10">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">Как учиться</div>
+              <h2 className="text-3xl font-bold mb-4 leading-tight">
+                3 приёма, которые делают<br />
+                <span className="text-brand-600 dark:text-brand-500 italic">учёбу эффективной</span>
+              </h2>
+              <Link href="/guide" className="inline-flex items-center gap-2 text-brand-600 dark:text-brand-500 text-sm font-medium hover:underline">
+                Полный гайд →
+              </Link>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-start gap-4">
+                <span className="w-8 h-8 flex-shrink-0 bg-brand-50 dark:bg-brand-900/20 rounded-lg flex items-center justify-center text-sm">🔁</span>
+                <div>
+                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">Не понял — попроси объяснить иначе</div>
+                  <div className="text-xs text-[var(--text-secondary)]">«Объясни как будто я школьник» — Ментора перестроит ответ</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <span className="w-8 h-8 flex-shrink-0 bg-green-50 dark:bg-green-900/20 rounded-lg flex items-center justify-center text-sm">📝</span>
+                <div>
+                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">Напиши «квиз» — получи 5 вопросов</div>
+                  <div className="text-xs text-[var(--text-secondary)]">Ментора проверит, что ты знаешь, а что нет</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <span className="w-8 h-8 flex-shrink-0 bg-amber-50 dark:bg-amber-900/20 rounded-lg flex items-center justify-center text-sm">⚡</span>
+                <div>
+                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">В конце — попроси «что я узнал»</div>
+                  <div className="text-xs text-[var(--text-secondary)]">Ментора даст итог сессии в 3–5 тезисах</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       {/* CTA */}
       <section className="bg-gray-900 dark:bg-[#04040c] text-white px-6 py-24 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-30" aria-hidden>
