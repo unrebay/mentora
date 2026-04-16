@@ -66,6 +66,14 @@ const GOAL_GUIDE: Record<string, string> = {
 export async function POST(req: NextRequest) {
   try {
     const { message, subject, history, imageData, imageMimeType } = await req.json();
+    // Input validation
+    if (!message || typeof message !== "string" || message.length > 4000) {
+      return NextResponse.json({ error: "Invalid message" }, { status: 400 });
+    }
+    const VALID_SUBJECTS = ["russian-history","world-history","mathematics","physics","chemistry","biology","russian-language","literature","english","social-studies","geography","computer-science","astronomy","discovery"];
+    if (!subject || !VALID_SUBJECTS.includes(subject)) {
+      return NextResponse.json({ error: "Invalid subject" }, { status: 400 });
+    }
 
     // Auth check
     const cookieStore = await cookies();
@@ -214,7 +222,7 @@ ${ragContext}
       max_tokens: hasImage ? 2048 : 1024,
       system: systemPrompt,
       messages: [
-        ...((history ?? []).slice(-10)),
+        ...((history ?? []).filter((m: {role: string}) => m.role === "user" || m.role === "assistant").slice(-10)),
         { role: "user", content: userTurnContent },
       ],
     });
@@ -262,6 +270,7 @@ ${ragContext}
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
     console.error("Chat API error:", errMsg);
-    return NextResponse.json({ error: "Internal server error", detail: errMsg }, { status: 500 });
+    console.error("Chat API error detail:", errMsg);
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
