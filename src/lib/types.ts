@@ -59,8 +59,8 @@ export const SUBJECTS: Subject[] = [
     description: "От Рюрика до наших дней",
     emoji: "🏰",
     available: true,
-    beta: true,
-    verified: false,
+    beta: false,
+    verified: true,
   },
   {
     id: "world-history",
