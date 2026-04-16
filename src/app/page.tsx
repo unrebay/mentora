@@ -45,6 +45,7 @@ const SUBJECTS = [
   { id: "geography", emoji: "🗺️", title: "География", desc: "Природа, страны, климат", live: true },
   { id: "computer-science", emoji: "💻", title: "Информатика", desc: "Алгоритмы, программирование", live: true },
   { id: "astronomy", emoji: "🔭", title: "Астрономия", desc: "Звёзды, планеты, вселенная", live: true },
+  { id: "discovery", emoji: "🌐", title: "Кругозор", desc: "Факты, открытия, феномены", live: true },
   { id: "suggest", emoji: "+", title: "Предложить тему", desc: "Голосуй за предмет", suggest: true },
 ];
 
