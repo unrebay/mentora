@@ -5,11 +5,11 @@ import AddSubjectModal from "@/components/AddSubjectModal";
 import SubjectSuggestionModal from "@/components/SubjectSuggestionModal";
 
 const XP_LEVELS = [
-  { name: "ÐÐ¾Ð²Ð¸ÑÐ¾Ðº",       minXP: 0,    maxXP: 100,      color: "bg-gray-400" },
-  { name: "ÐÑÑÐ»ÐµÐ´Ð¾Ð²Ð°ÑÐµÐ»Ñ", minXP: 100,  maxXP: 300,      color: "bg-blue-500" },
-  { name: "ÐÐ½Ð°ÑÐ¾Ðº",        minXP: 300,  maxXP: 600,      color: "bg-brand-500" },
-  { name: "ÐÑÑÐ¾ÑÐ¸Ðº",       minXP: 600,  maxXP: 1000,     color: "bg-purple-500" },
-  { name: "Ð­ÐºÑÐ¿ÐµÑÑ",       minXP: 1000, maxXP: Infinity, color: "bg-amber-500" },
+  { name: "Новичок",       minXP: 0,    maxXP: 100,      color: "bg-gray-400" },
+  { name: "Исследователь", minXP: 100,  maxXP: 300,      color: "bg-blue-500" },
+  { name: "Знаток",        minXP: 300,  maxXP: 600,      color: "bg-brand-500" },
+  { name: "Историк",       minXP: 600,  maxXP: 1000,     color: "bg-purple-500" },
+  { name: "Эксперт",       minXP: 1000, maxXP: Infinity, color: "bg-amber-500" },
 ];
 
 function getLevel(xp: number) {
@@ -22,18 +22,18 @@ function getLevel(xp: number) {
 
 function pluralDays(n: number): string {
   const m10 = n % 10, m100 = n % 100;
-  if (m100 >= 11 && m100 <= 14) return "Ð´Ð½ÐµÐ¹";
-  if (m10 === 1) return "Ð´ÐµÐ½Ñ";
-  if (m10 >= 2 && m10 <= 4) return "Ð´Ð½Ñ";
-  return "Ð´Ð½ÐµÐ¹";
+  if (m100 >= 11 && m100 <= 14) return "дней";
+  if (m10 === 1) return "день";
+  if (m10 >= 2 && m10 <= 4) return "дня";
+  return "дней";
 }
 
 function pluralMenty(n: number): string {
   const m10 = n % 10, m100 = n % 100;
-  if (m100 >= 11 && m100 <= 14) return "Ð¼ÐµÐ½Ñ";
-  if (m10 === 1) return "Ð¼ÐµÐ½ÑÐ°";
-  if (m10 >= 2 && m10 <= 4) return "Ð¼ÐµÐ½ÑÑ";
-  return "Ð¼ÐµÐ½Ñ";
+  if (m100 >= 11 && m100 <= 14) return "мент";
+  if (m10 === 1) return "мента";
+  if (m10 >= 2 && m10 <= 4) return "менты";
+  return "мент";
 }
 
 // Note: function declaration (not const) avoids potential TDZ issues in bundling
@@ -41,7 +41,7 @@ function MentoraEIcon() {
   return (
     <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8",
       fontStyle: "italic", fontWeight: 700, fontSize: "1.1em", lineHeight: 1,
-      marginRight: "0.12em" }}>Ðµ</span>
+      marginRight: "0.12em" }}>е</span>
   );
 }
 
@@ -74,11 +74,11 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
     <>
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-widest">
-          ÐÑÐµÐ´Ð¼ÐµÑÑ
+          Предметы
         </h2>
         <button onClick={() => setSuggestOpen(true)}
           className="flex items-center gap-1.5 text-xs font-medium text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 transition-colors px-3 py-1.5 rounded-lg">
-          <span className="text-base leading-none">+</span> ÐÑÐµÐ´Ð»Ð¾Ð¶Ð¸ÑÑ Ð¿ÑÐµÐ´Ð¼ÐµÑ
+          <span className="text-base leading-none">+</span> Предложить предмет
         </button>
       </div>
 
@@ -99,7 +99,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                 style={{ background: "var(--bg-secondary)", borderColor: "var(--border)" }}>
                 <div className="block p-5">
                   <span className="absolute top-3 right-3 text-[10px] font-medium px-1.5 py-0.5 rounded-md"
-                    style={{ background: "var(--bg)", color: "var(--text-muted)", border: "1px solid var(--border)" }}>Ð¡ÐÐÐ Ð</span>
+                    style={{ background: "var(--bg)", color: "var(--text-muted)", border: "1px solid var(--border)" }}>СКОРО</span>
                   <div className="text-3xl mb-3">{subject.emoji}</div>
                   <div className="font-semibold text-sm" style={{ color: "var(--text-secondary)" }}>{subject.title}</div>
                   <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{subject.description}</div>
@@ -122,8 +122,8 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
               onClick={() => setSelectedId(id => id === subject.id ? null : subject.id)}>
               <div className="block p-5">
                 {isVerified
-                  ? <span className="absolute top-3 right-3 text-[10px] font-bold bg-white/25 text-white px-1.5 py-0.5 rounded-md">â¶ verified</span>
-                  : <span className="absolute top-3 right-3 text-[10px] font-bold bg-brand-50 text-brand-600 px-1.5 py-0.5 rounded-md">â¶ beta</span>}
+                  ? <span className="absolute top-3 right-3 text-[10px] font-bold bg-white/25 text-white px-1.5 py-0.5 rounded-md">✶ verified</span>
+                  : <span className="absolute top-3 right-3 text-[10px] font-bold bg-brand-50 text-brand-600 px-1.5 py-0.5 rounded-md">✶ beta</span>}
 
                 <div className="text-3xl mb-2">{subject.emoji}</div>
                 <div className={`font-semibold text-sm mb-0.5 ${isVerified ? "text-white" : ""}`}
@@ -156,7 +156,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                   </div>
                   {(progress?.streak_days ?? 0) > 0 && (
                     <div className={`text-[10px] font-medium mb-2 ${isVerified ? "text-white/80" : "text-orange-500"}`}>
-                      ð¥ {progress!.streak_days} {pluralDays(progress!.streak_days)} Ð¿Ð¾Ð´ÑÑÐ´
+                      🔥 {progress!.streak_days} {pluralDays(progress!.streak_days)} подряд
                     </div>
                   )}
                   <Link href={`/learn/${subject.id}`}
@@ -164,7 +164,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                     className={`inline-flex text-xs font-semibold transition-colors ${
                       isVerified ? "text-white hover:text-white/80" : "text-brand-600 hover:text-brand-700"
                     }`}>
-                    {xp > 0 ? "ÐÑÐ¾Ð´Ð¾Ð»Ð¶Ð¸ÑÑ â" : "ÐÐ°ÑÐ°ÑÑ â"}
+                    {xp > 0 ? "Продолжить →" : "Начать →"}
                   </Link>
                 </div>
               </div>
@@ -180,7 +180,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
             <span className="text-2xl leading-none" style={{ color: "var(--text-muted)" }}>+</span>
           </div>
           <span className="text-xs font-medium text-center transition-colors" style={{ color: "var(--text-muted)" }}>
-            ÐÐ¾Ð±Ð°Ð²Ð¸ÑÑ Ð¿ÑÐµÐ´Ð¼ÐµÑ
+            Добавить предмет
           </span>
         </button>
       </div>
