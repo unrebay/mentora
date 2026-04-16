@@ -48,6 +48,20 @@ const STEPS = [
       { value: "curiosity", emoji: "✨", label: "Просто интересно", desc: "Люблю историю, хочу узнать больше" },
     ],
   },
+  {
+    step: 4,
+    title: "С чего начнём?",
+    subtitle: "Выбери первый предмет — сразу откроем чат",
+    field: "first_subject",
+    options: [
+      { value: "russian-history", emoji: "📜", label: "История России", desc: "От Древней Руси до современности" },
+      { value: "world-history", emoji: "🌍", label: "Всемирная история", desc: "Цивилизации, войны, революции" },
+      { value: "mathematics", emoji: "📐", label: "Математика", desc: "Алгебра, геометрия, задачи" },
+      { value: "physics", emoji: "⚡", label: "Физика", desc: "Механика, электричество, оптика" },
+      { value: "english", emoji: "🇬🇧", label: "Английский язык", desc: "Грамматика, лексика, разговорный" },
+      { value: "russian-language", emoji: "📝", label: "Русский язык", desc: "Орфография, пунктуация, ЕГЭ" },
+    ],
+  },
 ];
 
 export default function OnboardingPage() {
@@ -60,6 +74,9 @@ export default function OnboardingPage() {
   const step = STEPS[currentStep];
   const isLast = currentStep === STEPS.length - 1;
 
+  function handleSelect(value: string) {
+    setSelected(value);
+  }
 
   async function handleNext() {
     if (!selected || saving) return;
@@ -67,10 +84,17 @@ export default function OnboardingPage() {
     setAnswers(newAnswers);
     if (isLast) {
       setSaving(true); setError(null);
+      const firstSubject = selected;
       const ok = await completeOnboarding(newAnswers);
-      if (ok) { fetch("/api/email/welcome", { method: "POST" }).catch(() => {}); window.location.href = "/dashboard"; }
-      else { setError("Не удалось сохранить. Попробуй ещё раз."); setSaving(false); }
-    } else { setCurrentStep((s) => s + 1); setSelected(null); }
+      if (ok) {
+        fetch("/api/email/welcome", { method: "POST" }).catch(() => {});
+        window.location.href = `/learn/${firstSubject}`;
+      } else {
+        setError("Не удалось сохранить. Попробуй ещё раз."); setSaving(false);
+      }
+    } else {
+      setCurrentStep((s) => s + 1); setSelected(null);
+    }
   }
 
   async function handleSkip() {
@@ -80,8 +104,9 @@ export default function OnboardingPage() {
       style: answers.style ?? "storytelling",
       level: answers.level ?? "adult",
       goal: answers.goal ?? "general",
+      first_subject: "russian-history",
     });
-    if (ok) { window.location.href = "/dashboard"; }
+    if (ok) { window.location.href = "/learn/russian-history"; }
     else { setError("Не удалось пропустить. Попробуй ещё раз."); setSaving(false); }
   }
 
