@@ -99,7 +99,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                 style={{ background: "var(--bg-secondary)", borderColor: "var(--border)" }}>
                 <div className="block p-5">
                   <span className="absolute top-3 right-3 text-[10px] font-medium px-1.5 py-0.5 rounded-md"
-                    style={{ background: "var(--bg-secondary)", color: "var(--text-muted)" }}>Ð¡ÐÐÐ Ð</span>
+                    style={{ background: "var(--bg)", color: "var(--text-muted)", border: "1px solid var(--border)" }}>Ð¡ÐÐÐ Ð</span>
                   <div className="text-3xl mb-3">{subject.emoji}</div>
                   <div className="font-semibold text-sm" style={{ color: "var(--text-secondary)" }}>{subject.title}</div>
                   <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{subject.description}</div>
