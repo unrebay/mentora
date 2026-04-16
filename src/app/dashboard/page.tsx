@@ -158,7 +158,7 @@ export default async function DashboardPage() {
                 style={isUltima
                   ? { background: "#000000", color: "#fff", border: "none" }
                   : { background: "#4561E8", color: "#fff" }}>
-                <span className="font-bold tracking-wide text-xs">{isUltima ? "✦ ULTIMA" : "PRO"}</span>
+                <span className="font-bold tracking-wide text-xs">{isUltima ? "✦ ULTRA" : "PRO"}</span>
               </div>
               <div className="flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-xl px-4 py-2.5 text-sm"><span>♾️</span><span className="text-brand-700 font-medium">Безлимитные сообщения</span></div>
               {totalXP > 0 && <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm font-semibold text-[var(--text)]"><MentoraE /> {totalXP} {pluralMenty(totalXP)}</div>}
