@@ -25,7 +25,6 @@ function getLevel(xp: number) {
   return { ...lvl, idx, next, progress };
 }
 
-// Russian pluralization: 1 мента, 2-4 менты, 5+ мент
 function pluralMenty(n: number): string {
   const m10 = n % 10, m100 = n % 100;
   if (m100 >= 11 && m100 <= 14) return "мент";
@@ -34,9 +33,8 @@ function pluralMenty(n: number): string {
   return "мент";
 }
 
-// Mentora logo "е" — italic, Playfair, brand blue
 const MentoraE = () => (
-  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", fontWeight: 700, fontSize: "1.2em", lineHeight: 1, display: "inline-block", verticalAlign: "-0.08em", marginRight: "0.1em" }}>е</span>
+  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", fontWeight: 700, fontSize: "1.2em", lineHeight: 1, marginRight: "0.1em" }}>е</span>
 );
 
 type BadgeDef = {
@@ -109,10 +107,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
-      <nav
-        className="sticky top-0 z-10 border-b border-[var(--border)] px-6 py-4"
-        style={{ background: "var(--bg-nav)", backdropFilter: "blur(12px)" }}
-      >
+      <nav className="sticky top-0 z-10 border-b border-[var(--border)] px-6 py-4" style={{ background: "var(--bg-nav)", backdropFilter: "blur(12px)" }}>
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <Logo size="sm" />
           <div className="flex items-center gap-4">
@@ -121,56 +116,23 @@ export default async function ProfilePage() {
           </div>
         </div>
       </nav>
-
       <main className="max-w-3xl mx-auto px-6 py-10 space-y-8">
-      {/* Animated gradient background */}
-      <div
-        className="fixed inset-0 -z-10 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 100% 70% at 15% 10%, rgba(69,97,232,0.06) 0%, transparent 55%), radial-gradient(ellipse 80% 60% at 85% 90%, rgba(91,119,255,0.04) 0%, transparent 55%)",
-          animation: "gradientDrift 10s ease-in-out infinite alternate",
-        }}
-      />
-        {/* Шапка профиля */}
+      <div className="fixed inset-0 -z-10 pointer-events-none" style={{ background: "radial-gradient(ellipse 100% 70% at 15% 10%, rgba(69,97,232,0.06) 0%, transparent 55%), radial-gradient(ellipse 80% 60% at 85% 90%, rgba(91,119,255,0.04) 0%, transparent 55%)", animation: "gradientDrift 10s ease-in-out infinite alternate" }} />
         <div className="bg-[var(--bg-card)] rounded-2xl p-8 border border-[var(--border)] shadow-sm flex items-center gap-6">
-          <div
-            className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold text-white shrink-0"
-            style={{ background: `linear-gradient(135deg, ${lvl.color}, ${lvl.color}99)` }}
-          >
-            {initial}
-          </div>
+          <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold text-white shrink-0" style={{ background: `linear-gradient(135deg, ${lvl.color}, ${lvl.color}99)` }}>{initial}</div>
           <div className="flex-1 min-w-0">
             <p className="text-xl font-bold text-[var(--text)] truncate">{name}</p>
             <p className="text-sm text-[var(--text-muted)] truncate">{user.email}</p>
-            <ProfileNameEditor
-              currentNickname={profile?.display_name ?? null}
-              changesLeft={changesLeft}
-              currentFullName={profile?.full_name ?? null}
-              currentAge={profile?.age ?? null}
-              currentPhone={profile?.phone ?? null}
-            />
+            <ProfileNameEditor currentNickname={profile?.display_name ?? null} changesLeft={changesLeft} currentFullName={profile?.full_name ?? null} currentAge={profile?.age ?? null} currentPhone={profile?.phone ?? null} />
             <div className="mt-3 flex items-center gap-2">
               <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: lvl.bg, color: lvl.color }}>{lvl.name}</span>
-              {isPro && (
-                <span className="text-xs font-bold px-2.5 py-1 rounded-full tracking-wide"
-                  style={{ background: isUltima ? "#0f0f1e" : "#4561E8", color: "#fff", border: isUltima ? "1px solid #28284a" : "none" }}>
-                  {isUltima ? "✦ ULTIMA" : "PRO"}
-                </span>
-              )}
+              {isPro && <span className="text-xs font-bold px-2.5 py-1 rounded-full tracking-wide" style={{ background: isUltima ? "#0f0f1e" : "#4561E8", color: "#fff", border: isUltima ? "1px solid #28284a" : "none" }}>{isUltima ? "✦ ULTIMA" : "PRO"}</span>}
             </div>
           </div>
         </div>
-
-        {/* Статистика */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            {
-              label: "Менты",
-              value: <span className="text-2xl font-bold text-[var(--text)]">{totalXP} <span className="text-lg font-medium text-[var(--text-muted)]">{pluralMenty(totalXP)}</span></span>,
-              icon: <MentoraE />,
-              iconClass: "text-2xl mb-1",
-            },
+            { label: "Менты", value: <span className="text-2xl font-bold text-[var(--text)]">{totalXP} <span className="text-lg font-medium text-[var(--text-muted)]">{pluralMenty(totalXP)}</span></span>, icon: <MentoraE />, iconClass: "text-2xl mb-1" },
             { label: "Макс. стрик", value: <span className="text-2xl font-bold text-[var(--text)]">{maxStreak}<span className="text-lg font-medium text-[var(--text-muted)]">д</span></span>, icon: "🔥", iconClass: "text-2xl mb-1" },
             { label: "Сообщений", value: <span className="text-2xl font-bold text-[var(--text)]">{totalMessages}</span>, icon: "💬", iconClass: "text-2xl mb-1" },
             { label: "Достижений", value: <span className="text-2xl font-bold text-[var(--text)]">{earned.length}</span>, icon: "🏅", iconClass: "text-2xl mb-1" },
@@ -182,29 +144,16 @@ export default async function ProfilePage() {
             </div>
           ))}
         </div>
-
-        {/* Прогресс уровня */}
         <div className="bg-[var(--bg-card)] rounded-2xl p-6 border border-[var(--border)] shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <span className="font-semibold text-[var(--text)]">{lvl.name}</span>
-            {lvl.next && (
-              <span className="text-sm text-[var(--text-muted)]">
-                {lvl.next.name} через {lvl.next.minXP - totalXP} {pluralMenty(lvl.next.minXP - totalXP)}
-              </span>
-            )}
+            {lvl.next && <span className="text-sm text-[var(--text-muted)]">{lvl.next.name} через {lvl.next.minXP - totalXP} {pluralMenty(lvl.next.minXP - totalXP)}</span>}
           </div>
           <div className="h-3 bg-[var(--border)] rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${lvl.progress}%`, background: lvl.color }}
-            />
+            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${lvl.progress}%`, background: lvl.color }} />
           </div>
-          <p className="text-xs text-[var(--text-muted)] mt-2">
-            {totalXP} / {lvl.next?.minXP ?? totalXP} {pluralMenty(lvl.next?.minXP ?? totalXP)}
-          </p>
+          <p className="text-xs text-[var(--text-muted)] mt-2">{totalXP} / {lvl.next?.minXP ?? totalXP} {pluralMenty(lvl.next?.minXP ?? totalXP)}</p>
         </div>
-
-        {/* Бейджи — заработанные */}
         {earned.length > 0 && (
           <div>
             <h2 className="text-lg font-bold text-[var(--text)] mb-4">🏅 Достижения ({earned.length})</h2>
@@ -212,28 +161,17 @@ export default async function ProfilePage() {
               {earned.map(b => {
                 const ts = TIER_STYLE[b.tier];
                 return (
-                  <div
-                    key={b.id}
-                    className="bg-[var(--bg-card)] rounded-2xl p-5 border-2 shadow-sm flex flex-col items-center text-center gap-2"
-                    style={{ borderColor: ts.border, background: ts.border + "18" }}
-                  >
+                  <div key={b.id} className="bg-[var(--bg-card)] rounded-2xl p-5 border-2 shadow-sm flex flex-col items-center text-center gap-2" style={{ borderColor: ts.border, background: ts.border + "18" }}>
                     <span className="text-4xl">{b.icon}</span>
                     <span className="font-bold text-sm text-[var(--text)]">{b.name}</span>
                     <span className="text-xs t-secondary">{b.desc}</span>
-                    <span
-                      className="text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1"
-                      style={{ background: ts.border + "22", color: ts.border }}
-                    >
-                      {ts.label}
-                    </span>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1" style={{ background: ts.border + "22", color: ts.border }}>{ts.label}</span>
                   </div>
                 );
               })}
             </div>
           </div>
         )}
-
-        {/* Бейджи — заблокированные */}
         {locked.length > 0 && (
           <div>
             <h2 className="text-lg font-bold text-[var(--text-muted)] mb-4">🔒 Ещё не разблокировано</h2>
@@ -248,11 +186,7 @@ export default async function ProfilePage() {
             </div>
           </div>
         )}
-
-        {/* Referral widget */}
-        <div className="px-5 pb-8">
-          <ReferralWidget />
-        </div>
+        <div className="px-5 pb-8"><ReferralWidget /></div>
       </main>
     </div>
   );
