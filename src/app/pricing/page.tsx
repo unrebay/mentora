@@ -171,12 +171,12 @@ export default async function PricingPage() {
           </div>
 
           {/* ULTIMA */}
-          <div className="relative bg-gray-900 rounded-2xl p-7 flex flex-col">
+          <div className="relative bg-black rounded-2xl p-7 flex flex-col">
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
-              <span className="bg-gray-700 text-white text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase">Новинка</span>
+              <span className="bg-white/10 text-white text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase">НОВИНКА</span>
             </div>
             <div className="mb-6">
-              <p className="text-[11px] font-bold text-gray-400 tracking-[0.15em] uppercase mb-4">Ultima</p>
+              <p className="text-[11px] font-bold text-white tracking-[0.15em] uppercase mb-4">ULTIMA</p>
               <div className="flex items-end gap-1.5">
                 <span className="text-5xl font-bold tracking-tight text-white">799 ₽</span>
                 <span className="text-gray-400 text-sm mb-2">/мес</span>
@@ -240,9 +240,9 @@ export default async function PricingPage() {
         <h2 className="text-2xl font-bold text-center mb-10 tracking-tight">Часто спрашивают</h2>
         <div className="space-y-3">
           {FAQ.map(({ q, a }) => (
-            <div key={q} className="bg-white border border-gray-100 rounded-2xl px-6 py-5">
-              <p className="font-semibold text-gray-900 mb-2 text-sm">{q}</p>
-              <p className="text-sm text-gray-400 leading-relaxed">{a}</p>
+            <div key={q} className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl px-6 py-5">
+              <p className="font-semibold text-[var(--text)] mb-2 text-sm">{q}</p>
+              <p className="text-sm text-[var(--text-muted)] leading-relaxed">{a}</p>
             </div>
           ))}
         </div>
@@ -264,8 +264,8 @@ export default async function PricingPage() {
         <p className="text-gray-600 text-xs mt-5">Без карты. Без обязательств.</p>
       </section>
 
-      <footer className="py-8 border-t border-gray-100 bg-white">
-        <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-400">
+      <footer className="py-8 border-t border-[var(--border)] bg-[var(--bg)]">
+        <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-[var(--text-muted)]">
           <span>© 2026 Mentora</span>
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-gray-700 transition-colors">Конфиденциальность</Link>
