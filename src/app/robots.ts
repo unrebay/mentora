@@ -5,8 +5,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
-        disallow: ["/dashboard", "/learn", "/onboarding", "/auth"],
+        allow: ["/", "/pricing", "/privacy", "/terms"],
+        disallow: ["/profile", "/admin", "/api", "/dashboard", "/learn"],
       },
     ],
     sitemap: "https://mentora.su/sitemap.xml",
