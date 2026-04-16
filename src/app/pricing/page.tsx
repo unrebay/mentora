@@ -20,7 +20,7 @@ const PRO_FEATURES = [
   "Приоритетная поддержка",
 ];
 
-const ULTIMA_FEATURES = [
+const ULTRA_FEATURES = [
   "Всё из Pro",
   "Распознавание фото и задач",
   "Генерация презентаций по теме",
@@ -35,8 +35,8 @@ const FAQ = [
     a: "На Pro нет ограничений на количество сообщений в день. Учись столько, сколько хочешь." },
   { q: "Когда появятся новые предметы?",
     a: "Математика, биология и английский выйдут в первую очередь. Подписчики Pro получат доступ сразу при релизе." },
-  { q: "Как работает Ultima?",
-    a: "Ultima добавляет к Pro три новых возможности: сфотографируй задачу — Mentora объяснит решение, создай презентацию по любой теме, получи аудио-разбор сложного раздела." },
+  { q: "Как работает Ultra?",
+    a: "Ultra добавляет к Pro три новых возможности: сфотографируй задачу — Mentora объяснит решение, создай презентацию по любой теме, получи аудио-разбор сложного раздела." },
   { q: "Как отменить подписку?",
     a: "В любой момент в настройках аккаунта — без звонков и объяснений." },
 ];
@@ -44,12 +44,12 @@ const FAQ = [
 export const metadata = {
   title: "Тарифы — Mentora AI-репетитор",
   description:
-    "Начни бесплатно — 20 сообщений в день без карты. Pro за 399 ₽/мес открывает все 13 предметов без лимита. Ultima добавляет фото, презентации и аудио.",
-  keywords: ["тарифы AI репетитора", "стоимость репетитора онлайн", "Pro план Mentora", "Ultima"],
+    "Начни бесплатно — 20 сообщений в день без карты. Pro за 399 ₽/мес открывает все 13 предметов без лимита. Ultra добавляет фото, презентации и аудио.",
+  keywords: ["тарифы AI репетитора", "стоимость репетитора онлайн", "Pro план Mentora", "Ultra"],
   alternates: { canonical: "https://mentora.su/pricing" },
   openGraph: {
     title: "Тарифы Mentora — от 0 ₽",
-    description: "Бесплатно, Pro 399 ₽/мес или Ultima 799 ₽/мес. Без договоров — отмени в любой момент.",
+    description: "Бесплатно, Pro 399 ₽/мес или Ultra 799 ₽/мес. Без договоров — отмени в любой момент.",
     url: "https://mentora.su/pricing",
   },
 };
@@ -110,7 +110,7 @@ export default async function PricingPage() {
           <span className="text-brand-600 italic">без ограничений.</span>
         </h1>
         <p className="text-lg t-muted max-w-lg mx-auto leading-relaxed">
-          Бесплатный план без карты. Pro открывает все предметы. Ultima добавляет фото, презентации и аудио.
+          Бесплатный план без карты. Pro открывает все предметы. Ultra добавляет фото, презентации и аудио.
         </p>
       </section>
 
@@ -176,7 +176,7 @@ export default async function PricingPage() {
               <span className="bg-white/10 text-white text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase">НОВИНКА</span>
             </div>
             <div className="mb-6">
-              <p className="text-[11px] font-bold text-white tracking-[0.15em] uppercase mb-4">ULTIMA</p>
+              <p className="text-[11px] font-bold text-white tracking-[0.15em] uppercase mb-4">ULTRA</p>
               <div className="flex items-end gap-1.5">
                 <span className="text-5xl font-bold tracking-tight text-white">799 ₽</span>
                 <span className="text-gray-400 text-sm mb-2">/мес</span>
@@ -193,7 +193,7 @@ export default async function PricingPage() {
               <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_annual" />
             </div>
             <ul className="space-y-3 flex-1">
-              {ULTIMA_FEATURES.map(f => (
+              {ULTRA_FEATURES.map(f => (
                 <li key={f} className="flex items-start gap-2.5 text-sm text-white/70">
                   <Check color="white" />{f}
                 </li>
