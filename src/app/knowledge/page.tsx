@@ -30,7 +30,7 @@ export default async function KnowledgePage() {
       <nav className="flex-shrink-0 border-b border-white/8 px-4 py-3 flex items-center justify-between"
         style={{ background: "rgba(6,6,15,0.90)", backdropFilter: "blur(12px)" }}>
         <div className="flex items-center gap-3">
-          <Logo size="sm" />
+          <Logo size="sm" textColor="white" />
           <Link href="/dashboard" className="text-sm text-white/40 hover:text-white/70 transition-colors">
             ← Назад
           </Link>
