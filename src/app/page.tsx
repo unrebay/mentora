@@ -119,7 +119,7 @@ export default async function HomePage() {
                 Войти
               </Link>
               <Link href="/auth"
-                className="hidden sm:inline-flex px-5 py-2.5 bg-brand-600 dark:bg-brand-600 text-white text-sm font-medium rounded-xl hover:bg-brand-700 transition-colors">
+                className="inline-flex px-5 py-2.5 bg-brand-600 dark:bg-brand-600 text-white text-sm font-medium rounded-xl hover:bg-brand-700 transition-colors">
                 Попробовать бесплатно →
               </Link>
             </>
@@ -130,7 +130,7 @@ export default async function HomePage() {
       {/* HERO — with particle background */}
       <section className="relative overflow-hidden max-w-6xl mx-auto px-6 pt-16 pb-12">
         {/* Particle layer — behind content, screen blend */}
-        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+        <div className="absolute inset-0 pointer-events-none hidden md:block" aria-hidden>
           <ParticleHero />
         </div>
 
