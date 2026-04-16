@@ -54,7 +54,7 @@ const SUBJECTS = [
 const STEPS = [
   { n: "01", title: "Лендинг", desc: "Анимированный демо-диалог прямо на главной. Без регистрации — попробуй сейчас." },
   { n: "02", title: "Выбор предмета", desc: "Визуальные карточки с анимацией. Не список — галерея." },
-  { n: "03", title: "Настройка ментора", desc: "3 вопроса: стиль общения, уровень, цель. Ментор сразу отвечает в выбранном тнее.", badge: true },
+  { n: "03", title: "Настройка ментора", desc: "3 вопроса: стиль общения, уровень, цель. Ментор сразу отвечает в выбранном тоне.", badge: true },
   { n: "04", title: "Первый урок", desc: "Начинается мгновенно. Регистрация предлагается чтобы сохранить прогресс." },
   { n: "05", title: "Профиль", desc: "Менты, карта прогресса, стрик. Пользователь видит себя внутри системы." },
 ];
@@ -218,7 +218,7 @@ export default async function HomePage() {
         <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">Библиотека знаний</div>
         <h2 className="text-4xl font-bold mb-10 leading-tight">
           Выбери, что хочешь<br />
-     0    изучить <span className="text-brand-600 dark:text-brand-500 italic">сегодня</span>
+          изучить <span className="text-brand-600 dark:text-brand-500 italic">сегодня</span>
         </h2>
         <SubjectGrid subjects={SUBJECTS} />
       </section>
@@ -278,7 +278,7 @@ export default async function HomePage() {
             {STEPS.map((s) => (
               <div key={s.n} className="bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border)] relative">
                 {s.badge && (
-            0     <span className="absolute top-3 right-3 text-[9px] font-bold bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 px-1.5 py-0.5 rounded">ВАУ</span>
+                  <span className="absolute top-3 right-3 text-[9px] font-bold bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 px-1.5 py-0.5 rounded">ВАУ</span>
                 )}
                 <div className="text-xs font-bold text-[var(--text-muted)] mb-3">{s.n}</div>
                 <div className="font-semibold text-sm mb-1 text-[var(--text)]">{s.title}</div>
