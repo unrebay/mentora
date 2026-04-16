@@ -1,6 +1,30 @@
 import { redirect } from "next/navigation";
-export const dynamic = "force-dynamic";
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Mentora — AI-репетитор | История, Математика, Физика и ещё 10 предметов",
+  description:
+    "Персональный AI-репетитор для школьников и студентов. 13 предметов: история, математика, физика, химия, биология, русский язык, литература, английский и др. Подготовка к ЕГЭ/ОГЭ в живом диалоге. Начни бесплатно — без карты.",
+  keywords: [
+    "AI репетитор", "ИИ репетитор", "персональный ментор", "школьный репетитор онлайн",
+    "подготовка к ЕГЭ", "подготовка к ОГЭ", "ЕГЭ история", "ОГЭ математика",
+    "учить историю с ИИ", "история России ЕГЭ", "математика онлайн репетитор",
+    "физика онлайн", "химия репетитор", "биология онлайн", "английский с AI",
+    "обществознание ЕГЭ", "mentora", "mentora.su",
+  ],
+  alternates: { canonical: "https://mentora.su" },
+  openGraph: {
+    type: "website",
+    url: "https://mentora.su",
+    title: "Mentora — AI-репетитор по 13 школьным предметам",
+    description:
+      "История, математика, физика, химия, биология и ещё 8 предметов. Диалог с AI-ментором — живо, персонально, бесплатно.",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Mentora AI-репетитор" }],
+  },
+};
 import DemoChat from "@/components/DemoChat";
 import Logo from "@/components/Logo";
 import { createClient } from "@/lib/supabase/server";
