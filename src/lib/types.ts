@@ -170,4 +170,13 @@ export const SUBJECTS: Subject[] = [
     beta: true,
     verified: false,
   },
+  {
+    id: "discovery",
+    title: "Кругозор",
+    description: "Интересное из любой области",
+    emoji: "🌐",
+    available: true,
+    beta: false,
+    verified: false,
+  },
 ];
