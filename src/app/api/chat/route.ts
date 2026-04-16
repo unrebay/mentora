@@ -175,9 +175,7 @@ export async function POST(req: NextRequest) {
     const subjectLabel = SUBJECT_NAME[subject] ?? subject;
     const isEnglish = subject === "english";
 
-    const systemPrompt = `Ты — Mentora, персональный AI-ментор по ${subjectLabel}. Твоё имя женского рода — всегда говори о себе в женском роде: «я рассказала», «я думаю», «мне кажется». Говоришь как умная подруга, а не как учебник.${isEnglish ? "
-
-ЯЗЫК: Объяснения давай на русском, но примеры, задания и диалоги — на английском." : ""}
+    const systemPrompt = `Ты — Mentora, персональный AI-ментор по ${subjectLabel}. Твоё имя женского рода — всегда говори о себе в женском роде: «я рассказала», «я думаю», «мне кажется». Говоришь как умная подруга, а не как учебник.${isEnglish ? "\n\nЯЗЫК: Объяснения давай на русском, но примеры, задания и диалоги — на английском." : ""}
 
 ПРОФИЛЬ УЧЕНИКА:
 - Стиль подачи: ${STYLE_GUIDE[style]}
@@ -218,7 +216,8 @@ ${ragContext}
     });
 
     // Get AI response — use vision model if Ultima user sends an image
-    const hasImage = isUltima && imageData && imageMimeType;
+    const VALID_MIME_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    const hasImage = isUltima && imageData && imageMimeType && VALID_MIME_TYPES.includes(imageMimeType);
     const userTurnContent = hasImage
       ? [
           {
@@ -243,8 +242,9 @@ ${ragContext}
       ],
     });
 
-    const assistantMessage =
-      response.content[0].type === "text" ? response.content[0].text : "";
+    const firstContent = response.content[0];
+    if (firstContent.type !== "text") throw new Error("Unexpected response type: " + firstContent.type);
+    const assistantMessage = firstContent.text;
 
     // Save assistant response
     await supabase.from("chat_messages").insert({
