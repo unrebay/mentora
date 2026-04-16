@@ -246,6 +246,49 @@ export default async function HomePage() {
         </div>
       </section>
 
+            {/* ЕГЭ/ОГЭ COMING SOON */}
+      <section className="px-6 py-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="relative overflow-hidden rounded-3xl bg-gray-900 dark:bg-[#0a0a18] text-white p-8 md:p-12">
+            <div className="absolute inset-0 pointer-events-none" aria-hidden>
+              <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 80% 50%, #4561E820 0%, transparent 60%)" }} />
+            </div>
+            <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-600/20 text-brand-400 text-xs font-bold rounded-full mb-5 tracking-widest uppercase">
+                  🎯 Скоро — июнь 2026
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
+                  Режим подготовки<br />
+                  <span className="text-brand-400 italic">к ЕГЭ и ОГЭ</span>
+                </h2>
+                <p className="text-gray-400 leading-relaxed mb-6">
+                  Специальный режим с реальными заданиями, трекером готовности и прогнозом результата. Идеально к сезону экзаменов.
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-sm text-gray-300">
+                  <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Реальные задания ЕГЭ/ОГЭ</span>
+                  <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Трекер: осталось N дней</span>
+                  <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Прогноз результата</span>
+                  <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Все 13 предметов</span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-4">
+                <div className="bg-white/5 rounded-2xl p-5 border border-white/10">
+                  <div className="text-xs text-gray-400 mb-1">Пример: трекер готовности</div>
+                  <div className="text-xl font-bold mb-3">60% программы пройдено</div>
+                  <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                    <div className="h-full rounded-full bg-brand-500" style={{ width: "60%" }} />
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">До экзамена: 40 дней · История России · ЕГЭ 2026</div>
+                </div>
+                <Link href="/auth" className="block text-center py-3 px-6 bg-brand-600 text-white font-semibold rounded-xl hover:bg-brand-700 transition-colors text-sm">
+                  Начать готовиться уже сейчас →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       {/* HOW IT WORKS */}
       <section id="how" className="px-6 py-20" style={{ background: "var(--bg-secondary)" }}>
         <div className="max-w-6xl mx-auto">
