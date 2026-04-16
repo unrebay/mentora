@@ -3,11 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { SUBJECTS } from "@/lib/types";
 import Link from "next/link";
-import Logo from "@/components/Logo";
 import { PostHogIdentify } from "@/components/PostHogIdentify";
 import { PaymentSuccessTracker } from "@/components/PaymentSuccessTracker";
-import ThemeToggle from "@/components/ThemeToggle";
 import SubjectLibrarySection from "@/components/SubjectLibrarySection";
+import DashboardNav from "@/components/DashboardNav";
 
 const DAILY_LIMIT = 20;
 
@@ -54,9 +53,7 @@ export default async function DashboardPage() {
 
   if (!profile?.onboarding_completed) redirect("/onboarding");
 
-  const isTrialActive = profile?.trial_expires_at
-    ? new Date(profile.trial_expires_at) > new Date()
-    : false;
+  const isTrialActive = profile?.trial_expires_at ? new Date(profile.trial_expires_at) > new Date() : false;
   const isUltima = profile?.plan === "ultima";
   const isPro = isUltima || profile?.plan === "pro" || isTrialActive;
 
@@ -74,7 +71,7 @@ export default async function DashboardPage() {
     .select("*")
     .eq("user_id", user.id);
 
-  const totalXP  = progressData?.reduce((sum, p) => sum + (p.xp_total   ?? 0), 0) ?? 0;
+  const totalXP = progressData?.reduce((sum, p) => sum + (p.xp_total ?? 0), 0) ?? 0;
   const maxStreak = progressData?.reduce((max, p) => Math.max(max, p.streak_days ?? 0), 0) ?? 0;
 
   const { data: userSubjectRows } = await supabase
@@ -82,9 +79,7 @@ export default async function DashboardPage() {
     .select("subject_id")
     .eq("user_id", user.id);
 
-  let userSubjectIds: string[] =
-    userSubjectRows?.map((r: { subject_id: string }) => r.subject_id) ?? [];
-
+  let userSubjectIds: string[] = userSubjectRows?.map((r: { subject_id: string }) => r.subject_id) ?? [];
   if (userSubjectIds.length === 0) {
     await supabase
       .from("user_subjects")
@@ -93,6 +88,7 @@ export default async function DashboardPage() {
   }
 
   const userSubjects = SUBJECTS.filter((s) => userSubjectIds.includes(s.id));
+
   const firstName = getFirstName(
     user.user_metadata?.full_name ?? user.user_metadata?.name,
     user.email
@@ -107,47 +103,10 @@ export default async function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
-      <div className="fixed inset-0 -z-10 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse 100% 70% at 15% 10%, rgba(69,97,232,0.06) 0%, transparent 55%), radial-gradient(ellipse 80% 60% at 85% 90%, rgba(91,119,255,0.04) 0%, transparent 55%)", animation: "gradientDrift 10s ease-in-out infinite alternate" }} />
+      <div className="fixed inset-0 -z-10 pointer-events-none" style={{ background: "radial-gradient(ellipse 100% 70% at 15% 10%, rgba(69,97,232,0.06) 0%, transparent 55%), radial-gradient(ellipse 80% 60% at 85% 90%, rgba(91,119,255,0.04) 0%, transparent 55%)", animation: "gradientDrift 10s ease-in-out infinite alternate" }} />
       <PostHogIdentify userId={user.id} email={user.email ?? ""} />
       <PaymentSuccessTracker />
-      <nav className="sticky top-0 z-10 border-b border-[var(--border)]" style={{ background: "var(--bg-nav)", backdropFilter: "blur(12px)" }}>
-        <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <Logo size="sm" />
-            <div className="hidden md:flex items-center gap-5 ml-2">
-              <a href="/dashboard/progress" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">Прогресс</a>
-              <a href="/dashboard/analytics" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">Аналитика</a>
-              <a href="/knowledge" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">Галактика знаний</a>
-              <a href="/profile" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">Профиль</a>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            {totalXP > 0 && (
-              <div className="hidden sm:flex items-center gap-3 text-sm">
-                <span className="font-semibold text-[var(--text)]"><MentoraE />{totalXP} {pluralMenty(totalXP)}</span>
-                {maxStreak > 0 && <span className="text-orange-500 font-semibold">🔥 {maxStreak} {pluralDays(maxStreak)}</span>}
-              </div>
-            )}
-            {!isPro && <Link href="/pricing" className="hidden sm:inline-flex text-xs font-semibold px-3 py-1.5 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors">Тарифы</Link>}
-            <form action={handleLogout}><button type="submit" className="text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">Выйти</button></form>
-          </div>
-        </div>
-        <div className="md:hidden border-t border-[var(--border-light)] overflow-x-auto" style={{ scrollbarWidth: "none" }}>
-          <div className="flex min-w-max px-2">
-            {[
-              { href: "/dashboard/progress", label: "Прогресс" },
-              { href: "/dashboard/analytics", label: "Аналитика" },
-              { href: "/knowledge", label: "🌌 Галактика" },
-              { href: "/profile", label: "Профиль" },
-              ...(!isPro ? [{ href: "/pricing", label: "✨ Тарифы" }] : []),
-            ].map(({ href, label }) => (
-              <a key={href} href={href} className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors whitespace-nowrap px-3 py-2 border-b-2 border-transparent hover:border-brand-500">{label}</a>
-            ))}
-          </div>
-        </div>
-      </nav>
+      <DashboardNav isPro={isPro} isUltima={isUltima} totalXP={totalXP} maxStreak={maxStreak} logoutAction={handleLogout} />
       <div className="max-w-5xl mx-auto px-6 py-10">
         {isTrialActive && (
           <div className="mb-6 flex items-center gap-3 bg-brand-50 border border-brand-200 rounded-2xl px-5 py-4">
@@ -195,7 +154,12 @@ export default async function DashboardPage() {
           )}
           {isPro && (
             <div className="flex flex-wrap gap-3">
-              <div className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm" style={{ background: isUltima ? "#0f0f1e" : "#4561E8", color: "#fff", border: isUltima ? "1px solid #28284a" : "none" }}><span className="font-bold tracking-wide text-xs">{isUltima ? "✦ ULTIMA" : "PRO"}</span></div>
+              <div className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm"
+                style={isUltima
+                  ? { background: "linear-gradient(135deg, #1e1b4b, #2d1b69)", color: "#c4b5fd", border: "1px solid #4338ca" }
+                  : { background: "#4561E8", color: "#fff" }}>
+                <span className="font-bold tracking-wide text-xs">{isUltima ? "✦ ULTIMA" : "PRO"}</span>
+              </div>
               <div className="flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-xl px-4 py-2.5 text-sm"><span>♾️</span><span className="text-brand-700 font-medium">Безлимитные сообщения</span></div>
               {totalXP > 0 && <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm font-semibold text-[var(--text)]"><MentoraE /> {totalXP} {pluralMenty(totalXP)}</div>}
             </div>
