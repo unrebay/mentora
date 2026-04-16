@@ -126,7 +126,7 @@ export default async function ProfilePage() {
             <ProfileNameEditor currentNickname={profile?.display_name ?? null} changesLeft={changesLeft} currentFullName={profile?.full_name ?? null} currentAge={profile?.age ?? null} currentPhone={profile?.phone ?? null} />
             <div className="mt-3 flex items-center gap-2">
               <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: lvl.bg, color: lvl.color }}>{lvl.name}</span>
-              {isPro && <span className="text-xs font-bold px-2.5 py-1 rounded-full tracking-wide" style={{ background: isUltima ? "#000000" : "#4561E8", color: "#fff", border: "none" }}>{isUltima ? "✦ ULTIMA" : "PRO"}</span>}
+              {isPro && <span className="text-xs font-bold px-2.5 py-1 rounded-full tracking-wide" style={{ background: isUltima ? "#000000" : "#4561E8", color: "#fff", border: "none" }}>{isUltima ? "✦ ULTRA" : "PRO"}</span>}
             </div>
           </div>
         </div>
