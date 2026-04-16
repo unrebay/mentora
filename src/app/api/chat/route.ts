@@ -11,7 +11,8 @@ const anthropic = new Anthropic({
 });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const DAILY_LIMIT = 20;
+const WINDOW_HOURS = 8;
+const WINDOW_LIMIT = 8;
 
 // Subject display names for system prompt
 const SUBJECT_NAME: Record<string, string> = {
@@ -81,7 +82,7 @@ export async function POST(req: NextRequest) {
     const { data: profile } = await supabase
       .from("users")
       .select(
-        "onboarding_style, onboarding_level, onboarding_goal, plan, messages_today, messages_date, trial_expires_at"
+        "onboarding_style, onboarding_level, onboarding_goal, plan, messages_today, messages_window_start, trial_expires_at"
       )
       .eq("id", user.id)
       .single();
@@ -92,12 +93,14 @@ export async function POST(req: NextRequest) {
       : false;
     const isPro = profile?.plan === "pro" || profile?.plan === "ultima" || isTrialActive;
     const isUltima = profile?.plan === "ultima";
-    const today = new Date().toISOString().slice(0, 10);
-    const isNewDay = profile?.messages_date !== today;
-    const usedToday = isNewDay ? 0 : (profile?.messages_today ?? 0);
-    if (!isPro && usedToday >= DAILY_LIMIT) {
+    const now = new Date();
+    const windowStart = profile?.messages_window_start ? new Date(profile.messages_window_start) : null;
+    const windowExpired = !windowStart || (now.getTime() - windowStart.getTime()) >= WINDOW_HOURS * 3600000;
+    const usedInWindow = windowExpired ? 0 : (profile?.messages_today ?? 0);
+    const windowResetAt = new Date((windowExpired ? now : windowStart!).getTime() + WINDOW_HOURS * 3600000).toISOString();
+    if (!isPro && usedInWindow >= WINDOW_LIMIT) {
       return NextResponse.json(
-        { error: "limit_reached", messagesRemaining: 0 },
+        { error: "limit_reached", messagesRemaining: 0, resetAt: windowResetAt },
         { status: 429 }
       );
     }
@@ -228,13 +231,13 @@ ${ragContext}
     });
 
     // Update message counter + last_active_at
-    const newUsedToday = usedToday + 1;
+    const newUsedToday = usedInWindow + 1;
     await supabase
       .from("users")
       .update({
         messages_today: newUsedToday,
-        messages_date: today,
-        last_active_at: new Date().toISOString(),
+        messages_window_start: windowExpired ? now.toISOString() : (profile?.messages_window_start ?? now.toISOString()),
+        last_active_at: now.toISOString(),
       })
       .eq("id", user.id);
 
@@ -251,7 +254,8 @@ ${ragContext}
 
     return NextResponse.json({
       message: assistantMessage,
-      messagesRemaining: isPro ? null : DAILY_LIMIT - newUsedToday,
+      messagesRemaining: isPro ? null : Math.max(0, WINDOW_LIMIT - newUsedToday),
+      resetAt: isPro ? null : windowResetAt,
       trialExpiresAt: profile?.trial_expires_at ?? null,
     });
   } catch (err) {
