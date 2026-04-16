@@ -99,7 +99,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                 style={{ background: "var(--bg-secondary)", borderColor: "var(--border)" }}>
                 <div className="block p-5">
                   <span className="absolute top-3 right-3 text-[10px] font-medium px-1.5 py-0.5 rounded-md"
-                    style={{ background: "var(--bg)", color: "var(--text-muted)", border: "1px solid var(--border)" }}>СКОРО</span>
+                    style={{ background: "var(--bg-secondary)", color: "var(--text-muted)" }}>СКОРО</span>
                   <div className="text-3xl mb-3">{subject.emoji}</div>
                   <div className="font-semibold text-sm" style={{ color: "var(--text-secondary)" }}>{subject.title}</div>
                   <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{subject.description}</div>
@@ -121,9 +121,27 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                                : { background: "var(--bg-card)", borderColor: "var(--border)" }}
               onClick={() => setSelectedId(id => id === subject.id ? null : subject.id)}>
               <div className="block p-5">
-                {isVerified
-                  ? <span className="absolute top-3 right-3 text-[10px] font-bold bg-white/25 text-white px-1.5 py-0.5 rounded-md">✶ verified</span>
-                  : <span className="absolute top-3 right-3 text-[10px] font-bold bg-brand-50 text-brand-600 px-1.5 py-0.5 rounded-md">✶ beta</span>}
+                {/* Badge with tooltip */}
+                <div className="absolute top-3 right-3 group/badge" onClick={e => e.stopPropagation()}>
+                  {isVerified ? (
+                    <span className="text-[10px] font-bold bg-white/25 text-white px-1.5 py-0.5 rounded-md cursor-default">✶ verified</span>
+                  ) : (
+                    <span className="text-[10px] font-bold bg-brand-50 text-brand-600 px-1.5 py-0.5 rounded-md cursor-default">✶ beta</span>
+                  )}
+                  <div className="absolute right-0 top-full mt-1.5 w-44 pointer-events-none opacity-0 group-hover/badge:opacity-100 transition-opacity duration-200 ease-in-out z-30">
+                    <div className="rounded-xl px-3 py-2.5 shadow-xl border"
+                      style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+                      <p className="text-[11px] font-semibold mb-0.5" style={{ color: "var(--text)" }}>
+                        {isVerified ? "✶ Verified" : "✶ Beta"}
+                      </p>
+                      <p className="text-[10px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                        {isVerified
+                          ? "Полный курс с базой знаний и регулярными обновлениями"
+                          : "Предмет в разработке — контент активно пополняется"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
                 <div className="text-3xl mb-2">{subject.emoji}</div>
                 <div className={`font-semibold text-sm mb-0.5 ${isVerified ? "text-white" : ""}`}
@@ -164,7 +182,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                     className={`inline-flex text-xs font-semibold transition-colors ${
                       isVerified ? "text-white hover:text-white/80" : "text-brand-600 hover:text-brand-700"
                     }`}>
-                    {xp > 0 ? "Продолжить →" : "Начать →"}
+                    {xp > 0 ? "Продожить →" : "Начать →"}
                   </Link>
                 </div>
               </div>
@@ -175,7 +193,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
         <button onClick={() => setAddOpen(true)}
           className="relative rounded-2xl border-2 border-dashed transition-all cursor-pointer flex flex-col items-center justify-center p-5 min-h-[140px] gap-2 group hover:border-brand-300"
           style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-          <div className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+          <div className="w410 h-10 rounded-full flex items-center justify-center transition-colors"
             style={{ background: "var(--bg-secondary)" }}>
             <span className="text-2xl leading-none" style={{ color: "var(--text-muted)" }}>+</span>
           </div>
