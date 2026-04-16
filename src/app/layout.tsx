@@ -58,7 +58,7 @@ export const metadata: Metadata = {
       "Учи историю, математику, физику и ещё 10 предметов в диалоге с AI-ментором. Персонально. Живо. Бесплатно.",
     images: [
       {
-        url: "/opengraph-image",
+        url: "/opengraph-image.png",
         width: 1200,
         height: 630,
         alt: "Mentora — AI-репетитор по 13 школьным предметам",
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
     title: "Mentora — AI-репетитор по 13 школьным предметам",
     description:
       "Учи историю, математику, физику и ещё 10 предметов в диалоге с AI-ментором. Персонально. Живо. Бесплатно.",
-    images: ["/opengraph-image"],
+    images: ["/opengraph-image.png"],
   },
   icons: {
     icon: [
@@ -80,7 +80,7 @@ export const metadata: Metadata = {
       { url: "/favicon-48x48.png",   sizes: "48x48",  type: "image/png" },
     ],
     apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/apple-icon", sizes: "180x180", type: "image/png" },
     ],
     other: [
       { rel: "mask-icon", url: "/logo.svg", color: "#4561E8" },
