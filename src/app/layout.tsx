@@ -119,6 +119,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="theme-color" content="#4561E8" />
         <meta name="msapplication-TileColor" content="#4561E8" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
+        {/* PWA */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Mentora" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="application-name" content="Mentora" />
       </head>
       <body className={`${golos.variable} ${playfair.variable} font-sans`}>
         <ThemeProvider>
