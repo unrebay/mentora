@@ -80,7 +80,7 @@ export const metadata: Metadata = {
       { url: "/favicon-48x48.png",   sizes: "48x48",  type: "image/png" },
     ],
     apple: [
-      { url: "/apple-icon", sizes: "180x180", type: "image/png" },
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
     other: [
       { rel: "mask-icon", url: "/logo.svg", color: "#4561E8" },
