@@ -29,6 +29,7 @@ const SUBJECT_NAME: Record<string, string> = {
   "geography": "географии",
   "computer-science": "информатике и программированию",
   "astronomy": "астрономии",
+  "discovery": "расширению кругозора",
 };
 
 // --- Personalization guides (module-level constants, not recreated per request) ---
