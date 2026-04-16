@@ -1,27 +1,26 @@
 "use client";
-import dynamic from "next/dynamic";
-
-const Spline = dynamic(() => import("@splinetool/react-spline"), {
-  ssr: false,
-  loading: () => <div className="w-full h-full" />,
-});
+import type { CSSProperties } from "react";
 
 interface Props {
   scene?: string;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }
 
 export default function SplineScene({
-  scene = "https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode",
+  scene = "https://my.spline.design/6Wq1Q7YGyM-iab9i/",
   className,
   style,
 }: Props) {
   return (
-    <Spline
-      scene={scene}
+    <iframe
+      src={scene}
+      frameBorder="0"
       className={className}
-      style={{ width: "100%", height: "100%", ...style }}
+      style={{ width: "100%", height: "100%", border: "none", ...style }}
+      title="3D interactive background"
+      aria-hidden
+      loading="lazy"
     />
   );
 }
