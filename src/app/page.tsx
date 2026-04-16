@@ -30,6 +30,7 @@ import Logo from "@/components/Logo";
 import { createClient } from "@/lib/supabase/server";
 import ParticleHero from "@/components/ParticleHero";
 import ThemeToggle from "@/components/ThemeToggle";
+import SubjectGrid from "@/components/SubjectGrid";
 
 const SUBJECTS = [
   { id: "russian-history", emoji: "🏰", title: "История России", desc: "51 тема · 5 уровней", live: true },
@@ -213,38 +214,8 @@ export default async function HomePage() {
           Выбери, что хочешь<br />
           изучить <span className="text-brand-600 dark:text-brand-500 italic">сегодня</span>
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          {SUBJECTS.map((s) => (
-            <div key={s.id}
-              className={`relative p-4 rounded-2xl border transition-all ${
-                s.suggest
-                  ? "border-dashed border-[var(--border)] text-[var(--text-muted)] hover:border-brand-300 cursor-pointer flex flex-col items-center justify-center min-h-[100px]"
-                  : s.comingSoon && !s.live
-                  ? "bg-[var(--bg-secondary)] border-[var(--border)] opacity-70"
-                  : "bg-[var(--bg-card)] border-[var(--border)] hover:border-brand-300 hover:shadow-md cursor-pointer"
-              }`}>
-              {s.live && (
-                <span className="absolute top-3 right-3 text-[10px] font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded-md">LIVE</span>
-              )}
-              {!s.live && s.comingSoon && (
-                <span className="absolute top-3 right-3 text-[10px] font-medium bg-[var(--bg-secondary)] text-[var(--text-muted)] px-1.5 py-0.5 rounded-md">СКОРО</span>
-              )}
-              {s.suggest ? (
-                <div className="text-center">
-                  <div className="text-2xl mb-1">+</div>
-                  <div className="text-xs">{s.title}</div>
-                  <div className="text-xs text-[var(--text-muted)]">{s.desc}</div>
-                </div>
-              ) : (
-                <>
-                  <div className="text-2xl mb-2">{s.emoji}</div>
-                  <div className="font-semibold text-sm text-[var(--text)]">{s.title}</div>
-                  <div className="text-xs text-[var(--text-secondary)] mt-0.5">{s.desc}</div>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
+        <SubjectGrid subjects={SUBJECTS} />
+      </div>
       </section>
 
             {/* ЕГЭ/ОГЭ COMING SOON */}
