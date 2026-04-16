@@ -16,56 +16,47 @@ const WINDOW_LIMIT = 15;
 
 // Subject display names for system prompt
 const SUBJECT_NAME: Record<string, string> = {
-  "russian-history": "истории России",
-  "world-history": "всемирной истории",
-  "mathematics": "математике",
-  "physics": "физике",
-  "chemistry": "химии",
-  "biology": "биологии",
-  "russian-language": "русскому языку",
-  "literature": "литературе",
-  "english": "английскому языку",
-  "social-studies": "обществознанию",
-  "geography": "географии",
-  "computer-science": "информатике и программированию",
-  "astronomy": "астрономии",
-  "discovery": "расширению кругозора",
+  "russian-history": "\u0438\u0441\u0442\u043e\u0440\u0438\u0438 \u0420\u043e\u0441\u0441\u0438\u0438",
+  "world-history": "\u0432\u0441\u0435\u043c\u0438\u0440\u043d\u043e\u0439 \u0438\u0441\u0442\u043e\u0440\u0438\u0438",
+  "mathematics": "\u043c\u0430\u0442\u0435\u043c\u0430\u0442\u0438\u043a\u0435",
+  "physics": "\u0444\u0438\u0437\u0438\u043a\u0435",
+  "chemistry": "\u0445\u0438\u043c\u0438\u0438",
+  "biology": "\u0431\u0438\u043e\u043b\u043e\u0433\u0438\u0438",
+  "russian-language": "\u0440\u0443\u0441\u0441\u043a\u043e\u043c\u0443 \u044f\u0437\u044b\u043a\u0443",
+  "literature": "\u043b\u0438\u0442\u0435\u0440\u0430\u0442\u0443\u0440\u0435",
+  "english": "\u0430\u043d\u0433\u043b\u0438\u0439\u0441\u043a\u043e\u043c\u0443 \u044f\u0437\u044b\u043a\u0443",
+  "social-studies": "\u043e\u0431\u0449\u0435\u0441\u0442\u0432\u043e\u0437\u043d\u0430\u043d\u0438\u044e",
+  "geography": "\u0433\u0435\u043e\u0433\u0440\u0430\u0444\u0438\u0438",
+  "computer-science": "\u0438\u043d\u0444\u043e\u0440\u043c\u0430\u0442\u0438\u043a\u0435 \u0438 \u043f\u0440\u043e\u0433\u0440\u0430\u043c\u043c\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u044e",
+  "astronomy": "\u0430\u0441\u0442\u0440\u043e\u043d\u043e\u043c\u0438\u0438",
+  "discovery": "\u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043d\u0438\u044e \u043a\u0440\u0443\u0433\u043e\u0437\u043e\u0440\u0430",
 };
 
 // --- Personalization guides (module-level constants, not recreated per request) ---
 const STYLE_GUIDE: Record<string, string> = {
-  storytelling:
-    "Рассказывай через живые примеры и аналогии. Сначала — захватывающий факт, образ или неожиданный угол зрения, потом — объяснение сути.",
-  facts:
-    "Структурируй ответ чётко: от определения к принципу, от принципа к примеру. Акцент на логике, закономерностях и точных формулировках. Минимум лирики — максимум точности.",
-  practice:
-    "Чередуй краткое объяснение с вопросом-заданием. После ответа пользователя — оценивай, поправляй, углубляй. Твоя главная задача — проверить понимание, а не просто рассказать.",
+  storytelling: "Рассказывай через живые примеры и аналогии. Сначала — захватывающий факт, образ, или неожиданный угол зрения, потом — объяснение сути.",
+  facts: "Структурируй ответ чётко: от определения к принципу, от принципа к примеру. Акцент на логике, закономерностях и точных формулировках. Минимум лирики — максимум точности.",
+  practice: "Чередуй краткое объяснение с вопросом-заданием. После ответа пользователя — оценивай, поправляй, углубляй. Твоя главная задача — проверить понимание, а не просто рассказать.",
 };
 
 const LEVEL_GUIDE: Record<string, string> = {
-  school:
-    "Ученик — школьник, готовится к урокам или ЕГЭ/ОГЭ. Используй простой язык, школьную терминологию. Объясняй в контексте школьной программы, давай примеры из учебника, упоминай типовые форматы заданий и экзаменов по предмету.",
-  student:
-    "Ученик — студент вуза. Можно использовать академическую лексику, упоминать научные дискуссии, называть исследователей и теории. Ожидает глубины, а не упрощений.",
-  adult:
-    "Ученик — взрослый, учится для себя. Говори как с умным человеком без снобизма. Проводи параллели с практикой и личным опытом — это цепляет.",
-  expert:
-    "Ученик — глубокий знаток предмета. Веди как с коллегой: полемизируй, указывай на дискуссионные вопросы, называй конкретные источники и авторитетов. Не разжёвывай очевидное.",
+  school: "Ученик — школьник, готовится к урокам или ЕГЭ/ОГЭ. Используй простой язык, школьную терминологию. Объясняй в контексте школьной программы, давай примеры из учебника, упоминай типовые форматы заданий и экзаменов по предмету.",
+  student: "Ученик — студент вуза. Можно использовать академическую лексику, упоминать научные дискуссии, называть исследователей и теории. Ожидает глубины, а не упрощений.",
+  adult: "Ученик — взрослый, учится для себя. Говори как с умным человеком без снобизма. Проводи параллели с практикой и личным опытом — это цепляет.",
+  expert: "Ученик — глубокий знаток предмета. Веди как с коллегой: полемизируй, указывай на дискуссионные вопросы, называй конкретные источники и авторитетов. Не разжёвывай очевидное.",
 };
 
 const GOAL_GUIDE: Record<string, string> = {
   exam: "Цель — сдать ЕГЭ/ОГЭ. В конце каждого ответа добавляй блок '📝 Для экзамена:' с 1-2 ключевыми фактами/формулами в формате, удобном для запоминания.",
-  general:
-    "Цель — общее развитие. Показывай связи между темами, широкий контекст. Объясняй, почему это важно понимать.",
-  professional:
-    "Цель — профессиональная. Акцентируй глубину, методологию, дискуссионные вопросы предметной области. Давай ссылки на конкретные работы и научные подходы.",
-  curiosity:
-    "Цель — просто интересно. Выделяй самые неожиданные, малоизвестные или парадоксальные детали. Заражай интересом к предмету.",
+  general: "Цель — общее развитие. Показывай связи между темами, широкий контекст. Объясняй, почему это важно понимать.",
+  professional: "Цель — профессиональная. Акцентируй глубину, методологию, дискуссионные вопросы предметной области. Давай ссылки на конкретные работы и научные подходы.",
+  curiosity: "Цель — просто интересно. Выделяй самые неожиданные, малоизвестные или парадоксальные детали. Заражай интересом к предмету.",
 };
 
 export async function POST(req: NextRequest) {
   try {
     const { message, subject, history, imageData, imageMimeType } = await req.json();
+
     // Input validation
     if (!message || typeof message !== "string" || message.length > 4000) {
       return NextResponse.json({ error: "Invalid message" }, { status: 400 });
@@ -73,6 +64,10 @@ export async function POST(req: NextRequest) {
     const VALID_SUBJECTS = ["russian-history","world-history","mathematics","physics","chemistry","biology","russian-language","literature","english","social-studies","geography","computer-science","astronomy","discovery"];
     if (!subject || !VALID_SUBJECTS.includes(subject)) {
       return NextResponse.json({ error: "Invalid subject" }, { status: 400 });
+    }
+    // Image size guard (~5 MB base64)
+    if (imageData && imageData.length > 5_000_000) {
+      return NextResponse.json({ error: "Image too large" }, { status: 413 });
     }
 
     // Auth check
@@ -87,72 +82,91 @@ export async function POST(req: NextRequest) {
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    // Get user profile
+    // Get user profile (no messages_today/window — handled atomically below)
     const { data: profile } = await supabase
       .from("users")
-      .select(
-        "onboarding_style, onboarding_level, onboarding_goal, plan, messages_today, messages_window_start, trial_expires_at"
-      )
+      .select("onboarding_style, onboarding_level, onboarding_goal, plan, trial_expires_at")
       .eq("id", user.id)
       .single();
 
-    // --- Daily limit check ---
+    // --- Plan check ---
     const isTrialActive = profile?.trial_expires_at
       ? new Date(profile.trial_expires_at) > new Date()
       : false;
     const isPro = profile?.plan === "pro" || profile?.plan === "ultima" || isTrialActive;
     const isUltima = profile?.plan === "ultima";
-    const now = new Date();
-    const windowStart = profile?.messages_window_start ? new Date(profile.messages_window_start) : null;
-    const windowExpired = !windowStart || (now.getTime() - windowStart.getTime()) >= WINDOW_HOURS * 3600000;
-    const usedInWindow = windowExpired ? 0 : (profile?.messages_today ?? 0);
-    const windowResetAt = new Date((windowExpired ? now : windowStart!).getTime() + WINDOW_HOURS * 3600000).toISOString();
-    if (!isPro && usedInWindow >= WINDOW_LIMIT) {
-      return NextResponse.json(
-        { error: "limit_reached", messagesRemaining: 0, resetAt: windowResetAt },
-        { status: 429 }
-      );
-    }
 
-    // Get user memory for this subject
-    const { data: memory } = await supabase
-      .from("user_memory")
-      .select("memory_json")
-      .eq("user_id", user.id)
-      .eq("subject", subject)
-      .single();
+    // Atomic window check-and-increment for free users (prevents race condition)
+    let messagesRemaining: number | null = null;
+    let windowResetAt: string | null = null;
 
-    // RAG: embed the user message and search knowledge base
-    // Wrapped in try/catch — if OpenAI or search_knowledge fails, fall back to empty context
-    let ragContext = "База знаний пока пуста. Отвечай на основе своих знаний.";
-    try {
-      // Use Supabase Edge Function for embeddings (avoids OpenAI geo-blocking)
-      const embedResp = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/embed`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-        },
-        body: JSON.stringify({ input: message }),
+    if (!isPro) {
+      const { data: windowRows } = await supabase.rpc("increment_messages_window", {
+        p_user_id: user.id,
+        p_window_hours: WINDOW_HOURS,
+        p_window_limit: WINDOW_LIMIT,
       });
-      const embedData = await embedResp.json();
-      const queryEmbedding = embedData.embedding as number[];
-
-      const { data: chunks } = await supabase.rpc("search_knowledge", {
-        query_embedding: queryEmbedding,
-        subject_filter: subject,
-        match_count: 5,
-      });
-
-      if (chunks?.length) {
-        ragContext = chunks
-          .map((c: { content: string; topic: string }) => `[${c.topic}]\n${c.content}`)
-          .join("\n\n");
+      const w = windowRows?.[0];
+      if (!w?.allowed) {
+        const resetTs = w?.messages_window_start
+          ? new Date(new Date(w.messages_window_start).getTime() + WINDOW_HOURS * 3600000).toISOString()
+          : new Date(Date.now() + WINDOW_HOURS * 3600000).toISOString();
+        return NextResponse.json(
+          { error: "limit_reached", messagesRemaining: 0, resetAt: resetTs },
+          { status: 429 }
+        );
       }
-    } catch (ragErr) {
-      console.error("RAG error (non-blocking):", ragErr);
-      // Continue with empty context
+      messagesRemaining = Math.max(0, WINDOW_LIMIT - (w?.messages_today ?? WINDOW_LIMIT));
+      windowResetAt = w?.messages_window_start
+        ? new Date(new Date(w.messages_window_start).getTime() + WINDOW_HOURS * 3600000).toISOString()
+        : null;
+    } else {
+      // Pro: fire-and-forget last_active_at update
+      supabase.from("users").update({ last_active_at: new Date().toISOString() }).eq("id", user.id);
     }
+
+    // Parallel: fetch user memory + RAG embeddings simultaneously
+    const [memoryResult, ragContext] = await Promise.all([
+      supabase
+        .from("user_memory")
+        .select("memory_json")
+        .eq("user_id", user.id)
+        .eq("subject", subject)
+        .single(),
+      (async (): Promise<string> => {
+        try {
+          const embedResp = await fetch(
+            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/embed`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+              },
+              body: JSON.stringify({ input: message }),
+              signal: AbortSignal.timeout(5000),
+            }
+          );
+          const embedData = await embedResp.json();
+          const queryEmbedding = embedData.embedding as number[];
+          const { data: chunks } = await supabase.rpc("search_knowledge", {
+            query_embedding: queryEmbedding,
+            subject_filter: subject,
+            match_count: 5,
+          });
+          if (chunks?.length) {
+            return chunks
+              .map((c: { content: string; topic: string }) => `[${c.topic}]\n${c.content}`)
+              .join("\n\n");
+          }
+        } catch (ragErr) {
+          console.error("RAG error (non-blocking):", ragErr);
+        }
+        return "База знаний пока пуста. Отвечай на основе своих знаний.";
+      })(),
+    ]);
+
+    const memory = memoryResult.data;
 
     // Build personalized system prompt
     const style = profile?.onboarding_style ?? "storytelling";
@@ -161,7 +175,9 @@ export async function POST(req: NextRequest) {
     const subjectLabel = SUBJECT_NAME[subject] ?? subject;
     const isEnglish = subject === "english";
 
-    const systemPrompt = `Ты — Mentora, персональный AI-ментор по ${subjectLabel}. Твоё имя женского рода — всегда говори о себе в женском роде: «я рассказала», «я думаю», «мне кажется». Говоришь как умная подруга, а не как учебник.${isEnglish ? "\n\nЯЗЫК: Объяснения давай на русском, но примеры, задания и диалоги — на английском." : ""}
+    const systemPrompt = `Ты — Mentora, персональный AI-ментор по ${subjectLabel}. Твоё имя женского рода — всегда говори о себе в женском роде: «я рассказала», «я думаю», «мне кажется». Говоришь как умная подруга, а не как учебник.${isEnglish ? "
+
+ЯЗЫК: Объяснения давай на русском, но примеры, задания и диалоги — на английском." : ""}
 
 ПРОФИЛЬ УЧЕНИКА:
 - Стиль подачи: ${STYLE_GUIDE[style]}
@@ -239,17 +255,6 @@ ${ragContext}
       tokens_used: response.usage.input_tokens + response.usage.output_tokens,
     });
 
-    // Update message counter + last_active_at
-    const newUsedToday = usedInWindow + 1;
-    await supabase
-      .from("users")
-      .update({
-        messages_today: newUsedToday,
-        messages_window_start: windowExpired ? now.toISOString() : (profile?.messages_window_start ?? now.toISOString()),
-        last_active_at: now.toISOString(),
-      })
-      .eq("id", user.id);
-
     // Update XP atomically (+10 per message) — non-blocking
     try {
       await supabase.rpc("increment_xp", {
@@ -263,14 +268,13 @@ ${ragContext}
 
     return NextResponse.json({
       message: assistantMessage,
-      messagesRemaining: isPro ? null : Math.max(0, WINDOW_LIMIT - newUsedToday),
-      resetAt: isPro ? null : windowResetAt,
+      messagesRemaining,
+      resetAt: windowResetAt,
       trialExpiresAt: profile?.trial_expires_at ?? null,
     });
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
     console.error("Chat API error:", errMsg);
-    console.error("Chat API error detail:", errMsg);
-      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
