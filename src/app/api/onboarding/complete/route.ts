@@ -28,6 +28,14 @@ export async function POST(req: NextRequest) {
     if (body.level) updateData.onboarding_level = body.level;
     if (body.goal)  updateData.onboarding_goal  = body.goal;
 
+    // Add first subject to user_subjects
+    if (body.first_subject) {
+      await admin.from("user_subjects").upsert(
+        { user_id: user.id, subject_id: body.first_subject },
+        { onConflict: "user_id,subject_id" }
+      );
+    }
+
     const { error } = await admin.from("users").upsert(
       { id: user.id, email: user.email, ...updateData },
       { onConflict: "id" }
