@@ -5,6 +5,8 @@ interface LogoProps {
   fontSize?: string;
   href?: string;
   className?: string;
+  /** Force a specific text colour (e.g. "white" for permanently-dark backgrounds) */
+  textColor?: string;
 }
 
 const sizes = {
@@ -18,6 +20,7 @@ export default function Logo({
   fontSize: fontSizeOverride,
   href = "/",
   className = "",
+  textColor,
 }: LogoProps) {
   const fontSize = fontSizeOverride ?? sizes[size].fontSize;
 
@@ -30,7 +33,7 @@ export default function Logo({
         fontWeight: 700,
         letterSpacing: "-0.01em",
         lineHeight: 1,
-        color: "var(--text)",
+        color: textColor ?? "var(--text)",
       }}
     >
       M
