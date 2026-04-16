@@ -156,7 +156,7 @@ export default async function DashboardPage() {
             <div className="flex flex-wrap gap-3">
               <div className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm"
                 style={isUltima
-                  ? { background: "linear-gradient(135deg, #1e1b4b, #2d1b69)", color: "#c4b5fd", border: "1px solid #4338ca" }
+                  ? { background: "#000000", color: "#fff", border: "none" }
                   : { background: "#4561E8", color: "#fff" }}>
                 <span className="font-bold tracking-wide text-xs">{isUltima ? "✦ ULTIMA" : "PRO"}</span>
               </div>
