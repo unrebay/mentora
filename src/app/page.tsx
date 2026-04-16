@@ -29,6 +29,7 @@ import DemoChat from "@/components/DemoChat";
 import Logo from "@/components/Logo";
 import { createClient } from "@/lib/supabase/server";
 import ParticleHero from "@/components/ParticleHero";
+import SplineScene from "@/components/SplineScene";
 import ThemeToggle from "@/components/ThemeToggle";
 import SubjectGrid from "@/components/SubjectGrid";
 
@@ -131,9 +132,14 @@ export default async function HomePage() {
 
       {/* HERO — with particle background */}
       <section className="relative overflow-hidden max-w-6xl mx-auto px-6 pt-16 pb-12">
-        {/* Particle layer — behind content, screen blend */}
-        <div className="absolute inset-0 pointer-events-none hidden md:block" aria-hidden>
-          <ParticleHero />
+        {/* 3D + Particle background */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <div className="absolute inset-0 hidden md:block">
+            <SplineScene style={{ opacity: 0.55 }} />
+          </div>
+          <div className="absolute inset-0 hidden md:block mix-blend-screen">
+            <ParticleHero />
+          </div>
         </div>
 
         <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
