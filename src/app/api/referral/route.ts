@@ -46,8 +46,21 @@ export async function GET() {
 
 // Called when a referred user signs up with ref code
 export async function POST(req: NextRequest) {
+  // Auth check — caller must be the newly signed-up user
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+  );
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const { code, newUserId } = await req.json();
   if (!code || !newUserId) return NextResponse.json({ error: "Missing params" }, { status: 400 });
+
+  // Ensure the caller can only register their own referral
+  if (user.id !== newUserId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
