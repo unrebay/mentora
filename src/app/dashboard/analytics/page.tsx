@@ -12,74 +12,213 @@ export default function AnalyticsDashboard() {
   const [creating, setCreating] = useState(false)
   const [copied, setCopied] = useState<string | null>(null)
 
-  const load = () => { setLoading(true); fetch('/api/analytics/invite').then(r=>r.json()).then(d=>setInvites(Array.isArray(d)?d:[])).finally(()=>setLoading(false)) }
+  const load = () => {
+    setLoading(true)
+    fetch('/api/analytics/invite').then(r => r.json()).then(d => setInvites(Array.isArray(d) ? d : [])).finally(() => setLoading(false))
+  }
   useEffect(() => { load() }, [])
 
-  const create = async () => { setCreating(true); await fetch('/api/analytics/invite',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({label:newLabel||null})}); setNewLabel(''); setCreating(false); load() }
-  const revoke = async (id: string) => { await fetch(`/api/analytics/invite?id=${id}`,{method:'DELETE'}); load() }
-  const copy = (token: string) => { navigator.clipboard.writeText(`${window.location.origin}/analytics/invite/${token}`); setCopied(token); setTimeout(()=>setCopied(null),2000) }
+  const create = async () => {
+    setCreating(true)
+    await fetch('/api/analytics/invite', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ label: newLabel || null }) })
+    setNewLabel('')
+    setCreating(false)
+    load()
+  }
+  const revoke = async (id: string) => {
+    await fetch(`/api/analytics/invite?id=${id}`, { method: 'DELETE' })
+    load()
+  }
+  const copy = (token: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/analytics/invite/${token}`)
+    setCopied(token)
+    setTimeout(() => setCopied(null), 2000)
+  }
 
-  const active = invites.filter(i=>!i.revoked_at)
-  const revoked = invites.filter(i=>i.revoked_at)
+  const active = invites.filter(i => !i.revoked_at)
+  const revoked = invites.filter(i => i.revoked_at)
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-8 space-y-8">
-      <div>
-        <Link href="/dashboard" className="text-sm text-gray-400 hover:text-gray-600 mb-4 inline-block">← Назад</Link>
-        <h1 className="text-2xl font-bold text-gray-900">Аналитика для родителей и учителей</h1>
-        <p className="text-gray-500 text-sm mt-1">Создайте ссылку — получатель увидит прогресс ученика без регистрации.</p>
-      </div>
-      <div className="bg-white rounded-2xl border border-gray-100 p-5">
-        <h2 className="text-sm font-semibold text-gray-700 mb-3">Новая ссылка</h2>
-        <div className="flex gap-3">
-          <input type="text" value={newLabel} onChange={e=>setNewLabel(e.target.value)} onKeyDown={e=>e.key==='Enter'&&create()}
-            placeholder="Название (напр. «Мама» или «Класс 9А»)"
-            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4561E8]/30" />
-          <button onClick={create} disabled={creating}
-            className="px-5 py-2.5 bg-[#4561E8] text-white text-sm font-medium rounded-xl hover:bg-[#3651d8] disabled:opacity-50 whitespace-nowrap">
-            {creating?'Создаём…':'Создать ссылку'}
-          </button>
+    <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
+      <div className="max-w-2xl mx-auto px-6 py-8 space-y-6">
+
+        {/* Header */}
+        <div>
+          <Link href="/dashboard"
+            className="inline-flex items-center gap-1.5 text-sm mb-5 transition-colors"
+            style={{ color: "var(--text-muted)" }}>
+            <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M10 12L6 8l4-4" />
+            </svg>
+            Назад
+          </Link>
+          <h1 className="text-2xl font-bold mb-1" style={{ color: "var(--text)" }}>
+            Аналитика для{" "}
+            <span style={{
+              background: "linear-gradient(120deg, #6B8FFF, #4561E8, #9F7AFF)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}>
+              родителей и учителей
+            </span>
+          </h1>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            Создайте ссылку — получатель увидит прогресс ученика без регистрации.
+          </p>
         </div>
-      </div>
-      {loading ? <div className="text-sm text-gray-300 py-4">Загрузка…</div> : active.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center"><div className="text-3xl mb-3">🔗</div><p className="text-gray-400 text-sm">Ещё нет активных ссылок</p></div>
-      ) : (
-        <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Активные ссылки</h2>
-          {active.map(inv => (
-            <div key={inv.id} className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-gray-900">{inv.label ?? 'Без названия'}</div>
-                <div className="text-xs text-gray-300 truncate mt-0.5">{typeof window!=='undefined'?`${window.location.origin}/analytics/invite/${inv.token}`:''}</div>
-                <div className="text-xs text-gray-400 mt-0.5">Создана {fmt(inv.created_at)}</div>
-              </div>
-              <div className="flex gap-2 shrink-0">
-                <button onClick={()=>copy(inv.token)} className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50">{copied===inv.token?'✓ Скопировано':'Копировать'}</button>
-                <Link href={`/analytics/invite/${inv.token}`} target="_blank" className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50">Открыть</Link>
-                <button onClick={()=>revoke(inv.id)} className="px-3 py-1.5 text-xs font-medium rounded-lg text-red-400 hover:bg-red-50">Отозвать</button>
-              </div>
+
+        {/* Create new */}
+        <div className="rounded-2xl border p-5"
+          style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: "rgba(69,97,232,0.12)" }}>
+              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="#4561E8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M8 3v10M3 8h10" />
+              </svg>
             </div>
-          ))}
+            <span className="text-sm font-semibold" style={{ color: "var(--text)" }}>Новая ссылка</span>
+          </div>
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={newLabel}
+              onChange={e => setNewLabel(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && create()}
+              placeholder="Название (напр. «Мама» или «Класс 9А»)"
+              className="flex-1 px-4 py-2.5 rounded-xl text-sm focus:outline-none"
+              style={{
+                background: "var(--bg-secondary)",
+                border: "1px solid var(--border)",
+                color: "var(--text)",
+              }}
+            />
+            <button
+              onClick={create}
+              disabled={creating}
+              className="btn-glow px-5 py-2.5 text-white text-sm font-semibold rounded-xl disabled:opacity-50 whitespace-nowrap">
+              {creating ? 'Создаём…' : 'Создать'}
+            </button>
+          </div>
         </div>
-      )}
-      {revoked.length > 0 && (
-        <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wide">Отозванные</h2>
-          {revoked.map(inv => (
-            <div key={inv.id} className="bg-gray-50 rounded-xl px-4 py-3 opacity-50">
-              <span className="text-sm text-gray-500 line-through">{inv.label ?? 'Без названия'}</span>
+
+        {/* Links list */}
+        {loading ? (
+          <div className="flex items-center justify-center py-8 gap-1">
+            {[0, 1, 2].map(i => (
+              <div key={i} className="w-1.5 h-1.5 rounded-full animate-bounce"
+                style={{ background: "#4561E8", animationDelay: `${i * 0.15}s` }} />
+            ))}
+          </div>
+        ) : active.length === 0 ? (
+          <div className="rounded-2xl border p-10 text-center"
+            style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3"
+              style={{ background: "rgba(69,97,232,0.08)" }}>
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="#4561E8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
             </div>
-          ))}
+            <p className="text-sm font-medium mb-1" style={{ color: "var(--text)" }}>Нет активных ссылок</p>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>Создайте первую ссылку выше</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
+              Активные ссылки
+            </p>
+            {active.map(inv => (
+              <div key={inv.id} className="rounded-2xl border p-4"
+                style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+                <div className="flex items-start gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold mb-0.5" style={{ color: "var(--text)" }}>
+                      {inv.label ?? 'Без названия'}
+                    </div>
+                    <div className="text-xs truncate mb-1" style={{ color: "var(--text-muted)" }}>
+                      {typeof window !== 'undefined' ? `${window.location.origin}/analytics/invite/${inv.token}` : ''}
+                    </div>
+                    <div className="text-xs" style={{ color: "var(--text-muted)" }}>
+                      Создана {fmt(inv.created_at)}
+                    </div>
+                  </div>
+                  <div className="flex gap-2 shrink-0 flex-wrap justify-end">
+                    <button
+                      onClick={() => copy(inv.token)}
+                      className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all"
+                      style={{
+                        background: copied === inv.token ? "rgba(16,185,129,0.12)" : "var(--bg-secondary)",
+                        border: `1px solid ${copied === inv.token ? "rgba(16,185,129,0.3)" : "var(--border)"}`,
+                        color: copied === inv.token ? "#10b981" : "var(--text-secondary)",
+                      }}>
+                      {copied === inv.token ? '✓ Скопировано' : 'Копировать'}
+                    </button>
+                    <Link
+                      href={`/analytics/invite/${inv.token}`}
+                      target="_blank"
+                      className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all"
+                      style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}>
+                      Открыть
+                    </Link>
+                    <button
+                      onClick={() => revoke(inv.id)}
+                      className="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors"
+                      style={{ color: "#ef4444", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)" }}>
+                      Отозвать
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Revoked */}
+        {revoked.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "var(--text-muted)", opacity: 0.6 }}>
+              Отозванные
+            </p>
+            {revoked.map(inv => (
+              <div key={inv.id} className="rounded-xl px-4 py-3 opacity-40"
+                style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
+                <span className="text-sm line-through" style={{ color: "var(--text-secondary)" }}>
+                  {inv.label ?? 'Без названия'}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* How it works */}
+        <div className="rounded-2xl border p-5"
+          style={{ background: "rgba(69,97,232,0.05)", borderColor: "rgba(69,97,232,0.2)" }}>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+              style={{ background: "rgba(69,97,232,0.12)" }}>
+              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="#4561E8" strokeWidth="1.5" strokeLinecap="round">
+                <circle cx="8" cy="8" r="6" />
+                <path d="M8 5v3M8 10.5h.01" />
+              </svg>
+            </div>
+            <span className="text-sm font-semibold" style={{ color: "#4561E8" }}>Как это работает</span>
+          </div>
+          <ul className="space-y-2.5 text-sm" style={{ color: "var(--text-secondary)" }}>
+            {[
+              { icon: "🔗", text: "Создайте ссылку и отправьте родителю или учителю" },
+              { icon: "📊", text: "Они увидят прогресс, активность и статистику по предметам" },
+              { icon: "🔒", text: "Можно отозвать в любой момент" },
+              { icon: "👤", text: "Регистрация для просмотра не нужна" },
+            ].map(item => (
+              <li key={item.text} className="flex items-center gap-3">
+                <span className="shrink-0">{item.icon}</span>
+                <span>{item.text}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-      )}
-      <div className="bg-blue-50 rounded-2xl p-5">
-        <h3 className="text-sm font-semibold text-blue-800 mb-2">Как это работает</h3>
-        <ul className="text-sm text-blue-700 space-y-1.5">
-          <li>📎 Создайте ссылку и отправьте родителю или учителю</li>
-          <li>📊 Они увидят прогресс, активность и статистику по предметам</li>
-          <li>🔒 Можно отозвать в любой момент</li>
-          <li>👤 Регистрация для просмотра не нужна</li>
-        </ul>
       </div>
     </div>
   )
