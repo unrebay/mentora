@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Logo from "@/components/Logo";
+import SphereBlobScene, { AUTH_SPHERES } from "@/components/SphereBlobScene";
+import SubjectIcon from "@/components/SubjectIcon";
 import posthog from "posthog-js";
 
 // ── Type augmentation for hCaptcha on window ──────────────────────────────
@@ -20,7 +22,7 @@ const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? "";
 
 export default function AuthPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+    <Suspense fallback={<div className="min-h-screen" style={{ background: "#04060f" }} />}>
       <AuthPageContent />
     </Suspense>
   );
@@ -206,32 +208,29 @@ function AuthPageContent() {
   // ── Email confirmation screen ──────────────────────────────────────────
   if (emailSent) {
     return (
-      <main className="min-h-screen s-page flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-sm text-center">
-          <div className="text-center mb-8">
-            <Logo size="md" href="/" />
-          </div>
-          <div className="s-raised rounded-2xl shadow-sm border p-8 space-y-5" style={{borderColor:"var(--border-light)"}}>
-            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto" style={{background:"rgba(69,97,232,0.1)"}}>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4561E8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <main className="min-h-screen relative flex items-center justify-center px-4 py-12" style={{ background: "#04060f" }}>
+        <SphereBlobScene spheres={AUTH_SPHERES} intensity={0.5} />
+        <div className="relative z-10 w-full max-w-sm text-center animate-fade-in-up">
+          <Logo size="md" href="/" className="justify-center mb-10" />
+          <div className="glass rounded-3xl p-8 space-y-6">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto"
+              style={{ background: "rgba(69,97,232,0.18)", border: "1px solid rgba(107,143,255,0.25)" }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6B8FFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="4" width="20" height="16" rx="2"/>
                 <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
               </svg>
             </div>
             <div>
-              <h2 className="text-xl font-bold t-primary mb-2">Проверь почту</h2>
-              <p className="t-secondary text-sm leading-relaxed">
-                Мы отправили письмо на{" "}
-                <span className="font-semibold t-primary">{emailSent}</span>.
-                Перейди по ссылке в письме, чтобы активировать аккаунт.
+              <h2 className="text-xl font-bold text-white mb-2">Проверь почту</h2>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Письмо отправлено на{" "}
+                <span className="text-white font-semibold">{emailSent}</span>.<br/>
+                Перейди по ссылке, чтобы активировать аккаунт.
               </p>
             </div>
-            <div className="rounded-xl p-3 text-xs t-muted" style={{background:"var(--bg-secondary)"}}>
-              Не получил письмо? Проверь папку «Спам» или{" "}
-              <button
-                className="text-brand-600 hover:underline font-medium"
-                onClick={() => setEmailSent(null)}
-              >
+            <div className="rounded-xl p-3 text-xs text-gray-500" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              Не получил письмо? Проверь «Спам» или{" "}
+              <button className="text-[#6B8FFF] hover:underline font-medium" onClick={() => setEmailSent(null)}>
                 попробуй снова
               </button>
             </div>
@@ -242,183 +241,306 @@ function AuthPageContent() {
   }
 
   return (
-    <main className="min-h-screen s-page flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm">
+    <main className="min-h-screen flex">
 
-        {/* Logo */}
-        <div className="text-center mb-8">
+      {/* ══════════════════════════════════════════════
+          LEFT PANEL — Branded dark side with 3D spheres
+          Hidden on mobile, 42% on lg+
+      ══════════════════════════════════════════════ */}
+      <div className="hidden lg:flex relative flex-col overflow-hidden"
+        style={{ width: "42%", background: "#04060f", minHeight: "100vh" }}>
+
+        {/* 3D sphere scene */}
+        <SphereBlobScene spheres={AUTH_SPHERES} />
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col h-full p-10 xl:p-14">
+
+          {/* Logo */}
+          <Logo size="sm" href="/" />
+
+          {/* Center quote */}
+          <div className="flex-1 flex flex-col justify-center pt-8">
+            <p className="text-[11px] font-bold text-gray-600 tracking-[0.2em] uppercase mb-5">
+              Персональный AI-ментор
+            </p>
+            <h2 className="text-3xl xl:text-4xl font-black text-white leading-tight mb-5">
+              Задай вопрос,<br />
+              который не решаешься<br />
+              <span style={{
+                background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 45%, #9F7AFF 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}>
+                произнести вслух.
+              </span>
+            </h2>
+            <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
+              Ментора не осуждает. Объясняет столько раз, сколько нужно — на твоём языке.
+            </p>
+          </div>
+
+          {/* Bottom — subject icons + trust */}
+          <div>
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
+              {["russian-history","mathematics","physics","chemistry","biology","english","astronomy"].map(id => (
+                <SubjectIcon key={id} id={id} size={30} style={{ opacity: 0.85 }} />
+              ))}
+            </div>
+            <div className="flex items-center gap-3 text-xs text-gray-600">
+              <span>13 предметов</span>
+              <span className="text-gray-800">·</span>
+              <span>Без VPN</span>
+              <span className="text-gray-800">·</span>
+              <span>Без карты</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════
+          RIGHT PANEL — Form
+      ══════════════════════════════════════════════ */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-10"
+        style={{ background: "var(--bg)" }}>
+
+        {/* Mobile logo (hidden on lg+) */}
+        <div className="lg:hidden mb-8 w-full max-w-md">
           <Logo size="md" href="/" />
-          <p className="t-secondary mt-2 text-sm">
-            {isSignup ? "Создай бесплатный аккаунт" : "Войди в свой аккаунт"}
-          </p>
         </div>
 
-        <div className="s-raised rounded-2xl shadow-sm border p-8 space-y-4" style={{borderColor:"var(--border-light)"}}>
+        <div className="w-full max-w-md animate-fade-in-up">
 
-          {/* ── OAuth buttons ── */}
-          <div className="space-y-3">
+          {/* ── Mode toggle pill ── */}
+          <div className="relative flex p-1 rounded-2xl mb-6"
+            style={{ background: "var(--bg-secondary)" }}>
+            {/* Sliding indicator */}
+            <div
+              className="absolute top-1 bottom-1 rounded-xl transition-all duration-200"
+              style={{
+                width: "calc(50% - 4px)",
+                left: isSignup ? "calc(50%)" : "4px",
+                background: "var(--bg-card)",
+                boxShadow: "0 1px 5px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)",
+              }}
+            />
+            <button
+              onClick={() => switchMode("signin")}
+              className="relative flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors z-10"
+              style={{ color: !isSignup ? "var(--text)" : "var(--text-muted)" }}
+            >
+              Войти
+            </button>
+            <button
+              onClick={() => switchMode("signup")}
+              className="relative flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors z-10"
+              style={{ color: isSignup ? "var(--text)" : "var(--text-muted)" }}
+            >
+              Регистрация
+            </button>
+          </div>
+
+          {/* ── Auth card ── */}
+          <div className="rounded-3xl border p-7 space-y-4"
+            style={{
+              background: "var(--bg-card)",
+              borderColor: "var(--border)",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06)",
+            }}>
+
+            <div className="mb-1">
+              <h1 className="text-xl font-bold" style={{ color: "var(--text)" }}>
+                {isSignup ? "Создай аккаунт бесплатно" : "С возвращением"}
+              </h1>
+              <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
+                {isSignup ? "Без карты · Без обязательств" : "Войди чтобы продолжить учёбу"}
+              </p>
+            </div>
+
+            {/* ── Google OAuth ── */}
             <button
               type="button"
               onClick={() => handleOAuth("google")}
               disabled={oauthLoading !== null}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 border rounded-xl text-sm font-medium t-secondary s-raised hover:s-input transition-colors disabled:opacity-60" style={{borderColor:"var(--border)"}}
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-60"
+              style={{
+                background: "var(--bg-secondary)",
+                border: "1px solid var(--border)",
+                color: "var(--text-secondary)",
+              }}
             >
               {oauthLoading === "google" ? (
-                <span className="w-4 h-4 border-2 rounded-full animate-spin" style={{borderColor:"var(--border)",borderTopColor:"var(--text-secondary)"}} />
-              ) : (
-                <GoogleIcon />
-              )}
+                <span className="w-4 h-4 border-2 rounded-full animate-spin"
+                  style={{ borderColor: "var(--border)", borderTopColor: "var(--text-secondary)" }} />
+              ) : <GoogleIcon />}
               {isSignup ? "Зарегистрироваться через Google" : "Войти через Google"}
             </button>
-          </div>
 
-          {/* ── Divider ── */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t" style={{borderColor:"var(--border-light)"}} />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="s-raised px-3 t-muted">или через email</span>
-            </div>
-          </div>
-
-          {/* ── Email / Password form ── */}
-
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium t-secondary mb-1">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                className="w-full px-4 py-3 rounded-xl border t-primary s-input focus:outline-none focus:ring-2 focus:ring-[var(--brand)] text-sm transition" style={{borderColor:"var(--border)",background:"var(--bg-secondary)",color:"var(--text)"}}
-                placeholder="you@example.com"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium t-secondary mb-1">Пароль</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                autoComplete={isSignup ? "new-password" : "current-password"}
-                className="w-full px-4 py-3 rounded-xl border t-primary s-input focus:outline-none focus:ring-2 focus:ring-[var(--brand)] text-sm transition" style={{borderColor:"var(--border)",background:"var(--bg-secondary)",color:"var(--text)"}}
-                placeholder={isSignup ? "минимум 6 символов" : "••••••••"}
-              />
+            {/* ── Divider ── */}
+            <div className="relative flex items-center gap-3 py-1">
+              <div className="flex-1 border-t" style={{ borderColor: "var(--border-light)" }} />
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>или через email</span>
+              <div className="flex-1 border-t" style={{ borderColor: "var(--border-light)" }} />
             </div>
 
-            {/* hCaptcha — only for signup & when site key is set */}
-            {isSignup && HCAPTCHA_SITE_KEY && (
-              <div className="flex justify-center py-1">
-                <div
-                  ref={captchaRef}
-                  className="h-captcha"
-                  data-sitekey={HCAPTCHA_SITE_KEY}
-                  data-callback="onMentoraCaptchaSuccess"
-                  data-expired-callback="onMentoraCaptchaExpired"
-                  data-theme="auto"
+            {/* ── Email / Password form ── */}
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-muted)" }}>
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                  className="w-full px-4 py-3 rounded-xl border text-sm transition focus:outline-none focus:ring-2 focus:ring-[#4561E8]"
+                  style={{ background: "var(--bg-secondary)", borderColor: "var(--border)", color: "var(--text)" }}
+                  placeholder="you@example.com"
                 />
               </div>
-            )}
-
-            {error && (
-              <p className="text-red-500 dark:text-red-400 text-xs text-center bg-red-50 dark:bg-red-950/40 rounded-lg py-2 px-3">
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading || oauthLoading !== null}
-              className="w-full py-3 bg-brand-600 text-white rounded-xl font-semibold hover:bg-brand-700 transition-colors disabled:opacity-50 text-sm"
-            >
-              {loading
-                ? <span className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                    Загрузка...
-                  </span>
-                : isSignup ? "Создать аккаунт" : "Войти"
-              }
-            </button>
-          </form>
-
-          {/* Hidden widget: loads Telegram.Login API */}
-          <div id="telegram-login-widget" style={{position:"absolute",opacity:0,width:1,height:1,overflow:"hidden",pointerEvents:"none"}} />
-
-          {/* Telegram button — shown always, state reflects availability */}
-          <div className="mt-3">
-            {tgAvailable === false ? (
-              // Telegram is blocked (e.g. in Russia) — show notice instead of broken button
-              <div className="w-full flex items-center justify-center gap-2 px-4 py-3 border rounded-xl text-sm t-muted s-input" style={{borderColor:"var(--border-light)"}}>
-                <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" style={{fill:"var(--text-muted)"}}><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/></svg>
-                Telegram недоступен без VPN
+              <div>
+                <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-muted)" }}>
+                  Пароль
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  autoComplete={isSignup ? "new-password" : "current-password"}
+                  className="w-full px-4 py-3 rounded-xl border text-sm transition focus:outline-none focus:ring-2 focus:ring-[#4561E8]"
+                  style={{ background: "var(--bg-secondary)", borderColor: "var(--border)", color: "var(--text)" }}
+                  placeholder={isSignup ? "минимум 6 символов" : "••••••••"}
+                />
               </div>
-            ) : (
+
+              {/* hCaptcha — only for signup */}
+              {isSignup && HCAPTCHA_SITE_KEY && (
+                <div className="flex justify-center py-1">
+                  <div
+                    ref={captchaRef}
+                    className="h-captcha"
+                    data-sitekey={HCAPTCHA_SITE_KEY}
+                    data-callback="onMentoraCaptchaSuccess"
+                    data-expired-callback="onMentoraCaptchaExpired"
+                    data-theme="auto"
+                  />
+                </div>
+              )}
+
+              {error && (
+                <div className="flex items-start gap-2 rounded-xl px-3 py-2.5 text-xs"
+                  style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#f87171" }}>
+                  <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 mt-0.5 shrink-0" fill="currentColor">
+                    <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4zm0 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                  </svg>
+                  {error}
+                </div>
+              )}
+
               <button
-                type="button"
-                disabled={tgLoading || tgAvailable === null}
-                onClick={() => {
-                  const tg = window.Telegram;
-                  if (tg?.Login?.auth) {
-                    tg.Login.auth(
-                      { bot_id: 8558784965, request_access: "write" },
-                      (user) => {
-                        if (user && window.onTelegramAuth) {
-                          window.onTelegramAuth(user);
-                        } else if (!user) {
-                          setError("Не удалось войти через Telegram. Попробуй ещё раз.");
-                        }
-                      }
-                    );
-                  } else {
-                    setError("Telegram недоступен. Попробуй обновить страницу или использовать VPN.");
-                  }
-                }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 border rounded-xl text-sm font-medium t-secondary s-raised hover:s-input transition-colors disabled:opacity-60" style={{borderColor:"var(--border)"}}
+                type="submit"
+                disabled={loading || oauthLoading !== null}
+                className="btn-glow w-full py-3.5 rounded-2xl font-semibold text-sm disabled:opacity-50 disabled:transform-none"
               >
-                {tgLoading ? (
-                  <>
-                    <span className="w-4 h-4 border-2 rounded-full animate-spin" style={{borderColor:"var(--border)",borderTopColor:"var(--text-secondary)"}} />
-                    Входим через Telegram...
-                  </>
-                ) : tgAvailable === null ? (
-                  <>
-                    <span className="w-4 h-4 border-2 rounded-full animate-spin" style={{borderColor:"var(--border-light)",borderTopColor:"var(--text-muted)"}} />
-                    Проверяем Telegram...
-                  </>
-                ) : (
-                  <>
-                    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#2AABEE]"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/></svg>
-                    Войти через Telegram
-                  </>
-                )}
+                {loading
+                  ? <span className="flex items-center justify-center gap-2">
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Загружаем...
+                    </span>
+                  : isSignup ? "Создать аккаунт →" : "Войти →"
+                }
               </button>
+            </form>
+
+            {/* Hidden widget: loads Telegram.Login API */}
+            <div id="telegram-login-widget" style={{position:"absolute",opacity:0,width:1,height:1,overflow:"hidden",pointerEvents:"none"}} />
+
+            {/* Telegram button */}
+            <div>
+              {tgAvailable === false ? (
+                <div className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-xs"
+                  style={{ background: "var(--bg-secondary)", border: "1px solid var(--border-light)", color: "var(--text-muted)" }}>
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0 opacity-50" fill="currentColor">
+                    <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/>
+                  </svg>
+                  Telegram недоступен без VPN
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  disabled={tgLoading || tgAvailable === null}
+                  onClick={() => {
+                    const tg = window.Telegram;
+                    if (tg?.Login?.auth) {
+                      tg.Login.auth(
+                        { bot_id: 8558784965, request_access: "write" },
+                        (user) => {
+                          if (user && window.onTelegramAuth) {
+                            window.onTelegramAuth(user);
+                          } else if (!user) {
+                            setError("Не удалось войти через Telegram. Попробуй ещё раз.");
+                          }
+                        }
+                      );
+                    } else {
+                      setError("Telegram недоступен. Попробуй обновить страницу или использовать VPN.");
+                    }
+                }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-60"
+                  style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+                >
+                  {tgLoading ? (
+                    <>
+                      <span className="w-4 h-4 border-2 rounded-full animate-spin"
+                        style={{ borderColor: "var(--border)", borderTopColor: "var(--text-secondary)" }} />
+                      Входим через Telegram...
+                    </>
+                  ) : tgAvailable === null ? (
+                    <>
+                      <span className="w-4 h-4 border-2 rounded-full animate-spin"
+                        style={{ borderColor: "var(--border-light)", borderTopColor: "var(--text-muted)" }} />
+                      Проверяем Telegram...
+                    </>
+                  ) : (
+                    <>
+                      <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#2AABEE]">
+                        <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/>
+                      </svg>
+                      Войти через Telegram
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+
+          </div>{/* /auth card */}
+
+          {/* Switch mode link */}
+          <p className="text-center text-sm mt-5" style={{ color: "var(--text-muted)" }}>
+            {isSignup ? (
+              <>Уже есть аккаунт?{" "}
+                <button onClick={() => switchMode("signin")}
+                  className="font-semibold hover:underline" style={{ color: "var(--brand)" }}>
+                  Войти
+                </button>
+              </>
+            ) : (
+              <>Нет аккаунта?{" "}
+                <button onClick={() => switchMode("signup")}
+                  className="font-semibold hover:underline" style={{ color: "var(--brand)" }}>
+                  Зарегистрироваться бесплатно
+                </button>
+              </>
             )}
-          </div>
-        </div>
+          </p>
 
-        {/* Switch mode */}
-        <p className="text-center text-sm t-muted mt-5">
-          {isSignup ? (
-            <>Уже есть аккаунт?{" "}
-              <button onClick={() => switchMode("signin")} className="text-brand-600 font-medium hover:underline">
-                Войти
-              </button>
-            </>
-          ) : (
-            <>Нет аккаунта?{" "}
-              <button onClick={() => switchMode("signup")} className="text-brand-600 font-medium hover:underline">
-                Зарегистрироваться бесплатно
-              </button>
-            </>
-          )}
-        </p>
-
-      </div>
+        </div>{/* /max-w-md */}
+      </div>{/* /right panel */}
     </main>
   );
 }

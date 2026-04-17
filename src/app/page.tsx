@@ -5,6 +5,7 @@ import DemoChat from "@/components/DemoChat";
 import Logo from "@/components/Logo";
 import { createClient } from "@/lib/supabase/server";
 import NeuralNetworkCanvas from "@/components/NeuralNetworkCanvas";
+import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
 import ThemeToggle from "@/components/ThemeToggle";
 import SubjectGrid from "@/components/SubjectGrid";
 
@@ -133,6 +134,8 @@ export default async function HomePage() {
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
           <NeuralNetworkCanvas className="absolute inset-0 w-full h-full" />
         </div>
+        {/* Large ambient spheres behind the canvas (lower z, more subtle) */}
+        <SphereBlobScene spheres={SUBTLE_SPHERES} intensity={0.45} />
 
         {/* Gradient fade at bottom to blend with next section */}
         <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none" aria-hidden
