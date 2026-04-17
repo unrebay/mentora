@@ -27,29 +27,39 @@ export default async function KnowledgePage() {
   return (
     <div className="flex flex-col bg-[#06060f] text-white" style={{ height: "100dvh" }}>
       {/* Nav */}
-      <nav className="flex-shrink-0 border-b border-white/8 px-4 py-3 flex items-center justify-between"
-        style={{ background: "rgba(6,6,15,0.90)", backdropFilter: "blur(12px)" }}>
+      <nav className="flex-shrink-0 border-b px-4 py-3 flex items-center justify-between"
+        style={{ background: "rgba(6,6,15,0.92)", backdropFilter: "blur(16px)", borderColor: "rgba(255,255,255,0.07)" }}>
         <div className="flex items-center gap-3">
           <Logo size="sm" textColor="white" />
-          <Link href="/dashboard" className="text-sm text-white/40 hover:text-white/70 transition-colors">
-            ← Назад
+          <Link href="/dashboard"
+            className="flex items-center gap-1.5 text-sm font-medium rounded-lg px-2.5 py-1.5 transition-colors"
+            style={{ color: "rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.05)" }}>
+            <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M10 12L6 8l4-4" /></svg>
+            Назад
           </Link>
         </div>
-        <p className="text-xs font-bold text-white/50 tracking-wide uppercase hidden sm:block">
+        <p className="text-[10px] font-bold tracking-[0.18em] uppercase hidden sm:block"
+          style={{ color: "rgba(255,255,255,0.3)" }}>
           Галактика знаний
         </p>
       </nav>
 
       {/* Title */}
-      <div className="flex-shrink-0 px-4 pt-4 pb-2">
-        <h1 className="text-xl md:text-2xl font-bold leading-tight">
+      <div className="flex-shrink-0 px-5 pt-4 pb-2">
+        <h1 className="text-xl md:text-2xl font-bold leading-tight text-white">
           Все знания{" "}
-          <span style={{ color: "#6b8fff" }}>в одной галактике</span>
+          <span style={{
+            background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}>
+            в одной галактике
+          </span>
         </h1>
-        <p className="text-xs text-white/40 mt-1 leading-relaxed">
-          Каждый предмет — звезда. Каждая тема — созвездие.{" "}
-          Наведи на звезду, чтобы увидеть темы и перейти к изучению.{" "}
-          <span className="text-[#ffa040]">Оранжевым</span>{" "}
+        <p className="text-xs mt-1 leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>
+          Каждый предмет — звезда. Наведи, чтобы увидеть темы.{" "}
+          <span style={{ color: "#ffa040" }}>Оранжевым</span>{" "}
           светится то, что ты изучаешь прямо сейчас.
         </p>
       </div>
