@@ -51,7 +51,7 @@ export const RUSSIAN_HISTORY_TOPICS: TopicPeriod[] = [
     title: "Московское царство",
     years: "XVI–XVII вв.",
     emoji: "👑",
-    color: "bg-purple-100 text-purple-700",
+    color: "bg-[#EEF1FD] text-[#4561E8]",
     topics: [
       { id: "ivan4",          title: "Иван Грозный: реформы и опричнина" },
       { id: "kazan",          title: "Взятие Казани и расширение государства" },

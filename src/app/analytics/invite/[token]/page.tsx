@@ -64,7 +64,7 @@ export default function AnalyticsInvitePage() {
         <div className="text-5xl mb-4">🔗</div>
         <h1 className="text-xl font-semibold text-gray-900 mb-2">Ссылка недоступна</h1>
         <p className="text-gray-500 text-sm mb-6">{error}</p>
-        <Link href="/" className="text-sm text-indigo-600 hover:underline">На главную</Link>
+        <Link href="/" className="text-sm text-[#4561E8] hover:underline">На главную</Link>
       </div>
     </div>
   )
@@ -84,7 +84,7 @@ export default function AnalyticsInvitePage() {
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-lg font-bold text-gray-900">Mentora</span>
-            <span className="text-xs bg-indigo-50 text-indigo-600 font-medium px-2.5 py-1 rounded-full">Аналитика</span>
+            <span className="text-xs bg-indigo-50 text-[#4561E8] font-medium px-2.5 py-1 rounded-full">Аналитика</span>
           </div>
           <Link href="/auth" className="text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors px-4 py-1.5 rounded-lg">
             Попробовать →
@@ -95,7 +95,7 @@ export default function AnalyticsInvitePage() {
       <div className="max-w-3xl mx-auto px-6 py-8 space-y-5">
         <div className="bg-white rounded-2xl border border-gray-100 px-6 py-5">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center text-xl font-bold text-indigo-600">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center text-xl font-bold text-[#4561E8]">
               {label.charAt(0).toUpperCase()}
             </div>
             <div>

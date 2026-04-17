@@ -163,8 +163,8 @@ export default function TermsPage() {
           <p>Исполнитель: Белашов Андрей Владимирович</p>
           <p>ИНН: 325005748248</p>
           <p>Статус: Самозанятый (НПД)</p>
-          <p>Email: <a href="mailto:hi@mentora.su" className="text-indigo-600 hover:underline">hi@mentora.su</a></p>
-          <p>Сайт: <a href="https://mentora.su" className="text-indigo-600 hover:underline">mentora.su</a></p>
+          <p>Email: <a href="mailto:hi@mentora.su" className="text-[#4561E8] hover:underline">hi@mentora.su</a></p>
+          <p>Сайт: <a href="https://mentora.su" className="text-[#4561E8] hover:underline">mentora.su</a></p>
         </div>
       </section>
     </div>
