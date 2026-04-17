@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { MessageRole } from "@/lib/types";
 import ChatParticles from "@/components/ChatParticles";
+import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
 
 const DAILY_LIMIT = 30;
 
@@ -274,15 +275,47 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-5">
         {isEmpty && (
-          <div className="relative text-center pt-12">
+          <div className="relative text-center pt-10">
             <ChatParticles subject={subject} />
-            <div className="text-5xl mb-4">{config.emoji}</div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-[var(--text)] mb-2">Привет! Я твой ментор по теме «{subjectTitle}»</h2>
-            <p className="text-gray-500 dark:text-[var(--text-secondary)] text-sm max-w-sm mx-auto leading-relaxed">{config.hint}</p>
+            {/* Subject icon badge */}
+            <div className="inline-flex items-center justify-center mb-5">
+              <div
+                className="rounded-3xl p-1"
+                style={{
+                  background: `linear-gradient(135deg, ${subjectColor(subject)}33, ${subjectColor(subject)}11)`,
+                  boxShadow: `0 0 32px ${subjectColor(subject)}30`,
+                  border: `1px solid ${subjectColor(subject)}22`,
+                }}
+              >
+                <SubjectIcon id={subject} size={64} />
+              </div>
+            </div>
+            <h2 className="text-xl font-semibold text-[var(--text)] mb-2">
+              Привет! Я твой ментор по теме «{subjectTitle}»
+            </h2>
+            <p className="text-[var(--text-muted)] text-sm max-w-sm mx-auto leading-relaxed">{config.hint}</p>
             <div className="mt-6 flex flex-wrap gap-2 justify-center">
               {config.quickQuestions.map((q) => (
-                <button key={q} onClick={() => setInput(q)}
-                  className="px-4 py-2 bg-white dark:bg-[var(--bg-card)] border border-gray-200 dark:border-[var(--border)] rounded-xl text-sm text-gray-600 dark:text-[var(--text-secondary)] hover:border-brand-300 hover:text-brand-600 transition-colors">
+                <button
+                  key={q}
+                  onClick={() => setInput(q)}
+                  className="px-4 py-2 rounded-full text-sm transition-all duration-200"
+                  style={{
+                    background: "var(--bg-card)",
+                    border: `1px solid var(--border)`,
+                    color: "var(--text-secondary)",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = subjectColor(subject);
+                    (e.currentTarget as HTMLButtonElement).style.color = subjectColor(subject);
+                    (e.currentTarget as HTMLButtonElement).style.background = `${subjectColor(subject)}10`;
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border)";
+                    (e.currentTarget as HTMLButtonElement).style.color = "var(--text-secondary)";
+                    (e.currentTarget as HTMLButtonElement).style.background = "var(--bg-card)";
+                  }}
+                >
                   {q}
                 </button>
               ))}
@@ -299,13 +332,34 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                 </span>
               </div>
             )}
-            <div className={`max-w-[82%] rounded-2xl px-4 py-3 ${
-              msg.role === "user"
-                ? "bg-brand-600 text-white text-[15px] leading-relaxed"
-                : msg.isError
-                  ? "bg-red-50 border border-red-100 text-red-700"
-                  : "bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-light)] text-gray-800 dark:text-[var(--text)] shadow-sm"
-            }`}>
+            <div
+              className="max-w-[82%] rounded-2xl px-4 py-3"
+              style={
+                msg.role === "user"
+                  ? {
+                      background: "linear-gradient(135deg, #4561E8, #6B8FFF)",
+                      color: "white",
+                      fontSize: "15px",
+                      lineHeight: "1.65",
+                      boxShadow: "0 2px 12px rgba(69,97,232,0.35)",
+                    }
+                  : msg.isError
+                    ? {
+                        background: "rgba(239,68,68,0.06)",
+                        border: "1px solid rgba(239,68,68,0.2)",
+                        color: "#dc2626",
+                      }
+                    : {
+                        background: "var(--bg-card)",
+                        borderLeft: `3px solid ${subjectColor(subject)}`,
+                        borderTop: "1px solid var(--border-light)",
+                        borderRight: "1px solid var(--border-light)",
+                        borderBottom: "1px solid var(--border-light)",
+                        color: "var(--text)",
+                        boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+                      }
+              }
+            >
               {msg.role === "assistant" ? (
                 <>
                   <MarkdownMessage content={msg.content} />
@@ -349,7 +403,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           <div className="rounded-xl bg-gray-50 dark:bg-[var(--bg-secondary)] border border-gray-200 dark:border-[var(--border)] p-4 text-center">
             <p className="text-sm font-semibold text-gray-800 dark:text-[var(--text)] mb-1">Лимит на сегодня исчерпан</p>
             <p className="text-xs text-gray-500 dark:text-[var(--text-secondary)] mb-3">Возвращайся завтра — счётчик сбросится автоматически</p>
-            <Link href="/pricing" className="inline-flex items-center gap-2 bg-brand-600 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-brand-700 transition-colors">
+            <Link href="/pricing" className="btn-glow inline-flex items-center gap-2 text-xs font-semibold px-5 py-2.5 rounded-full">
               ⚡ Pro — безлимитный доступ
             </Link>
           </div>
@@ -362,27 +416,65 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                 <button type="button" onClick={() => setPendingImage(null)} className="text-gray-400 hover:text-gray-600 text-lg leading-none px-1">×</button>
               </div>
             )}
-            <form onSubmit={sendMessage} className="flex gap-2">
+            <form onSubmit={sendMessage} className="flex gap-2 items-center">
             {/* Hidden file input for Ultima */}
             {isUltima && (
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
             )}
             {/* Camera button — only for Ultima */}
             {isUltima && (
-              <button type="button" onClick={() => fileInputRef.current?.click()} title="Сфотографировать задачу"
-                className="px-3 py-3 rounded-xl border border-gray-200 dark:border-[var(--border)] text-gray-500 dark:text-[var(--text-secondary)] hover:bg-gray-50 dark:hover:bg-[var(--bg-secondary)] transition-colors shrink-0">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                title="Сфотографировать задачу"
+                className="shrink-0 flex items-center justify-center transition-colors"
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "50%",
+                  border: "1px solid var(--border)",
+                  background: "var(--bg-secondary)",
+                  color: "var(--text-muted)",
+                }}
+              >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                   <circle cx="12" cy="13" r="4"/>
                 </svg>
               </button>
             )}
-            <input value={input} onChange={(e) => setInput(e.target.value)}
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
               placeholder={pendingImage ? "Задай вопрос к фото (или отправь без текста)..." : "Задай вопрос..."}
               disabled={loading}
-              className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-brand-500 transition text-[15px] disabled:opacity-50 bg-gray-50 dark:bg-[var(--bg-secondary)] text-gray-900 dark:text-[var(--text)]" />
-            <button type="submit" disabled={loading || (!input.trim() && !pendingImage)}
-              className="px-5 py-3 bg-brand-600 text-white rounded-xl font-medium hover:bg-brand-700 transition-colors disabled:opacity-40 text-sm">
+              className="flex-1 px-5 py-3 text-[15px] disabled:opacity-50 focus:outline-none transition-all"
+              style={{
+                borderRadius: "9999px",
+                border: "1px solid var(--border)",
+                background: "var(--bg-secondary)",
+                color: "var(--text)",
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = "var(--brand)";
+                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(69,97,232,0.12)";
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = "var(--border)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            />
+            <button
+              type="submit"
+              disabled={loading || (!input.trim() && !pendingImage)}
+              className="shrink-0 btn-glow flex items-center justify-center disabled:opacity-40 transition-all"
+              style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "50%",
+                fontSize: "18px",
+              }}
+            >
               →
             </button>
             </form>
