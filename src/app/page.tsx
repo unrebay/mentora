@@ -87,42 +87,58 @@ const STATS = [
   { value: "0 ₽", label: "чтобы начать учиться", color: "#A78BFA", icon: `<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
 ];
 
-const FEATURES = [
+type Feature = {
+  icon: string;
+  title: string;
+  desc: string;
+  color: string;
+  tag?: string;
+  comparison?: { label: string; value: string; sub: string; highlight?: boolean }[];
+};
+
+const FEATURES: Feature[] = [
   {
     icon: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>`,
-    title: "Твои вопросы — только твои",
-    desc: "Всё шифруется. Никакая третья сторона не видит твои вопросы — даже самые личные. Спрашивай без стеснения.",
+    title: "Спрашивай без страха",
+    desc: "Диалоги шифруются по стандарту AES-256 — тому же, что используют банки и Apple Pay. Данные не передаются третьим лицам и не используются для рекламы. Задай вопрос, который не стал бы вводить в Google.",
     color: "#4561E8",
+    tag: "AES-256",
   },
   {
     icon: `<circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" fill="none"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>`,
-    title: "Подстраивается под тебя",
-    desc: "Запоминает твой уровень, стиль и темп. Не нужно объяснять себя заново — Ментора уже знает, как с тобой говорить.",
+    title: "Учится вместе с тобой",
+    desc: "Контекстная память Менторы запоминает каждый диалог: уровень, пробелы, стиль. С каждым разговором объяснения становятся точнее. Персонализированное обучение эффективнее стандартного на 76%.*",
     color: "#10B981",
+    tag: "+76% эффективность",
   },
   {
     icon: `<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>`,
-    title: "Всегда поддержит",
-    desc: "Без осуждения, без «ты должен был это знать». Объясняет столько раз, сколько нужно — и радуется твоим успехам.",
+    title: "Всегда на твоей стороне",
+    desc: "Не осудит, не устанет, не раздражится. Объяснит в третий раз с другого угла, поддержит когда что-то не выходит, и искренне порадуется когда получится. Именно так должен работать настоящий ментор.",
     color: "#FF7A00",
   },
   {
     icon: `<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>`,
-    title: "Технология без аналогов",
-    desc: "Claude AI — языковая модель нового поколения. Объясняет сложное так, как не способен ни один учебник или поисковик.",
+    title: "Уровень топовых AI-лабораторий",
+    desc: "Mentora работает на frontier-моделях — той же архитектуре трансформеров, что лежит в основе продуктов ведущих AI-компаний мира. RAG-retrieval, многоуровневый контекст и специализированный стек делают ответы точнее любого поисковика.",
     color: "#A78BFA",
+    tag: "Frontier AI",
   },
   {
     icon: `<circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>`,
-    title: "Откуда угодно, с любого устройства",
-    desc: "Работает напрямую в России без VPN. Телефон, планшет, ноутбук — просто открываешь браузер и учишься.",
+    title: "Знания — без границ",
+    desc: "Ребёнок из Индии, студент из Якутии или взрослый из Берлина — учиться можно из любой точки, без учителя и расписания. Стрики, уровни и менты превращают ежедневную учёбу в привычку, а не обязанность.",
     color: "#06B6D4",
   },
   {
     icon: `<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>`,
-    title: "В 6× дешевле репетитора",
-    desc: "Частный репетитор — от 1500₽/час. Mentora Pro — 499₽/месяц, без ограничений по времени и вопросам.",
+    title: "Считаем вместе",
+    desc: "8 занятий с репетитором в месяц или неограниченный доступ к Менторе — выбор очевиден.",
     color: "#F59E0B",
+    comparison: [
+      { label: "Репетитор", value: "12 000–24 000 ₽", sub: "8 занятий × 1 500–3 000 ₽/час" },
+      { label: "Mentora Pro", value: "499 ₽", sub: "месяц, безлимит, 24/7", highlight: true },
+    ],
   },
 ];
 
@@ -271,57 +287,101 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* STATS */}
-      <section className="text-white py-14 px-6 relative" style={{ background: "#111827" }}>
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-          {STATS.map((s) => (
-            <div key={s.value} className="flex flex-col items-center text-center gap-3">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                style={{ background: `${s.color}25`, color: s.color }}>
-                <svg viewBox="0 0 24 24" className="w-6 h-6" dangerouslySetInnerHTML={{ __html: s.icon }} />
-              </div>
-              <div>
-                <div className="text-3xl font-black tracking-tight" style={{ color: s.color }}>{s.value}</div>
-                <div className="text-sm text-gray-400 mt-0.5 leading-tight">{s.label}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        {/* Gradient bridge to next section */}
-        <div className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none" aria-hidden
-          style={{ background: "linear-gradient(to bottom, transparent, var(--bg))" }} />
-      </section>
+      {/* DARK BAND: STATS + FEATURES */}
+      <div style={{ background: "#080d1a" }}>
 
-      {/* FEATURES */}
-      <section className="max-w-6xl mx-auto px-6 pt-24 pb-16">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-px flex-1 bg-[var(--border)]" />
-          <span className="text-xs font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase">Почему Mentora</span>
-          <div className="h-px flex-1 bg-[var(--border)]" />
+        {/* STATS */}
+        <section className="text-white pt-14 pb-10 px-6">
+          <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+            {STATS.map((s) => (
+              <div key={s.value} className="flex flex-col items-center text-center gap-3">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                  style={{ background: `${s.color}25`, color: s.color }}>
+                  <svg viewBox="0 0 24 24" className="w-6 h-6" dangerouslySetInnerHTML={{ __html: s.icon }} />
+                </div>
+                <div>
+                  <div className="text-3xl font-black tracking-tight" style={{ color: s.color }}>{s.value}</div>
+                  <div className="text-sm text-gray-400 mt-0.5 leading-tight">{s.label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Thin divider */}
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
         </div>
-        <h2 className="text-4xl md:text-5xl font-black mb-3 leading-tight text-center">
-          Совершенно другой подход
-        </h2>
-        <p className="text-center text-[var(--text-muted)] text-base mb-12 max-w-xl mx-auto">
-          Не очередной учебник онлайн. Живой ментор, который работает только для тебя.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {FEATURES.map((f) => (
-            <div key={f.title}
-              className="rounded-2xl border p-6 flex flex-col gap-4 transition-all duration-200 hover:scale-[1.01]"
-              style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: `${f.color}18`, color: f.color }}>
-                <svg viewBox="0 0 24 24" className="w-5 h-5" dangerouslySetInnerHTML={{ __html: f.icon }} />
-              </div>
-              <div>
-                <h3 className="font-semibold text-sm mb-1.5" style={{ color: "var(--text)" }}>{f.title}</h3>
-                <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>{f.desc}</p>
-              </div>
+
+        {/* FEATURES */}
+        <section className="text-white px-6 pt-16 pb-24">
+          <div className="max-w-6xl mx-auto">
+            <p className="text-xs font-bold tracking-[0.22em] uppercase mb-4 text-center" style={{ color: "rgba(255,255,255,0.35)" }}>
+              Почему Mentora
+            </p>
+            <h2 className="text-4xl md:text-5xl font-black mb-3 leading-tight text-center text-white">
+              Совершенно другой подход
+            </h2>
+            <p className="text-center text-base mb-12 max-w-xl mx-auto" style={{ color: "rgba(255,255,255,0.45)" }}>
+              Не очередной учебник онлайн. Живой ментор, который работает только для тебя.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {FEATURES.map((f) => (
+                <div key={f.title}
+                  className="rounded-2xl p-6 flex flex-col gap-4 transition-all duration-200 hover:scale-[1.01]"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                      style={{ background: `${f.color}22`, color: f.color }}>
+                      <svg viewBox="0 0 24 24" className="w-5 h-5" dangerouslySetInnerHTML={{ __html: f.icon }} />
+                    </div>
+                    {f.tag && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 mt-1"
+                        style={{ background: `${f.color}22`, color: f.color, border: `1px solid ${f.color}40` }}>
+                        {f.tag}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm mb-1.5 text-white">{f.title}</h3>
+                    <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{f.desc}</p>
+                  </div>
+                  {f.comparison && (
+                    <div className="mt-1 space-y-2">
+                      {f.comparison.map((c) => (
+                        <div key={c.label}
+                          className="rounded-xl px-3 py-2.5 flex items-center justify-between gap-3"
+                          style={c.highlight
+                            ? { background: `${f.color}18`, border: `1px solid ${f.color}40` }
+                            : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }
+                          }>
+                          <div>
+                            <div className="text-[11px] font-semibold" style={{ color: c.highlight ? f.color : "rgba(255,255,255,0.4)" }}>{c.label}</div>
+                            <div className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>{c.sub}</div>
+                          </div>
+                          <div className="text-sm font-bold shrink-0"
+                            style={{ color: c.highlight ? f.color : "rgba(255,255,255,0.35)", textDecoration: c.highlight ? "none" : "line-through" }}>
+                            {c.value}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+        </section>
+
+        {/* SVG Wave transition to light section */}
+        <div aria-hidden style={{ display: "block", lineHeight: 0 }}>
+          <svg viewBox="0 0 1440 72" xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="none" style={{ display: "block", width: "100%", height: "72px" }}>
+            <path d="M0,36 C240,72 480,0 720,36 C960,72 1200,0 1440,36 L1440,72 L0,72 Z"
+              style={{ fill: "var(--bg)" }} />
+          </svg>
         </div>
-      </section>
+      </div>
 
       {/* SUBJECTS */}
       <section id="subjects" className="max-w-6xl mx-auto px-6 py-16">
