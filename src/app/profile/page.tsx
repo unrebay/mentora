@@ -10,11 +10,11 @@ import ThemeToggle from "@/components/ThemeToggle";
 export const metadata = { title: "Профиль — Mentora" };
 
 const XP_LEVELS = [
-  { name: "Новичок", minXP: 0, maxXP: 100, color: "#9ca3af", bg: "#f3f4f6" },
-  { name: "Исследователь", minXP: 100, maxXP: 300, color: "#3b82f6", bg: "#eff6ff" },
-  { name: "Знаток", minXP: 300, maxXP: 600, color: "#6366f1", bg: "#eef2ff" },
-  { name: "Историк", minXP: 600, maxXP: 1000, color: "#8b5cf6", bg: "#f5f3ff" },
-  { name: "Эксперт", minXP: 1000, maxXP: 99999, color: "#f59e0b", bg: "#fffbeb" },
+  { name: "Новичок",        minXP: 0,    maxXP: 100,      color: "#9ca3af", grad: ["#9ca3af", "#6b7280"] },
+  { name: "Исследователь",  minXP: 100,  maxXP: 300,      color: "#3b82f6", grad: ["#60a5fa", "#3b82f6"] },
+  { name: "Знаток",         minXP: 300,  maxXP: 600,      color: "#6366f1", grad: ["#818cf8", "#6366f1"] },
+  { name: "Историк",        minXP: 600,  maxXP: 1000,     color: "#8b5cf6", grad: ["#a78bfa", "#8b5cf6"] },
+  { name: "Эксперт",        minXP: 1000, maxXP: 99999,    color: "#f59e0b", grad: ["#fcd34d", "#f59e0b"] },
 ];
 
 function getLevel(xp: number) {
@@ -33,15 +33,8 @@ function pluralMenty(n: number): string {
   return "мент";
 }
 
-const MentoraE = () => (
-  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", fontWeight: 700, fontSize: "1.2em", lineHeight: 1, marginRight: "0.1em" }}>е</span>
-);
-
 type BadgeDef = {
-  id: string;
-  icon: string;
-  name: string;
-  desc: string;
+  id: string; icon: string; name: string; desc: string;
   tier: "bronze" | "silver" | "gold" | "special";
   check: (s: Stats) => boolean;
 };
@@ -58,16 +51,16 @@ const BADGES: BadgeDef[] = [
   { id: "xp100", icon: "✦", name: "Первые шаги", desc: "Набрал 100 ментов", tier: "bronze", check: s => s.totalXP >= 100 },
   { id: "xp500", icon: "✦", name: "Знаток", desc: "Набрал 500 ментов", tier: "silver", check: s => s.totalXP >= 500 },
   { id: "xp1000", icon: "💎", name: "Мастер", desc: "Набрал 1000 ментов", tier: "gold", check: s => s.totalXP >= 1000 },
-  { id: "early_bird", icon: "🦅", name: "Первопроходец", desc: "Присоединился в первые 30 дней", tier: "special", check: s => s.joinedDaysAgo <= 90 },
+  { id: "early_bird", icon: "🦅", name: "Первопроходец", desc: "Присоединился в первые 90 дней", tier: "special", check: s => s.joinedDaysAgo <= 90 },
   { id: "pro", icon: "👑", name: "Pro подписчик", desc: "Поддержал развитие Mentora", tier: "special", check: s => s.isPro },
   { id: "ultima", icon: "💎", name: "Ultima", desc: "Максимальный план Mentora", tier: "special", check: s => s.isUltima },
 ];
 
-const TIER_STYLE: Record<string, { border: string; bg: string; label: string }> = {
-  bronze: { border: "#d97706", bg: "#fffbeb", label: "Бронза" },
-  silver: { border: "#6b7280", bg: "#f9fafb", label: "Серебро" },
-  gold: { border: "#f59e0b", bg: "#fef3c7", label: "Золото" },
-  special: { border: "#8b5cf6", bg: "#f5f3ff", label: "Особый" },
+const TIER_CONFIG: Record<string, { color: string; label: string }> = {
+  bronze: { color: "#d97706", label: "Бронза" },
+  silver: { color: "#6b7280", label: "Серебро" },
+  gold:   { color: "#f59e0b", label: "Золото" },
+  special:{ color: "#8b5cf6", label: "Особый" },
 };
 
 export default async function ProfilePage() {
@@ -106,87 +99,219 @@ export default async function ProfilePage() {
   const locked = BADGES.filter(b => !b.check(stats));
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
-      <nav className="sticky top-0 z-10 border-b border-[var(--border)] px-6 py-4" style={{ background: "var(--bg-nav)", backdropFilter: "blur(12px)" }}>
+    <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
+
+      {/* Nav */}
+      <nav className="sticky top-0 z-10 border-b px-6 py-4 backdrop-blur-md"
+        style={{ background: "var(--bg-nav)", borderColor: "var(--border)" }}>
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <Logo size="sm" />
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            <Link href="/dashboard" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">← Назад</Link>
+            <Link href="/dashboard"
+              className="flex items-center gap-1.5 text-sm font-medium rounded-lg px-2.5 py-1.5 transition-colors"
+              style={{ color: "var(--text-muted)", background: "var(--bg-secondary)" }}>
+              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M10 12L6 8l4-4" />
+              </svg>
+              Назад
+            </Link>
           </div>
         </div>
       </nav>
-      <main className="max-w-3xl mx-auto px-6 py-10 space-y-8">
-      <div className="fixed inset-0 -z-10 pointer-events-none" style={{ background: "radial-gradient(ellipse 100% 70% at 15% 10%, rgba(69,97,232,0.06) 0%, transparent 55%), radial-gradient(ellipse 80% 60% at 85% 90%, rgba(91,119,255,0.04) 0%, transparent 55%)", animation: "gradientDrift 10s ease-in-out infinite alternate" }} />
-        <div className="bg-[var(--bg-card)] rounded-2xl p-8 border border-[var(--border)] shadow-sm flex items-center gap-6">
-          <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold text-white shrink-0" style={{ background: `linear-gradient(135deg, ${lvl.color}, ${lvl.color}99)` }}>{initial}</div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xl font-bold text-[var(--text)] truncate">{name}</p>
-            <p className="text-sm text-[var(--text-muted)] truncate">{user.email}</p>
-            <ProfileNameEditor currentNickname={profile?.display_name ?? null} changesLeft={changesLeft} currentFullName={profile?.full_name ?? null} currentAge={profile?.age ?? null} currentPhone={profile?.phone ?? null} />
-            <div className="mt-3 flex items-center gap-2">
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: lvl.bg, color: lvl.color }}>{lvl.name}</span>
-              {isPro && <span className="text-xs font-bold px-2.5 py-1 rounded-full tracking-wide" style={{ background: isUltima ? "#000000" : "#4561E8", color: "#fff", border: "none" }}>{isUltima ? "✦ ULTRA" : "PRO"}</span>}
+
+      {/* Ambient BG */}
+      <div className="fixed inset-0 -z-10 pointer-events-none"
+        style={{
+          background: `radial-gradient(ellipse 100% 70% at 15% 10%, ${lvl.color}0a 0%, transparent 55%), radial-gradient(ellipse 80% 60% at 85% 90%, ${lvl.color}07 0%, transparent 55%)`,
+        }}
+      />
+
+      <main className="max-w-3xl mx-auto px-6 py-10 space-y-6">
+
+        {/* ── Profile card ─────────────────────────────────── */}
+        <div className="rounded-2xl p-6 border flex flex-col sm:flex-row items-start sm:items-center gap-5"
+          style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
+        >
+          {/* Avatar */}
+          <div className="relative shrink-0">
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold text-white"
+              style={{ background: `linear-gradient(135deg, ${lvl.grad[0]}, ${lvl.grad[1]})`, boxShadow: `0 4px 20px ${lvl.color}40` }}>
+              {initial}
             </div>
+            {isPro && (
+              <div className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-xl flex items-center justify-center text-[10px] font-bold text-white"
+                style={{ background: isUltima ? "linear-gradient(135deg, #FF7A00, #7C3AED)" : "linear-gradient(135deg, #4561E8, #6B8FFF)" }}>
+                {isUltima ? "✦" : "P"}
+              </div>
+            )}
+          </div>
+
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 flex-wrap mb-1">
+              <p className="text-xl font-bold truncate" style={{ color: "var(--text)" }}>{name}</p>
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full"
+                style={{ background: `${lvl.color}18`, color: lvl.color }}>
+                {lvl.name}
+              </span>
+              {isPro && (
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white"
+                  style={{ background: isUltima ? "linear-gradient(135deg, #FF7A00, #7C3AED)" : "linear-gradient(135deg, #4561E8, #6B8FFF)" }}>
+                  {isUltima ? "✦ ULTRA" : "PRO"}
+                </span>
+              )}
+            </div>
+            <p className="text-sm mb-3 truncate" style={{ color: "var(--text-muted)" }}>{user.email}</p>
+            <ProfileNameEditor
+              currentNickname={profile?.display_name ?? null}
+              changesLeft={changesLeft}
+              currentFullName={profile?.full_name ?? null}
+              currentAge={profile?.age ?? null}
+              currentPhone={profile?.phone ?? null}
+            />
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+
+        {/* ── Stats grid ───────────────────────────────────── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: "Менты", value: <span className="text-2xl font-bold text-[var(--text)]">{totalXP} <span className="text-lg font-medium text-[var(--text-muted)]">{pluralMenty(totalXP)}</span></span>, icon: <MentoraE />, iconClass: "text-2xl mb-1" },
-            { label: "Макс. стрик", value: <span className="text-2xl font-bold text-[var(--text)]">{maxStreak}<span className="text-lg font-medium text-[var(--text-muted)]">д</span></span>, icon: "🔥", iconClass: "text-2xl mb-1" },
-            { label: "Сообщений", value: <span className="text-2xl font-bold text-[var(--text)]">{totalMessages}</span>, icon: "💬", iconClass: "text-2xl mb-1" },
-            { label: "Достижений", value: <span className="text-2xl font-bold text-[var(--text)]">{earned.length}</span>, icon: "🏅", iconClass: "text-2xl mb-1" },
+            {
+              label: "Менты",
+              value: totalXP,
+              suffix: ` ${pluralMenty(totalXP)}`,
+              icon: <span style={{ fontFamily: "Georgia,serif", color: "var(--brand)", fontStyle: "italic", fontWeight: 700, fontSize: "1.3rem", lineHeight: 1 }}>е</span>,
+              accent: "var(--brand)",
+            },
+            {
+              label: "Макс. стрик",
+              value: maxStreak,
+              suffix: "д",
+              icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00"/></svg>,
+              accent: "#FF7A00",
+            },
+            {
+              label: "Сообщений",
+              value: totalMessages,
+              suffix: "",
+              icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="1.8" strokeLinecap="round"><path d="M7.5 8h9M7.5 12h6M3 10.5a7.5 7.5 0 1 0 13.3 4.7L19.5 18l-2.7-2.8A7.5 7.5 0 1 0 3 10.5z"/></svg>,
+              accent: "#10B981",
+            },
+            {
+              label: "Достижений",
+              value: earned.length,
+              suffix: "",
+              icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="1.8" strokeLinecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>,
+              accent: "#f59e0b",
+            },
           ].map((s, i) => (
-            <div key={i} className="bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border)] shadow-sm text-center">
-              <div className={s.iconClass}>{s.icon}</div>
-              <div>{s.value}</div>
-              <div className="text-xs text-[var(--text-muted)] mt-1">{s.label}</div>
+            <div key={i} className="rounded-2xl p-4 border text-center"
+              style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center mx-auto mb-2"
+                style={{ background: `${s.accent}18` }}>
+                {s.icon}
+              </div>
+              <div className="font-bold text-xl" style={{ color: "var(--text)" }}>
+                {s.value.toLocaleString("ru-RU")}
+                <span className="text-sm font-medium ml-0.5" style={{ color: "var(--text-muted)" }}>{s.suffix}</span>
+              </div>
+              <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{s.label}</div>
             </div>
           ))}
         </div>
-        <div className="bg-[var(--bg-card)] rounded-2xl p-6 border border-[var(--border)] shadow-sm">
+
+        {/* ── XP Progress bar ──────────────────────────────── */}
+        <div className="rounded-2xl p-6 border"
+          style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
           <div className="flex items-center justify-between mb-3">
-            <span className="font-semibold text-[var(--text)]">{lvl.name}</span>
-            {lvl.next && <span className="text-sm text-[var(--text-muted)]">{lvl.next.name} через {lvl.next.minXP - totalXP} {pluralMenty(lvl.next.minXP - totalXP)}</span>}
+            <div className="flex items-center gap-2">
+              <span className="font-semibold" style={{ color: "var(--text)" }}>{lvl.name}</span>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+                style={{ background: `${lvl.color}15`, color: lvl.color }}>
+                {lvl.progress}%
+              </span>
+            </div>
+            {lvl.next && (
+              <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+                {lvl.next.name} через{" "}
+                <span className="font-semibold" style={{ color: lvl.color }}>{(lvl.next.minXP - totalXP).toLocaleString("ru-RU")}</span>
+                {" "}{pluralMenty(lvl.next.minXP - totalXP)}
+              </span>
+            )}
           </div>
-          <div className="h-3 bg-[var(--border)] rounded-full overflow-hidden">
-            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${lvl.progress}%`, background: lvl.color }} />
+          <div className="h-3 rounded-full overflow-hidden" style={{ background: "var(--bg-secondary)" }}>
+            <div className="h-full rounded-full transition-all duration-700"
+              style={{
+                width: `${lvl.progress}%`,
+                background: `linear-gradient(90deg, ${lvl.grad[0]}, ${lvl.grad[1]})`,
+                boxShadow: `0 0 8px ${lvl.color}60`,
+              }}
+            />
           </div>
-          <p className="text-xs text-[var(--text-muted)] mt-2">{totalXP} / {lvl.next?.minXP ?? totalXP} {pluralMenty(lvl.next?.minXP ?? totalXP)}</p>
+          <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
+            {totalXP.toLocaleString("ru-RU")} / {(lvl.next?.minXP ?? totalXP).toLocaleString("ru-RU")} {pluralMenty(lvl.next?.minXP ?? totalXP)}
+          </p>
         </div>
+
+        {/* ── Earned badges ────────────────────────────────── */}
         {earned.length > 0 && (
           <div>
-            <h2 className="text-lg font-bold text-[var(--text)] mb-4">🏅 Достижения ({earned.length})</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <h2 className="text-xs font-bold tracking-[0.18em] uppercase mb-4 flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              Достижения · {earned.length}
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {earned.map(b => {
-                const ts = TIER_STYLE[b.tier];
+                const tc = TIER_CONFIG[b.tier];
                 return (
-                  <div key={b.id} className="bg-[var(--bg-card)] rounded-2xl p-5 border-2 shadow-sm flex flex-col items-center text-center gap-2" style={{ borderColor: ts.border, background: ts.border + "18" }}>
-                    <span className="text-4xl">{b.icon}</span>
-                    <span className="font-bold text-sm text-[var(--text)]">{b.name}</span>
-                    <span className="text-xs t-secondary">{b.desc}</span>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1" style={{ background: ts.border + "22", color: ts.border }}>{ts.label}</span>
+                  <div key={b.id}
+                    className="rounded-2xl p-4 border-2 flex flex-col items-center text-center gap-2 relative overflow-hidden"
+                    style={{ borderColor: tc.color, background: `${tc.color}0d` }}
+                  >
+                    <div className="absolute inset-0 pointer-events-none"
+                      style={{ background: `radial-gradient(circle at 50% 0%, ${tc.color}18, transparent 60%)` }} />
+                    <span className="text-4xl relative z-10">{b.icon}</span>
+                    <span className="font-bold text-sm relative z-10" style={{ color: "var(--text)" }}>{b.name}</span>
+                    <span className="text-xs leading-snug relative z-10" style={{ color: "var(--text-secondary)" }}>{b.desc}</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full mt-0.5 relative z-10"
+                      style={{ background: `${tc.color}20`, color: tc.color }}>
+                      {tc.label}
+                    </span>
                   </div>
                 );
               })}
             </div>
           </div>
         )}
+
+        {/* ── Locked badges ────────────────────────────────── */}
         {locked.length > 0 && (
           <div>
-            <h2 className="text-lg font-bold text-[var(--text-muted)] mb-4">🔒 Ещё не разблокировано</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <h2 className="text-xs font-bold tracking-[0.18em] uppercase mb-4" style={{ color: "var(--text-muted)" }}>
+              Ещё не разблокировано · {locked.length}
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {locked.map(b => (
-                <div key={b.id} className="bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border)] flex flex-col items-center text-center gap-2 opacity-50">
+                <div key={b.id}
+                  className="rounded-2xl p-4 border flex flex-col items-center text-center gap-2"
+                  style={{ background: "var(--bg-secondary)", borderColor: "var(--border)", opacity: 0.45 }}
+                >
                   <span className="text-4xl grayscale">{b.icon}</span>
-                  <span className="font-bold text-sm text-[var(--text-secondary)]">{b.name}</span>
-                  <span className="text-xs text-[var(--text-muted)]">{b.desc}</span>
+                  <span className="font-bold text-sm" style={{ color: "var(--text-secondary)" }}>{b.name}</span>
+                  <span className="text-xs" style={{ color: "var(--text-muted)" }}>{b.desc}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
-        <div className="px-5 pb-8"><ReferralWidget /></div>
+
+        {/* ── Referral ─────────────────────────────────────── */}
+        <div className="pb-4">
+          <ReferralWidget />
+        </div>
+
       </main>
     </div>
   );
