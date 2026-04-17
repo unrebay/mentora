@@ -24,13 +24,18 @@ export async function POST(req: NextRequest) {
   try {
     const { message, history } = await req.json();
 
-    if (!message?.trim()) {
+    // Input validation
+    if (!message || typeof message !== "string" || !message.trim()) {
       return NextResponse.json({ error: "Empty message" }, { status: 400 });
     }
+    if (message.length > 2000) {
+      return NextResponse.json({ error: "Message too long" }, { status: 400 });
+    }
 
-    // Read demo usage counter from cookie
+    // Read demo usage counter from cookie (httpOnly — not forgeable from JS)
     const countCookie = req.cookies.get(COOKIE_NAME);
-    const usedCount = parseInt(countCookie?.value ?? "0", 10);
+    const rawCount = parseInt(countCookie?.value ?? "0", 10);
+    const usedCount = Number.isFinite(rawCount) && rawCount >= 0 ? rawCount : DEMO_LIMIT;
 
     if (usedCount >= DEMO_LIMIT) {
       return NextResponse.json(
@@ -39,13 +44,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Sanitize history: only valid role/content pairs, cap at 6 turns
+    const safeHistory = (Array.isArray(history) ? history : [])
+      .filter((m): m is { role: string; content: string } =>
+        m && (m.role === "user" || m.role === "assistant") &&
+        typeof m.content === "string" && m.content.length <= 2000
+      )
+      .slice(-6);
+
     // Get AI response
     const response = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 800,
       system: SYSTEM_PROMPT,
       messages: [
-        ...((history ?? []).slice(-6)),
+        ...safeHistory,
         { role: "user", content: message },
       ],
     });
