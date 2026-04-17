@@ -6,6 +6,12 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
 ) {
+  // Shared secret guard — only our VPS may use this proxy
+  const proxySecret = req.headers.get("x-proxy-secret");
+  if (!proxySecret || proxySecret !== process.env.PROXY_SECRET) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
   const { path } = await params;
   const pathStr = path.join("/");
   const body = await req.text();
