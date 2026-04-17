@@ -29,13 +29,13 @@ export default function DemoChat() {
   const [loading, setLoading] = useState(false);
   const [used, setUsed] = useState(0);
   const [limitReached, setLimitReached] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Only auto-scroll after the user has sent at least one message
+  // Scroll within the chat container only — never move the page
   useEffect(() => {
-    if (messages.length > 1 || loading) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if ((messages.length > 1 || loading) && messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
   }, [messages, loading]);
 
@@ -123,7 +123,7 @@ export default function DemoChat() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
         {messages.map((m, i) => (
           <div
             key={i}
@@ -164,7 +164,6 @@ export default function DemoChat() {
             </div>
           </div>
         )}
-        <div ref={bottomRef} />
       </div>
 
       {/* Suggestions (show only when just initial message) */}

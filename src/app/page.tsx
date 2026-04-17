@@ -241,19 +241,21 @@ export default async function HomePage() {
                   style={{ background: "linear-gradient(135deg, #4561E8 0%, #6B8FFF 100%)", boxShadow: "0 4px 16px rgba(69,97,232,0.4)" }}>
                   Начать учиться
                 </Link>
-                <a href="#demo"
+                <button
+                  type="button"
+                  onClick={() => document.querySelector<HTMLInputElement>("#demo input")?.focus()}
                   className="px-7 py-3.5 border border-white/20 text-gray-300 font-medium rounded-xl hover:border-white/40 hover:text-white transition-colors backdrop-blur-sm"
                   style={{ background: "rgba(255,255,255,0.04)" }}>
                   Посмотреть демо
-                </a>
+                </button>
               </div>
             </div>
 
             <div id="demo" className="flex flex-col gap-4">
               <DemoChat />
-              <p className="text-sm text-gray-500 italic text-center leading-relaxed">
+              <p className="text-sm text-gray-500 text-center leading-relaxed">
                 Задай вопрос, который не решался{" "}
-                <span className="text-[#4561E8] not-italic font-medium">произнести вслух</span>
+                <span className="text-[#4561E8] font-medium">произнести вслух</span>
               </p>
             </div>
           </div>
@@ -268,15 +270,11 @@ export default async function HomePage() {
             </div>
             <div className="text-center">
               <p className="text-2xl font-semibold text-white mb-1">Преподаватель объясняет всем.</p>
-              <p className="text-2xl font-semibold mb-12">
-                <span style={{
-                  fontFamily: "var(--font-playfair), Georgia, serif",
-                  fontWeight: 700,
-                  color: "#4561E8",
-                }}>
-                  M<span style={{ fontStyle: "italic", marginRight: "0.05em" }}>e</span>ntora
+              <p className="text-2xl font-semibold mb-12 text-white">
+                <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700 }}>
+                  M<span style={{ color: "#4561E8", fontStyle: "italic", marginRight: "0.05em" }}>e</span>ntora
                 </span>
-                <span className="text-white"> — только тебе.</span>
+                {" "}— только тебе.
               </p>
               <Link href="/auth"
                 className="inline-flex px-7 py-3.5 bg-[#4561E8] text-white font-medium rounded-xl hover:bg-[#3651d8] transition-colors">
@@ -399,6 +397,59 @@ export default async function HomePage() {
         <SubjectGrid subjects={SUBJECTS} />
       </section>
 
+      {/* HOW TO LEARN */}
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-3xl p-8 md:p-10">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">Как учиться</div>
+              <h2 className="text-3xl font-bold mb-4 leading-tight">
+                3 приёма, которые делают<br />
+                <span className="text-brand-600 dark:text-brand-500 italic">учёбу эффективной</span>
+              </h2>
+              <Link href="/guide" className="inline-flex items-center gap-2 text-brand-600 dark:text-brand-500 text-sm font-medium hover:underline">
+                Полный гайд →
+              </Link>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-start gap-4">
+                <span className="w-8 h-8 flex-shrink-0 bg-brand-50 dark:bg-brand-900/20 rounded-lg flex items-center justify-center">
+                  <svg viewBox="0 0 16 16" className="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path strokeLinecap="round" d="M2 8a6 6 0 1 0 12 0A6 6 0 0 0 2 8zm3.5-1.5L8 9l2.5-2.5"/>
+                  </svg>
+                </span>
+                <div>
+                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">Не понял — попроси объяснить иначе</div>
+                  <div className="text-xs text-[var(--text-secondary)]">«Объясни как будто я школьник» — Ментора перестроит ответ</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <span className="w-8 h-8 flex-shrink-0 bg-green-50 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                  <svg viewBox="0 0 16 16" className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path strokeLinecap="round" d="M13 4H3a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zM3 7h10"/>
+                  </svg>
+                </span>
+                <div>
+                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">Напиши «квиз» — получи 5 вопросов</div>
+                  <div className="text-xs text-[var(--text-secondary)]">Ментора проверит, что ты знаешь, а что нет</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <span className="w-8 h-8 flex-shrink-0 bg-amber-50 dark:bg-amber-900/20 rounded-lg flex items-center justify-center">
+                  <svg viewBox="0 0 16 16" className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path strokeLinecap="round" d="M8 2v4M8 10v4M2 8h4M10 8h4"/>
+                  </svg>
+                </span>
+                <div>
+                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">В конце — попроси «что я узнал»</div>
+                  <div className="text-xs text-[var(--text-secondary)]">Ментора даст итог сессии в 3–5 тезисах</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ЕГЭ/ОГЭ COMING SOON */}
       <section className="px-6 py-16">
         <div className="max-w-6xl mx-auto">
@@ -465,59 +516,6 @@ export default async function HomePage() {
                 <div className="text-xs text-[var(--text-secondary)] leading-relaxed">{s.desc}</div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* HOW TO LEARN */}
-      <section className="max-w-6xl mx-auto px-6 py-16">
-        <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-3xl p-8 md:p-10">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div>
-              <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">Как учиться</div>
-              <h2 className="text-3xl font-bold mb-4 leading-tight">
-                3 приёма, которые делают<br />
-                <span className="text-brand-600 dark:text-brand-500 italic">учёбу эффективной</span>
-              </h2>
-              <Link href="/guide" className="inline-flex items-center gap-2 text-brand-600 dark:text-brand-500 text-sm font-medium hover:underline">
-                Полный гайд →
-              </Link>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-start gap-4">
-                <span className="w-8 h-8 flex-shrink-0 bg-brand-50 dark:bg-brand-900/20 rounded-lg flex items-center justify-center">
-                  <svg viewBox="0 0 16 16" className="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path strokeLinecap="round" d="M2 8a6 6 0 1 0 12 0A6 6 0 0 0 2 8zm3.5-1.5L8 9l2.5-2.5"/>
-                  </svg>
-                </span>
-                <div>
-                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">Не понял — попроси объяснить иначе</div>
-                  <div className="text-xs text-[var(--text-secondary)]">«Объясни как будто я школьник» — Ментора перестроит ответ</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <span className="w-8 h-8 flex-shrink-0 bg-green-50 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-                  <svg viewBox="0 0 16 16" className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path strokeLinecap="round" d="M13 4H3a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zM3 7h10"/>
-                  </svg>
-                </span>
-                <div>
-                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">Напиши «квиз» — получи 5 вопросов</div>
-                  <div className="text-xs text-[var(--text-secondary)]">Ментора проверит, что ты знаешь, а что нет</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <span className="w-8 h-8 flex-shrink-0 bg-amber-50 dark:bg-amber-900/20 rounded-lg flex items-center justify-center">
-                  <svg viewBox="0 0 16 16" className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path strokeLinecap="round" d="M8 2v4M8 10v4M2 8h4M10 8h4"/>
-                  </svg>
-                </span>
-                <div>
-                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">В конце — попроси «что я узнал»</div>
-                  <div className="text-xs text-[var(--text-secondary)]">Ментора даст итог сессии в 3–5 тезисах</div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
