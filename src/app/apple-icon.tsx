@@ -11,33 +11,36 @@ export default function AppleIcon() {
         style={{
           width: 180,
           height: 180,
-          background: "#ffffff",
+          borderRadius: 40,
+          background: "#050914",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
+        {/* M */}
         <span
           style={{
             fontFamily: "Georgia, serif",
             fontWeight: 800,
-            fontSize: 108,
-            color: "#000000",
-            letterSpacing: "-3px",
+            fontSize: 110,
+            color: "#ffffff",
             lineHeight: 1,
+            letterSpacing: "-2px",
           }}
         >
           M
         </span>
+        {/* e — brand blue italic */}
         <span
           style={{
             fontFamily: "Georgia, serif",
             fontWeight: 700,
-            fontSize: 108,
+            fontSize: 110,
             color: "#4561E8",
             fontStyle: "italic",
-            marginLeft: "-6px",
             lineHeight: 1,
+            marginLeft: "-5px",
           }}
         >
           e

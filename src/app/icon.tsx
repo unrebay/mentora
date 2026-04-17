@@ -11,19 +11,41 @@ export default function Icon() {
         style={{
           width: 32,
           height: 32,
-          borderRadius: 7,
-          background: "linear-gradient(135deg, #4f6ef7 0%, #3b5bdb 100%)",
+          borderRadius: 8,
+          background: "#050914",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontFamily: "system-ui, sans-serif",
-          fontWeight: 800,
-          fontSize: 20,
-          color: "white",
-          letterSpacing: "-0.5px",
+          gap: 0,
         }}
       >
-        M
+        {/* M */}
+        <span
+          style={{
+            fontFamily: "Georgia, serif",
+            fontWeight: 800,
+            fontSize: 19,
+            color: "#ffffff",
+            lineHeight: 1,
+            letterSpacing: "-0.5px",
+          }}
+        >
+          M
+        </span>
+        {/* e — brand blue italic */}
+        <span
+          style={{
+            fontFamily: "Georgia, serif",
+            fontWeight: 700,
+            fontSize: 19,
+            color: "#4561E8",
+            fontStyle: "italic",
+            lineHeight: 1,
+            marginLeft: "-1px",
+          }}
+        >
+          e
+        </span>
       </div>
     ),
     { ...size }
