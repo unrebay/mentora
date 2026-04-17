@@ -5,7 +5,25 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     if (body.type !== "notification") return NextResponse.json({ ok: true });
-    const payment = body.object;
+
+    // Never trust the webhook body — re-fetch payment from YooKassa API to verify
+    const notifiedPaymentId = body.object?.id;
+    if (!notifiedPaymentId) return NextResponse.json({ ok: true });
+
+    const verifyResp = await fetch(`https://api.yookassa.ru/v3/payments/${notifiedPaymentId}`, {
+      headers: {
+        Authorization: "Basic " + Buffer.from(
+          `${process.env.YOOKASSA_SHOP_ID}:${process.env.YOOKASSA_SECRET_KEY}`
+        ).toString("base64"),
+      },
+    });
+    if (!verifyResp.ok) {
+      console.error("Webhook: YooKassa re-fetch failed", verifyResp.status);
+      return NextResponse.json({ ok: true });
+    }
+
+    // Use the verified payment object, not the webhook body
+    const payment = await verifyResp.json();
     if (payment.status !== "succeeded") return NextResponse.json({ ok: true });
 
     const userId = payment.metadata?.user_id;
