@@ -207,13 +207,25 @@ export default function AnalyticsDashboard() {
           </div>
           <ul className="space-y-2.5 text-sm" style={{ color: "var(--text-secondary)" }}>
             {[
-              { icon: "🔗", text: "Создайте ссылку и отправьте родителю или учителю" },
-              { icon: "📊", text: "Они увидят прогресс, активность и статистику по предметам" },
-              { icon: "🔒", text: "Можно отозвать в любой момент" },
-              { icon: "👤", text: "Регистрация для просмотра не нужна" },
+              {
+                icon: <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="#4561E8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M7 9a3 3 0 0 0 4.54.32l1.8-1.8a3 3 0 0 0-4.24-4.24l-1.04 1.03"/><path d="M9 7a3 3 0 0 0-4.54-.32L2.66 8.48a3 3 0 0 0 4.24 4.24L7.93 11.7"/></svg>,
+                text: "Создайте ссылку и отправьте родителю или учителю",
+              },
+              {
+                icon: <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="#4561E8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="10" width="3" height="5" rx="0.5"/><rect x="6" y="6" width="3" height="9" rx="0.5"/><rect x="11" y="2" width="3" height="13" rx="0.5"/></svg>,
+                text: "Они увидят прогресс, активность и статистику по предметам",
+              },
+              {
+                icon: <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="#4561E8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="7" width="10" height="8" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>,
+                text: "Можно отозвать в любой момент",
+              },
+              {
+                icon: <svg className="w-4 h-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="#4561E8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>,
+                text: "Регистрация для просмотра не нужна",
+              },
             ].map(item => (
               <li key={item.text} className="flex items-center gap-3">
-                <span className="shrink-0">{item.icon}</span>
+                {item.icon}
                 <span>{item.text}</span>
               </li>
             ))}

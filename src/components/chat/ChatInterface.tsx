@@ -60,7 +60,7 @@ function parseInline(text: string): React.ReactNode {
         if (part.startsWith("*") && part.endsWith("*") && part.length > 2)
           return <em key={i}>{part.slice(1, -1)}</em>;
         if (part.startsWith("`") && part.endsWith("`") && part.length > 2)
-          return <code key={i} className="bg-gray-100 dark:bg-[var(--bg-secondary)] text-gray-800 dark:text-[var(--text)] rounded px-1 text-sm font-mono">{part.slice(1, -1)}</code>;
+          return <code key={i} className="rounded px-1 text-sm font-mono" style={{ background: "var(--bg-secondary)", color: "var(--text)" }}>{part.slice(1, -1)}</code>;
         return <span key={i}>{part}</span>;
       })}
     </>
@@ -251,18 +251,19 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="flex flex-col bg-gray-50 dark:bg-[var(--bg)]" style={{ height: "100dvh" }}>
+    <div className="flex flex-col" style={{ height: "100dvh", background: "var(--bg)" }}>
       {/* Header */}
-      <header className="bg-white dark:bg-[var(--bg-card)] border-b border-gray-100 dark:border-[var(--border-light)] px-4 py-3 flex items-center gap-3">
-        <Link href="/dashboard" className="text-gray-400 dark:text-[var(--text-muted)] hover:text-gray-600 dark:hover:text-[var(--text-secondary)] transition-colors text-lg">←</Link>
+      <header className="border-b px-4 py-3 flex items-center gap-3 shrink-0"
+        style={{ background: "var(--bg-card)", borderColor: "var(--border-light)" }}>
+        <Link href="/dashboard" className="transition-colors text-lg" style={{ color: "var(--text-muted)" }}>←</Link>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h1 className="font-semibold text-gray-900 dark:text-[var(--text)] text-sm">{subjectTitle}</h1>
+            <h1 className="font-semibold text-sm" style={{ color: "var(--text)" }}>{subjectTitle}</h1>
             {initialMessagesRemaining === null && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded tracking-wide" style={{ background: "var(--brand)", color: "#fff" }}>PRO</span>
             )}
           </div>
-          <p className="text-xs text-gray-400 dark:text-[var(--text-muted)]">AI-ментор · Mentora</p>
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>AI-ментор · Mentora</p>
         </div>
         {showCounter && (
           <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-full px-3 py-1">
@@ -326,7 +327,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             {msg.role === "assistant" && (
-              <div className="w-8 h-8 rounded-full bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border)] shadow-sm flex items-center justify-center mr-2 mt-0.5 shrink-0 select-none">
+              <div className="w-8 h-8 rounded-full border flex items-center justify-center mr-2 mt-0.5 shrink-0 select-none" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
                 <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, fontSize: "13px", lineHeight: 1, color: "currentColor", letterSpacing: "-0.02em" }}>
                   M<span style={{ color: "var(--brand)", fontStyle: "italic", marginRight: "0.03em" }}>e</span>
                 </span>
@@ -379,12 +380,12 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
 
         {loading && (
           <div className="flex justify-start">
-            <div className="w-8 h-8 rounded-full bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border)] shadow-sm flex items-center justify-center mr-2 shrink-0 select-none">
+            <div className="w-8 h-8 rounded-full border flex items-center justify-center mr-2 shrink-0 select-none" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
               <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, fontSize: "13px", lineHeight: 1, color: "var(--text)", letterSpacing: "-0.02em" }}>
                 M<span style={{ color: "var(--brand)", fontStyle: "italic", display: "inline-block", verticalAlign: "baseline", position: "relative", top: "0.03em", marginRight: "0.03em" }}>e</span>
               </span>
             </div>
-            <div className="bg-white dark:bg-[var(--bg-card)] border border-gray-100 dark:border-[var(--border-light)] rounded-2xl px-4 py-4 shadow-sm">
+            <div className="rounded-2xl px-4 py-4" style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
               <div className="flex gap-1.5 items-end h-4">
                 {[0, 1, 2].map((i) => (
                   <div key={i} className="w-2 h-2 rounded-full"
@@ -398,11 +399,12 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       </div>
 
       {/* Input */}
-      <div className="bg-white dark:bg-[var(--bg-card)] border-t border-gray-100 dark:border-[var(--border-light)] px-4 py-4">
+      <div className="border-t px-4 pt-4 shrink-0"
+        style={{ background: "var(--bg-card)", borderColor: "var(--border-light)", paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}>
         {limitReached ? (
-          <div className="rounded-xl bg-gray-50 dark:bg-[var(--bg-secondary)] border border-gray-200 dark:border-[var(--border)] p-4 text-center">
-            <p className="text-sm font-semibold text-gray-800 dark:text-[var(--text)] mb-1">Лимит на сегодня исчерпан</p>
-            <p className="text-xs text-gray-500 dark:text-[var(--text-secondary)] mb-3">Возвращайся завтра — счётчик сбросится автоматически</p>
+          <div className="rounded-xl p-4 text-center" style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)" }}>
+            <p className="text-sm font-semibold mb-1" style={{ color: "var(--text)" }}>Лимит на сегодня исчерпан</p>
+            <p className="text-xs mb-3" style={{ color: "var(--text-secondary)" }}>Возвращайся завтра — счётчик сбросится автоматически</p>
             <Link href="/pricing" className="btn-glow inline-flex items-center gap-2 text-xs font-semibold px-5 py-2.5 rounded-full">
               ⚡ Pro — безлимитный доступ
             </Link>
@@ -410,10 +412,10 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         ) : (
           <>
             {pendingImage && (
-              <div className="flex items-center gap-2 mb-2 p-2 bg-gray-50 dark:bg-[var(--bg-secondary)] rounded-xl border border-gray-200 dark:border-[var(--border)]">
+              <div className="flex items-center gap-2 mb-2 p-2 rounded-xl border" style={{ background: "var(--bg-secondary)", borderColor: "var(--border)" }}>
                 <img src={pendingImage.preview} alt="Фото задачи" className="w-12 h-12 rounded-lg object-cover shrink-0" />
-                <span className="text-xs text-gray-500 dark:text-[var(--text-secondary)] flex-1">Фото прикреплено — напиши вопрос или отправь сразу</span>
-                <button type="button" onClick={() => setPendingImage(null)} className="text-gray-400 hover:text-gray-600 text-lg leading-none px-1">×</button>
+                <span className="text-xs flex-1" style={{ color: "var(--text-secondary)" }}>Фото прикреплено — напиши вопрос или отправь сразу</span>
+                <button type="button" onClick={() => setPendingImage(null)} className="text-lg leading-none px-1" style={{ color: "var(--text-muted)" }}>×</button>
               </div>
             )}
             <form onSubmit={sendMessage} className="flex gap-2 items-center">

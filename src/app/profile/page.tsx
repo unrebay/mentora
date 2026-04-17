@@ -1,3 +1,4 @@
+import React from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -34,26 +35,40 @@ function pluralMenty(n: number): string {
 }
 
 type BadgeDef = {
-  id: string; icon: string; name: string; desc: string;
+  id: string; icon: React.ReactNode; name: string; desc: string;
   tier: "bronze" | "silver" | "gold" | "special";
   check: (s: Stats) => boolean;
 };
 type Stats = { totalXP: number; maxStreak: number; totalMessages: number; isPro: boolean; isUltima: boolean; joinedDaysAgo: number };
 
+// SVG badge icons
+const BadgeIcon = {
+  chat: (c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+  books: (c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
+  grad:  (c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
+  book:  (c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+  flame: (c: string) => <svg viewBox="0 0 24 24" fill="none" style={{ width: 28, height: 28 }}><path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill={c}/><path d="M12 14.5c0 1.105-.895 2-2 2s-2-.895-2-2c0-1.5 2-3 2-3s2 1.5 2 3z" fill="rgba(255,200,80,0.85)"/></svg>,
+  trophy:(c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>,
+  spark: (c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+  gem:   (c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3L8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>,
+  bird:  (c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}><path d="M22 2l-7.7 19.4-4.3-9.1L1.2 7.9 22 2z"/></svg>,
+  crown: (c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}><path d="M2 4l4 8 6-6 6 6 4-8v14H2V4z"/></svg>,
+};
+
 const BADGES: BadgeDef[] = [
-  { id: "first_message", icon: "💬", name: "Первый вопрос", desc: "Отправил первое сообщение", tier: "bronze", check: s => s.totalMessages >= 1 },
-  { id: "student", icon: "📚", name: "Студент", desc: "50 сообщений ментору", tier: "bronze", check: s => s.totalMessages >= 50 },
-  { id: "scholar", icon: "🎓", name: "Учёный", desc: "200 сообщений ментору", tier: "silver", check: s => s.totalMessages >= 200 },
-  { id: "professor", icon: "📖", name: "Профессор", desc: "500 сообщений ментору", tier: "gold", check: s => s.totalMessages >= 500 },
-  { id: "streak3", icon: "🔥", name: "На разогреве", desc: "3 дня учёбы подряд", tier: "bronze", check: s => s.maxStreak >= 3 },
-  { id: "streak7", icon: "🔥", name: "Неделя знаний", desc: "7 дней учёбы подряд", tier: "silver", check: s => s.maxStreak >= 7 },
-  { id: "streak30", icon: "🏆", name: "Месяц упорства", desc: "30 дней учёбы подряд", tier: "gold", check: s => s.maxStreak >= 30 },
-  { id: "xp100", icon: "✦", name: "Первые шаги", desc: "Набрал 100 ментов", tier: "bronze", check: s => s.totalXP >= 100 },
-  { id: "xp500", icon: "✦", name: "Знаток", desc: "Набрал 500 ментов", tier: "silver", check: s => s.totalXP >= 500 },
-  { id: "xp1000", icon: "💎", name: "Мастер", desc: "Набрал 1000 ментов", tier: "gold", check: s => s.totalXP >= 1000 },
-  { id: "early_bird", icon: "🦅", name: "Первопроходец", desc: "Присоединился в первые 90 дней", tier: "special", check: s => s.joinedDaysAgo <= 90 },
-  { id: "pro", icon: "👑", name: "Pro подписчик", desc: "Поддержал развитие Mentora", tier: "special", check: s => s.isPro },
-  { id: "ultima", icon: "💎", name: "Ultima", desc: "Максимальный план Mentora", tier: "special", check: s => s.isUltima },
+  { id: "first_message", icon: BadgeIcon.chat("#d97706"), name: "Первый вопрос", desc: "Отправил первое сообщение", tier: "bronze", check: s => s.totalMessages >= 1 },
+  { id: "student", icon: BadgeIcon.books("#d97706"), name: "Студент", desc: "50 сообщений ментору", tier: "bronze", check: s => s.totalMessages >= 50 },
+  { id: "scholar", icon: BadgeIcon.grad("#6b7280"), name: "Учёный", desc: "200 сообщений ментору", tier: "silver", check: s => s.totalMessages >= 200 },
+  { id: "professor", icon: BadgeIcon.book("#f59e0b"), name: "Профессор", desc: "500 сообщений ментору", tier: "gold", check: s => s.totalMessages >= 500 },
+  { id: "streak3", icon: BadgeIcon.flame("#FF7A00"), name: "На разогреве", desc: "3 дня учёбы подряд", tier: "bronze", check: s => s.maxStreak >= 3 },
+  { id: "streak7", icon: BadgeIcon.flame("#FF7A00"), name: "Неделя знаний", desc: "7 дней учёбы подряд", tier: "silver", check: s => s.maxStreak >= 7 },
+  { id: "streak30", icon: BadgeIcon.trophy("#f59e0b"), name: "Месяц упорства", desc: "30 дней учёбы подряд", tier: "gold", check: s => s.maxStreak >= 30 },
+  { id: "xp100", icon: BadgeIcon.spark("#d97706"), name: "Первые шаги", desc: "Набрал 100 ментов", tier: "bronze", check: s => s.totalXP >= 100 },
+  { id: "xp500", icon: BadgeIcon.spark("#6b7280"), name: "Знаток", desc: "Набрал 500 ментов", tier: "silver", check: s => s.totalXP >= 500 },
+  { id: "xp1000", icon: BadgeIcon.gem("#f59e0b"), name: "Мастер", desc: "Набрал 1000 ментов", tier: "gold", check: s => s.totalXP >= 1000 },
+  { id: "early_bird", icon: BadgeIcon.bird("#8b5cf6"), name: "Первопроходец", desc: "Присоединился в первые 90 дней", tier: "special", check: s => s.joinedDaysAgo <= 90 },
+  { id: "pro", icon: BadgeIcon.crown("#8b5cf6"), name: "Pro подписчик", desc: "Поддержал развитие Mentora", tier: "special", check: s => s.isPro },
+  { id: "ultima", icon: BadgeIcon.gem("#8b5cf6"), name: "Ultima", desc: "Максимальный план Mentora", tier: "special", check: s => s.isUltima },
 ];
 
 const TIER_CONFIG: Record<string, { color: string; label: string }> = {
@@ -272,7 +287,7 @@ export default async function ProfilePage() {
                   >
                     <div className="absolute inset-0 pointer-events-none"
                       style={{ background: `radial-gradient(circle at 50% 0%, ${tc.color}18, transparent 60%)` }} />
-                    <span className="text-4xl relative z-10">{b.icon}</span>
+                    <div className="relative z-10 w-10 h-10 flex items-center justify-center">{b.icon}</div>
                     <span className="font-bold text-sm relative z-10" style={{ color: "var(--text)" }}>{b.name}</span>
                     <span className="text-xs leading-snug relative z-10" style={{ color: "var(--text-secondary)" }}>{b.desc}</span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full mt-0.5 relative z-10"
@@ -298,7 +313,8 @@ export default async function ProfilePage() {
                   className="rounded-2xl p-4 border flex flex-col items-center text-center gap-2"
                   style={{ background: "var(--bg-secondary)", borderColor: "var(--border)", opacity: 0.45 }}
                 >
-                  <span className="text-4xl grayscale">{b.icon}</span>
+                  <div className="w-10 h-10 flex items-center justify-center opacity-50"
+                    style={{ filter: "grayscale(1)" }}>{b.icon}</div>
                   <span className="font-bold text-sm" style={{ color: "var(--text-secondary)" }}>{b.name}</span>
                   <span className="text-xs" style={{ color: "var(--text-muted)" }}>{b.desc}</span>
                 </div>

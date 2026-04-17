@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import ThemeToggle from "@/components/ThemeToggle";
 import BuyProButton from "@/components/BuyProButton";
 import PricingFAQ from "@/components/PricingFAQ";
 import { createServerClient } from "@supabase/ssr";
@@ -86,17 +87,20 @@ export default async function PricingPage() {
       >
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <Logo size="sm" fontSize="1.44rem" />
-          <div className="hidden md:flex items-center gap-8 text-sm t-secondary">
-            <Link href="/#subjects" className="hover:t-primary transition-colors">Предметы</Link>
-            <Link href="/#how" className="hover:t-primary transition-colors">Как работает</Link>
-            <Link href="/pricing" className="t-primary font-medium">Тарифы</Link>
+          <div className="hidden md:flex items-center gap-8 text-sm" style={{ color: "var(--text-secondary)" }}>
+            <Link href="/#subjects" className="hover:opacity-70 transition-opacity">Предметы</Link>
+            <Link href="/#how" className="hover:opacity-70 transition-opacity">Как работает</Link>
+            <Link href="/pricing" className="font-medium" style={{ color: "var(--text)" }}>Тарифы</Link>
           </div>
-          <Link
-            href="/auth"
-            className="btn-glow px-5 py-2.5 text-sm font-semibold rounded-xl"
-          >
-            Попробовать бесплатно →
-          </Link>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <Link
+              href="/auth"
+              className="btn-glow px-5 py-2.5 text-sm font-semibold rounded-xl text-white"
+            >
+              Попробовать бесплатно →
+            </Link>
+          </div>
         </div>
       </nav>
 

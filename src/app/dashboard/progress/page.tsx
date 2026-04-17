@@ -242,7 +242,13 @@ export default async function ProgressPage() {
                         <span>{s.messages} {pluralMsg(s.messages)}</span>
                         {s.streak > 0 && (
                           <><span>·</span>
-                          <span style={{ color: "#FF7A00" }}>🔥 {s.streak} {pluralDays(s.streak)}</span></>
+                          <span className="flex items-center gap-1" style={{ color: "#FF7A00" }}>
+                            <svg viewBox="0 0 24 24" fill="none" style={{ width: 13, height: 13, display: "inline" }}>
+                              <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00"/>
+                              <path d="M12 14.5c0 1.105-.895 2-2 2s-2-.895-2-2c0-1.5 2-3 2-3s2 1.5 2 3z" fill="rgba(255,200,80,0.85)"/>
+                            </svg>
+                            {s.streak} {pluralDays(s.streak)}
+                          </span></>
                         )}
                       </div>
                     </div>
