@@ -59,10 +59,10 @@ const STEPS = [
 ];
 
 const STATS = [
-  { value: "8+", label: "предметов в разработке" },
-  { value: "90%", label: "точность ответов AI" },
-  { value: "24/7", label: "доступен без VPN" },
-  { value: "∞", label: "терпения у ментора" },
+  { value: "13", label: "предметов уже доступны", color: "#4561E8", icon: `<path d="M4 19V5a2 2 0 0 1 2-2h14M4 19a2 2 0 0 0 2 2h14M4 19V9l8-4 8 4v10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
+  { value: "90%", label: "точность ответов AI", color: "#10B981", icon: `<circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6" fill="none"/><path d="M8 12l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
+  { value: "24/7", label: "доступен без VPN", color: "#FF7A00", icon: `<circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6" fill="none"/><path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none"/>` },
+  { value: "0 ₽", label: "чтобы начать учиться", color: "#A78BFA", icon: `<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
 ];
 
 const TESTIMONIALS = [
@@ -145,15 +145,23 @@ export default async function HomePage() {
                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
                 Уже доступно · История России и мира
               </div>
-              <h1 className="text-5xl font-bold leading-tight mb-6 tracking-tight text-white">
+              <h1 className="text-[3.2rem] md:text-[4rem] font-black leading-[1.05] mb-6 tracking-tight text-white">
                 Забудь про{" "}
-                <span className="line-through text-gray-500">скучные</span>{" "}
+                <span className="line-through text-gray-600 font-bold">скучные</span>{" "}
                 учебники.<br />
                 Учись в{" "}
-                <span className="text-[#4561E8] italic">диалоге.</span>
+                <span style={{
+                  background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  fontStyle: "italic",
+                }}>
+                  диалоге.
+                </span>
               </h1>
-              <p className="text-lg text-gray-300 leading-relaxed mb-6">
-                AI-ментор, который знает твой уровень, помнит тебя и объясняет так, как тебе удобно. По истории, математике, биологии и многому другому.
+              <p className="text-lg text-gray-400 leading-relaxed mb-6 max-w-md">
+                AI-ментор, который знает твой уровень, помнит тебя и объясняет так, как тебе удобно. История, математика, физика и ещё 11 предметов.
               </p>
               <div className="flex justify-end mb-8 mt-1">
                 <p className="text-sm text-gray-500 italic text-right leading-relaxed max-w-[260px]">
@@ -162,15 +170,28 @@ export default async function HomePage() {
                   <span className="text-[#4561E8] not-italic font-medium">произнести вслух</span>
                 </p>
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3 mb-5">
                 <Link href="/auth"
-                  className="px-6 py-3.5 bg-[#4561E8] text-white font-medium rounded-xl hover:bg-[#3651d8] transition-colors">
+                  className="px-7 py-3.5 font-semibold rounded-xl text-white transition-all"
+                  style={{ background: "linear-gradient(135deg, #4561E8 0%, #6B8FFF 100%)", boxShadow: "0 4px 16px rgba(69,97,232,0.4)" }}>
                   Начать учиться →
                 </Link>
                 <a href="#demo"
-                  className="px-6 py-3.5 border border-white/20 text-gray-300 font-medium rounded-xl hover:border-white/40 hover:text-white transition-colors">
+                  className="px-7 py-3.5 border border-white/20 text-gray-300 font-medium rounded-xl hover:border-white/40 hover:text-white transition-colors backdrop-blur-sm"
+                  style={{ background: "rgba(255,255,255,0.04)" }}>
                   Посмотреть демо
                 </a>
+              </div>
+              {/* Trust signals */}
+              <div className="flex items-center flex-wrap gap-x-4 gap-y-1.5 text-xs text-gray-500">
+                <span className="flex items-center gap-1.5">
+                  <svg viewBox="0 0 12 12" className="w-3 h-3 text-amber-400" fill="currentColor"><path d="M6 1l1.5 3 3.5.5-2.5 2.4.6 3.4L6 9 2.9 10.3l.6-3.4L1 4.5l3.5-.5z"/></svg>
+                  4.9 / 5 оценка
+                </span>
+                <span className="text-gray-700">·</span>
+                <span>13 предметов</span>
+                <span className="text-gray-700">·</span>
+                <span>Без VPN · Без карты</span>
               </div>
             </div>
             <div id="demo">
@@ -201,11 +222,17 @@ export default async function HomePage() {
 
       {/* STATS */}
       <section className="bg-gray-900 dark:bg-[#0a0a18] text-white py-14 px-6 border-y border-white/5">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           {STATS.map((s) => (
-            <div key={s.value}>
-              <div className="text-4xl font-bold mb-1">{s.value}</div>
-              <div className="text-sm text-gray-400">{s.label}</div>
+            <div key={s.value} className="flex flex-col items-center text-center gap-3">
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
+                style={{ background: `${s.color}20`, color: s.color }}>
+                <svg viewBox="0 0 24 24" className="w-5 h-5" dangerouslySetInnerHTML={{ __html: s.icon }} />
+              </div>
+              <div>
+                <div className="text-3xl font-black tracking-tight" style={{ color: s.color }}>{s.value}</div>
+                <div className="text-xs text-gray-500 mt-0.5 leading-tight">{s.label}</div>
+              </div>
             </div>
           ))}
         </div>
@@ -213,11 +240,17 @@ export default async function HomePage() {
 
       {/* SUBJECTS */}
       <section id="subjects" className="max-w-6xl mx-auto px-6 py-20">
-        <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">Библиотека знаний</div>
-        <h2 className="text-4xl font-bold mb-10 leading-tight">
-          Выбери, что хочешь<br />
-          изучить <span className="text-brand-600 dark:text-brand-500 italic">сегодня</span>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-px flex-1 bg-[var(--border)]" />
+          <span className="text-xs font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase">Библиотека знаний</span>
+          <div className="h-px flex-1 bg-[var(--border)]" />
+        </div>
+        <h2 className="text-4xl md:text-5xl font-black mb-3 leading-tight text-center">
+          Выбери предмет
         </h2>
+        <p className="text-center text-[var(--text-muted)] text-base mb-10">
+          13 предметов · от школьной программы до университета
+        </p>
         <SubjectGrid subjects={SUBJECTS} />
       </section>
 
@@ -294,26 +327,34 @@ export default async function HomePage() {
         <h2 className="text-4xl font-bold mb-3 leading-tight">Уже учатся с Mentora</h2>
         <p className="text-[var(--text-secondary)] mb-10 text-lg">Реальные результаты реальных учеников</p>
         <div className="grid md:grid-cols-3 gap-6">
-          {TESTIMONIALS.map((t) => (
-            <div key={t.name} className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col gap-4">
-              <div className="flex gap-0.5">
-                {Array.from({ length: t.stars }).map((_, i) => (
-                  <span key={i} className="text-amber-400 text-sm">★</span>
-                ))}
-              </div>
-              <p className="text-[var(--text-secondary)] text-sm leading-relaxed flex-1">&ldquo;{t.text}&rdquo;</p>
-              <div className="text-xs font-medium text-[var(--text-muted)]">{t.xp}</div>
-              <div className="flex items-center gap-3 pt-2 border-t border-[var(--border-light)]">
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${t.avatarBg}`}>
-                  {t.avatar}
+          {TESTIMONIALS.map((t, i) => {
+            const accentColors = ["#4561E8", "#FF7A00", "#10B981"];
+            const accent = accentColors[i % accentColors.length];
+            return (
+              <div key={t.name} className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col gap-4 relative overflow-hidden">
+                {/* Colored top accent line */}
+                <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style={{ background: accent }} />
+                {/* Quote mark */}
+                <div className="text-5xl leading-none font-black select-none -mt-1 -mb-2" style={{ color: accent, opacity: 0.2 }}>"</div>
+                <div className="flex gap-0.5">
+                  {Array.from({ length: t.stars }).map((_, i) => (
+                    <span key={i} className="text-amber-400 text-sm">★</span>
+                  ))}
                 </div>
-                <div>
-                  <div className="text-sm font-semibold text-[var(--text)]">{t.name}</div>
-                  <div className="text-xs text-[var(--text-muted)]">{t.role}</div>
+                <p className="text-[var(--text-secondary)] text-sm leading-relaxed flex-1">{t.text}</p>
+                <div className="text-xs font-semibold px-2 py-1 rounded-md w-fit" style={{ background: `${accent}15`, color: accent }}>{t.xp}</div>
+                <div className="flex items-center gap-3 pt-2 border-t border-[var(--border-light)]">
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${t.avatarBg}`}>
+                    {t.avatar}
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-[var(--text)]">{t.name}</div>
+                    <div className="text-xs text-[var(--text-muted)]">{t.role}</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         <div className="mt-12 flex flex-wrap justify-center gap-8 text-center">
           {[
