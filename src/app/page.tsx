@@ -8,6 +8,7 @@ import NeuralNetworkCanvas from "@/components/NeuralNetworkCanvas";
 import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
 import ThemeToggle from "@/components/ThemeToggle";
 import SubjectGrid from "@/components/SubjectGrid";
+import DemoScrollButton from "@/components/DemoScrollButton";
 
 export const dynamic = "force-dynamic";
 
@@ -241,13 +242,7 @@ export default async function HomePage() {
                   style={{ background: "linear-gradient(135deg, #4561E8 0%, #6B8FFF 100%)", boxShadow: "0 4px 16px rgba(69,97,232,0.4)" }}>
                   Начать учиться
                 </Link>
-                <button
-                  type="button"
-                  onClick={() => document.querySelector<HTMLInputElement>("#demo input")?.focus()}
-                  className="px-7 py-3.5 border border-white/20 text-gray-300 font-medium rounded-xl hover:border-white/40 hover:text-white transition-colors backdrop-blur-sm"
-                  style={{ background: "rgba(255,255,255,0.04)" }}>
-                  Посмотреть демо
-                </button>
+                <DemoScrollButton />
               </div>
             </div>
 
