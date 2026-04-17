@@ -34,9 +34,9 @@ export default function AnalyticsDashboard() {
         <div className="flex gap-3">
           <input type="text" value={newLabel} onChange={e=>setNewLabel(e.target.value)} onKeyDown={e=>e.key==='Enter'&&create()}
             placeholder="Название (напр. «Мама» или «Класс 9А»)"
-            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/30" />
+            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4561E8]/30" />
           <button onClick={create} disabled={creating}
-            className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 disabled:opacity-50 whitespace-nowrap">
+            className="px-5 py-2.5 bg-[#4561E8] text-white text-sm font-medium rounded-xl hover:bg-[#3651d8] disabled:opacity-50 whitespace-nowrap">
             {creating?'Создаём…':'Создать ссылку'}
           </button>
         </div>
@@ -72,9 +72,9 @@ export default function AnalyticsDashboard() {
           ))}
         </div>
       )}
-      <div className="bg-indigo-50 rounded-2xl p-5">
-        <h3 className="text-sm font-semibold text-indigo-800 mb-2">Как это работает</h3>
-        <ul className="text-sm text-indigo-700 space-y-1.5">
+      <div className="bg-blue-50 rounded-2xl p-5">
+        <h3 className="text-sm font-semibold text-blue-800 mb-2">Как это работает</h3>
+        <ul className="text-sm text-blue-700 space-y-1.5">
           <li>📎 Создайте ссылку и отправьте родителю или учителю</li>
           <li>📊 Они увидят прогресс, активность и статистику по предметам</li>
           <li>🔒 Можно отозвать в любой момент</li>

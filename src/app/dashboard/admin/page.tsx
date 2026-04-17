@@ -116,7 +116,7 @@ export default function AdminPage() {
       <div className="flex gap-2 mb-6">
         {(["list","add","bulk"] as const).map(t => (
           <button key={t} onClick={() => { setTab(t); if (t!=="add") cancelEdit(); }}
-            className={`px-4 py-2 rounded text-sm font-medium transition ${tab===t?"bg-indigo-600":"bg-gray-800 hover:bg-gray-700"}`}>
+            className={`px-4 py-2 rounded text-sm font-medium transition ${tab===t?"bg-[#4561E8]":"bg-gray-800 hover:bg-gray-700"}`}>
             {t==="list"?"Список":t==="add"?(editId?"Редактировать":"Добавить"):"Массовый импорт"}
           </button>
         ))}
@@ -143,10 +143,10 @@ export default function AdminPage() {
               <tbody>{chunks.map(c=>(
                 <tr key={c.id} className="border-b border-gray-800 hover:bg-gray-900">
                   <td className="py-2"><input type="checkbox" checked={selected.has(c.id)} onChange={()=>toggleSelect(c.id)}/></td>
-                  <td className="py-2 pr-3"><div className="font-medium text-indigo-400">{c.subject}</div><div className="text-gray-400">{c.topic}</div></td>
+                  <td className="py-2 pr-3"><div className="font-medium text-[#4561E8]">{c.subject}</div><div className="text-gray-400">{c.topic}</div></td>
                   <td className="py-2 pr-3 text-gray-300 text-xs max-w-xs"><div className="line-clamp-2">{c.content}</div>{c.source&&<div className="text-gray-500 mt-1">📚 {c.source}</div>}</td>
                   <td className="py-2">
-                    <button onClick={()=>startEdit(c)} className="text-indigo-400 hover:text-indigo-300 mr-2 text-xs">Изм.</button>
+                    <button onClick={()=>startEdit(c)} className="text-[#4561E8] hover:text-blue-400 mr-2 text-xs">Изм.</button>
                     <button onClick={async()=>{if(!confirm("Удалить?"))return;await fetch(`/api/admin/knowledge/${c.id}`,{method:"DELETE"});flash("Удалено");load();}} className="text-red-400 hover:text-red-300 text-xs">Удал.</button>
                   </td>
                 </tr>
@@ -180,7 +180,7 @@ export default function AdminPage() {
           <div><label className="block text-xs text-gray-400 mb-1">Источник</label>
             <input value={form.source} onChange={e=>setForm(f=>({...f,source:e.target.value}))} placeholder="напр. Учебник истории 10 класс" className="w-full bg-gray-800 rounded px-3 py-2 text-sm"/></div>
           <div className="flex gap-3">
-            <button onClick={saveChunk} disabled={saving||!form.content.trim()} className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 px-6 py-2 rounded text-sm font-medium">
+            <button onClick={saveChunk} disabled={saving||!form.content.trim()} className="bg-[#4561E8] hover:bg-[#3651d8] disabled:opacity-50 px-6 py-2 rounded text-sm font-medium">
               {saving?"Сохранение...":editId?"Обновить":"Добавить"}
             </button>
             {editId&&<button onClick={cancelEdit} className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">Отмена</button>}
@@ -201,7 +201,7 @@ export default function AdminPage() {
               placeholder={"Topic: Война 1812\nSource: Учебник 10 кл.\nНаполеон вторгся в Россию...\n---\nTopic: Бородино\nБитва 7 сентября 1812..."}
               className="w-full bg-gray-800 rounded px-3 py-2 text-sm font-mono"/>
           </div>
-          <button onClick={bulkImport} disabled={bulkImporting||!bulkText.trim()} className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 px-6 py-2 rounded text-sm font-medium">
+          <button onClick={bulkImport} disabled={bulkImporting||!bulkText.trim()} className="bg-[#4561E8] hover:bg-[#3651d8] disabled:opacity-50 px-6 py-2 rounded text-sm font-medium">
             {bulkImporting?"Импорт...":"Импортировать блоки"}
           </button>
         </div>

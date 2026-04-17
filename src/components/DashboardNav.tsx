@@ -58,7 +58,12 @@ export default function DashboardNav({ isPro, isUltima, totalXP, maxStreak, logo
           {totalXP > 0 && (
             <div className="hidden sm:flex items-center gap-3 text-sm">
               <span className="font-semibold text-[var(--text)]"><MentoraE />{totalXP} {pluralMenty(totalXP)}</span>
-              {maxStreak > 0 && <span className="text-orange-500 font-semibold">🔥 {maxStreak} {pluralDays(maxStreak)}</span>}
+              {maxStreak > 0 && (
+                <span className="flex items-center gap-1 text-orange-500 font-semibold">
+                  <svg viewBox="0 0 14 14" fill="currentColor" className="w-3.5 h-3.5"><path d="M7 13C4.79 13 3 11.21 3 9c0-1.63.93-3.33 1.86-4.5.31-.39.93-.16.93.31v.15c0 .47.31.85.78.93.31.08.62-.08.78-.31C7.82 4.73 8.07 4.2 8.07 4.2c.23-.39.78-.31.93.08.31.78.47 1.63.23 2.33.7-.62.78-1.63.78-1.63 0-.47.54-.78.93-.54C11.7 5.12 12.4 6.36 12.4 7.77 12.4 10.55 10.44 13 7 13z"/></svg>
+                  {maxStreak} {pluralDays(maxStreak)}
+                </span>
+              )}
             </div>
           )}
           {!isPro && (
@@ -91,12 +96,12 @@ export default function DashboardNav({ isPro, isUltima, totalXP, maxStreak, logo
         <div className="md:hidden border-t border-[var(--border)]" style={{ background: "var(--bg-nav)" }}>
           <div className="max-w-5xl mx-auto px-3 py-2 flex flex-col">
             {[
-              { href: "/dashboard", label: "📚 Предметы" },
+              { href: "/dashboard", label: "Предметы" },
               { href: "/dashboard/progress", label: "Прогресс" },
               { href: "/dashboard/analytics", label: "Аналитика" },
-              { href: "/knowledge", label: "🌌 Галактика знаний" },
+              { href: "/knowledge", label: "Галактика знаний" },
               { href: "/profile", label: "Профиль" },
-              ...(!isPro ? [{ href: "/pricing", label: "✨ Тарифы" }] : []),
+              ...(!isPro ? [{ href: "/pricing", label: "Тарифы" }] : []),
             ].map(({ href, label }) => (
               <a key={href} href={href} onClick={() => setOpen(false)}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text)] hover:bg-[var(--bg-secondary)] transition-colors">
@@ -106,7 +111,12 @@ export default function DashboardNav({ isPro, isUltima, totalXP, maxStreak, logo
             {totalXP > 0 && (
               <div className="flex gap-4 px-3 py-2 text-xs text-[var(--text-muted)]">
                 <span className="font-semibold"><MentoraE />{totalXP} {pluralMenty(totalXP)}</span>
-                {maxStreak > 0 && <span className="text-orange-500 font-medium">🔥 {maxStreak} {pluralDays(maxStreak)}</span>}
+                {maxStreak > 0 && (
+                  <span className="flex items-center gap-1 text-orange-500 font-medium">
+                    <svg viewBox="0 0 14 14" fill="currentColor" className="w-3.5 h-3.5"><path d="M7 13C4.79 13 3 11.21 3 9c0-1.63.93-3.33 1.86-4.5.31-.39.93-.16.93.31v.15c0 .47.31.85.78.93.31.08.62-.08.78-.31C7.82 4.73 8.07 4.2 8.07 4.2c.23-.39.78-.31.93.08.31.78.47 1.63.23 2.33.7-.62.78-1.63.78-1.63 0-.47.54-.78.93-.54C11.7 5.12 12.4 6.36 12.4 7.77 12.4 10.55 10.44 13 7 13z"/></svg>
+                    {maxStreak} {pluralDays(maxStreak)}
+                  </span>
+                )}
               </div>
             )}
             <div className="border-t border-[var(--border)] mt-1 pt-1">

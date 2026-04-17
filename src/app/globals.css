@@ -108,3 +108,17 @@ code:not([class]) {
   0%   { opacity: 0.7; transform: scale(1)    translate(0%,   0%); }
   100% { opacity: 1;   transform: scale(1.12) translate(2%, 1.5%); }
 }
+
+@keyframes orb1 {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  33%  { transform: translate(60px, 40px) scale(1.08); }
+  66%  { transform: translate(-30px, 80px) scale(0.95); }
+  100% { transform: translate(40px, -30px) scale(1.05); }
+}
+
+@keyframes orb2 {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  40%  { transform: translate(-50px, 60px) scale(1.1); }
+  80%  { transform: translate(30px, -40px) scale(0.9); }
+  100% { transform: translate(-20px, 20px) scale(1.05); }
+}

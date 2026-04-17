@@ -50,7 +50,7 @@ export default function AnalyticsInvitePage() {
       <div className="flex flex-col items-center gap-3">
         <div className="flex gap-1">
           {[0,1,2].map(i => (
-            <div key={i} className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: `${i*0.15}s` }} />
+            <div key={i} className="w-2 h-2 bg-[#4561E8] rounded-full animate-bounce" style={{ animationDelay: `${i*0.15}s` }} />
           ))}
         </div>
         <p className="text-sm text-gray-400">Загрузка аналитики…</p>
@@ -84,9 +84,9 @@ export default function AnalyticsInvitePage() {
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-lg font-bold text-gray-900">Mentora</span>
-            <span className="text-xs bg-indigo-50 text-[#4561E8] font-medium px-2.5 py-1 rounded-full">Аналитика</span>
+            <span className="text-xs bg-blue-50 text-[#4561E8] font-medium px-2.5 py-1 rounded-full">Аналитика</span>
           </div>
-          <Link href="/auth" className="text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors px-4 py-1.5 rounded-lg">
+          <Link href="/auth" className="text-sm font-medium text-white bg-[#4561E8] hover:bg-[#3651d8] transition-colors px-4 py-1.5 rounded-lg">
             Попробовать →
           </Link>
         </div>
@@ -95,7 +95,7 @@ export default function AnalyticsInvitePage() {
       <div className="max-w-3xl mx-auto px-6 py-8 space-y-5">
         <div className="bg-white rounded-2xl border border-gray-100 px-6 py-5">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center text-xl font-bold text-[#4561E8]">
+            <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-xl font-bold text-[#4561E8]">
               {label.charAt(0).toUpperCase()}
             </div>
             <div>
@@ -135,7 +135,7 @@ export default function AnalyticsInvitePage() {
                     className="w-full rounded-t-md transition-all"
                     style={{
                       height: `${Math.max((count / maxDay) * 100, 6)}%`,
-                      backgroundColor: count > 0 ? '#6366f1' : '#e5e7eb',
+                      backgroundColor: count > 0 ? '#4561E8' : '#e5e7eb',
                       opacity: count > 0 ? 0.7 + (count / maxDay) * 0.3 : 1,
                     }}
                   />
@@ -165,7 +165,7 @@ export default function AnalyticsInvitePage() {
                       <span className="text-gray-400 text-xs">{msgs} сообщ. · {p.xp_total} XP</span>
                     </div>
                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${(p.xp_total / maxXP) * 100}%` }} />
+                      <div className="h-full bg-[#4561E8] rounded-full" style={{ width: `${(p.xp_total / maxXP) * 100}%` }} />
                     </div>
                   </div>
                 )

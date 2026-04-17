@@ -3,12 +3,13 @@ import { useState } from "react";
 import Link from "next/link";
 import AddSubjectModal from "@/components/AddSubjectModal";
 import SubjectSuggestionModal from "@/components/SubjectSuggestionModal";
+import SubjectIcon from "@/components/SubjectIcon";
 
 const XP_LEVELS = [
   { name: "Новичок",       minXP: 0,    maxXP: 100,      color: "bg-gray-400" },
   { name: "Исследователь", minXP: 100,  maxXP: 300,      color: "bg-blue-500" },
   { name: "Знаток",        minXP: 300,  maxXP: 600,      color: "bg-brand-500" },
-  { name: "Историк",       minXP: 600,  maxXP: 1000,     color: "bg-purple-500" },
+  { name: "Историк",       minXP: 600,  maxXP: 1000,     color: "bg-[#4561E8]" },
   { name: "Эксперт",       minXP: 1000, maxXP: Infinity, color: "bg-amber-500" },
 ];
 
@@ -36,12 +37,20 @@ function pluralMenty(n: number): string {
   return "мент";
 }
 
-// Note: function declaration (not const) avoids potential TDZ issues in bundling
 function MentoraEIcon() {
   return (
     <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8",
       fontStyle: "italic", fontWeight: 700, fontSize: "1.1em", lineHeight: 1,
       marginRight: "0.12em" }}>е</span>
+  );
+}
+
+// Inline SVG icons for UI elements
+function FlameIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 14C5.24 14 3 11.76 3 9c0-2.1 1.2-4.3 2.4-5.8.4-.5 1.2-.2 1.2.4v.2c0 .6.4 1.1 1 1.2.4.1.8-.1 1-.4C9.2 3.7 9.5 3 9.5 3c.3-.5 1-.4 1.2.1.4 1 .6 2.1.3 3 .9-.8 1-2.1 1-2.1 0-.6.7-1 1.2-.7C14.3 4.2 15 5.8 15 7.5c0 3.59-2.69 6.5-7 6.5z" fill="currentColor"/>
+    </svg>
   );
 }
 
@@ -95,12 +104,14 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
           if (!isActive) {
             return (
               <div key={subject.id}
-                className="relative rounded-2xl border transition-all overflow-hidden opacity-60"
+                className="relative rounded-2xl border transition-all overflow-hidden opacity-55"
                 style={{ background: "var(--bg-secondary)", borderColor: "var(--border)" }}>
                 <div className="block p-5">
                   <span className="absolute top-3 right-3 text-[10px] font-medium px-1.5 py-0.5 rounded-md"
                     style={{ background: "var(--bg-secondary)", color: "var(--text-muted)" }}>СКОРО</span>
-                  <div className="text-3xl mb-3">{subject.emoji}</div>
+                  <div className="mb-3">
+                    <SubjectIcon id={subject.id} size={38} style={{ opacity: 0.55 }} />
+                  </div>
                   <div className="font-semibold text-sm" style={{ color: "var(--text-secondary)" }}>{subject.title}</div>
                   <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{subject.description}</div>
                 </div>
@@ -121,7 +132,6 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                                : { background: "var(--bg-card)", borderColor: "var(--border)" }}
               onClick={() => setSelectedId(id => id === subject.id ? null : subject.id)}>
               <div className="block p-5">
-                {/* Badge with tooltip */}
                 <div className="absolute top-3 right-3 group/badge" onClick={e => e.stopPropagation()}>
                   {isVerified ? (
                     <span className="text-[10px] font-bold bg-white/25 text-white px-1.5 py-0.5 rounded-md cursor-default">✶ verified</span>
@@ -143,7 +153,14 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                   </div>
                 </div>
 
-                <div className="text-3xl mb-2">{subject.emoji}</div>
+                <div className="mb-2">
+                  <SubjectIcon
+                    id={subject.id}
+                    size={38}
+                    light
+                    style={isVerified ? { background: "rgba(255,255,255,0.2)", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" } : undefined}
+                  />
+                </div>
                 <div className={`font-semibold text-sm mb-0.5 ${isVerified ? "text-white" : ""}`}
                   style={isVerified ? undefined : { color: "var(--text)" }}>
                   {subject.title}
@@ -153,7 +170,6 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                   {subject.description}
                 </div>
 
-                {/* Progress bar */}
                 <div className={`mt-3 pt-3 border-t ${isVerified ? "border-white/20" : ""}`}
                   style={isVerified ? undefined : { borderColor: "var(--border)" }}>
                   <div className="flex items-center justify-between mb-1">
@@ -173,8 +189,9 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                       style={{ width: `${lvl.progress}%` }} />
                   </div>
                   {(progress?.streak_days ?? 0) > 0 && (
-                    <div className={`text-[10px] font-medium mb-2 ${isVerified ? "text-white/80" : "text-orange-500"}`}>
-                      🔥 {progress!.streak_days} {pluralDays(progress!.streak_days)} подряд
+                    <div className={`flex items-center gap-1 text-[10px] font-medium mb-2 ${isVerified ? "text-white/80" : "text-orange-500"}`}>
+                      <FlameIcon className="w-3 h-3" />
+                      {progress!.streak_days} {pluralDays(progress!.streak_days)} подряд
                     </div>
                   )}
                   <Link href={`/learn/${subject.id}`}
@@ -182,7 +199,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                     className={`inline-flex text-xs font-semibold transition-colors ${
                       isVerified ? "text-white hover:text-white/80" : "text-brand-600 hover:text-brand-700"
                     }`}>
-                    {xp > 0 ? "Продожить →" : "Начать →"}
+                    {xp > 0 ? "Продолжить →" : "Начать →"}
                   </Link>
                 </div>
               </div>
@@ -193,9 +210,9 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
         <button onClick={() => setAddOpen(true)}
           className="relative rounded-2xl border-2 border-dashed transition-all cursor-pointer flex flex-col items-center justify-center p-5 min-h-[140px] gap-2 group hover:border-brand-300"
           style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-          <div className="w410 h-10 rounded-full flex items-center justify-center transition-colors"
+          <div className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
             style={{ background: "var(--bg-secondary)" }}>
-            <span className="text-2xl leading-none" style={{ color: "var(--text-muted)" }}>+</span>
+            <span className="text-xl font-light" style={{ color: "var(--text-muted)" }}>+</span>
           </div>
           <span className="text-xs font-medium text-center transition-colors" style={{ color: "var(--text-muted)" }}>
             Добавить предмет
