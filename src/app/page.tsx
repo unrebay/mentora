@@ -2,13 +2,12 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import DemoChat from "@/components/DemoChat";
-import Logo from "@/components/Logo";
 import { createClient } from "@/lib/supabase/server";
 import NeuralNetworkCanvas from "@/components/NeuralNetworkCanvas";
 import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
-import ThemeToggle from "@/components/ThemeToggle";
 import SubjectGrid from "@/components/SubjectGrid";
 import DemoScrollButton from "@/components/DemoScrollButton";
+import LandingNav from "@/components/LandingNav";
 
 export const dynamic = "force-dynamic";
 
@@ -82,7 +81,7 @@ const STEPS = [
 ];
 
 const STATS = [
-  { value: "13", label: "предметов уже доступны", color: "#4561E8", icon: `<path d="M4 19V5a2 2 0 0 1 2-2h14M4 19a2 2 0 0 0 2 2h14M4 19V9l8-4 8 4v10" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
+  { value: "13", label: "предметов уже доступны", color: "#4561E8", icon: `<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
   { value: "90%", label: "точность ответов AI", color: "#10B981", icon: `<circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.2" fill="none"/><path d="M8 12l3 3 5-5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
   { value: "24/7", label: "доступен без VPN", color: "#FF7A00", icon: `<circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.2" fill="none"/><path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" fill="none"/>` },
   { value: "0 ₽", label: "чтобы начать учиться", color: "#A78BFA", icon: `<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
@@ -181,30 +180,8 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
 
-      {/* NAV */}
-      <nav className="sticky top-0 z-50 border-b border-[var(--border)]"
-        style={{ background: "var(--bg-nav)", backdropFilter: "blur(12px)" }}>
-        <div className="max-w-6xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-4 px-6 py-4">
-          <Logo size="sm" fontSize="1.44rem" />
-          <div className="hidden md:flex items-center justify-center gap-8 text-sm text-[var(--text-secondary)]">
-            <a href="#subjects" className="hover:text-[var(--text)] transition-colors">Предметы</a>
-            <a href="#how" className="hover:text-[var(--text)] transition-colors">Как работает</a>
-            <Link href="/pricing" className="hover:text-[var(--text)] transition-colors">Тарифы</Link>
-          </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <Link href="/auth"
-              className="hidden sm:inline px-4 py-2 text-sm text-[var(--text-secondary)] font-medium hover:text-[var(--text)] transition-colors">
-              Войти
-            </Link>
-            <Link href="/auth"
-              className="inline-flex px-5 py-2.5 bg-brand-600 dark:bg-brand-600 text-white text-sm font-medium rounded-xl hover:bg-brand-700 transition-colors">
-              <span className="hidden sm:inline">Попробовать бесплатно</span>
-              <span className="sm:hidden">Начать</span>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      {/* NAV — scroll-aware dark/light */}
+      <LandingNav />
 
       {/* HERO */}
       <section className="relative overflow-hidden" style={{ background: "#04060f" }}>

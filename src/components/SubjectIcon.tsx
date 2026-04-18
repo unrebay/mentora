@@ -25,7 +25,7 @@ const FALLBACK = { from: "#6b7280", to: "#4b5563" };
 function RussianHistoryIcon() {
   // Kremlin-style tower with star
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
       <path d="M5 21V11l7-4 7 4v10H5Z" />
       <path d="M9 21v-6h6v6" />
       <path d="M12 7V4" />
@@ -38,7 +38,7 @@ function RussianHistoryIcon() {
 function WorldHistoryIcon() {
   // Globe with meridians
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
       <circle cx="12" cy="12" r="9" />
       <path d="M12 3c-3 3-3 15 0 18M12 3c3 3 3 15 0 18" />
       <path d="M3.5 9h17M3.5 15h17" />
@@ -49,7 +49,7 @@ function WorldHistoryIcon() {
 function MathematicsIcon() {
   // Pi symbol (π) — clean and recognisable
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
       <path d="M5 7h14" />
       <path d="M9 7v9a2 2 0 0 1-2 2" />
       <path d="M15 7v6c0 2 1 3 2 3" />
@@ -60,7 +60,7 @@ function MathematicsIcon() {
 function PhysicsIcon() {
   // Atom — nucleus + 3 elliptic orbits
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
       <circle cx="12" cy="12" r="1.8" fill="currentColor" stroke="none" />
       <ellipse cx="12" cy="12" rx="9" ry="3.5" />
       <ellipse cx="12" cy="12" rx="9" ry="3.5" transform="rotate(60 12 12)" />
@@ -72,7 +72,7 @@ function PhysicsIcon() {
 function ChemistryIcon() {
   // Erlenmeyer flask with liquid
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
       <path d="M9 3h6M10 3v6l-5 9a1 1 0 0 0 .9 1.5h12.2A1 1 0 0 0 19 18l-5-9V3" />
       <path d="M8.5 16h7" />
     </svg>
@@ -82,7 +82,7 @@ function ChemistryIcon() {
 function BiologyIcon() {
   // DNA double helix (simplified)
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
       <path d="M7 3c4 2 6 4 6 9s-2 7-6 9" />
       <path d="M17 3c-4 2-6 4-6 9s2 7 6 9" />
       <path d="M9 9h6M9 15h6" />
@@ -93,7 +93,7 @@ function BiologyIcon() {
 function RussianLanguageIcon() {
   // Open book
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
       <path d="M2 4v16a1 1 0 0 0 1 1h8v-1a2 2 0 0 1 2 0v1h8a1 1 0 0 0 1-1V4" />
       <path d="M12 4v16" />
       <path d="M2 4c0-1 2-2 5-2s5 1 5 2" />
@@ -106,7 +106,7 @@ function RussianLanguageIcon() {
 function LiteratureIcon() {
   // Feather quill with ink
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
       <path d="M20 4C14 4 9 8 8 14l-3 7 4-2c2-1 3-2 4-4 4-1 8-4 9-11Z" />
       <path d="M8 14c1-3 3-5 6-7" />
       <path d="M5 21l3-7" />
@@ -117,7 +117,7 @@ function LiteratureIcon() {
 function EnglishIcon() {
   // Speech bubble with letter A
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
       <path d="M21 11.5A8.38 8.38 0 0 1 12.5 20c-1.8 0-3.5-.5-4.9-1.4L3 20l1.4-4.6A8.5 8.5 0 1 1 21 11.5Z" />
       <path d="M9 13l1.5-4 1.5 4M9.6 11.5h2.8" />
     </svg>
@@ -127,7 +127,7 @@ function EnglishIcon() {
 function SocialStudiesIcon() {
   // Two people silhouettes
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
       <circle cx="9" cy="7" r="3" />
       <path d="M3 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2" />
       <path d="M16 3.1a3 3 0 0 1 0 5.8" />
@@ -139,7 +139,7 @@ function SocialStudiesIcon() {
 function GeographyIcon() {
   // Globe with location pin
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
       <path d="M12 2C8.7 2 6 4.7 6 8c0 5 6 14 6 14s6-9 6-14c0-3.3-2.7-6-6-6Z" />
       <circle cx="12" cy="8" r="2" />
     </svg>
@@ -149,7 +149,7 @@ function GeographyIcon() {
 function ComputerScienceIcon() {
   // Code brackets </>
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
       <path d="M16 18l6-6-6-6" />
       <path d="M8 6L2 12l6 6" />
       <path d="M12 4l-1.5 16" />
@@ -160,7 +160,7 @@ function ComputerScienceIcon() {
 function AstronomyIcon() {
   // Saturn-like planet with ring
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
       <circle cx="12" cy="12" r="5" />
       <path d="M3 8c2 1 11 6 18 5" />
       <path d="M3 8c0-1 1-2 3-1" />
@@ -172,7 +172,7 @@ function AstronomyIcon() {
 function DiscoveryIcon() {
   // Lightbulb / idea
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
       <path d="M12 2a7 7 0 0 1 5 11.8l-.7 1.2H7.7L7 13.8A7 7 0 0 1 12 2Z" />
       <path d="M9 18h6M10 21h4" />
       <path d="M12 6v2M8.5 7.5l1.5 1.5M15.5 7.5l-1.5 1.5" />

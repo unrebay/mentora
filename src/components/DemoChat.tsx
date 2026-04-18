@@ -14,7 +14,8 @@ const INITIAL_MESSAGE: Message = {
     "Привет! Я Mentora — твой персональный AI-ментор по истории. Спроси меня про любую эпоху, личность или событие — расскажу так, что запомнишь надолго.",
 };
 
-const DEMO_LIMIT = 5;
+const SOFT_LIMIT = 3;  // After this many messages — show dismissible soft banner
+const DEMO_LIMIT = 5;  // After this many — disable input entirely
 
 function renderMarkdown(text: string): string {
   return text
@@ -29,6 +30,7 @@ export default function DemoChat() {
   const [loading, setLoading] = useState(false);
   const [used, setUsed] = useState(0);
   const [limitReached, setLimitReached] = useState(false);
+  const [softBannerDismissed, setSoftBannerDismissed] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -75,8 +77,9 @@ export default function DemoChat() {
         ...prev,
         { role: "assistant", content: data.message },
       ]);
-      setUsed(data.used ?? used + 1);
-      if (data.remaining === 0) setLimitReached(true);
+      const newUsed = data.used ?? used + 1;
+      setUsed(newUsed);
+      if (data.remaining === 0 || newUsed >= DEMO_LIMIT) setLimitReached(true);
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -103,6 +106,9 @@ export default function DemoChat() {
     "Почему пала Римская империя?",
     "Как началась Первая мировая?",
   ];
+
+  const showSoftBanner = used >= SOFT_LIMIT && !softBannerDismissed && !limitReached;
+  const remaining = DEMO_LIMIT - used;
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden flex flex-col" style={{ maxHeight: 480 }}>
@@ -140,7 +146,6 @@ export default function DemoChat() {
                   ? "bg-gray-900 text-white"
                   : "bg-gray-50 border border-gray-100 text-gray-700"
               }`}
-            
               dangerouslySetInnerHTML={{ __html: renderMarkdown(m.content) }}
             />
             {m.role === "user" && (
@@ -181,22 +186,53 @@ export default function DemoChat() {
         </div>
       )}
 
-      {/* Limit reached CTA */}
-      {limitReached ? (
-        <div className="border-t border-gray-100 px-4 py-4 text-center bg-gradient-to-b from-white to-gray-50 shrink-0">
-          <p className="text-xs text-gray-500 mb-2">
-            Демо закончилось — но это только начало 🚀
-          </p>
-          <Link
-            href="/auth"
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 text-white text-xs font-semibold rounded-xl hover:bg-brand-700 transition-colors"
+      {/* Soft limit banner — shown after SOFT_LIMIT messages, dismissible */}
+      {showSoftBanner && (
+        <div className="mx-3 mb-2 px-3 py-2 rounded-xl flex items-center justify-between gap-2 shrink-0"
+          style={{ background: "rgba(69,97,232,0.07)", border: "1px solid rgba(69,97,232,0.18)" }}>
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-medium text-gray-600">
+              Осталось {remaining} {remaining === 1 ? "сообщение" : "сообщения"} в демо
+            </p>
+            <Link href="/auth" className="text-[11px] text-brand-600 font-semibold hover:underline">
+              Зарегистрируйся — 30 в день бесплатно →
+            </Link>
+          </div>
+          <button
+            onClick={() => setSoftBannerDismissed(true)}
+            className="shrink-0 text-gray-400 hover:text-gray-600 transition-colors p-0.5"
+            aria-label="Закрыть"
           >
-            Зарегистрироваться бесплатно →
-          </Link>
-          <p className="text-[10px] text-gray-400 mt-2">30 сообщений в день · бесплатно</p>
+            <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M1 1l10 10M11 1L1 11" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* Hard limit — disable input, show gentle CTA */}
+      {limitReached ? (
+        <div className="border-t border-gray-100 px-4 py-3 shrink-0" style={{ background: "linear-gradient(to bottom, #fff, #f9fafb)" }}>
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <p className="text-xs text-gray-500">Демо-лимит исчерпан 🚀</p>
+            <Link
+              href="/auth"
+              className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors shrink-0"
+            >
+              Продолжить бесплатно →
+            </Link>
+          </div>
+          {/* Grayed-out disabled input to show what they're missing */}
+          <div className="flex gap-2 items-center opacity-35 pointer-events-none select-none">
+            <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-400">
+              Напиши Менторе про любую эпоху...
+            </div>
+            <div className="w-7 h-7 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-xs">↑</div>
+          </div>
+          <p className="text-[10px] text-gray-400 text-center mt-2">30 сообщений в день · без карты · бесплатно</p>
         </div>
       ) : (
-        /* Input */
+        /* Normal input */
         <div className="border-t border-gray-100 px-4 py-3 flex gap-2 items-center shrink-0">
           {used > 0 && used >= DEMO_LIMIT - 1 && (
             <span className="text-[10px] text-amber-500 font-medium shrink-0">
@@ -210,7 +246,9 @@ export default function DemoChat() {
             onKeyDown={handleKey}
             placeholder="Напиши Менторе про любую эпоху..."
             disabled={loading}
-            className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:border-brand-300 disabled:opacity-50 transition-colors"
+            // fontSize 16px prevents iOS Safari from auto-zooming the page on focus
+            style={{ fontSize: "16px" }}
+            className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none focus:border-brand-300 disabled:opacity-50 transition-colors"
           />
           <button
             onClick={() => sendMessage()}
