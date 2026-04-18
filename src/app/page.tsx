@@ -199,7 +199,8 @@ export default async function HomePage() {
             </Link>
             <Link href="/auth"
               className="inline-flex px-5 py-2.5 bg-brand-600 dark:bg-brand-600 text-white text-sm font-medium rounded-xl hover:bg-brand-700 transition-colors">
-              Попробовать бесплатно
+              <span className="hidden sm:inline">Попробовать бесплатно</span>
+              <span className="sm:hidden">Начать</span>
             </Link>
           </div>
         </div>
@@ -218,7 +219,7 @@ export default async function HomePage() {
         <div className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-12">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h1 className="text-[3.2rem] md:text-[4rem] font-black leading-[1.05] mb-6 tracking-tight text-white">
+              <h1 className="text-[2.1rem] sm:text-[2.8rem] md:text-[3.2rem] lg:text-[4rem] font-black leading-[1.05] mb-6 tracking-tight text-white">
                 Забудь про{" "}
                 <span className="line-through text-gray-600 font-bold">скучные</span>{" "}
                 учебники.<br />
@@ -258,14 +259,14 @@ export default async function HomePage() {
           {/* Floating questions */}
           <div className="relative z-10 mt-20 max-w-4xl mx-auto px-4">
             <div className="mb-24 space-y-10">
-              <p className="text-2xl font-semibold text-white w-fit">Подожди, а почему именно 1941-й?</p>
-              <p className="text-lg font-medium text-gray-400 w-fit ml-auto mr-[8%]">Это вообще базово знать или нет?</p>
-              <p className="text-3xl font-bold text-white w-fit ml-[14%]">Объясни ещё раз, другими словами.</p>
-              <p className="text-xl font-medium text-gray-500 w-fit ml-[52%]">А зачем это вообще учить?</p>
+              <p className="text-xl sm:text-2xl font-semibold text-white w-fit">Подожди, а почему именно 1941-й?</p>
+              <p className="text-base sm:text-lg font-medium text-gray-400 w-fit ml-auto mr-[8%]">Это вообще базово знать или нет?</p>
+              <p className="text-2xl sm:text-3xl font-bold text-white w-fit sm:ml-[14%]">Объясни ещё раз, другими словами.</p>
+              <p className="text-base sm:text-xl font-medium text-gray-500 w-fit ml-[28%] sm:ml-[52%]">А зачем это вообще учить?</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-semibold text-white mb-1">Преподаватель объясняет всем.</p>
-              <p className="text-2xl font-semibold mb-12 text-white">
+              <p className="text-xl sm:text-2xl font-semibold text-white mb-1">Преподаватель объясняет всем.</p>
+              <p className="text-xl sm:text-2xl font-semibold mb-12 text-white">
                 <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700 }}>
                   M<span style={{ color: "#4561E8", fontStyle: "italic", marginRight: "0.05em" }}>e</span>ntora
                 </span>
@@ -394,7 +395,7 @@ export default async function HomePage() {
 
       {/* HOW TO LEARN */}
       <section className="max-w-6xl mx-auto px-6 py-16">
-        <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-3xl p-8 md:p-10">
+        <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-3xl p-5 sm:p-8 md:p-10">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
               <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">Как учиться</div>
@@ -464,7 +465,7 @@ export default async function HomePage() {
                 <p className="text-gray-400 leading-relaxed mb-6">
                   Специальный режим с реальными заданиями, трекером готовности и прогнозом результата. Идеально к сезону экзаменов.
                 </p>
-                <div className="grid grid-cols-2 gap-2 text-sm text-gray-300">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-300">
                   <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Реальные задания ЕГЭ/ОГЭ</span>
                   <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Трекер: осталось N дней</span>
                   <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Прогноз результата</span>
@@ -561,7 +562,7 @@ export default async function HomePage() {
         </div>
         <div className="relative z-10">
           <p className="text-gray-500 text-xs font-semibold tracking-[0.2em] uppercase mb-8">Твой персональный AI-ментор</p>
-          <h2 className="text-5xl font-bold mb-5 leading-tight">
+          <h2 className="text-3xl sm:text-5xl font-bold mb-5 leading-tight">
             Учись так,<br />
             как тебе{" "}
             <span className="text-[#4561E8] italic">удобно.</span>
