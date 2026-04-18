@@ -178,7 +178,7 @@ export default async function HomePage() {
   if (user) redirect("/dashboard");
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
+    <div className="min-h-screen text-[var(--text)]" style={{ background: "#04060f" }}>
 
       {/* NAV — scroll-aware dark/light */}
       <LandingNav />
