@@ -48,8 +48,15 @@ export default function LandingNav() {
         </div>
 
         {/* Right actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-end gap-3">
           <ThemeToggle />
+          <Link
+            href="/auth"
+            className="inline-flex px-3 py-2 sm:hidden text-sm font-medium rounded-xl transition-colors duration-300"
+            style={{ color: isDark ? "rgba(255,255,255,0.85)" : "var(--text-secondary)" }}
+          >
+            Войти
+          </Link>
           <Link
             href="/auth"
             className="hidden sm:inline px-4 py-2 text-sm font-medium transition-colors duration-300"
@@ -59,10 +66,9 @@ export default function LandingNav() {
           </Link>
           <Link
             href="/auth"
-            className="inline-flex px-3 py-2 sm:px-5 sm:py-2.5 bg-brand-600 text-white text-sm font-medium rounded-xl hover:bg-brand-700 transition-colors"
+            className="hidden sm:inline-flex px-5 py-2.5 bg-brand-600 text-white text-sm font-medium rounded-xl hover:bg-brand-700 transition-colors"
           >
-            <span className="hidden sm:inline">Попробовать бесплатно</span>
-            <span className="sm:hidden">Начать</span>
+            Попробовать бесплатно
           </Link>
         </div>
       </div>
