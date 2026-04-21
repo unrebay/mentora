@@ -6,9 +6,10 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
 ) {
-  // Shared secret guard — only our VPS may use this proxy
-  const proxySecret = req.headers.get("x-proxy-secret");
-  if (!proxySecret || proxySecret !== process.env.PROXY_SECRET) {
+  // Auth: VPS sends x-vercel-protection-bypass (already in defaultHeaders of Anthropic client)
+  // This is the same secret Vercel uses for deployment protection bypass.
+  const bypass = req.headers.get("x-vercel-protection-bypass");
+  if (!bypass || bypass !== process.env.VERCEL_BYPASS_SECRET) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
