@@ -15,7 +15,7 @@ const META: Record<string, { from: string; to: string }> = {
   "geography":        { from: "#14B8A6", to: "#0A7A6A" },
   "computer-science": { from: "#64748B", to: "#334155" },
   "astronomy":        { from: "#7C3AED", to: "#4C1598" },
-  "discovery":        { from: "#FF7A00", to: "#C04800" },
+  "discovery":        { from: "#8BB8CC", to: "#4A7080" },
 };
 
 const FALLBACK = { from: "#6b7280", to: "#4b5563" };

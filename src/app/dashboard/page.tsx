@@ -27,7 +27,10 @@ function pluralMenty(n: number): string {
 }
 
 const MentoraE = () => (
-  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "var(--brand)", fontStyle: "italic", fontWeight: 700, fontSize: "1.1em", lineHeight: 1, marginRight: "0.08em" }}>е</span>
+  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, fontSize: "1.1em", lineHeight: 1, letterSpacing: "-0.01em", marginRight: "0.1em" }}>
+    <span style={{ color: "var(--text)" }}>M</span>
+    <span style={{ color: "#4561E8", fontStyle: "italic" }}>е</span>
+  </span>
 );
 
 function getFirstName(fullName?: string | null, email?: string | null): string {
@@ -275,7 +278,7 @@ export default async function DashboardPage() {
             {totalXP > 0 && (
               <div className="flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-semibold border"
                 style={{ background: "var(--bg-card)", borderColor: "var(--border)", color: "var(--text)" }}>
-                <MentoraE />{totalXP} {pluralMenty(totalXP)}
+                <MentoraE />{totalXP}
               </div>
             )}
 
