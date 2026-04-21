@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Logo from "@/components/Logo";
-import SphereBlobScene, { AUTH_SPHERES } from "@/components/SphereBlobScene";
+import MathField from "@/components/MathField";
 import SubjectIcon from "@/components/SubjectIcon";
 import posthog from "posthog-js";
 
@@ -209,9 +209,9 @@ function AuthPageContent() {
   if (emailSent) {
     return (
       <main className="min-h-screen relative flex items-center justify-center px-4 py-12" style={{ background: "#04060f" }}>
-        <SphereBlobScene spheres={AUTH_SPHERES} intensity={0.5} />
+        <MathField />
         <div className="relative z-10 w-full max-w-sm text-center animate-fade-in-up">
-          <Logo size="md" href="/" className="justify-center mb-10" />
+          <Logo size="md" href="/" className="justify-center mb-10" textColor="white" />
           <div className="glass rounded-3xl p-8 space-y-6">
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto"
               style={{ background: "rgba(69,97,232,0.18)", border: "1px solid rgba(107,143,255,0.25)" }}>
@@ -250,18 +250,19 @@ function AuthPageContent() {
       <div className="hidden lg:flex relative flex-col overflow-hidden"
         style={{ width: "42%", background: "#04060f", minHeight: "100vh" }}>
 
-        {/* 3D sphere scene */}
-        <SphereBlobScene spheres={AUTH_SPHERES} />
+        {/* Floating math symbols */}
+        <MathField />
 
         {/* Content */}
         <div className="relative z-10 flex flex-col h-full p-10 xl:p-14">
 
           {/* Logo */}
-          <Logo size="sm" href="/" />
+          <Logo size="sm" href="/" textColor="white" />
 
-          {/* Center quote */}
+          {/* Center quote */
           <div className="flex-1 flex flex-col justify-center pt-8">
-            <p className="text-[11px] font-bold text-gray-600 tracking-[0.2em] uppercase mb-5">
+            <p className="text-[11px] font-bold tracking-[0.2em] uppercase mb-5"
+               style={{ color: "rgba(107,143,255,0.7)" }}>
               Персональный AI-ментор
             </p>
             <h2 className="text-3xl xl:text-4xl font-black text-white leading-tight mb-5">
@@ -276,7 +277,8 @@ function AuthPageContent() {
                 произнести вслух.
               </span>
             </h2>
-            <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
+            <p className="text-sm leading-relaxed max-w-xs"
+               style={{ color: "rgba(255,255,255,0.55)" }}>
               Ментора не осуждает. Объясняет столько раз, сколько нужно — на твоём языке.
             </p>
           </div>
@@ -288,11 +290,11 @@ function AuthPageContent() {
                 <SubjectIcon key={id} id={id} size={30} style={{ opacity: 0.85 }} />
               ))}
             </div>
-            <div className="flex items-center gap-3 text-xs text-gray-600">
+            <div className="flex items-center gap-3 text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
               <span>13 предметов</span>
-              <span className="text-gray-800">·</span>
+              <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
               <span>Без VPN</span>
-              <span className="text-gray-800">·</span>
+              <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
               <span>Без карты</span>
             </div>
           </div>
