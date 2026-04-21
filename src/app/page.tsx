@@ -178,13 +178,13 @@ export default async function HomePage() {
   if (user) redirect("/dashboard");
 
   return (
-    <div className="min-h-screen text-[var(--text)]" style={{ background: "#04060f" }}>
+    <div className="min-h-screen text-[var(--text)]" style={{ background: "var(--bg)" }}>
 
       {/* NAV — scroll-aware dark/light */}
       <LandingNav />
 
       {/* HERO */}
-      <section className="relative overflow-hidden" style={{ background: "#04060f" }}>
+      <section className="relative overflow-hidden" style={{ background: "var(--bg)" }}>
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
           <NeuralNetworkCanvas className="absolute inset-0 w-full h-full" />
         </div>
