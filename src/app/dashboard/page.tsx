@@ -261,7 +261,7 @@ export default async function DashboardPage() {
                   ? { background: "linear-gradient(135deg, #FF7A00, #7C3AED)", boxShadow: "0 2px 12px rgba(124,58,237,0.3)" }
                   : { background: "linear-gradient(135deg, #4561E8, #6B8FFF)", boxShadow: "0 2px 12px rgba(69,97,232,0.3)" }
                 }>
-                {isUltima ? "✦ ULTRA" : "PRO"}
+                {isUltima ? "✦ ULTIMA" : "PRO"}
               </div>
             )}
 

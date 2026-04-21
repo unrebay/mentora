@@ -444,7 +444,7 @@ export default async function HomePage() {
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-300">
                   <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Реальные задания ЕГЭ/ОГЭ</span>
-                  <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Трекер: осталось N дней</span>
+                  <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Трекер готовности к экзамену</span>
                   <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Прогноз результата</span>
                   <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Все 13 предметов</span>
                 </div>

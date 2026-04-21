@@ -22,7 +22,7 @@ export default function BuyProButton({ isLoggedIn, isPro, isUltima = false, plan
   if (isUltimaPlan && isUltima) {
     return (
       <div className="block text-center py-2.5 px-5 bg-emerald-800/60 text-emerald-300 font-semibold rounded-xl border border-emerald-700/50 text-sm">
-        ✓ Ultra активна
+        ✓ Ultima активна
       </div>
     );
   }
@@ -58,8 +58,8 @@ export default function BuyProButton({ isLoggedIn, isPro, isUltima = false, plan
   const label = loading
     ? "Переходим к оплате..."
     : isAnnual
-      ? (isUltimaPlan ? "Оформить Ultra на год →" : "Оформить годовой план →")
-      : (isUltimaPlan ? "Получить Ultra →" : "Попробовать Pro →");
+      ? (isUltimaPlan ? "Оформить Ultima на год →" : "Оформить годовой план →")
+      : (isUltimaPlan ? "Получить Ultima →" : "Попробовать Pro →");
 
   const buttonStyle = isUltimaPlan
     ? "bg-white text-gray-900 hover:bg-gray-100"

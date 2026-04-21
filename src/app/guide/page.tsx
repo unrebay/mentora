@@ -216,7 +216,7 @@ export default function GuidePage() {
               <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
                 Free: 20 сообщений в день — без карты навсегда. Счётчик сбрасывается в полночь.{" "}
                 <Link href="/pricing" className="font-semibold hover:underline" style={{ color: "#f59e0b" }}>
-                  Узнать про Pro и Ultra →
+                  Узнать про Pro и Ultima →
                 </Link>
               </p>
             </div>
