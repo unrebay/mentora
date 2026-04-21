@@ -4,6 +4,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import BuyProButton from "@/components/BuyProButton";
 import PricingFAQ from "@/components/PricingFAQ";
 import MobileMenuButton from "@/components/MobileMenuButton";
+import MobileMenuButton from "@/components/MobileMenuButton";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
