@@ -259,7 +259,7 @@ function AuthPageContent() {
           {/* Logo */}
           <Logo size="sm" href="/" textColor="white" />
 
-          {/* Center quote */
+          {/* Center quote */}
           <div className="flex-1 flex flex-col justify-center pt-8">
             <p className="text-[11px] font-bold tracking-[0.2em] uppercase mb-5"
                style={{ color: "rgba(107,143,255,0.7)" }}>
