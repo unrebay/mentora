@@ -137,7 +137,7 @@ const FEATURES: Feature[] = [
     color: "#F59E0B",
     comparison: [
       { label: "Репетитор", value: "12 000–24 000 ₽", sub: "8 занятий × 1 500–3 000 ₽/час" },
-      { label: "Mentora Pro", value: "499 ₽", sub: "месяц, безлимит, 24/7", highlight: true },
+      { label: "Mentora Pro", value: "399 ₽", sub: "месяц, безлимит, 24/7", highlight: true },
     ],
   },
 ];

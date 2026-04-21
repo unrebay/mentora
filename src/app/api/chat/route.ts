@@ -11,8 +11,8 @@ const anthropic = new Anthropic({
 });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const WINDOW_HOURS = 8;
-const WINDOW_LIMIT = 15;
+const WINDOW_HOURS = 24;
+const WINDOW_LIMIT = 20;
 
 // Subject display names for system prompt
 const SUBJECT_NAME: Record<string, string> = {

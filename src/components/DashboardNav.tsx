@@ -60,12 +60,12 @@ export default function DashboardNav({ isPro, isUltima, totalXP, maxStreak, logo
           <ThemeToggle />
           {totalXP > 0 && (
             <div className="hidden sm:flex items-center gap-1.5 text-sm">
-              <span className="flex items-center gap-0.5 rounded-full px-2.5 py-1 font-semibold border" style={{ background: "var(--bg-secondary)", borderColor: "var(--border)", color: "var(--text)" }}>
+              <span className="flex items-center gap-0.5 rounded-full px-2.5 h-7 font-semibold border" style={{ background: "var(--bg-secondary)", borderColor: "var(--border)", color: "var(--text)" }}>
                 <MentoraE />{totalXP}
               </span>
               {maxStreak > 0 && (
-                <span className="flex items-center gap-1 rounded-full px-2.5 py-1 font-semibold border" style={{ background: "rgba(249,115,22,0.07)", borderColor: "rgba(249,115,22,0.28)", color: "#f97316" }}>
-                  <svg viewBox="0 0 14 14" fill="currentColor" className="w-3 h-3"><path d="M7 13C4.79 13 3 11.21 3 9c0-1.63.93-3.33 1.86-4.5.31-.39.93-.16.93.31v.15c0 .47.31.85.78.93.31.08.62-.08.78-.31C7.82 4.73 8.07 4.2 8.07 4.2c.23-.39.78-.31.93.08.31.78.47 1.63.23 2.33.7-.62.78-1.63.78-1.63 0-.47.54-.78.93-.54C11.7 5.12 12.4 6.36 12.4 7.77 12.4 10.55 10.44 13 7 13z"/></svg>
+                <span className="flex items-center gap-1 rounded-full px-2.5 h-7 font-semibold border" style={{ background: "rgba(249,115,22,0.07)", borderColor: "rgba(249,115,22,0.28)", color: "#f97316" }}>
+                  <svg viewBox="0 0 24 24" fill="none" className="w-3.5 h-3.5 shrink-0"><path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00"/></svg>
                   {maxStreak} {pluralDays(maxStreak)}
                 </span>
               )}
