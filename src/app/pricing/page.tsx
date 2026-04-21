@@ -3,6 +3,7 @@ import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
 import BuyProButton from "@/components/BuyProButton";
 import PricingFAQ from "@/components/PricingFAQ";
+import MobileMenuButton from "@/components/MobileMenuButton";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
@@ -33,12 +34,12 @@ const ULTRA_FEATURES = [
 export const metadata = {
   title: "Тарифы — Mentora AI-репетитор",
   description:
-    "Начни бесплатно — 20 сообщений в день без карты. Pro за 399 ₽/мес открывает все 13 предметов без лимита. Ultima добавляет фото, презентации и аудио.",
-  keywords: ["тарифы AI репетитора", "стоимость репетитора онлайн", "Pro план Mentora", "Ultima"],
+    "Начни бесплатно — 20 сообщений в день без карты. Pro за 399 ₽/мес открывает все 13 предметов без лимита. Ultra добавляет фото, презентации и аудио.",
+  keywords: ["тарифы AI репетитора", "стоимость репетитора онлайн", "Pro план Mentora", "Ultra"],
   alternates: { canonical: "https://mentora.su/pricing" },
   openGraph: {
     title: "Тарифы Mentora — от 0 ₽",
-    description: "Бесплатно, Pro 399 ₽/мес или Ultima 799 ₽/мес. Без договоров — отмени в любой момент.",
+    description: "Бесплатно, Pro 399 ₽/мес или Ultra 799 ₽/мес. Без договоров — отмени в любой момент.",
     url: "https://mentora.su/pricing",
   },
 };
@@ -103,12 +104,17 @@ export default async function PricingPage() {
                 Войти
               </Link>
             )}
-                        <Link
-              href="/auth"
+            <Link
+              href={isLoggedIn ? "/dashboard" : "/auth"}
               className="btn-glow px-5 py-2.5 text-sm font-semibold rounded-xl text-white"
             >
-              Попробовать бесплатно →
+              {isLoggedIn ? "В кабинет →" : "Попробовать бесплатно →"}
             </Link>
+            <MobileMenuButton links={[
+              { href: "/#subjects", label: "Предметы" },
+              { href: "/#how", label: "Как работает" },
+              { href: "/pricing", label: "Тарифы", active: true },
+            ]} />
           </div>
         </div>
       </nav>
@@ -144,7 +150,7 @@ export default async function PricingPage() {
           </span>
         </h1>
         <p className="text-lg t-muted max-w-lg mx-auto leading-relaxed">
-          Бесплатный план без карты. Pro открывает все предметы. Ultima добавляет фото, презентации и аудио.
+          Бесплатный план без карты. Pro открывает все предметы. Ultra добавляет фото, презентации и аудио.
         </p>
       </section>
 
@@ -310,7 +316,7 @@ export default async function PricingPage() {
                   backgroundClip: "text",
                 }}
               >
-                ULTIMA
+                ULTRA
               </p>
               <div className="flex items-end gap-1.5">
                 <span className="text-5xl font-bold tracking-tight text-white">799 ₽</span>
