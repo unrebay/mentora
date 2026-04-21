@@ -94,7 +94,16 @@ export default async function PricingPage() {
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <Link
+            {!isLoggedIn && (
+              <Link
+                href="/auth"
+                className="hidden sm:inline px-4 py-2 text-sm font-medium transition-colors"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Войти
+              </Link>
+            )}
+                        <Link
               href="/auth"
               className="btn-glow px-5 py-2.5 text-sm font-semibold rounded-xl text-white"
             >
@@ -301,7 +310,7 @@ export default async function PricingPage() {
                   backgroundClip: "text",
                 }}
               >
-                ULTRA
+                ULTIMA
               </p>
               <div className="flex items-end gap-1.5">
                 <span className="text-5xl font-bold tracking-tight text-white">799 ₽</span>

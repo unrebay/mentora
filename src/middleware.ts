@@ -32,22 +32,27 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith(p)
   );
 
+  // Build canonical origin — same pattern as auth/callback/route.ts.
+  // request.url contains localhost:3000 when nginx doesn't forward
+  // x-forwarded-host, so we prefer NEXT_PUBLIC_BASE_URL first.
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL ?? "").replace(/\/$/, "");
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const proto = request.headers.get("x-forwarded-proto") ?? "https";
+  const origin = baseUrl || (forwardedHost ? `${proto}://${forwardedHost}` : new URL(request.url).origin);
+
   // Redirect unauthenticated users to auth
   if (!user && isProtected) {
-    return NextResponse.redirect(new URL("/auth", request.url));
+    return NextResponse.redirect(new URL("/auth", origin));
   }
 
   // Redirect logged-in users away from auth page
   if (user && request.nextUrl.pathname === "/auth") {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/dashboard", origin));
   }
 
   return supabaseResponse;
 }
 
 export const config = {
-  // Exclude static assets, API routes, and the OAuth callback route (it sets
-  // session cookies itself — running the middleware getUser() first would
-  // interfere with cookie propagation).
   matcher: ["/((?!_next/static|_next/image|favicon.ico|api|auth/callback).*)"],
 };
