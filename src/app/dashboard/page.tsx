@@ -6,7 +6,6 @@ import Link from "next/link";
 import { PostHogIdentify } from "@/components/PostHogIdentify";
 import { PaymentSuccessTracker } from "@/components/PaymentSuccessTracker";
 import SubjectLibrarySection from "@/components/SubjectLibrarySection";
-import DashboardNav from "@/components/DashboardNav";
 import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
 
 const DAILY_LIMIT = 20;
@@ -125,8 +124,6 @@ export default async function DashboardPage() {
 
       <PostHogIdentify userId={user.id} email={user.email ?? ""} />
       <PaymentSuccessTracker />
-      <DashboardNav isPro={isPro} isUltima={isUltima} totalXP={totalXP} maxStreak={maxStreak} logoutAction={handleLogout} />
-
       <div className="max-w-5xl mx-auto px-6 py-10">
 
         {/* ── Trial active banner ───────────────────────────── */}

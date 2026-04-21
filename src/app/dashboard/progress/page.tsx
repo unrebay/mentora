@@ -103,29 +103,7 @@ export default async function ProgressPage() {
   return (
     <main className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
 
-      {/* Header */}
-      <header className="border-b px-6 py-4 flex items-center gap-3 backdrop-blur-md sticky top-0 z-10"
-        style={{ borderColor: "var(--border-light)", background: "var(--bg-nav)" }}>
-        <Link href="/dashboard"
-          className="flex items-center gap-1.5 text-sm font-medium transition-colors rounded-lg px-2.5 py-1.5"
-          style={{ color: "var(--text-muted)", background: "var(--bg-secondary)" }}>
-          <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M10 12L6 8l4-4" /></svg>
-          Библиотека
-        </Link>
-        <h1 className="font-bold flex-1" style={{
-          background: "linear-gradient(120deg, var(--text) 0%, var(--text-secondary) 100%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-        }}>
-          Мой прогресс
-        </h1>
-        <Link href="/profile"
-          className="text-sm font-medium transition-colors"
-          style={{ color: "var(--brand)" }}>
-          Профиль →
-        </Link>
-      </header>
+
 
       <div className="max-w-2xl mx-auto px-5 py-8 space-y-8">
 

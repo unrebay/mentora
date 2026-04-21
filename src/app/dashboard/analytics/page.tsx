@@ -44,14 +44,7 @@ export default function AnalyticsDashboard() {
 
         {/* Header */}
         <div>
-          <Link href="/dashboard"
-            className="inline-flex items-center gap-1.5 text-sm mb-5 transition-colors"
-            style={{ color: "var(--text-muted)" }}>
-            <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M10 12L6 8l4-4" />
-            </svg>
-            Назад
-          </Link>
+
           <h1 className="text-2xl font-bold mb-1" style={{ color: "var(--text)" }}>
             Аналитика для{" "}
             <span style={{

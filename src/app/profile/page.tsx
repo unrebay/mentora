@@ -2,11 +2,9 @@ import React from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { ProfileNameEditor } from "@/components/ProfileNameEditor";
 import ReferralWidget from "@/components/ReferralWidget";
-import Logo from "@/components/Logo";
-import ThemeToggle from "@/components/ThemeToggle";
+import DashboardNav from "@/components/DashboardNav";
 
 export const metadata = { title: "Профиль — Mentora" };
 
@@ -113,27 +111,19 @@ export default async function ProfilePage() {
   const earned = BADGES.filter(b => b.check(stats));
   const locked = BADGES.filter(b => !b.check(stats));
 
+  async function handleLogout() {
+    "use server";
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+    const { redirect } = await import("next/navigation");
+    redirect("/");
+  }
+
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
 
-      {/* Nav */}
-      <nav className="sticky top-0 z-10 border-b px-6 py-4 backdrop-blur-md"
-        style={{ background: "var(--bg-nav)", borderColor: "var(--border)" }}>
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <Logo size="sm" />
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <Link href="/dashboard"
-              className="flex items-center gap-1.5 text-sm font-medium rounded-lg px-2.5 py-1.5 transition-colors"
-              style={{ color: "var(--text-muted)", background: "var(--bg-secondary)" }}>
-              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M10 12L6 8l4-4" />
-              </svg>
-              Назад
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <DashboardNav isPro={isPro} isUltima={isUltima} totalXP={totalXP} maxStreak={maxStreak} logoutAction={handleLogout} />
 
       {/* Ambient BG */}
       <div className="fixed inset-0 -z-10 pointer-events-none"
