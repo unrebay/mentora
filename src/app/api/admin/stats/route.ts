@@ -14,7 +14,7 @@ export async function GET() {
   const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
   const [
-    totalUsersRes, proUsersRes, newTodayRes, activeTodayRes, activeWeekRes,
+    totalUsersRes, proUsersRes, ultimaUsersRes, newTodayRes, activeTodayRes, activeWeekRes,
     totalMsgsRes, msgsTodayRes, userMsgsWeekRes, aiMsgsWeekRes,
     activeSubsRes, chunksRes, recentUsersRes, subjectMsgsRes, trialExpiredRes,
   ] = await Promise.all([
@@ -46,11 +46,12 @@ export async function GET() {
 
   const totalUsers = totalUsersRes.count ?? 0;
   const proUsers = proUsersRes.count ?? 0;
+  const ultimaUsers = ultimaUsersRes.count ?? 0;
   const userMsgsWeek = userMsgsWeekRes.count ?? 0;
   const aiMsgsWeek = aiMsgsWeekRes.count ?? 0;
 
   return NextResponse.json({
-    users: { total: totalUsers, pro: proUsers, free: totalUsers - proUsers, newToday: newTodayRes.count ?? 0, activeToday: activeTodayRes.count ?? 0, activeWeek: activeWeekRes.count ?? 0, trialExpired: trialExpiredRes.count ?? 0 },
+    users: { total: totalUsers, pro: proUsers, ultima: ultimaUsers, free: totalUsers - proUsers - ultimaUsers, newToday: newTodayRes.count ?? 0, activeToday: activeTodayRes.count ?? 0, activeWeek: activeWeekRes.count ?? 0, trialExpired: trialExpiredRes.count ?? 0 },
     chat: { totalMessages: totalMsgsRes.count ?? 0, messagesToday: msgsTodayRes.count ?? 0, userMessagesWeek: userMsgsWeek, aiResponsesWeek: aiMsgsWeek, aiResponseRate: userMsgsWeek > 0 ? Math.round((aiMsgsWeek / userMsgsWeek) * 100) : 0, topSubjects },
     billing: { activeSubscriptions: activeSubsRes.count ?? 0 },
     knowledge: { chunks: chunksRes.count ?? 0 },
