@@ -80,3 +80,5 @@
 | YooKassa | ✅ | — |
 | Resend Email | ✅ | — |
 | PostHog Analytics | ✅ | — |
+
+<!-- ci: fix Vercel proxy auth -->
