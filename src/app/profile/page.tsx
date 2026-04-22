@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ProfileNameEditor } from "@/components/ProfileNameEditor";
 import ReferralWidget from "@/components/ReferralWidget";
+import MeLogo from "@/components/MeLogo";
 import DashboardNav from "@/components/DashboardNav";
 
 export const metadata = { title: "Профиль — Mentora" };
@@ -180,7 +181,7 @@ export default async function ProfilePage() {
               label: "Мент",
               value: totalXP,
               suffix: "",
-              icon: <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, fontSize: "1.3rem", letterSpacing: "-0.02em", lineHeight: 1 }}><span style={{ color: "var(--text)" }}>M</span><span style={{ color: "var(--brand)", fontStyle: "italic", display: "inline-block", transform: "translateY(0.07em)" }}>е</span></span>,
+              icon: <MeLogo height={28} />,
               accent: "var(--brand)",
             },
             {

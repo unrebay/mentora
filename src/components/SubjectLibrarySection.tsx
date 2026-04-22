@@ -1,4 +1,5 @@
 "use client";
+import MeLogo from "@/components/MeLogo";
 import { useState } from "react";
 import Link from "next/link";
 import AddSubjectModal from "@/components/AddSubjectModal";
@@ -37,14 +38,6 @@ function pluralMenty(n: number): string {
   if (m10 === 1) return "мента";
   if (m10 >= 2 && m10 <= 4) return "менты";
   return "мент";
-}
-
-function MentoraEIcon({ color = "var(--brand)" }: { color?: string }) {
-  return (
-    <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1, marginRight: "0.1em" }}>
-      <span style={{ color }}>M</span><span style={{ color, fontStyle: "italic", display: "inline-block", transform: "translateY(0.07em)" }}>е</span>
-    </span>
-  );
 }
 
 interface SubjectItem {
@@ -177,7 +170,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                       <span className="text-[10px] font-semibold text-white/65">{lvl.name}</span>
                       {xp > 0 && (
                         <span className="text-[10px] font-bold text-white">
-                          <MentoraEIcon color="rgba(255,255,255,0.9)" />{xp} {pluralMenty(xp)}
+                          <MeLogo height={11} variant="white" style={{ marginRight: 1 }} />{xp} {pluralMenty(xp)}
                         </span>
                       )}
                     </div>
@@ -250,7 +243,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                     <span className="text-[10px] font-semibold" style={{ color: "var(--text-muted)" }}>{lvl.name}</span>
                     {xp > 0 && (
                       <span className="text-[10px] font-bold" style={{ color }}>
-                        <MentoraEIcon color={color} />{xp} {pluralMenty(xp)}
+                        <MeLogo height={11} colorM={color} colorE={color} style={{ marginRight: 1 }} />{xp} {pluralMenty(xp)}
                       </span>
                     )}
                   </div>

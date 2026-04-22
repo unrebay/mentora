@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MessageRole } from "@/lib/types";
 import ChatParticles from "@/components/ChatParticles";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
+import MeLogo from "@/components/MeLogo";
 
 const DAILY_LIMIT = 30;
 
@@ -161,6 +162,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const [lastUserMsg, setLastUserMsg] = useState("");
   // Ultima image upload state
   const [pendingImage, setPendingImage] = useState<{ data: string; mimeType: string; preview: string } | null>(null);
+  const [nativeModeActive, setNativeModeActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -177,6 +179,33 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     reader.readAsDataURL(file);
     e.target.value = "";
   };
+
+  async function quickSend(text: string) {
+    if (loading || limitReached) return;
+    setMessages(prev => [...prev.filter(m => !m.isError), { role: "user", content: text }]);
+    setLastUserMsg(text);
+    setLoading(true);
+    posthog.capture("message_sent", { subject });
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, subject, history: messages.filter(m => !m.isError).slice(-10) }),
+      });
+      const data = await res.json();
+      if (res.status === 429) { setMessagesRemaining(0); setMessages(prev => prev.filter(m => !(m.role === "user" && m.content === text))); return; }
+      if (!res.ok || !data.message) {
+        setMessages(prev => [...prev, { role: "assistant", content: data.error ?? "Произошла ошибка. Попробуй ещё раз 🔄", isError: true }]);
+        return;
+      }
+      setMessages(prev => [...prev, { role: "assistant", content: data.message }]);
+      if (data.messagesRemaining !== undefined) setMessagesRemaining(data.messagesRemaining);
+    } catch {
+      setMessages(prev => [...prev, { role: "assistant", content: "Нет связи с сервером. Проверь интернет и попробуй ещё раз 🔄", isError: true }]);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const config = SUBJECT_CONFIG[subject] ?? DEFAULT_CONFIG;
   const isLimited = messagesRemaining !== null;
@@ -329,9 +358,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             {msg.role === "assistant" && (
               <div className="w-8 h-8 rounded-full border flex items-center justify-center mr-2 mt-0.5 shrink-0 select-none" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-                <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, fontSize: "13px", lineHeight: 1, color: "currentColor", letterSpacing: "-0.02em" }}>
-                  M<span style={{ color: "var(--brand)", fontStyle: "italic", marginRight: "0.03em" }}>e</span>
-                </span>
+                <MeLogo height={14} />
               </div>
             )}
             <div
@@ -382,9 +409,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         {loading && (
           <div className="flex justify-start">
             <div className="w-8 h-8 rounded-full border flex items-center justify-center mr-2 shrink-0 select-none" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-              <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, fontSize: "13px", lineHeight: 1, color: "var(--text)", letterSpacing: "-0.02em" }}>
-                M<span style={{ color: "var(--brand)", fontStyle: "italic", display: "inline-block", verticalAlign: "baseline", position: "relative", top: "0.03em", marginRight: "0.03em" }}>e</span>
-              </span>
+              <MeLogo height={14} />
             </div>
             <div className="rounded-2xl px-4 py-4" style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)" }}>
               <div className="flex gap-1.5 items-end h-4">
@@ -412,6 +437,37 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           </div>
         ) : (
           <>
+            {/* Native speaker mode chip — English only */}
+            {subject === "english" && (
+              <div className="mb-2 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (nativeModeActive) {
+                      quickSend("Switch back to Russian — вернись в обычный режим, объяснения на русском");
+                      setNativeModeActive(false);
+                    } else {
+                      quickSend("Включи режим носителя — давай общаться только на английском, как native speaker");
+                      setNativeModeActive(true);
+                    }
+                  }}
+                  disabled={loading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all disabled:opacity-50"
+                  style={nativeModeActive ? {
+                    background: "linear-gradient(135deg, #3B82F6, #1848C0)",
+                    color: "white",
+                    boxShadow: "0 2px 8px rgba(59,130,246,0.35)",
+                  } : {
+                    background: "rgba(59,130,246,0.08)",
+                    color: "#3B82F6",
+                    border: "1px solid rgba(59,130,246,0.25)",
+                  }}
+                >
+                  <span>🗣️</span>
+                  {nativeModeActive ? "Native mode · выйти" : "Режим носителя"}
+                </button>
+              </div>
+            )}
             {pendingImage && (
               <div className="flex items-center gap-2 mb-2 p-2 rounded-xl border" style={{ background: "var(--bg-secondary)", borderColor: "var(--border)" }}>
                 <img src={pendingImage.preview} alt="Фото задачи" className="w-12 h-12 rounded-lg object-cover shrink-0" />

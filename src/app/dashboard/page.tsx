@@ -7,6 +7,8 @@ import { PostHogIdentify } from "@/components/PostHogIdentify";
 import { PaymentSuccessTracker } from "@/components/PaymentSuccessTracker";
 import SubjectLibrarySection from "@/components/SubjectLibrarySection";
 import BadgesSection from "@/components/BadgesSection";
+import MeLogo from "@/components/MeLogo";
+import WhatsNewBanner from "@/components/WhatsNewBanner";
 import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
 
 const DAILY_LIMIT = 20;
@@ -26,12 +28,6 @@ function pluralMenty(n: number): string {
   if (m10 >= 2 && m10 <= 4) return "менты";
   return "мент";
 }
-
-const MentoraE = () => (
-  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, letterSpacing: "-0.02em", marginRight: "0.12em" }}>
-    <span style={{ color: "var(--text)" }}>M</span><span style={{ color: "#4561E8", fontStyle: "italic", display: "inline-block", transform: "translateY(0.07em)" }}>е</span>
-  </span>
-);
 
 function getFirstName(fullName?: string | null, email?: string | null): string {
   if (fullName) return fullName.split(" ")[0];
@@ -238,6 +234,8 @@ export default async function DashboardPage() {
             Продолжай учиться — прогресс накапливается каждый день
           </p>
 
+          <WhatsNewBanner />
+
           {/* Stats pills */}
           <div className="flex flex-wrap gap-2 items-center">
             {!isPro && (
@@ -280,7 +278,7 @@ export default async function DashboardPage() {
             {totalXP > 0 && (
               <div className="flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-semibold border"
                 style={{ background: "var(--bg-card)", borderColor: "var(--border)", color: "var(--text)" }}>
-                <MentoraE />{totalXP}
+                <MeLogo height={15} />{totalXP}
               </div>
             )}
 

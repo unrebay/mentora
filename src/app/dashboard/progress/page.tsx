@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { SUBJECTS } from "@/lib/types";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
+import MeLogo from "@/components/MeLogo";
 
 export const metadata = { title: "Мой прогресс — Mentora" };
 
@@ -114,10 +115,7 @@ export default async function ProgressPage() {
               label: "Всего ментов",
               value: totalXP.toLocaleString("ru-RU"),
               icon: (
-                <span style={{ fontFamily: "Georgia,serif", fontWeight: 700, fontSize: "1.2rem", lineHeight: 1 }}>
-                <span style={{ color: "#6B8FFF" }}>M</span>
-                <span style={{ color: "#6B8FFF", fontStyle: "italic" }}>е</span>
-              </span>
+                <MeLogo height={22} colorM="#6B8FFF" colorE="#6B8FFF" />
               ),
               accent: "#6B8FFF",
             },

@@ -1,16 +1,9 @@
 "use client";
 import { useState } from "react";
+import MeLogo from "@/components/MeLogo";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
-
-function MentoraE() {
-  return (
-    <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, letterSpacing: "-0.02em" }}>
-      <span style={{ color: "var(--text)" }}>M</span><span style={{ color: "#4561E8", fontStyle: "italic", display: "inline-block", transform: "translateY(0.07em)", marginRight: "0.08em" }}>е</span>
-    </span>
-  );
-}
 
 function pluralDays(n: number): string {
   const m10 = n % 10, m100 = n % 100;
@@ -60,7 +53,7 @@ export default function DashboardNav({ isPro, isUltima, totalXP, maxStreak, logo
           {totalXP > 0 && (
             <div className="hidden sm:flex items-center gap-1.5 text-sm">
               <div style={{ display: "flex", alignItems: "center", gap: 2, height: 28, padding: "0 10px", borderRadius: 9999, fontWeight: 600, fontSize: "0.875rem", border: "1px solid var(--border)", background: "var(--bg-secondary)", color: "var(--text)" }}>
-                <MentoraE />{totalXP}
+                <MeLogo height={15} />{totalXP}
               </div>
               {maxStreak > 0 && (
                 <div style={{ display: "flex", alignItems: "center", gap: 4, height: 28, padding: "0 10px", borderRadius: 9999, fontWeight: 600, fontSize: "0.875rem", border: "1px solid rgba(249,115,22,0.28)", background: "rgba(249,115,22,0.07)", color: "#f97316" }}>
@@ -114,7 +107,7 @@ export default function DashboardNav({ isPro, isUltima, totalXP, maxStreak, logo
             ))}
             {totalXP > 0 && (
               <div className="flex gap-4 px-3 py-2 text-xs text-[var(--text-muted)]">
-                <span className="font-semibold"><MentoraE />{totalXP} {pluralMenty(totalXP)}</span>
+                <span className="font-semibold"><MeLogo height={15} />{totalXP} {pluralMenty(totalXP)}</span>
                 {maxStreak > 0 && (
                   <span className="flex items-center gap-1 text-orange-500 font-medium">
                     <svg viewBox="0 0 14 14" fill="currentColor" className="w-3.5 h-3.5"><path d="M7 13C4.79 13 3 11.21 3 9c0-1.63.93-3.33 1.86-4.5.31-.39.93-.16.93.31v.15c0 .47.31.85.78.93.31.08.62-.08.78-.31C7.82 4.73 8.07 4.2 8.07 4.2c.23-.39.78-.31.93.08.31.78.47 1.63.23 2.33.7-.62.78-1.63.78-1.63 0-.47.54-.78.93-.54C11.7 5.12 12.4 6.36 12.4 7.77 12.4 10.55 10.44 13 7 13z"/></svg>
