@@ -101,7 +101,7 @@ function buildGraph(W: number, H: number, progress: UserProgress[]): GNode[] {
       const baseAngle = (i / topicLabels.length) * Math.PI * 2 - Math.PI / 2;
       const angleJitter = (seededRand(seed1) - 0.5) * 1.4;
       const angle = baseAngle + angleJitter;
-      const minOrbit = r * 2.4 + 8, maxOrbit = r * 2.4 + (topicLabels.length > 6 ? 28 : 20);
+      const minOrbit = r * 3.0 + 12, maxOrbit = r * 3.0 + (topicLabels.length > 6 ? 38 : 28);
       const orbitR = minOrbit + seededRand(seed1 + 1) * (maxOrbit - minOrbit);
       const baseR = 2.8 + seededRand(seed1 + 2) * 1.6;
       return { x: cx + Math.cos(angle) * orbitR, y: cy + Math.sin(angle) * orbitR,
@@ -181,7 +181,7 @@ function render(
         ctx.fillStyle = pal.core; ctx.globalAlpha = labelAlpha;
         ctx.shadowColor = "rgba(0,0,0,0.95)"; ctx.shadowBlur = 7;
         const dx = tp.x - n.x, dy = tp.y - n.y, len = Math.sqrt(dx*dx+dy*dy)||1;
-        ctx.fillText(tp.label, tp.x + dx/len*7, tp.y + dy/len*7); ctx.restore();
+        const offset = tp.baseR * 2.2 + 10; ctx.fillText(tp.label, tp.x + dx/len*offset, tp.y + dy/len*offset); ctx.restore();
       }
     });
   }
@@ -227,6 +227,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
   const [activeId,    setActiveId]    = useState<string | null>(null);
   const [hovTopicIdx, setHovTopicIdx] = useState<[string, number] | null>(null);
   const [selectedId,  setSelectedId]  = useState<string | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<{ nodeId: string; label: string; x: number; y: number } | null>(null);
   // Popup position in canvas-space pixels
   const [popupAnchor, setPopupAnchor] = useState<{ x: number; y: number; r: number } | null>(null);
 
@@ -304,6 +305,17 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
     if (Math.hypot(e.clientX - clickStart.current.x, e.clientY - clickStart.current.y) > 6) return;
     const c = canvasRef.current; if (!c) return;
     const r = c.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+    // Check topic dot first
+    const th = hitTopic(mx, my);
+    if (th) {
+      const [node, idx] = th;
+      const tp = node.topics[idx];
+      setSelectedTopic({ nodeId: node.id, label: tp.label, x: tp.x, y: tp.y });
+      setSelectedId(null); setPopupAnchor(null);
+      activate(node.id);
+      return;
+    }
+    setSelectedTopic(null);
     const s = hitSubject(mx, my);
     if (s) {
       setSelectedId(prev => {
@@ -315,7 +327,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
     } else {
       setSelectedId(null); setPopupAnchor(null);
     }
-  }, [hitSubject, activate]);
+  }, [hitSubject, hitTopic, activate]);
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() };
@@ -336,7 +348,8 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
       const r = c.getBoundingClientRect(), mx = e.changedTouches[0].clientX - r.left, my = e.changedTouches[0].clientY - r.top;
       const s = hitSubject(mx, my);
       if (s) {
-        setSelectedId(prev => {
+        setSelectedTopic(null);
+      setSelectedId(prev => {
           if (prev === s.id) { setPopupAnchor(null); return null; }
           setPopupAnchor({ x: s.x, y: s.y, r: s.r });
           return s.id;
@@ -352,6 +365,19 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
   const selTops = selectedId === "russian-history" ? RUSSIAN_HISTORY_TOPICS : null;
   // Simple topic list for non-history subjects
   const selTopicStrings = selectedId && selectedId !== "russian-history" ? (TOPICS[selectedId] ?? []) : [];
+
+  // Topic mini-popup position
+  const TOPIC_POP_W = 220;
+  let topicPopStyle: React.CSSProperties = { display: "none" };
+  if (selectedTopic && canvasRef.current) {
+    const W = canvasRef.current.clientWidth, H = canvasRef.current.clientHeight;
+    let px = selectedTopic.x - TOPIC_POP_W / 2;
+    const py = selectedTopic.y < H * 0.6 ? selectedTopic.y + 18 : selectedTopic.y - 100;
+    px = Math.max(8, Math.min(px, W - TOPIC_POP_W - 8));
+    topicPopStyle = { display: "block", left: px, top: Math.max(8, py), width: TOPIC_POP_W };
+  }
+  // Find node for selected topic
+  const topicNode = selectedTopic ? nodesRef.current.find(n => n.id === selectedTopic.nodeId) : null;
 
   // Compute popup CSS position — anchor to star, clamp within canvas
   const POPUP_W = 300, POPUP_H_EST = 180;
@@ -385,6 +411,36 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
         ))}
       </div>
       <p className="absolute top-4 left-4 z-10 text-[10px] text-white/25 pointer-events-none md:hidden">Нажми на звезду</p>
+
+      {/* Topic mini-popup */}
+      {selectedTopic && topicNode && (
+        <div className="absolute z-40 rounded-xl overflow-hidden pointer-events-auto"
+          style={{
+            ...topicPopStyle,
+            background: "rgba(10,10,28,0.95)",
+            backdropFilter: "blur(20px)",
+            border: `1px solid ${PAL[topicNode.status].core}40`,
+            boxShadow: `0 4px 24px rgba(0,0,0,0.5)`,
+          }}
+        >
+          <div className="px-3 py-2.5 flex items-start justify-between gap-2">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wide mb-0.5"
+                style={{ color: PAL[topicNode.status].core }}>Тема</p>
+              <p className="text-sm font-semibold text-white leading-tight">{selectedTopic.label}</p>
+            </div>
+            <button onClick={() => setSelectedTopic(null)}
+              className="shrink-0 text-white/30 hover:text-white/70 transition-colors text-xs leading-none mt-0.5">✕</button>
+          </div>
+          <div className="px-3 pb-3">
+            <a href={`/learn/${selectedTopic.nodeId}?topic=${encodeURIComponent(selectedTopic.label)}`}
+              className="block w-full text-center py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90"
+              style={{ background: PAL[topicNode.status].core }}>
+              Обсудить эту тему →
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Floating popup card */}
       {selNode && selSub && (
