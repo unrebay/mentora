@@ -158,7 +158,7 @@ export default async function ProfilePage() {
               {isPro && (
                 <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white"
                   style={{ background: isUltima ? "linear-gradient(135deg, #FF7A00, #7C3AED)" : "linear-gradient(135deg, #4561E8, #6B8FFF)" }}>
-                  {isUltima ? "✦ ULTRA" : "PRO"}
+                  {isUltima ? "+ ULTRA" : "PRO"}
                 </span>
               )}
             </div>
