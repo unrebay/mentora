@@ -16,6 +16,9 @@ const META: Record<string, { from: string; to: string }> = {
   "computer-science": { from: "#64748B", to: "#334155" },
   "astronomy":        { from: "#7C3AED", to: "#4C1598" },
   "discovery":        { from: "#8BB8CC", to: "#4A7080" },
+  "spanish":          { from: "#EF4444", to: "#B91C1C" },
+  "german":           { from: "#374151", to: "#1F2937" },
+  "french":           { from: "#3B82F6", to: "#1D4ED8" },
 };
 
 const FALLBACK = { from: "#6b7280", to: "#4b5563" };
@@ -115,11 +118,41 @@ function LiteratureIcon() {
 }
 
 function EnglishIcon() {
-  // Speech bubble with letter A
+  // Speech bubble with "EN"
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
       <path d="M21 11.5A8.38 8.38 0 0 1 12.5 20c-1.8 0-3.5-.5-4.9-1.4L3 20l1.4-4.6A8.5 8.5 0 1 1 21 11.5Z" />
-      <path d="M9 13l1.5-4 1.5 4M9.6 11.5h2.8" />
+      <text x="5.5" y="14" fontSize="6.5" fontWeight="700" fontFamily="system-ui,sans-serif" fill="currentColor" stroke="none" letterSpacing="0.3">EN</text>
+    </svg>
+  );
+}
+
+function SpanishIcon() {
+  // Speech bubble with "ES"
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+      <path d="M21 11.5A8.38 8.38 0 0 1 12.5 20c-1.8 0-3.5-.5-4.9-1.4L3 20l1.4-4.6A8.5 8.5 0 1 1 21 11.5Z" />
+      <text x="5.5" y="14" fontSize="6.5" fontWeight="700" fontFamily="system-ui,sans-serif" fill="currentColor" stroke="none" letterSpacing="0.3">ES</text>
+    </svg>
+  );
+}
+
+function GermanIcon() {
+  // Speech bubble with "DE"
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+      <path d="M21 11.5A8.38 8.38 0 0 1 12.5 20c-1.8 0-3.5-.5-4.9-1.4L3 20l1.4-4.6A8.5 8.5 0 1 1 21 11.5Z" />
+      <text x="5.5" y="14" fontSize="6.5" fontWeight="700" fontFamily="system-ui,sans-serif" fill="currentColor" stroke="none" letterSpacing="0.3">DE</text>
+    </svg>
+  );
+}
+
+function FrenchIcon() {
+  // Speech bubble with "FR"
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+      <path d="M21 11.5A8.38 8.38 0 0 1 12.5 20c-1.8 0-3.5-.5-4.9-1.4L3 20l1.4-4.6A8.5 8.5 0 1 1 21 11.5Z" />
+      <text x="5.5" y="14" fontSize="6.5" fontWeight="700" fontFamily="system-ui,sans-serif" fill="currentColor" stroke="none" letterSpacing="0.3">FR</text>
     </svg>
   );
 }
@@ -196,6 +229,9 @@ const ICONS: Record<string, ReactNode> = {
   "computer-science": <ComputerScienceIcon />,
   "astronomy":        <AstronomyIcon />,
   "discovery":        <DiscoveryIcon />,
+  "spanish":          <SpanishIcon />,
+  "german":           <GermanIcon />,
+  "french":           <FrenchIcon />,
 };
 
 // ── Component ───────────────────────────────────────────────────────────────

@@ -12,6 +12,8 @@ import MeLogo from "@/components/MeLogo";
 import WhatsNewBanner from "@/components/WhatsNewBanner";
 import ReferralWidget from "@/components/ReferralWidget";
 import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
+import dynamic from "next/dynamic";
+const ChatParticles = dynamic(() => import("@/components/ChatParticles"), { ssr: false });
 
 const DAILY_LIMIT = 20;
 
@@ -116,6 +118,10 @@ export default async function DashboardPage() {
       {/* Ambient sphere background — subtle, theme-aware */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden dark:block hidden">
         <SphereBlobScene spheres={SUBTLE_SPHERES} intensity={0.5} />
+      </div>
+      {/* Floating math/science symbols — always visible in both themes */}
+      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+        <ChatParticles subject="discovery" />
       </div>
       {/* Light theme: soft gradient orbs */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden dark:hidden">

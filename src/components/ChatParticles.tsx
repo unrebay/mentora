@@ -47,8 +47,10 @@ export default function ChatParticles({ subject }: { subject: string }) {
       init();
     };
 
+    const isDark = () => document.documentElement.classList.contains("dark");
+
     const init = () => {
-      const count = 28;
+      const count = 32;
       particlesRef.current = Array.from({ length: count }, (_, i) => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
@@ -56,8 +58,9 @@ export default function ChatParticles({ subject }: { subject: string }) {
         vy: (Math.random() - 0.5) * 0.15,
         symbol: symbols[i % symbols.length],
         opacity: 0,
-        baseOpacity: 0.05 + Math.random() * 0.08,
-        size: 12 + Math.floor(Math.random() * 10),
+        // Increased 2.5× vs original: dark 0.12–0.32, light 0.07–0.20
+        baseOpacity: 0.12 + Math.random() * 0.20,
+        size: 12 + Math.floor(Math.random() * 12),
         phase: Math.random() * Math.PI * 2,
       }));
     };
@@ -65,6 +68,7 @@ export default function ChatParticles({ subject }: { subject: string }) {
     const draw = () => {
       timeRef.current += 0.008;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const dark = isDark();
 
       for (const p of particlesRef.current) {
         p.x += p.vx + Math.sin(timeRef.current + p.phase) * 0.2;
@@ -77,8 +81,12 @@ export default function ChatParticles({ subject }: { subject: string }) {
 
         p.opacity += (p.baseOpacity - p.opacity) * 0.02;
 
+        // Dark theme: bright blue-violet. Light theme: slightly deeper, less opacity
+        const alpha = dark ? p.opacity : p.opacity * 0.55;
+        const color = dark ? `rgba(100, 140, 255, ${alpha})` : `rgba(69, 97, 232, ${alpha})`;
+
         ctx.font = `${p.size}px 'Georgia', serif`;
-        ctx.fillStyle = `rgba(69, 97, 232, ${p.opacity})`;
+        ctx.fillStyle = color;
         ctx.fillText(p.symbol, p.x, p.y);
       }
 

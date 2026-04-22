@@ -135,6 +135,19 @@ function MarkdownMessage({ content }: { content: string }) {
       orderedBuffer.push(orderedMatch[1]);
       continue;
     }
+    // If a non-empty continuation line appears while a list is open,
+    // append it to the last item rather than starting a new paragraph
+    // (fixes "1. 1. 1." when model wraps item text onto the next line)
+    if (line.trim() !== "") {
+      if (orderedBuffer.length > 0) {
+        orderedBuffer[orderedBuffer.length - 1] += " " + line.trim();
+        continue;
+      }
+      if (listBuffer.length > 0) {
+        listBuffer[listBuffer.length - 1] += " " + line.trim();
+        continue;
+      }
+    }
     flushLists();
     if (line.match(/^#{1,3} /)) {
       const text = line.replace(/^#{1,3} /, "");

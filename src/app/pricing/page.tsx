@@ -160,6 +160,7 @@ export default async function PricingPage() {
 
           {/* FREE */}
           <div
+            data-tilt data-tilt-strength="4"
             className="rounded-2xl p-7 flex flex-col border"
             style={{
               background: "var(--bg-card)",
@@ -195,6 +196,7 @@ export default async function PricingPage() {
 
           {/* PRO — gradient border wrapper */}
           <div
+            data-tilt data-tilt-strength="4"
             className="relative rounded-[17px] p-[1.5px] flex flex-col"
             style={{
               background: "linear-gradient(145deg, #6B8FFF, #4561E8 45%, #9F7AFF)",
@@ -261,6 +263,7 @@ export default async function PricingPage() {
 
           {/* ULTRA — ambient glow dark card */}
           <div
+            data-tilt data-tilt-strength="4"
             className="relative rounded-2xl p-7 flex flex-col overflow-hidden"
             style={{ background: "#060610" }}
           >

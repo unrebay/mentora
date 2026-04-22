@@ -4,6 +4,7 @@ import "./globals.css";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import { SplashScreen } from "@/components/SplashScreen";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import TiltProvider from "@/components/TiltProvider";
 
 const golos = Golos_Text({
   subsets: ["latin", "cyrillic"],
@@ -130,6 +131,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <PostHogProvider>
             <SplashScreen />
+            <TiltProvider />
             {children}
           </PostHogProvider>
         </ThemeProvider>

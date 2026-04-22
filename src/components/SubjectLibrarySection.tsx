@@ -142,6 +142,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
           if (isVerified) {
             return (
               <div key={subject.id}
+                data-tilt data-tilt-strength="5"
                 className="relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 group"
                 style={{
                   background: `linear-gradient(145deg, ${color}ee, ${color}99 60%, ${color}cc)`,
@@ -234,6 +235,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
           /* ── Beta / active card ───────────────── */
           return (
             <div key={subject.id}
+              data-tilt data-tilt-strength="5"
               className="relative rounded-2xl border overflow-hidden cursor-pointer transition-all duration-200 group"
               style={{
                 background: "var(--bg-card)",

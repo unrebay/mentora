@@ -173,7 +173,7 @@ export default async function ProgressPage() {
               brandBg: false,
             },
           ] as { label: string; value: number; icon: React.ReactNode; accent: string; brandBg: boolean }[]).map((s, i) => (
-            <div key={i} className="rounded-2xl p-4 border text-center"
+            <div key={i} data-tilt data-tilt-strength="5" className="rounded-2xl p-4 border text-center"
               style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
               {s.brandBg ? (
                 <div className="mx-auto mb-2 w-fit">{s.icon}</div>
