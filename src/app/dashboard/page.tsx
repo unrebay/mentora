@@ -73,7 +73,8 @@ export default async function DashboardPage() {
   const earnedBadgeIds = badgesData?.map((b: { badge_id: string }) => b.badge_id) ?? [];
 
   const totalXP = progressData?.reduce((sum, p) => sum + (p.xp_total ?? 0), 0) ?? 0;
-  const maxStreak = progressData?.reduce((max, p) => Math.max(max, p.streak_days ?? 0), 0) ?? 0;
+  const currentStreak = progressData?.reduce((max, p) => Math.max(max, p.streak_days ?? 0), 0) ?? 0;
+  const bestStreak = progressData?.reduce((max, p) => Math.max(max, p.best_streak ?? 0), 0) ?? 0;
 
   const { data: userSubjectRows } = await supabase
     .from("user_subjects")
@@ -102,8 +103,8 @@ export default async function DashboardPage() {
     redirect("/");
   }
 
-  const streakPct = Math.round((maxStreak / 7) * 100);
-  const daysLeft = 7 - maxStreak;
+  const streakPct = Math.round((currentStreak / 7) * 100);
+  const daysLeft = 7 - currentStreak;
 
   return (
     <main className="min-h-screen text-[var(--text)]" style={{ background: "var(--bg)" }}>
@@ -149,7 +150,7 @@ export default async function DashboardPage() {
         )}
 
         {/* ── Streak progress banner ───────────────────────── */}
-        {!isPro && !profile?.streak_reward_claimed && maxStreak < 7 && (
+        {!isPro && !profile?.streak_reward_claimed && currentStreak < 7 && (
           <div className="mb-6 rounded-2xl px-5 py-4 border overflow-hidden relative"
             style={{
               background: "rgba(255,122,0,0.06)",
@@ -174,9 +175,9 @@ export default async function DashboardPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
                   <p className="font-semibold text-sm" style={{ color: "rgba(180,80,0,1)" }}>
-                    {maxStreak === 0 ? "Начни стрик — получи 3 дня Pro" : `${maxStreak} из 7 дней → 3 дня Pro бесплатно`}
+                    {currentStreak === 0 ? "Начни стрик — получи 3 дня Pro" : `${currentStreak} из 7 дней → 3 дня Pro бесплатно`}
                   </p>
-                  <span className="text-sm font-bold shrink-0 ml-3" style={{ color: "#FF7A00" }}>{maxStreak}/7</span>
+                  <span className="text-sm font-bold shrink-0 ml-3" style={{ color: "#FF7A00" }}>{currentStreak}/7</span>
                 </div>
                 <p className="text-xs mb-2" style={{ color: "rgba(200,100,20,0.8)" }}>
                   Учись {daysLeft} {daysLeft === 1 ? "день" : daysLeft < 5 ? "дня" : "дней"} подряд и получи 3 дня Pro без карты.
@@ -282,14 +283,14 @@ export default async function DashboardPage() {
               </div>
             )}
 
-            {maxStreak > 0 && (
+            {currentStreak > 0 && (
               <div className="flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm border"
                 style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
                 <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none">
                   <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00" />
                 </svg>
                 <span style={{ color: "var(--text-secondary)" }}>
-                  Стрик: <span className="font-semibold" style={{ color: "#FF7A00" }}>{maxStreak} {pluralDays(maxStreak)}</span>
+                  Стрик: <span className="font-semibold" style={{ color: "#FF7A00" }}>{currentStreak} {pluralDays(currentStreak)}</span>
                 </span>
               </div>
             )}

@@ -38,7 +38,7 @@ type BadgeDef = {
   tier: "bronze" | "silver" | "gold" | "special";
   check: (s: Stats) => boolean;
 };
-type Stats = { totalXP: number; maxStreak: number; totalMessages: number; isPro: boolean; isUltima: boolean; joinedDaysAgo: number };
+type Stats = { totalXP: number; bestStreak: number; totalMessages: number; isPro: boolean; isUltima: boolean; joinedDaysAgo: number };
 
 // SVG badge icons
 const BadgeIcon = {
@@ -59,9 +59,9 @@ const BADGES: BadgeDef[] = [
   { id: "student", icon: BadgeIcon.books("#d97706"), name: "Студент", desc: "50 сообщений ментору", tier: "bronze", check: s => s.totalMessages >= 50 },
   { id: "scholar", icon: BadgeIcon.grad("#6b7280"), name: "Учёный", desc: "200 сообщений ментору", tier: "silver", check: s => s.totalMessages >= 200 },
   { id: "professor", icon: BadgeIcon.book("#f59e0b"), name: "Профессор", desc: "500 сообщений ментору", tier: "gold", check: s => s.totalMessages >= 500 },
-  { id: "streak3", icon: BadgeIcon.flame("#FF7A00"), name: "На разогреве", desc: "3 дня учёбы подряд", tier: "bronze", check: s => s.maxStreak >= 3 },
-  { id: "streak7", icon: BadgeIcon.flame("#FF7A00"), name: "Неделя знаний", desc: "7 дней учёбы подряд", tier: "silver", check: s => s.maxStreak >= 7 },
-  { id: "streak30", icon: BadgeIcon.trophy("#f59e0b"), name: "Месяц упорства", desc: "30 дней учёбы подряд", tier: "gold", check: s => s.maxStreak >= 30 },
+  { id: "streak3", icon: BadgeIcon.flame("#FF7A00"), name: "На разогреве", desc: "3 дня учёбы подряд", tier: "bronze", check: s => s.bestStreak >= 3 },
+  { id: "streak7", icon: BadgeIcon.flame("#FF7A00"), name: "Неделя знаний", desc: "7 дней учёбы подряд", tier: "silver", check: s => s.bestStreak >= 7 },
+  { id: "streak30", icon: BadgeIcon.trophy("#f59e0b"), name: "Месяц упорства", desc: "30 дней учёбы подряд", tier: "gold", check: s => s.bestStreak >= 30 },
   { id: "xp100", icon: BadgeIcon.spark("#d97706"), name: "Первые шаги", desc: "Набрал 100 ментов", tier: "bronze", check: s => s.totalXP >= 100 },
   { id: "xp500", icon: BadgeIcon.spark("#6b7280"), name: "Знаток", desc: "Набрал 500 ментов", tier: "silver", check: s => s.totalXP >= 500 },
   { id: "xp1000", icon: BadgeIcon.gem("#f59e0b"), name: "Мастер", desc: "Набрал 1000 ментов", tier: "gold", check: s => s.totalXP >= 1000 },
@@ -90,12 +90,13 @@ export default async function ProfilePage() {
 
   const [{ data: profile }, { data: progressData }, { count: msgCount }] = await Promise.all([
     supabase.from("users").select("plan, created_at, display_name, name_changes_count, full_name, age, phone").eq("id", user.id).single(),
-    supabase.from("user_progress").select("xp_total, streak_days").eq("user_id", user.id),
+    supabase.from("user_progress").select("xp_total, streak_days, best_streak").eq("user_id", user.id),
     supabase.from("chat_messages").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("role", "user"),
   ]);
 
   const totalXP = progressData?.reduce((s, p) => s + (p.xp_total ?? 0), 0) ?? 0;
-  const maxStreak = progressData?.reduce((m, p) => Math.max(m, p.streak_days ?? 0), 0) ?? 0;
+  const currentStreak = progressData?.reduce((m, p) => Math.max(m, p.streak_days ?? 0), 0) ?? 0;
+  const bestStreak = progressData?.reduce((m, p) => Math.max(m, p.best_streak ?? 0), 0) ?? 0;
   const totalMessages = msgCount ?? 0;
   const isUltima = profile?.plan === "ultima";
   const isPro = isUltima || profile?.plan === "pro";
@@ -103,7 +104,7 @@ export default async function ProfilePage() {
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 86400000)
     : 999;
 
-  const stats: Stats = { totalXP, maxStreak, totalMessages, isPro, isUltima, joinedDaysAgo };
+  const stats: Stats = { totalXP, bestStreak, totalMessages, isPro, isUltima, joinedDaysAgo };
   const lvl = getLevel(totalXP);
   const changesLeft = Math.max(0, 2 - (profile?.name_changes_count ?? 0));
   const name = profile?.full_name ?? profile?.display_name ?? user.email?.split("@")[0] ?? "Пользователь";
@@ -124,7 +125,7 @@ export default async function ProfilePage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
 
-      <DashboardNav isPro={isPro} isUltima={isUltima} totalXP={totalXP} maxStreak={maxStreak} logoutAction={handleLogout} />
+      <DashboardNav isPro={isPro} isUltima={isUltima} totalXP={totalXP} currentStreak={currentStreak} bestStreak={bestStreak} logoutAction={handleLogout} />
 
       {/* Ambient BG */}
       <div className="fixed inset-0 -z-10 pointer-events-none"
@@ -186,7 +187,7 @@ export default async function ProfilePage() {
             },
             {
               label: "Рекорд стрика",
-              value: maxStreak,
+              value: bestStreak,
               suffix: "",
               icon: <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none"><path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00"/></svg>,
               accent: "#FF7A00",

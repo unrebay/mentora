@@ -1,6 +1,6 @@
 "use client"
 import posthog from "posthog-js";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { MessageRole } from "@/lib/types";
 import ChatParticles from "@/components/ChatParticles";
@@ -163,8 +163,33 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   // Ultima image upload state
   const [pendingImage, setPendingImage] = useState<{ data: string; mimeType: string; preview: string } | null>(null);
   const [nativeModeActive, setNativeModeActive] = useState(false);
+  const [showNativeHint, setShowNativeHint] = useState(false);
+  const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Native hint: show first 3 visits to English chat, auto-dismiss after 5s
+  useEffect(() => {
+    if (subject !== "english") return;
+    try {
+      const key = "mentora_native_hint_count";
+      const count = parseInt(localStorage.getItem(key) ?? "0", 10);
+      if (count < 3) {
+        localStorage.setItem(key, String(count + 1));
+        setShowNativeHint(true);
+        hintTimerRef.current = setTimeout(() => setShowNativeHint(false), 5000);
+      }
+    } catch {}
+    return () => { if (hintTimerRef.current) clearTimeout(hintTimerRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const dismissNativeHint = useCallback(() => {
+    if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+    setShowNativeHint(false);
+    // Mark as seen 3 times so it won't show again
+    try { localStorage.setItem("mentora_native_hint_count", "3"); } catch {}
+  }, []);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -437,6 +462,37 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           </div>
         ) : (
           <>
+            {/* Native hint tooltip — shown first 3 visits */}
+            {subject === "english" && showNativeHint && (
+              <div
+                className="mb-2 mx-auto max-w-xs rounded-2xl px-4 py-3 flex items-start gap-3 animate-[fadeUp_0.3s_ease]"
+                style={{
+                  background: "linear-gradient(135deg, rgba(59,130,246,0.10) 0%, rgba(29,78,216,0.07) 100%)",
+                  border: "1px solid rgba(59,130,246,0.22)",
+                }}
+              >
+                <span className="text-lg leading-none shrink-0 mt-0.5">🗣️</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold mb-0.5" style={{ color: "#3B82F6" }}>
+                    Режим носителя
+                  </p>
+                  <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                    Нажми кнопку ниже — и Ментора перейдёт на живой английский как native speaker
+                  </p>
+                </div>
+                <button
+                  onClick={dismissNativeHint}
+                  aria-label="Скрыть подсказку"
+                  className="shrink-0 mt-0.5 rounded-lg p-1 transition-colors hover:bg-[var(--bg-secondary)]"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            )}
+
             {/* Native speaker mode chip — English only */}
             {subject === "english" && (
               <div className="mb-2 flex justify-center">
