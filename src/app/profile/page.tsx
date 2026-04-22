@@ -208,7 +208,9 @@ export default async function ProfilePage() {
             <div key={i} className="rounded-2xl p-4 border text-center"
               style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
               <div className="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2"
-                style={{ background: `${s.accent}18` }}>
+                style={i === 0
+                  ? { background: "rgba(69,97,232,0.08)", border: "1.5px solid rgba(140,165,240,0.45)" }
+                  : { background: `${s.accent}18` }}>
                 {s.icon}
               </div>
               <div className="font-bold text-xl" style={{ color: "var(--text)" }}>

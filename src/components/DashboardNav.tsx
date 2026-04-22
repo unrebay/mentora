@@ -59,13 +59,13 @@ export default function DashboardNav({ isPro, isUltima, totalXP, maxStreak, logo
         <div className="flex items-center gap-2 md:gap-2">
           <ThemeToggle />
           {totalXP > 0 && (
-            <div className="hidden sm:flex items-end gap-1.5 text-sm">
-              <span className="flex items-center gap-0.5 rounded-full px-2.5 h-7 font-semibold border" style={{ background: "var(--bg-secondary)", borderColor: "var(--border)", color: "var(--text)", alignItems: "baseline" }}>
+            <div className="hidden sm:flex items-center gap-1.5 text-sm">
+              <span className="flex items-center gap-0.5 rounded-full px-2.5 h-7 font-semibold border" style={{ background: "var(--bg-secondary)", borderColor: "var(--border)", color: "var(--text)" }}>
                 <MentoraE />{totalXP}
               </span>
               {maxStreak > 0 && (
                 <span className="flex items-center gap-1 rounded-full px-2.5 h-7 font-semibold border" style={{ background: "rgba(249,115,22,0.07)", borderColor: "rgba(249,115,22,0.28)", color: "#f97316" }}>
-                  <svg viewBox="0 0 24 24" fill="none" style={{ width: 18, height: 18, flexShrink: 0, marginTop: 2 }}><path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" style={{ width: 16, height: 16, flexShrink: 0 }}><path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00"/></svg>
                   {maxStreak} {pluralDays(maxStreak)}
                 </span>
               )}
