@@ -333,7 +333,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             <h1 className="font-semibold text-sm" style={{ color: "var(--text)" }}>{subjectTitle}</h1>
             {initialMessagesRemaining === null && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded tracking-wide" style={{ background: isUltima ? "linear-gradient(135deg,#7C3AED,#4561E8)" : "var(--brand)", color: "#fff" }}>
-                {isUltima ? "ULTIMA" : "PRO"}
+                {isUltima ? "ULTRA" : "PRO"}
               </span>
             )}
           </div>

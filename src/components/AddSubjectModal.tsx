@@ -2,6 +2,7 @@
 import { useState, useTransition } from "react";
 import { SUBJECTS } from "@/lib/types";
 import { addUserSubject } from "@/app/dashboard/actions";
+import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
 
 interface Props {
   open: boolean;
@@ -16,7 +17,6 @@ export default function AddSubjectModal({ open, onClose, existingSubjectIds }: P
   if (!open) return null;
 
   const available = SUBJECTS.filter((s) => s.available && !existingSubjectIds.includes(s.id));
-  const unavailable = SUBJECTS.filter((s) => !s.available);
 
   function handleAdd(subjectId: string) {
     setAdding(subjectId);
@@ -34,86 +34,88 @@ export default function AddSubjectModal({ open, onClose, existingSubjectIds }: P
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className="w-full max-w-lg rounded-2xl border shadow-xl overflow-hidden"
+        className="w-full max-w-2xl rounded-2xl border shadow-xl overflow-hidden"
         style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b"
           style={{ borderColor: "var(--border)" }}>
           <div>
-            <h2 className="text-lg font-bold text-[var(--text)]">Добавить предмет</h2>
-            <p className="text-sm text-[var(--text-secondary)] mt-0.5">Выбери из каталога Mentora</p>
+            <h2 className="text-lg font-bold" style={{ color: "var(--text)" }}>Добавить предмет</h2>
+            <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Выбери из каталога Mentora</p>
           </div>
           <button
             onClick={onClose}
-            className="text-[var(--text-muted)] hover:text-[var(--text)] transition-colors text-2xl leading-none"
+            className="text-2xl leading-none transition-colors"
+            style={{ color: "var(--text-muted)" }}
           >
             ×
           </button>
         </div>
 
-        {/* Subject list */}
-        <div className="p-4 max-h-[60vh] overflow-y-auto space-y-2">
-          {available.length === 0 && (
-            <p className="text-center text-sm text-[var(--text-muted)] py-6">
+        {/* Subject tile grid */}
+        <div className="p-4 max-h-[65vh] overflow-y-auto">
+          {available.length === 0 ? (
+            <p className="text-center text-sm py-8" style={{ color: "var(--text-muted)" }}>
               Все доступные предметы уже добавлены 🎉
             </p>
-          )}
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {available.map((s) => {
+                const color = subjectColor(s.id);
+                const isAdding = pending && adding === s.id;
+                return (
+                  <div
+                    key={s.id}
+                    className="relative rounded-2xl border overflow-hidden flex flex-col"
+                    style={{ background: "var(--bg-secondary)", borderColor: "var(--border)" }}
+                  >
+                    {/* Color accent bar */}
+                    <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl"
+                      style={{ background: `linear-gradient(90deg, ${color}, ${color}44)` }} />
 
-          {available.map((s) => (
-            <div
-              key={s.id}
-              className="flex items-center justify-between p-3.5 rounded-xl border transition-colors"
-              style={{ background: "var(--bg-secondary)", borderColor: "var(--border)" }}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{s.emoji}</span>
-                <div>
-                  <div className="font-medium text-sm text-[var(--text)]">{s.title}</div>
-                  <div className="text-xs text-[var(--text-muted)]">{s.description}</div>
-                </div>
-                {s.verified && (
-                  <span className="text-[10px] font-bold bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 px-1.5 py-0.5 rounded-md">
-                    VERIFIED
-                  </span>
-                )}
-                {s.beta && !s.verified && (
-                  <span className="text-[10px] font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded-md">
-                    BETA
-                  </span>
-                )}
-              </div>
-              <button
-                onClick={() => handleAdd(s.id)}
-                disabled={pending && adding === s.id}
-                className="px-4 py-1.5 bg-brand-600 text-white text-xs font-medium rounded-lg hover:bg-brand-700 transition-colors disabled:opacity-60 shrink-0"
-              >
-                {pending && adding === s.id ? "..." : "Добавить"}
-              </button>
-            </div>
-          ))}
+                    <div className="p-4 flex flex-col flex-1 pt-5">
+                      {/* Icon + badge row */}
+                      <div className="flex items-start justify-between mb-3">
+                        <SubjectIcon id={s.id} size={40} />
+                        {s.verified && (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md"
+                            style={{ background: "rgba(69,97,232,0.1)", color: "#4561E8" }}>
+                            ✶ verified
+                          </span>
+                        )}
+                        {s.beta && !s.verified && (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md"
+                            style={{ background: `${color}18`, color }}>
+                            ✶ beta
+                          </span>
+                        )}
+                      </div>
 
-          {unavailable.length > 0 && (
-            <>
-              <div className="pt-2 pb-1">
-                <span className="text-[10px] font-semibold text-[var(--text-muted)] tracking-widest uppercase">
-                  Скоро
-                </span>
-              </div>
-              {unavailable.map((s) => (
-                <div
-                  key={s.id}
-                  className="flex items-center gap-3 p-3.5 rounded-xl border opacity-50"
-                  style={{ background: "var(--bg-secondary)", borderColor: "var(--border)" }}
-                >
-                  <span className="text-2xl">{s.emoji}</span>
-                  <div>
-                    <div className="font-medium text-sm text-[var(--text)]">{s.title}</div>
-                    <div className="text-xs text-[var(--text-muted)]">{s.description}</div>
+                      <div className="font-semibold text-sm leading-snug mb-0.5" style={{ color: "var(--text)" }}>
+                        {s.title}
+                      </div>
+                      <div className="text-xs flex-1 mb-3" style={{ color: "var(--text-muted)" }}>
+                        {s.description}
+                      </div>
+
+                      <button
+                        onClick={() => handleAdd(s.id)}
+                        disabled={isAdding}
+                        className="w-full py-1.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-60"
+                        style={{
+                          background: isAdding ? `${color}22` : `${color}15`,
+                          color,
+                          border: `1px solid ${color}30`,
+                        }}
+                      >
+                        {isAdding ? "Добавляю..." : "Добавить"}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>

@@ -67,7 +67,7 @@ const BADGES: BadgeDef[] = [
   { id: "xp1000", icon: BadgeIcon.gem("#f59e0b"), name: "Мастер", desc: "Набрал 1000 ментов", tier: "gold", check: s => s.totalXP >= 1000 },
   { id: "early_bird", icon: BadgeIcon.bird("#8b5cf6"), name: "Первопроходец", desc: "Присоединился в первые 90 дней", tier: "special", check: s => s.joinedDaysAgo <= 90 },
   { id: "pro", icon: BadgeIcon.crown("#8b5cf6"), name: "Pro подписчик", desc: "Поддержал развитие Mentora", tier: "special", check: s => s.isPro },
-  { id: "ultima", icon: BadgeIcon.gem("#8b5cf6"), name: "Ultima", desc: "Максимальный план Mentora", tier: "special", check: s => s.isUltima },
+  { id: "ultima", icon: BadgeIcon.gem("#8b5cf6"), name: "Ultra", desc: "Максимальный план Mentora", tier: "special", check: s => s.isUltima },
 ];
 
 const TIER_CONFIG: Record<string, { color: string; label: string }> = {
