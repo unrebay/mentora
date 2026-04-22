@@ -1,3 +1,4 @@
+import React from "react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -45,7 +46,7 @@ export default async function ProgressPage() {
 
   const { data: progressRows } = await supabase
     .from("user_progress")
-    .select("subject, xp_total, streak_days, last_active_at")
+    .select("subject, xp_total, streak_days, best_streak, last_active_at")
     .eq("user_id", user.id)
     .order("last_active_at", { ascending: false, nullsFirst: false });
 
@@ -69,8 +70,23 @@ export default async function ProgressPage() {
   }
 
   const totalXP = progressRows?.reduce((s, p) => s + (p.xp_total ?? 0), 0) ?? 0;
-  const maxStreak = progressRows?.reduce((m, p) => Math.max(m, p.streak_days ?? 0), 0) ?? 0;
+  const bestStreak = progressRows?.reduce((m, p) => Math.max(m, p.best_streak ?? p.streak_days ?? 0), 0) ?? 0;
   const totalMessages = msgRows?.length ?? 0;
+
+  // Badge count — mirror profile logic
+  const BADGE_CHECKS = [
+    (m: number, _b: number, _x: number) => m >= 1,
+    (m: number, _b: number, _x: number) => m >= 50,
+    (m: number, _b: number, _x: number) => m >= 200,
+    (m: number, _b: number, _x: number) => m >= 500,
+    (_m: number, b: number, _x: number) => b >= 3,
+    (_m: number, b: number, _x: number) => b >= 7,
+    (_m: number, b: number, _x: number) => b >= 30,
+    (_m: number, _b: number, x: number) => x >= 100,
+    (_m: number, _b: number, x: number) => x >= 500,
+    (_m: number, _b: number, x: number) => x >= 1000,
+  ];
+  const earnedBadges = BADGE_CHECKS.filter(fn => fn(totalMessages, bestStreak, totalXP)).length;
   const activeSubjects = progressRows?.filter(p => (p.xp_total ?? 0) > 0) ?? [];
 
   const subjectStats = activeSubjects.map(p => {
@@ -109,49 +125,49 @@ export default async function ProgressPage() {
       <div className="max-w-2xl mx-auto px-5 py-8 space-y-8">
 
         {/* ── Summary stats ─────────────────────────────────── */}
-        <div className="grid grid-cols-3 gap-3">
-          {[
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {([
             {
-              label: "Всего ментов",
-              value: totalXP.toLocaleString("ru-RU"),
-              icon: (
-                <MeLogo height={20} colorM="#6B8FFF" colorE="#6B8FFF" />
-              ),
-              accent: "#6B8FFF",
+              label: "Мент",
+              value: totalXP,
+              icon: <MeLogo height={28} />,
+              accent: "var(--brand)",
+              brandBg: true,
             },
             {
-              label: "Макс. стрик",
-              value: `${maxStreak}д`,
-              icon: (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 3C12 3 7.5 8 7.5 12.5C7.5 15.538 9.462 18 12 18C14.538 18 16.5 15.538 16.5 12.5C16.5 11 16 10 15.5 9C15.5 9 15.5 11.5 13.5 12C14.5 9.5 13 7 12 3Z" fill="#FF7A00"/>
-                  <path d="M12 15C10.895 15 10 14.105 10 13C10 12.5 10.2 12.1 10.5 11.8C10.5 12.5 11 13 12 13C13 13 13.5 12.5 13.5 11.8C13.8 12.1 14 12.5 14 13C14 14.105 13.105 15 12 15Z" fill="#FFCC00"/>
-                </svg>
-              ),
+              label: "Рекорд стрика",
+              value: bestStreak,
+              icon: <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none"><path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00"/></svg>,
               accent: "#FF7A00",
+              brandBg: false,
             },
             {
-              label: "Вопросов",
-              value: totalMessages.toLocaleString("ru-RU"),
-              icon: (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z" fill="#10B981" fillOpacity="0.9"/>
-                  <path d="M7 9H17M7 13H14" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-                </svg>
-              ),
+              label: "Сообщений",
+              value: totalMessages,
+              icon: <svg className="w-7 h-7" viewBox="0 0 24 24" fill="#10B981"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg>,
               accent: "#10B981",
+              brandBg: false,
             },
-          ].map(stat => (
-            <div key={stat.label}
-              className="rounded-2xl p-4 border flex flex-col items-center text-center"
-              style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
-            >
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-2"
-                style={{ background: `${stat.accent}18` }}>
-                {stat.icon}
+            {
+              label: "Достижений",
+              value: earnedBadges,
+              icon: <svg className="w-7 h-7" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>,
+              accent: "#f59e0b",
+              brandBg: false,
+            },
+          ] as { label: string; value: number; icon: React.ReactNode; accent: string; brandBg: boolean }[]).map((s, i) => (
+            <div key={i} className="rounded-2xl p-4 border text-center"
+              style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2"
+                style={s.brandBg
+                  ? { background: "rgba(69,97,232,0.08)", border: "1.5px solid rgba(140,165,240,0.45)" }
+                  : { background: `${s.accent}18` }}>
+                {s.icon}
               </div>
-              <div className="text-2xl font-bold" style={{ color: "var(--text)" }}>{stat.value}</div>
-              <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{stat.label}</div>
+              <div className="font-bold text-xl" style={{ color: "var(--text)" }}>
+                {s.value.toLocaleString("ru-RU")}
+              </div>
+              <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{s.label}</div>
             </div>
           ))}
         </div>
