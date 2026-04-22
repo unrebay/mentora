@@ -5,12 +5,12 @@ import { SUBJECTS } from "@/lib/types";
 import { RUSSIAN_HISTORY_TOPICS } from "@/lib/topics";
 
 const PAL = {
-  active: { core: "#ffa040", glow: "rgba(255,160,64,0.80)",  ring: "rgba(255,160,64,0.30)", label: "Изучается" },
-  full:   { core: "#6b8fff", glow: "rgba(107,143,255,0.70)", ring: "rgba(107,143,255,0.25)", label: "Полный" },
-  beta:   { core: "#c8d4ff", glow: "rgba(200,212,255,0.55)", ring: "rgba(200,212,255,0.20)", label: "Бета" },
-  locked: { core: "#2a2a44", glow: "rgba(60,60,100,0.20)",   ring: "rgba(60,60,100,0.08)",  label: "Скоро" },
+  active:      { core: "#ffa040", glow: "rgba(255,160,64,0.80)",  ring: "rgba(255,160,64,0.30)",   label: "Изучается" },
+  active_full: { core: "#ffa040", glow: "rgba(255,160,64,0.80)",  ring: "rgba(107,143,255,0.45)",  label: "Изучается" },
+  full:        { core: "#6b8fff", glow: "rgba(107,143,255,0.70)", ring: "rgba(107,143,255,0.25)",  label: "Полный" },
+  beta:        { core: "#c8d4ff", glow: "rgba(200,212,255,0.55)", ring: "rgba(200,212,255,0.20)",  label: "Бета" },
 };
-type Status = "active" | "full" | "beta" | "locked";
+type Status = "active" | "active_full" | "full" | "beta";
 
 const LAYOUT: Record<string, { cx: number; cy: number }> = {
   "russian-history":  { cx: 0.50, cy: 0.42 }, "world-history":    { cx: 0.24, cy: 0.28 },
@@ -41,14 +41,17 @@ const TOPICS: Record<string, string[]> = {
 interface UserProgress { subject: string; xp_total: number }
 interface Props { className?: string; userProgress?: UserProgress[] }
 
+const FULL_SUBJECTS = new Set(["russian-history"]);
+
 function getStatus(id: string, progress: UserProgress[]): Status {
-  if (progress.find(x => x.subject === id && x.xp_total > 0)) return "active";
-  if (id === "russian-history") return "full";
-  return ["world-history","mathematics","physics","chemistry","biology",
-    "russian-language","literature","english","social-studies",
-    "geography","computer-science","astronomy"].includes(id) ? "beta" : "locked";
+  const hasProgress = !!progress.find(x => x.subject === id && x.xp_total > 0);
+  const isFull = FULL_SUBJECTS.has(id);
+  if (hasProgress && isFull) return "active_full";
+  if (hasProgress) return "active";
+  if (isFull) return "full";
+  return "beta"; // no more locked/Скоро
 }
-function getRadius(s: Status) { return s==="full"?28:s==="active"?26:s==="beta"?20:14; }
+function getRadius(s: Status) { return s==="full"?28:s==="active"||s==="active_full"?26:s==="beta"?20:14; }
 
 function seededRand(seed: number): number {
   const x = Math.sin(seed + 1) * 10000;
@@ -104,7 +107,7 @@ function render(
 
   // Connection lines
   for (const n of nodes) {
-    if (n.status === "locked") continue;
+    // all statuses are visible
     const pal = PAL[n.status], isActive = n.id === activeId;
     for (const tp of n.topics) {
       ctx.save();
@@ -117,7 +120,6 @@ function render(
 
   // Topic dots — always visible
   for (const n of nodes) {
-    if (n.status === "locked") continue;
     const pal = PAL[n.status], isActive = n.id === activeId;
     n.topics.forEach((tp, idx) => {
       const sh = 0.6 + 0.4 * Math.sin(t * 0.0005 + tp.phase);
@@ -150,19 +152,28 @@ function render(
     const isActive = n.id === activeId, sh = 0.72 + 0.28 * Math.sin(t * 0.0007 + n.phase);
     const pal = PAL[n.status], glowR = n.r*(isActive?3.6:2.2)*sh, coreR = n.r*(isActive?1.25:1)*sh;
     ctx.save();
-    if (n.status !== "locked") {
-      const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, glowR);
-      g.addColorStop(0, pal.glow); g.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(n.x, n.y, glowR, 0, Math.PI*2); ctx.fill();
+    // Main glow (always orange for active/active_full)
+    const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, glowR);
+    g.addColorStop(0, pal.glow); g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(n.x, n.y, glowR, 0, Math.PI*2); ctx.fill();
+    // For active_full: add extra blue outer glow layer
+    if (n.status === "active_full") {
+      const g2 = ctx.createRadialGradient(n.x, n.y, coreR, n.x, n.y, glowR * 1.6);
+      g2.addColorStop(0, "rgba(107,143,255,0.35)"); g2.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = g2; ctx.beginPath(); ctx.arc(n.x, n.y, glowR * 1.6, 0, Math.PI*2); ctx.fill();
     }
     ctx.shadowBlur = isActive ? 24*sh : 14*sh; ctx.shadowColor = pal.glow;
     ctx.fillStyle = pal.core; ctx.beginPath(); ctx.arc(n.x, n.y, coreR, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = pal.ring; ctx.lineWidth = isActive ? 1.5 : 0.8; ctx.shadowBlur = 10;
-    ctx.beginPath(); ctx.arc(n.x, n.y, coreR+4*sh, 0, Math.PI*2); ctx.stroke(); ctx.restore();
+    // Ring — blue for active_full, otherwise pal.ring
+    ctx.strokeStyle = pal.ring; ctx.lineWidth = isActive ? 1.5 : 0.8;
+    ctx.shadowBlur = isActive ? 12 : 6;
+    ctx.shadowColor = n.status === "active_full" ? "rgba(107,143,255,0.8)" : pal.glow;
+    ctx.beginPath(); ctx.arc(n.x, n.y, coreR+4*sh, 0, Math.PI*2); ctx.stroke();
+    ctx.restore();
     ctx.save(); ctx.font = isActive ? "bold 12px system-ui" : "10px system-ui";
     ctx.textAlign = "center"; ctx.textBaseline = "top";
     ctx.fillStyle = isActive ? "#fff" : pal.core;
-    ctx.globalAlpha = isActive ? 1 : (n.status==="locked"?0.3:0.65+0.3*sh);
+    ctx.globalAlpha = isActive ? 1 : (0.65+0.3*sh);
     ctx.shadowColor = "rgba(0,0,0,0.95)"; ctx.shadowBlur = 10;
     ctx.fillText(n.label, n.x, n.y+coreR+7); ctx.restore();
   }
@@ -222,7 +233,6 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
 
   const hitTopic = useCallback((mx: number, my: number): [GNode, number] | null => {
     for (const n of nodesRef.current) {
-      if (n.status === "locked") continue;
       for (let i = 0; i < n.topics.length; i++) {
         const tp = n.topics[i];
         if (Math.hypot(tp.x - mx, tp.y - my) < tp.baseR * 4 + 6) return [n, i];
@@ -257,7 +267,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
     const c = canvasRef.current; if (!c) return;
     const r = c.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
     const s = hitSubject(mx, my);
-    if (s && s.status !== "locked") {
+    if (s) {
       setSelectedId(id => id === s.id ? null : s.id);
       activate(s.id);
     }
@@ -281,7 +291,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
       const c = canvasRef.current; if (!c) return;
       const r = c.getBoundingClientRect(), mx = e.changedTouches[0].clientX - r.left, my = e.changedTouches[0].clientY - r.top;
       const s = hitSubject(mx, my);
-      if (s && s.status !== "locked") { setSelectedId(id => id === s.id ? null : s.id); activate(s.id); }
+      if (s) { setSelectedId(id => id === s.id ? null : s.id); activate(s.id); }
     }
     activate(null);
   }, [activate, hitSubject]);
@@ -293,10 +303,14 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
   return (
     <div className={`relative w-full h-full ${className}`} style={{ background: "#06060f" }}>
       <div className="absolute top-4 right-4 flex flex-col gap-1.5 z-10 pointer-events-none">
-        {(Object.entries(PAL) as [Status, typeof PAL[Status]][]).map(([k, v]) => (
-          <div key={k} className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full" style={{ background: v.core, boxShadow: `0 0 5px ${v.core}` }} />
-            <span className="text-[10px] text-white/40 font-medium">{v.label}</span>
+        {([
+          { key: "active",      core: "#ffa040", label: "Изучается" },
+          { key: "full",        core: "#6b8fff", label: "Полный" },
+          { key: "beta",        core: "#c8d4ff", label: "Бета" },
+        ] as { key: string; core: string; label: string }[]).map(item => (
+          <div key={item.key} className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full" style={{ background: item.core, boxShadow: `0 0 5px ${item.core}` }} />
+            <span className="text-[10px] text-white/40 font-medium">{item.label}</span>
           </div>
         ))}
       </div>
