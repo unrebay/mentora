@@ -59,7 +59,7 @@ export default function DashboardNav({ isPro, isUltima, totalXP, maxStreak, logo
         <div className="flex items-center gap-2 md:gap-2">
           <ThemeToggle />
           {totalXP > 0 && (
-            <div className="hidden sm:flex items-center gap-1.5 text-sm">
+            <div className="hidden sm:flex items-end gap-1.5 text-sm">
               <span className="flex items-center gap-0.5 rounded-full px-2.5 h-7 font-semibold border" style={{ background: "var(--bg-secondary)", borderColor: "var(--border)", color: "var(--text)", alignItems: "baseline" }}>
                 <MentoraE />{totalXP}
               </span>

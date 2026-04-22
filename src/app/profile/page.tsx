@@ -141,15 +141,10 @@ export default async function ProfilePage() {
           {/* Avatar */}
           <div className="relative shrink-0">
             <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold text-white"
-              style={{ background: `linear-gradient(135deg, ${lvl.grad[0]}, ${lvl.grad[1]})`, boxShadow: `0 4px 20px ${lvl.color}40` }}>
+              style={{ background: isUltima ? "linear-gradient(135deg, #FF7A00, #7C3AED)" : isPro ? "linear-gradient(135deg, #4561E8, #6B8FFF)" : `linear-gradient(135deg, ${lvl.grad[0]}, ${lvl.grad[1]})`, boxShadow: isUltima ? "0 4px 20px rgba(255,122,0,0.35)" : isPro ? "0 4px 20px rgba(69,97,232,0.35)" : `0 4px 20px ${lvl.color}40` }}>
               {initial}
             </div>
-            {isPro && (
-              <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-xl flex items-center justify-center text-[10px] font-bold text-white shadow-lg"
-                style={{ background: isUltima ? "linear-gradient(135deg, #FF7A00, #7C3AED)" : "linear-gradient(135deg, #4561E8, #6B8FFF)" }}>
-                {isUltima ? "✦" : "P"}
-              </div>
-            )}
+
           </div>
 
           {/* Info */}
@@ -185,7 +180,7 @@ export default async function ProfilePage() {
               label: "Менты",
               value: totalXP,
               suffix: ` ${pluralMenty(totalXP)}`,
-              icon: <span style={{ fontFamily: "Georgia,serif", color: "var(--brand)", fontWeight: 700, fontSize: "1.3rem", lineHeight: 1 }}><span>M</span><span style={{ fontStyle: "italic" }}>е</span></span>,
+              icon: <span style={{ fontFamily: "Georgia,serif", fontWeight: 700, fontSize: "1.3rem", lineHeight: 1 }}><span style={{ color: "var(--text)" }}>M</span><span style={{ color: "var(--brand)", fontStyle: "italic" }}>е</span></span>,
               accent: "var(--brand)",
             },
             {
