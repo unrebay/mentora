@@ -168,7 +168,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                   onClick={(e) => askRemove(e, subject)}
                   disabled={isRemoving}
                   aria-label="Удалить предмет"
-                  className="absolute top-2.5 left-2.5 z-20 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 disabled:cursor-not-allowed"
+                  className="absolute -top-2.5 -left-2.5 z-20 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 disabled:cursor-not-allowed"
                   style={{ background: "rgba(0,0,0,0.35)", color: "rgba(255,255,255,0.9)" }}
                 >
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -256,7 +256,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                 onClick={(e) => askRemove(e, subject)}
                 disabled={isRemoving}
                 aria-label="Удалить предмет"
-                className="absolute top-2.5 left-2.5 z-20 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 disabled:cursor-not-allowed"
+                className="absolute -top-2.5 -left-2.5 z-20 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 disabled:cursor-not-allowed"
                 style={{ background: "rgba(0,0,0,0.10)", color: "var(--text-secondary)" }}
               >
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">

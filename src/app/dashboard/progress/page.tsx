@@ -70,6 +70,7 @@ export default async function ProgressPage() {
   }
 
   const totalXP = progressRows?.reduce((s, p) => s + (p.xp_total ?? 0), 0) ?? 0;
+  const currentStreak = progressRows?.reduce((m, p) => Math.max(m, p.streak_days ?? 0), 0) ?? 0;
   const bestStreak = progressRows?.reduce((m, p) => Math.max(m, p.best_streak ?? p.streak_days ?? 0), 0) ?? 0;
   const totalMessages = msgRows?.length ?? 0;
 
@@ -135,8 +136,8 @@ export default async function ProgressPage() {
               brandBg: true,
             },
             {
-              label: "Рекорд стрика",
-              value: bestStreak,
+              label: "Стрик сейчас",
+              value: currentStreak,
               icon: <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none"><path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00"/></svg>,
               accent: "#FF7A00",
               brandBg: false,
