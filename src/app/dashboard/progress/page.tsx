@@ -8,6 +8,13 @@ import MeLogo from "@/components/MeLogo";
 
 export const metadata = { title: "Мой прогресс — Mentora" };
 
+function pluralMenty(n: number): string {
+  const m10 = n % 10, m100 = n % 100;
+  if (m100 >= 11 && m100 <= 14) return "мент";
+  if (m10 === 1) return "мента";
+  if (m10 >= 2 && m10 <= 4) return "менты";
+  return "мент";
+}
 function pluralDays(n: number) {
   const m10 = n % 10, m100 = n % 100;
   if (m100 >= 11 && m100 <= 14) return "дней";
@@ -131,7 +138,16 @@ export default async function ProgressPage() {
             {
               label: "Мент",
               value: totalXP,
-              icon: <MeLogo height={28} />,
+              icon: (
+                <div style={{
+                  width: 44, height: 44, borderRadius: 12,
+                  background: "linear-gradient(135deg, #4561E8 0%, #7B9FFF 100%)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: "0 2px 12px rgba(69,97,232,0.35)",
+                }}>
+                  <MeLogo height={22} colorM="rgba(255,255,255,0.97)" colorE="rgba(255,255,255,0.75)" />
+                </div>
+              ),
               accent: "var(--brand)",
               brandBg: true,
             },
@@ -159,12 +175,14 @@ export default async function ProgressPage() {
           ] as { label: string; value: number; icon: React.ReactNode; accent: string; brandBg: boolean }[]).map((s, i) => (
             <div key={i} className="rounded-2xl p-4 border text-center"
               style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2"
-                style={s.brandBg
-                  ? { background: "rgba(69,97,232,0.08)", border: "1.5px solid rgba(140,165,240,0.45)" }
-                  : { background: `${s.accent}18` }}>
-                {s.icon}
-              </div>
+              {s.brandBg ? (
+                <div className="mx-auto mb-2 w-fit">{s.icon}</div>
+              ) : (
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2"
+                  style={{ background: `${s.accent}18` }}>
+                  {s.icon}
+                </div>
+              )}
               <div className="font-bold text-xl" style={{ color: "var(--text)" }}>
                 {s.value.toLocaleString("ru-RU")}
               </div>
@@ -189,7 +207,7 @@ export default async function ProgressPage() {
                 </p>
                 <p className="font-bold text-base" style={{ color: "var(--text)" }}>{topSubject.title}</p>
                 <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                  {topSubject.xp} ментов · {topSubject.lvl.name}
+                  {topSubject.xp} {pluralMenty(topSubject.xp)} · {topSubject.lvl.name}
                 </p>
                 {/* XP bar */}
                 <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--bg-secondary)" }}>
@@ -235,7 +253,7 @@ export default async function ProgressPage() {
                           style={{ width: `${s.lvl.progress}%`, background: `linear-gradient(90deg, ${subjectColor(s.id)}aa, ${subjectColor(s.id)})` }} />
                       </div>
                       <div className="flex items-center gap-3 text-xs" style={{ color: "var(--text-muted)" }}>
-                        <span style={{ color: subjectColor(s.id) }} className="font-semibold">{s.xp} ментов</span>
+                        <span style={{ color: subjectColor(s.id) }} className="font-semibold">{s.xp} {pluralMenty(s.xp)}</span>
                         <span>·</span>
                         <span>{s.messages} {pluralMsg(s.messages)}</span>
                         {s.streak > 0 && (

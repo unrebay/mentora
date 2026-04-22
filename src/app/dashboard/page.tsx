@@ -333,7 +333,7 @@ export default async function DashboardPage() {
                 </p>
                 <p className="font-bold text-base truncate" style={{ color: "var(--text)" }}>{lastActiveSubject.title}</p>
                 <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                  {lastActiveProgress?.xp_total ?? 0} ментов
+                  {lastActiveProgress?.xp_total ?? 0} {pluralMenty(lastActiveProgress?.xp_total ?? 0)}
                   {(lastActiveProgress?.streak_days ?? 0) > 0 && ` · 🔥 ${lastActiveProgress!.streak_days} дн. подряд`}
                 </p>
               </div>

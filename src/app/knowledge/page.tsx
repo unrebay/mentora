@@ -11,10 +11,7 @@ export const metadata: Metadata = {
 };
 
 const KnowledgeGraph = dynamic(() => import("@/components/KnowledgeGraph"), { ssr: false });
-const SplineScene = dynamic(() => import("@/components/SplineScene"), { ssr: false });
-
-// Spline "Particles 🌑" — https://app.spline.design/community/file/3ff7b617-2fe9-46c7-8e06-b6d7c382f4db
-const SPLINE_SCENE = "https://my.spline.design/3ff7b617-2fe9-46c7-8e06-b6d7c382f4db/";
+const ParticleField = dynamic(() => import("@/components/ParticleField"), { ssr: false });
 
 export default async function KnowledgePage() {
   const supabase = await createClient();
@@ -70,12 +67,10 @@ export default async function KnowledgePage() {
 
       {/* Galaxy — fills all remaining height */}
       <div className="flex-1 relative min-h-0" style={{ background: "#06060f" }}>
-        {/* Spline 3D background layer — pointer-events none so canvas stays interactive */}
-        <div className="absolute inset-0 z-0" style={{ pointerEvents: "none", opacity: 0.7 }}>
-          <SplineScene scene={SPLINE_SCENE} />
-        </div>
+        {/* Native particle system — responds to cursor, no iframe needed */}
+        <ParticleField className="absolute inset-0 w-full h-full z-0" count={120} />
         {/* Interactive galaxy canvas on top */}
-        <KnowledgeGraph className="absolute inset-0 w-full h-full" userProgress={userProgress} />
+        <KnowledgeGraph className="absolute inset-0 w-full h-full z-10" userProgress={userProgress} />
       </div>
     </div>
   );
