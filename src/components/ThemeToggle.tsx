@@ -18,9 +18,15 @@ const MoonIcon = () => (
   </svg>
 );
 
-export default function ThemeToggle({ className = "" }: { className?: string }) {
+interface ThemeToggleProps {
+  className?: string;
+  /** Force the toggle to always render with dark-background styling */
+  forceDark?: boolean;
+}
+
+export default function ThemeToggle({ className = "", forceDark = false }: ThemeToggleProps) {
   const { theme, toggle } = useTheme();
-  const isDark = theme === "dark";
+  const isDark = forceDark || theme === "dark";
 
   return (
     <button
@@ -49,10 +55,10 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
         <MoonIcon />
       </span>
 
-      {/* Sliding thumb */}
+      {/* Sliding thumb — position based on actual theme, not visual style */}
       <span
         className={`absolute left-0 top-0.5 w-6 h-6 rounded-full shadow-sm transition-all duration-300 ${
-          isDark ? "translate-x-7 bg-[#4561E8]" : "translate-x-0.5 bg-white shadow-md"
+          theme === "dark" ? "translate-x-7 bg-[#4561E8]" : "translate-x-0.5 bg-white shadow-md"
         }`}
       />
     </button>
