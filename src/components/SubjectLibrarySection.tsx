@@ -1,10 +1,11 @@
 "use client";
 import MeLogo from "@/components/MeLogo";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import AddSubjectModal from "@/components/AddSubjectModal";
 import SubjectSuggestionModal from "@/components/SubjectSuggestionModal";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
+import { removeUserSubject } from "@/app/dashboard/actions";
 
 const XP_LEVELS = [
   { name: "Новичок",       minXP: 0,    maxXP: 100  },
@@ -60,8 +61,27 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
   const [selectedId, setSelectedId] = useState<string | null>(
     userSubjects.find(s => s.available && (s.beta || s.verified))?.id ?? null
   );
+  const [confirmSubject, setConfirmSubject] = useState<SubjectItem | null>(null);
+  const [removing, setRemoving] = useState<string | null>(null);
+  const [, startRemoveTransition] = useTransition();
 
   const progressMap = new Map(progressEntries.map((p) => [p.subject, p]));
+
+  function askRemove(e: React.MouseEvent, subject: SubjectItem) {
+    e.stopPropagation();
+    setConfirmSubject(subject);
+  }
+
+  function confirmRemove() {
+    if (!confirmSubject) return;
+    const id = confirmSubject.id;
+    setConfirmSubject(null);
+    setRemoving(id);
+    startRemoveTransition(async () => {
+      await removeUserSubject(id);
+      setRemoving(null);
+    });
+  }
 
   return (
     <>
@@ -91,6 +111,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
           const isBeta = subject.beta && !isVerified;
           const isActive = subject.available && (isBeta || isVerified);
           const isSelected = subject.id === selectedId;
+          const isRemoving = removing === subject.id;
           const lvl = getLevel(progress?.xp_total ?? 0);
           const xp = progress?.xp_total ?? 0;
           const color = subjectColor(subject.id);
@@ -121,9 +142,10 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
           if (isVerified) {
             return (
               <div key={subject.id}
-                className="relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-200"
+                className="relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 group"
                 style={{
                   background: `linear-gradient(145deg, ${color}ee, ${color}99 60%, ${color}cc)`,
+                  opacity: isRemoving ? 0.4 : 1,
                   boxShadow: isSelected
                     ? `0 0 0 2px white, 0 8px 32px ${color}50`
                     : `0 4px 20px ${color}30`,
@@ -140,6 +162,19 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                     opacity: 0.04, mixBlendMode: "overlay",
                   }}
                 />
+
+                {/* Remove button */}
+                <button
+                  onClick={(e) => askRemove(e, subject)}
+                  disabled={isRemoving}
+                  aria-label="Удалить предмет"
+                  className="absolute top-2.5 left-2.5 z-20 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 disabled:cursor-not-allowed"
+                  style={{ background: "rgba(0,0,0,0.35)", color: "rgba(255,255,255,0.9)" }}
+                >
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
 
                 <div className="relative z-10 p-5">
                   <div className="absolute top-3 right-3 group/badge" onClick={e => e.stopPropagation()}>
@@ -202,6 +237,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
               className="relative rounded-2xl border overflow-hidden cursor-pointer transition-all duration-200 group"
               style={{
                 background: "var(--bg-card)",
+                opacity: isRemoving ? 0.4 : 1,
                 borderColor: isSelected ? color : "var(--border)",
                 boxShadow: isSelected ? `0 0 0 1px ${color}, 0 4px 20px ${color}25` : "none",
               }}
@@ -214,6 +250,19 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
               {/* Hover glow overlay */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"
                 style={{ background: `radial-gradient(ellipse at 30% 0%, ${color}10 0%, transparent 60%)` }} />
+
+              {/* Remove button */}
+              <button
+                onClick={(e) => askRemove(e, subject)}
+                disabled={isRemoving}
+                aria-label="Удалить предмет"
+                className="absolute top-2.5 left-2.5 z-20 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 disabled:cursor-not-allowed"
+                style={{ background: "rgba(0,0,0,0.10)", color: "var(--text-secondary)" }}
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
 
               <div className="relative z-10 p-5">
                 <div className="absolute top-4 right-3 group/badge" onClick={e => e.stopPropagation()}>
@@ -295,6 +344,48 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
           </span>
         </button>
       </div>
+
+      {/* ── Confirm remove dialog ─────────────────────────────── */}
+      {confirmSubject && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)" }}
+          onClick={() => setConfirmSubject(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl border shadow-xl p-6"
+            style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <SubjectIcon id={confirmSubject.id} size={40} />
+              <div>
+                <p className="font-bold text-sm" style={{ color: "var(--text)" }}>Удалить предмет?</p>
+                <p className="text-xs mt-0.5 font-medium" style={{ color: subjectColor(confirmSubject.id) }}>{confirmSubject.title}</p>
+              </div>
+            </div>
+            <p className="text-sm leading-relaxed mb-5" style={{ color: "var(--text-secondary)" }}>
+              Предмет будет убран из твоей библиотеки. Позже ты сможешь добавить его обратно — весь прогресс сохранится.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmSubject(null)}
+                className="flex-1 py-2 rounded-xl text-sm font-semibold transition-colors"
+                style={{ background: "var(--bg-secondary)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
+              >
+                Отмена
+              </button>
+              <button
+                onClick={confirmRemove}
+                className="flex-1 py-2 rounded-xl text-sm font-semibold transition-colors"
+                style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
+              >
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <AddSubjectModal open={addOpen} onClose={() => setAddOpen(false)} existingSubjectIds={existingSubjectIds} />
       <SubjectSuggestionModal open={suggestOpen} onClose={() => setSuggestOpen(false)} userId={userId} />
