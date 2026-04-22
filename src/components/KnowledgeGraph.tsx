@@ -13,13 +13,19 @@ const PAL = {
 type Status = "active" | "active_full" | "full" | "beta";
 
 const LAYOUT: Record<string, { cx: number; cy: number }> = {
-  "russian-history":  { cx: 0.50, cy: 0.42 }, "world-history":    { cx: 0.24, cy: 0.28 },
-  "mathematics":      { cx: 0.73, cy: 0.27 }, "physics":          { cx: 0.84, cy: 0.51 },
-  "chemistry":        { cx: 0.73, cy: 0.70 }, "biology":          { cx: 0.50, cy: 0.76 },
-  "russian-language": { cx: 0.27, cy: 0.70 }, "literature":       { cx: 0.15, cy: 0.51 },
-  "english":          { cx: 0.20, cy: 0.34 }, "social-studies":   { cx: 0.36, cy: 0.18 },
-  "geography":        { cx: 0.63, cy: 0.17 }, "computer-science": { cx: 0.82, cy: 0.33 },
-  "astronomy":        { cx: 0.62, cy: 0.83 },
+  "russian-history":  { cx: 0.50, cy: 0.44 }, // centre — главный предмет
+  "world-history":    { cx: 0.17, cy: 0.27 }, // верх-лево
+  "mathematics":      { cx: 0.74, cy: 0.20 }, // верх-право
+  "physics":          { cx: 0.91, cy: 0.55 }, // край правый
+  "chemistry":        { cx: 0.79, cy: 0.78 }, // право-низ
+  "biology":          { cx: 0.46, cy: 0.86 }, // низ-центр
+  "russian-language": { cx: 0.20, cy: 0.80 }, // лево-низ
+  "literature":       { cx: 0.05, cy: 0.52 }, // край левый
+  "english":          { cx: 0.12, cy: 0.18 }, // верх-край-лево
+  "social-studies":   { cx: 0.35, cy: 0.09 }, // самый верх
+  "geography":        { cx: 0.66, cy: 0.10 }, // верх-право
+  "computer-science": { cx: 0.88, cy: 0.30 }, // право-верх
+  "astronomy":        { cx: 0.60, cy: 0.91 }, // самый низ
 };
 
 const TOPICS: Record<string, string[]> = {
@@ -38,13 +44,13 @@ const TOPICS: Record<string, string[]> = {
   "astronomy":        ["Солнечная система","Звёзды","Галактики","Космонавтика"],
 };
 
-// Nebula clusters — soft background glow behind groups of related subjects
+// Nebula clusters — visible soft glow behind groups of related subjects
 const NEBULAE = [
-  { cx: 0.78, cy: 0.44, rx: 0.28, ry: 0.36, color: "rgba(80,100,255,0.055)"  }, // Sciences
-  { cx: 0.37, cy: 0.35, rx: 0.22, ry: 0.25, color: "rgba(255,140,60,0.045)"  }, // History
-  { cx: 0.19, cy: 0.50, rx: 0.18, ry: 0.28, color: "rgba(60,200,180,0.04)"   }, // Languages/Lit
-  { cx: 0.55, cy: 0.76, rx: 0.22, ry: 0.20, color: "rgba(80,200,120,0.04)"   }, // Life sciences
-  { cx: 0.36, cy: 0.18, rx: 0.16, ry: 0.14, color: "rgba(160,120,255,0.04)"  }, // Social/Geo
+  { cx: 0.82, cy: 0.44, rx: 0.26, color: [80, 110, 255],  a: 0.18 }, // Sciences (blue)
+  { cx: 0.36, cy: 0.38, rx: 0.24, color: [255, 140, 60],  a: 0.15 }, // History (amber)
+  { cx: 0.11, cy: 0.48, rx: 0.18, color: [60, 200, 180],  a: 0.14 }, // Languages/Lit (teal)
+  { cx: 0.52, cy: 0.83, rx: 0.22, color: [80, 210, 120],  a: 0.13 }, // Life sciences (green)
+  { cx: 0.50, cy: 0.10, rx: 0.20, color: [180, 120, 255], a: 0.14 }, // Social/Geo (purple)
 ];
 
 interface UserProgress { subject: string; xp_total: number }
@@ -63,11 +69,11 @@ function getStatus(id: string, progress: UserProgress[]): Status {
 
 // Star radius scales with XP for active subjects
 function getRadius(status: Status, xp = 0): number {
-  if (status === "beta") return 20;
-  if (status === "full") return 28;
-  // active / active_full: base 22, grows up to ~40 with XP
-  const bonus = Math.min(18, Math.sqrt(Math.max(0, xp)) * 0.57);
-  return Math.round(22 + bonus);
+  if (status === "beta") return 26;
+  if (status === "full") return 36;
+  // active / active_full: base 28, grows up to ~50 with XP
+  const bonus = Math.min(22, Math.sqrt(Math.max(0, xp)) * 0.7);
+  return Math.round(28 + bonus);
 }
 
 function seededRand(seed: number): number {
@@ -112,18 +118,16 @@ const BG_STARS = Array.from({ length: 160 }, (_, i) => ({
 }));
 
 function drawBg(ctx: CanvasRenderingContext2D, W: number, H: number, t: number) {
-  // Nebulae — drawn first, very subtle
+  // Nebulae — visible radial glow clouds
   for (const nb of NEBULAE) {
-    ctx.save();
-    ctx.scale(1, nb.ry / nb.rx); // ellipse via scale
-    const cx = nb.cx * W, cy = (nb.cy * H) * (nb.rx / nb.ry);
-    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, nb.rx * W);
-    g.addColorStop(0, nb.color);
-    g.addColorStop(0.5, nb.color.replace(/[\d.]+\)$/, m => `${parseFloat(m) * 0.4})`));
-    g.addColorStop(1, "rgba(0,0,0,0)");
+    const cx = nb.cx * W, cy = nb.cy * H, r = nb.rx * Math.min(W, H);
+    const [r0, g0, b0] = nb.color;
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0,   `rgba(${r0},${g0},${b0},${nb.a})`);
+    g.addColorStop(0.45, `rgba(${r0},${g0},${b0},${nb.a * 0.5})`);
+    g.addColorStop(1,   `rgba(${r0},${g0},${b0},0)`);
     ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(cx, cy, nb.rx * W, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
   }
   // Background stars with subtle twinkle
   for (const s of BG_STARS) {
