@@ -41,9 +41,8 @@ function pluralMenty(n: number): string {
 
 function MentoraEIcon({ color = "var(--brand)" }: { color?: string }) {
   return (
-    <span style={{ fontWeight: 700, lineHeight: 1, marginRight: "0.1em" }}>
-      <span style={{ color }}>M</span>
-      <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color, fontStyle: "italic" }}>е</span>
+    <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1, marginRight: "0.1em" }}>
+      <span style={{ color }}>M</span><span style={{ color, fontStyle: "italic", display: "inline-block", transform: "translateY(0.07em)" }}>е</span>
     </span>
   );
 }

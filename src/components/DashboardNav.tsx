@@ -6,9 +6,8 @@ import ThemeToggle from "@/components/ThemeToggle";
 
 function MentoraE() {
   return (
-    <span style={{ fontWeight: 700, letterSpacing: "-0.01em", verticalAlign: "middle" }}>
-      <span style={{ color: "var(--text)" }}>M</span>
-      <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic", marginRight: "0.08em" }}>е</span>
+    <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, letterSpacing: "-0.02em" }}>
+      <span style={{ color: "var(--text)" }}>M</span><span style={{ color: "#4561E8", fontStyle: "italic", display: "inline-block", transform: "translateY(0.07em)", marginRight: "0.08em" }}>е</span>
     </span>
   );
 }

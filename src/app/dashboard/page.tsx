@@ -28,9 +28,8 @@ function pluralMenty(n: number): string {
 }
 
 const MentoraE = () => (
-  <span style={{ fontWeight: 700, letterSpacing: "-0.01em", marginRight: "0.12em" }}>
-    <span style={{ color: "var(--text)" }}>M</span>
-    <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color: "#4561E8", fontStyle: "italic" }}>е</span>
+  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, letterSpacing: "-0.02em", marginRight: "0.12em" }}>
+    <span style={{ color: "var(--text)" }}>M</span><span style={{ color: "#4561E8", fontStyle: "italic", display: "inline-block", transform: "translateY(0.07em)" }}>е</span>
   </span>
 );
 
