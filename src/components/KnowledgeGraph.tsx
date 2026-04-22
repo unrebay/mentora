@@ -427,7 +427,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
   }
 
   return (
-    <div className={`relative w-full h-full ${className}`} style={{ background: "#06060f" }}>
+    <div className={`relative w-full h-full ${className}`}>
       {/* Legend */}
       <div className="absolute top-4 right-4 flex flex-col gap-1.5 z-10 pointer-events-none">
         {([
