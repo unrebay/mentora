@@ -145,13 +145,12 @@ export default function DashboardNav({
             style={{ background: open ? (dk ? "rgba(255,255,255,0.08)" : "var(--bg-secondary)") : "transparent" }}
           >
             <div className="relative w-[18px] h-[12px]">
-              {["top-0", "top-[5px]", "bottom-0"].map((pos, i) => (
-                <span key={i} className={`absolute left-0 w-full h-[2px] rounded-full transition-all duration-200 ${
-                  i === 0 ? (open ? "top-[5px] rotate-45" : pos) :
-                  i === 1 ? `${pos} ${open ? "opacity-0 scale-x-0" : ""}` :
-                             (open ? "bottom-[5px] -rotate-45" : pos)
-                }`} style={{ background: dk ? "rgba(255,255,255,0.85)" : "var(--text)" }} />
-              ))}
+              <span className={`absolute left-0 w-full h-[2px] rounded-full transition-all duration-200 origin-center ${open ? "top-[5px] rotate-45" : "top-0"}`}
+                style={{ background: dk ? "rgba(255,255,255,0.85)" : "var(--text)" }} />
+              <span className={`absolute left-0 top-[5px] w-full h-[2px] rounded-full transition-all duration-200 ${open ? "opacity-0 scale-x-0" : ""}`}
+                style={{ background: dk ? "rgba(255,255,255,0.85)" : "var(--text)" }} />
+              <span className={`absolute left-0 w-full h-[2px] rounded-full transition-all duration-200 origin-center ${open ? "bottom-[5px] -rotate-45" : "bottom-0"}`}
+                style={{ background: dk ? "rgba(255,255,255,0.85)" : "var(--text)" }} />
             </div>
           </button>
         </div>

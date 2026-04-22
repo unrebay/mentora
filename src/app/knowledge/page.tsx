@@ -11,10 +11,6 @@ export const metadata: Metadata = {
 };
 
 const KnowledgeGraph = dynamic(() => import("@/components/KnowledgeGraph"), { ssr: false });
-const SplineScene = dynamic(() => import("@/components/SplineScene"), { ssr: false });
-
-// 🔁 Replace this with your own scene URL from spline.design → Share → Copy link (.splinecode)
-const GALAXY_SPLINE_SCENE = "https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode";
 
 export default async function KnowledgePage() {
   const supabase = await createClient();
@@ -69,13 +65,7 @@ export default async function KnowledgePage() {
       </div>
 
       {/* Galaxy — fills all remaining height */}
-      <div className="flex-1 relative min-h-0" style={{ background: "#06060f" }}>
-        {/* Spline 3D background — purely visual, pointer-events disabled */}
-        <div className="absolute inset-0 z-0" style={{ pointerEvents: "none" }}>
-          <SplineScene scene={GALAXY_SPLINE_SCENE} />
-        </div>
-
-        {/* Interactive canvas — on top of Spline */}
+      <div className="flex-1 relative min-h-0">
         <KnowledgeGraph className="absolute inset-0 w-full h-full" userProgress={userProgress} />
       </div>
     </div>

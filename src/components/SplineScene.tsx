@@ -1,22 +1,11 @@
 "use client";
-import dynamic from "next/dynamic";
 import type { CSSProperties } from "react";
 
 /**
- * SplineScene — renders a Spline 3D scene using @splinetool/react-spline.
- * Loaded client-side only (no SSR) with a minimal loading placeholder.
- *
- * Usage:
- *   <SplineScene scene="https://prod.spline.design/{hash}/scene.splinecode" />
- *
- * To create/find scenes: https://spline.design → share → copy embed URL (.splinecode)
+ * SplineScene — embeds a Spline 3D scene as an iframe.
+ * The scene URL comes from spline.design → Share → Copy Link.
+ * For the .splinecode format (react-spline), use SplineReact instead.
  */
-
-const Spline = dynamic(() => import("@splinetool/react-spline"), {
-  ssr: false,
-  loading: () => null,
-});
-
 interface Props {
   scene: string;
   className?: string;
@@ -25,11 +14,15 @@ interface Props {
 
 export default function SplineScene({ scene, className, style }: Props) {
   return (
-    <div className={className} style={{ width: "100%", height: "100%", ...style }}>
-      <Spline
-        scene={scene}
-        style={{ width: "100%", height: "100%", pointerEvents: "none" }}
-      />
-    </div>
+    <iframe
+      src={scene}
+      frameBorder="0"
+      className={className}
+      style={{ width: "100%", height: "100%", border: "none", ...style }}
+      title="3D galaxy background"
+      aria-hidden
+      loading="lazy"
+      allow="autoplay"
+    />
   );
 }
