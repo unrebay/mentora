@@ -101,9 +101,9 @@ function buildGraph(W: number, H: number, progress: UserProgress[]): GNode[] {
       const baseAngle = (i / topicLabels.length) * Math.PI * 2 - Math.PI / 2;
       const angleJitter = (seededRand(seed1) - 0.5) * 1.4;
       const angle = baseAngle + angleJitter;
-      const minOrbit = r * 2.2 + 6, maxOrbit = r * 2.2 + (topicLabels.length > 6 ? 22 : 16);
+      const minOrbit = r * 2.4 + 8, maxOrbit = r * 2.4 + (topicLabels.length > 6 ? 28 : 20);
       const orbitR = minOrbit + seededRand(seed1 + 1) * (maxOrbit - minOrbit);
-      const baseR = 1.8 + seededRand(seed1 + 2) * 1.2;
+      const baseR = 2.8 + seededRand(seed1 + 2) * 1.6;
       return { x: cx + Math.cos(angle) * orbitR, y: cy + Math.sin(angle) * orbitR,
                label, phase: seededRand(seed1 + 50) * Math.PI * 2, baseR };
     });
@@ -350,6 +350,8 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
   const selNode = nodesRef.current.find(n => n.id === selectedId);
   const selSub  = SUBJECTS.find(s => s.id === selectedId);
   const selTops = selectedId === "russian-history" ? RUSSIAN_HISTORY_TOPICS : null;
+  // Simple topic list for non-history subjects
+  const selTopicStrings = selectedId && selectedId !== "russian-history" ? (TOPICS[selectedId] ?? []) : [];
 
   // Compute popup CSS position — anchor to star, clamp within canvas
   const POPUP_W = 300, POPUP_H_EST = 180;
@@ -424,29 +426,38 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
           <div className="px-4 py-3">
             <p className="text-xs text-white/40 mb-3 leading-relaxed">{selSub.description}</p>
 
-            {/* Topics preview */}
-            {selTops ? (
-              <div className="overflow-x-auto -mx-1">
-                <div className="flex gap-1.5 pb-1 min-w-max px-1">
-                  {selTops.slice(0, 6).map(p => (
-                    <div key={p.id} className="flex-shrink-0 rounded-xl px-2.5 py-1.5 text-center"
-                      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", width: 76 }}>
-                      <div className="text-sm mb-0.5">{p.emoji}</div>
-                      <div className="text-[9px] font-medium text-white/70 leading-tight line-clamp-2">{p.title}</div>
-                    </div>
-                  ))}
-                  {selTops.length > 6 && (
-                    <div className="flex-shrink-0 rounded-xl px-2.5 py-1.5 flex items-center justify-center"
-                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", width: 76 }}>
-                      <span className="text-[9px] text-white/30">+{selTops.length - 6} тем</span>
-                    </div>
-                  )}
+            {/* Topics preview — all subjects */}
+            {(selTops || selTopicStrings.length > 0) && (
+              <div className="overflow-x-auto -mx-1" style={{
+                scrollbarWidth: "thin",
+                scrollbarColor: "rgba(255,255,255,0.15) transparent",
+              }}>
+                <style>{".galaxy-scroll::-webkit-scrollbar{height:4px}.galaxy-scroll::-webkit-scrollbar-track{background:transparent}.galaxy-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:4px}"}</style>
+                <div className="galaxy-scroll flex gap-1.5 pb-2 min-w-max px-1" style={{ overflowX: "auto" }}>
+                  {selTops
+                    ? selTops.map(p => (
+                        <a key={p.id}
+                          href={`/learn/${selNode.id}?topic=${encodeURIComponent(p.title)}`}
+                          className="flex-shrink-0 rounded-xl px-2.5 py-2 text-center transition-all hover:scale-105 hover:bg-white/10 cursor-pointer"
+                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", width: 84 }}>
+                          <div className="text-sm mb-1">{p.emoji}</div>
+                          <div className="text-[9px] font-medium text-white/75 leading-tight line-clamp-2">{p.title}</div>
+                        </a>
+                      ))
+                    : selTopicStrings.map((label, i) => (
+                        <a key={i}
+                          href={`/learn/${selNode.id}?topic=${encodeURIComponent(label)}`}
+                          className="flex-shrink-0 rounded-xl px-2.5 py-2 text-center transition-all hover:scale-105 hover:bg-white/10 cursor-pointer"
+                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", width: 84 }}>
+                          <div className="text-[9px] font-medium text-white/75 leading-tight">{label}</div>
+                        </a>
+                      ))
+                  }
                 </div>
               </div>
-            ) : (
-              <p className="text-[10px] text-white/30 italic">
-                {selNode.status === "active" ? "Ты уже изучаешь этот предмет" : "Mentora подстроится с первого сообщения"}
-              </p>
+            )}
+            {!selTops && selTopicStrings.length === 0 && (
+              <p className="text-[10px] text-white/30 italic">Mentora подстроится с первого сообщения</p>
             )}
           </div>
 
