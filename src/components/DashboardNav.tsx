@@ -29,9 +29,10 @@ interface DashboardNavProps {
   currentStreak: number;
   bestStreak: number;
   logoutAction: () => Promise<void>;
+  variant?: "default" | "dark";
 }
 
-export default function DashboardNav({ isPro, isUltima, totalXP, currentStreak, bestStreak, logoutAction }: DashboardNavProps) {
+export default function DashboardNav({ isPro, isUltima, totalXP, currentStreak, bestStreak, logoutAction, variant = "default" }: DashboardNavProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -47,7 +48,7 @@ export default function DashboardNav({ isPro, isUltima, totalXP, currentStreak, 
   }
 
   return (
-    <nav className="sticky top-0 z-20 border-b border-[var(--border)]" style={{ background: "var(--bg-nav)", backdropFilter: "blur(12px)" }}>
+    <nav className="sticky top-0 z-20 border-b" style={{ background: variant === "dark" ? "rgba(6,6,15,0.97)" : "var(--bg-nav)", borderColor: variant === "dark" ? "rgba(255,255,255,0.07)" : "var(--border)", backdropFilter: "blur(12px)" }}>
       {/* Top bar */}
       <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
         {/* Left: logo + desktop links */}
@@ -104,7 +105,7 @@ export default function DashboardNav({ isPro, isUltima, totalXP, currentStreak, 
 
       {/* Mobile dropdown menu */}
       {open && (
-        <div className="md:hidden border-t border-[var(--border)]" style={{ background: "var(--bg-nav)" }}>
+        <div className="md:hidden border-t" style={{ background: variant === "dark" ? "rgba(6,6,15,0.97)" : "var(--bg-nav)", borderColor: variant === "dark" ? "rgba(255,255,255,0.07)" : "var(--border)" }}>
           <div className="max-w-5xl mx-auto px-3 py-2 flex flex-col">
             {[
               { href: "/dashboard", label: "Предметы" },

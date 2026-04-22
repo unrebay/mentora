@@ -116,8 +116,8 @@ function buildGraph(W: number, H: number, progress: UserProgress[]): GNode[] {
   });
 
   // Minimum distance repulsion between topic dots within each star
-  const MIN_TOPIC_DIST = 44;
-  for (let iter = 0; iter < 5; iter++) {
+  const MIN_TOPIC_DIST = 58;
+  for (let iter = 0; iter < 12; iter++) {
     for (const node of nodes) {
       for (let ti = 0; ti < node.topics.length; ti++) {
         const tpa = node.topics[ti];
@@ -207,7 +207,7 @@ function render(
       ctx.restore();
       if (isActive || isHovTopic) {
         const labelAlpha = isHovTopic ? 1 : (0.6 + 0.3 * sh) * opacity;
-        ctx.save(); ctx.font = isHovTopic ? 'bold 10px "Golos Text", system-ui' : '9px "Golos Text", system-ui';
+        ctx.save(); ctx.font = isHovTopic ? 'bold 12px "Golos Text", system-ui' : '600 11px "Golos Text", system-ui';
         ctx.textAlign = "center"; ctx.textBaseline = "top";
         ctx.fillStyle = pal.core; ctx.globalAlpha = labelAlpha;
         ctx.shadowColor = "rgba(0,0,0,0.95)"; ctx.shadowBlur = 7;
@@ -237,7 +237,7 @@ function render(
     ctx.shadowColor = n.status === "active_full" ? "rgba(107,143,255,0.8)" : pal.glow;
     ctx.beginPath(); ctx.arc(n.x, n.y, coreR+4*sh, 0, Math.PI*2); ctx.stroke();
     ctx.restore();
-    ctx.save(); ctx.font = isActive ? 'bold 13px "Golos Text", system-ui' : '11px "Golos Text", system-ui';
+    ctx.save(); ctx.font = isActive ? 'bold 14px "Golos Text", system-ui' : '600 12px "Golos Text", system-ui';
     ctx.textAlign = "center"; ctx.textBaseline = "top";
     ctx.fillStyle = isActive ? "#fff" : pal.core;
     ctx.globalAlpha = isActive ? 1 : (0.65+0.3*sh);
@@ -491,7 +491,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
             <div className="flex items-center gap-3 min-w-0">
               <span className="text-2xl shrink-0">{selSub.emoji}</span>
               <div className="min-w-0">
-                <h3 className="font-bold text-white text-sm leading-tight truncate">{selSub.title}</h3>
+                <h3 className="font-bold text-white text-sm leading-snug break-words">{selSub.title}</h3>
                 <div className="flex items-center gap-1.5 mt-1">
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md"
                     style={{ background: PAL[selNode.status].core + "25", color: PAL[selNode.status].core }}>
@@ -526,7 +526,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
                         <a key={p.id}
                           href={`/learn/${selNode.id}?topic=${encodeURIComponent(p.title)}`}
                           className="flex-shrink-0 rounded-xl px-2.5 py-2 text-center transition-all hover:scale-105 hover:bg-white/10 cursor-pointer"
-                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", width: 84 }}>
+                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", minWidth: 72, maxWidth: 120 }}>
                           <div className="text-sm mb-1">{p.emoji}</div>
                           <div className="text-[9px] font-medium text-white/75 leading-tight line-clamp-2">{p.title}</div>
                         </a>
@@ -535,7 +535,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
                         <a key={i}
                           href={`/learn/${selNode.id}?topic=${encodeURIComponent(label)}`}
                           className="flex-shrink-0 rounded-xl px-2.5 py-2 text-center transition-all hover:scale-105 hover:bg-white/10 cursor-pointer"
-                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", width: 84 }}>
+                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", minWidth: 72, maxWidth: 120 }}>
                           <div className="text-[9px] font-medium text-white/75 leading-tight">{label}</div>
                         </a>
                       ))

@@ -42,7 +42,7 @@ export default async function KnowledgePage() {
   return (
     <div className="flex flex-col bg-[#06060f] text-white" style={{ height: "100dvh" }}>
       {/* Nav */}
-      <DashboardNav isPro={isPro} isUltima={isUltima} totalXP={totalXP} currentStreak={currentStreak} bestStreak={bestStreak} logoutAction={handleLogout} />
+      <DashboardNav isPro={isPro} isUltima={isUltima} totalXP={totalXP} currentStreak={currentStreak} bestStreak={bestStreak} logoutAction={handleLogout} variant="dark" />
 
       {/* Title */}
       <div className="flex-shrink-0 px-5 pt-4 pb-2">
