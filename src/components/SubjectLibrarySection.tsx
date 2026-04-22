@@ -39,14 +39,12 @@ function pluralMenty(n: number): string {
   return "мент";
 }
 
-function MentoraEIcon() {
+function MentoraEIcon({ color = "var(--brand)" }: { color?: string }) {
   return (
-    <span style={{
-      fontFamily: "var(--font-playfair), Georgia, serif",
-      color: "var(--brand)",
-      fontStyle: "italic", fontWeight: 700, fontSize: "1.1em",
-      lineHeight: 1, marginRight: "0.1em",
-    }}>е</span>
+    <span style={{ fontWeight: 700, lineHeight: 1, marginRight: "0.1em" }}>
+      <span style={{ color }}>M</span>
+      <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", color, fontStyle: "italic" }}>е</span>
+    </span>
   );
 }
 
@@ -180,7 +178,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                       <span className="text-[10px] font-semibold text-white/65">{lvl.name}</span>
                       {xp > 0 && (
                         <span className="text-[10px] font-bold text-white">
-                          <span style={{ fontFamily: "Georgia, serif", fontStyle: "italic" }}>е</span>{xp} {pluralMenty(xp)}
+                          <MentoraEIcon color="rgba(255,255,255,0.9)" />{xp} {pluralMenty(xp)}
                         </span>
                       )}
                     </div>
@@ -253,7 +251,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                     <span className="text-[10px] font-semibold" style={{ color: "var(--text-muted)" }}>{lvl.name}</span>
                     {xp > 0 && (
                       <span className="text-[10px] font-bold" style={{ color }}>
-                        <MentoraEIcon />{xp} {pluralMenty(xp)}
+                        <MentoraEIcon color={color} />{xp} {pluralMenty(xp)}
                       </span>
                     )}
                   </div>

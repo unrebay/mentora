@@ -180,7 +180,7 @@ export default async function ProfilePage() {
               label: "Мент",
               value: totalXP,
               suffix: "",
-              icon: <span style={{ fontFamily: "Georgia,serif", fontWeight: 700, fontSize: "1.3rem", lineHeight: 1 }}><span style={{ color: "var(--text)" }}>M</span><span style={{ color: "var(--brand)", fontStyle: "italic" }}>е</span></span>,
+              icon: <span style={{ fontWeight: 700, fontSize: "1.3rem", lineHeight: 1 }}><span style={{ color: "var(--text)" }}>M</span><span style={{ fontFamily: "Georgia,serif", color: "var(--brand)", fontStyle: "italic" }}>е</span></span>,
               accent: "var(--brand)",
             },
             {

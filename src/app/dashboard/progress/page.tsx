@@ -114,7 +114,10 @@ export default async function ProgressPage() {
               label: "Всего ментов",
               value: totalXP.toLocaleString("ru-RU"),
               icon: (
-                <span style={{ fontFamily: "Georgia,serif", color: "#6B8FFF", fontStyle: "italic", fontWeight: 700, fontSize: "1.2rem", lineHeight: 1 }}>е</span>
+                <span style={{ fontFamily: "Georgia,serif", fontWeight: 700, fontSize: "1.2rem", lineHeight: 1 }}>
+                <span style={{ color: "#6B8FFF" }}>M</span>
+                <span style={{ color: "#6B8FFF", fontStyle: "italic" }}>е</span>
+              </span>
               ),
               accent: "#6B8FFF",
             },
