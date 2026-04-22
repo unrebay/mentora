@@ -111,22 +111,55 @@ const BadgeIcon = {
     <circle cx="19.5" cy="8" r="1.4" fill={c}/>
     <path d="M3 19.5H21" stroke={c} strokeWidth="2" strokeLinecap="round"/>
   </svg>,
+  // Stack of books (профессор)
+  stack: (c: string) => <svg viewBox="0 0 24 24" fill="none" style={{ width: 40, height: 40 }}>
+    <rect x="4" y="16.5" width="16" height="3.5" rx="1" fill={c} fillOpacity="0.15" stroke={c} strokeWidth="1.4" strokeLinejoin="round"/>
+    <rect x="5.5" y="11.5" width="13" height="3.5" rx="1" fill={c} fillOpacity="0.22" stroke={c} strokeWidth="1.4" strokeLinejoin="round"/>
+    <rect x="7" y="6.5" width="10" height="3.5" rx="1" fill={c} fillOpacity="0.32" stroke={c} strokeWidth="1.4" strokeLinejoin="round"/>
+    <path d="M7 6.5V10M6 11.5V15M5 16.5V20" stroke={c} strokeWidth="1.1" strokeLinecap="round"/>
+  </svg>,
+  // Calendar (неделя знаний)
+  calendar: (c: string) => <svg viewBox="0 0 24 24" fill="none" style={{ width: 40, height: 40 }}>
+    <rect x="3" y="4.5" width="18" height="16" rx="2" fill={c} fillOpacity="0.15" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M3 9.5H21" stroke={c} strokeWidth="1.4" strokeLinecap="round"/>
+    <path d="M8 2.5V6.5M16 2.5V6.5" stroke={c} strokeWidth="1.6" strokeLinecap="round"/>
+    <circle cx="7.5" cy="13.5" r="1.2" fill={c} fillOpacity="0.45"/>
+    <circle cx="12" cy="13.5" r="1.2" fill={c} fillOpacity="0.45"/>
+    <circle cx="16.5" cy="13.5" r="1.2" fill={c} fillOpacity="0.45"/>
+    <circle cx="7.5" cy="17.5" r="1.2" fill={c} fillOpacity="0.45"/>
+    <circle cx="12" cy="17.5" r="1.5" fill={c}/>
+    <path d="M10.8 17.5l.9.9 1.7-1.7" stroke="white" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>,
+  // Medal (знаток — отличается от звезды первых шагов)
+  medal: (c: string) => <svg viewBox="0 0 24 24" fill="none" style={{ width: 40, height: 40 }}>
+    <circle cx="12" cy="14.5" r="6.5" fill={c} fillOpacity="0.15" stroke={c} strokeWidth="1.5"/>
+    <path d="M9.5 6L8 3H16L14.5 6" stroke={c} strokeWidth="1.4" strokeLinejoin="round"/>
+    <path d="M9.5 6H14.5" stroke={c} strokeWidth="1.2" strokeLinecap="round"/>
+    <path d="M12 10.5l1.2 2.6 2.8.4-2 2 .5 2.8L12 17l-2.5 1.3.5-2.8-2-2 2.8-.4z" fill={c} fillOpacity="0.55" stroke={c} strokeWidth="0.9" strokeLinejoin="round"/>
+  </svg>,
+  // Infinity (ультра — отличается от алмаза мастера)
+  infinity: (c: string) => <svg viewBox="0 0 24 24" fill="none" style={{ width: 40, height: 40 }}>
+    <path d="M12 12C12 12 9.5 8 6.5 8C4 8 2 10 2 12C2 14 4 16 6.5 16C9.5 16 12 12 12 12Z" fill={c} fillOpacity="0.2" stroke={c} strokeWidth="1.6" strokeLinejoin="round"/>
+    <path d="M12 12C12 12 14.5 16 17.5 16C20 16 22 14 22 12C22 10 20 8 17.5 8C14.5 8 12 12 12 12Z" fill={c} fillOpacity="0.2" stroke={c} strokeWidth="1.6" strokeLinejoin="round"/>
+    <circle cx="6.5" cy="12" r="1.5" fill={c} fillOpacity="0.5"/>
+    <circle cx="17.5" cy="12" r="1.5" fill={c} fillOpacity="0.5"/>
+  </svg>,
 };
 
 const BADGES: BadgeDef[] = [
   { id: "first_message", icon: BadgeIcon.chat("#d97706"), name: "Первый вопрос", desc: "Отправил первое сообщение", tier: "bronze", check: s => s.totalMessages >= 1 },
   { id: "student", icon: BadgeIcon.books("#d97706"), name: "Студент", desc: "50 сообщений Менторе", tier: "bronze", check: s => s.totalMessages >= 50 },
   { id: "scholar", icon: BadgeIcon.grad("#6b7280"), name: "Учёный", desc: "200 сообщений Менторе", tier: "silver", check: s => s.totalMessages >= 200 },
-  { id: "professor", icon: BadgeIcon.book("#f59e0b"), name: "Профессор", desc: "500 сообщений Менторе", tier: "gold", check: s => s.totalMessages >= 500 },
+  { id: "professor", icon: BadgeIcon.stack("#f59e0b"), name: "Профессор", desc: "500 сообщений Менторе", tier: "gold", check: s => s.totalMessages >= 500 },
   { id: "streak3", icon: BadgeIcon.flame("#FF7A00"), name: "На разогреве", desc: "3 дня учёбы подряд", tier: "bronze", check: s => s.bestStreak >= 3 },
-  { id: "streak7", icon: BadgeIcon.flame("#FF7A00"), name: "Неделя знаний", desc: "7 дней учёбы подряд", tier: "silver", check: s => s.bestStreak >= 7 },
+  { id: "streak7", icon: BadgeIcon.calendar("#f59e0b"), name: "Неделя знаний", desc: "7 дней учёбы подряд", tier: "silver", check: s => s.bestStreak >= 7 },
   { id: "streak30", icon: BadgeIcon.trophy("#f59e0b"), name: "Месяц упорства", desc: "30 дней учёбы подряд", tier: "gold", check: s => s.bestStreak >= 30 },
   { id: "xp100", icon: BadgeIcon.spark("#d97706"), name: "Первые шаги", desc: "Набрал 100 мент", tier: "bronze", check: s => s.totalXP >= 100 },
-  { id: "xp500", icon: BadgeIcon.spark("#6b7280"), name: "Знаток", desc: "Набрал 500 мент", tier: "silver", check: s => s.totalXP >= 500 },
+  { id: "xp500", icon: BadgeIcon.medal("#6b7280"), name: "Знаток", desc: "Набрал 500 мент", tier: "silver", check: s => s.totalXP >= 500 },
   { id: "xp1000", icon: BadgeIcon.gem("#f59e0b"), name: "Мастер", desc: "Набрал 1000 мент", tier: "gold", check: s => s.totalXP >= 1000 },
   { id: "early_bird", icon: BadgeIcon.bird("#8b5cf6"), name: "Первопроходец", desc: "Присоединился в первые 90 дней", tier: "special", check: s => s.joinedDaysAgo <= 90 },
   { id: "pro", icon: BadgeIcon.crown("#8b5cf6"), name: "Pro подписчик", desc: "Поддержал развитие Mentora", tier: "special", check: s => s.isPro },
-  { id: "ultima", icon: BadgeIcon.gem("#8b5cf6"), name: "Ultra", desc: "Максимальный план Mentora", tier: "special", check: s => s.isUltima },
+  { id: "ultima", icon: BadgeIcon.infinity("#8b5cf6"), name: "Ultra", desc: "Максимальный план Mentora", tier: "special", check: s => s.isUltima },
 ];
 
 const TIER_CONFIG: Record<string, { color: string; label: string }> = {
