@@ -145,7 +145,7 @@ export default async function ProfilePage() {
               {initial}
             </div>
             {isPro && (
-              <div className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-xl flex items-center justify-center text-[10px] font-bold text-white"
+              <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-xl flex items-center justify-center text-[10px] font-bold text-white shadow-lg"
                 style={{ background: isUltima ? "linear-gradient(135deg, #FF7A00, #7C3AED)" : "linear-gradient(135deg, #4561E8, #6B8FFF)" }}>
                 {isUltima ? "✦" : "P"}
               </div>
@@ -185,13 +185,13 @@ export default async function ProfilePage() {
               label: "Менты",
               value: totalXP,
               suffix: ` ${pluralMenty(totalXP)}`,
-              icon: <span style={{ fontFamily: "Georgia,serif", color: "var(--brand)", fontStyle: "italic", fontWeight: 700, fontSize: "1.3rem", lineHeight: 1 }}>е</span>,
+              icon: <span style={{ fontFamily: "Georgia,serif", color: "var(--brand)", fontWeight: 700, fontSize: "1.3rem", lineHeight: 1 }}><span>M</span><span style={{ fontStyle: "italic" }}>е</span></span>,
               accent: "var(--brand)",
             },
             {
-              label: "Макс. стрик",
+              label: "Рекорд стрика",
               value: maxStreak,
-              suffix: "д",
+              suffix: " д",
               icon: <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none"><path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00"/></svg>,
               accent: "#FF7A00",
             },
@@ -199,14 +199,14 @@ export default async function ProfilePage() {
               label: "Сообщений",
               value: totalMessages,
               suffix: "",
-              icon: <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="1.8" strokeLinecap="round"><path d="M7.5 8h9M7.5 12h6M3 10.5a7.5 7.5 0 1 0 13.3 4.7L19.5 18l-2.7-2.8A7.5 7.5 0 1 0 3 10.5z"/></svg>,
+              icon: <svg className="w-7 h-7" viewBox="0 0 24 24" fill="#10B981"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg>,
               accent: "#10B981",
             },
             {
               label: "Достижений",
               value: earned.length,
               suffix: "",
-              icon: <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="1.8" strokeLinecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>,
+              icon: <svg className="w-7 h-7" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>,
               accent: "#f59e0b",
             },
           ].map((s, i) => (

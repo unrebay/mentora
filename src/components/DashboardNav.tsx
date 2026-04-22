@@ -6,9 +6,9 @@ import ThemeToggle from "@/components/ThemeToggle";
 
 function MentoraE() {
   return (
-    <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, fontSize: "1.1em", lineHeight: 1, letterSpacing: "-0.01em" }}>
+    <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700, fontSize: "0.95em", lineHeight: 1, letterSpacing: "-0.01em" }}>
       <span style={{ color: "var(--text)" }}>M</span>
-      <span style={{ color: "#4561E8", fontStyle: "italic", marginRight: "0.1em" }}>е</span>
+      <span style={{ color: "#4561E8", fontStyle: "italic", marginRight: "0.08em" }}>е</span>
     </span>
   );
 }
@@ -60,12 +60,12 @@ export default function DashboardNav({ isPro, isUltima, totalXP, maxStreak, logo
           <ThemeToggle />
           {totalXP > 0 && (
             <div className="hidden sm:flex items-center gap-1.5 text-sm">
-              <span className="flex items-center gap-0.5 rounded-full px-2.5 h-7 font-semibold border" style={{ background: "var(--bg-secondary)", borderColor: "var(--border)", color: "var(--text)" }}>
+              <span className="flex items-center gap-0.5 rounded-full px-2.5 h-7 font-semibold border" style={{ background: "var(--bg-secondary)", borderColor: "var(--border)", color: "var(--text)", alignItems: "baseline" }}>
                 <MentoraE />{totalXP}
               </span>
               {maxStreak > 0 && (
                 <span className="flex items-center gap-1 rounded-full px-2.5 h-7 font-semibold border" style={{ background: "rgba(249,115,22,0.07)", borderColor: "rgba(249,115,22,0.28)", color: "#f97316" }}>
-                  <svg viewBox="0 0 24 24" fill="none" className="w-3.5 h-3.5 shrink-0"><path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" style={{ width: 18, height: 18, flexShrink: 0, marginTop: 2 }}><path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00"/></svg>
                   {maxStreak} {pluralDays(maxStreak)}
                 </span>
               )}
