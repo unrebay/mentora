@@ -115,7 +115,7 @@ export default async function ProgressPage() {
               label: "Всего ментов",
               value: totalXP.toLocaleString("ru-RU"),
               icon: (
-                <MeLogo height={22} />
+                <MeLogo height={20} colorM="#6B8FFF" colorE="#6B8FFF" />
               ),
               accent: "#6B8FFF",
             },
@@ -123,8 +123,9 @@ export default async function ProgressPage() {
               label: "Макс. стрик",
               value: `${maxStreak}д`,
               icon: (
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00" />
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 3C12 3 7.5 8 7.5 12.5C7.5 15.538 9.462 18 12 18C14.538 18 16.5 15.538 16.5 12.5C16.5 11 16 10 15.5 9C15.5 9 15.5 11.5 13.5 12C14.5 9.5 13 7 12 3Z" fill="#FF7A00"/>
+                  <path d="M12 15C10.895 15 10 14.105 10 13C10 12.5 10.2 12.1 10.5 11.8C10.5 12.5 11 13 12 13C13 13 13.5 12.5 13.5 11.8C13.8 12.1 14 12.5 14 13C14 14.105 13.105 15 12 15Z" fill="#FFCC00"/>
                 </svg>
               ),
               accent: "#FF7A00",
@@ -133,8 +134,9 @@ export default async function ProgressPage() {
               label: "Вопросов",
               value: totalMessages.toLocaleString("ru-RU"),
               icon: (
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="1.8" strokeLinecap="round">
-                  <path d="M7.5 8h9M7.5 12h6M3 10.5a7.5 7.5 0 1 0 13.3 4.7L19.5 18l-2.7-2.8A7.5 7.5 0 1 0 3 10.5z" />
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z" fill="#10B981" fillOpacity="0.9"/>
+                  <path d="M7 9H17M7 13H14" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
                 </svg>
               ),
               accent: "#10B981",
