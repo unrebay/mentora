@@ -10,6 +10,7 @@ import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
 import BadgesSection from "@/components/BadgesSection";
 import MeLogo from "@/components/MeLogo";
 import WhatsNewBanner from "@/components/WhatsNewBanner";
+import ReferralWidget from "@/components/ReferralWidget";
 import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
 
 const DAILY_LIMIT = 20;
@@ -351,6 +352,11 @@ export default async function DashboardPage() {
           userId={user.id}
           progressEntries={progressData ?? []}
         />
+
+        {/* ── Referral ─────────────────────────────────────── */}
+        <div className="mt-8 mb-2">
+          <ReferralWidget />
+        </div>
       </div>
     </main>
   );
