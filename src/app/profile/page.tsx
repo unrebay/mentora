@@ -42,29 +42,88 @@ type Stats = { totalXP: number; bestStreak: number; totalMessages: number; isPro
 
 // SVG badge icons
 const BadgeIcon = {
-  chat: (c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 40, height: 40 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-  books: (c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 40, height: 40 }}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
-  grad:  (c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 40, height: 40 }}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
-  book:  (c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 40, height: 40 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
-  flame: (c: string) => <svg viewBox="0 0 24 24" fill="none" style={{ width: 40, height: 40 }}><path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill={c}/><path d="M12 14.5c0 1.105-.895 2-2 2s-2-.895-2-2c0-1.5 2-3 2-3s2 1.5 2 3z" fill="rgba(255,200,80,0.85)"/></svg>,
-  trophy:(c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 40, height: 40 }}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>,
-  spark: (c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 40, height: 40 }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
-  gem:   (c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 40, height: 40 }}><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3L8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>,
-  bird:  (c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 40, height: 40 }}><path d="M22 2l-7.7 19.4-4.3-9.1L1.2 7.9 22 2z"/></svg>,
-  crown: (c: string) => <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 40, height: 40 }}><path d="M2 4l4 8 6-6 6 6 4-8v14H2V4z"/></svg>,
+  // Chat bubble with message dots
+  chat: (c: string) => <svg viewBox="0 0 24 24" fill="none" style={{ width: 40, height: 40 }}>
+    <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6.5 17.5H20C21.1 17.5 22 16.6 22 15.5V4C22 2.9 21.1 2 20 2Z" fill={c} fillOpacity="0.15" stroke={c} strokeWidth="1.6" strokeLinejoin="round"/>
+    <circle cx="8" cy="11" r="1.3" fill={c}/>
+    <circle cx="12" cy="11" r="1.3" fill={c}/>
+    <circle cx="16" cy="11" r="1.3" fill={c}/>
+  </svg>,
+  // Open book with text lines
+  books: (c: string) => <svg viewBox="0 0 24 24" fill="none" style={{ width: 40, height: 40 }}>
+    <path d="M3 7C3 7 6.5 5.5 12 6.5V21C6.5 20 3 21.5 3 21.5V7Z" fill={c} fillOpacity="0.15" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M21 7C21 7 17.5 5.5 12 6.5V21C17.5 20 21 21.5 21 21.5V7Z" fill={c} fillOpacity="0.15" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M12 6.5V21" stroke={c} strokeWidth="1.3" strokeLinecap="round"/>
+    <path d="M5.5 10h4M5.5 13h4M14.5 10h4M14.5 13h4" stroke={c} strokeWidth="1.2" strokeLinecap="round"/>
+  </svg>,
+  // Graduation cap with tassel
+  grad: (c: string) => <svg viewBox="0 0 24 24" fill="none" style={{ width: 40, height: 40 }}>
+    <path d="M12 4.5L2 9.5L12 14.5L22 9.5L12 4.5Z" fill={c} fillOpacity="0.2" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M6 12V17.5C8.5 20 15.5 20 18 17.5V12" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M22 9.5V14" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="22" cy="14.5" r="1.2" fill={c}/>
+  </svg>,
+  // Open books (professor) — two books
+  book: (c: string) => <svg viewBox="0 0 24 24" fill="none" style={{ width: 40, height: 40 }}>
+    <path d="M12 7C9.5 5.5 5 5.5 3 6.5V19.5C5 18.5 9.5 18.5 12 20V7Z" fill={c} fillOpacity="0.15" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M12 7C14.5 5.5 19 5.5 21 6.5V19.5C19 18.5 14.5 18.5 12 20V7Z" fill={c} fillOpacity="0.15" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M12 7V20" stroke={c} strokeWidth="1.2" strokeLinecap="round"/>
+    <path d="M5.5 9.5h4.5M5.5 12.5h4.5M14 9.5h4.5M14 12.5h4.5" stroke={c} strokeWidth="1.1" strokeLinecap="round"/>
+  </svg>,
+  // Flame with inner glow core
+  flame: (c: string) => <svg viewBox="0 0 24 24" fill="none" style={{ width: 40, height: 40 }}>
+    <path d="M12 2C12 2 7 7.5 7 12.5C7 15.54 9.24 18 12 18C14.76 18 17 15.54 17 12.5C17 11 16.5 10 16 9C16 9 15.5 11.5 13.5 12C14.5 9.5 13.5 5.5 12 2Z" fill={c}/>
+    <path d="M12 15.5C11 15.5 9.5 14.5 9.5 13C9.5 11.8 11 10.5 12 9.8C13 10.5 14.5 11.8 14.5 13C14.5 14.5 13 15.5 12 15.5Z" fill="#FFDD44" fillOpacity="0.9"/>
+  </svg>,
+  // Trophy with base and handles
+  trophy: (c: string) => <svg viewBox="0 0 24 24" fill="none" style={{ width: 40, height: 40 }}>
+    <path d="M7 3H17V11C17 13.76 14.76 16 12 16C9.24 16 7 13.76 7 11V3Z" fill={c} fillOpacity="0.18" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M4 5H7V10C5.5 10 4 8.5 4 7V5Z" fill={c} fillOpacity="0.12" stroke={c} strokeWidth="1.4" strokeLinejoin="round"/>
+    <path d="M20 5H17V10C18.5 10 20 8.5 20 7V5Z" fill={c} fillOpacity="0.12" stroke={c} strokeWidth="1.4" strokeLinejoin="round"/>
+    <path d="M12 16V19" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M8.5 21.5H15.5" stroke={c} strokeWidth="1.8" strokeLinecap="round"/>
+    <circle cx="12" cy="10" r="1.8" fill={c} fillOpacity="0.35"/>
+  </svg>,
+  // 5-point star with inner highlight
+  spark: (c: string) => <svg viewBox="0 0 24 24" fill="none" style={{ width: 40, height: 40 }}>
+    <path d="M12 2L14.6 8.8L22 9.5L16.8 14.3L18.5 21.5L12 17.8L5.5 21.5L7.2 14.3L2 9.5L9.4 8.8L12 2Z" fill={c} fillOpacity="0.2" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M12 5.5L13.6 9.8L18 10.2L14.8 13L15.8 17.5L12 15.3L8.2 17.5L9.2 13L6 10.2L10.4 9.8L12 5.5Z" fill={c} fillOpacity="0.35"/>
+  </svg>,
+  // Diamond gem with facets
+  gem: (c: string) => <svg viewBox="0 0 24 24" fill="none" style={{ width: 40, height: 40 }}>
+    <path d="M5.5 3H18.5L22 9L12 22L2 9L5.5 3Z" fill={c} fillOpacity="0.15" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M2 9H22" stroke={c} strokeWidth="1.3" strokeLinecap="round"/>
+    <path d="M8.5 3L6 9L12 22" stroke={c} strokeWidth="1.1" strokeLinecap="round" strokeOpacity="0.6"/>
+    <path d="M15.5 3L18 9L12 22" stroke={c} strokeWidth="1.1" strokeLinecap="round" strokeOpacity="0.6"/>
+    <path d="M5.5 3L8.5 9H15.5L18.5 3" stroke={c} strokeWidth="1.1" strokeLinecap="round" strokeOpacity="0.6"/>
+  </svg>,
+  // Rocket (первопроходец)
+  bird: (c: string) => <svg viewBox="0 0 24 24" fill="none" style={{ width: 40, height: 40 }}>
+    <path d="M12 2C12 2 8 6 8 12V14L6 16L8 17V15H16V17L18 16L16 14V12C16 6 12 2 12 2Z" fill={c} fillOpacity="0.18" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+    <circle cx="12" cy="10" r="2" fill={c} fillOpacity="0.5" stroke={c} strokeWidth="1.2"/>
+    <path d="M10 17.5C10 19.5 11 21 12 21C13 21 14 19.5 14 17.5H10Z" fill={c} fillOpacity="0.25" stroke={c} strokeWidth="1.2" strokeLinejoin="round"/>
+  </svg>,
+  // Crown with jewels
+  crown: (c: string) => <svg viewBox="0 0 24 24" fill="none" style={{ width: 40, height: 40 }}>
+    <path d="M3 17L4.5 8L9 13.5L12 5L15 13.5L19.5 8L21 17H3Z" fill={c} fillOpacity="0.18" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+    <circle cx="4.5" cy="8" r="1.4" fill={c}/>
+    <circle cx="12" cy="5" r="1.4" fill={c}/>
+    <circle cx="19.5" cy="8" r="1.4" fill={c}/>
+    <path d="M3 19.5H21" stroke={c} strokeWidth="2" strokeLinecap="round"/>
+  </svg>,
 };
 
 const BADGES: BadgeDef[] = [
   { id: "first_message", icon: BadgeIcon.chat("#d97706"), name: "Первый вопрос", desc: "Отправил первое сообщение", tier: "bronze", check: s => s.totalMessages >= 1 },
-  { id: "student", icon: BadgeIcon.books("#d97706"), name: "Студент", desc: "50 сообщений ментору", tier: "bronze", check: s => s.totalMessages >= 50 },
-  { id: "scholar", icon: BadgeIcon.grad("#6b7280"), name: "Учёный", desc: "200 сообщений ментору", tier: "silver", check: s => s.totalMessages >= 200 },
-  { id: "professor", icon: BadgeIcon.book("#f59e0b"), name: "Профессор", desc: "500 сообщений ментору", tier: "gold", check: s => s.totalMessages >= 500 },
+  { id: "student", icon: BadgeIcon.books("#d97706"), name: "Студент", desc: "50 сообщений Менторе", tier: "bronze", check: s => s.totalMessages >= 50 },
+  { id: "scholar", icon: BadgeIcon.grad("#6b7280"), name: "Учёный", desc: "200 сообщений Менторе", tier: "silver", check: s => s.totalMessages >= 200 },
+  { id: "professor", icon: BadgeIcon.book("#f59e0b"), name: "Профессор", desc: "500 сообщений Менторе", tier: "gold", check: s => s.totalMessages >= 500 },
   { id: "streak3", icon: BadgeIcon.flame("#FF7A00"), name: "На разогреве", desc: "3 дня учёбы подряд", tier: "bronze", check: s => s.bestStreak >= 3 },
   { id: "streak7", icon: BadgeIcon.flame("#FF7A00"), name: "Неделя знаний", desc: "7 дней учёбы подряд", tier: "silver", check: s => s.bestStreak >= 7 },
   { id: "streak30", icon: BadgeIcon.trophy("#f59e0b"), name: "Месяц упорства", desc: "30 дней учёбы подряд", tier: "gold", check: s => s.bestStreak >= 30 },
-  { id: "xp100", icon: BadgeIcon.spark("#d97706"), name: "Первые шаги", desc: "Набрал 100 ментов", tier: "bronze", check: s => s.totalXP >= 100 },
-  { id: "xp500", icon: BadgeIcon.spark("#6b7280"), name: "Знаток", desc: "Набрал 500 ментов", tier: "silver", check: s => s.totalXP >= 500 },
-  { id: "xp1000", icon: BadgeIcon.gem("#f59e0b"), name: "Мастер", desc: "Набрал 1000 ментов", tier: "gold", check: s => s.totalXP >= 1000 },
+  { id: "xp100", icon: BadgeIcon.spark("#d97706"), name: "Первые шаги", desc: "Набрал 100 мент", tier: "bronze", check: s => s.totalXP >= 100 },
+  { id: "xp500", icon: BadgeIcon.spark("#6b7280"), name: "Знаток", desc: "Набрал 500 мент", tier: "silver", check: s => s.totalXP >= 500 },
+  { id: "xp1000", icon: BadgeIcon.gem("#f59e0b"), name: "Мастер", desc: "Набрал 1000 мент", tier: "gold", check: s => s.totalXP >= 1000 },
   { id: "early_bird", icon: BadgeIcon.bird("#8b5cf6"), name: "Первопроходец", desc: "Присоединился в первые 90 дней", tier: "special", check: s => s.joinedDaysAgo <= 90 },
   { id: "pro", icon: BadgeIcon.crown("#8b5cf6"), name: "Pro подписчик", desc: "Поддержал развитие Mentora", tier: "special", check: s => s.isPro },
   { id: "ultima", icon: BadgeIcon.gem("#8b5cf6"), name: "Ultra", desc: "Максимальный план Mentora", tier: "special", check: s => s.isUltima },
