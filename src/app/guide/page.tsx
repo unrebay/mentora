@@ -214,7 +214,7 @@ export default function GuidePage() {
             <div>
               <div className="font-semibold text-sm mb-1" style={{ color: "#d97706" }}>Про лимит бесплатного тарифа</div>
               <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                Free: 20 сообщений в день — без карты навсегда. Счётчик сбрасывается в полночь.{" "}
+                Free: 20 сообщений в скользящем окне 24 часа — без карты навсегда.{" "}
                 <Link href="/pricing" className="font-semibold hover:underline" style={{ color: "#f59e0b" }}>
                   Узнать про Pro и Ultra →
                 </Link>

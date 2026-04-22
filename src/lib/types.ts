@@ -180,3 +180,56 @@ export const SUBJECTS: Subject[] = [
     verified: true,
   },
 ];
+
+// ======= Badge system =======
+export interface BadgeDefinition {
+  id: string;
+  emoji: string;
+  title: string;
+  description: string;
+}
+
+export const BADGE_DEFINITIONS: BadgeDefinition[] = [
+  {
+    id: "first_steps",
+    emoji: "🌱",
+    title: "Первые шаги",
+    description: "Первое сообщение с Ментором",
+  },
+  {
+    id: "curious_mind",
+    emoji: "🔍",
+    title: "Любознательный",
+    description: "100 XP в одном предмете",
+  },
+  {
+    id: "deep_diver",
+    emoji: "🌊",
+    title: "Глубокое погружение",
+    description: "500 XP в одном предмете",
+  },
+  {
+    id: "on_a_roll",
+    emoji: "🔥",
+    title: "В ударе",
+    description: "Стрик 3 дня подряд",
+  },
+  {
+    id: "week_warrior",
+    emoji: "⚡",
+    title: "Неделя знаний",
+    description: "Стрик 7 дней подряд",
+  },
+  {
+    id: "knowledge_seeker",
+    emoji: "📚",
+    title: "Искатель знаний",
+    description: "1000 XP суммарно",
+  },
+  {
+    id: "scholar",
+    emoji: "🎓",
+    title: "Учёный",
+    description: "5000 XP суммарно",
+  },
+];

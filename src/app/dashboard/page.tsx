@@ -6,6 +6,7 @@ import Link from "next/link";
 import { PostHogIdentify } from "@/components/PostHogIdentify";
 import { PaymentSuccessTracker } from "@/components/PaymentSuccessTracker";
 import SubjectLibrarySection from "@/components/SubjectLibrarySection";
+import BadgesSection from "@/components/BadgesSection";
 import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
 
 const DAILY_LIMIT = 20;
@@ -69,10 +70,12 @@ export default async function DashboardPage() {
   const usedToday = isNewDay ? 0 : (profile?.messages_today ?? 0);
   const messagesRemaining = isPro ? null : Math.max(0, DAILY_LIMIT - usedToday);
 
-  const { data: progressData } = await supabase
-    .from("user_progress")
-    .select("*")
-    .eq("user_id", user.id);
+  const [{ data: progressData }, { data: badgesData }] = await Promise.all([
+    supabase.from("user_progress").select("*").eq("user_id", user.id),
+    supabase.from("user_badges").select("badge_id").eq("user_id", user.id),
+  ]);
+
+  const earnedBadgeIds = badgesData?.map((b: { badge_id: string }) => b.badge_id) ?? [];
 
   const totalXP = progressData?.reduce((sum, p) => sum + (p.xp_total ?? 0), 0) ?? 0;
   const maxStreak = progressData?.reduce((max, p) => Math.max(max, p.streak_days ?? 0), 0) ?? 0;
@@ -310,6 +313,9 @@ export default async function DashboardPage() {
             )}
           </div>
         </div>
+
+        {/* ── Badges ──────────────────────────────────────── */}
+        <BadgesSection earnedBadgeIds={earnedBadgeIds} />
 
         {/* ── Subject library ───────────────────────────────── */}
         <SubjectLibrarySection
