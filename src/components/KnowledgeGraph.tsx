@@ -38,6 +38,15 @@ const TOPICS: Record<string, string[]> = {
   "astronomy":        ["Солнечная система","Звёзды","Галактики","Космонавтика"],
 };
 
+// Nebula clusters — soft background glow behind groups of related subjects
+const NEBULAE = [
+  { cx: 0.78, cy: 0.44, rx: 0.28, ry: 0.36, color: "rgba(80,100,255,0.055)"  }, // Sciences
+  { cx: 0.37, cy: 0.35, rx: 0.22, ry: 0.25, color: "rgba(255,140,60,0.045)"  }, // History
+  { cx: 0.19, cy: 0.50, rx: 0.18, ry: 0.28, color: "rgba(60,200,180,0.04)"   }, // Languages/Lit
+  { cx: 0.55, cy: 0.76, rx: 0.22, ry: 0.20, color: "rgba(80,200,120,0.04)"   }, // Life sciences
+  { cx: 0.36, cy: 0.18, rx: 0.16, ry: 0.14, color: "rgba(160,120,255,0.04)"  }, // Social/Geo
+];
+
 interface UserProgress { subject: string; xp_total: number }
 interface Props { className?: string; userProgress?: UserProgress[] }
 
@@ -49,9 +58,17 @@ function getStatus(id: string, progress: UserProgress[]): Status {
   if (hasProgress && isFull) return "active_full";
   if (hasProgress) return "active";
   if (isFull) return "full";
-  return "beta"; // no more locked/Скоро
+  return "beta";
 }
-function getRadius(s: Status) { return s==="full"?28:s==="active"||s==="active_full"?26:s==="beta"?20:14; }
+
+// Star radius scales with XP for active subjects
+function getRadius(status: Status, xp = 0): number {
+  if (status === "beta") return 20;
+  if (status === "full") return 28;
+  // active / active_full: base 22, grows up to ~40 with XP
+  const bonus = Math.min(18, Math.sqrt(Math.max(0, xp)) * 0.57);
+  return Math.round(22 + bonus);
+}
 
 function seededRand(seed: number): number {
   const x = Math.sin(seed + 1) * 10000;
@@ -60,13 +77,15 @@ function seededRand(seed: number): number {
 
 interface GNode {
   id: string; label: string; emoji: string; status: Status;
-  x: number; y: number; r: number; phase: number;
+  x: number; y: number; r: number; xp: number; phase: number;
   topics: { x: number; y: number; label: string; phase: number; baseR: number }[];
 }
 
 function buildGraph(W: number, H: number, progress: UserProgress[]): GNode[] {
   return SUBJECTS.map((s, si) => {
-    const status = getStatus(s.id, progress), r = getRadius(status);
+    const status = getStatus(s.id, progress);
+    const xp = progress.find(x => x.subject === s.id)?.xp_total ?? 0;
+    const r = getRadius(status, xp);
     const pos = LAYOUT[s.id] ?? { cx: 0.5, cy: 0.5 };
     const cx = pos.cx * W, cy = pos.cy * H;
     const topicLabels = TOPICS[s.id] ?? [];
@@ -81,19 +100,35 @@ function buildGraph(W: number, H: number, progress: UserProgress[]): GNode[] {
       return { x: cx + Math.cos(angle) * orbitR, y: cy + Math.sin(angle) * orbitR,
                label, phase: seededRand(seed1 + 50) * Math.PI * 2, baseR };
     });
-    return { id: s.id, label: s.title, emoji: s.emoji, status, x: cx, y: cy, r,
+    return { id: s.id, label: s.title, emoji: s.emoji, status, x: cx, y: cy, r, xp,
              phase: seededRand(si * 13) * Math.PI * 2, topics };
   });
 }
 
-const BG_STARS = Array.from({ length: 130 }, (_, i) => ({
+const BG_STARS = Array.from({ length: 160 }, (_, i) => ({
   x: ((i * 137.5) % 1000) / 10, y: ((i * 97.3 + 17) % 1000) / 10,
-  r: 0.12 + (i % 4) * 0.08, a: 0.15 + (i % 5) * 0.07,
+  r: 0.10 + (i % 5) * 0.07, a: 0.12 + (i % 6) * 0.06,
+  twinkle: (i % 3 === 0), phase: (i * 0.73) % (Math.PI * 2),
 }));
 
-function drawBg(ctx: CanvasRenderingContext2D, W: number, H: number) {
+function drawBg(ctx: CanvasRenderingContext2D, W: number, H: number, t: number) {
+  // Nebulae — drawn first, very subtle
+  for (const nb of NEBULAE) {
+    ctx.save();
+    ctx.scale(1, nb.ry / nb.rx); // ellipse via scale
+    const cx = nb.cx * W, cy = (nb.cy * H) * (nb.rx / nb.ry);
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, nb.rx * W);
+    g.addColorStop(0, nb.color);
+    g.addColorStop(0.5, nb.color.replace(/[\d.]+\)$/, m => `${parseFloat(m) * 0.4})`));
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(cx, cy, nb.rx * W, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  // Background stars with subtle twinkle
   for (const s of BG_STARS) {
-    ctx.fillStyle = `rgba(255,255,255,${s.a})`;
+    const a = s.twinkle ? s.a * (0.7 + 0.3 * Math.sin(t * 0.0008 + s.phase)) : s.a;
+    ctx.fillStyle = `rgba(255,255,255,${a})`;
     ctx.beginPath(); ctx.arc((s.x / 100) * W, (s.y / 100) * H, s.r, 0, Math.PI * 2); ctx.fill();
   }
 }
@@ -103,11 +138,10 @@ function render(
   activeId: string | null, hovTopicIdx: [string, number] | null,
   t: number, W: number, H: number,
 ) {
-  ctx.clearRect(0, 0, W, H); drawBg(ctx, W, H);
+  ctx.clearRect(0, 0, W, H); drawBg(ctx, W, H, t);
 
   // Connection lines
   for (const n of nodes) {
-    // all statuses are visible
     const pal = PAL[n.status], isActive = n.id === activeId;
     for (const tp of n.topics) {
       ctx.save();
@@ -118,7 +152,7 @@ function render(
     }
   }
 
-  // Topic dots — always visible
+  // Topic dots
   for (const n of nodes) {
     const pal = PAL[n.status], isActive = n.id === activeId;
     n.topics.forEach((tp, idx) => {
@@ -152,11 +186,9 @@ function render(
     const isActive = n.id === activeId, sh = 0.72 + 0.28 * Math.sin(t * 0.0007 + n.phase);
     const pal = PAL[n.status], glowR = n.r*(isActive?3.6:2.2)*sh, coreR = n.r*(isActive?1.25:1)*sh;
     ctx.save();
-    // Main glow (always orange for active/active_full)
     const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, glowR);
     g.addColorStop(0, pal.glow); g.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(n.x, n.y, glowR, 0, Math.PI*2); ctx.fill();
-    // For active_full: add extra blue outer glow layer
     if (n.status === "active_full") {
       const g2 = ctx.createRadialGradient(n.x, n.y, coreR, n.x, n.y, glowR * 1.6);
       g2.addColorStop(0, "rgba(107,143,255,0.35)"); g2.addColorStop(1, "rgba(0,0,0,0)");
@@ -164,7 +196,6 @@ function render(
     }
     ctx.shadowBlur = isActive ? 24*sh : 14*sh; ctx.shadowColor = pal.glow;
     ctx.fillStyle = pal.core; ctx.beginPath(); ctx.arc(n.x, n.y, coreR, 0, Math.PI*2); ctx.fill();
-    // Ring — blue for active_full, otherwise pal.ring
     ctx.strokeStyle = pal.ring; ctx.lineWidth = isActive ? 1.5 : 0.8;
     ctx.shadowBlur = isActive ? 12 : 6;
     ctx.shadowColor = n.status === "active_full" ? "rgba(107,143,255,0.8)" : pal.glow;
@@ -191,6 +222,8 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
   const [activeId,    setActiveId]    = useState<string | null>(null);
   const [hovTopicIdx, setHovTopicIdx] = useState<[string, number] | null>(null);
   const [selectedId,  setSelectedId]  = useState<string | null>(null);
+  // Popup position in canvas-space pixels
+  const [popupAnchor, setPopupAnchor] = useState<{ x: number; y: number; r: number } | null>(null);
 
   const init = useCallback(() => {
     const canvas = canvasRef.current; if (!canvas) return;
@@ -268,8 +301,14 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
     const r = c.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
     const s = hitSubject(mx, my);
     if (s) {
-      setSelectedId(id => id === s.id ? null : s.id);
+      setSelectedId(prev => {
+        if (prev === s.id) { setPopupAnchor(null); return null; }
+        setPopupAnchor({ x: s.x, y: s.y, r: s.r });
+        return s.id;
+      });
       activate(s.id);
+    } else {
+      setSelectedId(null); setPopupAnchor(null);
     }
   }, [hitSubject, activate]);
 
@@ -291,7 +330,14 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
       const c = canvasRef.current; if (!c) return;
       const r = c.getBoundingClientRect(), mx = e.changedTouches[0].clientX - r.left, my = e.changedTouches[0].clientY - r.top;
       const s = hitSubject(mx, my);
-      if (s) { setSelectedId(id => id === s.id ? null : s.id); activate(s.id); }
+      if (s) {
+        setSelectedId(prev => {
+          if (prev === s.id) { setPopupAnchor(null); return null; }
+          setPopupAnchor({ x: s.x, y: s.y, r: s.r });
+          return s.id;
+        });
+        activate(s.id);
+      }
     }
     activate(null);
   }, [activate, hitSubject]);
@@ -300,13 +346,30 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
   const selSub  = SUBJECTS.find(s => s.id === selectedId);
   const selTops = selectedId === "russian-history" ? RUSSIAN_HISTORY_TOPICS : null;
 
+  // Compute popup CSS position — anchor to star, clamp within canvas
+  const POPUP_W = 300, POPUP_H_EST = 180;
+  let popupStyle: React.CSSProperties = { display: "none" };
+  if (popupAnchor && canvasRef.current) {
+    const W = canvasRef.current.clientWidth, H = canvasRef.current.clientHeight;
+    let px = popupAnchor.x - POPUP_W / 2;
+    // Place above star if enough room, else below
+    const aboveY = popupAnchor.y - popupAnchor.r - POPUP_H_EST - 16;
+    const belowY = popupAnchor.y + popupAnchor.r + 16;
+    let py = aboveY >= 4 ? aboveY : belowY;
+    // Clamp horizontally
+    px = Math.max(8, Math.min(px, W - POPUP_W - 8));
+    py = Math.max(8, Math.min(py, H - POPUP_H_EST - 8));
+    popupStyle = { display: "block", left: px, top: py, width: POPUP_W };
+  }
+
   return (
     <div className={`relative w-full h-full ${className}`} style={{ background: "#06060f" }}>
+      {/* Legend */}
       <div className="absolute top-4 right-4 flex flex-col gap-1.5 z-10 pointer-events-none">
         {([
-          { key: "active",      core: "#ffa040", label: "Изучается" },
-          { key: "full",        core: "#6b8fff", label: "Полный" },
-          { key: "beta",        core: "#c8d4ff", label: "Бета" },
+          { key: "active", core: "#ffa040", label: "Изучается" },
+          { key: "full",   core: "#6b8fff", label: "Полный" },
+          { key: "beta",   core: "#c8d4ff", label: "Бета" },
         ] as { key: string; core: string; label: string }[]).map(item => (
           <div key={item.key} className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full" style={{ background: item.core, boxShadow: `0 0 5px ${item.core}` }} />
@@ -316,49 +379,79 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
       </div>
       <p className="absolute top-4 left-4 z-10 text-[10px] text-white/25 pointer-events-none md:hidden">Нажми на звезду</p>
 
+      {/* Floating popup card */}
       {selNode && selSub && (
-        <div className="absolute bottom-0 left-0 right-0 z-20" style={{ background: "rgba(6,6,15,0.96)", backdropFilter: "blur(16px)" }}>
-          <div className="max-w-3xl mx-auto px-4 py-4">
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{selSub.emoji}</span>
-                <div>
-                  <h3 className="font-bold text-white text-base">{selSub.title}</h3>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
-                      style={{ background: PAL[selNode.status].core + "30", color: PAL[selNode.status].core }}>
-                      {PAL[selNode.status].label.toUpperCase()}
-                    </span>
-                    <span className="text-xs text-white/40">{selSub.description}</span>
-                  </div>
+        <div
+          className="absolute z-30 rounded-2xl overflow-hidden pointer-events-auto"
+          style={{
+            ...popupStyle,
+            background: "rgba(10,10,28,0.92)",
+            backdropFilter: "blur(20px)",
+            border: `1px solid ${PAL[selNode.status].core}30`,
+            boxShadow: `0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px ${PAL[selNode.status].core}15`,
+          }}
+        >
+          {/* Header */}
+          <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-2"
+            style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="text-2xl shrink-0">{selSub.emoji}</span>
+              <div className="min-w-0">
+                <h3 className="font-bold text-white text-sm leading-tight truncate">{selSub.title}</h3>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md"
+                    style={{ background: PAL[selNode.status].core + "25", color: PAL[selNode.status].core }}>
+                    {PAL[selNode.status].label}
+                  </span>
+                  {selNode.xp > 0 && (
+                    <span className="text-[10px] text-white/35">{selNode.xp} мент</span>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <a href={`/learn/${selNode.id}`}
-                  className="px-3 py-2 bg-brand-600 text-white text-sm font-semibold rounded-xl hover:bg-brand-700 transition-colors">
-                  Начать →
-                </a>
-                <button onClick={() => setSelectedId(null)}
-                  className="px-2 py-2 text-white/40 hover:text-white/70 transition-colors text-lg leading-none">✕</button>
-              </div>
             </div>
+            <button onClick={() => { setSelectedId(null); setPopupAnchor(null); }}
+              className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors text-sm leading-none">
+              ✕
+            </button>
+          </div>
+
+          {/* Description */}
+          <div className="px-4 py-3">
+            <p className="text-xs text-white/40 mb-3 leading-relaxed">{selSub.description}</p>
+
+            {/* Topics preview */}
             {selTops ? (
-              <div className="overflow-x-auto -mx-4 px-4">
-                <div className="flex gap-2 pb-2 min-w-max">
-                  {selTops.map(p => (
-                    <div key={p.id} className="flex-shrink-0 bg-white/5 border border-white/10 rounded-xl px-3 py-2 hover:bg-white/10 transition-colors" style={{ width: 115 }}>
-                      <div className="text-sm mb-1">{p.emoji}</div>
-                      <div className="text-xs font-medium text-white/80 leading-tight line-clamp-2">{p.title}</div>
-                      <div className="text-[10px] text-white/30 mt-1">{p.years} · {p.topics.length} тем</div>
+              <div className="overflow-x-auto -mx-1">
+                <div className="flex gap-1.5 pb-1 min-w-max px-1">
+                  {selTops.slice(0, 6).map(p => (
+                    <div key={p.id} className="flex-shrink-0 rounded-xl px-2.5 py-1.5 text-center"
+                      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", width: 76 }}>
+                      <div className="text-sm mb-0.5">{p.emoji}</div>
+                      <div className="text-[9px] font-medium text-white/70 leading-tight line-clamp-2">{p.title}</div>
                     </div>
                   ))}
+                  {selTops.length > 6 && (
+                    <div className="flex-shrink-0 rounded-xl px-2.5 py-1.5 flex items-center justify-center"
+                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", width: 76 }}>
+                      <span className="text-[9px] text-white/30">+{selTops.length - 6} тем</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-white/30">
-                {selNode.status === "active" ? "Ты уже изучаешь этот предмет." : "Нажми «Начать» — Mentora подстроится с первого сообщения."}
+              <p className="text-[10px] text-white/30 italic">
+                {selNode.status === "active" ? "Ты уже изучаешь этот предмет" : "Mentora подстроится с первого сообщения"}
               </p>
             )}
+          </div>
+
+          {/* CTA */}
+          <div className="px-4 pb-4">
+            <a href={`/learn/${selNode.id}`}
+              className="block w-full text-center py-2 rounded-xl text-xs font-semibold text-white transition-all hover:opacity-90"
+              style={{ background: `linear-gradient(135deg, ${PAL[selNode.status].core}, ${PAL[selNode.status].core}cc)` }}>
+              {selNode.status === "active" || selNode.status === "active_full" ? "Продолжить →" : "Начать →"}
+            </a>
           </div>
         </div>
       )}
