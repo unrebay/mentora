@@ -9,6 +9,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const { searchParams } = new URL(req.url);
+  const subject = searchParams.get("subject") ?? "discovery";
+
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -18,7 +21,7 @@ export async function POST(req: NextRequest) {
   const { data: chunks, error } = await supabase
     .from("knowledge_chunks")
     .select("id, content")
-    .eq("subject", "discovery")
+    .eq("subject", subject)
     .is("embedding", null)
     .limit(8);
 
@@ -61,7 +64,7 @@ export async function POST(req: NextRequest) {
   const { count: remaining } = await supabase
     .from("knowledge_chunks")
     .select("*", { count: "exact", head: true })
-    .eq("subject", "discovery")
+    .eq("subject", subject)
     .is("embedding", null);
 
   return NextResponse.json({
