@@ -641,8 +641,9 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       {/* ── Level Up celebration modal ─────────────────────────────── */}
       {showLevelUp && levelUpData && (
         <div
-          className="fixed bottom-6 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm rounded-2xl overflow-hidden shadow-2xl"
+          className="fixed bottom-6 left-1/2 w-[calc(100%-2rem)] max-w-sm rounded-2xl overflow-hidden shadow-2xl"
           style={{
+            zIndex: 9999,
             transform: `translateX(-50%) translateY(${levelUpFading ? "8px" : "0"})`,
             opacity: levelUpFading ? 0 : 1,
             transition: "opacity 0.5s ease, transform 0.5s ease",
