@@ -89,7 +89,7 @@ interface GNode {
 }
 
 function buildGraph(W: number, H: number, progress: UserProgress[]): GNode[] {
-  return SUBJECTS.map((s, si) => {
+  const nodes: GNode[] = SUBJECTS.map((s, si) => {
     const status = getStatus(s.id, progress);
     const xp = progress.find(x => x.subject === s.id)?.xp_total ?? 0;
     const r = getRadius(status, xp);
@@ -99,9 +99,13 @@ function buildGraph(W: number, H: number, progress: UserProgress[]): GNode[] {
     const topics = topicLabels.map((label, i) => {
       const seed1 = si * 100 + i * 7;
       const baseAngle = (i / topicLabels.length) * Math.PI * 2 - Math.PI / 2;
-      const angleJitter = (seededRand(seed1) - 0.5) * 1.4;
+      const angleJitter = (seededRand(seed1) - 0.5) * 0.3;
       const angle = baseAngle + angleJitter;
-      const minOrbit = r * 3.0 + 12, maxOrbit = r * 3.0 + (topicLabels.length > 6 ? 38 : 28);
+      // Ensure minimum arc spacing: circumference ≥ N * 55px
+      const minCircumference = topicLabels.length * 55;
+      const minOrbitFromSpacing = minCircumference / (2 * Math.PI);
+      const minOrbit = Math.max(r * 2.8 + 10, minOrbitFromSpacing);
+      const maxOrbit = minOrbit + 20;
       const orbitR = minOrbit + seededRand(seed1 + 1) * (maxOrbit - minOrbit);
       const baseR = 2.8 + seededRand(seed1 + 2) * 1.6;
       return { x: cx + Math.cos(angle) * orbitR, y: cy + Math.sin(angle) * orbitR,
@@ -110,6 +114,33 @@ function buildGraph(W: number, H: number, progress: UserProgress[]): GNode[] {
     return { id: s.id, label: s.title, emoji: s.emoji, status, x: cx, y: cy, r, xp,
              phase: seededRand(si * 13) * Math.PI * 2, topics };
   });
+
+  // Minimum distance repulsion between topic dots within each star
+  const MIN_TOPIC_DIST = 44;
+  for (let iter = 0; iter < 5; iter++) {
+    for (const node of nodes) {
+      for (let ti = 0; ti < node.topics.length; ti++) {
+        const tpa = node.topics[ti];
+        for (let tj = ti + 1; tj < node.topics.length; tj++) {
+          const tpb = node.topics[tj];
+          const ddx = tpb.x - tpa.x, ddy = tpb.y - tpa.y;
+          const d = Math.sqrt(ddx*ddx + ddy*ddy) || 1;
+          if (d < MIN_TOPIC_DIST) {
+            const push = (MIN_TOPIC_DIST - d) * 0.55;
+            const nnx = ddx/d, nny = ddy/d;
+            // Push outward along the topic's radial vector from star center
+            const rxa = tpa.x - node.x, rya = tpa.y - node.y, rla = Math.sqrt(rxa*rxa+rya*rya)||1;
+            const rxb = tpb.x - node.x, ryb = tpb.y - node.y, rlb = Math.sqrt(rxb*rxb+ryb*ryb)||1;
+            tpa.x -= nnx * push * 0.4 + (rxa/rla) * push * 0.4;
+            tpa.y -= nny * push * 0.4 + (rya/rla) * push * 0.4;
+            tpb.x += nnx * push * 0.4 + (rxb/rlb) * push * 0.4;
+            tpb.y += nny * push * 0.4 + (ryb/rlb) * push * 0.4;
+          }
+        }
+      }
+    }
+  }
+  return nodes;
 }
 
 const BG_STARS = Array.from({ length: 160 }, (_, i) => ({
@@ -227,7 +258,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
   const [activeId,    setActiveId]    = useState<string | null>(null);
   const [hovTopicIdx, setHovTopicIdx] = useState<[string, number] | null>(null);
   const [selectedId,  setSelectedId]  = useState<string | null>(null);
-  const [selectedTopic, setSelectedTopic] = useState<{ nodeId: string; label: string; x: number; y: number } | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<{ nodeId: string; label: string; x: number; y: number; status: Status } | null>(null);
   // Popup position in canvas-space pixels
   const [popupAnchor, setPopupAnchor] = useState<{ x: number; y: number; r: number } | null>(null);
 
@@ -274,7 +305,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
     for (const n of nodesRef.current) {
       for (let i = 0; i < n.topics.length; i++) {
         const tp = n.topics[i];
-        if (Math.hypot(tp.x - mx, tp.y - my) < tp.baseR * 4 + 6) return [n, i];
+        if (Math.hypot(tp.x - mx, tp.y - my) < tp.baseR * 5 + 14) return [n, i];
       }
     }
     return null;
@@ -302,7 +333,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
   }, []);
 
   const onClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (Math.hypot(e.clientX - clickStart.current.x, e.clientY - clickStart.current.y) > 6) return;
+    if (Math.hypot(e.clientX - clickStart.current.x, e.clientY - clickStart.current.y) > 10) return;
     const c = canvasRef.current; if (!c) return;
     const r = c.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
     // Check topic dot first
@@ -310,7 +341,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
     if (th) {
       const [node, idx] = th;
       const tp = node.topics[idx];
-      setSelectedTopic({ nodeId: node.id, label: tp.label, x: tp.x, y: tp.y });
+      setSelectedTopic({ nodeId: node.id, label: tp.label, x: tp.x, y: tp.y, status: node.status });
       setSelectedId(null); setPopupAnchor(null);
       activate(node.id);
       return;
@@ -377,7 +408,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
     topicPopStyle = { display: "block", left: px, top: Math.max(8, py), width: TOPIC_POP_W };
   }
   // Find node for selected topic
-  const topicNode = selectedTopic ? nodesRef.current.find(n => n.id === selectedTopic.nodeId) : null;
+  // topicNode removed — status stored directly in selectedTopic
 
   // Compute popup CSS position — anchor to star, clamp within canvas
   const POPUP_W = 300, POPUP_H_EST = 180;
@@ -413,20 +444,20 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
       <p className="absolute top-4 left-4 z-10 text-[10px] text-white/25 pointer-events-none md:hidden">Нажми на звезду</p>
 
       {/* Topic mini-popup */}
-      {selectedTopic && topicNode && (
+      {selectedTopic && (
         <div className="absolute z-40 rounded-xl overflow-hidden pointer-events-auto"
           style={{
             ...topicPopStyle,
             background: "rgba(10,10,28,0.95)",
             backdropFilter: "blur(20px)",
-            border: `1px solid ${PAL[topicNode.status].core}40`,
+            border: `1px solid ${PAL[selectedTopic.status].core}40`,
             boxShadow: `0 4px 24px rgba(0,0,0,0.5)`,
           }}
         >
           <div className="px-3 py-2.5 flex items-start justify-between gap-2">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wide mb-0.5"
-                style={{ color: PAL[topicNode.status].core }}>Тема</p>
+                style={{ color: PAL[selectedTopic.status].core }}>Тема</p>
               <p className="text-sm font-semibold text-white leading-tight">{selectedTopic.label}</p>
             </div>
             <button onClick={() => setSelectedTopic(null)}
@@ -435,7 +466,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
           <div className="px-3 pb-3">
             <a href={`/learn/${selectedTopic.nodeId}?topic=${encodeURIComponent(selectedTopic.label)}`}
               className="block w-full text-center py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90"
-              style={{ background: PAL[topicNode.status].core }}>
+              style={{ background: PAL[selectedTopic.status].core }}>
               Обсудить эту тему →
             </a>
           </div>
