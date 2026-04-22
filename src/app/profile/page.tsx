@@ -89,7 +89,7 @@ export default async function ProfilePage() {
   if (!user) redirect("/auth");
 
   const [{ data: profile }, { data: progressData }, { count: msgCount }] = await Promise.all([
-    supabase.from("users").select("plan, created_at, display_name, name_changes_count, full_name, age, phone").eq("id", user.id).single(),
+    supabase.from("users").select("plan, trial_expires_at, created_at, display_name, name_changes_count, full_name, age, phone").eq("id", user.id).single(),
     supabase.from("user_progress").select("xp_total, streak_days, best_streak").eq("user_id", user.id),
     supabase.from("chat_messages").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("role", "user"),
   ]);
@@ -99,7 +99,8 @@ export default async function ProfilePage() {
   const bestStreak = progressData?.reduce((m, p) => Math.max(m, p.best_streak ?? 0), 0) ?? 0;
   const totalMessages = msgCount ?? 0;
   const isUltima = profile?.plan === "ultima";
-  const isPro = isUltima || profile?.plan === "pro";
+  const isTrialActive = profile?.trial_expires_at ? new Date(profile.trial_expires_at) > new Date() : false;
+  const isPro = isUltima || profile?.plan === "pro" || isTrialActive;
   const joinedDaysAgo = profile?.created_at
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 86400000)
     : 999;
@@ -160,7 +161,7 @@ export default async function ProfilePage() {
               {isPro && (
                 <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white"
                   style={{ background: isUltima ? "linear-gradient(135deg, #4561E8, #7C3AED)" : "linear-gradient(135deg, #4561E8, #6B8FFF)" }}>
-                  {isUltima ? "+ ULTRA" : "PRO"}
+                  {isUltima ? "ULTRA" : "PRO"}
                 </span>
               )}
             </div>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { PostHogIdentify } from "@/components/PostHogIdentify";
 import { PaymentSuccessTracker } from "@/components/PaymentSuccessTracker";
 import SubjectLibrarySection from "@/components/SubjectLibrarySection";
+import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
 import BadgesSection from "@/components/BadgesSection";
 import MeLogo from "@/components/MeLogo";
 import WhatsNewBanner from "@/components/WhatsNewBanner";
@@ -65,12 +66,7 @@ export default async function DashboardPage() {
   const usedToday = isNewDay ? 0 : (profile?.messages_today ?? 0);
   const messagesRemaining = isPro ? null : Math.max(0, DAILY_LIMIT - usedToday);
 
-  const [{ data: progressData }, { data: badgesData }] = await Promise.all([
-    supabase.from("user_progress").select("*").eq("user_id", user.id),
-    supabase.from("user_badges").select("badge_id").eq("user_id", user.id),
-  ]);
-
-  const earnedBadgeIds = badgesData?.map((b: { badge_id: string }) => b.badge_id) ?? [];
+  const { data: progressData } = await supabase.from("user_progress").select("*").eq("user_id", user.id);
 
   const totalXP = progressData?.reduce((sum, p) => sum + (p.xp_total ?? 0), 0) ?? 0;
   const currentStreak = progressData?.reduce((max, p) => Math.max(max, p.streak_days ?? 0), 0) ?? 0;
@@ -90,6 +86,14 @@ export default async function DashboardPage() {
   }
 
   const userSubjects = SUBJECTS.filter((s) => userSubjectIds.includes(s.id));
+
+  // Last active subject — most recent last_active_at from progressData
+  const lastActiveProgress = progressData
+    ?.filter(p => p.last_active_at)
+    .sort((a, b) => new Date(b.last_active_at!).getTime() - new Date(a.last_active_at!).getTime())[0];
+  const lastActiveSubject = lastActiveProgress
+    ? SUBJECTS.find(s => s.id === lastActiveProgress.subject) ?? null
+    : null;
 
   const firstName = getFirstName(
     user.user_metadata?.full_name ?? user.user_metadata?.name,
@@ -312,8 +316,33 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* ── Badges ──────────────────────────────────────── */}
-        <BadgesSection earnedBadgeIds={earnedBadgeIds} />
+        {/* ── Продолжить обучение ─────────────────────────── */}
+        {lastActiveSubject && (
+          <div className="rounded-2xl overflow-hidden border"
+            style={{
+              background: `linear-gradient(135deg, ${subjectColor(lastActiveSubject.id)}22, ${subjectColor(lastActiveSubject.id)}08)`,
+              borderColor: `${subjectColor(lastActiveSubject.id)}30`,
+            }}
+          >
+            <div className="p-5 flex items-center gap-4">
+              <SubjectIcon id={lastActiveSubject.id} size={52} />
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold tracking-[0.15em] uppercase mb-1" style={{ color: subjectColor(lastActiveSubject.id) }}>
+                  Продолжить обучение
+                </p>
+                <p className="font-bold text-base truncate" style={{ color: "var(--text)" }}>{lastActiveSubject.title}</p>
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                  {lastActiveProgress?.xp_total ?? 0} ментов
+                  {(lastActiveProgress?.streak_days ?? 0) > 0 && ` · 🔥 ${lastActiveProgress!.streak_days} дн. подряд`}
+                </p>
+              </div>
+              <Link href={`/learn/${lastActiveSubject.id}`}
+                className="btn-glow shrink-0 px-4 py-2 rounded-xl text-sm font-semibold text-white">
+                Продолжить →
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* ── Subject library ───────────────────────────────── */}
         <SubjectLibrarySection

@@ -178,6 +178,7 @@ export async function POST(req: NextRequest) {
     const goal = profile?.onboarding_goal ?? "general";
     const subjectLabel = SUBJECT_NAME[subject] ?? subject;
     const isEnglish = subject === "english";
+    const planLabel = isUltima ? "Ultima (максимальный тариф, безлимитные сообщения, загрузка фото задач)" : isPro ? "Pro (безлимитные сообщения)" : "Free (лимит сообщений в день)";
 
     const isDiscovery = subject === "discovery";
     const systemPrompt = isDiscovery
@@ -196,6 +197,7 @@ export async function POST(req: NextRequest) {
 - Стиль подачи: ${STYLE_GUIDE[style]}
 - Уровень: ${LEVEL_GUIDE[level]}
 - Цель: ${GOAL_GUIDE[goal]}
+- Тариф: ${planLabel}
 
 ПАМЯТЬ О ПОЛЬЗОВАТЕЛЕ:
 ${JSON.stringify(memory?.memory_json ?? {})}

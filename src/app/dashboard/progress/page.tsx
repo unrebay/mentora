@@ -47,7 +47,7 @@ export default async function ProgressPage() {
     .from("user_progress")
     .select("subject, xp_total, streak_days, last_active_at")
     .eq("user_id", user.id)
-    .order("xp_total", { ascending: false });
+    .order("last_active_at", { ascending: false, nullsFirst: false });
 
   const { data: msgRows } = await supabase
     .from("chat_messages")
@@ -115,7 +115,7 @@ export default async function ProgressPage() {
               label: "Всего ментов",
               value: totalXP.toLocaleString("ru-RU"),
               icon: (
-                <MeLogo height={22} colorM="#6B8FFF" colorE="#6B8FFF" />
+                <MeLogo height={22} />
               ),
               accent: "#6B8FFF",
             },
@@ -166,7 +166,7 @@ export default async function ProgressPage() {
               <SubjectIcon id={topSubject.id} size={52} />
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold tracking-[0.15em] uppercase mb-1" style={{ color: subjectColor(topSubject.id) }}>
-                  Главный предмет
+                  Продолжить обучение
                 </p>
                 <p className="font-bold text-base" style={{ color: "var(--text)" }}>{topSubject.title}</p>
                 <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>

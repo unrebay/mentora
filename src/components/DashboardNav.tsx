@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import MeLogo from "@/components/MeLogo";
 import Link from "next/link";
 import Logo from "@/components/Logo";
@@ -32,6 +33,18 @@ interface DashboardNavProps {
 
 export default function DashboardNav({ isPro, isUltima, totalXP, currentStreak, bestStreak, logoutAction }: DashboardNavProps) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  function navClass(href: string) {
+    const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
+    return active
+      ? "text-sm font-semibold transition-colors"
+      : "text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors";
+  }
+  function navStyle(href: string) {
+    const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
+    return active ? { color: "#4561E8" } : {};
+  }
 
   return (
     <nav className="sticky top-0 z-20 border-b border-[var(--border)]" style={{ background: "var(--bg-nav)", backdropFilter: "blur(12px)" }}>
@@ -41,10 +54,10 @@ export default function DashboardNav({ isPro, isUltima, totalXP, currentStreak, 
         <div className="flex items-center gap-3">
           <Logo size="sm" />
           <div className="hidden md:flex items-center gap-5 ml-2">
-            <a href="/dashboard/progress" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">Прогресс</a>
-            <a href="/dashboard/analytics" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">Аналитика</a>
-            <a href="/knowledge" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">Галактика знаний</a>
-            <a href="/profile" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">Профиль</a>
+            <a href="/dashboard/progress" className={navClass("/dashboard/progress")} style={navStyle("/dashboard/progress")}>Прогресс</a>
+            <a href="/dashboard/analytics" className={navClass("/dashboard/analytics")} style={navStyle("/dashboard/analytics")}>Аналитика</a>
+            <a href="/knowledge" className={navClass("/knowledge")} style={navStyle("/knowledge")}>Галактика знаний</a>
+            <a href="/profile" className={navClass("/profile")} style={navStyle("/profile")}>Профиль</a>
           </div>
         </div>
 
