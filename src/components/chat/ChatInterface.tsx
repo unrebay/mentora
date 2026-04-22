@@ -164,29 +164,46 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const [pendingImage, setPendingImage] = useState<{ data: string; mimeType: string; preview: string } | null>(null);
   const [nativeModeActive, setNativeModeActive] = useState(false);
   const [showNativeHint, setShowNativeHint] = useState(false);
+  const [hintFading, setHintFading] = useState(false);
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Native hint: show first 3 visits to English chat, auto-dismiss after 5s
+  // Native hint: show first 3 visits to English chat, fade in, auto-dismiss after 5s with fade out
   useEffect(() => {
     if (subject !== "english") return;
+    let rafId: number;
+    let fadeOutTimer: ReturnType<typeof setTimeout>;
     try {
       const key = "mentora_native_hint_count";
       const count = parseInt(localStorage.getItem(key) ?? "0", 10);
       if (count < 3) {
         localStorage.setItem(key, String(count + 1));
+        setHintFading(true);
         setShowNativeHint(true);
-        hintTimerRef.current = setTimeout(() => setShowNativeHint(false), 5000);
+        // fade in after mount
+        rafId = requestAnimationFrame(() => {
+          requestAnimationFrame(() => setHintFading(false));
+        });
+        // auto-dismiss after 5s with fade out
+        hintTimerRef.current = setTimeout(() => {
+          setHintFading(true);
+          fadeOutTimer = setTimeout(() => setShowNativeHint(false), 400);
+        }, 5000);
       }
     } catch {}
-    return () => { if (hintTimerRef.current) clearTimeout(hintTimerRef.current); };
+    return () => {
+      cancelAnimationFrame(rafId);
+      if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+      clearTimeout(fadeOutTimer);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const dismissNativeHint = useCallback(() => {
     if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
-    setShowNativeHint(false);
+    setHintFading(true);
+    setTimeout(() => setShowNativeHint(false), 400);
     // Mark as seen 3 times so it won't show again
     try { localStorage.setItem("mentora_native_hint_count", "3"); } catch {}
   }, []);
@@ -465,16 +482,17 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             {/* Native hint tooltip — shown first 3 visits */}
             {subject === "english" && showNativeHint && (
               <div
-                className="mb-2 mx-auto max-w-xs rounded-2xl px-4 py-3 flex items-start gap-3 animate-[fadeUp_0.3s_ease]"
+                className="mb-2 mx-auto max-w-xs rounded-2xl px-4 py-3 flex items-start gap-2"
                 style={{
                   background: "linear-gradient(135deg, rgba(59,130,246,0.10) 0%, rgba(29,78,216,0.07) 100%)",
                   border: "1px solid rgba(59,130,246,0.22)",
+                  opacity: hintFading ? 0 : 1,
+                  transition: "opacity 0.4s ease",
                 }}
               >
-                <span className="text-lg leading-none shrink-0 mt-0.5">🗣️</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold mb-0.5" style={{ color: "#3B82F6" }}>
-                    Режим носителя
+                    Подсказка:
                   </p>
                   <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
                     Нажми кнопку ниже — и Ментора перейдёт на живой английский как native speaker
@@ -483,7 +501,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                 <button
                   onClick={dismissNativeHint}
                   aria-label="Скрыть подсказку"
-                  className="shrink-0 mt-0.5 rounded-lg p-1 transition-colors hover:bg-[var(--bg-secondary)]"
+                  className="shrink-0 rounded-lg p-1 transition-colors hover:bg-[var(--bg-secondary)]"
                   style={{ color: "var(--text-muted)" }}
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
