@@ -11,6 +11,37 @@ const anthropic = new Anthropic({
 });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+
+// ── XP level detection ────────────────────────────────────────────────────────
+const XP_LEVELS_API = [
+  { name: "Новичок", minXP: 0 },
+  { name: "Исследователь", minXP: 100 },
+  { name: "Знаток", minXP: 300 },
+  { name: "Историк", minXP: 600 },
+  { name: "Эксперт", minXP: 1000 },
+];
+function getLevelName(xp: number): string {
+  return [...XP_LEVELS_API].reverse().find(l => xp >= l.minXP)?.name ?? "Новичок";
+}
+function getLevelColor(level: string): string {
+  const colors: Record<string, string> = {
+    "Исследователь": "#4561E8",
+    "Знаток": "#7C3AED",
+    "Историк": "#f59e0b",
+    "Эксперт": "#d97706",
+  };
+  return colors[level] ?? "#4561E8";
+}
+function getLevelUpMessage(newLevel: string, subjectTitle: string): string {
+  const msgs: Record<string, string> = {
+    "Исследователь": `Новичок — позади! Ты уже глубже разбираешься в теме «${subjectTitle}» чем большинство. Задавай больше вопросов — это и есть путь вперёд.`,
+    "Знаток": `Уровень Знатока — это уже серьёзно! Твоя работа с темой «${subjectTitle}» даёт результат. Ментора видит твой прогресс и рада за тебя!`,
+    "Историк": `Историк! Ты вложил настоящий труд, и это видно. Тема «${subjectTitle}» открывается тебе с новых сторон. Не останавливайся — впереди Эксперт!`,
+    "Эксперт": `Легенда! Уровень Эксперт по теме «${subjectTitle}» — вершина, до которой доходят единицы. Ментора искренне гордится твоим путём!`,
+  };
+  return msgs[newLevel] ?? `Поздравляем! Ты достиг уровня ${newLevel}!`;
+}
+
 const WINDOW_HOURS = 24;
 const WINDOW_LIMIT = 20;
 
@@ -277,7 +308,28 @@ ${ragContext}
       tokens_used: response.usage.input_tokens + response.usage.output_tokens,
     });
 
-    // Update XP atomically (+10 per message) — non-blocking
+    // Detect level up + Update XP atomically (+10 per message) — non-blocking
+    let levelUp: { newLevel: string; oldLevel: string; message: string; color: string } | null = null;
+    try {
+      const { data: prog } = await supabase
+        .from("user_progress")
+        .select("xp_total")
+        .eq("user_id", user.id)
+        .eq("subject", subject)
+        .maybeSingle();
+      const oldXP = prog?.xp_total ?? 0;
+      const oldLevel = getLevelName(oldXP);
+      const newLevel = getLevelName(oldXP + 10);
+      if (newLevel !== oldLevel) {
+        levelUp = {
+          newLevel,
+          oldLevel,
+          message: getLevelUpMessage(newLevel, subjectLabel),
+          color: getLevelColor(newLevel),
+        };
+      }
+    } catch { /* non-critical */ }
+
     try {
       await supabase.rpc("increment_xp", {
         p_user_id: user.id,
@@ -293,6 +345,7 @@ ${ragContext}
       messagesRemaining,
       resetAt: windowResetAt,
       trialExpiresAt: profile?.trial_expires_at ?? null,
+      ...(levelUp ? { levelUp } : {}),
     });
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);

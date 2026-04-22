@@ -166,6 +166,10 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const [showNativeHint, setShowNativeHint] = useState(false);
   const [hintFading, setHintFading] = useState(false);
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [levelUpData, setLevelUpData] = useState<{ newLevel: string; oldLevel: string; message: string; color: string } | null>(null);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [levelUpFading, setLevelUpFading] = useState(false);
+  const levelUpTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -206,6 +210,12 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     setTimeout(() => setShowNativeHint(false), 400);
     // Mark as seen 3 times so it won't show again
     try { localStorage.setItem("mentora_native_hint_count", "3"); } catch {}
+  }, []);
+
+  const dismissLevelUp = useCallback(() => {
+    if (levelUpTimerRef.current) clearTimeout(levelUpTimerRef.current);
+    setLevelUpFading(true);
+    setTimeout(() => { setShowLevelUp(false); setLevelUpData(null); }, 500);
   }, []);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -309,6 +319,17 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
 
       setMessages((prev) => [...prev, { role: "assistant", content: data.message }]);
       if (data.messagesRemaining !== undefined) setMessagesRemaining(data.messagesRemaining);
+      if (data.levelUp) {
+        setLevelUpData(data.levelUp);
+        setLevelUpFading(true);
+        setShowLevelUp(true);
+        requestAnimationFrame(() => requestAnimationFrame(() => setLevelUpFading(false)));
+        if (levelUpTimerRef.current) clearTimeout(levelUpTimerRef.current);
+        levelUpTimerRef.current = setTimeout(() => {
+          setLevelUpFading(true);
+          setTimeout(() => { setShowLevelUp(false); setLevelUpData(null); }, 500);
+        }, 10000);
+      }
     } catch {
       setMessages((prev) => [...prev, {
         role: "assistant",
@@ -616,6 +637,58 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           </>
         )}
       </div>
+
+      {/* ── Level Up celebration modal ─────────────────────────────── */}
+      {showLevelUp && levelUpData && (
+        <div
+          className="fixed bottom-6 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm rounded-2xl overflow-hidden shadow-2xl"
+          style={{
+            transform: `translateX(-50%) translateY(${levelUpFading ? "8px" : "0"})`,
+            opacity: levelUpFading ? 0 : 1,
+            transition: "opacity 0.5s ease, transform 0.5s ease",
+            background: `linear-gradient(135deg, ${levelUpData.color}ee, ${levelUpData.color}99)`,
+          }}
+        >
+          {/* Sparkle particles */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(12)].map((_, i) => (
+              <div key={i} className="absolute rounded-full"
+                style={{
+                  width: i % 3 === 0 ? 6 : i % 3 === 1 ? 4 : 3,
+                  height: i % 3 === 0 ? 6 : i % 3 === 1 ? 4 : 3,
+                  left: `${8 + (i * 7.5) % 84}%`,
+                  bottom: `${10 + (i * 13) % 60}%`,
+                  background: i % 2 === 0 ? "rgba(255,255,255,0.9)" : "rgba(255,220,100,0.85)",
+                  animation: `mentoraSpark ${1.2 + (i % 4) * 0.4}s ease-in-out ${(i * 0.15) % 1.2}s infinite`,
+                }}
+              />
+            ))}
+          </div>
+          {/* Grain overlay */}
+          <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, opacity: 0.05, mixBlendMode: "overlay" }} />
+
+          <div className="relative z-10 px-5 pt-5 pb-5">
+            <button
+              onClick={dismissLevelUp}
+              aria-label="Закрыть"
+              className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-white/20"
+              style={{ color: "rgba(255,255,255,0.8)" }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            </button>
+
+            <p className="text-[10px] font-bold tracking-[0.2em] uppercase mb-1" style={{ color: "rgba(255,255,255,0.7)" }}>
+              Новый уровень
+            </p>
+            <p className="text-2xl font-bold text-white mb-2">{levelUpData.newLevel} ✦</p>
+            <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.88)" }}>
+              {levelUpData.message}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

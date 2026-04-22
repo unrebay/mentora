@@ -192,3 +192,11 @@ code:not([class]) {
 .animate-fade-in-up {
   animation: fadeInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
+
+/* ── Level-up sparkle animation ──────────────────────────────────────────── */
+@keyframes mentoraSpark {
+  0%   { opacity: 0;   transform: translateY(0) scale(0.5); }
+  30%  { opacity: 1;   transform: translateY(-12px) scale(1); }
+  70%  { opacity: 0.7; transform: translateY(-24px) scale(0.8); }
+  100% { opacity: 0;   transform: translateY(-36px) scale(0.3); }
+}
