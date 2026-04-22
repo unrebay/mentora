@@ -13,19 +13,20 @@ const PAL = {
 type Status = "active" | "active_full" | "full" | "beta";
 
 const LAYOUT: Record<string, { cx: number; cy: number }> = {
-  "russian-history":  { cx: 0.50, cy: 0.44 }, // centre — главный предмет
-  "world-history":    { cx: 0.17, cy: 0.27 }, // верх-лево
-  "mathematics":      { cx: 0.74, cy: 0.20 }, // верх-право
-  "physics":          { cx: 0.91, cy: 0.55 }, // край правый
-  "chemistry":        { cx: 0.79, cy: 0.78 }, // право-низ
-  "biology":          { cx: 0.46, cy: 0.86 }, // низ-центр
-  "russian-language": { cx: 0.20, cy: 0.80 }, // лево-низ
-  "literature":       { cx: 0.05, cy: 0.52 }, // край левый
-  "english":          { cx: 0.12, cy: 0.18 }, // верх-край-лево
-  "social-studies":   { cx: 0.35, cy: 0.09 }, // самый верх
-  "geography":        { cx: 0.66, cy: 0.10 }, // верх-право
-  "computer-science": { cx: 0.88, cy: 0.30 }, // право-верх
-  "astronomy":        { cx: 0.60, cy: 0.91 }, // самый низ
+  "russian-history":  { cx: 0.46, cy: 0.38 }, // чуть левее центра
+  "discovery":        { cx: 0.63, cy: 0.60 }, // правее центра — не перекрывает историю
+  "world-history":    { cx: 0.22, cy: 0.27 }, // верх-лево
+  "mathematics":      { cx: 0.70, cy: 0.20 }, // верх-право
+  "physics":          { cx: 0.82, cy: 0.50 }, // правый
+  "chemistry":        { cx: 0.72, cy: 0.72 }, // право-низ
+  "biology":          { cx: 0.46, cy: 0.78 }, // низ-центр
+  "russian-language": { cx: 0.24, cy: 0.72 }, // лево-низ
+  "literature":       { cx: 0.13, cy: 0.50 }, // левый
+  "english":          { cx: 0.16, cy: 0.22 }, // верх-лево
+  "social-studies":   { cx: 0.37, cy: 0.13 }, // верх-центр
+  "geography":        { cx: 0.62, cy: 0.14 }, // верх-право
+  "computer-science": { cx: 0.82, cy: 0.32 }, // право-верх
+  "astronomy":        { cx: 0.56, cy: 0.86 }, // низ
 };
 
 const TOPICS: Record<string, string[]> = {
@@ -69,11 +70,11 @@ function getStatus(id: string, progress: UserProgress[]): Status {
 
 // Star radius scales with XP for active subjects
 function getRadius(status: Status, xp = 0): number {
-  if (status === "beta") return 26;
-  if (status === "full") return 36;
-  // active / active_full: base 28, grows up to ~50 with XP
+  if (status === "beta") return 30;
+  if (status === "full") return 42;
+  // active / active_full: base 34, grows up to ~56 with XP
   const bonus = Math.min(22, Math.sqrt(Math.max(0, xp)) * 0.7);
-  return Math.round(28 + bonus);
+  return Math.round(34 + bonus);
 }
 
 function seededRand(seed: number): number {
@@ -175,7 +176,7 @@ function render(
       ctx.restore();
       if (isActive || isHovTopic) {
         const labelAlpha = isHovTopic ? 1 : (0.6 + 0.3 * sh) * opacity;
-        ctx.save(); ctx.font = isHovTopic ? "bold 9px system-ui" : "8.5px system-ui";
+        ctx.save(); ctx.font = isHovTopic ? 'bold 10px "Golos Text", system-ui' : '9px "Golos Text", system-ui';
         ctx.textAlign = "center"; ctx.textBaseline = "top";
         ctx.fillStyle = pal.core; ctx.globalAlpha = labelAlpha;
         ctx.shadowColor = "rgba(0,0,0,0.95)"; ctx.shadowBlur = 7;
@@ -205,7 +206,7 @@ function render(
     ctx.shadowColor = n.status === "active_full" ? "rgba(107,143,255,0.8)" : pal.glow;
     ctx.beginPath(); ctx.arc(n.x, n.y, coreR+4*sh, 0, Math.PI*2); ctx.stroke();
     ctx.restore();
-    ctx.save(); ctx.font = isActive ? "bold 12px system-ui" : "10px system-ui";
+    ctx.save(); ctx.font = isActive ? 'bold 13px "Golos Text", system-ui' : '11px "Golos Text", system-ui';
     ctx.textAlign = "center"; ctx.textBaseline = "top";
     ctx.fillStyle = isActive ? "#fff" : pal.core;
     ctx.globalAlpha = isActive ? 1 : (0.65+0.3*sh);
