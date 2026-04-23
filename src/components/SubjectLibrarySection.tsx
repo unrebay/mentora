@@ -142,7 +142,6 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
           if (isVerified) {
             return (
               <div key={subject.id} className="relative group">
-                {/* Remove button — outside overflow-hidden card, overlaps card + bg */}
                 <button
                   onClick={(e) => askRemove(e, subject)}
                   disabled={isRemoving}
@@ -154,7 +153,6 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                     <path d="M18 6L6 18M6 6l12 12" />
                   </svg>
                 </button>
-
                 <div
                   data-tilt data-tilt-strength="5"
                   className="relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-200"
@@ -167,77 +165,76 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                   }}
                   onClick={() => setSelectedId(id => id === subject.id ? null : subject.id)}
                 >
-                {/* Depth overlay */}
-                <div className="absolute inset-0 pointer-events-none"
-                  style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%, rgba(0,0,0,0.1) 100%)" }} />
-                {/* Grain */}
-                <div className="absolute inset-0 pointer-events-none"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E")`,
-                    opacity: 0.04, mixBlendMode: "overlay",
-                  }}
-                />
+                  {/* Depth overlay */}
+                  <div className="absolute inset-0 pointer-events-none"
+                    style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%, rgba(0,0,0,0.1) 100%)" }} />
+                  {/* Grain */}
+                  <div className="absolute inset-0 pointer-events-none"
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E")`,
+                      opacity: 0.04, mixBlendMode: "overlay",
+                    }}
+                  />
 
-                <div className="relative z-10 p-5">
-                  <div className="absolute top-3 right-3 group/badge" onClick={e => e.stopPropagation()}>
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md cursor-default"
-                      style={{ background: "rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.9)" }}>
-                      ✶ verified
-                    </span>
-                    <div className="absolute right-0 top-full mt-1.5 w-44 pointer-events-none opacity-0 group-hover/badge:opacity-100 transition-opacity duration-200 z-30">
-                      <div className="rounded-xl px-3 py-2.5 shadow-xl border"
-                        style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-                        <p className="text-[11px] font-semibold mb-0.5" style={{ color: "var(--text)" }}>✶ Verified</p>
-                        <p className="text-[10px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                          Полный курс с базой знаний и регулярными обновлениями
-                        </p>
+                  <div className="relative z-10 p-5">
+                    <div className="absolute top-3 right-3 group/badge" onClick={e => e.stopPropagation()}>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md cursor-default"
+                        style={{ background: "rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.9)" }}>
+                        ✶ verified
+                      </span>
+                      <div className="absolute right-0 top-full mt-1.5 w-44 pointer-events-none opacity-0 group-hover/badge:opacity-100 transition-opacity duration-200 z-30">
+                        <div className="rounded-xl px-3 py-2.5 shadow-xl border"
+                          style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+                          <p className="text-[11px] font-semibold mb-0.5" style={{ color: "var(--text)" }}>✶ Verified</p>
+                          <p className="text-[10px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                            Полный курс с базой знаний и регулярными обновлениями
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="mb-3">
-                    <SubjectIcon id={subject.id} size={38} light
-                      style={{ background: "rgba(255,255,255,0.2)", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }} />
-                  </div>
-                  <div className="font-semibold text-sm text-white leading-snug mb-0.5">{subject.title}</div>
-                  <div className="text-xs text-white/65">{subject.description}</div>
+                    <div className="mb-3">
+                      <SubjectIcon id={subject.id} size={38} light
+                        style={{ background: "rgba(255,255,255,0.2)", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }} />
+                    </div>
+                    <div className="font-semibold text-sm text-white leading-snug mb-0.5">{subject.title}</div>
+                    <div className="text-xs text-white/65">{subject.description}</div>
 
-                  <div className="mt-3 pt-3 border-t border-white/20">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-semibold text-white/65">{lvl.name}</span>
-                      {xp > 0 && (
-                        <span className="text-[10px] font-bold text-white">
-                          <MeLogo height={11} variant="white" style={{ marginRight: 1 }} />{xp} {pluralMenty(xp)}
-                        </span>
+                    <div className="mt-3 pt-3 border-t border-white/20">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] font-semibold text-white/65">{lvl.name}</span>
+                        {xp > 0 && (
+                          <span className="text-[10px] font-bold text-white">
+                            <MeLogo height={11} variant="white" style={{ marginRight: 1 }} />{xp} {pluralMenty(xp)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="h-1.5 rounded-full overflow-hidden mb-2.5" style={{ background: "rgba(255,255,255,0.2)" }}>
+                        <div className="h-full rounded-full" style={{ width: `${lvl.progress}%`, background: "rgba(255,255,255,0.65)" }} />
+                      </div>
+                      {(progress?.streak_days ?? 0) > 0 && (
+                        <div className="flex items-center gap-1 text-[10px] font-medium text-white/75 mb-2">
+                          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="currentColor" />
+                          </svg>
+                          {progress!.streak_days} {pluralDays(progress!.streak_days)} подряд
+                        </div>
                       )}
+                      <Link href={`/learn/${subject.id}`}
+                        onClick={e => e.stopPropagation()}
+                        className="inline-flex text-xs font-semibold text-white/90 hover:text-white transition-colors">
+                        {xp > 0 ? "Продолжить →" : "Начать →"}
+                      </Link>
                     </div>
-                    <div className="h-1.5 rounded-full overflow-hidden mb-2.5" style={{ background: "rgba(255,255,255,0.2)" }}>
-                      <div className="h-full rounded-full" style={{ width: `${lvl.progress}%`, background: "rgba(255,255,255,0.65)" }} />
-                    </div>
-                    {(progress?.streak_days ?? 0) > 0 && (
-                      <div className="flex items-center gap-1 text-[10px] font-medium text-white/75 mb-2">
-                        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none">
-                          <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="currentColor" />
-                        </svg>
-                        {progress!.streak_days} {pluralDays(progress!.streak_days)} подряд
-                      </div>
-                    )}
-                    <Link href={`/learn/${subject.id}`}
-                      onClick={e => e.stopPropagation()}
-                      className="inline-flex text-xs font-semibold text-white/90 hover:text-white transition-colors">
-                      {xp > 0 ? "Продолжить →" : "Начать →"}
-                    </Link>
                   </div>
                 </div>
-                </div>{/* /inner card */}
-              </div>{/* /outer wrapper */}
+              </div>
             );
           }
 
           /* ── Beta / active card ───────────────── */
           return (
             <div key={subject.id} className="relative group">
-              {/* Remove button — outside overflow-hidden card */}
               <button
                 onClick={(e) => askRemove(e, subject)}
                 disabled={isRemoving}
@@ -249,81 +246,80 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
               </button>
+              <div
+                data-tilt data-tilt-strength="5"
+                className="relative rounded-2xl border overflow-hidden cursor-pointer transition-all duration-200"
+                style={{
+                  background: "var(--bg-card)",
+                  opacity: isRemoving ? 0.4 : 1,
+                  borderColor: isSelected ? color : "var(--border)",
+                  boxShadow: isSelected ? `0 0 0 1px ${color}, 0 4px 20px ${color}25` : "none",
+                }}
+                onClick={() => setSelectedId(id => id === subject.id ? null : subject.id)}
+              >
+                {/* Subject-color top accent */}
+                <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl"
+                  style={{ background: `linear-gradient(90deg, ${color}, ${color}44)` }} />
 
-            <div
-              data-tilt data-tilt-strength="5"
-              className="relative rounded-2xl border overflow-hidden cursor-pointer transition-all duration-200"
-              style={{
-                background: "var(--bg-card)",
-                opacity: isRemoving ? 0.4 : 1,
-                borderColor: isSelected ? color : "var(--border)",
-                boxShadow: isSelected ? `0 0 0 1px ${color}, 0 4px 20px ${color}25` : "none",
-              }}
-              onClick={() => setSelectedId(id => id === subject.id ? null : subject.id)}
-            >
-              {/* Subject-color top accent */}
-              <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl"
-                style={{ background: `linear-gradient(90deg, ${color}, ${color}44)` }} />
+                {/* Hover glow overlay */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"
+                  style={{ background: `radial-gradient(ellipse at 30% 0%, ${color}10 0%, transparent 60%)` }} />
 
-              {/* Hover glow overlay */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"
-                style={{ background: `radial-gradient(ellipse at 30% 0%, ${color}10 0%, transparent 60%)` }} />
-
-              <div className="relative z-10 p-5">
-                <div className="absolute top-4 right-3 group/badge" onClick={e => e.stopPropagation()}>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md cursor-default"
-                    style={{ background: `${color}18`, color }}>
-                    ✶ beta
-                  </span>
-                  <div className="absolute right-0 top-full mt-1.5 w-44 pointer-events-none opacity-0 group-hover/badge:opacity-100 transition-opacity duration-200 z-30">
-                    <div className="rounded-xl px-3 py-2.5 shadow-xl border"
-                      style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-                      <p className="text-[11px] font-semibold mb-0.5" style={{ color: "var(--text)" }}>✶ Beta</p>
-                      <p className="text-[10px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                        Предмет в разработке — контент активно пополняется
-                      </p>
+                <div className="relative z-10 p-5">
+                  <div className="absolute top-4 right-3 group/badge" onClick={e => e.stopPropagation()}>
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md cursor-default"
+                      style={{ background: `${color}18`, color }}>
+                      ✶ beta
+                    </span>
+                    <div className="absolute right-0 top-full mt-1.5 w-44 pointer-events-none opacity-0 group-hover/badge:opacity-100 transition-opacity duration-200 z-30">
+                      <div className="rounded-xl px-3 py-2.5 shadow-xl border"
+                        style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+                        <p className="text-[11px] font-semibold mb-0.5" style={{ color: "var(--text)" }}>✶ Beta</p>
+                        <p className="text-[10px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                          Предмет в разработке — контент активно пополняется
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="mb-3 mt-1">
-                  <SubjectIcon id={subject.id} size={38} />
-                </div>
-                <div className="font-semibold text-sm leading-snug mb-0.5" style={{ color: "var(--text)" }}>{subject.title}</div>
-                <div className="text-xs" style={{ color: "var(--text-muted)" }}>{subject.description}</div>
+                  <div className="mb-3 mt-1">
+                    <SubjectIcon id={subject.id} size={38} />
+                  </div>
+                  <div className="font-semibold text-sm leading-snug mb-0.5" style={{ color: "var(--text)" }}>{subject.title}</div>
+                  <div className="text-xs" style={{ color: "var(--text-muted)" }}>{subject.description}</div>
 
-                <div className="mt-3 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-semibold" style={{ color: "var(--text-muted)" }}>{lvl.name}</span>
-                    {xp > 0 && (
-                      <span className="text-[10px] font-bold" style={{ color }}>
-                        <MeLogo height={11} colorM={color} colorE={color} style={{ marginRight: 1 }} />{xp} {pluralMenty(xp)}
-                      </span>
+                  <div className="mt-3 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-semibold" style={{ color: "var(--text-muted)" }}>{lvl.name}</span>
+                      {xp > 0 && (
+                        <span className="text-[10px] font-bold" style={{ color }}>
+                          <MeLogo height={11} colorM={color} colorE={color} style={{ marginRight: 1 }} />{xp} {pluralMenty(xp)}
+                        </span>
+                      )}
+                    </div>
+                    {/* Gradient XP bar */}
+                    <div className="h-1.5 rounded-full overflow-hidden mb-2.5" style={{ background: "var(--bg-secondary)" }}>
+                      <div className="h-full rounded-full transition-all"
+                        style={{ width: `${lvl.progress}%`, background: `linear-gradient(90deg, ${color}cc, ${color})` }} />
+                    </div>
+                    {(progress?.streak_days ?? 0) > 0 && (
+                      <div className="flex items-center gap-1 text-[10px] font-medium mb-2" style={{ color: "#FF7A00" }}>
+                        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="currentColor" />
+                        </svg>
+                        {progress!.streak_days} {pluralDays(progress!.streak_days)} подряд
+                      </div>
                     )}
+                    <Link href={`/learn/${subject.id}`}
+                      onClick={e => e.stopPropagation()}
+                      className="inline-flex text-xs font-semibold transition-colors hover:opacity-80"
+                      style={{ color }}>
+                      {xp > 0 ? "Продолжить →" : "Начать →"}
+                    </Link>
                   </div>
-                  {/* Gradient XP bar */}
-                  <div className="h-1.5 rounded-full overflow-hidden mb-2.5" style={{ background: "var(--bg-secondary)" }}>
-                    <div className="h-full rounded-full transition-all"
-                      style={{ width: `${lvl.progress}%`, background: `linear-gradient(90deg, ${color}cc, ${color})` }} />
-                  </div>
-                  {(progress?.streak_days ?? 0) > 0 && (
-                    <div className="flex items-center gap-1 text-[10px] font-medium mb-2" style={{ color: "#FF7A00" }}>
-                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="currentColor" />
-                      </svg>
-                      {progress!.streak_days} {pluralDays(progress!.streak_days)} подряд
-                    </div>
-                  )}
-                  <Link href={`/learn/${subject.id}`}
-                    onClick={e => e.stopPropagation()}
-                    className="inline-flex text-xs font-semibold transition-colors hover:opacity-80"
-                    style={{ color }}>
-                    {xp > 0 ? "Продолжить →" : "Начать →"}
-                  </Link>
                 </div>
               </div>
-            </div>{/* /inner card */}
-            </div>{/* /outer wrapper */}
+            </div>
           );
         })}
 
