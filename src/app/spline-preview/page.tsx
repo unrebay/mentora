@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import SubjectIcon from "@/components/SubjectIcon";
+import SubjectCard3D from "@/components/SubjectCard3D";
+import MeLogo from "@/components/MeLogo";
 
 /* ─── tiny helpers ──────────────────────────────────────────────────────── */
 
@@ -110,55 +111,22 @@ function Toggle3D({ label, defaultOn = false }: { label: string; defaultOn?: boo
   );
 }
 
-/* ─── 3D Subject Icon Card — uses real SVG icons from SubjectIcon ──────── */
+/* ─── subject labels ─────────────────────────────────────────────────────── */
 
-const SUBJECT_META: Record<string, { label: string; glow: string }> = {
-  "russian-history":  { label: "Рус. история",  glow: "rgba(232,86,86,0.6)" },
-  "world-history":    { label: "Мир. история",   glow: "rgba(69,97,232,0.6)" },
-  "mathematics":      { label: "Математика",     glow: "rgba(139,92,246,0.6)" },
-  "physics":          { label: "Физика",          glow: "rgba(14,165,233,0.6)" },
-  "chemistry":        { label: "Химия",           glow: "rgba(16,185,129,0.6)" },
-  "biology":          { label: "Биология",        glow: "rgba(34,197,94,0.6)" },
-  "russian-language": { label: "Рус. язык",      glow: "rgba(239,68,68,0.6)" },
-  "literature":       { label: "Литература",      glow: "rgba(245,158,11,0.6)" },
-  "english":          { label: "Английский",      glow: "rgba(59,130,246,0.6)" },
-  "geography":        { label: "География",       glow: "rgba(20,184,166,0.6)" },
-  "computer-science": { label: "Информатика",    glow: "rgba(100,116,139,0.6)" },
-  "astronomy":        { label: "Астрономия",      glow: "rgba(124,58,237,0.6)" },
+const LABELS: Record<string, string> = {
+  "russian-history":  "Рус. история",
+  "world-history":    "Мир. история",
+  "mathematics":      "Математика",
+  "physics":          "Физика",
+  "chemistry":        "Химия",
+  "biology":          "Биология",
+  "russian-language": "Рус. язык",
+  "literature":       "Литература",
+  "english":          "Английский",
+  "geography":        "География",
+  "computer-science": "Информатика",
+  "astronomy":        "Астрономия",
 };
-
-function SubjectCard3D({ id }: { id: string }) {
-  const h = useHover();
-  const meta = SUBJECT_META[id] ?? { label: id, glow: "rgba(100,100,100,0.5)" };
-  return (
-    <div
-      {...h.bind}
-      style={{
-        display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
-        padding: "20px 16px",
-        borderRadius: 20,
-        background: h.on ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.03)",
-        border: `1px solid ${h.on ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.08)"}`,
-        cursor: "default",
-        transition: "all 0.18s ease",
-        transform: h.on ? "translateY(-5px) scale(1.05)" : "none",
-        boxShadow: h.on ? `0 16px 48px ${meta.glow}40, 0 4px 20px rgba(0,0,0,0.3)` : "none",
-        minWidth: 90,
-      }}
-    >
-      {/* Real SVG icon with boosted shadow on hover */}
-      <div style={{
-        filter: h.on ? `drop-shadow(0 0 12px ${meta.glow})` : "none",
-        transition: "filter 0.18s",
-      }}>
-        <SubjectIcon id={id} size={56} />
-      </div>
-      <span style={{ color: h.on ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.55)", fontSize: 12, fontWeight: 600, textAlign: "center", fontFamily: "system-ui,sans-serif", lineHeight: 1.3, transition: "color 0.18s" }}>
-        {meta.label}
-      </span>
-    </div>
-  );
-}
 
 /* ─── Section wrapper ────────────────────────────────────────────────────── */
 
@@ -272,41 +240,34 @@ export default function SplinePreviewPage() {
           </div>
         </Section>
 
-        {/* ── Section 3: Subject icons ── */}
+        {/* ── Section 3: Subject icons — iOS glassmorphism ── */}
         <Section
-          title="📚 Иконки предметов (3D карточки)"
-          desc="Настоящие SVG иконки Mentora — наведи, чтобы увидеть свечение"
+          title="📚 Иконки предметов — iOS glassmorphism"
+          desc="Твёрдая плитка + стеклянная карточка с SVG. Наведи — поднимается."
         >
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-            {Object.keys(SUBJECT_META).map(id => (
-              <SubjectCard3D key={id} id={id} />
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+            {Object.keys(LABELS).map(id => (
+              <SubjectCard3D key={id} id={id} label={LABELS[id]} size={64} />
             ))}
           </div>
         </Section>
 
-        {/* ── Section 4: Combined header mockup ── */}
+        {/* ── Section 4: Header mockup ── */}
         <Section
           title="📐 Шапка — как будет выглядеть в сборе"
-          desc="Мокап верхней полосы с 3D элементами"
+          desc="Мокап верхней полосы с правильным логотипом и 3D элементами"
         >
-          {/* Fake header bar */}
+          {/* Dark header bar */}
           <div style={{
             display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: "14px 20px",
+            padding: "12px 20px",
             borderRadius: 14,
-            background: "rgba(255,255,255,0.04)",
+            background: "rgba(6,6,15,0.95)",
             border: "1px solid rgba(255,255,255,0.08)",
           }}>
-            {/* Logo */}
-            <div style={{
-              width: 36, height: 36, borderRadius: 10,
-              background: "linear-gradient(135deg, #4561E8 0%, #7B9FFF 100%)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 18, fontWeight: 900, color: "#fff",
-              boxShadow: "0 0 14px rgba(69,97,232,0.5), 0 1px 0 rgba(255,255,255,0.2) inset",
-              fontFamily: "system-ui,sans-serif",
-            }}>
-              M
+            {/* Logo — правильный: белая M + синяя e (на тёмном фоне) */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <MeLogo height={22} colorM="rgba(255,255,255,0.97)" colorE="#4561E8" />
             </div>
 
             {/* Pills */}
@@ -314,7 +275,35 @@ export default function SplinePreviewPage() {
               <Pill3D from="#FF6B35" to="#C62828" glow="rgba(255,80,0,0.55)">
                 🔥 47
               </Pill3D>
-              <Pill3D from="#7C3AED" to="#4C1598" glow="rgba(124,58,237,0.55)">
+              <Pill3D from="#4561E8" to="#2438B0" glow="rgba(69,97,232,0.55)">
+                ⚡ 860 мент
+              </Pill3D>
+              <Pill3D from="#F59E0B" to="#92400E" glow="rgba(245,158,11,0.55)">
+                👑 Ultima
+              </Pill3D>
+            </div>
+          </div>
+
+          {/* Light header bar */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "12px 20px",
+            borderRadius: 14,
+            background: "#ffffff",
+            border: "1px solid rgba(0,0,0,0.08)",
+            marginTop: 12,
+          }}>
+            {/* Logo — правильный: чёрная M + синяя e (на светлом фоне) */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <MeLogo height={22} colorM="#1a1a1a" colorE="#4561E8" />
+            </div>
+
+            {/* Pills — те же, они работают на любом фоне */}
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <Pill3D from="#FF6B35" to="#C62828" glow="rgba(255,80,0,0.55)">
+                🔥 47
+              </Pill3D>
+              <Pill3D from="#4561E8" to="#2438B0" glow="rgba(69,97,232,0.55)">
                 ⚡ 860 мент
               </Pill3D>
               <Pill3D from="#F59E0B" to="#92400E" glow="rgba(245,158,11,0.55)">

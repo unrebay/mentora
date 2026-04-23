@@ -117,45 +117,28 @@ function LiteratureIcon() {
   );
 }
 
-function EnglishIcon() {
-  // Speech bubble with "EN"
+function LangBubbleIcon({ code }: { code: string }) {
+  // Speech bubble with language code centered inside
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
       <path d="M21 11.5A8.38 8.38 0 0 1 12.5 20c-1.8 0-3.5-.5-4.9-1.4L3 20l1.4-4.6A8.5 8.5 0 1 1 21 11.5Z" />
-      <text x="5.5" y="14" fontSize="6.5" fontWeight="700" fontFamily="system-ui,sans-serif" fill="currentColor" stroke="none" letterSpacing="0.3">EN</text>
+      {/* Centered in the bubble body (center ~12, 10.5) */}
+      <text
+        x="12" y="10.5"
+        fontSize="6.8" fontWeight="800"
+        fontFamily="system-ui,sans-serif"
+        fill="currentColor" stroke="none"
+        textAnchor="middle" dominantBaseline="central"
+        letterSpacing="0.2"
+      >{code}</text>
     </svg>
   );
 }
 
-function SpanishIcon() {
-  // Speech bubble with "ES"
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
-      <path d="M21 11.5A8.38 8.38 0 0 1 12.5 20c-1.8 0-3.5-.5-4.9-1.4L3 20l1.4-4.6A8.5 8.5 0 1 1 21 11.5Z" />
-      <text x="5.5" y="14" fontSize="6.5" fontWeight="700" fontFamily="system-ui,sans-serif" fill="currentColor" stroke="none" letterSpacing="0.3">ES</text>
-    </svg>
-  );
-}
-
-function GermanIcon() {
-  // Speech bubble with "DE"
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
-      <path d="M21 11.5A8.38 8.38 0 0 1 12.5 20c-1.8 0-3.5-.5-4.9-1.4L3 20l1.4-4.6A8.5 8.5 0 1 1 21 11.5Z" />
-      <text x="5.5" y="14" fontSize="6.5" fontWeight="700" fontFamily="system-ui,sans-serif" fill="currentColor" stroke="none" letterSpacing="0.3">DE</text>
-    </svg>
-  );
-}
-
-function FrenchIcon() {
-  // Speech bubble with "FR"
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
-      <path d="M21 11.5A8.38 8.38 0 0 1 12.5 20c-1.8 0-3.5-.5-4.9-1.4L3 20l1.4-4.6A8.5 8.5 0 1 1 21 11.5Z" />
-      <text x="5.5" y="14" fontSize="6.5" fontWeight="700" fontFamily="system-ui,sans-serif" fill="currentColor" stroke="none" letterSpacing="0.3">FR</text>
-    </svg>
-  );
-}
+function EnglishIcon() { return <LangBubbleIcon code="EN" />; }
+function SpanishIcon() { return <LangBubbleIcon code="ES" />; }
+function GermanIcon()  { return <LangBubbleIcon code="DE" />; }
+function FrenchIcon()  { return <LangBubbleIcon code="FR" />; }
 
 function SocialStudiesIcon() {
   // Two people silhouettes
@@ -233,6 +216,12 @@ const ICONS: Record<string, ReactNode> = {
   "german":           <GermanIcon />,
   "french":           <FrenchIcon />,
 };
+
+/** Exported icon map — use in glassmorphism cards where you need raw SVG without background */
+export { ICONS as SUBJECT_ICONS };
+
+/** Exported colour map — use when you need subject accent colours */
+export { META as SUBJECT_META_COLORS };
 
 // ── Component ───────────────────────────────────────────────────────────────
 interface Props {
