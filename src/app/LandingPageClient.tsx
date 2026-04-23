@@ -159,10 +159,7 @@ export default function LandingPageClient() {
       {/* ── HERO ──────────────────────────────────────────────────── */}
       <section className="relative min-h-screen flex flex-col justify-center overflow-hidden">
 
-        <AmbientHero
-          variant="hero"
-          splineUrl="https://my.spline.design/fba5a24b-a843-461d-b983-e5c140313420/"
-        />
+        <AmbientHero variant="hero" />
 
         {/* Blue tint overlay */}
         <div

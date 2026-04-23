@@ -25,10 +25,11 @@ const ORBS: Record<
   Array<{ color: string; size: number; x: string; y: string; delay: string; duration: string; opacity: number }>
 > = {
   hero: [
-    { color: "69,97,232",  size: 600, x: "10%",  y: "-10%", delay: "0s",    duration: "18s", opacity: 0.35 },
-    { color: "107,135,255",size: 500, x: "70%",  y: "5%",   delay: "3s",    duration: "22s", opacity: 0.25 },
-    { color: "167,139,250",size: 400, x: "40%",  y: "60%",  delay: "6s",    duration: "16s", opacity: 0.20 },
-    { color: "69,97,232",  size: 350, x: "85%",  y: "80%",  delay: "1s",    duration: "20s", opacity: 0.15 },
+    { color: "69,97,232",  size: 900, x: "15%",  y: "-15%", delay: "0s",  duration: "18s", opacity: 0.55 },
+    { color: "107,135,255",size: 750, x: "75%",  y: "0%",   delay: "3s",  duration: "22s", opacity: 0.45 },
+    { color: "167,139,250",size: 600, x: "45%",  y: "65%",  delay: "6s",  duration: "16s", opacity: 0.35 },
+    { color: "69,97,232",  size: 500, x: "88%",  y: "75%",  delay: "1s",  duration: "20s", opacity: 0.30 },
+    { color: "99,102,241", size: 400, x: "30%",  y: "30%",  delay: "9s",  duration: "24s", opacity: 0.25 },
   ],
   auth: [
     { color: "69,97,232",  size: 500, x: "5%",   y: "10%",  delay: "0s",    duration: "20s", opacity: 0.30 },
@@ -42,7 +43,7 @@ const ORBS: Record<
   ],
 };
 
-const ANIM_NAMES = ["orbDrift1", "orbDrift2", "orbDrift3", "orbDrift1"];
+const ANIM_NAMES = ["orbDrift1", "orbDrift2", "orbDrift3", "orbDrift1", "orbDrift2"];
 
 export default function AmbientHero({
   splineUrl,
@@ -64,7 +65,7 @@ export default function AmbientHero({
         style={{
           background:
             variant === "hero"
-              ? "radial-gradient(ellipse 90% 60% at 50% -10%, rgba(69,97,232,0.18) 0%, transparent 65%), #080814"
+              ? "radial-gradient(ellipse 120% 70% at 50% -5%, rgba(69,97,232,0.30) 0%, rgba(69,97,232,0.08) 50%, transparent 70%), #080814"
               : variant === "auth"
               ? "radial-gradient(ellipse 70% 50% at 20% 50%, rgba(69,97,232,0.15) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 50%, rgba(167,139,250,0.12) 0%, transparent 55%), #080814"
               : "#080814",
@@ -84,7 +85,7 @@ export default function AmbientHero({
             marginLeft:  -(orb.size / 2),
             marginTop:   -(orb.size / 2),
             background: `radial-gradient(circle, rgba(${orb.color},${orb.opacity}) 0%, transparent 70%)`,
-            filter: "blur(40px)",
+            filter: "blur(60px)",
             animation: `${ANIM_NAMES[i % ANIM_NAMES.length]} ${orb.duration} ${orb.delay} ease-in-out infinite`,
           }}
         />

@@ -111,19 +111,36 @@ export default function DemoChat() {
   const remaining = DEMO_LIMIT - used;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden flex flex-col" style={{ maxHeight: 480 }}>
+    <div
+      className="rounded-2xl overflow-hidden flex flex-col"
+      style={{
+        maxHeight: 480,
+        background: "rgba(8,8,20,0.85)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        backdropFilter: "blur(24px)",
+      }}
+    >
       {/* Header */}
-      <div className="bg-gray-50 border-b border-gray-100 px-4 py-3 flex items-center justify-between shrink-0">
+      <div
+        className="px-4 py-3 flex items-center justify-between shrink-0"
+        style={{ background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+      >
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold">
+          <div
+            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
+            style={{ background: "linear-gradient(135deg, #4561E8, #6b87ff)" }}
+          >
             М
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-800">Mentora · персональный AI-ментор</p>
-            <p className="text-[10px] text-green-500 font-medium">● онлайн сейчас</p>
+            <p className="text-xs font-semibold text-white">Mentora · персональный AI-ментор</p>
+            <p className="text-[10px] font-medium" style={{ color: "#4ade80" }}>● онлайн сейчас</p>
           </div>
         </div>
-        <span className="text-xs text-gray-400 bg-white border border-gray-100 px-2 py-1 rounded-lg">
+        <span
+          className="text-xs px-2 py-1 rounded-lg"
+          style={{ color: "rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+        >
           📜 История
         </span>
       </div>
@@ -136,20 +153,26 @@ export default function DemoChat() {
             className={`flex ${m.role === "user" ? "justify-end" : "justify-start"} gap-2`}
           >
             {m.role === "assistant" && (
-              <div className="w-6 h-6 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
+              <div
+                className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5 text-white"
+                style={{ background: "rgba(69,97,232,0.4)" }}
+              >
                 М
               </div>
             )}
             <div
-              className={`max-w-[82%] px-3 py-2 rounded-xl text-xs leading-relaxed ${
-                m.role === "user"
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-50 border border-gray-100 text-gray-700"
-              }`}
+              className="max-w-[82%] px-3 py-2 rounded-xl text-xs leading-relaxed"
+              style={m.role === "user"
+                ? { background: "linear-gradient(135deg, #4561E8, #6b87ff)", color: "white" }
+                : { background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.85)" }
+              }
               dangerouslySetInnerHTML={{ __html: renderMarkdown(m.content) }}
             />
             {m.role === "user" && (
-              <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
+              <div
+                className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5"
+                style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)" }}
+              >
                 Я
               </div>
             )}
@@ -159,13 +182,19 @@ export default function DemoChat() {
         {/* Typing indicator */}
         {loading && (
           <div className="flex justify-start gap-2">
-            <div className="w-6 h-6 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
+            <div
+              className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5 text-white"
+              style={{ background: "rgba(69,97,232,0.4)" }}
+            >
               М
             </div>
-            <div className="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+            <div
+              className="rounded-xl px-3 py-2 flex items-center gap-1"
+              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "rgba(255,255,255,0.4)", animationDelay: "0ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "rgba(255,255,255,0.4)", animationDelay: "150ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "rgba(255,255,255,0.4)", animationDelay: "300ms" }} />
             </div>
           </div>
         )}
@@ -178,7 +207,10 @@ export default function DemoChat() {
             <button
               key={s}
               onClick={() => sendMessage(s)}
-              className="text-[10px] px-2.5 py-1 rounded-lg border border-gray-200 text-gray-500 hover:border-brand-300 hover:text-brand-600 transition-colors"
+              className="text-[10px] px-2.5 py-1 rounded-lg transition-colors"
+              style={{ border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.04)" }}
+              onMouseEnter={e => { (e.target as HTMLButtonElement).style.borderColor = "rgba(69,97,232,0.5)"; (e.target as HTMLButtonElement).style.color = "#6b87ff"; }}
+              onMouseLeave={e => { (e.target as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.12)"; (e.target as HTMLButtonElement).style.color = "rgba(255,255,255,0.5)"; }}
             >
               {s}
             </button>
@@ -189,18 +221,19 @@ export default function DemoChat() {
       {/* Soft limit banner — shown after SOFT_LIMIT messages, dismissible */}
       {showSoftBanner && (
         <div className="mx-3 mb-2 px-3 py-2 rounded-xl flex items-center justify-between gap-2 shrink-0"
-          style={{ background: "rgba(69,97,232,0.07)", border: "1px solid rgba(69,97,232,0.18)" }}>
+          style={{ background: "rgba(69,97,232,0.1)", border: "1px solid rgba(69,97,232,0.25)" }}>
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-medium text-gray-600">
+            <p className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>
               Осталось {remaining} {remaining === 1 ? "сообщение" : "сообщения"} в демо
             </p>
-            <Link href="/auth" className="text-[11px] text-brand-600 font-semibold hover:underline">
+            <Link href="/auth" className="text-[11px] font-semibold hover:underline" style={{ color: "#6b87ff" }}>
               Зарегистрируйся — 30 в день бесплатно →
             </Link>
           </div>
           <button
             onClick={() => setSoftBannerDismissed(true)}
-            className="shrink-0 text-gray-400 hover:text-gray-600 transition-colors p-0.5"
+            className="shrink-0 transition-colors p-0.5"
+            style={{ color: "rgba(255,255,255,0.35)" }}
             aria-label="Закрыть"
           >
             <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -212,30 +245,31 @@ export default function DemoChat() {
 
       {/* Hard limit — disable input, show gentle CTA */}
       {limitReached ? (
-        <div className="border-t border-gray-100 px-4 py-3 shrink-0" style={{ background: "linear-gradient(to bottom, #fff, #f9fafb)" }}>
+        <div className="px-4 py-3 shrink-0" style={{ background: "rgba(255,255,255,0.03)", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
           <div className="flex items-center justify-between gap-3 mb-2">
-            <p className="text-xs text-gray-500">Демо-лимит исчерпан 🚀</p>
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>Демо-лимит исчерпан 🚀</p>
             <Link
               href="/auth"
-              className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors shrink-0"
+              className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg shrink-0 text-white transition-opacity hover:opacity-80"
+              style={{ background: "linear-gradient(135deg, #4561E8, #6b87ff)" }}
             >
               Продолжить бесплатно →
             </Link>
           </div>
           {/* Grayed-out disabled input to show what they're missing */}
-          <div className="flex gap-2 items-center opacity-35 pointer-events-none select-none">
-            <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-400">
+          <div className="flex gap-2 items-center opacity-30 pointer-events-none select-none">
+            <div className="flex-1 rounded-lg px-3 py-2 text-xs" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}>
               Напиши Менторе про любую эпоху...
             </div>
-            <div className="w-7 h-7 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-xs">↑</div>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}>↑</div>
           </div>
-          <p className="text-[10px] text-gray-400 text-center mt-2">30 сообщений в день · без карты · бесплатно</p>
+          <p className="text-[10px] text-center mt-2" style={{ color: "rgba(255,255,255,0.3)" }}>30 сообщений в день · без карты · бесплатно</p>
         </div>
       ) : (
         /* Normal input */
-        <div className="border-t border-gray-100 px-4 py-3 flex gap-2 items-center shrink-0">
+        <div className="px-4 py-3 flex gap-2 items-center shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
           {used > 0 && used >= DEMO_LIMIT - 1 && (
-            <span className="text-[10px] text-amber-500 font-medium shrink-0">
+            <span className="text-[10px] font-medium shrink-0" style={{ color: "#f59e0b" }}>
               {DEMO_LIMIT - used} из {DEMO_LIMIT}
             </span>
           )}
@@ -247,13 +281,14 @@ export default function DemoChat() {
             placeholder="Напиши Менторе про любую эпоху..."
             disabled={loading}
             // fontSize 16px prevents iOS Safari from auto-zooming the page on focus
-            style={{ fontSize: "16px" }}
-            className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-700 placeholder-gray-400 focus:outline-none focus:border-brand-300 disabled:opacity-50 transition-colors"
+            style={{ fontSize: "16px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "white" }}
+            className="flex-1 rounded-lg px-3 py-2 focus:outline-none disabled:opacity-50 transition-colors placeholder:text-white/30"
           />
           <button
             onClick={() => sendMessage()}
             disabled={loading || !input.trim()}
-            className="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center text-white text-xs shrink-0 hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs shrink-0 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity hover:opacity-80"
+            style={{ background: "linear-gradient(135deg, #4561E8, #6b87ff)" }}
           >
             ↑
           </button>
