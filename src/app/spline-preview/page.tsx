@@ -190,7 +190,7 @@ export default function SplinePreviewPage() {
 
         {/* ── Section 1: Header pills ── */}
         <Section
-          title="🎯 Пиллы в шапке"
+          title="Пиллы в шапке"
           desc="Стрик, ментов, сообщения, подписка — вместо текущих плоских SVG"
         >
           {/* Comparison */}
@@ -199,10 +199,10 @@ export default function SplinePreviewPage() {
               Сейчас (плоские)
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
-              <FlatPill>🔥 47</FlatPill>
-              <FlatPill>⚡ 1 240 мент</FlatPill>
-              <FlatPill>💬 3</FlatPill>
-              <FlatPill bg="rgba(69,97,232,0.2)">👑 Ultima</FlatPill>
+              <FlatPill>47 дней</FlatPill>
+              <FlatPill>1 240 мент</FlatPill>
+              <FlatPill>3 сообщ.</FlatPill>
+              <FlatPill bg="rgba(69,97,232,0.2)">Ultima</FlatPill>
             </div>
           </div>
 
@@ -212,16 +212,16 @@ export default function SplinePreviewPage() {
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 14, alignItems: "center" }}>
               <Pill3D from="#FF6B35" to="#C62828" glow="rgba(255,80,0,0.55)">
-                🔥 47
+                47 дней
               </Pill3D>
               <Pill3D from="#7C3AED" to="#4C1598" glow="rgba(124,58,237,0.55)">
-                ⚡ 1 240 мент
+                1 240 мент
               </Pill3D>
               <Pill3D from="#0EA5E9" to="#0870B0" glow="rgba(14,165,233,0.55)">
-                💬 3
+                3 сообщ.
               </Pill3D>
               <Pill3D from="#F59E0B" to="#92400E" glow="rgba(245,158,11,0.55)">
-                👑 Ultima
+                Ultima
               </Pill3D>
             </div>
           </div>
@@ -229,7 +229,7 @@ export default function SplinePreviewPage() {
 
         {/* ── Section 2: Toggles ── */}
         <Section
-          title="🔘 Тумблеры — 3D переключатели"
+          title="Тумблеры — 3D переключатели"
           desc="Нажми — переключаются. Thumb со сферической подсветкой"
         >
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -242,7 +242,7 @@ export default function SplinePreviewPage() {
 
         {/* ── Section 3: Subject icons — iOS glassmorphism ── */}
         <Section
-          title="📚 Иконки предметов — iOS glassmorphism"
+          title="Иконки предметов — glassmorphism"
           desc="Твёрдая плитка + стеклянная карточка с SVG. Наведи — поднимается."
         >
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
@@ -254,7 +254,7 @@ export default function SplinePreviewPage() {
 
         {/* ── Section 4: Header mockup ── */}
         <Section
-          title="📐 Шапка — как будет выглядеть в сборе"
+          title="Шапка — как будет выглядеть в сборе"
           desc="Мокап верхней полосы с правильным логотипом и 3D элементами"
         >
           {/* Dark header bar */}
@@ -273,13 +273,13 @@ export default function SplinePreviewPage() {
             {/* Pills */}
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <Pill3D from="#FF6B35" to="#C62828" glow="rgba(255,80,0,0.55)">
-                🔥 47
+                47 дней
               </Pill3D>
               <Pill3D from="#4561E8" to="#2438B0" glow="rgba(69,97,232,0.55)">
-                ⚡ 860 мент
+                860 мент
               </Pill3D>
               <Pill3D from="#F59E0B" to="#92400E" glow="rgba(245,158,11,0.55)">
-                👑 Ultima
+                Ultima
               </Pill3D>
             </div>
           </div>
@@ -293,21 +293,21 @@ export default function SplinePreviewPage() {
             border: "1px solid rgba(0,0,0,0.08)",
             marginTop: 12,
           }}>
-            {/* Logo — правильный: чёрная M + синяя e (на светлом фоне) */}
+            {/* Logo */}
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <MeLogo height={22} colorM="#1a1a1a" colorE="#4561E8" />
             </div>
 
-            {/* Pills — те же, они работают на любом фоне */}
+            {/* Pills */}
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <Pill3D from="#FF6B35" to="#C62828" glow="rgba(255,80,0,0.55)">
-                🔥 47
+                47 дней
               </Pill3D>
               <Pill3D from="#4561E8" to="#2438B0" glow="rgba(69,97,232,0.55)">
-                ⚡ 860 мент
+                860 мент
               </Pill3D>
               <Pill3D from="#F59E0B" to="#92400E" glow="rgba(245,158,11,0.55)">
-                👑 Ultima
+                Ultima
               </Pill3D>
             </div>
           </div>
