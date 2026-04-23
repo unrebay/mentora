@@ -160,16 +160,19 @@ export default function LandingPageClient() {
       {/* ── HERO ──────────────────────────────────────────────────── */}
       <section className="relative min-h-screen flex flex-col justify-center overflow-hidden">
 
-        <AmbientHero variant="hero" />
+        <AmbientHero
+          variant="hero"
+          splineUrl="https://my.spline.design/retrofuturismbganimation-HFdvtQ5oOt2HeV1VdNeILLtN/"
+        />
 
-        {/* Diagonal beams — positioned right side, partially visible */}
+        {/* CSS fallback beams — subtle, visible before Spline loads */}
         <DiagonalBeams
-          count={9}
+          count={7}
           angle={-42}
           color="rgba(69,97,232,1)"
           accentColor="rgba(130,160,255,1)"
-          intensity={0.9}
-          animate
+          intensity={0.4}
+          animate={false}
           style={{
             top: "-10%",
             right: "-5%",

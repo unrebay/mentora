@@ -111,13 +111,20 @@ export default function AmbientHero({
         }}
       />
 
-      {/* Spline iframe — layered on top */}
+      {/* Spline iframe — layered on top with hue-rotate to shift warm→blue */}
       {splineUrl && (
         <iframe
           src={splineUrl}
           frameBorder="0"
           className="absolute inset-0 w-full h-full"
-          style={{ border: "none", opacity: 0.85 }}
+          style={{
+            border: "none",
+            opacity: 0.92,
+            // hue-rotate(190deg): orange ~30° → blue ~220°
+            // saturate(1.4): make the blue more vivid
+            // brightness(0.85): slightly dim to blend with dark bg
+            filter: "hue-rotate(190deg) saturate(1.4) brightness(0.85)",
+          }}
           title="3D scene"
           aria-hidden
           loading="lazy"

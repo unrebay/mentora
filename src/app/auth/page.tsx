@@ -268,7 +268,10 @@ function AuthPageContent() {
         className="hidden lg:flex relative flex-col overflow-hidden"
         style={{ width: "42%", minHeight: "100vh" }}
       >
-        <AmbientHero variant="auth" />
+        <AmbientHero
+          variant="auth"
+          splineUrl="https://my.spline.design/retrofuturismbganimation-HFdvtQ5oOt2HeV1VdNeILLtN/"
+        />
 
         {/* Content */}
         <div className="relative z-10 flex flex-col h-full p-10 xl:p-14">
