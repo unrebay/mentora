@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import MeLogo from "@/components/MeLogo";
 
 /* ── Icon presets ────────────────────────────────────────── */
@@ -38,7 +39,7 @@ export function StarIcon({ color = "#f59e0b" }: { color?: string }) {
 interface StatCardProps {
   label: string;
   value: number;
-  icon: React.ReactNode;
+  icon: ReactNode;
   accent: string;
   /** Use brand styling (Мент card) — subtle blue tint wrapper */
   isBrand?: boolean;
