@@ -26,7 +26,7 @@ export default function SubjectCard3D({ id, label, size = 64, className = "", on
     </span>
   );
 
-  // Layout: solid card offset bottom-left, glass card top-right
+  // Layout: solid card offset bottom-right, glass card top-left (matches Spline "Frosted Glass Icons")
   const offset = Math.round(size * 0.13);
   const cardSize = size - offset;
   const radius = Math.round(cardSize * 0.26);
