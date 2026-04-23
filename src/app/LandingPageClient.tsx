@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import DemoChat from "@/components/DemoChat";
 import AmbientHero from "@/components/AmbientHero";
+import DiagonalBeams from "@/components/DiagonalBeams";
 import LandingNav from "@/components/LandingNav";
 
 /* ── Data ──────────────────────────────────────────────────────────── */
@@ -160,6 +161,23 @@ export default function LandingPageClient() {
       <section className="relative min-h-screen flex flex-col justify-center overflow-hidden">
 
         <AmbientHero variant="hero" />
+
+        {/* Diagonal beams — positioned right side, partially visible */}
+        <DiagonalBeams
+          count={9}
+          angle={-42}
+          color="rgba(69,97,232,1)"
+          accentColor="rgba(130,160,255,1)"
+          intensity={0.9}
+          animate
+          style={{
+            top: "-10%",
+            right: "-5%",
+            left: "auto",
+            width: "55%",
+            height: "120%",
+          }}
+        />
 
         {/* Blue tint overlay */}
         <div
