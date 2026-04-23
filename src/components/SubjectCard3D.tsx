@@ -55,22 +55,22 @@ export default function SubjectCard3D({ id, label, size = 64, className = "", on
       {/* Icon — two-layer glassmorphism */}
       <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
 
-        {/* ① Solid colour card — bottom-left, "shadow" layer */}
+        {/* ① Solid colour card — bottom-right, "shadow" layer */}
         <div style={{
           position: "absolute",
-          bottom: 0, left: 0,
+          bottom: 0, right: 0,
           width: cardSize, height: cardSize,
           borderRadius: radius,
           background: `linear-gradient(135deg, ${meta.from} 0%, ${meta.to} 100%)`,
           transition: "transform 0.18s ease, opacity 0.18s",
-          opacity: hovered ? 1 : 0.9,
+          opacity: hovered ? 1 : 0.88,
           transform: hovered ? "scale(1.04)" : "none",
         }} />
 
-        {/* ② Frosted glass card — top-right, icon layer */}
+        {/* ② Frosted glass card — top-left, icon layer */}
         <div style={{
           position: "absolute",
-          top: 0, right: 0,
+          top: 0, left: 0,
           width: cardSize, height: cardSize,
           borderRadius: radius,
           /* Glass effect */
