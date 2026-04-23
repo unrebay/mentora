@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import SubjectIcon from "@/components/SubjectIcon";
 
 export const metadata = undefined; // client component
 
@@ -111,18 +112,26 @@ function Toggle3D({ label, defaultOn = false }: { label: string; defaultOn?: boo
   );
 }
 
-/* ─── 3D Subject Icon Card ───────────────────────────────────────────────── */
+/* ─── 3D Subject Icon Card — uses real SVG icons from SubjectIcon ──────── */
 
-interface SubjectCardProps {
-  emoji: string;
-  label: string;
-  from: string;
-  to: string;
-  glow: string;
-}
+const SUBJECT_META: Record<string, { label: string; glow: string }> = {
+  "russian-history":  { label: "Рус. история",  glow: "rgba(232,86,86,0.6)" },
+  "world-history":    { label: "Мир. история",   glow: "rgba(69,97,232,0.6)" },
+  "mathematics":      { label: "Математика",     glow: "rgba(139,92,246,0.6)" },
+  "physics":          { label: "Физика",          glow: "rgba(14,165,233,0.6)" },
+  "chemistry":        { label: "Химия",           glow: "rgba(16,185,129,0.6)" },
+  "biology":          { label: "Биология",        glow: "rgba(34,197,94,0.6)" },
+  "russian-language": { label: "Рус. язык",      glow: "rgba(239,68,68,0.6)" },
+  "literature":       { label: "Литература",      glow: "rgba(245,158,11,0.6)" },
+  "english":          { label: "Английский",      glow: "rgba(59,130,246,0.6)" },
+  "geography":        { label: "География",       glow: "rgba(20,184,166,0.6)" },
+  "computer-science": { label: "Информатика",    glow: "rgba(100,116,139,0.6)" },
+  "astronomy":        { label: "Астрономия",      glow: "rgba(124,58,237,0.6)" },
+};
 
-function SubjectCard3D({ emoji, label, from, to, glow }: SubjectCardProps) {
+function SubjectCard3D({ id }: { id: string }) {
   const h = useHover();
+  const meta = SUBJECT_META[id] ?? { label: id, glow: "rgba(100,100,100,0.5)" };
   return (
     <div
       {...h.bind}
@@ -130,40 +139,24 @@ function SubjectCard3D({ emoji, label, from, to, glow }: SubjectCardProps) {
         display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
         padding: "20px 16px",
         borderRadius: 20,
-        background: h.on
-          ? `linear-gradient(155deg, ${from}22 0%, ${to}11 100%)`
-          : "rgba(255,255,255,0.03)",
-        border: `1px solid ${h.on ? from + "55" : "rgba(255,255,255,0.08)"}`,
+        background: h.on ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.03)",
+        border: `1px solid ${h.on ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.08)"}`,
         cursor: "default",
         transition: "all 0.18s ease",
-        transform: h.on ? "translateY(-4px) scale(1.04)" : "none",
-        boxShadow: h.on ? `0 12px 40px ${glow}30, 0 4px 16px rgba(0,0,0,0.3)` : "none",
+        transform: h.on ? "translateY(-5px) scale(1.05)" : "none",
+        boxShadow: h.on ? `0 16px 48px ${meta.glow}40, 0 4px 20px rgba(0,0,0,0.3)` : "none",
         minWidth: 90,
       }}
     >
-      {/* Icon circle — 3D sphere-style */}
+      {/* Real SVG icon with boosted shadow on hover */}
       <div style={{
-        width: 56, height: 56,
-        borderRadius: 16,
-        background: `radial-gradient(circle at 30% 28%, ${from}FF 0%, ${from}CC 35%, ${to}FF 70%, ${to}88 100%)`,
-        boxShadow: h.on
-          ? `0 1px 0 rgba(255,255,255,0.35) inset,
-             0 -2px 0 rgba(0,0,0,0.3) inset,
-             0 8px 24px ${glow},
-             0 2px 6px rgba(0,0,0,0.5)`
-          : `0 1px 0 rgba(255,255,255,0.22) inset,
-             0 -2px 0 rgba(0,0,0,0.25) inset,
-             0 4px 12px ${glow}90,
-             0 2px 5px rgba(0,0,0,0.4)`,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: 26,
-        transition: "box-shadow 0.18s",
-        flexShrink: 0,
+        filter: h.on ? `drop-shadow(0 0 12px ${meta.glow})` : "none",
+        transition: "filter 0.18s",
       }}>
-        {emoji}
+        <SubjectIcon id={id} size={56} />
       </div>
-      <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, fontWeight: 600, textAlign: "center", fontFamily: "system-ui,sans-serif", lineHeight: 1.3 }}>
-        {label}
+      <span style={{ color: h.on ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.55)", fontSize: 12, fontWeight: 600, textAlign: "center", fontFamily: "system-ui,sans-serif", lineHeight: 1.3, transition: "color 0.18s" }}>
+        {meta.label}
       </span>
     </div>
   );
@@ -284,21 +277,12 @@ export default function SplinePreviewPage() {
         {/* ── Section 3: Subject icons ── */}
         <Section
           title="📚 Иконки предметов (3D карточки)"
-          desc="Наведи — карточки поднимаются и светятся цветом предмета"
+          desc="Настоящие SVG иконки Mentora — наведи, чтобы увидеть свечение"
         >
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-            <SubjectCard3D emoji="🏛" label="Рус. история" from="#E85656" to="#B82020" glow="rgba(232,86,86,0.6)" />
-            <SubjectCard3D emoji="🌍" label="Мир. история" from="#4561E8" to="#2438B0" glow="rgba(69,97,232,0.6)" />
-            <SubjectCard3D emoji="π" label="Математика" from="#8B5CF6" to="#5B28D0" glow="rgba(139,92,246,0.6)" />
-            <SubjectCard3D emoji="⚛" label="Физика" from="#0EA5E9" to="#0870B0" glow="rgba(14,165,233,0.6)" />
-            <SubjectCard3D emoji="⚗" label="Химия" from="#10B981" to="#067050" glow="rgba(16,185,129,0.6)" />
-            <SubjectCard3D emoji="🧬" label="Биология" from="#22C55E" to="#0F7A32" glow="rgba(34,197,94,0.6)" />
-            <SubjectCard3D emoji="📖" label="Рус. язык" from="#EF4444" to="#B01010" glow="rgba(239,68,68,0.6)" />
-            <SubjectCard3D emoji="✍" label="Литература" from="#F59E0B" to="#B06000" glow="rgba(245,158,11,0.6)" />
-            <SubjectCard3D emoji="EN" label="Английский" from="#3B82F6" to="#1848C0" glow="rgba(59,130,246,0.6)" />
-            <SubjectCard3D emoji="🌐" label="География" from="#14B8A6" to="#0A7A6A" glow="rgba(20,184,166,0.6)" />
-            <SubjectCard3D emoji="💻" label="Информатика" from="#64748B" to="#334155" glow="rgba(100,116,139,0.6)" />
-            <SubjectCard3D emoji="🔭" label="Астрономия" from="#7C3AED" to="#4C1598" glow="rgba(124,58,237,0.6)" />
+            {Object.keys(SUBJECT_META).map(id => (
+              <SubjectCard3D key={id} id={id} />
+            ))}
           </div>
         </Section>
 

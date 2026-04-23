@@ -83,36 +83,41 @@ export default function DashboardNav({
 
           {totalXP > 0 && (
             <div className="hidden sm:flex items-center gap-1.5 text-sm">
-              {/* XP pill */}
+              {/* XP pill — 3D */}
               <div style={{
-                display: "flex", alignItems: "center", gap: 4, height: 28,
-                padding: "0 10px", borderRadius: 9999, fontWeight: 600,
+                display: "flex", alignItems: "center", gap: 5, height: 30,
+                padding: "0 12px", borderRadius: 9999, fontWeight: 700,
                 fontSize: "0.875rem", lineHeight: 1,
-                border: dk ? "1px solid rgba(255,255,255,0.12)" : "1px solid var(--border)",
-                background: dk ? "rgba(255,255,255,0.07)" : "var(--bg-secondary)",
-                color: dk ? "rgba(255,255,255,0.95)" : "var(--text)",
+                background: "linear-gradient(155deg, #4561E8 0%, #2438B0 100%)",
+                color: "#fff",
+                boxShadow: "0 1px 0 rgba(255,255,255,0.2) inset, 0 -2px 0 rgba(0,0,0,0.28) inset, 0 4px 14px rgba(69,97,232,0.45), 0 2px 5px rgba(0,0,0,0.3)",
+                transition: "transform 0.12s ease, box-shadow 0.12s ease",
+                cursor: "default",
+                userSelect: "none",
               }}>
-                {/* White M + blue е on dark; default MeLogo otherwise */}
                 <MeLogo
-                  height={16}
-                  colorM={dk ? "rgba(255,255,255,0.95)" : undefined}
-                  colorE={dk ? "#4561E8" : undefined}
+                  height={15}
+                  colorM="rgba(255,255,255,0.97)"
+                  colorE="rgba(255,255,255,0.7)"
                 />
                 <span style={{ lineHeight: 1 }}>{totalXP}</span>
               </div>
 
-              {/* Streak pill */}
+              {/* Streak pill — 3D */}
               {currentStreak > 0 && (
                 <div style={{
-                  display: "flex", alignItems: "center", gap: 4, height: 28,
-                  padding: "0 10px", borderRadius: 9999, fontWeight: 600,
+                  display: "flex", alignItems: "center", gap: 5, height: 30,
+                  padding: "0 12px", borderRadius: 9999, fontWeight: 700,
                   fontSize: "0.875rem", lineHeight: 1,
-                  border: "1px solid rgba(249,115,22,0.28)",
-                  background: "rgba(249,115,22,0.07)",
-                  color: "#f97316",
+                  background: "linear-gradient(155deg, #FF6B35 0%, #C62828 100%)",
+                  color: "#fff",
+                  boxShadow: "0 1px 0 rgba(255,255,255,0.2) inset, 0 -2px 0 rgba(0,0,0,0.28) inset, 0 4px 14px rgba(255,80,0,0.45), 0 2px 5px rgba(0,0,0,0.3)",
+                  transition: "transform 0.12s ease, box-shadow 0.12s ease",
+                  cursor: "default",
+                  userSelect: "none",
                 }}>
-                  <svg viewBox="0 0 24 24" fill="none" style={{ width: 16, height: 16, flexShrink: 0, display: "block" }}>
-                    <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00"/>
+                  <svg viewBox="0 0 24 24" fill="none" style={{ width: 15, height: 15, flexShrink: 0, display: "block" }}>
+                    <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="rgba(255,255,255,0.95)"/>
                   </svg>
                   <span style={{ lineHeight: 1 }}>{currentStreak} {pluralDays(currentStreak)}</span>
                 </div>

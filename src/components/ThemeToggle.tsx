@@ -55,11 +55,19 @@ export default function ThemeToggle({ className = "", forceDark = false }: Theme
         <MoonIcon />
       </span>
 
-      {/* Sliding thumb — position based on actual theme, not visual style */}
+      {/* Sliding thumb — 3D sphere via radial-gradient shading */}
       <span
-        className={`absolute left-0 top-0.5 w-6 h-6 rounded-full shadow-sm transition-all duration-300 ${
-          theme === "dark" ? "translate-x-7 bg-[#4561E8]" : "translate-x-0.5 bg-white shadow-md"
+        className={`absolute left-0 top-0.5 w-6 h-6 rounded-full transition-all duration-300 ${
+          theme === "dark" ? "translate-x-7" : "translate-x-0.5"
         }`}
+        style={{
+          background: theme === "dark"
+            ? "radial-gradient(circle at 33% 30%, #B8CCFF 0%, #6B8FFF 30%, #4561E8 60%, #1A2A8A 100%)"
+            : "radial-gradient(circle at 33% 30%, #FFFFFF 0%, #E8E8E8 40%, #C0C0C0 75%, #909090 100%)",
+          boxShadow: theme === "dark"
+            ? "0 2px 8px rgba(0,0,0,0.45), 0 0 12px rgba(69,97,232,0.45)"
+            : "0 2px 8px rgba(0,0,0,0.25), 0 1px 3px rgba(0,0,0,0.15)",
+        }}
       />
     </button>
   );
