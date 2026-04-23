@@ -141,18 +141,32 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
           /* ── Verified card — premium gradient dark ─── */
           if (isVerified) {
             return (
-              <div key={subject.id}
-                data-tilt data-tilt-strength="5"
-                className="relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 group"
-                style={{
-                  background: `linear-gradient(145deg, ${color}ee, ${color}99 60%, ${color}cc)`,
-                  opacity: isRemoving ? 0.4 : 1,
-                  boxShadow: isSelected
-                    ? `0 0 0 2px white, 0 8px 32px ${color}50`
-                    : `0 4px 20px ${color}30`,
-                }}
-                onClick={() => setSelectedId(id => id === subject.id ? null : subject.id)}
-              >
+              <div key={subject.id} className="relative group">
+                {/* Remove button — outside overflow-hidden card, overlaps card + bg */}
+                <button
+                  onClick={(e) => askRemove(e, subject)}
+                  disabled={isRemoving}
+                  aria-label="Удалить предмет"
+                  className="absolute -top-2.5 -left-2.5 z-30 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 disabled:cursor-not-allowed"
+                  style={{ background: "rgba(0,0,0,0.55)", color: "#fff", boxShadow: "0 1px 4px rgba(0,0,0,0.3)" }}
+                >
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+
+                <div
+                  data-tilt data-tilt-strength="5"
+                  className="relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-200"
+                  style={{
+                    background: `linear-gradient(145deg, ${color}ee, ${color}99 60%, ${color}cc)`,
+                    opacity: isRemoving ? 0.4 : 1,
+                    boxShadow: isSelected
+                      ? `0 0 0 2px white, 0 8px 32px ${color}50`
+                      : `0 4px 20px ${color}30`,
+                  }}
+                  onClick={() => setSelectedId(id => id === subject.id ? null : subject.id)}
+                >
                 {/* Depth overlay */}
                 <div className="absolute inset-0 pointer-events-none"
                   style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%, rgba(0,0,0,0.1) 100%)" }} />
@@ -163,19 +177,6 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                     opacity: 0.04, mixBlendMode: "overlay",
                   }}
                 />
-
-                {/* Remove button */}
-                <button
-                  onClick={(e) => askRemove(e, subject)}
-                  disabled={isRemoving}
-                  aria-label="Удалить предмет"
-                  className="absolute -top-2.5 -left-2.5 z-20 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 disabled:cursor-not-allowed"
-                  style={{ background: "rgba(0,0,0,0.35)", color: "rgba(255,255,255,0.9)" }}
-                >
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                    <path d="M18 6L6 18M6 6l12 12" />
-                  </svg>
-                </button>
 
                 <div className="relative z-10 p-5">
                   <div className="absolute top-3 right-3 group/badge" onClick={e => e.stopPropagation()}>
@@ -228,15 +229,30 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                     </Link>
                   </div>
                 </div>
-              </div>
+                </div>{/* /inner card */}
+              </div>{/* /outer wrapper */}
             );
           }
 
           /* ── Beta / active card ───────────────── */
           return (
-            <div key={subject.id}
+            <div key={subject.id} className="relative group">
+              {/* Remove button — outside overflow-hidden card */}
+              <button
+                onClick={(e) => askRemove(e, subject)}
+                disabled={isRemoving}
+                aria-label="Удалить предмет"
+                className="absolute -top-2.5 -left-2.5 z-30 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 disabled:cursor-not-allowed"
+                style={{ background: "rgba(0,0,0,0.18)", color: "var(--text-secondary)", boxShadow: "0 1px 4px rgba(0,0,0,0.15)" }}
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+
+            <div
               data-tilt data-tilt-strength="5"
-              className="relative rounded-2xl border overflow-hidden cursor-pointer transition-all duration-200 group"
+              className="relative rounded-2xl border overflow-hidden cursor-pointer transition-all duration-200"
               style={{
                 background: "var(--bg-card)",
                 opacity: isRemoving ? 0.4 : 1,
@@ -252,19 +268,6 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
               {/* Hover glow overlay */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"
                 style={{ background: `radial-gradient(ellipse at 30% 0%, ${color}10 0%, transparent 60%)` }} />
-
-              {/* Remove button */}
-              <button
-                onClick={(e) => askRemove(e, subject)}
-                disabled={isRemoving}
-                aria-label="Удалить предмет"
-                className="absolute -top-2.5 -left-2.5 z-20 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 disabled:cursor-not-allowed"
-                style={{ background: "rgba(0,0,0,0.10)", color: "var(--text-secondary)" }}
-              >
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </button>
 
               <div className="relative z-10 p-5">
                 <div className="absolute top-4 right-3 group/badge" onClick={e => e.stopPropagation()}>
@@ -319,7 +322,8 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                   </Link>
                 </div>
               </div>
-            </div>
+            </div>{/* /inner card */}
+            </div>{/* /outer wrapper */}
           );
         })}
 

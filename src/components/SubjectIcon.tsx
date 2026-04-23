@@ -118,18 +118,24 @@ function LiteratureIcon() {
 }
 
 function LangBubbleIcon({ code }: { code: string }) {
-  // Speech bubble with language code centered inside
+  // Rounded-rect bubble body (y 1→16, centre y=8.5) + small tail bottom-left
+  // Text sits dead-centre inside the rect body
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
-      <path d="M21 11.5A8.38 8.38 0 0 1 12.5 20c-1.8 0-3.5-.5-4.9-1.4L3 20l1.4-4.6A8.5 8.5 0 1 1 21 11.5Z" />
-      {/* Centered in the bubble body (center ~12, 10.5) */}
+    <svg viewBox="0 0 24 24" fill="none" width="100%" height="100%">
+      {/* Bubble body — rect so centre is perfectly calculable */}
+      <rect x="1" y="1" width="22" height="16" rx="4" ry="4"
+        fill="none" stroke="currentColor" strokeWidth="1.8" />
+      {/* Tail */}
+      <path d="M4 17 L2 22 L9 17 Z"
+        fill="currentColor" stroke="none" opacity="0.9" />
+      {/* Code — vertically centred in rect body: y = 1 + 16/2 = 9 */}
       <text
-        x="12" y="10.5"
-        fontSize="6.8" fontWeight="800"
+        x="12" y="9"
+        fontSize="7" fontWeight="800"
         fontFamily="system-ui,sans-serif"
         fill="currentColor" stroke="none"
         textAnchor="middle" dominantBaseline="central"
-        letterSpacing="0.2"
+        letterSpacing="0.3"
       >{code}</text>
     </svg>
   );

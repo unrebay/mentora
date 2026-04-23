@@ -6,6 +6,7 @@ import { ProfileNameEditor } from "@/components/ProfileNameEditor";
 import ReferralWidget from "@/components/ReferralWidget";
 import MeLogo from "@/components/MeLogo";
 import DashboardNav from "@/components/DashboardNav";
+import StatCard, { MentIcon, FlameIcon, MessageIcon, StarIcon } from "@/components/StatCard";
 
 export const metadata = { title: "Профиль — Mentora" };
 
@@ -270,51 +271,10 @@ export default async function ProfilePage() {
 
         {/* ── Stats grid ───────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            {
-              label: "Мент",
-              value: totalXP,
-              suffix: "",
-              icon: <MeLogo height={28} />,
-              accent: "var(--brand)",
-            },
-            {
-              label: "Рекорд стрика",
-              value: bestStreak,
-              suffix: "",
-              icon: <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none"><path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00"/></svg>,
-              accent: "#FF7A00",
-            },
-            {
-              label: "Сообщений",
-              value: totalMessages,
-              suffix: "",
-              icon: <svg className="w-7 h-7" viewBox="0 0 24 24" fill="#10B981"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg>,
-              accent: "#10B981",
-            },
-            {
-              label: "Достижений",
-              value: earned.length,
-              suffix: "",
-              icon: <svg className="w-7 h-7" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>,
-              accent: "#f59e0b",
-            },
-          ].map((s, i) => (
-            <div key={i} className="rounded-2xl p-4 border text-center"
-              style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2"
-                style={i === 0
-                  ? { background: "rgba(69,97,232,0.08)", border: "1.5px solid rgba(140,165,240,0.45)" }
-                  : { background: `${s.accent}18` }}>
-                {s.icon}
-              </div>
-              <div className="font-bold text-xl" style={{ color: "var(--text)" }}>
-                {s.value.toLocaleString("ru-RU")}
-                <span className="text-sm font-medium ml-0.5" style={{ color: "var(--text-muted)" }}>{s.suffix}</span>
-              </div>
-              <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{s.label}</div>
-            </div>
-          ))}
+          <StatCard label="Мент"          value={totalXP}       icon={<MentIcon />}    accent="var(--brand)" isBrand />
+          <StatCard label="Рекорд стрика" value={bestStreak}    icon={<FlameIcon />}   accent="#FF7A00" />
+          <StatCard label="Сообщений"     value={totalMessages} icon={<MessageIcon />} accent="#10B981" />
+          <StatCard label="Достижений"    value={earned.length} icon={<StarIcon />}    accent="#f59e0b" />
         </div>
 
         {/* ── XP Progress bar ──────────────────────────────── */}
