@@ -22,15 +22,15 @@
 
   .dark {
     /* ── Dark theme ─────────────────────────────────────────────────── */
-    --bg:            #0a0a18;
-    --bg-secondary:  #0f0f22;
-    --bg-card:       #16162c;
-    --bg-nav:        rgba(10,10,24,0.94);
+    --bg:            #080814;
+    --bg-secondary:  #0d0d22;
+    --bg-card:       #13132a;
+    --bg-nav:        rgba(8,8,20,0.92);
     --text:          #eeeef8;
     --text-secondary:#b0b0d0;
-    --text-muted:    #7878a8;
-    --border:        #28284a;
-    --border-light:  #1e1e3a;
+    --text-muted:    #7070a0;
+    --border:        #252545;
+    --border-light:  #1c1c38;
     --brand:         #6b87ff;
     --brand-hover:   #5570f0;
     --shadow:        0 1px 4px rgba(0,0,0,0.5);
@@ -56,36 +56,94 @@ nav, .card, section, main, aside, header, footer {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-/* ── Semantic utility classes ─────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────────
+   UTILITY CLASSES
+───────────────────────────────────────────────────────────────────────────── */
+
 @layer utilities {
+  /* ── Semantic colors ───────────────────────────────────────────── */
   .t-primary   { color: var(--text); }
   .t-secondary { color: var(--text-secondary); }
   .t-muted     { color: var(--text-muted); }
-
   .s-page      { background-color: var(--bg); }
   .s-raised    { background-color: var(--bg-card); }
   .s-input     { background-color: var(--bg-secondary); }
-
   .b-default   { border-color: var(--border); }
   .b-subtle    { border-color: var(--border-light); }
 
-  /* ── Glassmorphism card (use on dark backgrounds) ──────────────── */
+  /* ── Glassmorphism — light surface ─────────────────────────────── */
   .glass {
-    background: rgba(255, 255, 255, 0.045);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.35),
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 
-  /* ── Gradient text utility ─────────────────────────────────────── */
+  /* ── Glass card — richer version for content cards ─────────────── */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.035);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                box-shadow 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                border-color 0.2s ease;
+  }
+  .glass-card:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  /* ── Hover lift — generic card animation ───────────────────────── */
+  .hover-lift {
+    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                box-shadow 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  .hover-lift:hover {
+    transform: translateY(-3px) scale(1.015);
+  }
+
+  /* ── Gradient text ─────────────────────────────────────────────── */
   .text-gradient-blue {
-    background: linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%);
+    background: linear-gradient(120deg, #9ca3ff 0%, #6b87ff 40%, #a78bfa 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+  .text-gradient-brand {
+    background: linear-gradient(135deg, #6b87ff 0%, #4561E8 50%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Gradient border (CSS mask technique) ──────────────────────── */
+  .gradient-border {
+    position: relative;
+    background-clip: padding-box;
+  }
+  .gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(107,135,255,0.6) 0%, rgba(69,97,232,0.3) 50%, rgba(167,139,250,0.5) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
   }
 
   /* ── Glow button ───────────────────────────────────────────────── */
@@ -96,13 +154,24 @@ nav, .card, section, main, aside, header, footer {
     transition: box-shadow 0.2s ease, transform 0.15s ease;
   }
   .btn-glow:hover {
-    box-shadow: 0 6px 28px rgba(69, 97, 232, 0.6), 0 1px 0 rgba(255,255,255,0.15) inset;
+    box-shadow: 0 8px 32px rgba(69, 97, 232, 0.65), 0 1px 0 rgba(255,255,255,0.15) inset;
     transform: translateY(-1px);
   }
   .btn-glow:active { transform: translateY(0); }
+
+  /* ── Ambient glow (subject color glow) ─────────────────────────── */
+  .glow-brand {
+    box-shadow: 0 0 40px rgba(69,97,232,0.2), 0 0 80px rgba(69,97,232,0.05);
+  }
+
+  /* ── No scrollbar ───────────────────────────────────────────────── */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
-/* ── Inline code ──────────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────────
+   INLINE CODE
+───────────────────────────────────────────────────────────────────────────── */
 code:not([class]) {
   background-color: var(--bg-secondary);
   color: var(--text);
@@ -122,33 +191,34 @@ code:not([class]) {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes mentoraDot {
   0%, 60%, 100% { transform: translateY(0);    opacity: 0.4; }
   30%           { transform: translateY(-5px); opacity: 1;   }
 }
 
-/* Legacy gradient drift */
-@keyframes gradientDrift {
-  0%   { opacity: 0.7; transform: scale(1)    translate(0%,   0%); }
-  100% { opacity: 1;   transform: scale(1.12) translate(2%, 1.5%); }
+/* Hero ambient orbs */
+@keyframes orbDrift1 {
+  0%   { transform: translate(0px,   0px)   scale(1);    }
+  25%  { transform: translate(40px, -30px)  scale(1.05); }
+  50%  { transform: translate(-20px, 50px)  scale(0.97); }
+  75%  { transform: translate(60px,  20px)  scale(1.03); }
+  100% { transform: translate(0px,   0px)   scale(1);    }
+}
+@keyframes orbDrift2 {
+  0%   { transform: translate(0px,   0px)   scale(1);    }
+  30%  { transform: translate(-60px, 40px)  scale(1.08); }
+  60%  { transform: translate(30px, -50px)  scale(0.94); }
+  85%  { transform: translate(-20px, 20px)  scale(1.04); }
+  100% { transform: translate(0px,   0px)   scale(1);    }
+}
+@keyframes orbDrift3 {
+  0%   { transform: translate(0px, 0px)   scale(1);    }
+  40%  { transform: translate(50px, 60px) scale(1.06); }
+  70%  { transform: translate(-40px,-20px) scale(0.96); }
+  100% { transform: translate(0px, 0px)   scale(1);    }
 }
 
-/* Dashboard ambient orbs */
-@keyframes orb1 {
-  0%   { transform: translate(0px, 0px) scale(1); }
-  33%  { transform: translate(60px, 40px) scale(1.08); }
-  66%  { transform: translate(-30px, 80px) scale(0.95); }
-  100% { transform: translate(40px, -30px) scale(1.05); }
-}
-@keyframes orb2 {
-  0%   { transform: translate(0px, 0px) scale(1); }
-  40%  { transform: translate(-50px, 60px) scale(1.1); }
-  80%  { transform: translate(30px, -40px) scale(0.9); }
-  100% { transform: translate(-20px, 20px) scale(1.05); }
-}
-
-/* ── Spline-style 3D sphere float animations ─────────────────────────────── */
+/* ── Spline-style sphere floats ──────────────────────────────────────────── */
 @keyframes sphereFloat1 {
   0%, 100% { transform: translate(0px,  0px)  scale(1);    }
   25%      { transform: translate(18px, -24px) scale(1.04); }
@@ -172,31 +242,75 @@ code:not([class]) {
   65%      { transform: translate(20px, -14px) scale(0.94); }
 }
 
-/* ── Mesh background pulse ───────────────────────────────────────────────── */
-@keyframes meshPulse {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50%      { opacity: 1;   transform: scale(1.08); }
-}
-
-/* ── Glow pulse (for highlighted elements) ───────────────────────────────── */
-@keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(69,97,232,0.3); }
-  50%      { box-shadow: 0 0 40px rgba(69,97,232,0.6); }
-}
-
-/* ── Fade-in slide up ────────────────────────────────────────────────────── */
+/* ── General purpose animations ─────────────────────────────────────────── */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0);    }
 }
-.animate-fade-in-up {
-  animation: fadeInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0);     }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.93); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(69,97,232,0.3); }
+  50%      { box-shadow: 0 0 50px rgba(69,97,232,0.6), 0 0 80px rgba(107,135,255,0.2); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-8px); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200%  0; }
+}
+@keyframes rotate360 {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-/* ── Level-up sparkle animation ──────────────────────────────────────────── */
+/* ── Utility animation classes ───────────────────────────────────────────── */
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+.animate-fade-in-up-delay-1 { animation: fadeInUp 0.5s 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+.animate-fade-in-up-delay-2 { animation: fadeInUp 0.5s 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+.animate-fade-in-up-delay-3 { animation: fadeInUp 0.5s 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+.animate-fade-in-up-delay-4 { animation: fadeInUp 0.5s 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+.animate-scale-in  { animation: scaleIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+.animate-float     { animation: float 4s ease-in-out infinite; }
+.animate-float-slow{ animation: float 6s ease-in-out infinite; }
+
+/* ── Chat-specific animations ────────────────────────────────────────────── */
 @keyframes mentoraSpark {
   0%   { opacity: 0;   transform: translateY(0) scale(0.5); }
   30%  { opacity: 1;   transform: translateY(-12px) scale(1); }
   70%  { opacity: 0.7; transform: translateY(-24px) scale(0.8); }
   100% { opacity: 0;   transform: translateY(-36px) scale(0.3); }
 }
+
+/* ── Stagger helpers ─────────────────────────────────────────────────────── */
+.stagger-children > *:nth-child(1)  { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2)  { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3)  { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4)  { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5)  { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6)  { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(7)  { animation-delay: 0.35s; }
+.stagger-children > *:nth-child(8)  { animation-delay: 0.4s; }
