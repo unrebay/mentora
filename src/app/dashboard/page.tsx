@@ -11,7 +11,7 @@ import BadgesSection from "@/components/BadgesSection";
 import MeLogo from "@/components/MeLogo";
 import WhatsNewBanner from "@/components/WhatsNewBanner";
 import ReferralWidget from "@/components/ReferralWidget";
-import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
+import AmbientHero from "@/components/AmbientHero";
 import dynamic from "next/dynamic";
 const ChatParticles = dynamic(() => import("@/components/ChatParticles"), { ssr: false });
 
@@ -114,25 +114,12 @@ export default async function DashboardPage() {
   const daysLeft = 7 - currentStreak;
 
   return (
-    <main className="min-h-screen text-[var(--text)]" style={{ background: "var(--bg)" }}>
-      {/* Ambient sphere background — subtle, theme-aware */}
-      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden dark:block hidden">
-        <SphereBlobScene spheres={SUBTLE_SPHERES} intensity={0.5} />
-      </div>
-      {/* Floating math/science symbols — always visible in both themes */}
+    <main className="min-h-screen text-white" style={{ background: "#080814" }}>
+      {/* Ambient background — fixed, behind all content */}
+      <AmbientHero variant="dashboard" />
+      {/* Floating math/science symbols */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
         <ChatParticles subject="discovery" />
-      </div>
-      {/* Light theme: soft gradient orbs */}
-      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden dark:hidden">
-        <div className="absolute rounded-full" style={{
-          width: 700, height: 700, top: "-200px", left: "-150px",
-          background: "radial-gradient(circle, rgba(69,97,232,0.05) 0%, transparent 65%)",
-        }} />
-        <div className="absolute rounded-full" style={{
-          width: 500, height: 500, top: "30%", right: "-80px",
-          background: "radial-gradient(circle, rgba(255,122,0,0.04) 0%, transparent 65%)",
-        }} />
       </div>
 
       <PostHogIdentify userId={user.id} email={user.email ?? ""} />
