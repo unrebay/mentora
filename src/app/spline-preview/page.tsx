@@ -3,8 +3,6 @@
 import { useState } from "react";
 import SubjectIcon from "@/components/SubjectIcon";
 
-export const metadata = undefined; // client component
-
 /* ─── tiny helpers ──────────────────────────────────────────────────────── */
 
 function useHover() {
