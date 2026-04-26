@@ -73,6 +73,7 @@ export default function DashboardNav({
             <a href="/dashboard/analytics" className={navClass("/dashboard/analytics")} style={navStyle("/dashboard/analytics")}>Аналитика</a>
             <a href="/knowledge" className={navClass("/knowledge")} style={navStyle("/knowledge")}>Галактика знаний</a>
             <a href="/profile" className={navClass("/profile")} style={navStyle("/profile")}>Профиль</a>
+            <a href="/about" className={navClass("/about")} style={navStyle("/about")}>О проекте</a>
           </div>
         </div>
 
@@ -177,6 +178,7 @@ export default function DashboardNav({
               { href: "/dashboard/analytics", label: "Аналитика" },
               { href: "/knowledge", label: "Галактика знаний" },
               { href: "/profile", label: "Профиль" },
+              { href: "/about", label: "О проекте" },
               ...(!isPro ? [{ href: "/pricing", label: "Тарифы" }] : []),
             ].map(({ href, label }) => (
               <a key={href} href={href} onClick={() => setOpen(false)}

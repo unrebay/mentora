@@ -94,13 +94,29 @@ export async function POST(req: NextRequest) {
     await admin.from("users").update({ trial_expires_at: base.toISOString() }).eq("id", userId);
   }
 
-  // Reward referrer: +3 days Pro trial
+  // ── Reward chain ────────────────────────────────────────────────────────
+  // Level 0 (direct referrer): +3 days Pro trial
   await extendTrial(referral.referrer_id, 3);
 
-  // Reward referred user: +3 days Pro trial (wait for their row to exist)
-  // The users table row is created by a DB trigger after auth.users insert,
-  // so it should already exist at this point.
+  // Level 0 (newly referred user): +3 days Pro trial
+  // The users table row is created by a DB trigger after auth.users insert.
   await extendTrial(newUserId, 3);
+
+  // Levels 1–4 (referrer's referrers up the chain): +1 day each
+  // Walk up by finding who referred each ancestor via referred_id lookup.
+  const MAX_DEPTH = 4;
+  let ancestorId = referral.referrer_id;
+  for (let depth = 1; depth <= MAX_DEPTH; depth++) {
+    const { data: parentRef } = await admin
+      .from("referrals")
+      .select("referrer_id")
+      .eq("referred_id", ancestorId)
+      .in("status", ["completed", "rewarded"])
+      .maybeSingle();
+    if (!parentRef?.referrer_id) break; // no further ancestor
+    await extendTrial(parentRef.referrer_id, 1);
+    ancestorId = parentRef.referrer_id;
+  }
 
   // Mark as rewarded
   await admin.from("referrals").update({ status: "rewarded", rewarded_at: new Date().toISOString() }).eq("id", referral.id);
