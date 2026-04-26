@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ProfileNameEditor } from "@/components/ProfileNameEditor";
 import ReferralWidget from "@/components/ReferralWidget";
+import GiftProBanner from "@/components/GiftProBanner";
 import MeLogo from "@/components/MeLogo";
 import DashboardNav from "@/components/DashboardNav";
 import StatCard, { MentIcon, FlameIcon, MessageIcon, StarIcon } from "@/components/StatCard";
@@ -182,7 +183,7 @@ export default async function ProfilePage() {
   if (!user) redirect("/auth");
 
   const [{ data: profile }, { data: progressData }, { count: msgCount }] = await Promise.all([
-    supabase.from("users").select("plan, trial_expires_at, created_at, display_name, name_changes_count, full_name, age, phone").eq("id", user.id).single(),
+    supabase.from("users").select("plan, trial_expires_at, created_at, display_name, name_changes_count, full_name, age, phone, gift_pro_claimed").eq("id", user.id).single(),
     supabase.from("user_progress").select("xp_total, streak_days, best_streak").eq("user_id", user.id),
     supabase.from("chat_messages").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("role", "user"),
   ]);
@@ -364,6 +365,14 @@ export default async function ProfilePage() {
             </div>
           </div>
         )}
+
+        {/* ── Gift Pro banner — shown for all users ────────── */}
+        <div className="pb-4">
+          <GiftProBanner
+            giftClaimed={profile?.gift_pro_claimed ?? false}
+            isUltima={isUltima}
+          />
+        </div>
 
         {/* ── Referral ─────────────────────────────────────── */}
         <div className="pb-4">

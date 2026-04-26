@@ -172,6 +172,21 @@ export default function AboutPage() {
                 <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", marginTop: 4, lineHeight: 1.5 }}>
                   Сейчас идёт бета — ты уже внутри. Поделись с другом, пока мест не стало меньше.
                 </p>
+              <div style={{
+                marginTop: 12,
+                display: "inline-flex", alignItems: "center", gap: 8,
+                background: "rgba(16,185,129,0.12)",
+                border: "1px solid rgba(16,185,129,0.28)",
+                borderRadius: 10,
+                padding: "7px 14px",
+              }}>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 12v10H4V12M22 7H2v5h20V7zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+                </svg>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "#10B981" }}>
+                  Каждому зарегистрированному пользователю — подарок: месяц Pro бесплатно
+                </span>
+              </div>
               </div>
               <div style={{ display: "flex", gap: 12, flexShrink: 0 }}>
                 {[
@@ -269,58 +284,114 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ── WHY MENTORA VS ALTERNATIVES ──────────────────────── */}
+        {/* ── COMPARISON TABLE ──────────────────────────────── */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
           <Tag color="#10B981">Сравнение</Tag>
-          <h2 style={{ fontSize: 26, fontWeight: 900, color: "white", margin: "16px 0 24px", letterSpacing: "-0.5px" }}>
-            Почему не Google, не ChatGPT, не репетитор?
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: "white", margin: "16px 0 6px", letterSpacing: "-0.5px" }}>
+            Mentora против альтернатив
           </h2>
+          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", marginBottom: 24, lineHeight: 1.6 }}>
+            Мы честно сравниваем — включая свои ограничения.
+          </p>
 
-          <div className="grid md:grid-cols-3 gap-4">
-            {[
-              {
-                title: "Не Google",
-                color: "#FF7A00",
-                points: [
-                  "Google даёт статьи — ты сам разбираешься",
-                  "Mentora объясняет именно тебе, твоим языком",
-                  "Не нужно знать, что именно искать",
-                ],
-              },
-              {
-                title: "Не просто ChatGPT",
-                color: "#4561E8",
-                points: [
-                  "Общий чат не знает твоего прогресса",
-                  "Mentora настроен на российскую программу",
-                  "Ментор помнит историю ваших диалогов",
-                ],
-              },
-              {
-                title: "Не репетитор",
-                color: "#10B981",
-                points: [
-                  "В 20 раз дешевле частного педагога",
-                  "Занятие не отменится и не перенесётся",
-                  "Терпение бесконечное — переспрашивай сколько угодно",
-                ],
-              },
-            ].map(col => (
-              <div key={col.title}
-                className="p-5 rounded-2xl"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
-              >
-                <div style={{ fontWeight: 800, fontSize: 14, color: col.color, marginBottom: 14 }}>{col.title}</div>
-                <ul className="space-y-2.5">
-                  {col.points.map(p => (
-                    <li key={p} className="flex gap-2.5 items-start">
-                      <span style={{ width: 5, height: 5, borderRadius: "50%", background: col.color, flexShrink: 0, marginTop: 7, display: "inline-block" }} />
-                      <span style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.55 }}>{p}</span>
-                    </li>
+          {/* Table */}
+          <div style={{ overflowX: "auto" as const }}>
+            <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 0 }}>
+              <thead>
+                <tr>
+                  {["Критерий", "Поисковая машина", "ИИ-модели", "Mentora", "Репетитор"].map((h, i) => (
+                    <th key={h} style={{
+                      padding: "10px 14px",
+                      fontSize: 12, fontWeight: 700, textAlign: "left" as const,
+                      color: i === 3 ? "#6b87ff" : "rgba(255,255,255,0.4)",
+                      background: i === 3 ? "rgba(69,97,232,0.12)" : "rgba(255,255,255,0.03)",
+                      borderBottom: i === 3 ? "1px solid rgba(107,135,255,0.3)" : "1px solid rgba(255,255,255,0.06)",
+                      borderTop: i === 3 ? "1px solid rgba(107,135,255,0.3)" : "1px solid rgba(255,255,255,0.06)",
+                      borderLeft: i === 3 ? "1px solid rgba(107,135,255,0.3)" : i === 0 ? "1px solid rgba(255,255,255,0.06)" : "none",
+                      borderRight: i === 3 ? "1px solid rgba(107,135,255,0.3)" : i === 4 ? "1px solid rgba(255,255,255,0.06)" : "none",
+                      borderRadius: i === 0 ? "12px 0 0 0" : i === 4 ? "0 12px 0 0" : 0,
+                      whiteSpace: "nowrap" as const,
+                      letterSpacing: "0.03em",
+                    }}>
+                      {h}
+                    </th>
                   ))}
-                </ul>
-              </div>
-            ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {
+                    criterion: "Знает твой уровень",
+                    search: "✗", ai: "Частично", mentora: "✓", tutor: "✓",
+                    note: "Ментора запоминает профиль с первого диалога",
+                  },
+                  {
+                    criterion: "Помнит прошлые сессии",
+                    search: "✗", ai: "✗", mentora: "✓", tutor: "Обычно",
+                    note: "История и прогресс хранятся бессрочно",
+                  },
+                  {
+                    criterion: "Доступен в 3 часа ночи",
+                    search: "✓", ai: "✓", mentora: "✓", tutor: "✗",
+                    note: "",
+                  },
+                  {
+                    criterion: "Объясняет, а не ищет",
+                    search: "✗", ai: "✓", mentora: "✓", tutor: "✓",
+                    note: "Поисковик даёт ссылки — разбираться приходится самому",
+                  },
+                  {
+                    criterion: "Настроен на рос. программу",
+                    search: "Частично", ai: "✗", mentora: "✓", tutor: "✓",
+                    note: "Контекст, терминология и задания адаптированы",
+                  },
+                  {
+                    criterion: "Стоимость в месяц",
+                    search: "Бесплатно", ai: "~2 000 ₽", mentora: "499 ₽", tutor: "12 000+ ₽",
+                    note: "",
+                  },
+                  {
+                    criterion: "Объяснит 10 раз по-разному",
+                    search: "✗", ai: "✓", mentora: "✓", tutor: "Не всегда",
+                    note: "Репетитор тоже устаёт объяснять одно и то же",
+                  },
+                  {
+                    criterion: "Живая эмпатия",
+                    search: "✗", ai: "✗", mentora: "✗", tutor: "✓",
+                    note: "Честный минус — настоящего человека AI не заменит",
+                  },
+                ].map((row, ri) => {
+                  const isLast = ri === 7;
+                  const cellStyle = (i: number, val: string): React.CSSProperties => ({
+                    padding: "11px 14px",
+                    fontSize: 13,
+                    color: val === "✓" ? "#10B981"
+                      : val === "✗" ? "rgba(255,255,255,0.25)"
+                      : i === 3 ? "#a5b4fc"
+                      : "rgba(255,255,255,0.5)",
+                    fontWeight: val === "✓" || val === "✗" ? 700 : 500,
+                    background: i === 3 ? "rgba(69,97,232,0.08)" : i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
+                    borderBottom: isLast ? "1px solid rgba(255,255,255,0.06)" : "1px solid rgba(255,255,255,0.04)",
+                    borderLeft: i === 3 ? "1px solid rgba(107,135,255,0.2)" : i === 0 ? "1px solid rgba(255,255,255,0.06)" : "none",
+                    borderRight: i === 3 ? "1px solid rgba(107,135,255,0.2)" : i === 4 ? "1px solid rgba(255,255,255,0.06)" : "none",
+                    borderRadius: isLast && i === 0 ? "0 0 0 12px" : isLast && i === 4 ? "0 0 12px 0" : 0,
+                    lineHeight: 1.4,
+                  });
+                  return (
+                    <tr key={row.criterion}>
+                      <td style={cellStyle(0, "")}>
+                        <div style={{ color: "rgba(255,255,255,0.7)", fontWeight: 600, fontSize: 13 }}>{row.criterion}</div>
+                        {row.note && <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 2, lineHeight: 1.4 }}>{row.note}</div>}
+                      </td>
+                      <td style={cellStyle(1, row.search)}>{row.search}</td>
+                      <td style={cellStyle(2, row.ai)}>{row.ai}</td>
+                      <td style={cellStyle(3, row.mentora)}>{row.mentora}</td>
+                      <td style={cellStyle(4, row.tutor)}>{row.tutor}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </section>
 
