@@ -1,9 +1,24 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion } from "motion/react";
 import DemoChat from "@/components/DemoChat";
 import AmbientHero from "@/components/AmbientHero";
 import LandingNav from "@/components/LandingNav";
+
+/* ── Motion helpers ─────────────────────────────────────────────────── */
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 28 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] as const },
+});
+
+const fadeUpInView = (delay = 0) => ({
+  initial: { opacity: 0, y: 32 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-80px" },
+  transition: { duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] as const },
+});
 
 /* ── Data ──────────────────────────────────────────────────────────── */
 
@@ -163,12 +178,12 @@ export default function LandingPageClient() {
           variant="hero"
           splineUrl="https://my.spline.design/retrofuturismbganimation-HFdvtQ5oOt2HeV1VdNeILLtN/"
           iframeStyle={{
-            /* 150% size, anchored to right edge — beams sit behind the chat card */
-            top: "-25%",
+            /* 80vh tall, anchored to right — beams sit behind the chat card */
+            top: "10%",
             left: "auto",
-            right: "-15%",
-            width: "90%",
-            height: "150%",
+            right: "-10%",
+            width: "85%",
+            height: "80vh",
           }}
         />
 
@@ -184,13 +199,7 @@ export default function LandingPageClient() {
           <div className="grid md:grid-cols-2 gap-16 items-center">
 
             {/* Left — headline */}
-            <div
-              className="transition-all duration-700"
-              style={{
-                opacity: mounted ? 1 : 0,
-                transform: mounted ? "translateY(0)" : "translateY(2rem)",
-              }}
-            >
+            <motion.div {...fadeUp(0)}>
               <div
                 className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-7 tracking-widest uppercase"
                 style={{
@@ -294,15 +303,7 @@ export default function LandingPageClient() {
             </div>
 
             {/* Right — demo chat */}
-            <div
-              id="demo"
-              className="transition-all duration-700"
-              style={{
-                opacity: mounted ? 1 : 0,
-                transform: mounted ? "translateY(0)" : "translateY(2rem)",
-                transitionDelay: "200ms",
-              }}
-            >
+            <motion.div id="demo" {...fadeUp(0.18)}>
               <div
                 className="rounded-3xl overflow-hidden"
                 style={{
@@ -321,7 +322,7 @@ export default function LandingPageClient() {
                 Задай вопрос, который не решался{" "}
                 <span style={{ color: "#6b87ff" }}>произнести вслух</span>
               </p>
-            </div>
+            </motion.div>
           </div>
         </div>
 
@@ -336,9 +337,10 @@ export default function LandingPageClient() {
       <section className="py-14 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {STATS.map(s => (
-              <div
+            {STATS.map((s, i) => (
+              <motion.div
                 key={s.value}
+                {...fadeUpInView(i * 0.08)}
                 className="flex flex-col items-center text-center gap-3 rounded-2xl px-4 py-6"
                 style={{
                   background: "rgba(255,255,255,0.03)",
@@ -352,7 +354,7 @@ export default function LandingPageClient() {
                 <div className="text-xs leading-tight" style={{ color: "rgba(255,255,255,0.45)" }}>
                   {s.label}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -377,9 +379,9 @@ export default function LandingPageClient() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-            {SUBJECTS.map(s => (
+            {SUBJECTS.map((s, i) => (
+              <motion.div key={s.id} {...fadeUpInView(i * 0.04)}>
               <Link
-                key={s.id}
                 href="/auth"
                 className="flex flex-col items-center gap-3 rounded-2xl p-5 text-center transition-all duration-300"
                 style={{
@@ -411,6 +413,7 @@ export default function LandingPageClient() {
                   </div>
                 </div>
               </Link>
+              </motion.div>
             ))}
 
             {/* Suggest tile */}
@@ -470,23 +473,24 @@ export default function LandingPageClient() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {FEATURES.map(f => (
-              <div
+            {FEATURES.map((f, i) => (
+              <motion.div
                 key={f.title}
+                {...fadeUpInView(i * 0.07)}
                 className="rounded-2xl p-6 flex flex-col gap-4 transition-all duration-300 cursor-default"
                 style={{
                   background: "rgba(255,255,255,0.035)",
                   border: "1px solid rgba(255,255,255,0.07)",
                   backdropFilter: "blur(16px)",
                 }}
-                onMouseEnter={e => {
-                  const el = e.currentTarget as HTMLDivElement;
+                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
+                  const el = e.currentTarget;
                   el.style.transform = "translateY(-3px)";
                   el.style.borderColor = `${f.color}35`;
                   el.style.boxShadow = `0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px ${f.color}20`;
                 }}
-                onMouseLeave={e => {
-                  const el = e.currentTarget as HTMLDivElement;
+                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => {
+                  const el = e.currentTarget;
                   el.style.transform = "translateY(0)";
                   el.style.borderColor = "rgba(255,255,255,0.07)";
                   el.style.boxShadow = "none";
@@ -551,7 +555,7 @@ export default function LandingPageClient() {
                     ))}
                   </div>
                 )}
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -589,9 +593,10 @@ export default function LandingPageClient() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
-            {STEPS.map(s => (
-              <div
+            {STEPS.map((s, i) => (
+              <motion.div
                 key={s.n}
+                {...fadeUpInView(i * 0.08)}
                 className="relative rounded-2xl p-5 transition-all duration-300"
                 style={{
                   background: "rgba(255,255,255,0.03)",
@@ -630,7 +635,7 @@ export default function LandingPageClient() {
                 <div className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>
                   {s.desc}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -751,23 +756,24 @@ export default function LandingPageClient() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map(t => (
-              <div
+            {TESTIMONIALS.map((t, i) => (
+              <motion.div
                 key={t.name}
+                {...fadeUpInView(i * 0.1)}
                 className="relative rounded-2xl p-6 flex flex-col gap-4 overflow-hidden transition-all duration-300"
                 style={{
                   background: "rgba(255,255,255,0.035)",
                   border: "1px solid rgba(255,255,255,0.07)",
                   backdropFilter: "blur(16px)",
                 }}
-                onMouseEnter={e => {
-                  const el = e.currentTarget as HTMLDivElement;
+                onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
+                  const el = e.currentTarget;
                   el.style.transform = "translateY(-3px)";
                   el.style.borderColor = `${t.color}35`;
                   el.style.boxShadow = "0 16px 48px rgba(0,0,0,0.4)";
                 }}
-                onMouseLeave={e => {
-                  const el = e.currentTarget as HTMLDivElement;
+                onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => {
+                  const el = e.currentTarget;
                   el.style.transform = "translateY(0)";
                   el.style.borderColor = "rgba(255,255,255,0.07)";
                   el.style.boxShadow = "none";
@@ -815,7 +821,7 @@ export default function LandingPageClient() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
