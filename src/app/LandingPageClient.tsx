@@ -175,26 +175,44 @@ export default function LandingPageClient() {
       {/* ── HERO ──────────────────────────────────────────────────── */}
       <section className="relative min-h-screen flex flex-col justify-center overflow-hidden">
 
-        <AmbientHero
-          variant="hero"
-          splineUrl="https://my.spline.design/retrofuturismbganimation-HFdvtQ5oOt2HeV1VdNeILLtN/"
-          iframeStyle={{
-            /* 80vh tall, anchored to right — beams sit behind the chat card */
-            top: "10%",
-            left: "auto",
-            right: "-10%",
-            width: "85%",
-            height: "80vh",
-          }}
-        />
+        {/* Enhanced CSS background — no iframe, pure CSS */}
+        <AmbientHero variant="hero" />
 
-        {/* Blue tint overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse 70% 60% at 60% 40%, rgba(69,97,232,0.12) 0%, transparent 70%)",
-          }}
-        />
+        {/* Animated mesh gradient — the "aurora" effect */}
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
+          {/* Main radial glow top-left */}
+          <div style={{
+            position: "absolute", top: "-20%", left: "-10%",
+            width: "65%", height: "70%",
+            background: "radial-gradient(ellipse, rgba(69,97,232,0.22) 0%, rgba(69,97,232,0.06) 50%, transparent 75%)",
+            filter: "blur(40px)",
+            animation: "meshDrift1 20s ease-in-out infinite",
+          }} />
+          {/* Secondary glow right */}
+          <div style={{
+            position: "absolute", top: "10%", right: "-5%",
+            width: "50%", height: "65%",
+            background: "radial-gradient(ellipse, rgba(107,135,255,0.18) 0%, rgba(167,139,250,0.08) 50%, transparent 75%)",
+            filter: "blur(50px)",
+            animation: "meshDrift2 25s ease-in-out infinite",
+          }} />
+          {/* Accent glow bottom center */}
+          <div style={{
+            position: "absolute", bottom: "-10%", left: "30%",
+            width: "45%", height: "50%",
+            background: "radial-gradient(ellipse, rgba(99,102,241,0.14) 0%, transparent 70%)",
+            filter: "blur(60px)",
+            animation: "meshDrift3 18s ease-in-out infinite",
+          }} />
+          {/* Subtle horizontal lines — grid */}
+          <div style={{
+            position: "absolute", inset: 0,
+            backgroundImage: "linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)",
+            backgroundSize: "72px 72px",
+            maskImage: "radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, transparent 90%)",
+            WebkitMaskImage: "radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, transparent 90%)",
+          }} />
+        </div>
 
         <div className="relative z-10 max-w-6xl mx-auto px-6 pt-32 pb-20 w-full">
           <div className="grid md:grid-cols-2 gap-16 items-center">
