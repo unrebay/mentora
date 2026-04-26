@@ -105,6 +105,7 @@ export default function DashboardNav({
     >
       {/* ── The actual pill ── */}
       <div
+        data-tour="nav-pill"
         className="max-w-5xl mx-auto"
         style={{
           pointerEvents: "all",

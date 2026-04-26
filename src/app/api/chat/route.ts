@@ -337,6 +337,30 @@ ${ragContext}
       tokens_used: response.usage.input_tokens + response.usage.output_tokens,
     });
 
+    // ── Non-blocking memory write-back (all users, all plans) ────────────────
+    void (async () => {
+      try {
+        const extractResp = await anthropic.messages.create({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 300,
+          system: "Extract student learning facts as compact JSON. Return ONLY valid JSON object with no markdown, no explanation.",
+          messages: [{
+            role: "user",
+            content: `Subject: ${subjectLabel}\nStudent: ${message}\nMentor: ${assistantMessage.slice(0, 400)}\nExisting memory: ${JSON.stringify(memory?.memory_json ?? {})}\n\nReturn updated JSON: {"topics_covered": string[], "difficulty_areas": string[], "interests": string[], "last_seen": "${new Date().toISOString().split("T")[0]}"}. Merge with existing, max 15 items per array.`,
+          }],
+        });
+        const rawText = extractResp.content[0].type === "text" ? extractResp.content[0].text.trim() : "{}";
+        const jsonStart = rawText.indexOf("{");
+        const jsonEnd = rawText.lastIndexOf("}");
+        const jsonStr = jsonStart !== -1 && jsonEnd !== -1 ? rawText.slice(jsonStart, jsonEnd + 1) : "{}";
+        const newMemory = JSON.parse(jsonStr);
+        await supabase.from("user_memory").upsert(
+          { user_id: user.id, subject, memory_json: newMemory },
+          { onConflict: "user_id,subject" }
+        );
+      } catch { /* non-critical */ }
+    })();
+
     // Detect level up + Update XP atomically (+10 per message) — non-blocking
     let levelUp: { newLevel: string; oldLevel: string; message: string; color: string } | null = null;
     try {

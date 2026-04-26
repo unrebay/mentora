@@ -75,7 +75,7 @@ const STEPS: Step[] = [
     tip: "Можно переспрашивать сколько угодно",
   },
   {
-    targetSelector: "[data-tour='nav-stats']",
+    targetSelector: "[data-tour='nav-pill']",
     cardSide: "bottom",
     icon: "flame",
     tag: "Прогресс",

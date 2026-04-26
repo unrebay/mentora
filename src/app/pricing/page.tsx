@@ -23,12 +23,12 @@ const PRO_FEATURES = [
   "Приоритетная поддержка",
 ];
 
-const ULTRA_FEATURES = [
-  "Всё из Pro",
-  "Распознавание фото и задач",
-  "Генерация презентаций по теме",
-  "Аудио-разборы и объяснения",
-  "Ранний доступ к новым функциям",
+const ULTRA_FEATURES: { label: string; soon?: boolean }[] = [
+  { label: "Всё из Pro" },
+  { label: "Распознавание фото и задач" },
+  { label: "Генерация презентаций по теме", soon: true },
+  { label: "Аудио-разборы и объяснения", soon: true },
+  { label: "Ранний доступ к новым функциям" },
 ];
 
 export const metadata = {
@@ -156,7 +156,7 @@ export default async function PricingPage() {
 
       {/* PRICING CARDS */}
       <section className="max-w-5xl mx-auto px-6 pb-8">
-        <div className="grid md:grid-cols-3 gap-4 items-stretch">
+        <div className="grid md:grid-cols-3 gap-6 md:gap-4 items-stretch">
 
           {/* FREE */}
           <div
@@ -197,7 +197,7 @@ export default async function PricingPage() {
           {/* PRO — gradient border wrapper */}
           <div
             data-tilt data-tilt-strength="4"
-            className="relative rounded-[17px] p-[1.5px] flex flex-col"
+            className="relative rounded-[17px] p-[1.5px] flex flex-col mt-3 md:mt-0"
             style={{
               background: "linear-gradient(145deg, #6B8FFF, #4561E8 45%, #9F7AFF)",
               boxShadow: "0 8px 40px rgba(69,97,232,0.25), 0 2px 8px rgba(69,97,232,0.15)",
@@ -264,7 +264,7 @@ export default async function PricingPage() {
           {/* ULTRA — ambient glow dark card */}
           <div
             data-tilt data-tilt-strength="4"
-            className="relative rounded-2xl p-7 flex flex-col overflow-hidden"
+            className="relative rounded-2xl p-7 flex flex-col overflow-hidden mt-3 md:mt-0"
             style={{ background: "#060610" }}
           >
             {/* Ambient glow overlays */}
@@ -339,9 +339,24 @@ export default async function PricingPage() {
               <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_annual" />
             </div>
             <ul className="space-y-3 flex-1 relative z-10">
-              {ULTRA_FEATURES.map(f => (
-                <li key={f} className="flex items-start gap-2.5 text-sm text-white/70">
-                  <Check dark />{f}
+              {ULTRA_FEATURES.map(({ label, soon }) => (
+                <li key={label} className="flex items-start gap-2.5 text-sm text-white/70">
+                  <Check dark />
+                  <span className="flex items-center gap-2 flex-wrap">
+                    {label}
+                    {soon && (
+                      <span
+                        className="text-[10px] font-bold px-1.5 py-0.5 rounded-md tracking-wide"
+                        style={{
+                          background: "rgba(255,122,0,0.18)",
+                          color: "#FF9A3C",
+                          border: "1px solid rgba(255,122,0,0.25)",
+                        }}
+                      >
+                        скоро
+                      </span>
+                    )}
+                  </span>
                 </li>
               ))}
             </ul>

@@ -431,9 +431,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>AI-ментор · Mentora</p>
         </div>
         {showCounter && (
-          <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-full px-3 py-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            <span className="text-xs font-medium text-amber-700">осталось {messagesRemaining} из {DAILY_LIMIT}</span>
+          <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-full px-3 py-1 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+            <span className="text-xs font-medium text-amber-700 whitespace-nowrap">
+              <span className="hidden sm:inline">осталось </span>{messagesRemaining}<span className="hidden sm:inline"> из {DAILY_LIMIT}</span>
+            </span>
           </div>
         )}
         {/* Export to PDF — Ultra only, shown when conversation has content */}
