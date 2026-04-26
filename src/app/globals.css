@@ -64,7 +64,7 @@ nav, .card, section, main, aside, header, footer {
 
   .s-page      { background-color: var(--bg); }
   .s-raised    { background-color: var(--bg-card); }
-  .s-input     { background-color: var(--bg-secondary); }
+  .s-input     { background-color: var(--bg-secondary); color: var(--text); }
 
   .b-default   { border-color: var(--border); }
   .b-subtle    { border-color: var(--border-light); }
