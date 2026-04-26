@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import DashboardNav from "@/components/DashboardNav";
+import OnboardingTour from "@/components/OnboardingTour";
+import { TourButtonMobile } from "@/components/TourButton";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -32,6 +34,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <>
       <DashboardNav isPro={isPro} isUltima={isUltima} totalXP={totalXP} currentStreak={currentStreak} bestStreak={bestStreak} logoutAction={handleLogout} />
       {children}
+      {/* Onboarding tour — auto-shows on first visit, reopenable via TourButton */}
+      <OnboardingTour />
+      {/* Mobile floating tour button — appears after 10s of inactivity */}
+      <TourButtonMobile />
     </>
   );
 }

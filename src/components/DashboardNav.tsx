@@ -5,6 +5,7 @@ import MeLogo from "@/components/MeLogo";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
+import { TourButtonDesktop } from "@/components/TourButton";
 
 function pluralDays(n: number): string {
   const m10 = n % 10, m100 = n % 100;
@@ -79,6 +80,8 @@ export default function DashboardNav({
 
         {/* Right: stats + actions */}
         <div className="flex items-center gap-2 md:gap-2">
+          {/* Tour button — subtle book icon */}
+          <TourButtonDesktop forceDark={dk} />
           {/* Theme toggle — always renders dark-styled on dark pages */}
           <ThemeToggle forceDark={dk} />
 
