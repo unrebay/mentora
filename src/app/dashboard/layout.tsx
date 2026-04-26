@@ -1,8 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import DashboardNav from "@/components/DashboardNav";
 import OnboardingTour from "@/components/OnboardingTour";
 import { TourButtonMobile } from "@/components/TourButton";
+
+// Pages with a forced dark background — nav should always be dark on these
+const DARK_PAGES = ["/dashboard/about"];
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -18,10 +22,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const isUltima = profile?.plan === "ultima";
   const isPro = isUltima || profile?.plan === "pro" || isTrialActive;
   const totalXP = progressData?.reduce((s: number, p: { xp_total?: number }) => s + (p.xp_total ?? 0), 0) ?? 0;
-  // currentStreak = best active streak right now (resets if a day was missed)
   const currentStreak = progressData?.reduce((m: number, p: { streak_days?: number }) => Math.max(m, p.streak_days ?? 0), 0) ?? 0;
-  // bestStreak = all-time record, never resets
   const bestStreak = progressData?.reduce((m: number, p: { best_streak?: number }) => Math.max(m, p.best_streak ?? 0), 0) ?? 0;
+
+  // Detect if current page needs forced dark nav
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") ?? "";
+  const navVariant = DARK_PAGES.some(p => pathname.startsWith(p)) ? "dark" : "default";
 
   async function handleLogout() {
     "use server";
@@ -32,7 +39,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <>
-      <DashboardNav isPro={isPro} isUltima={isUltima} totalXP={totalXP} currentStreak={currentStreak} bestStreak={bestStreak} logoutAction={handleLogout} />
+      <DashboardNav
+        isPro={isPro}
+        isUltima={isUltima}
+        totalXP={totalXP}
+        currentStreak={currentStreak}
+        bestStreak={bestStreak}
+        logoutAction={handleLogout}
+        variant={navVariant}
+      />
       {children}
       <OnboardingTour />
       <TourButtonMobile />

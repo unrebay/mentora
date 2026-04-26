@@ -1,373 +1,437 @@
+"use client";
 import Link from "next/link";
-
-export const metadata = { title: "О проекте — Mentora" };
-
-// ── Mini components ───────────────────────────────────────────────────────
-function Section({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <section className={`max-w-4xl mx-auto px-5 sm:px-8 ${className}`}>
-      {children}
-    </section>
-  );
-}
-
-function Card({ children, accent = false }: { children: React.ReactNode; accent?: boolean }) {
-  return (
-    <div
-      style={{
-        background: accent ? "rgba(69,97,232,0.08)" : "rgba(255,255,255,0.04)",
-        border: `1px solid ${accent ? "rgba(69,97,232,0.25)" : "rgba(255,255,255,0.07)"}`,
-        borderRadius: 20,
-        padding: "28px 28px",
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function Tag({ children, color = "#4561E8" }: { children: React.ReactNode; color?: string }) {
-  return (
-    <span
-      style={{
-        display: "inline-block",
-        fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const,
-        padding: "3px 10px", borderRadius: 99,
-        background: `${color}20`, color, border: `1px solid ${color}40`,
-      }}
-    >
-      {children}
-    </span>
-  );
-}
-
-function IconBox({ path, color = "#4561E8" }: { path: string; color?: string }) {
-  return (
-    <div style={{
-      width: 40, height: 40, borderRadius: 12, flexShrink: 0,
-      background: `${color}18`, border: `1px solid ${color}35`,
-      display: "flex", alignItems: "center", justifyContent: "center",
-    }}>
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d={path} />
-      </svg>
-    </div>
-  );
-}
+import { useState, useEffect } from "react";
 
 export default function AboutPage() {
-  const STACK = [
-    { label: "Frontend", items: ["Next.js 14", "TypeScript", "Tailwind CSS", "Motion (Framer)"], color: "#4561E8" },
-    { label: "AI-ядро", items: ["Claude Haiku 4.5", "RAG + pgvector", "OpenAI Embeddings", "Contextual memory"], color: "#A78BFA" },
-    { label: "Backend", items: ["Supabase (Auth + DB)", "Edge Functions", "YooKassa payments", "Resend Email"], color: "#10B981" },
-    { label: "Инфра", items: ["Vercel (EU + CDN)", "VPS (Россия)", "Anthropic Proxy", "PostHog Analytics"], color: "#FF7A00" },
-  ];
 
+  /* ── June 1 countdown ─────────────────────────────────────────── */
+  const [countdown, setCountdown] = useState({ days: 0, hours: 0, mins: 0, secs: 0, done: false });
+
+  useEffect(() => {
+    const target = new Date("2026-06-01T00:00:00+03:00").getTime();
+    function tick() {
+      const diff = target - Date.now();
+      if (diff <= 0) { setCountdown(c => ({ ...c, done: true })); return; }
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const mins = Math.floor((diff % 3600000) / 60000);
+      const secs = Math.floor((diff % 60000) / 1000);
+      setCountdown({ days, hours, mins, secs, done: false });
+    }
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  /* ── Roadmap ─────────────────────────────────────────────────── */
   const TIMELINE = [
-    { q: "Q1 2026", label: "Запуск платформы", done: true, desc: "14 предметов, Auth, Pro/Ultima тарифы, реферальная система" },
-    { q: "Q2 2026", label: "Режим ЕГЭ/ОГЭ", done: false, desc: "Тесты с реальными заданиями, трекер готовности, аналитика ошибок" },
-    { q: "Q3 2026", label: "B2B: школы и классы", done: false, desc: "Дашборд учителя, групповые лицензии, интеграция с дневниками" },
-    { q: "Q4 2026", label: "Мобильное приложение", done: false, desc: "iOS и Android, push-уведомления, офлайн-режим для конспектов" },
-    { q: "2027", label: "Языки и страны", done: false, desc: "Английская версия, Казахстан, другие языки обучения" },
+    {
+      q: "Q1 2026", label: "Запуск платформы", done: true,
+      desc: "14 предметов, персональный ментор, Pro и Ultima тарифы, реферальная система",
+    },
+    {
+      q: "Q2 2026", label: "Учебные программы и треки", done: false,
+      desc: "Структурированные курсы по темам, режим «Научи меня с нуля», трекер охваченных тем",
+    },
+    {
+      q: "Q3 2026", label: "Мобильное приложение", done: false,
+      desc: "iOS и Android — учись в дороге, push-уведомления, офлайн-конспекты",
+    },
+    {
+      q: "Q4 2026", label: "B2B: школы и организации", done: false,
+      desc: "После 1000+ активных пользователей: дашборд учителя, групповые лицензии",
+    },
+    {
+      q: "2027", label: "Международная экспансия", done: false,
+      desc: "Английская версия, Казахстан, другие языки и системы образования",
+    },
   ];
 
+  /* ── Values ───────────────────────────────────────────────────── */
   const VALUES = [
     {
-      path: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
+      icon: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
       color: "#4561E8",
-      title: "Спрашивай без страха",
-      desc: "Ментора не осудит, не расскажет родителям, не поставит оценку. Каждый диалог шифруется — как в банке.",
+      title: "Спрашивай без стыда",
+      desc: "Ментора не осудит, не расскажет учителю, не посмеётся. Здесь нет «тупых» вопросов — есть только твой прогресс.",
     },
     {
-      path: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
+      icon: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
       color: "#10B981",
-      title: "Учёба для всех",
-      desc: "Репетитор за 2 000 ₽/час — не у каждого семья может себе позволить. Pro за 499 ₽ в месяц — может каждый.",
+      title: "Доступно каждому",
+      desc: "Репетитор в Москве стоит от 2 000 ₽/час. Pro-план Mentora — 499 ₽ в месяц. Это не компромисс — это честный выбор.",
     },
     {
-      path: "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11",
-      color: "#FF7A00",
-      title: "Честные ответы",
-      desc: "Если Ментора не знает — скажет об этом. Мы не генерируем уверенную чушь ради красивого ответа.",
+      icon: "M13 2L3 14h9l-1 8 10-12h-9l1-8z",
+      color: "#F59E0B",
+      title: "Занятия не отменяются",
+      desc: "Ни праздники, ни болезни, ни плохое настроение. Ментора доступен в 3 часа ночи — ровно тогда, когда нужен.",
     },
     {
-      path: "M13 2L3 14h9l-1 8 10-12h-9l1-8z",
+      icon: "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11",
       color: "#A78BFA",
-      title: "Frontier AI, русские данные",
-      desc: "Под капотом — Claude от Anthropic. Контекст адаптирован под российскую школьную программу.",
+      title: "Честные ответы",
+      desc: "Если чего-то не знает — скажет прямо. Мы не генерируем уверенную чушь для красоты — нам важен твой результат.",
     },
   ];
 
-  return (
-    <div style={{ background: "#080814", minHeight: "100vh", color: "white", paddingBottom: 80 }}>
+  /* ── Helpers ──────────────────────────────────────────────────── */
+  function Tag({ children, color = "#4561E8" }: { children: React.ReactNode; color?: string }) {
+    return (
+      <span style={{
+        display: "inline-block", fontSize: 11, fontWeight: 700,
+        letterSpacing: "0.08em", textTransform: "uppercase" as const,
+        padding: "3px 10px", borderRadius: 99,
+        background: `${color}18`, color, border: `1px solid ${color}38`,
+      }}>
+        {children}
+      </span>
+    );
+  }
 
-      {/* ── Ambient background ─────────────────────────────────────────── */}
+  function Card({ children, accent = false, light = false }: { children: React.ReactNode; accent?: boolean; light?: boolean }) {
+    return (
+      <div style={{
+        background: light
+          ? (accent ? "rgba(69,97,232,0.06)" : "rgba(0,0,0,0.03)")
+          : (accent ? "rgba(69,97,232,0.1)" : "rgba(255,255,255,0.04)"),
+        border: `1px solid ${accent ? "rgba(69,97,232,0.22)" : light ? "rgba(0,0,0,0.07)" : "rgba(255,255,255,0.07)"}`,
+        borderRadius: 20,
+        padding: "28px 28px",
+      }}>
+        {children}
+      </div>
+    );
+  }
+
+  const num = (n: number) => String(n).padStart(2, "0");
+
+  return (
+    <div
+      className="min-h-screen"
+      style={{ background: "#080814", color: "white", paddingBottom: 80 }}
+    >
+      {/* ── Ambient ─────────────────────────────────────────────── */}
       <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
         <div style={{
-          position: "absolute", top: "-15%", left: "10%",
-          width: "60%", height: "55%",
-          background: "radial-gradient(ellipse, rgba(69,97,232,0.14) 0%, transparent 70%)",
-          filter: "blur(50px)",
+          position: "absolute", top: "-10%", left: "5%",
+          width: "55%", height: "50%",
+          background: "radial-gradient(ellipse, rgba(69,97,232,0.16) 0%, transparent 70%)",
+          filter: "blur(60px)",
         }} />
         <div style={{
-          position: "absolute", bottom: "10%", right: "5%",
-          width: "45%", height: "40%",
-          background: "radial-gradient(ellipse, rgba(167,139,250,0.10) 0%, transparent 70%)",
+          position: "absolute", bottom: "5%", right: "5%",
+          width: "40%", height: "40%",
+          background: "radial-gradient(ellipse, rgba(167,139,250,0.1) 0%, transparent 70%)",
           filter: "blur(60px)",
         }} />
       </div>
 
       <div className="relative" style={{ zIndex: 1 }}>
 
-        {/* ── HERO ──────────────────────────────────────────────────────── */}
-        <Section className="pt-14 pb-16">
-          <div style={{ maxWidth: 680 }}>
-            <Tag color="#4561E8">Наша история</Tag>
-            <h1
-              className="mt-5 mb-5"
-              style={{
-                fontSize: "clamp(32px, 5vw, 52px)",
-                fontWeight: 900,
-                lineHeight: 1.1,
-                letterSpacing: "-1.5px",
-                color: "white",
-              }}
-            >
-              Мы строим репетитора,<br />
-              <span style={{ color: "#6b87ff" }}>которого у нас никогда не было</span>
-            </h1>
-            <p style={{ fontSize: 17, lineHeight: 1.7, color: "rgba(255,255,255,0.55)", maxWidth: 560 }}>
-              Хороший учитель знает, как ты мыслишь. Помнит, где ты застрял в прошлый раз. Объясняет по-новому, если не понял. Не устаёт. Не осуждает. Mentora — наша попытка сделать такого учителя доступным каждому.
-            </p>
-          </div>
-        </Section>
+        {/* ── HERO ─────────────────────────────────────────────── */}
+        <section className="max-w-4xl mx-auto px-5 sm:px-8 pt-14 pb-16">
+          <Tag color="#4561E8">О нас</Tag>
+          <h1 style={{
+            fontSize: "clamp(30px, 5vw, 52px)",
+            fontWeight: 900, lineHeight: 1.1,
+            letterSpacing: "-1.5px", color: "white",
+            margin: "20px 0 18px",
+          }}>
+            Ментор, которого<br />
+            <span style={{ color: "#6b87ff" }}>ты всегда хотел иметь</span>
+          </h1>
+          <p style={{ fontSize: 17, lineHeight: 1.75, color: "rgba(255,255,255,0.52)", maxWidth: 580 }}>
+            Хороший наставник знает, как ты мыслишь. Помнит, где ты застрял в прошлый раз.
+            Объясняет по-новому, если с первого раза не понял. Не устаёт. Не осуждает.
+            Mentora — наша попытка сделать такого учителя доступным каждому.
+          </p>
+        </section>
 
-        {/* ── PROBLEM ───────────────────────────────────────────────────── */}
-        <Section className="pb-16">
+        {/* ── JUNE 1 COUNTDOWN ─────────────────────────────────── */}
+        {!countdown.done && (
+          <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
+            <div style={{
+              background: "linear-gradient(135deg, rgba(69,97,232,0.18) 0%, rgba(107,135,255,0.1) 100%)",
+              border: "1px solid rgba(107,135,255,0.25)",
+              borderRadius: 20,
+              padding: "24px 28px",
+              display: "flex",
+              flexWrap: "wrap" as const,
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 16,
+            }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "#6b87ff", marginBottom: 4 }}>
+                  Официальный запуск
+                </div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: "white" }}>
+                  1 июня 2026 — открытие для всех
+                </div>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", marginTop: 4, lineHeight: 1.5 }}>
+                  Сейчас идёт бета — ты уже внутри. Поделись с другом, пока мест не стало меньше.
+                </p>
+              </div>
+              <div style={{ display: "flex", gap: 12, flexShrink: 0 }}>
+                {[
+                  { v: countdown.days,  l: "дней" },
+                  { v: countdown.hours, l: "часов" },
+                  { v: countdown.mins,  l: "минут" },
+                  { v: countdown.secs,  l: "секунд" },
+                ].map(({ v, l }) => (
+                  <div key={l} style={{ textAlign: "center" as const }}>
+                    <div style={{
+                      fontSize: "clamp(22px, 4vw, 32px)", fontWeight: 900,
+                      color: "white", lineHeight: 1,
+                      fontVariantNumeric: "tabular-nums",
+                      fontFamily: "ui-monospace, monospace",
+                    }}>{num(v)}</div>
+                    <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", marginTop: 3 }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ── PROBLEM / SOLUTION ───────────────────────────────── */}
+        <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
           <div className="grid md:grid-cols-2 gap-5">
             <Card>
               <Tag color="#FF7A00">Проблема</Tag>
-              <h3 className="mt-4 mb-3 text-xl font-black text-white leading-tight">
+              <h3 style={{ fontSize: 20, fontWeight: 800, color: "white", margin: "16px 0 10px", lineHeight: 1.25 }}>
                 Репетитор — это роскошь
               </h3>
               <p style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,0.5)" }}>
-                Средняя цена занятия в Москве — 2 500 ₽. Восемь занятий в месяц = 20 000 ₽. Для большинства семей это непозволительная роскошь. Тем временем AI достиг уровня, при котором он объясняет не хуже — а иногда лучше — живого педагога.
+                Средняя цена занятия в Москве — 2 500 ₽. Восемь занятий в месяц = 20 000 ₽.
+                Для большинства семей это недостижимо. А хороший учитель нужен каждому ребёнку — не только тем, чьи родители могут себе это позволить.
               </p>
             </Card>
             <Card accent>
               <Tag color="#4561E8">Решение</Tag>
-              <h3 className="mt-4 mb-3 text-xl font-black text-white leading-tight">
-                AI-ментор без компромиссов
+              <h3 style={{ fontSize: 20, fontWeight: 800, color: "white", margin: "16px 0 10px", lineHeight: 1.25 }}>
+                Персональный ментор без ограничений
               </h3>
               <p style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,0.5)" }}>
-                Mentora помнит тебя. Знает твой уровень, стиль мышления и пробелы. Объяснит три раза разными словами, не раздражаясь. 14 предметов, 24/7, без VPN — доступно для всей России за 499 ₽ в месяц.
+                Mentora помнит тебя. Знает твой уровень, стиль мышления и пробелы.
+                Объяснит трижды разными словами, не раздражаясь. 14 предметов, 24/7,
+                без VPN — за 499 ₽ в месяц.
               </p>
             </Card>
           </div>
-        </Section>
+        </section>
 
-        {/* ── HOW IT WORKS ──────────────────────────────────────────────── */}
-        <Section className="pb-16">
-          <Tag color="#A78BFA">Под капотом</Tag>
-          <h2 className="mt-4 mb-8 text-2xl font-black text-white tracking-tight">Как это устроено</h2>
+        {/* ── HOW LEARNING WORKS ───────────────────────────────── */}
+        <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
+          <Tag color="#A78BFA">Как это работает</Tag>
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: "white", margin: "16px 0 8px", letterSpacing: "-0.5px" }}>
+            Не поиск по ключевым словам —<br />живой разговор
+          </h2>
+          <p style={{ fontSize: 15, color: "rgba(255,255,255,0.45)", marginBottom: 28, lineHeight: 1.6 }}>
+            Ты просто пишешь, как написал бы другу. Ментора разбирается в теме и отвечает именно тебе.
+          </p>
 
           <div className="space-y-3">
             {[
               {
-                n: "01",
-                title: "Контекстная память",
-                desc: "Каждое твоё сообщение векторизируется и сохраняется. Ментора строит профиль твоего знания — что ты понял, где застрял, какой стиль объяснений тебе подходит. RAG-retrieval достаёт нужный контекст при каждом ответе.",
-                color: "#4561E8",
+                n: "01", color: "#4561E8",
+                title: "Начни с любого вопроса",
+                desc: "Не нужно составлять программу или выбирать тему. Пиши как есть: «объясни синусы», «помоги с сочинением», «почему началась Холодная война». Ментора сам ориентируется по контексту.",
               },
               {
-                n: "02",
-                title: "Frontier AI модели",
-                desc: "Мы работаем на Claude Haiku 4.5 от Anthropic — одной из самых точных языковых моделей на рынке. Промпты настроены под российскую школьную программу, ЕГЭ и ОГЭ. Ответы проходят post-processing для форматирования формул и структуры.",
-                color: "#A78BFA",
+                n: "02", color: "#A78BFA",
+                title: "Ментора подстраивается под тебя",
+                desc: "Уже после нескольких сообщений система понимает твой уровень и стиль: объясняет через примеры, формулы или практику — в зависимости от того, как ты лучше воспринимаешь. Это фиксируется и применяется при каждом следующем сеансе.",
               },
               {
-                n: "03",
-                title: "Безопасность данных",
-                desc: "Вся инфраструктура разделена: данные российских пользователей хранятся на VPS в России, API-запросы идут через EU-прокси. Диалоги шифруются AES-256. Мы не передаём данные третьим лицам и не обучаем модели на переписке пользователей.",
-                color: "#10B981",
+                n: "03", color: "#10B981",
+                title: "Прогресс накапливается автоматически",
+                desc: "Каждый диалог пополняет твою учебную память. Ментора помнит, что ты уже знаешь, где застревал и о чём спрашивал — и не начинает объяснение с нуля каждый раз. XP и стрики показывают, насколько ты регулярен.",
               },
-            ].map((item) => (
-              <div
-                key={item.n}
+              {
+                n: "04", color: "#F59E0B",
+                title: "Конспекты и закрепление",
+                desc: "После разбора темы Ментора может собрать PDF-конспект с ключевыми фактами, терминами и вопросом для самопроверки — чтобы ты мог закрепить материал и вернуться к нему в любое время.",
+              },
+            ].map(item => (
+              <div key={item.n}
                 className="flex gap-5 p-5 rounded-2xl"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+                style={{ background: "rgba(255,255,255,0.035)", border: "1px solid rgba(255,255,255,0.07)" }}
               >
-                <div
-                  className="flex-shrink-0 text-xs font-black"
-                  style={{ color: item.color, minWidth: 28, paddingTop: 2 }}
-                >
-                  {item.n}
-                </div>
+                <div style={{ color: item.color, fontSize: 12, fontWeight: 900, minWidth: 28, paddingTop: 2, flexShrink: 0 }}>{item.n}</div>
                 <div>
-                  <div className="font-bold text-white text-sm mb-1">{item.title}</div>
-                  <p style={{ fontSize: 13, lineHeight: 1.7, color: "rgba(255,255,255,0.48)" }}>{item.desc}</p>
+                  <div style={{ fontWeight: 700, color: "white", fontSize: 14, marginBottom: 5 }}>{item.title}</div>
+                  <p style={{ fontSize: 13, lineHeight: 1.65, color: "rgba(255,255,255,0.47)" }}>{item.desc}</p>
                 </div>
               </div>
             ))}
           </div>
-        </Section>
+        </section>
 
-        {/* ── STACK ─────────────────────────────────────────────────────── */}
-        <Section className="pb-16">
-          <Tag color="#10B981">Технологии</Tag>
-          <h2 className="mt-4 mb-8 text-2xl font-black text-white tracking-tight">Стек</h2>
-          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3">
-            {STACK.map((s) => (
-              <div
-                key={s.label}
-                className="p-4 rounded-2xl"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+        {/* ── WHY MENTORA VS ALTERNATIVES ──────────────────────── */}
+        <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
+          <Tag color="#10B981">Сравнение</Tag>
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: "white", margin: "16px 0 24px", letterSpacing: "-0.5px" }}>
+            Почему не Google, не ChatGPT, не репетитор?
+          </h2>
+
+          <div className="grid md:grid-cols-3 gap-4">
+            {[
+              {
+                title: "Не Google",
+                color: "#FF7A00",
+                points: [
+                  "Google даёт статьи — ты сам разбираешься",
+                  "Mentora объясняет именно тебе, твоим языком",
+                  "Не нужно знать, что именно искать",
+                ],
+              },
+              {
+                title: "Не просто ChatGPT",
+                color: "#4561E8",
+                points: [
+                  "Общий чат не знает твоего прогресса",
+                  "Mentora настроен на российскую программу",
+                  "Ментор помнит историю ваших диалогов",
+                ],
+              },
+              {
+                title: "Не репетитор",
+                color: "#10B981",
+                points: [
+                  "В 20 раз дешевле частного педагога",
+                  "Занятие не отменится и не перенесётся",
+                  "Терпение бесконечное — переспрашивай сколько угодно",
+                ],
+              },
+            ].map(col => (
+              <div key={col.title}
+                className="p-5 rounded-2xl"
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
               >
-                <Tag color={s.color}>{s.label}</Tag>
-                <ul className="mt-3 space-y-1.5">
-                  {s.items.map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>
-                      <span style={{ width: 5, height: 5, borderRadius: "50%", background: s.color, flexShrink: 0, display: "inline-block" }} />
-                      {item}
+                <div style={{ fontWeight: 800, fontSize: 14, color: col.color, marginBottom: 14 }}>{col.title}</div>
+                <ul className="space-y-2.5">
+                  {col.points.map(p => (
+                    <li key={p} className="flex gap-2.5 items-start">
+                      <span style={{ width: 5, height: 5, borderRadius: "50%", background: col.color, flexShrink: 0, marginTop: 7, display: "inline-block" }} />
+                      <span style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.55 }}>{p}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             ))}
           </div>
-        </Section>
+        </section>
 
-        {/* ── VALUES ────────────────────────────────────────────────────── */}
-        <Section className="pb-16">
+        {/* ── VALUES ───────────────────────────────────────────── */}
+        <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
           <Tag color="#FF7A00">Ценности</Tag>
-          <h2 className="mt-4 mb-8 text-2xl font-black text-white tracking-tight">Во что мы верим</h2>
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: "white", margin: "16px 0 24px", letterSpacing: "-0.5px" }}>Во что мы верим</h2>
           <div className="grid md:grid-cols-2 gap-4">
-            {VALUES.map((v) => (
-              <div
-                key={v.title}
+            {VALUES.map(v => (
+              <div key={v.title}
                 className="flex gap-4 p-5 rounded-2xl"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
               >
-                <IconBox path={v.path} color={v.color} />
+                <div style={{
+                  width: 40, height: 40, borderRadius: 12, flexShrink: 0,
+                  background: `${v.color}18`, border: `1px solid ${v.color}35`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke={v.color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d={v.icon} />
+                  </svg>
+                </div>
                 <div>
-                  <div className="font-bold text-white text-sm mb-1">{v.title}</div>
-                  <p style={{ fontSize: 13, lineHeight: 1.7, color: "rgba(255,255,255,0.48)" }}>{v.desc}</p>
+                  <div style={{ fontWeight: 700, color: "white", fontSize: 14, marginBottom: 5 }}>{v.title}</div>
+                  <p style={{ fontSize: 13, lineHeight: 1.65, color: "rgba(255,255,255,0.48)" }}>{v.desc}</p>
                 </div>
               </div>
             ))}
           </div>
-        </Section>
+        </section>
 
-        {/* ── ROADMAP ───────────────────────────────────────────────────── */}
-        <Section className="pb-16">
+        {/* ── ROADMAP ──────────────────────────────────────────── */}
+        <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
           <Tag color="#6366F1">Дорожная карта</Tag>
-          <h2 className="mt-4 mb-8 text-2xl font-black text-white tracking-tight">Куда мы движемся</h2>
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: "white", margin: "16px 0 28px", letterSpacing: "-0.5px" }}>Куда мы движемся</h2>
+
           <div className="relative pl-6" style={{ borderLeft: "1px solid rgba(255,255,255,0.08)" }}>
-            {TIMELINE.map((item, i) => (
+            {TIMELINE.map(item => (
               <div key={item.q} className="relative mb-6 last:mb-0">
-                {/* dot */}
-                <div
-                  className="absolute -left-8 top-1 w-3 h-3 rounded-full"
-                  style={{
-                    background: item.done ? "#4561E8" : "rgba(255,255,255,0.12)",
-                    border: item.done ? "none" : "1px solid rgba(255,255,255,0.2)",
-                    boxShadow: item.done ? "0 0 10px rgba(69,97,232,0.6)" : "none",
-                  }}
-                />
+                <div className="absolute -left-8 top-1 w-3 h-3 rounded-full" style={{
+                  background: item.done ? "#4561E8" : "rgba(255,255,255,0.12)",
+                  border: item.done ? "none" : "1px solid rgba(255,255,255,0.2)",
+                  boxShadow: item.done ? "0 0 10px rgba(69,97,232,0.6)" : "none",
+                }} />
                 <div className="flex items-start gap-3 flex-wrap">
-                  <span
-                    className="text-xs font-bold px-2 py-0.5 rounded-full"
-                    style={{
-                      background: item.done ? "rgba(69,97,232,0.2)" : "rgba(255,255,255,0.06)",
-                      color: item.done ? "#6b87ff" : "rgba(255,255,255,0.35)",
-                      flexShrink: 0,
-                    }}
-                  >
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{
+                    background: item.done ? "rgba(69,97,232,0.2)" : "rgba(255,255,255,0.06)",
+                    color: item.done ? "#6b87ff" : "rgba(255,255,255,0.35)",
+                    flexShrink: 0,
+                  }}>
                     {item.q}
                   </span>
                   <div>
-                    <div className="text-sm font-semibold text-white mb-0.5">
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "white", marginBottom: 3 }}>
                       {item.label}
                       {item.done && (
-                        <span className="ml-2 text-xs font-normal" style={{ color: "#4561E8" }}>
+                        <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 400, color: "#4561E8" }}>
                           <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ display: "inline", marginBottom: 1 }}>
-                            <path d="M2 6l3 3 5-5"/>
-                          </svg>
-                          {" "}готово
+                            <path d="M2 6l3 3 5-5" />
+                          </svg>{" "}готово
                         </span>
                       )}
                     </div>
-                    <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1.5 }}>{item.desc}</p>
+                    <p style={{ fontSize: 12, color: "rgba(255,255,255,0.38)", lineHeight: 1.5 }}>{item.desc}</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-        </Section>
+        </section>
 
-        {/* ── B2B ───────────────────────────────────────────────────────── */}
-        <Section className="pb-16">
-          <Card accent>
-            <div className="flex items-start gap-4 flex-wrap md:flex-nowrap">
-              <div className="flex-1">
-                <Tag color="#4561E8">Для бизнеса</Tag>
-                <h3 className="mt-4 mb-3 text-xl font-black text-white leading-tight">
-                  Mentora для школ и корпораций
-                </h3>
-                <p style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,0.5)", marginBottom: 16 }}>
-                  Групповые лицензии, дашборд учителя с аналитикой по каждому ученику, интеграция с журналами и системами обучения. Если вы ищете AI-решение для образовательного учреждения — напишите нам.
-                </p>
-                <div className="flex gap-3 flex-wrap">
-                  <a
-                    href="mailto:hello@mentora.su"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-white text-sm"
-                    style={{ background: "rgba(69,97,232,0.3)", border: "1px solid rgba(69,97,232,0.45)" }}
-                  >
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
-                    </svg>
-                    hello@mentora.su
-                  </a>
-                  <Link
-                    href="/pricing"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm"
-                    style={{ color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
-                  >
-                    Тарифы →
-                  </Link>
-                </div>
-              </div>
-              <div className="shrink-0 hidden md:block">
-                <div className="text-right">
-                  <div className="text-3xl font-black" style={{ color: "#4561E8" }}>B2B</div>
-                  <div className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>запуск Q3 2026</div>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </Section>
-
-        {/* ── CTA ───────────────────────────────────────────────────────── */}
-        <Section className="pb-4">
-          <div className="text-center">
-            <p className="text-sm mb-4" style={{ color: "rgba(255,255,255,0.35)" }}>
-              Вопросы, предложения, партнёрство — пиши напрямую
-            </p>
-            <div className="flex items-center justify-center gap-3 flex-wrap">
-              <a
-                href="mailto:hello@mentora.su"
-                className="text-sm font-medium"
-                style={{ color: "rgba(255,255,255,0.45)", textDecoration: "underline", textDecorationStyle: "dotted" as const }}
-              >
-                hello@mentora.su
-              </a>
-              <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
-              <Link href="/dashboard" className="text-sm font-medium" style={{ color: "#6b87ff" }}>
-                Вернуться к учёбе →
-              </Link>
+        {/* ── ULTIMA NOTE ──────────────────────────────────────── */}
+        <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
+          <div style={{
+            background: "rgba(245,158,11,0.08)",
+            border: "1px solid rgba(245,158,11,0.2)",
+            borderRadius: 16,
+            padding: "16px 20px",
+            display: "flex",
+            gap: 14,
+            alignItems: "flex-start",
+          }}>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01" />
+            </svg>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#F59E0B", marginBottom: 4 }}>Про тариф Ultima</div>
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.6 }}>
+                Мы активно разрабатываем новые функции. Часть возможностей, описанных в тарифе Ultima,
+                ещё находится в тестировании и будет запускаться поэтапно до 1 июня 2026 года.
+                Все подписчики Ultima получат доступ к ним автоматически по мере появления.
+              </p>
             </div>
           </div>
-        </Section>
+        </section>
+
+        {/* ── CTA ──────────────────────────────────────────────── */}
+        <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-4 text-center">
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.3)", marginBottom: 14 }}>
+            Вопросы, партнёрство, обратная связь
+          </p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, flexWrap: "wrap" as const }}>
+            <a href="mailto:hello@mentora.su" style={{ fontSize: 14, fontWeight: 500, color: "rgba(255,255,255,0.45)", textDecoration: "underline", textDecorationStyle: "dotted" as const }}>
+              hello@mentora.su
+            </a>
+            <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
+            <Link href="/dashboard" style={{ fontSize: 14, fontWeight: 500, color: "#6b87ff" }}>
+              Вернуться к учёбе →
+            </Link>
+          </div>
+        </section>
 
       </div>
     </div>

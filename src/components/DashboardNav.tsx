@@ -94,35 +94,45 @@ export default function DashboardNav({
   const navBlur = "blur(28px) saturate(1.8)";
 
   return (
+    /* Outer sticky strip — transparent, just provides the floating gap */
     <nav
       className="sticky top-0 z-20"
       style={{
-        background: navBg,
-        backdropFilter: navBlur,
-        WebkitBackdropFilter: navBlur,
-        /* gradient bottom border instead of hard line */
-        borderBottom: dk
-          ? "1px solid rgba(255,255,255,0.07)"
-          : "1px solid rgba(0,0,0,0.06)",
-        boxShadow: dk
-          ? "0 1px 0 rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.35)"
-          : "0 1px 0 rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.06)",
+        padding: "10px 14px",
+        background: "transparent",
+        pointerEvents: "none", // clicks pass through the padding gaps
       }}
     >
-      {/* ── thin top accent line ── */}
-      <div style={{
-        height: 1,
-        background: dk
-          ? "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 30%, rgba(107,135,255,0.3) 60%, transparent 100%)"
-          : "linear-gradient(90deg, transparent 0%, rgba(69,97,232,0.12) 40%, rgba(69,97,232,0.25) 60%, transparent 100%)",
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-      }} />
+      {/* ── The actual pill ── */}
+      <div
+        className="max-w-5xl mx-auto"
+        style={{
+          pointerEvents: "all",
+          background: navBg,
+          backdropFilter: navBlur,
+          WebkitBackdropFilter: navBlur,
+          borderRadius: 20,
+          border: dk
+            ? "1px solid rgba(255,255,255,0.1)"
+            : "1px solid rgba(0,0,0,0.07)",
+          boxShadow: dk
+            ? "0 2px 0 rgba(255,255,255,0.04) inset, 0 8px 40px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset"
+            : "0 4px 24px rgba(0,0,0,0.09), 0 1px 0 rgba(255,255,255,0.8) inset",
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
+        {/* thin top shimmer line */}
+        <div style={{
+          height: 1,
+          background: dk
+            ? "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 40%, rgba(107,135,255,0.35) 65%, transparent 100%)"
+            : "linear-gradient(90deg, transparent 0%, rgba(69,97,232,0.1) 40%, rgba(69,97,232,0.22) 65%, transparent 100%)",
+          position: "absolute", top: 0, left: 0, right: 0,
+        }} />
 
       {/* ── Top bar ── */}
-      <div className="max-w-5xl mx-auto flex items-center justify-between px-4" style={{ height: 52 }}>
+      <div className="flex items-center justify-between px-4" style={{ height: 52 }}>
 
         {/* Left: logo + desktop links */}
         <div className="flex items-center gap-1">
@@ -261,20 +271,24 @@ export default function DashboardNav({
             </div>
           </button>
         </div>
-      </div>
+      </div>{/* end top bar */}
+      </div>{/* end pill */}
 
-      {/* ── Mobile dropdown ── */}
+      {/* ── Mobile dropdown (pill below) ── */}
       {open && (
         <div
-          className="md:hidden"
+          className="md:hidden max-w-5xl mx-auto mt-2"
           style={{
-            background: dk ? "rgba(8,8,20,0.88)" : "rgba(255,255,255,0.88)",
+            pointerEvents: "all",
+            background: dk ? "rgba(8,8,20,0.92)" : "rgba(255,255,255,0.92)",
             backdropFilter: "blur(28px) saturate(1.8)",
             WebkitBackdropFilter: "blur(28px) saturate(1.8)",
-            borderTop: dk ? "1px solid rgba(255,255,255,0.06)" : "1px solid rgba(0,0,0,0.05)",
+            borderRadius: 20,
+            border: dk ? "1px solid rgba(255,255,255,0.09)" : "1px solid rgba(0,0,0,0.07)",
+            boxShadow: dk ? "0 8px 40px rgba(0,0,0,0.5)" : "0 4px 24px rgba(0,0,0,0.1)",
           }}
         >
-          <div className="max-w-5xl mx-auto px-3 py-2 flex flex-col gap-0.5">
+          <div className="px-3 py-2 flex flex-col gap-0.5">
             {[
               { href: "/dashboard",           label: "Предметы" },
               { href: "/dashboard/progress",  label: "Прогресс" },
