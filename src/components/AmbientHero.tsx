@@ -1,23 +1,13 @@
 "use client";
 import type { CSSProperties } from "react";
 
-/**
- * AmbientHero — CSS-only animated background scene.
- * Used as a fallback when no Spline URL is provided, or as a layer
- * beneath the Spline iframe.
- *
- * Props:
- *   splineUrl — if provided, renders <iframe> from spline.design ON TOP of
- *               the CSS scene. Pass via Share → Embed → Link.
- *   variant   — "hero" (full blue glow), "auth" (blue+purple split),
- *               "dashboard" (subtle ambient, for behind content)
- */
-
 interface AmbientHeroProps {
   splineUrl?: string;
   variant?: "hero" | "auth" | "dashboard";
   className?: string;
   style?: CSSProperties;
+  /** Override position/size of the Spline iframe. Default: absolute inset-0 100%x100% */
+  iframeStyle?: CSSProperties;
 }
 
 const ORBS: Record<
@@ -50,6 +40,7 @@ export default function AmbientHero({
   variant = "hero",
   className = "",
   style,
+  iframeStyle,
 }: AmbientHeroProps) {
   const orbs = ORBS[variant];
 
@@ -111,25 +102,63 @@ export default function AmbientHero({
         }}
       />
 
-      {/* Spline iframe — layered on top with hue-rotate to shift warm→blue */}
+      {/* Spline iframe — hue-rotated orange→blue */}
       {splineUrl && (
-        <iframe
-          src={splineUrl}
-          frameBorder="0"
-          className="absolute inset-0 w-full h-full"
-          style={{
-            border: "none",
-            opacity: 0.92,
-            // hue-rotate(190deg): orange ~30° → blue ~220°
-            // saturate(1.4): make the blue more vivid
-            // brightness(0.85): slightly dim to blend with dark bg
-            filter: "hue-rotate(190deg) saturate(1.4) brightness(0.85)",
-          }}
-          title="3D scene"
-          aria-hidden
-          loading="lazy"
-          allow="autoplay"
-        />
+        <>
+          <iframe
+            src={splineUrl}
+            frameBorder="0"
+            style={{
+              position: "absolute",
+              border: "none",
+              opacity: 0.95,
+              filter: "hue-rotate(190deg) saturate(1.4) brightness(0.85)",
+              // Default: fill container. Override via iframeStyle prop.
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              ...iframeStyle,
+            }}
+            title="3D scene"
+            aria-hidden
+            loading="lazy"
+            allow="autoplay"
+          />
+
+          {/* ── Mask overlays to hide Spline watermarks ────────────────
+              "Chasing Sunsets" text sits in lower-left quadrant of the scene.
+              "Built with Spline" badge is bottom-right corner.
+              We cover both with bg-matched gradients so they're invisible.   */}
+
+          {/* Lower-left gradient — hides scene title text */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              width: "45%",
+              height: "28%",
+              background: "linear-gradient(135deg, #080814 25%, transparent 100%)",
+              pointerEvents: "none",
+              zIndex: 3,
+            }}
+          />
+
+          {/* Bottom-right solid block — hides "Built with Spline" badge */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              right: 0,
+              width: 180,
+              height: 36,
+              background: "#080814",
+              pointerEvents: "none",
+              zIndex: 3,
+            }}
+          />
+        </>
       )}
     </div>
   );

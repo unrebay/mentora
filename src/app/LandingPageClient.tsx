@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import DemoChat from "@/components/DemoChat";
 import AmbientHero from "@/components/AmbientHero";
-import DiagonalBeams from "@/components/DiagonalBeams";
 import LandingNav from "@/components/LandingNav";
 
 /* ── Data ──────────────────────────────────────────────────────────── */
@@ -163,22 +162,13 @@ export default function LandingPageClient() {
         <AmbientHero
           variant="hero"
           splineUrl="https://my.spline.design/retrofuturismbganimation-HFdvtQ5oOt2HeV1VdNeILLtN/"
-        />
-
-        {/* CSS fallback beams — subtle, visible before Spline loads */}
-        <DiagonalBeams
-          count={7}
-          angle={-42}
-          color="rgba(69,97,232,1)"
-          accentColor="rgba(130,160,255,1)"
-          intensity={0.4}
-          animate={false}
-          style={{
-            top: "-10%",
-            right: "-5%",
+          iframeStyle={{
+            /* 150% size, anchored to right edge — beams sit behind the chat card */
+            top: "-25%",
             left: "auto",
-            width: "55%",
-            height: "120%",
+            right: "-15%",
+            width: "90%",
+            height: "150%",
           }}
         />
 
