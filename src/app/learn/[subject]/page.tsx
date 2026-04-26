@@ -132,11 +132,17 @@ export default async function LearnPage({ params, searchParams }: Props) {
   const isUltima = profile?.plan === "ultima";
   let initialMessagesRemaining: number | null = null;
 
+  // Calendar day reset: expired if window_start is from a previous UTC day
+  let initialResetAt: string | null = null;
   if (profile?.plan !== "pro" && profile?.plan !== "ultima") {
     const windowStart = profile?.messages_window_start ? new Date(profile.messages_window_start) : null;
-    const windowExpired = !windowStart || Date.now() - windowStart.getTime() > WINDOW_HOURS * 3_600_000;
-    const usedInWindow = windowExpired ? 0 : (profile?.messages_today ?? 0);
-    initialMessagesRemaining = Math.max(0, WINDOW_LIMIT - usedInWindow);
+    const todayUtc = new Date(); todayUtc.setUTCHours(0, 0, 0, 0);
+    const windowExpired = !windowStart || windowStart < todayUtc;
+    const usedToday = windowExpired ? 0 : (profile?.messages_today ?? 0);
+    initialMessagesRemaining = Math.max(0, WINDOW_LIMIT - usedToday);
+    // Next midnight UTC
+    const nextMidnight = new Date(); nextMidnight.setUTCHours(24, 0, 0, 0);
+    initialResetAt = nextMidnight.toISOString();
   }
 
   // If topic passed from topics map — prepend as initial message
@@ -148,6 +154,7 @@ export default async function LearnPage({ params, searchParams }: Props) {
       subjectTitle={subjectData.title}
       initialHistory={history ?? []}
       initialMessagesRemaining={initialMessagesRemaining}
+      initialResetAt={initialResetAt}
       initialTopic={initialTopic}
       isUltima={isUltima}
     />

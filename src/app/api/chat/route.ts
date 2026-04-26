@@ -142,19 +142,20 @@ export async function POST(req: NextRequest) {
         p_window_limit: WINDOW_LIMIT,
       });
       const w = windowRows?.[0];
+      // Next midnight UTC
+      const nextMidnightUTC = (() => {
+        const d = new Date();
+        d.setUTCHours(24, 0, 0, 0);
+        return d.toISOString();
+      })();
       if (!w?.allowed) {
-        const resetTs = w?.messages_window_start
-          ? new Date(new Date(w.messages_window_start).getTime() + WINDOW_HOURS * 3600000).toISOString()
-          : new Date(Date.now() + WINDOW_HOURS * 3600000).toISOString();
         return NextResponse.json(
-          { error: "limit_reached", messagesRemaining: 0, resetAt: resetTs },
+          { error: "limit_reached", messagesRemaining: 0, resetAt: nextMidnightUTC },
           { status: 429 }
         );
       }
       messagesRemaining = Math.max(0, WINDOW_LIMIT - (w?.messages_today ?? WINDOW_LIMIT));
-      windowResetAt = w?.messages_window_start
-        ? new Date(new Date(w.messages_window_start).getTime() + WINDOW_HOURS * 3600000).toISOString()
-        : null;
+      windowResetAt = nextMidnightUTC;
     } else {
       // Pro: fire-and-forget last_active_at update
       supabase.from("users").update({ last_active_at: new Date().toISOString() }).eq("id", user.id);

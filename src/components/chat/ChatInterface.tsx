@@ -28,7 +28,23 @@ const SUBJECT_CONFIG: Record<string, { emoji: string; hint: string; quickQuestio
 const DEFAULT_CONFIG = { emoji: "🎓", hint: "Задай любой вопрос — я помогу разобраться", quickQuestions: ["С чего начать изучение?", "Объясни основные понятия", "Дай план изучения"] };
 
 interface Message { role: MessageRole; content: string; isError?: boolean; imageUrl?: string }
-interface Props { subject: string; subjectTitle: string; initialHistory: { role: string; content: string }[]; initialMessagesRemaining: number | null; initialTopic?: string; isUltima?: boolean }
+interface Props { subject: string; subjectTitle: string; initialHistory: { role: string; content: string }[]; initialMessagesRemaining: number | null; initialResetAt?: string | null; initialTopic?: string; isUltima?: boolean }
+
+// ─── Countdown helpers ────────────────────────────────────────────────────
+function msUntilNextMidnightUTC(): number {
+  const now = new Date();
+  const next = new Date();
+  next.setUTCHours(24, 0, 0, 0);
+  return next.getTime() - now.getTime();
+}
+function formatCountdown(ms: number): string {
+  if (ms <= 0) return "00:00:00";
+  const totalSec = Math.floor(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
 
 // ─── Math rendering (KaTeX via CDN injected by layout) ─────────────────────
 function renderMath(formula: string, display: boolean): React.ReactNode {
@@ -165,13 +181,16 @@ function MarkdownMessage({ content }: { content: string }) {
 }
 
 // ─── Main Component ────────────────────────────────────────────────────────
-export default function ChatInterface({ subject, subjectTitle, initialHistory, initialMessagesRemaining, initialTopic, isUltima = false }: Props) {
+export default function ChatInterface({ subject, subjectTitle, initialHistory, initialMessagesRemaining, initialResetAt, initialTopic, isUltima = false }: Props) {
   const [messages, setMessages] = useState<Message[]>(
     initialHistory.map((m) => ({ role: m.role as MessageRole, content: m.content }))
   );
   const [input, setInput] = useState(initialTopic ? `Расскажи про: ${initialTopic}` : "");
   const [loading, setLoading] = useState(false);
   const [messagesRemaining, setMessagesRemaining] = useState<number | null>(initialMessagesRemaining);
+  // resetAt stored for potential future use (e.g. displaying exact timestamp)
+  const [, setResetAt] = useState<string | null>(initialResetAt ?? null);
+  const [countdown, setCountdown] = useState<string>(() => formatCountdown(msUntilNextMidnightUTC()));
   const [lastUserMsg, setLastUserMsg] = useState("");
   // Ultima image upload state
   const [pendingImage, setPendingImage] = useState<{ data: string; mimeType: string; preview: string } | null>(null);
@@ -215,6 +234,14 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       clearTimeout(fadeOutTimer);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Countdown ticker — updates every second ────────────────────────────────
+  useEffect(() => {
+    const tick = () => setCountdown(formatCountdown(msUntilNextMidnightUTC()));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
   }, []);
 
   const dismissNativeHint = useCallback(() => {
@@ -332,6 +359,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
 
       setMessages((prev) => [...prev, { role: "assistant", content: data.message, imageUrl: data.imageUrl ?? undefined }]);
       if (data.messagesRemaining !== undefined) setMessagesRemaining(data.messagesRemaining);
+      if (data.resetAt) setResetAt(data.resetAt);
       if (data.levelUp) {
         setLevelUpData(data.levelUp);
         setLevelUpFading(true);
@@ -518,12 +546,24 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       <div className="border-t px-4 pt-4 shrink-0"
         style={{ background: "var(--bg-card)", borderColor: "var(--border-light)", paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}>
         {limitReached ? (
-          <div className="rounded-xl p-4 text-center" style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)" }}>
-            <p className="text-sm font-semibold mb-1" style={{ color: "var(--text)" }}>Лимит на сегодня исчерпан</p>
-            <p className="text-xs mb-3" style={{ color: "var(--text-secondary)" }}>Возвращайся завтра — счётчик сбросится автоматически</p>
-            <Link href="/pricing" className="btn-glow inline-flex items-center gap-2 text-xs font-semibold px-5 py-2.5 rounded-full">
-              ⚡ Pro — безлимитный доступ
-            </Link>
+          <div className="rounded-2xl p-5 text-center space-y-3" style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)" }}>
+            <div>
+              <p className="text-sm font-semibold mb-0.5" style={{ color: "var(--text)" }}>Лимит на сегодня исчерпан</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Обновится в 00:00 UTC</p>
+            </div>
+            {/* Countdown timer */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ color: "var(--text-muted)", flexShrink: 0 }}>
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <span className="text-base font-mono font-semibold tracking-widest" style={{ color: "var(--text)" }}>{countdown}</span>
+            </div>
+            <div>
+              <Link href="/pricing" className="btn-glow inline-flex items-center gap-2 text-xs font-semibold px-5 py-2.5 rounded-full">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                Pro — безлимитный доступ
+              </Link>
+            </div>
           </div>
         ) : (
           <>
