@@ -220,22 +220,61 @@ export default function OnboardingTour() {
   const isLast = step === STEPS.length - 1;
   const cardW = typeof window !== "undefined" ? Math.min(CARD_W, window.innerWidth - 24) : CARD_W;
 
+  // Spotlight: a circle centered near the step's target area (cx/cy), sized to reveal the UI element
+  const vw = typeof window !== "undefined" ? window.innerWidth : 1280;
+  const vh = typeof window !== "undefined" ? window.innerHeight : 800;
+  const spotX = s.cx * vw;
+  const spotY = s.cy * vh;
+  // First step (welcome) and "tiers" step: no spotlight (no specific UI element)
+  const hasSpotlight = step !== 0 && step !== 4;
+  const spotR = isMobile ? Math.min(vw * 0.38, 160) : Math.min(vw * 0.22, 220);
+
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 9998, pointerEvents: "none" }}>
-      {/* Backdrop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+      {/* Backdrop — SVG with spotlight cutout */}
+      <svg
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "all" }}
         onClick={() => close(false)}
-        style={{
-          position: "absolute", inset: 0,
-          background: "rgba(4,4,16,0.55)",
-          backdropFilter: "blur(4px)",
-          WebkitBackdropFilter: "blur(4px)",
-          pointerEvents: "all",
-        }}
-      />
+      >
+        <defs>
+          <mask id="spotlightMask">
+            {/* White = visible (dark overlay), black = transparent (spotlight) */}
+            <rect width="100%" height="100%" fill="white" />
+            {hasSpotlight && (
+              <motion.ellipse
+                cx={spotX}
+                cy={spotY}
+                rx={spotR}
+                ry={spotR * 0.62}
+                fill="black"
+                animate={{ cx: spotX, cy: spotY, rx: spotR, ry: spotR * 0.62 }}
+                transition={{ type: "spring", stiffness: 160, damping: 26 }}
+              />
+            )}
+          </mask>
+        </defs>
+        {/* Dark semi-transparent overlay with spotlight hole */}
+        <rect
+          width="100%"
+          height="100%"
+          fill="rgba(4,4,16,0.62)"
+          mask="url(#spotlightMask)"
+        />
+        {/* Spotlight ring glow */}
+        {hasSpotlight && (
+          <motion.ellipse
+            cx={spotX}
+            cy={spotY}
+            rx={spotR + 2}
+            ry={(spotR + 2) * 0.62}
+            fill="none"
+            stroke="rgba(69,97,232,0.5)"
+            strokeWidth="1.5"
+            animate={{ cx: spotX, cy: spotY, rx: spotR + 2, ry: (spotR + 2) * 0.62 }}
+            transition={{ type: "spring", stiffness: 160, damping: 26 }}
+          />
+        )}
+      </svg>
 
       {/* ── Flying card ── */}
       <motion.div
