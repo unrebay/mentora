@@ -6,12 +6,31 @@ const TOUR_KEY = "mentora_tour_v1";
 const CARD_W = 360;
 const CARD_H = 290; // approximate for clamping
 
+/* ── Step icon SVG paths ──────────────────────────────────────────── */
+const STEP_ICONS: Record<string, string> = {
+  wave:    "M6 8c0-1.1.9-2 2-2s2 .9 2 2c0 2.2-4 5-4 5s-4-2.8-4-5c0-1.1.9-2 2-2s2 .9 2 2zM14 4c.6 0 1 .4 1 1v6c0 .6-.4 1-1 1h-2",
+  book:    "M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z",
+  chat:    "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",
+  flame:   "M12 2c0 0-5 5-5 10a5 5 0 0 0 10 0c0-2-1-4-2-5-1 2-3 3-3 5 0-3 0-7 0-10z",
+  star:    "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
+  gift:    "M20 12v10H4V12M22 7H2v5h20V7zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z",
+};
+
+function StepIcon({ name, color = "#4561E8" }: { name: string; color?: string }) {
+  const d = STEP_ICONS[name] ?? STEP_ICONS.star;
+  return (
+    <svg viewBox="0 0 24 24" fill="none" width="20" height="20" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d={d} />
+    </svg>
+  );
+}
+
 /* ── Step definitions ──────────────────────────────────────────────── */
 interface Step {
   /** cx/cy = fraction of viewport (0..1), where the card center lands */
   cx: number;
   cy: number;
-  emoji: string;
+  icon: string;
   tag: string;
   title: string;
   desc: string;
@@ -23,7 +42,7 @@ interface Step {
 const STEPS: Step[] = [
   {
     cx: 0.5, cy: 0.5,
-    emoji: "👋",
+    icon: "wave",
     tag: "Добро пожаловать",
     title: "Ты в Mentora!",
     desc: "AI-ментор по 14 предметам — знает твой уровень и объясняет так, как тебе удобно. Пройдём быстрый тур?",
@@ -31,7 +50,7 @@ const STEPS: Step[] = [
   },
   {
     cx: 0.28, cy: 0.68,
-    emoji: "📚",
+    icon: "book",
     tag: "Предметы",
     title: "Выбери предмет",
     desc: "Нажми на любую карточку — откроется чат именно по этой теме. Прогресс по каждому предмету хранится отдельно.",
@@ -40,7 +59,7 @@ const STEPS: Step[] = [
   },
   {
     cx: 0.72, cy: 0.38,
-    emoji: "💬",
+    icon: "chat",
     tag: "Чат",
     title: "Просто задай вопрос",
     desc: "Внутри предмета — живой чат. Пиши свободно: «объясни теорему Пифагора» или «почему началась Холодная война». Ментора помнит весь контекст.",
@@ -48,7 +67,7 @@ const STEPS: Step[] = [
   },
   {
     cx: 0.5, cy: 0.14,
-    emoji: "🔥",
+    icon: "flame",
     tag: "Прогресс",
     title: "Стрики и менты",
     desc: "Каждый день учёбы — это стрик. Каждый ответ приносит менты (твой XP). Они видны в шапке прямо сейчас.",
@@ -57,7 +76,7 @@ const STEPS: Step[] = [
   },
   {
     cx: 0.5, cy: 0.5,
-    emoji: "⭐",
+    icon: "star",
     tag: "Тарифы",
     title: "Базовый и Pro",
     desc: "Бесплатно: 20 сообщений в сутки и один активный предмет. Pro (499 ₽/мес) — безлимит, все 14 предметов, долгосрочная память.",
@@ -65,7 +84,7 @@ const STEPS: Step[] = [
   },
   {
     cx: 0.72, cy: 0.72,
-    emoji: "🎁",
+    icon: "gift",
     tag: "Рефералы",
     title: "Приглашай — получай дни",
     desc: "Твоя реферальная ссылка — в профиле. Приглашённый друг регистрируется — вам обоим +3 дня Pro. Его рефералы тоже приносят тебе +1 день.",
@@ -255,7 +274,7 @@ export default function OnboardingTour() {
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 20,
                 }}>
-                  {s.emoji}
+                  <StepIcon name={s.icon} color="#6b87ff" />
                 </div>
                 <div>
                   <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#6b87ff", marginBottom: 2 }}>
@@ -354,7 +373,7 @@ export default function OnboardingTour() {
                     boxShadow: "0 4px 16px rgba(69,97,232,0.4)",
                   }}
                 >
-                  {isLast ? "Понятно! 🚀" : "Далее →"}
+                  {isLast ? "Понятно!" : "Далее →"}
                 </button>
               </div>
             </div>

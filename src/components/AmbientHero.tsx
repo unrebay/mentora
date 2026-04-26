@@ -111,13 +111,12 @@ export default function AmbientHero({
             style={{
               position: "absolute",
               border: "none",
-              opacity: 0.95,
-              filter: "hue-rotate(190deg) saturate(1.4) brightness(0.85)",
-              // Default: fill container. Override via iframeStyle prop.
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
+              opacity: 0.90,
+              filter: "hue-rotate(190deg) saturate(1.3) brightness(0.80)",
+              top: "-5%",
+              left: "-5%",
+              width: "110%",
+              height: "110%",
               ...iframeStyle,
             }}
             title="3D scene"
@@ -126,36 +125,74 @@ export default function AmbientHero({
             allow="autoplay"
           />
 
-          {/* ── Mask overlays to hide Spline watermarks ────────────────
-              "Chasing Sunsets" text sits in lower-left quadrant of the scene.
-              "Built with Spline" badge is bottom-right corner.
-              We cover both with bg-matched gradients so they're invisible.   */}
+          {/* ── Full-coverage vignette mask ─────────────────────────────
+              Radial + edge gradients hide ALL Spline watermarks and scene
+              text regardless of viewport size or scene layout.            */}
 
-          {/* Lower-left gradient — hides scene title text */}
+          {/* Radial dark vignette — center transparent, edges dark */}
           <div
             style={{
               position: "absolute",
-              bottom: 0,
-              left: 0,
-              width: "45%",
-              height: "28%",
-              background: "linear-gradient(135deg, #080814 25%, transparent 100%)",
+              inset: 0,
+              background: "radial-gradient(ellipse 65% 55% at 50% 45%, transparent 20%, rgba(8,8,20,0.55) 65%, rgba(8,8,20,0.92) 90%, #080814 100%)",
               pointerEvents: "none",
               zIndex: 3,
             }}
           />
 
-          {/* Bottom-right solid block — hides "Built with Spline" badge */}
+          {/* Bottom fade — fully covers watermarks and scene text */}
           <div
             style={{
               position: "absolute",
               bottom: 0,
+              left: 0,
               right: 0,
-              width: 180,
-              height: 36,
-              background: "#080814",
+              height: "38%",
+              background: "linear-gradient(to top, #080814 0%, rgba(8,8,20,0.95) 40%, transparent 100%)",
               pointerEvents: "none",
-              zIndex: 3,
+              zIndex: 4,
+            }}
+          />
+
+          {/* Top fade */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: "18%",
+              background: "linear-gradient(to bottom, rgba(8,8,20,0.7) 0%, transparent 100%)",
+              pointerEvents: "none",
+              zIndex: 4,
+            }}
+          />
+
+          {/* Left fade */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              bottom: 0,
+              width: "12%",
+              background: "linear-gradient(to right, rgba(8,8,20,0.6) 0%, transparent 100%)",
+              pointerEvents: "none",
+              zIndex: 4,
+            }}
+          />
+
+          {/* Right fade */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              bottom: 0,
+              width: "12%",
+              background: "linear-gradient(to left, rgba(8,8,20,0.6) 0%, transparent 100%)",
+              pointerEvents: "none",
+              zIndex: 4,
             }}
           />
         </>

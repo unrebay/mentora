@@ -3,6 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import AnimateIn from "@/components/AnimateIn";
+import SubjectIcon from "@/components/SubjectIcon";
 
 export const metadata = { title: "О проекте — Mentora" };
 
@@ -17,20 +18,20 @@ export default async function AboutPage() {
   if (!user) redirect("/auth");
 
   const SUBJECTS = [
-    { emoji: "🏰", title: "История России",    desc: "51 тема · 5 уровней",            color: "#4561E8" },
-    { emoji: "🌍", title: "Всемирная история", desc: "60 тем · 5 уровней",             color: "#6366F1" },
-    { emoji: "📐", title: "Математика",        desc: "Алгебра, геометрия, анализ",     color: "#3B82F6" },
-    { emoji: "⚡", title: "Физика",            desc: "Механика до квантового мира",    color: "#06B6D4" },
-    { emoji: "🧪", title: "Химия",             desc: "Вещества, реакции, законы",      color: "#10B981" },
-    { emoji: "🧬", title: "Биология",          desc: "Клетка до экосистем",            color: "#22C55E" },
-    { emoji: "📝", title: "Русский язык",      desc: "Грамматика и орфография",        color: "#8B5CF6" },
-    { emoji: "📚", title: "Литература",        desc: "Классика и современная проза",   color: "#A78BFA" },
-    { emoji: "🇬🇧", title: "Английский язык",  desc: "A1 — C2, разговорный",           color: "#F59E0B" },
-    { emoji: "🏛️", title: "Обществознание",   desc: "Право, экономика, социология",   color: "#FF7A00" },
-    { emoji: "🗺️", title: "География",        desc: "Природа, страны, климат",        color: "#14B8A6" },
-    { emoji: "💻", title: "Информатика",       desc: "Алгоритмы, программирование",    color: "#6B7280" },
-    { emoji: "🔭", title: "Астрономия",        desc: "Звёзды, планеты, вселенная",     color: "#7C3AED" },
-    { emoji: "🌐", title: "Кругозор",          desc: "Факты, открытия, феномены",      color: "#EC4899" },
+    { id: "russian-history",  title: "История России",    desc: "51 тема · 5 уровней",            color: "#4561E8" },
+    { id: "world-history",    title: "Всемирная история", desc: "60 тем · 5 уровней",             color: "#6366F1" },
+    { id: "mathematics",      title: "Математика",        desc: "Алгебра, геометрия, анализ",     color: "#3B82F6" },
+    { id: "physics",          title: "Физика",            desc: "Механика до квантового мира",    color: "#06B6D4" },
+    { id: "chemistry",        title: "Химия",             desc: "Вещества, реакции, законы",      color: "#10B981" },
+    { id: "biology",          title: "Биология",          desc: "Клетка до экосистем",            color: "#22C55E" },
+    { id: "russian-language", title: "Русский язык",      desc: "Грамматика и орфография",        color: "#8B5CF6" },
+    { id: "literature",       title: "Литература",        desc: "Классика и современная проза",   color: "#A78BFA" },
+    { id: "english",          title: "Английский язык",   desc: "A1 — C2, разговорный",           color: "#F59E0B" },
+    { id: "social-studies",   title: "Обществознание",    desc: "Право, экономика, социология",   color: "#FF7A00" },
+    { id: "geography",        title: "География",         desc: "Природа, страны, климат",        color: "#14B8A6" },
+    { id: "computer-science", title: "Информатика",       desc: "Алгоритмы, программирование",    color: "#6B7280" },
+    { id: "astronomy",        title: "Астрономия",        desc: "Звёзды, планеты, вселенная",     color: "#7C3AED" },
+    { id: "discovery",        title: "Кругозор",          desc: "Факты, открытия, феномены",      color: "#EC4899" },
   ];
 
   return (
@@ -167,7 +168,7 @@ export default async function AboutPage() {
                 background: "rgba(255,255,255,0.04)",
                 border: "1px solid rgba(255,255,255,0.07)",
               }}>
-                <span className="text-xl shrink-0">{s.emoji}</span>
+                <SubjectIcon id={s.id} size={28} />
                 <div>
                   <div className="text-sm font-semibold text-white leading-tight">{s.title}</div>
                   <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{s.desc}</div>
@@ -185,12 +186,12 @@ export default async function AboutPage() {
         </AnimateIn>
         <div className="grid md:grid-cols-2 gap-4">
           {[
-            { icon: "🔒", title: "Спрашивай без страха", desc: "Диалоги шифруются по стандарту AES-256 — тому же, что используют банки и Apple Pay. Задай вопрос, который не стал бы вводить в Google.", tag: "AES-256", color: "#4561E8" },
-            { icon: "🧠", title: "Учится вместе с тобой", desc: "Контекстная память запоминает каждый диалог: уровень, пробелы, стиль. Персонализированное обучение эффективнее стандартного на 76%.", tag: "+76% эффективность", color: "#10B981" },
-            { icon: "❤️", title: "Всегда на твоей стороне", desc: "Не осудит, не устанет, не раздражится. Объяснит в третий раз с другого угла, поддержит и искренне порадуется успеху.", color: "#FF7A00" },
-            { icon: "⚡", title: "Уровень топовых AI-лабораторий", desc: "Mentora работает на frontier-моделях. RAG-retrieval и многоуровневый контекст делают ответы точнее любого поисковика.", tag: "Frontier AI", color: "#A78BFA" },
-            { icon: "🌍", title: "Знания без границ", desc: "Учиться можно из любой точки, без учителя и расписания. Стрики, уровни и менты превращают ежедневную учёбу в привычку.", color: "#06B6D4" },
-            { icon: "💰", title: "Считаем вместе", desc: "8 занятий с репетитором — 12 000–24 000 ₽. Mentora Pro — 499 ₽ в месяц, безлимит, 24/7. Выбор очевиден.", color: "#F59E0B" },
+            { svgPath: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none"/>`, title: "Спрашивай без страха", desc: "Диалоги шифруются по стандарту AES-256 — тому же, что используют банки и Apple Pay. Задай вопрос, который не стал бы вводить в Google.", tag: "AES-256", color: "#4561E8" },
+            { svgPath: `<circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8" fill="none"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none"/>`, title: "Учится вместе с тобой", desc: "Контекстная память запоминает каждый диалог: уровень, пробелы, стиль. Персонализированное обучение эффективнее стандартного на 76%.", tag: "+76% эффективность", color: "#10B981" },
+            { svgPath: `<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="1.8" fill="none"/>`, title: "Всегда на твоей стороне", desc: "Не осудит, не устанет, не раздражится. Объяснит в третий раз с другого угла, поддержит и искренне порадуется успеху.", color: "#FF7A00" },
+            { svgPath: `<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none"/>`, title: "Уровень топовых AI-лабораторий", desc: "Mentora работает на frontier-моделях. RAG-retrieval и многоуровневый контекст делают ответы точнее любого поисковика.", tag: "Frontier AI", color: "#A78BFA" },
+            { svgPath: `<circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.8" fill="none"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none"/>`, title: "Знания без границ", desc: "Учиться можно из любой точки, без учителя и расписания. Стрики, уровни и менты превращают ежедневную учёбу в привычку.", color: "#06B6D4" },
+            { svgPath: `<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>`, title: "Считаем вместе", desc: "8 занятий с репетитором — 12 000–24 000 ₽. Mentora Pro — 499 ₽ в месяц, безлимит, 24/7. Выбор очевиден.", color: "#F59E0B" },
           ].map((f, i) => (
             <AnimateIn key={f.title} delay={i * 0.05}>
               <div className="p-5 rounded-2xl h-full" style={{
@@ -198,7 +199,7 @@ export default async function AboutPage() {
                 border: "1px solid rgba(255,255,255,0.07)",
               }}>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">{f.icon}</span>
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" style={{ color: f.color, flexShrink: 0 }} dangerouslySetInnerHTML={{ __html: f.svgPath }} />
                   <span className="font-semibold text-white text-sm">{f.title}</span>
                   {f.tag && (
                     <span className="text-xs font-bold px-2 py-0.5 rounded-full ml-auto shrink-0" style={{
@@ -292,9 +293,13 @@ export default async function AboutPage() {
           }}>
             {/* Header */}
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl shrink-0" style={{
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0" style={{
                 background: "rgba(69,97,232,0.18)", border: "1px solid rgba(69,97,232,0.3)",
-              }}>🎁</div>
+              }}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#6b87ff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 12v10H4V12M22 7H2v5h20V7zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                </svg>
+              </div>
               <div>
                 <h2 className="font-black text-2xl text-white tracking-tight">Приглашай друзей — получай дни Pro</h2>
                 <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.45)" }}>Никаких денег. Просто делись ссылкой.</p>
@@ -313,7 +318,7 @@ export default async function AboutPage() {
                   <div className="flex items-start gap-3 p-3 rounded-xl" style={{
                     background: "rgba(69,97,232,0.12)", border: "1px solid rgba(69,97,232,0.25)",
                   }}>
-                    <span className="text-lg shrink-0">🟦</span>
+                    <span className="shrink-0 w-4 h-4 rounded-sm inline-block" style={{ background: "#4561E8" }}></span>
                     <div>
                       <div className="text-sm font-semibold text-white">Прямой реферал (уровень 1)</div>
                       <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>
@@ -325,7 +330,7 @@ export default async function AboutPage() {
                   <div className="flex items-start gap-3 p-3 rounded-xl" style={{
                     background: "rgba(99,102,241,0.10)", border: "1px solid rgba(99,102,241,0.2)",
                   }}>
-                    <span className="text-lg shrink-0">🟪</span>
+                    <span className="shrink-0 w-4 h-4 rounded-sm inline-block" style={{ background: "#6366F1" }}></span>
                     <div>
                       <div className="text-sm font-semibold text-white">Друг твоего друга (уровень 2)</div>
                       <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>
@@ -337,7 +342,7 @@ export default async function AboutPage() {
                   <div className="flex items-start gap-3 p-3 rounded-xl" style={{
                     background: "rgba(167,139,250,0.08)", border: "1px solid rgba(167,139,250,0.18)",
                   }}>
-                    <span className="text-lg shrink-0">🔮</span>
+                    <span className="shrink-0 w-4 h-4 rounded-sm inline-block" style={{ background: "#A78BFA" }}></span>
                     <div>
                       <div className="text-sm font-semibold text-white">Уровни 3 и 4</div>
                       <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>
@@ -368,7 +373,9 @@ export default async function AboutPage() {
                           border: `2px solid ${row.color}55`,
                           color: row.color,
                         }}>
-                          👤
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                          </svg>
                         </div>
                       ))}
                     </div>

@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import DemoChat from "@/components/DemoChat";
 import AmbientHero from "@/components/AmbientHero";
 import LandingNav from "@/components/LandingNav";
+import SubjectIcon from "@/components/SubjectIcon";
 
 /* ── Motion helpers ─────────────────────────────────────────────────── */
 const fadeUp = (delay = 0) => ({
@@ -403,7 +404,7 @@ export default function LandingPageClient() {
                   el.style.boxShadow = "none";
                 }}
               >
-                <span className="text-3xl">{s.emoji}</span>
+                <SubjectIcon id={s.id} size={36} />
                 <div>
                   <div className="text-sm font-semibold text-white leading-tight mb-1">
                     {s.title}
