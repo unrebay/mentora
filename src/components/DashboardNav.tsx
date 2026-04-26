@@ -165,7 +165,7 @@ export default function DashboardNav({
           <ThemeToggle forceDark={dk} />
 
           {totalXP > 0 && (
-            <div className="hidden sm:flex items-center gap-1.5">
+            <div className="hidden sm:flex items-center gap-1.5" data-tour="nav-stats">
               {/* XP pill */}
               <div style={{
                 display: "flex", alignItems: "center", gap: 5, height: 30,

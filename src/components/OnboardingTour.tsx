@@ -4,7 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const TOUR_KEY = "mentora_tour_v1";
 const CARD_W = 360;
-const CARD_H = 290; // approximate for clamping
+const CARD_H = 300;
+const SPOT_PAD = 14;   // padding around element for spotlight rect
+const CARD_GAP = 20;   // gap between spotlight edge and card
 
 /* ── Step icon SVG paths ──────────────────────────────────────────── */
 const STEP_ICONS: Record<string, string> = {
@@ -27,21 +29,27 @@ function StepIcon({ name, color = "#4561E8" }: { name: string; color?: string })
 
 /* ── Step definitions ──────────────────────────────────────────────── */
 interface Step {
-  /** cx/cy = fraction of viewport (0..1), where the card center lands */
-  cx: number;
-  cy: number;
+  /**
+   * CSS selector of the element to spotlight.
+   * null = no spotlight (welcome / tiers steps).
+   */
+  targetSelector?: string;
+  /**
+   * Preferred side for the card relative to the spotlight.
+   * "center" means no spotlight — card in the middle of the screen.
+   * For large (full-width) elements the card auto-falls to a safe corner.
+   */
+  cardSide: "top" | "bottom" | "left" | "right" | "center";
   icon: string;
   tag: string;
   title: string;
   desc: string;
   tip?: string;
-  /** arrow direction pointing toward the UI element being described */
-  arrow?: "up" | "down" | "left" | "right";
 }
 
 const STEPS: Step[] = [
   {
-    cx: 0.5, cy: 0.5,
+    cardSide: "center",
     icon: "wave",
     tag: "Добро пожаловать",
     title: "Ты в Mentora!",
@@ -49,33 +57,34 @@ const STEPS: Step[] = [
     tip: "Займёт меньше минуты",
   },
   {
-    cx: 0.28, cy: 0.68,
+    targetSelector: "[data-tour='subjects']",
+    cardSide: "bottom",
     icon: "book",
     tag: "Предметы",
     title: "Выбери предмет",
     desc: "Нажми на любую карточку — откроется чат именно по этой теме. Прогресс по каждому предмету хранится отдельно.",
-    arrow: "down",
     tip: "Можно менять предмет в любое время",
   },
   {
-    cx: 0.72, cy: 0.38,
+    targetSelector: "[data-tour='subjects']",
+    cardSide: "bottom",
     icon: "chat",
     tag: "Чат",
     title: "Просто задай вопрос",
-    desc: "Внутри предмета — живой чат. Пиши свободно: «объясни теорему Пифагора» или «почему началась Холодная война». Ментора помнит весь контекст.",
+    desc: "Внутри предмета — живой чат. Пиши свободно: «объясни теорему Пифагора» или «почему началась Холодная война». Ментора помнит контекст.",
     tip: "Можно переспрашивать сколько угодно",
   },
   {
-    cx: 0.5, cy: 0.14,
+    targetSelector: "[data-tour='nav-stats']",
+    cardSide: "bottom",
     icon: "flame",
     tag: "Прогресс",
     title: "Стрики и менты",
     desc: "Каждый день учёбы — это стрик. Каждый ответ приносит менты (твой XP). Они видны в шапке прямо сейчас.",
-    arrow: "up",
     tip: "Стрик сбрасывается если пропустить день",
   },
   {
-    cx: 0.5, cy: 0.5,
+    cardSide: "center",
     icon: "star",
     tag: "Тарифы",
     title: "Базовый и Pro",
@@ -83,119 +92,195 @@ const STEPS: Step[] = [
     tip: "Пробные дни дают новым пользователям",
   },
   {
-    cx: 0.72, cy: 0.72,
+    targetSelector: "[data-tour='referral']",
+    cardSide: "top",
     icon: "gift",
     tag: "Рефералы",
     title: "Приглашай — получай дни",
     desc: "Твоя реферальная ссылка — в профиле. Приглашённый друг регистрируется — вам обоим +3 дня Pro. Его рефералы тоже приносят тебе +1 день.",
-    arrow: "down",
     tip: "До 4 уровней в реферальной цепочке",
   },
 ];
 
-/* ── Position helpers ──────────────────────────────────────────────── */
-function getCardPos(step: number, isMobile: boolean): { x: number; y: number } {
-  const vw = typeof window !== "undefined" ? window.innerWidth : 390;
-  const vh = typeof window !== "undefined" ? window.innerHeight : 844;
-  if (isMobile) {
-    // Pin card to bottom of screen (bottom-sheet style) so spotlight is visible above
-    const cardW = Math.min(CARD_W, vw - 24);
-    return {
-      x: Math.max(0, (vw - cardW) / 2),
-      y: vh - CARD_H - 32, // 32px bottom margin (covers safe area on most phones)
-    };
-  }
-  const { cx, cy } = STEPS[step];
-  const cardW = Math.min(CARD_W, vw - 32);
-  const x = Math.max(16, Math.min(vw - cardW - 16, cx * vw - cardW / 2));
-  const y = Math.max(72, Math.min(vh - CARD_H - 24, cy * vh - CARD_H / 2));
-  return { x, y };
+/* ── Spotlight rect (viewport-relative, in px) ─────────────────────── */
+interface SpotRect { x: number; y: number; w: number; h: number }
+
+function clamp(v: number, lo: number, hi: number) { return Math.max(lo, Math.min(hi, v)); }
+
+/**
+ * Query the DOM for a selector and return its padded bounding rect.
+ * Returns null if element not found.
+ */
+function querySpot(selector: string): SpotRect | null {
+  const el = document.querySelector(selector);
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  if (r.width === 0 || r.height === 0) return null;
+  return {
+    x: r.left - SPOT_PAD,
+    y: r.top  - SPOT_PAD,
+    w: r.width  + SPOT_PAD * 2,
+    h: r.height + SPOT_PAD * 2,
+  };
 }
 
-/* ── Arrow SVG ─────────────────────────────────────────────────────── */
-function Arrow({ dir }: { dir: "up" | "down" | "left" | "right" }) {
-  const arrows = {
-    up:    { d: "M8 12L8 4M8 4L4 8M8 4L12 8", label: "↑" },
-    down:  { d: "M8 4L8 12M8 12L4 8M8 12L12 8", label: "↓" },
-    left:  { d: "M12 8L4 8M4 8L8 4M4 8L8 12", label: "←" },
-    right: { d: "M4 8L12 8M12 8L8 4M12 8L8 12", label: "→" },
-  }[dir];
-  return (
-    <motion.span
-      animate={{ y: dir === "down" ? [0, 4, 0] : dir === "up" ? [0, -4, 0] : 0, x: dir === "right" ? [0, 4, 0] : dir === "left" ? [0, -4, 0] : 0 }}
-      transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
-      className="inline-flex items-center justify-center w-6 h-6 rounded-full flex-shrink-0"
-      style={{ background: "rgba(69,97,232,0.2)", border: "1px solid rgba(69,97,232,0.4)" }}
-    >
-      <svg viewBox="0 0 16 16" fill="none" width="12" height="12" stroke="#6b87ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d={arrows.d} />
-      </svg>
-    </motion.span>
-  );
+/**
+ * Compute where the card should sit given a spotlight rect, preferred side,
+ * step index (used for alternating large-element placement), and viewport size.
+ */
+function cardPos(
+  spot: SpotRect | null,
+  side: Step["cardSide"],
+  stepIdx: number,
+  vw: number,
+  vh: number,
+  isMobile: boolean,
+): { x: number; y: number } {
+  const cw = Math.min(CARD_W, vw - 32);
+  const ch = CARD_H;
+  const NAV_H = 90; // below sticky nav pill
+
+  // Mobile: always pin to bottom-center
+  if (isMobile) {
+    return { x: Math.max(0, (vw - cw) / 2), y: vh - ch - 40 };
+  }
+
+  // No spotlight: center of screen
+  if (!spot || side === "center") {
+    return {
+      x: clamp(vw / 2 - cw / 2, 16, vw - cw - 16),
+      y: clamp(vh / 2 - ch / 2, NAV_H, vh - ch - 24),
+    };
+  }
+
+  // Wide element (takes ≥60% of viewport width): card goes below nav on
+  // alternating left / right so successive steps feel distinct.
+  if (spot.w >= vw * 0.6) {
+    const leftSide = stepIdx % 2 === 1; // odd steps → left, even → right
+    return {
+      x: leftSide ? 16 : clamp(vw - cw - 16, 16, vw - cw - 16),
+      y: NAV_H,
+    };
+  }
+
+  // Normal-sized element: position outside on the preferred side.
+  const centerX = clamp(spot.x + spot.w / 2 - cw / 2, 16, vw - cw - 16);
+  const centerY = clamp(spot.y + spot.h / 2 - ch / 2, NAV_H, vh - ch - 24);
+
+  switch (side) {
+    case "top": {
+      const y = spot.y - ch - CARD_GAP;
+      return { x: centerX, y: y >= NAV_H ? y : spot.y + spot.h + CARD_GAP }; // flip to bottom if no room
+    }
+    case "bottom": {
+      const y = spot.y + spot.h + CARD_GAP;
+      return { x: centerX, y: Math.min(vh - ch - 24, y) };
+    }
+    case "left": {
+      const x = spot.x - cw - CARD_GAP;
+      return { x: Math.max(16, x), y: centerY };
+    }
+    case "right": {
+      const x = spot.x + spot.w + CARD_GAP;
+      return { x: Math.min(vw - cw - 16, x), y: centerY };
+    }
+    default:
+      return { x: clamp(vw / 2 - cw / 2, 16, vw - cw - 16), y: clamp(vh / 2 - ch / 2, NAV_H, vh - ch - 24) };
+  }
 }
 
 /* ── Main component ────────────────────────────────────────────────── */
 export default function OnboardingTour() {
-  const [visible, setVisible] = useState(false);
-  const [step, setStep] = useState(0);
-  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [visible, setVisible]   = useState(false);
+  const [step, setStep]         = useState(0);
+  const [spot, setSpot]         = useState<SpotRect | null>(null);
+  const [pos, setPos]           = useState({ x: 0, y: 0 });
   const [isMobile, setIsMobile] = useState(false);
-  const [ready, setReady] = useState(false);
+  const [ready, setReady]       = useState(false);
 
-  const updatePos = useCallback((stepIdx: number, mobile: boolean) => {
-    setPos(getCardPos(stepIdx, mobile));
+  /* Update spotlight + card position whenever step or visibility changes */
+  const refreshLayout = useCallback((stepIdx: number, mobile: boolean) => {
+    const s = STEPS[stepIdx];
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    if (!s.targetSelector) {
+      setSpot(null);
+      setPos(cardPos(null, s.cardSide, stepIdx, vw, vh, mobile));
+      return;
+    }
+
+    const el = document.querySelector(s.targetSelector) as HTMLElement | null;
+    if (!el) {
+      setSpot(null);
+      setPos(cardPos(null, "center", stepIdx, vw, vh, mobile));
+      return;
+    }
+
+    // Scroll the element into view (top of viewport, accounting for nav height)
+    const scrollY = window.scrollY + el.getBoundingClientRect().top - 100;
+    window.scrollTo({ top: Math.max(0, scrollY), behavior: "smooth" });
+
+    // Wait for scroll to settle, then measure
+    const timer = setTimeout(() => {
+      const r = querySpot(s.targetSelector!);
+      setSpot(r);
+      setPos(cardPos(r, s.cardSide, stepIdx, vw, vh, mobile));
+    }, 450);
+    return timer;
   }, []);
 
+  /* Initial mount */
   useEffect(() => {
     const mobile = window.innerWidth < 768;
     setIsMobile(mobile);
-
-    // Show tour for new users
-    if (!localStorage.getItem(TOUR_KEY)) {
-      const initialPos = getCardPos(0, mobile);
-      setPos(initialPos);
-      setReady(true);
-      // Small delay so the page settles first
-      const t = setTimeout(() => setVisible(true), 900);
-      return () => clearTimeout(t);
-    }
     setReady(true);
 
-    // Listen for manual open
+    if (!localStorage.getItem(TOUR_KEY)) {
+      const timer = setTimeout(() => {
+        setVisible(true);
+        refreshLayout(0, mobile);
+      }, 900);
+      return () => clearTimeout(timer);
+    }
+
     const openHandler = () => {
       const m = window.innerWidth < 768;
       setIsMobile(m);
       setStep(0);
-      setPos(getCardPos(0, m));
       setVisible(true);
+      refreshLayout(0, m);
     };
     window.addEventListener("mentora:open-tour", openHandler);
-
-    const onResize = () => {
-      const m = window.innerWidth < 768;
-      setIsMobile(m);
-    };
+    const onResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", onResize);
-
     return () => {
       window.removeEventListener("mentora:open-tour", openHandler);
       window.removeEventListener("resize", onResize);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Also register open handler when already done (for TourButton)
+  /* TourButton re-open (after ready=true) */
   useEffect(() => {
     if (!ready) return;
     const openHandler = () => {
       const m = window.innerWidth < 768;
       setIsMobile(m);
       setStep(0);
-      setPos(getCardPos(0, m));
       setVisible(true);
+      refreshLayout(0, m);
     };
     window.addEventListener("mentora:open-tour", openHandler);
     return () => window.removeEventListener("mentora:open-tour", openHandler);
-  }, [ready]);
+  }, [ready, refreshLayout]);
+
+  /* Refresh layout when step or visible changes */
+  useEffect(() => {
+    if (!visible) return;
+    const timer = refreshLayout(step, isMobile);
+    return () => { if (timer) clearTimeout(timer); };
+  }, [step, visible, isMobile, refreshLayout]);
 
   const close = useCallback((markDone = false) => {
     if (markDone) localStorage.setItem(TOUR_KEY, "1");
@@ -204,75 +289,67 @@ export default function OnboardingTour() {
 
   const goTo = useCallback((idx: number) => {
     setStep(idx);
-    updatePos(idx, isMobile);
-  }, [isMobile, updatePos]);
+  }, []);
 
-  const next = () => {
-    if (step < STEPS.length - 1) goTo(step + 1);
-    else close(true);
-  };
-
+  const next = () => { if (step < STEPS.length - 1) goTo(step + 1); else close(true); };
   const prev = () => { if (step > 0) goTo(step - 1); };
 
   if (!ready || !visible) return null;
 
   const s = STEPS[step];
   const isLast = step === STEPS.length - 1;
-  const cardW = typeof window !== "undefined" ? Math.min(CARD_W, window.innerWidth - 24) : CARD_W;
-
-  // Spotlight: a circle centered near the step's target area (cx/cy), sized to reveal the UI element
   const vw = typeof window !== "undefined" ? window.innerWidth : 1280;
-  const vh = typeof window !== "undefined" ? window.innerHeight : 800;
-  const spotX = s.cx * vw;
-  const spotY = s.cy * vh;
-  // First step (welcome) and "tiers" step: no spotlight (no specific UI element)
-  // On mobile: only the Progress step (3) has a meaningful spotlight (header nav)
-  const hasSpotlight = isMobile ? step === 3 : (step !== 0 && step !== 4);
-  const spotR = isMobile ? Math.min(vw * 0.2, 80) : Math.min(vw * 0.22, 220);
+  const cardW = Math.min(CARD_W, vw - 24);
+  const hasSpotlight = !!spot;
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 9998, pointerEvents: "none" }}>
-      {/* Backdrop — SVG with spotlight cutout */}
+      {/* ── SVG backdrop with rectangular spotlight cutout ── */}
       <svg
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "all" }}
         onClick={() => close(false)}
       >
         <defs>
-          <mask id="spotlightMask">
-            {/* White = visible (dark overlay), black = transparent (spotlight) */}
+          <mask id="tourMask">
             <rect width="100%" height="100%" fill="white" />
             {hasSpotlight && (
-              <motion.ellipse
-                cx={spotX}
-                cy={spotY}
-                rx={spotR}
-                ry={spotR * 0.62}
+              <motion.rect
+                x={spot.x}
+                y={spot.y}
+                width={spot.w}
+                height={spot.h}
+                rx={16}
                 fill="black"
-                animate={{ cx: spotX, cy: spotY, rx: spotR, ry: spotR * 0.62 }}
-                transition={{ type: "spring", stiffness: 160, damping: 26 }}
+                initial={false}
+                animate={{ x: spot.x, y: spot.y, width: spot.w, height: spot.h }}
+                transition={{ type: "spring", stiffness: 200, damping: 30 }}
               />
             )}
           </mask>
         </defs>
-        {/* Dark semi-transparent overlay with spotlight hole */}
+
+        {/* Dark overlay with spotlight hole */}
         <rect
           width="100%"
           height="100%"
-          fill="rgba(4,4,16,0.62)"
-          mask="url(#spotlightMask)"
+          fill="rgba(4,4,18,0.65)"
+          mask="url(#tourMask)"
         />
+
         {/* Spotlight ring glow */}
         {hasSpotlight && (
-          <motion.ellipse
-            cx={spotX}
-            cy={spotY}
-            rx={spotR + 2}
-            ry={(spotR + 2) * 0.62}
+          <motion.rect
+            x={spot.x - 2}
+            y={spot.y - 2}
+            width={spot.w + 4}
+            height={spot.h + 4}
+            rx={17}
             fill="none"
-            stroke="rgba(69,97,232,0.5)"
+            stroke="rgba(107,135,255,0.6)"
             strokeWidth="1.5"
-            animate={{ cx: spotX, cy: spotY, rx: spotR + 2, ry: (spotR + 2) * 0.62 }}
-            transition={{ type: "spring", stiffness: 160, damping: 26 }}
+            initial={false}
+            animate={{ x: spot.x - 2, y: spot.y - 2, width: spot.w + 4, height: spot.h + 4 }}
+            transition={{ type: "spring", stiffness: 200, damping: 30 }}
           />
         )}
       </svg>
@@ -280,39 +357,48 @@ export default function OnboardingTour() {
       {/* ── Flying card ── */}
       <motion.div
         animate={{ x: pos.x, y: pos.y }}
-        transition={{ type: "spring", stiffness: 220, damping: 28, mass: 0.9 }}
+        transition={{ type: "spring", stiffness: 240, damping: 30, mass: 0.85 }}
         style={{
-          position: "absolute", top: 0, left: 0,
+          position: "absolute",
+          top: 0,
+          left: 0,
           width: cardW,
           pointerEvents: "all",
           zIndex: 9999,
         }}
       >
+        {/* Step counter badge */}
+        <div style={{
+          position: "absolute", top: -11, right: 14,
+          fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.5)",
+          background: "rgba(10,10,26,0.92)", border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: 99, padding: "2px 8px", zIndex: 1,
+        }}>
+          {step + 1} / {STEPS.length}
+        </div>
+
         {/* Glass card */}
-        <div
-          style={{
-            background: "rgba(12,12,28,0.82)",
-            backdropFilter: "blur(24px) saturate(1.4)",
-            WebkitBackdropFilter: "blur(24px) saturate(1.4)",
-            border: "1px solid rgba(255,255,255,0.12)",
-            borderRadius: 20,
-            boxShadow: "0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(69,97,232,0.15), inset 0 1px 0 rgba(255,255,255,0.08)",
-            overflow: "hidden",
-          }}
-        >
-          {/* Top accent line */}
-          <div style={{ height: 2, background: "linear-gradient(90deg, #4561E8, #a78bfa, transparent)", opacity: 0.8 }} />
+        <div style={{
+          background: "rgba(10,10,26,0.88)",
+          backdropFilter: "blur(24px) saturate(1.5)",
+          WebkitBackdropFilter: "blur(24px) saturate(1.5)",
+          border: "1px solid rgba(255,255,255,0.13)",
+          borderRadius: 20,
+          boxShadow: "0 8px 48px rgba(0,0,0,0.65), 0 0 0 1px rgba(69,97,232,0.18), inset 0 1px 0 rgba(255,255,255,0.08)",
+          overflow: "hidden",
+        }}>
+          {/* Top accent bar */}
+          <div style={{ height: 2, background: "linear-gradient(90deg, #4561E8, #a78bfa, transparent)", opacity: 0.85 }} />
 
           <div style={{ padding: "18px 20px 20px" }}>
-            {/* Header row */}
+            {/* Header */}
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{
                   width: 40, height: 40, borderRadius: 12, flexShrink: 0,
-                  background: "rgba(69,97,232,0.18)",
-                  border: "1px solid rgba(69,97,232,0.3)",
+                  background: "rgba(69,97,232,0.2)",
+                  border: "1px solid rgba(69,97,232,0.32)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 20,
                 }}>
                   <StepIcon name={s.icon} color="#6b87ff" />
                 </div>
@@ -328,18 +414,18 @@ export default function OnboardingTour() {
               <button
                 onClick={() => close(false)}
                 style={{
-                  width: 26, height: 26, borderRadius: 8, border: "1px solid rgba(255,255,255,0.12)",
-                  background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)",
+                  width: 26, height: 26, borderRadius: 8,
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  background: "rgba(255,255,255,0.06)",
+                  color: "rgba(255,255,255,0.4)",
                   cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
                   flexShrink: 0, fontSize: 14, lineHeight: 1,
                 }}
                 title="Закрыть"
-              >
-                ✕
-              </button>
+              >✕</button>
             </div>
 
-            {/* Description */}
+            {/* Description (animated on step change) */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={step}
@@ -348,22 +434,13 @@ export default function OnboardingTour() {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.22 }}
               >
-                <p style={{ fontSize: 13.5, lineHeight: 1.6, color: "rgba(255,255,255,0.65)", marginBottom: s.tip || s.arrow ? 12 : 0 }}>
+                <p style={{ fontSize: 13.5, lineHeight: 1.65, color: "rgba(255,255,255,0.68)", marginBottom: s.tip ? 12 : 0 }}>
                   {s.desc}
                 </p>
-
-                {(s.tip || s.arrow) && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    {s.arrow && !(isMobile && s.arrow === "down") && <Arrow dir={s.arrow} />}
-                    {s.tip && (
-                      <span style={{
-                        fontSize: 11.5, color: "rgba(255,255,255,0.35)",
-                        fontStyle: "italic", lineHeight: 1.4,
-                      }}>
-                        {s.tip}
-                      </span>
-                    )}
-                  </div>
+                {s.tip && (
+                  <span style={{ fontSize: 11.5, color: "rgba(255,255,255,0.33)", fontStyle: "italic", lineHeight: 1.4 }}>
+                    {s.tip}
+                  </span>
                 )}
               </motion.div>
             </AnimatePresence>
@@ -377,32 +454,27 @@ export default function OnboardingTour() {
                     key={i}
                     onClick={() => goTo(i)}
                     style={{
-                      width: i === step ? 18 : 6,
-                      height: 6,
-                      borderRadius: 99,
-                      border: "none",
-                      cursor: "pointer",
+                      width: i === step ? 18 : 6, height: 6, borderRadius: 99,
+                      border: "none", cursor: "pointer",
                       background: i === step ? "#4561E8" : "rgba(255,255,255,0.18)",
-                      transition: "all 0.2s ease",
-                      padding: 0,
+                      transition: "all 0.2s ease", padding: 0,
                     }}
                   />
                 ))}
               </div>
-
-              {/* Buttons */}
+              {/* Navigation buttons */}
               <div style={{ display: "flex", gap: 8 }}>
                 {step > 0 && (
                   <button
                     onClick={prev}
                     style={{
-                      padding: "7px 14px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.12)",
-                      background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.55)",
+                      padding: "7px 14px", borderRadius: 10,
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      background: "rgba(255,255,255,0.06)",
+                      color: "rgba(255,255,255,0.55)",
                       cursor: "pointer", fontSize: 12.5, fontWeight: 600,
                     }}
-                  >
-                    Назад
-                  </button>
+                  >Назад</button>
                 )}
                 <button
                   onClick={next}
@@ -412,22 +484,10 @@ export default function OnboardingTour() {
                     color: "white", cursor: "pointer", fontSize: 12.5, fontWeight: 700,
                     boxShadow: "0 4px 16px rgba(69,97,232,0.4)",
                   }}
-                >
-                  {isLast ? "Понятно!" : "Далее →"}
-                </button>
+                >{isLast ? "Понятно!" : "Далее →"}</button>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Step counter badge */}
-        <div style={{
-          position: "absolute", top: -10, right: 14,
-          fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.5)",
-          background: "rgba(12,12,28,0.9)", border: "1px solid rgba(255,255,255,0.1)",
-          borderRadius: 99, padding: "2px 8px",
-        }}>
-          {step + 1} / {STEPS.length}
         </div>
       </motion.div>
     </div>

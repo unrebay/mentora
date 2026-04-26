@@ -361,15 +361,17 @@ export default async function DashboardPage() {
         )}
 
         {/* ── Subject library ───────────────────────────────── */}
-        <SubjectLibrarySection
-          userSubjects={userSubjects}
-          existingSubjectIds={userSubjectIds}
-          userId={user.id}
-          progressEntries={progressData ?? []}
-        />
+        <div data-tour="subjects">
+          <SubjectLibrarySection
+            userSubjects={userSubjects}
+            existingSubjectIds={userSubjectIds}
+            userId={user.id}
+            progressEntries={progressData ?? []}
+          />
+        </div>
 
         {/* ── Referral ─────────────────────────────────────── */}
-        <div className="mt-8 mb-2">
+        <div className="mt-8 mb-2" data-tour="referral">
           <ReferralWidget />
         </div>
       </div>
