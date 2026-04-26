@@ -90,7 +90,7 @@ export default function DashboardNav({
   /* ── background / blur ── */
   const navBg = dk
     ? "rgba(8,8,20,0.62)"
-    : "rgba(255,255,255,0.72)";
+    : "var(--bg-nav)";
   const navBlur = "blur(28px) saturate(1.8)";
 
   return (
@@ -114,7 +114,7 @@ export default function DashboardNav({
           borderRadius: 20,
           border: dk
             ? "1px solid rgba(255,255,255,0.1)"
-            : "1px solid rgba(0,0,0,0.07)",
+            : "1px solid var(--border-light)",
           boxShadow: dk
             ? "0 2px 0 rgba(255,255,255,0.04) inset, 0 8px 40px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset"
             : "0 4px 24px rgba(0,0,0,0.09), 0 1px 0 rgba(255,255,255,0.8) inset",
@@ -280,11 +280,11 @@ export default function DashboardNav({
           className="md:hidden max-w-5xl mx-auto mt-2"
           style={{
             pointerEvents: "all",
-            background: dk ? "rgba(8,8,20,0.92)" : "rgba(255,255,255,0.92)",
+            background: dk ? "rgba(8,8,20,0.92)" : "var(--bg-nav)",
             backdropFilter: "blur(28px) saturate(1.8)",
             WebkitBackdropFilter: "blur(28px) saturate(1.8)",
             borderRadius: 20,
-            border: dk ? "1px solid rgba(255,255,255,0.09)" : "1px solid rgba(0,0,0,0.07)",
+            border: dk ? "1px solid rgba(255,255,255,0.09)" : "1px solid var(--border-light)",
             boxShadow: dk ? "0 8px 40px rgba(0,0,0,0.5)" : "0 4px 24px rgba(0,0,0,0.1)",
           }}
         >
