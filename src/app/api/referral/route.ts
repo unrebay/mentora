@@ -44,25 +44,28 @@ export async function GET() {
   });
 }
 
-// Called when a referred user signs up with ref code
+// Called when a referred user signs up with ref code.
+// NOTE: No session cookie required — signup happens before email confirmation,
+// so there is no active session yet. We verify the user via the admin client instead.
 export async function POST(req: NextRequest) {
-  // Auth check — caller must be the newly signed-up user
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
-  );
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
   const { code, newUserId } = await req.json();
   if (!code || !newUserId) return NextResponse.json({ error: "Missing params" }, { status: 400 });
 
-  // Ensure the caller can only register their own referral
-  if (user.id !== newUserId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-
   const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+  // Verify the user actually exists in Supabase Auth (prevents fake UUID injection)
+  const { data: authUserData, error: authLookupError } = await admin.auth.admin.getUserById(newUserId);
+  if (authLookupError || !authUserData?.user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
+  // Prevent double-processing (idempotency): if this user was already referred, skip
+  const { data: alreadyReferred } = await admin
+    .from("referrals")
+    .select("id")
+    .eq("referred_id", newUserId)
+    .maybeSingle();
+  if (alreadyReferred) return NextResponse.json({ ok: false, reason: "already_referred" });
 
   const { data: referral } = await admin.from("referrals")
     .select("*")
@@ -80,16 +83,39 @@ export async function POST(req: NextRequest) {
     completed_at: new Date().toISOString(),
   }).eq("id", referral.id);
 
-  // Reward referrer: 3 days Pro trial extension
-  const { data: referrer } = await admin.from("users").select("trial_expires_at, plan").eq("id", referral.referrer_id).single();
-  if (referrer && referrer.plan === "pro") {
-    // Already pro - just log it
-  } else {
-    const base = referrer?.trial_expires_at && new Date(referrer.trial_expires_at) > new Date()
-      ? new Date(referrer.trial_expires_at)
+  // Helper: extend trial by N days for a user (skip if already on paid pro)
+  async function extendTrial(userId: string, days: number) {
+    const { data: u } = await admin.from("users").select("trial_expires_at, plan").eq("id", userId).single();
+    if (u?.plan === "pro" || u?.plan === "ultima") return; // already paid — no need
+    const base = u?.trial_expires_at && new Date(u.trial_expires_at) > new Date()
+      ? new Date(u.trial_expires_at)
       : new Date();
-    base.setDate(base.getDate() + 3);
-    await admin.from("users").update({ trial_expires_at: base.toISOString() }).eq("id", referral.referrer_id);
+    base.setDate(base.getDate() + days);
+    await admin.from("users").update({ trial_expires_at: base.toISOString() }).eq("id", userId);
+  }
+
+  // ── Reward chain ────────────────────────────────────────────────────────
+  // Level 0 (direct referrer): +3 days Pro trial
+  await extendTrial(referral.referrer_id, 3);
+
+  // Level 0 (newly referred user): +3 days Pro trial
+  // The users table row is created by a DB trigger after auth.users insert.
+  await extendTrial(newUserId, 3);
+
+  // Levels 1–4 (referrer's referrers up the chain): +1 day each
+  // Walk up by finding who referred each ancestor via referred_id lookup.
+  const MAX_DEPTH = 4;
+  let ancestorId = referral.referrer_id;
+  for (let depth = 1; depth <= MAX_DEPTH; depth++) {
+    const { data: parentRef } = await admin
+      .from("referrals")
+      .select("referrer_id")
+      .eq("referred_id", ancestorId)
+      .in("status", ["completed", "rewarded"])
+      .maybeSingle();
+    if (!parentRef?.referrer_id) break; // no further ancestor
+    await extendTrial(parentRef.referrer_id, 1);
+    ancestorId = parentRef.referrer_id;
   }
 
   // Mark as rewarded

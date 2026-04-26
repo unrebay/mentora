@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { SUBJECTS } from "@/lib/types";
 import ChatInterface from "@/components/chat/ChatInterface";
 
-const DAILY_LIMIT = 30;
+const WINDOW_LIMIT = 20; // rolling 24h window, matches api/chat/route.ts
+const WINDOW_HOURS = 24;
 
 interface Props {
   params: Promise<{ subject: string }>;
@@ -124,7 +125,7 @@ export default async function LearnPage({ params, searchParams }: Props) {
   // Calculate remaining messages for today
   const { data: profile } = await supabase
     .from("users")
-    .select("plan, messages_today, messages_date")
+    .select("plan, messages_today, messages_window_start")
     .eq("id", user.id)
     .single();
 
@@ -132,10 +133,10 @@ export default async function LearnPage({ params, searchParams }: Props) {
   let initialMessagesRemaining: number | null = null;
 
   if (profile?.plan !== "pro" && profile?.plan !== "ultima") {
-    const today = new Date().toISOString().slice(0, 10);
-    const isNewDay = profile?.messages_date !== today;
-    const usedToday = isNewDay ? 0 : (profile?.messages_today ?? 0);
-    initialMessagesRemaining = Math.max(0, DAILY_LIMIT - usedToday);
+    const windowStart = profile?.messages_window_start ? new Date(profile.messages_window_start) : null;
+    const windowExpired = !windowStart || Date.now() - windowStart.getTime() > WINDOW_HOURS * 3_600_000;
+    const usedInWindow = windowExpired ? 0 : (profile?.messages_today ?? 0);
+    initialMessagesRemaining = Math.max(0, WINDOW_LIMIT - usedInWindow);
   }
 
   // If topic passed from topics map — prepend as initial message

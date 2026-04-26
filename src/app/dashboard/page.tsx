@@ -50,7 +50,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("onboarding_completed, plan, trial_expires_at, streak_reward_claimed, messages_today, messages_date")
+    .select("onboarding_completed, plan, trial_expires_at, streak_reward_claimed, messages_today, messages_window_start")
     .eq("id", user.id)
     .single();
 
@@ -64,10 +64,11 @@ export default async function DashboardPage() {
     ? new Date(profile.trial_expires_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })
     : null;
 
-  const today = new Date().toISOString().slice(0, 10);
-  const isNewDay = profile?.messages_date !== today;
-  const usedToday = isNewDay ? 0 : (profile?.messages_today ?? 0);
-  const messagesRemaining = isPro ? null : Math.max(0, DAILY_LIMIT - usedToday);
+  const WINDOW_HOURS = 24;
+  const windowStart = profile?.messages_window_start ? new Date(profile.messages_window_start) : null;
+  const windowExpired = !windowStart || Date.now() - windowStart.getTime() > WINDOW_HOURS * 3_600_000;
+  const usedInWindow = windowExpired ? 0 : (profile?.messages_today ?? 0);
+  const messagesRemaining = isPro ? null : Math.max(0, DAILY_LIMIT - usedInWindow);
 
   const { data: progressData } = await supabase.from("user_progress").select("*").eq("user_id", user.id);
 
