@@ -95,16 +95,16 @@ const STEPS: Step[] = [
 
 /* ── Position helpers ──────────────────────────────────────────────── */
 function getCardPos(step: number, isMobile: boolean): { x: number; y: number } {
-  if (isMobile || typeof window === "undefined") {
-    const vw = typeof window !== "undefined" ? window.innerWidth : 390;
-    const vh = typeof window !== "undefined" ? window.innerHeight : 844;
+  const vw = typeof window !== "undefined" ? window.innerWidth : 390;
+  const vh = typeof window !== "undefined" ? window.innerHeight : 844;
+  if (isMobile) {
+    // Pin card to bottom of screen (bottom-sheet style) so spotlight is visible above
+    const cardW = Math.min(CARD_W, vw - 24);
     return {
-      x: Math.max(0, (vw - Math.min(CARD_W, vw - 24)) / 2),
-      y: Math.max(60, (vh - CARD_H) / 2),
+      x: Math.max(0, (vw - cardW) / 2),
+      y: vh - CARD_H - 32, // 32px bottom margin (covers safe area on most phones)
     };
   }
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
   const { cx, cy } = STEPS[step];
   const cardW = Math.min(CARD_W, vw - 32);
   const x = Math.max(16, Math.min(vw - cardW - 16, cx * vw - cardW / 2));
@@ -226,8 +226,9 @@ export default function OnboardingTour() {
   const spotX = s.cx * vw;
   const spotY = s.cy * vh;
   // First step (welcome) and "tiers" step: no spotlight (no specific UI element)
-  const hasSpotlight = step !== 0 && step !== 4;
-  const spotR = isMobile ? Math.min(vw * 0.38, 160) : Math.min(vw * 0.22, 220);
+  // On mobile: only the Progress step (3) has a meaningful spotlight (header nav)
+  const hasSpotlight = isMobile ? step === 3 : (step !== 0 && step !== 4);
+  const spotR = isMobile ? Math.min(vw * 0.2, 80) : Math.min(vw * 0.22, 220);
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 9998, pointerEvents: "none" }}>
@@ -353,7 +354,7 @@ export default function OnboardingTour() {
 
                 {(s.tip || s.arrow) && (
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    {s.arrow && <Arrow dir={s.arrow} />}
+                    {s.arrow && !(isMobile && s.arrow === "down") && <Arrow dir={s.arrow} />}
                     {s.tip && (
                       <span style={{
                         fontSize: 11.5, color: "rgba(255,255,255,0.35)",
