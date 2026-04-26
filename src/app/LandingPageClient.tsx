@@ -300,7 +300,7 @@ export default function LandingPageClient() {
                   Объясни ещё раз, другими словами.
                 </p>
               </div>
-            </div>
+            </motion.div>
 
             {/* Right — demo chat */}
             <motion.div id="demo" {...fadeUp(0.18)}>

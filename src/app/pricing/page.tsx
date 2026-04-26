@@ -4,6 +4,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import BuyProButton from "@/components/BuyProButton";
 import PricingFAQ from "@/components/PricingFAQ";
 import MobileMenuButton from "@/components/MobileMenuButton";
+import AnimateIn from "@/components/AnimateIn";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
@@ -121,6 +122,7 @@ export default async function PricingPage() {
 
       {/* HERO */}
       <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
+        <AnimateIn>
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8 text-xs font-bold tracking-widest uppercase"
           style={{
             background: "rgba(69,97,232,0.1)",
@@ -152,6 +154,7 @@ export default async function PricingPage() {
         <p className="text-lg t-muted max-w-lg mx-auto leading-relaxed">
           Бесплатный план без карты. Pro открывает все предметы. Ultra добавляет фото, презентации и аудио.
         </p>
+        </AnimateIn>
       </section>
 
       {/* PRICING CARDS */}
@@ -159,6 +162,7 @@ export default async function PricingPage() {
         <div className="grid md:grid-cols-3 gap-4 items-stretch">
 
           {/* FREE */}
+          <AnimateIn delay={0.05}>
           <div
             data-tilt data-tilt-strength="4"
             className="rounded-2xl p-7 flex flex-col border"
@@ -193,8 +197,10 @@ export default async function PricingPage() {
               ))}
             </ul>
           </div>
+          </AnimateIn>
 
           {/* PRO — gradient border wrapper */}
+          <AnimateIn delay={0.13}>
           <div
             data-tilt data-tilt-strength="4"
             className="relative rounded-[17px] p-[1.5px] flex flex-col"
@@ -260,8 +266,10 @@ export default async function PricingPage() {
               </ul>
             </div>
           </div>
+          </AnimateIn>
 
           {/* ULTRA — ambient glow dark card */}
+          <AnimateIn delay={0.21}>
           <div
             data-tilt data-tilt-strength="4"
             className="relative rounded-2xl p-7 flex flex-col overflow-hidden"
@@ -346,10 +354,12 @@ export default async function PricingPage() {
               ))}
             </ul>
           </div>
+          </AnimateIn>
 
         </div>
 
         {/* STREAK PROMO */}
+        <AnimateIn delay={0.1}>
         <div
           className="mt-4 flex items-center gap-4 rounded-2xl px-6 py-4 border"
           style={{
@@ -387,8 +397,10 @@ export default async function PricingPage() {
             </p>
           </div>
         </div>
+        </AnimateIn>
 
         {/* SCHOOL CALLOUT */}
+        <AnimateIn delay={0.05}>
         <div
           className="mt-4 border rounded-2xl px-7 py-6"
           style={{
@@ -423,11 +435,13 @@ export default async function PricingPage() {
             </a>
           </div>
         </div>
+        </AnimateIn>
 
       </section>
 
       {/* FAQ */}
       <section className="max-w-2xl mx-auto px-6 pt-16 pb-20">
+        <AnimateIn>
         <div className="text-center mb-10">
           <p
             className="text-[11px] font-bold tracking-[0.15em] uppercase mb-3"
@@ -437,7 +451,10 @@ export default async function PricingPage() {
           </p>
           <h2 className="text-3xl font-bold tracking-tight t-primary">Часто спрашивают</h2>
         </div>
+        </AnimateIn>
+        <AnimateIn delay={0.1}>
         <PricingFAQ />
+        </AnimateIn>
       </section>
 
       {/* FOOTER CTA */}

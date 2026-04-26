@@ -7,6 +7,7 @@ import ReferralWidget from "@/components/ReferralWidget";
 import MeLogo from "@/components/MeLogo";
 import DashboardNav from "@/components/DashboardNav";
 import StatCard, { MentIcon, FlameIcon, MessageIcon, StarIcon } from "@/components/StatCard";
+import AnimateIn from "@/components/AnimateIn";
 
 export const metadata = { title: "Профиль — Mentora" };
 
@@ -231,6 +232,7 @@ export default async function ProfilePage() {
       <main className="max-w-3xl mx-auto px-6 py-10 space-y-6">
 
         {/* ── Profile card ─────────────────────────────────── */}
+        <AnimateIn>
         <div className="rounded-2xl p-6 border flex flex-col sm:flex-row items-start sm:items-center gap-5"
           style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
         >
@@ -268,16 +270,20 @@ export default async function ProfilePage() {
             />
           </div>
         </div>
+        </AnimateIn>
 
         {/* ── Stats grid ───────────────────────────────────── */}
+        <AnimateIn delay={0.07}>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <StatCard label="Мент"          value={totalXP}       icon={<MentIcon />}    accent="var(--brand)" isBrand />
           <StatCard label="Рекорд стрика" value={bestStreak}    icon={<FlameIcon />}   accent="#FF7A00" />
           <StatCard label="Сообщений"     value={totalMessages} icon={<MessageIcon />} accent="#10B981" />
           <StatCard label="Достижений"    value={earned.length} icon={<StarIcon />}    accent="#f59e0b" />
         </div>
+        </AnimateIn>
 
         {/* ── XP Progress bar ──────────────────────────────── */}
+        <AnimateIn delay={0.05}>
         <div className="rounded-2xl p-6 border"
           style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
           <div className="flex items-center justify-between mb-3">
@@ -309,9 +315,11 @@ export default async function ProfilePage() {
             {totalXP.toLocaleString("ru-RU")} / {(lvl.next?.minXP ?? totalXP).toLocaleString("ru-RU")} {pluralMenty(lvl.next?.minXP ?? totalXP)}
           </p>
         </div>
+        </AnimateIn>
 
         {/* ── Earned badges ────────────────────────────────── */}
         {earned.length > 0 && (
+          <AnimateIn delay={0.05}>
           <div>
             <h2 className="text-xs font-bold tracking-[0.18em] uppercase mb-4 flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
@@ -341,10 +349,12 @@ export default async function ProfilePage() {
               })}
             </div>
           </div>
+          </AnimateIn>
         )}
 
         {/* ── Locked badges ────────────────────────────────── */}
         {locked.length > 0 && (
+          <AnimateIn delay={0.05}>
           <div>
             <h2 className="text-xs font-bold tracking-[0.18em] uppercase mb-4" style={{ color: "var(--text-muted)" }}>
               Ещё не разблокировано · {locked.length}
@@ -363,12 +373,15 @@ export default async function ProfilePage() {
               ))}
             </div>
           </div>
+          </AnimateIn>
         )}
 
         {/* ── Referral ─────────────────────────────────────── */}
+        <AnimateIn delay={0.05}>
         <div className="pb-4">
           <ReferralWidget />
         </div>
+        </AnimateIn>
 
       </main>
     </div>

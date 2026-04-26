@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, Suspense } from "react";
+import { motion } from "motion/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Logo from "@/components/Logo";
@@ -214,7 +215,12 @@ function AuthPageContent() {
         style={{ background: "#080814" }}
       >
         <AmbientHero variant="auth" />
-        <div className="relative z-10 w-full max-w-sm text-center animate-fade-in-up">
+        <motion.div
+          className="relative z-10 w-full max-w-sm text-center"
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
           <Logo size="md" href="/" className="justify-center mb-10" textColor="white" />
           <div
             className="rounded-3xl p-8 space-y-6"
@@ -252,7 +258,7 @@ function AuthPageContent() {
               </button>
             </div>
           </div>
-        </div>
+        </motion.div>
       </main>
     );
   }
@@ -274,7 +280,12 @@ function AuthPageContent() {
         />
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col h-full p-10 xl:p-14">
+        <motion.div
+          className="relative z-10 flex flex-col h-full p-10 xl:p-14"
+          initial={{ opacity: 0, x: -24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        >
 
           {/* Logo */}
           <Logo size="sm" href="/" textColor="white" />
@@ -324,7 +335,7 @@ function AuthPageContent() {
               <span>Без карты</span>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* ══════════════════════════════════════════════
@@ -339,7 +350,12 @@ function AuthPageContent() {
           <Logo size="md" href="/" textColor="white" />
         </div>
 
-        <div className="w-full max-w-md animate-fade-in-up">
+        <motion.div
+          className="w-full max-w-md"
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
 
           {/* ── Mode toggle pill ── */}
           <div
@@ -615,7 +631,7 @@ function AuthPageContent() {
             )}
           </p>
 
-        </div>{/* /max-w-md */}
+        </motion.div>{/* /max-w-md */}
       </div>{/* /right panel */}
     </main>
   );

@@ -12,6 +12,7 @@ import MeLogo from "@/components/MeLogo";
 import WhatsNewBanner from "@/components/WhatsNewBanner";
 import ReferralWidget from "@/components/ReferralWidget";
 import AmbientHero from "@/components/AmbientHero";
+import AnimateIn from "@/components/AnimateIn";
 import dynamic from "next/dynamic";
 const ChatParticles = dynamic(() => import("@/components/ChatParticles"), { ssr: false });
 
@@ -50,7 +51,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("onboarding_completed, plan, trial_expires_at, streak_reward_claimed, messages_today, messages_date")
+    .select("onboarding_completed, plan, trial_expires_at, streak_reward_claimed, messages_today, messages_window_start")
     .eq("id", user.id)
     .single();
 
@@ -64,10 +65,11 @@ export default async function DashboardPage() {
     ? new Date(profile.trial_expires_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })
     : null;
 
-  const today = new Date().toISOString().slice(0, 10);
-  const isNewDay = profile?.messages_date !== today;
-  const usedToday = isNewDay ? 0 : (profile?.messages_today ?? 0);
-  const messagesRemaining = isPro ? null : Math.max(0, DAILY_LIMIT - usedToday);
+  const WINDOW_HOURS = 24;
+  const windowStart = profile?.messages_window_start ? new Date(profile.messages_window_start) : null;
+  const windowExpired = !windowStart || Date.now() - windowStart.getTime() > WINDOW_HOURS * 3_600_000;
+  const usedInWindow = windowExpired ? 0 : (profile?.messages_today ?? 0);
+  const messagesRemaining = isPro ? null : Math.max(0, DAILY_LIMIT - usedInWindow);
 
   const { data: progressData } = await supabase.from("user_progress").select("*").eq("user_id", user.id);
 
@@ -214,6 +216,7 @@ export default async function DashboardPage() {
         )}
 
         {/* ── Greeting ─────────────────────────────────────── */}
+        <AnimateIn>
         <div className="mb-10">
           <p className="text-xs font-bold tracking-[0.18em] uppercase mb-2" style={{ color: "var(--text-muted)" }}>
             Библиотека знаний
@@ -309,9 +312,12 @@ export default async function DashboardPage() {
             )}
           </div>
         </div>
+        </AnimateIn>
 
         {/* ── Продолжить обучение ─────────────────────────── */}
+        <AnimateIn delay={0.08}>
         {lastActiveSubject && (
+          <AnimateIn delay={0.05}>
           <div className="mt-8 mb-6 rounded-2xl overflow-hidden border"
             style={{
               background: `linear-gradient(135deg, ${subjectColor(lastActiveSubject.id)}22, ${subjectColor(lastActiveSubject.id)}08)`,
@@ -336,20 +342,26 @@ export default async function DashboardPage() {
               </Link>
             </div>
           </div>
+          </AnimateIn>
         )}
+        </AnimateIn>
 
         {/* ── Subject library ───────────────────────────────── */}
+        <AnimateIn delay={0.05}>
         <SubjectLibrarySection
           userSubjects={userSubjects}
           existingSubjectIds={userSubjectIds}
           userId={user.id}
           progressEntries={progressData ?? []}
         />
+        </AnimateIn>
 
         {/* ── Referral ─────────────────────────────────────── */}
+        <AnimateIn delay={0.06}>
         <div className="mt-8 mb-2">
           <ReferralWidget />
         </div>
+        </AnimateIn>
       </div>
     </main>
   );
