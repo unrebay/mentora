@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
 
     const ok = await sendEmail({
       to: user.email,
-      subject: "Ментор скучает 👋 — вернись к урокам",
+      subject: "Ментора ждёт — вернись к урокам",
       html: reengagementEmailHtml(),
     });
 

@@ -65,7 +65,7 @@ export function welcomeEmailHtml(email: string): string {
             Добро пожаловать
           </p>
           <h1 style="margin:0 0 16px;font-size:28px;font-weight:800;color:#111827;letter-spacing:-0.5px;line-height:1.2;">
-            Ментор готов к работе 🎓
+            Ментор готов к работе
           </h1>
           <p style="margin:0 0 20px;font-size:16px;color:#6b7280;line-height:1.6;">
             Я — Mentora, твой персональный AI-ментор по истории. Я уже знаю твой стиль обучения и уровень — и готова объяснять так, как тебе удобно.
@@ -78,7 +78,7 @@ export function welcomeEmailHtml(email: string): string {
           <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
             <tr><td style="background:#4561E8;border-radius:12px;">
               <a href="https://mentora.su/learn/russian-history" style="display:inline-block;padding:14px 32px;color:white;font-weight:600;font-size:15px;text-decoration:none;letter-spacing:-0.2px;">
-                Начать первый урок →
+                Начать первый урок &rarr;
               </a>
             </td></tr>
           </table>
@@ -91,18 +91,18 @@ export function welcomeEmailHtml(email: string): string {
           <table cellpadding="0" cellspacing="0" width="100%">
             <tr>
               <td style="padding:6px 12px 6px 0;font-size:14px;color:#374151;vertical-align:top;">
-                <span style="margin-right:8px;">📜</span>История России — 51 тема
+                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4561E8;margin-right:8px;vertical-align:middle;"></span>История России — 51 тема
               </td>
               <td style="padding:6px 0;font-size:14px;color:#374151;vertical-align:top;">
-                <span style="margin-right:8px;">⚡</span>XP и уровни прогресса
+                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10B981;margin-right:8px;vertical-align:middle;"></span>XP и уровни прогресса
               </td>
             </tr>
             <tr>
               <td style="padding:6px 12px 6px 0;font-size:14px;color:#374151;vertical-align:top;">
-                <span style="margin-right:8px;">🌍</span>История мира — скоро
+                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#6366F1;margin-right:8px;vertical-align:middle;"></span>История мира — скоро
               </td>
               <td style="padding:6px 0;font-size:14px;color:#374151;vertical-align:top;">
-                <span style="margin-right:8px;">🎯</span>Стиль под тебя
+                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#FF7A00;margin-right:8px;vertical-align:middle;"></span>Стиль под тебя
               </td>
             </tr>
           </table>
@@ -115,7 +115,7 @@ export function welcomeEmailHtml(email: string): string {
 
         <!-- Footer -->
         <tr><td style="padding-top:24px;text-align:center;font-size:12px;color:#9ca3af;line-height:1.6;">
-          © 2026 Mentora · <a href="https://mentora.su" style="color:#9ca3af;text-decoration:none;">mentora.su</a><br>
+          &copy; 2026 Mentora &middot; <a href="https://mentora.su" style="color:#9ca3af;text-decoration:none;">mentora.su</a><br>
           Ты получил это письмо, потому что зарегистрировался на mentora.su
         </td></tr>
 
@@ -130,7 +130,7 @@ export function reengagementEmailHtml(): string {
   return `<!DOCTYPE html>
 <html lang="ru">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Давно не виделись!</title></head>
+<title>Ментора ждёт</title></head>
 <body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;padding:40px 16px;">
     <tr><td align="center">
@@ -149,7 +149,7 @@ export function reengagementEmailHtml(): string {
         <!-- Card -->
         <tr><td style="background:white;border-radius:20px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
           <h1 style="margin:0 0 12px;font-size:26px;font-weight:800;color:#111827;letter-spacing:-0.5px;">
-            Ментор скучает 👋
+            Ментора ждёт
           </h1>
           <p style="margin:0 0 20px;font-size:16px;color:#6b7280;line-height:1.6;">
             Прошло несколько дней с твоего последнего урока. История не ждёт — каждый день можно узнать что-то новое за 10 минут.
@@ -162,7 +162,7 @@ export function reengagementEmailHtml(): string {
           <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
             <tr><td style="background:#3b5bdb;border-radius:12px;">
               <a href="https://mentora.su/learn/russian-history" style="display:inline-block;padding:14px 28px;color:white;font-weight:600;font-size:15px;text-decoration:none;">
-                Продолжить учиться →
+                Продолжить учиться &rarr;
               </a>
             </td></tr>
           </table>
@@ -174,7 +174,7 @@ export function reengagementEmailHtml(): string {
 
         <!-- Footer -->
         <tr><td style="padding-top:24px;text-align:center;font-size:12px;color:#9ca3af;">
-          © 2026 Mentora · <a href="https://mentora.su" style="color:#9ca3af;">mentora.su</a>
+          &copy; 2026 Mentora &middot; <a href="https://mentora.su" style="color:#9ca3af;">mentora.su</a>
         </td></tr>
 
       </table>
