@@ -246,6 +246,7 @@ ${ragContext}
 7. Пиши по-русски (кроме английского языка — там примеры на английском)
 8. Если не уверена в точной второстепенной дате или малоизвестной детали — скажи об этом легко, вплетая в ответ: «точную дату лучше сверь в учебнике — ориентировочно это [год/период]». Без акцента и извинений — как честный собеседник
 9. Речь: грамотная, тёплая, уважительная. Исключены: сленг, молодёжные клише, разговорные вставки («без напряга», «погнали», «классно», «чётко», «вот так», «ну и т.д.»). Живость — через точные образы и интересные примеры, не через имитацию молодёжного общения
+10. ИЛЛЮСТРАЦИИ: если визуальная схема, диаграмма или картинка реально поможет понять тему — добавь на отдельной строке маркер [IMG: <english description, max 50 words>]. Только когда действительно нужна — не к каждому ответу. Описание строго на английском, стиль: "educational illustration, clean vector style".
 
 ДИНАМИКА СЛОЖНОСТИ (анализируй историю диалога):
 — Путается, пишет «не понимаю», отвечает неверно 2 раза подряд → упрости: сократи объём, дай бытовую аналогию, разбей на шаги. Без объявлений — просто сделай.
@@ -294,10 +295,36 @@ ${ragContext}
 
     const firstContent = response.content[0];
     if (firstContent.type !== "text") throw new Error("Unexpected response type: " + firstContent.type);
-    const assistantMessage = firstContent.text;
+    let assistantMessage = firstContent.text;
     // Guard: never save an empty response to DB
     if (!assistantMessage.trim()) {
       throw new Error("Empty assistant response");
+    }
+
+    // ── Image generation: detect [IMG: ...] marker ────────────────────────────
+    let imageUrl: string | null = null;
+    const imgMatch = assistantMessage.match(/\[IMG:\s*([^\]]{5,300})\]/i);
+    if (imgMatch && isPro && process.env.OPENAI_API_KEY) {
+      const imgDescription = imgMatch[1].trim();
+      // Strip the marker from the message
+      assistantMessage = assistantMessage.replace(/\[IMG:\s*[^\]]{5,300}\]/gi, "").replace(/\n{3,}/g, "\n\n").trim();
+      try {
+        const imgRes = await openai.images.generate({
+          model: "dall-e-3",
+          prompt: `Educational illustration for a student learning app. ${imgDescription}. Clean, minimalist style, white background, no text, no watermarks. Suitable for all ages.`,
+          n: 1,
+          size: "1024x1024",
+          quality: "standard",
+          style: "vivid",
+        });
+        imageUrl = imgRes.data[0]?.url ?? null;
+      } catch (imgErr) {
+        console.error("Image generation failed (non-blocking):", imgErr);
+        // Continue without image — don't fail the whole request
+      }
+    } else if (imgMatch) {
+      // Strip the marker even if we can't generate
+      assistantMessage = assistantMessage.replace(/\[IMG:\s*[^\]]{5,300}\]/gi, "").replace(/\n{3,}/g, "\n\n").trim();
     }
 
     // Save assistant response
@@ -347,6 +374,7 @@ ${ragContext}
       resetAt: windowResetAt,
       trialExpiresAt: profile?.trial_expires_at ?? null,
       ...(levelUp ? { levelUp } : {}),
+      ...(imageUrl ? { imageUrl } : {}),
     });
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);

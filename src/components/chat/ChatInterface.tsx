@@ -27,7 +27,7 @@ const SUBJECT_CONFIG: Record<string, { emoji: string; hint: string; quickQuestio
 };
 const DEFAULT_CONFIG = { emoji: "🎓", hint: "Задай любой вопрос — я помогу разобраться", quickQuestions: ["С чего начать изучение?", "Объясни основные понятия", "Дай план изучения"] };
 
-interface Message { role: MessageRole; content: string; isError?: boolean }
+interface Message { role: MessageRole; content: string; isError?: boolean; imageUrl?: string }
 interface Props { subject: string; subjectTitle: string; initialHistory: { role: string; content: string }[]; initialMessagesRemaining: number | null; initialTopic?: string; isUltima?: boolean }
 
 // ─── Math rendering (KaTeX via CDN injected by layout) ─────────────────────
@@ -263,7 +263,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         setMessages(prev => [...prev, { role: "assistant", content: data.error ?? "Произошла ошибка. Попробуй ещё раз 🔄", isError: true }]);
         return;
       }
-      setMessages(prev => [...prev, { role: "assistant", content: data.message }]);
+      setMessages(prev => [...prev, { role: "assistant", content: data.message, imageUrl: data.imageUrl ?? undefined }]);
       if (data.messagesRemaining !== undefined) setMessagesRemaining(data.messagesRemaining);
     } catch {
       setMessages(prev => [...prev, { role: "assistant", content: "Нет связи с сервером. Проверь интернет и попробуй ещё раз 🔄", isError: true }]);
@@ -330,7 +330,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         return;
       }
 
-      setMessages((prev) => [...prev, { role: "assistant", content: data.message }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: data.message, imageUrl: data.imageUrl ?? undefined }]);
       if (data.messagesRemaining !== undefined) setMessagesRemaining(data.messagesRemaining);
       if (data.levelUp) {
         setLevelUpData(data.levelUp);
@@ -470,6 +470,18 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
               {msg.role === "assistant" ? (
                 <>
                   <MarkdownMessage content={msg.content} />
+                  {msg.imageUrl && (
+                    <div className="mt-3">
+                      <img
+                        src={msg.imageUrl}
+                        alt="Иллюстрация к ответу"
+                        className="rounded-xl w-full max-w-sm object-cover"
+                        style={{ border: "1px solid var(--border-light)" }}
+                        loading="lazy"
+                      />
+                      <p className="text-[10px] mt-1" style={{ color: "var(--text-muted)" }}>Иллюстрация сгенерирована AI</p>
+                    </div>
+                  )}
                   {msg.isError && (
                     <button
                       onClick={(e) => sendMessage(e as unknown as React.FormEvent, lastUserMsg)}
