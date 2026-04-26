@@ -184,6 +184,10 @@ code:not([class]) {
   50%      { box-shadow: 0 0 40px rgba(69,97,232,0.6); }
 }
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ── Fade-in slide up ────────────────────────────────────────────────────── */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(16px); }

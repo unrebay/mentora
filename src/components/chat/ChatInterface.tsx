@@ -202,6 +202,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [levelUpFading, setLevelUpFading] = useState(false);
   const levelUpTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [exportingPdf, setExportingPdf] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -257,6 +258,34 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     setLevelUpFading(true);
     setTimeout(() => { setShowLevelUp(false); setLevelUpData(null); }, 500);
   }, []);
+
+  // ── PDF export (Ultra only) ────────────────────────────────────────────────
+  const handleExportPdf = async () => {
+    if (exportingPdf || messages.filter(m => !m.isError).length < 2) return;
+    setExportingPdf(true);
+    try {
+      const res = await fetch("/api/chat/generate-notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject,
+          subjectTitle,
+          messages: messages.filter(m => !m.isError).slice(-30),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.notes) throw new Error(data.error ?? "Failed");
+      localStorage.setItem("mentora_print_notes", JSON.stringify({
+        notes: data.notes,
+        subjectTitle: data.subjectTitle,
+      }));
+      window.open("/notes/print", "_blank");
+    } catch {
+      // silently fail — non-critical
+    } finally {
+      setExportingPdf(false);
+    }
+  };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -406,6 +435,32 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
             <span className="text-xs font-medium text-amber-700">осталось {messagesRemaining} из {DAILY_LIMIT}</span>
           </div>
+        )}
+        {/* Export to PDF — Ultra only, shown when conversation has content */}
+        {isUltima && messages.filter(m => !m.isError).length >= 3 && (
+          <button
+            onClick={handleExportPdf}
+            disabled={exportingPdf}
+            title="Скачать конспект PDF"
+            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all disabled:opacity-50"
+            style={{
+              background: "var(--bg-secondary)",
+              border: "1px solid var(--border)",
+              color: "var(--text-muted)",
+            }}
+          >
+            {exportingPdf ? (
+              <span style={{ display: "inline-block", width: 14, height: 14, border: "2px solid var(--text-muted)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+            ) : (
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="12" y1="18" x2="12" y2="12"/>
+                <polyline points="9 15 12 18 15 15"/>
+              </svg>
+            )}
+            {exportingPdf ? "Создаю..." : "Конспект"}
+          </button>
         )}
       </header>
 

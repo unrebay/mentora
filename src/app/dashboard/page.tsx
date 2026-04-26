@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { SUBJECTS } from "@/lib/types";
 import Link from "next/link";
 import { PostHogIdentify } from "@/components/PostHogIdentify";
-import { PaymentSuccessTracker } from "@/components/PaymentSuccessTracker";
+import { ProActivationBanner, ProExpiryBanner } from "@/components/ProBanners";
 import SubjectLibrarySection from "@/components/SubjectLibrarySection";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
 import BadgesSection from "@/components/BadgesSection";
@@ -137,8 +137,16 @@ export default async function DashboardPage() {
       </div>
 
       <PostHogIdentify userId={user.id} email={user.email ?? ""} />
-      <PaymentSuccessTracker />
       <div className="max-w-5xl mx-auto px-6 py-10">
+
+        {/* ── Pro activation banner (payment=success in URL) ────────── */}
+        <ProActivationBanner plan={profile?.plan ?? "free"} />
+
+        {/* ── Pro expiry warning (≤3 days left) ────────────────────── */}
+        <ProExpiryBanner
+          trialExpiresAt={profile?.trial_expires_at ?? null}
+          isPro={isPro}
+        />
 
         {/* ── Trial active banner ───────────────────────────── */}
         {isTrialActive && (
