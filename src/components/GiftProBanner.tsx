@@ -4,12 +4,16 @@ import { useState, useEffect } from "react";
 interface Props {
   giftClaimed: boolean;
   isUltima: boolean;
+  /** True if user registered before June 1, 2026 and is eligible */
+  eligible: boolean;
 }
 
 const GIFT_FROM = new Date("2026-06-01T00:00:00+03:00").getTime();
 const EXPIRES_LABEL = "1 января 2027";
 
-export default function GiftProBanner({ giftClaimed: initialClaimed, isUltima }: Props) {
+export default function GiftProBanner({ giftClaimed: initialClaimed, isUltima, eligible }: Props) {
+  // Not eligible — registered after June 1
+  if (!eligible) return null;
   const [claimed, setClaimed] = useState(initialClaimed);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

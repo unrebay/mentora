@@ -27,13 +27,19 @@ export async function POST() {
     // Fetch current profile
     const { data: profile } = await supabase
       .from("users")
-      .select("plan, gift_pro_claimed")
+      .select("plan, gift_pro_claimed, created_at")
       .eq("id", user.id)
       .single();
 
     if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     if (profile.gift_pro_claimed) {
       return NextResponse.json({ error: "Already claimed" }, { status: 409 });
+    }
+
+    // Only users registered before June 1 are eligible
+    const registeredAt = profile.created_at ? new Date(profile.created_at).getTime() : 0;
+    if (registeredAt >= GIFT_AVAILABLE_FROM.getTime()) {
+      return NextResponse.json({ error: "Not eligible" }, { status: 403 });
     }
 
     // Ultima users: mark claimed but don't downgrade their plan

@@ -366,11 +366,16 @@ export default async function ProfilePage() {
           </div>
         )}
 
-        {/* ── Gift Pro banner — shown for all users ────────── */}
+        {/* ── Gift Pro banner — only for users registered before June 1 ── */}
         <div className="pb-4">
           <GiftProBanner
             giftClaimed={profile?.gift_pro_claimed ?? false}
             isUltima={isUltima}
+            eligible={
+              profile?.created_at
+                ? new Date(profile.created_at).getTime() < new Date("2026-06-01T00:00:00+03:00").getTime()
+                : false
+            }
           />
         </div>
 
