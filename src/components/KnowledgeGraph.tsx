@@ -12,21 +12,22 @@ const PAL = {
 };
 type Status = "active" | "active_full" | "full" | "beta";
 
+// More chaotic, galaxy-like positions — less circular, more scattered
 const LAYOUT: Record<string, { cx: number; cy: number }> = {
-  "russian-history":  { cx: 0.46, cy: 0.38 },
-  "discovery":        { cx: 0.63, cy: 0.60 },
-  "world-history":    { cx: 0.22, cy: 0.27 },
-  "mathematics":      { cx: 0.70, cy: 0.20 },
-  "physics":          { cx: 0.82, cy: 0.50 },
-  "chemistry":        { cx: 0.72, cy: 0.72 },
-  "biology":          { cx: 0.46, cy: 0.78 },
-  "russian-language": { cx: 0.24, cy: 0.72 },
-  "literature":       { cx: 0.13, cy: 0.50 },
-  "english":          { cx: 0.16, cy: 0.22 },
-  "social-studies":   { cx: 0.37, cy: 0.13 },
-  "geography":        { cx: 0.62, cy: 0.14 },
-  "computer-science": { cx: 0.82, cy: 0.32 },
-  "astronomy":        { cx: 0.56, cy: 0.86 },
+  "russian-history":  { cx: 0.44, cy: 0.41 },  // center anchor
+  "discovery":        { cx: 0.65, cy: 0.60 },
+  "world-history":    { cx: 0.18, cy: 0.31 },
+  "mathematics":      { cx: 0.74, cy: 0.17 },
+  "physics":          { cx: 0.89, cy: 0.50 },
+  "chemistry":        { cx: 0.71, cy: 0.76 },
+  "biology":          { cx: 0.43, cy: 0.85 },
+  "russian-language": { cx: 0.21, cy: 0.74 },
+  "literature":       { cx: 0.07, cy: 0.54 },
+  "english":          { cx: 0.11, cy: 0.18 },
+  "social-studies":   { cx: 0.36, cy: 0.06 },
+  "geography":        { cx: 0.63, cy: 0.10 },
+  "computer-science": { cx: 0.87, cy: 0.30 },
+  "astronomy":        { cx: 0.53, cy: 0.91 },
 };
 
 const TOPICS: Record<string, string[]> = {
@@ -89,27 +90,34 @@ function easeInOut(t: number): number {
 
 interface ZoomState {
   id:       string | null;
-  cx:       number;   // canvas-space star coords
+  cx:       number;
   cy:       number;
   phase:    "idle" | "in" | "done" | "out";
   startT:   number;
-  progress: number;   // 0..1
+  progress: number;
 }
 
-// Topics stored as orbital parameters, not static coords
 interface TopicOrbit {
   label:      string;
-  baseAngle:  number;   // radians, starting angle
-  orbitR:     number;   // pixels orbit radius
-  speed:      number;   // rad/ms (tiny, can be negative for CCW)
-  phase:      number;   // phase offset for pulse animation
-  baseR:      number;   // dot radius
+  baseAngle:  number;
+  orbitR:     number;
+  speed:      number;
+  phase:      number;
+  baseR:      number;
+}
+
+interface Drift {
+  amplitude: number;   // px
+  speed:     number;   // rad/ms
+  angle:     number;   // phase X
+  phaseY:    number;   // phase Y (different to create elliptical path)
 }
 
 interface GNode {
   id: string; label: string; emoji: string; status: Status;
   x: number; y: number; r: number; xp: number; phase: number;
   topics: TopicOrbit[];
+  drift: Drift;
 }
 
 function buildGraph(W: number, H: number, progress: UserProgress[]): GNode[] {
@@ -124,18 +132,34 @@ function buildGraph(W: number, H: number, progress: UserProgress[]): GNode[] {
     const topics: TopicOrbit[] = topicLabels.map((label, i) => {
       const seed = si * 100 + i * 7;
       const baseAngle = (i / topicLabels.length) * Math.PI * 2 - Math.PI / 2;
-      // orbit radius: enough that N dots don't overlap
       const minOrbit = Math.max(r * 5 + 14, topicLabels.length * 8);
       const orbitR = minOrbit + seededRand(seed + 1) * 18;
-      // slow orbit — some CW, some CCW
       const speed = (seededRand(seed + 3) * 0.3 + 0.15) * (seededRand(seed + 4) > 0.5 ? 1 : -1) * 0.00005;
       const baseR = 1.1 + seededRand(seed + 2) * 0.7;
       return { label, baseAngle, orbitR, speed, phase: seededRand(seed + 50) * Math.PI * 2, baseR };
     });
 
+    // Drift: gentle Lissajous float
+    const ds = si * 31 + 7;
+    const drift: Drift = {
+      amplitude: 5 + seededRand(ds) * 8,                        // 5–13px
+      speed:     (0.05 + seededRand(ds + 1) * 0.07) * 0.0001,  // very slow
+      angle:     seededRand(ds + 2) * Math.PI * 2,
+      phaseY:    seededRand(ds + 3) * Math.PI * 2,
+    };
+
     return { id: s.id, label: s.title, emoji: s.emoji, status, x: cx, y: cy, r, xp,
-             phase: seededRand(si * 13) * Math.PI * 2, topics };
+             phase: seededRand(si * 13) * Math.PI * 2, topics, drift };
   });
+}
+
+// Compute current drifted position for a node
+function driftedPos(n: GNode, t: number, frozen?: { cx: number; cy: number }) {
+  if (frozen) return frozen;
+  return {
+    cx: n.x + n.drift.amplitude * Math.sin(t * n.drift.speed + n.drift.angle),
+    cy: n.y + n.drift.amplitude * Math.cos(t * n.drift.speed * 0.73 + n.drift.phaseY),
+  };
 }
 
 const BG_STARS = Array.from({ length: 200 }, (_, i) => ({
@@ -171,9 +195,6 @@ function render(
 ) {
   ctx.clearRect(0, 0, W, H);
 
-  // ── FIXED zoom transform: smooth, no jump at t=0 ─────────────────────────
-  // Formula: star at (cx,cy) moves smoothly to screen center (W/2,H/2)
-  // tx(t) = t * (W/2 - cx*ZOOM_MAX)  →  at t=0: tx=0 (identity), at t=1: star centered
   const scale = 1 + (ZOOM_MAX - 1) * zoom.progress;
   const tx = zoom.progress * (W / 2 - zoom.cx * ZOOM_MAX);
   const ty = zoom.progress * (H / 2 - zoom.cy * ZOOM_MAX);
@@ -186,15 +207,16 @@ function render(
 
   drawBg(ctx, W, H, t);
 
-  // ── Topic orbit dots — always visible around every star ───────────────────
+  // ── Topic orbit dots ──────────────────────────────────────────────────────
   for (const n of nodes) {
     const pal = PAL[n.status];
     const isActive = n.id === activeId;
-    const isZoomedTarget = zoom.id === n.id && zoom.phase === "done";
-    const isAnyZoom = zoom.phase !== "idle";
+    const isZoomTarget = zoom.id === n.id && zoom.phase !== "idle";
+    const isZoomDone   = zoom.id === n.id && zoom.phase === "done";
+    const isAnyZoom    = zoom.phase !== "idle";
 
-    // Hide dots for zoomed target (panel takes over)
-    if (isZoomedTarget) continue;
+    // Compute drifted position (freeze for zoom target to match zoom center)
+    const pos = driftedPos(n, t, isZoomTarget ? { cx: zoom.cx, cy: zoom.cy } : undefined);
 
     // Fade all non-target dots when zooming in on another star
     let nodeAlpha = 1;
@@ -203,19 +225,20 @@ function render(
     }
     if (nodeAlpha < 0.01) continue;
 
+    // Treat zoomed-done star as "active" for topic visibility
+    const showTopicLabels = isActive || isZoomDone;
+    const topicBaseOp = isZoomDone ? 0.75 : (isActive ? 0.65 : 0.14);
+
     n.topics.forEach((tp) => {
-      // Animated orbit position
       const angle = tp.baseAngle + tp.speed * t;
-      const tpx = n.x + Math.cos(angle) * tp.orbitR;
-      const tpy = n.y + Math.sin(angle) * tp.orbitR;
+      const tpx = pos.cx + Math.cos(angle) * tp.orbitR;
+      const tpy = pos.cy + Math.sin(angle) * tp.orbitR;
 
       const pulse = 0.7 + 0.3 * Math.sin(t * 0.001 + tp.phase);
-      // Base opacity: faint for idle stars, visible for hovered/active
-      const baseOp = isActive ? 0.65 : 0.14;
-      const opacity = baseOp * pulse * nodeAlpha;
+      const opacity = topicBaseOp * pulse * nodeAlpha;
 
       // Glow halo
-      const gR = tp.baseR * (isActive ? 5 : 3.5);
+      const gR = tp.baseR * (showTopicLabels ? 5.5 : 3.5);
       const grad = ctx.createRadialGradient(tpx, tpy, 0, tpx, tpy, gR);
       grad.addColorStop(0, pal.glow.replace(/[\d.]+\)$/, `${opacity * 0.55})`));
       grad.addColorStop(1, "rgba(0,0,0,0)");
@@ -225,18 +248,18 @@ function render(
       // Core dot
       ctx.save();
       ctx.globalAlpha = opacity;
-      ctx.shadowBlur = isActive ? 7 : 3;
+      ctx.shadowBlur = showTopicLabels ? 8 : 3;
       ctx.shadowColor = pal.glow;
       ctx.fillStyle = pal.core;
       ctx.beginPath(); ctx.arc(tpx, tpy, tp.baseR * (1 + 0.2 * pulse), 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // Topic label on hover
-      if (isActive) {
+      // Label — visible on hover AND when zoomed in
+      if (showTopicLabels) {
         ctx.save();
         ctx.globalAlpha = opacity * 0.92;
-        ctx.font = '9px "Golos Text", system-ui';
+        ctx.font = `${isZoomDone ? 10 : 9}px "Golos Text", system-ui`;
         ctx.textAlign = "center"; ctx.textBaseline = "top";
         ctx.fillStyle = "#fff";
         ctx.shadowColor = "rgba(0,0,0,0.95)"; ctx.shadowBlur = 10;
@@ -251,6 +274,10 @@ function render(
     const isActive = n.id === activeId;
     const sh = 0.72 + 0.28 * Math.sin(t * 0.0007 + n.phase);
     const pal = PAL[n.status];
+    const isZoomTarget = zoom.id === n.id && zoom.phase !== "idle";
+
+    // Compute drifted position
+    const pos = driftedPos(n, t, isZoomTarget ? { cx: zoom.cx, cy: zoom.cy } : undefined);
 
     // Fade non-target stars during zoom
     let globalAlpha = 1;
@@ -262,23 +289,23 @@ function render(
 
     const glowR = n.r * (isActive ? 5 : 3.5) * sh;
     const coreR = n.r * (isActive ? 1.3 : 1) * sh;
-    const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, glowR);
+    const g = ctx.createRadialGradient(pos.cx, pos.cy, 0, pos.cx, pos.cy, glowR);
     g.addColorStop(0, pal.glow); g.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(n.x, n.y, glowR, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(pos.cx, pos.cy, glowR, 0, Math.PI * 2); ctx.fill();
 
     if (n.status === "active_full") {
-      const g2 = ctx.createRadialGradient(n.x, n.y, coreR, n.x, n.y, glowR * 1.8);
+      const g2 = ctx.createRadialGradient(pos.cx, pos.cy, coreR, pos.cx, pos.cy, glowR * 1.8);
       g2.addColorStop(0, "rgba(107,143,255,0.30)"); g2.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = g2; ctx.beginPath(); ctx.arc(n.x, n.y, glowR * 1.8, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = g2; ctx.beginPath(); ctx.arc(pos.cx, pos.cy, glowR * 1.8, 0, Math.PI * 2); ctx.fill();
     }
 
     ctx.shadowBlur = isActive ? 18 * sh : 10 * sh; ctx.shadowColor = pal.glow;
     ctx.fillStyle = pal.core;
-    ctx.beginPath(); ctx.arc(n.x, n.y, coreR, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(pos.cx, pos.cy, coreR, 0, Math.PI * 2); ctx.fill();
 
     ctx.strokeStyle = pal.ring; ctx.lineWidth = isActive ? 1.2 : 0.6;
     ctx.shadowBlur = isActive ? 8 : 4;
-    ctx.beginPath(); ctx.arc(n.x, n.y, coreR + 3 * sh, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(pos.cx, pos.cy, coreR + 3 * sh, 0, Math.PI * 2); ctx.stroke();
     ctx.restore();
 
     // Label
@@ -289,7 +316,7 @@ function render(
       ctx.fillStyle = isActive ? "#fff" : pal.core;
       ctx.globalAlpha *= isActive ? 1 : (0.65 + 0.3 * sh);
       ctx.shadowColor = "rgba(0,0,0,0.97)"; ctx.shadowBlur = 8;
-      ctx.fillText(n.label, n.x, n.y + coreR + 5);
+      ctx.fillText(n.label, pos.cx, pos.cy + coreR + 5);
       ctx.restore();
     }
   }
@@ -311,11 +338,11 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
   const [showPanel,    setShowPanel]    = useState(false);
   const [panelId,      setPanelId]      = useState<string | null>(null);
   const [panelVisible, setPanelVisible] = useState(false);
-  const [isZoomed,     setIsZoomed]     = useState(false); // for back button
+  const [isZoomed,     setIsZoomed]     = useState(false);
 
   // ── Glass hint pill ───────────────────────────────────────────────────────
-  const [hintMounted,  setHintMounted]  = useState(false); // in DOM
-  const [hintVisible,  setHintVisible]  = useState(false); // CSS transition
+  const [hintMounted,  setHintMounted]  = useState(false);
+  const [hintVisible,  setHintVisible]  = useState(false);
   const hintTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const lastInteractionRef = useRef<number>(Date.now());
 
@@ -399,15 +426,27 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
     return () => { cancelAnimationFrame(rafRef.current); window.removeEventListener("resize", init); };
   }, [init]);
 
+  // Get drifted coords for a node at current time (for hit-testing)
+  const getNodePos = useCallback((n: GNode) => {
+    const t = performance.now() - t0Ref.current;
+    const zoom = zoomRef.current;
+    if (zoom.id === n.id && zoom.phase !== "idle") {
+      return { cx: zoom.cx, cy: zoom.cy };
+    }
+    return driftedPos(n, t);
+  }, []);
+
   const startZoomIn = useCallback((id: string) => {
     const node = nodesRef.current.find(n => n.id === id);
     if (!node) return;
     resetHint();
-    zoomRef.current = { id, cx: node.x, cy: node.y, phase: "in", startT: performance.now(), progress: 0 };
+    // Capture current drifted position as zoom center
+    const pos = getNodePos(node);
+    zoomRef.current = { id, cx: pos.cx, cy: pos.cy, phase: "in", startT: performance.now(), progress: 0 };
     setPanelId(id);
     setShowPanel(false);
     setPanelVisible(false);
-  }, [resetHint]);
+  }, [resetHint, getNodePos]);
 
   const startZoomOut = useCallback(() => {
     const zoom = zoomRef.current;
@@ -423,12 +462,13 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
   const hitSubject = useCallback((mx: number, my: number) => {
     let best: GNode | null = null, bestD = Infinity;
     for (const n of nodesRef.current) {
-      const d = Math.hypot(n.x - mx, n.y - my);
+      const pos = getNodePos(n);
+      const d = Math.hypot(pos.cx - mx, pos.cy - my);
       const hitR = n.r * 4 + 12;
       if (d < hitR && d < bestD) { bestD = d; best = n; }
     }
     return best;
-  }, []);
+  }, [getNodePos]);
 
   // Convert screen → canvas-space accounting for zoom
   const toCanvasSpace = useCallback((screenX: number, screenY: number): [number, number] => {
@@ -535,7 +575,6 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
             }}
             className="flex items-center gap-2.5"
           >
-            {/* Pulsing dot */}
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-40" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-white/70" />
