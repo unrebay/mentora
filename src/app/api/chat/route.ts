@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
@@ -120,7 +121,7 @@ export async function POST(req: NextRequest) {
     // Get user profile (no messages_today/window — handled atomically below)
     const { data: profile } = await supabase
       .from("users")
-      .select("onboarding_style, onboarding_level, onboarding_goal, plan, trial_expires_at")
+      .select("onboarding_style, onboarding_level, onboarding_goal, plan, trial_expires_at, streak_reward_claimed")
       .eq("id", user.id)
       .single();
 
@@ -393,6 +394,43 @@ ${ragContext}
       console.error("XP update failed (non-blocking):", xpErr);
     }
 
+    // ── Streak reward: auto-give 3 days Pro when streak hits 7 ───────────
+    let streakRewardEarned = false;
+    try {
+      if (!profile?.streak_reward_claimed && !isPro) {
+        // Read updated streak after increment_xp
+        const { data: progressRows } = await supabase
+          .from("user_progress")
+          .select("streak_days")
+          .eq("user_id", user.id);
+        const maxStreak = progressRows?.reduce((m, p) => Math.max(m, p.streak_days ?? 0), 0) ?? 0;
+
+        if (maxStreak >= 7) {
+          const admin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          );
+          // Give 3 days Pro trial
+          const { data: u } = await admin
+            .from("users")
+            .select("trial_expires_at")
+            .eq("id", user.id)
+            .single();
+          const base = u?.trial_expires_at && new Date(u.trial_expires_at) > new Date()
+            ? new Date(u.trial_expires_at)
+            : new Date();
+          base.setDate(base.getDate() + 3);
+          await admin.from("users").update({
+            trial_expires_at: base.toISOString(),
+            streak_reward_claimed: true,
+          }).eq("id", user.id);
+          streakRewardEarned = true;
+        }
+      }
+    } catch (rewardErr) {
+      console.error("Streak reward failed (non-blocking):", rewardErr);
+    }
+
     return NextResponse.json({
       message: assistantMessage,
       messagesRemaining,
@@ -400,6 +438,7 @@ ${ragContext}
       trialExpiresAt: profile?.trial_expires_at ?? null,
       ...(levelUp ? { levelUp } : {}),
       ...(imageUrl ? { imageUrl } : {}),
+      ...(streakRewardEarned ? { streakRewardEarned: true } : {}),
     });
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);

@@ -400,6 +400,12 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           setTimeout(() => { setShowLevelUp(false); setLevelUpData(null); }, 500);
         }, 10000);
       }
+      // Streak reward earned → redirect to dashboard with celebration
+      if (data.streakRewardEarned) {
+        setTimeout(() => {
+          window.location.href = "/dashboard?streak_reward=1";
+        }, 1500);
+      }
     } catch {
       setMessages((prev) => [...prev, {
         role: "assistant",

@@ -12,6 +12,8 @@ import MeLogo from "@/components/MeLogo";
 import WhatsNewBanner from "@/components/WhatsNewBanner";
 import ReferralWidget from "@/components/ReferralWidget";
 import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
+import dynamic from "next/dynamic";
+const StreakRewardCelebration = dynamic(() => import("@/components/StreakRewardCelebration"), { ssr: false });
 
 const DAILY_LIMIT = 20;
 
@@ -168,6 +170,7 @@ export default async function DashboardPage() {
         }
       `}</style>
 
+      <StreakRewardCelebration />
       <PostHogIdentify userId={user.id} email={user.email ?? ""} />
       <div className="max-w-5xl mx-auto px-6 py-10">
 
@@ -189,14 +192,28 @@ export default async function DashboardPage() {
             }}
           >
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: "rgba(69,97,232,0.15)" }}>
-              <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="var(--brand)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" fill="var(--brand)" stroke="none"/>
-              </svg>
+              style={{ background: profile?.streak_reward_claimed ? "rgba(255,122,0,0.15)" : "rgba(69,97,232,0.15)" }}>
+              {profile?.streak_reward_claimed ? (
+                /* Fire icon — streak reward */
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00"/>
+                </svg>
+              ) : (
+                /* Star icon — referral / generic trial */
+                <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="var(--brand)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" fill="var(--brand)" stroke="none"/>
+                </svg>
+              )}
             </div>
             <div className="flex-1">
-              <p className="font-semibold text-sm" style={{ color: "var(--brand)" }}>Pro активен до {trialExpiresDate}</p>
-              <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>Ты собрал 7-дневный стрик — и получил 3 дня Pro. Безлимитные сообщения уже работают.</p>
+              <p className="font-semibold text-sm" style={{ color: profile?.streak_reward_claimed ? "#FF7A00" : "var(--brand)" }}>
+                Pro активен до {trialExpiresDate}
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
+                {profile?.streak_reward_claimed
+                  ? "Ты собрал 7-дневный стрик — и получил 3 дня Pro. Безлимитные сообщения уже работают."
+                  : "Пробный доступ активирован. Безлимитные сообщения работают."}
+              </p>
             </div>
           </div>
         )}
