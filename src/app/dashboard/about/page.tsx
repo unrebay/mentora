@@ -553,6 +553,62 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* ── Support section ──────────────────────────────────── */}
+        <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-10">
+          <h2 style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: "var(--text-muted)", marginBottom: 16 }}>
+            Поддержать платформу
+          </h2>
+          <div className="rounded-2xl p-6 border" style={{ background: "linear-gradient(135deg, rgba(69,97,232,0.07) 0%, rgba(159,122,255,0.05) 100%)", borderColor: "rgba(69,97,232,0.18)" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 16, flexWrap: "wrap" as const }}>
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>
+                  Mentora — независимый проект
+                </p>
+                <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 0 }}>
+                  Платформа создаётся без венчурных инвесторов и рекламы. Если тебе нравится то, что мы делаем, —
+                  лучшая поддержка это подписка Pro или Ultima, реферальная ссылка другу и отзыв.
+                </p>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: 8, flexShrink: 0 }}>
+                <Link
+                  href="/pricing"
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 7,
+                    fontSize: 13, fontWeight: 600,
+                    padding: "9px 18px", borderRadius: 12,
+                    background: "var(--brand)", color: "#fff",
+                    textDecoration: "none",
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  Поддержать подпиской
+                </Link>
+                <Link
+                  href="/profile"
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 7,
+                    fontSize: 13, fontWeight: 600,
+                    padding: "9px 18px", borderRadius: 12,
+                    background: "rgba(69,97,232,0.10)",
+                    color: "var(--brand)",
+                    border: "1px solid rgba(69,97,232,0.2)",
+                    textDecoration: "none",
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                  Пригласить друга
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── CTA ──────────────────────────────────────────────── */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-4 text-center">
           <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 14 }}>

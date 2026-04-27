@@ -154,6 +154,53 @@ export default async function PricingPage() {
         </p>
       </section>
 
+      {/* PROMO BANNER */}
+      <section className="max-w-5xl mx-auto px-6 pb-6">
+        <div className="relative overflow-hidden rounded-2xl px-5 py-4 flex flex-wrap items-center gap-3"
+          style={{
+            background: "linear-gradient(135deg, rgba(69,97,232,0.12) 0%, rgba(159,122,255,0.10) 100%)",
+            border: "1px solid rgba(69,97,232,0.28)",
+          }}>
+          {/* Glow */}
+          <div className="absolute -top-6 left-8 w-32 h-16 rounded-full pointer-events-none"
+            style={{ background: "rgba(69,97,232,0.18)", filter: "blur(24px)" }} />
+
+          {/* Fire icon */}
+          <div className="relative z-10 flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center"
+            style={{ background: "rgba(245,158,11,0.15)" }}>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+              <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z"
+                fill="#f59e0b" />
+            </svg>
+          </div>
+
+          <div className="relative z-10 flex-1 min-w-0">
+            <span className="font-bold text-sm" style={{ color: "var(--text)" }}>
+              Только до 1 июня —
+            </span>{" "}
+            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              при покупке годового плана <strong style={{ color: "var(--brand)" }}>+3 месяца в подарок</strong>.
+              Платишь за 12 месяцев — пользуешься 15.
+            </span>
+          </div>
+
+          <div className="relative z-10 flex-shrink-0">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg"
+              style={{
+                background: "rgba(69,97,232,0.15)",
+                border: "1px solid rgba(69,97,232,0.3)",
+                color: "var(--brand)",
+              }}>
+              <svg viewBox="0 0 12 12" width="9" height="9" fill="currentColor">
+                <circle cx="6" cy="6" r="2.5" />
+                <circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+              </svg>
+              Успей до 1 июня
+            </span>
+          </div>
+        </div>
+      </section>
+
       {/* PRICING CARDS */}
       <section className="max-w-5xl mx-auto px-6 pb-8">
         <div className="grid md:grid-cols-3 gap-6 md:gap-4 items-stretch">

@@ -205,6 +205,17 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const [exportingPdf, setExportingPdf] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea
+  const adjustTextareaHeight = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const maxH = 160; // ~6 lines
+    el.style.height = Math.min(el.scrollHeight, maxH) + "px";
+    el.style.overflowY = el.scrollHeight > maxH ? "auto" : "hidden";
+  }, []);
 
   // Native hint: show first 3 visits to English chat, fade in, auto-dismiss after 5s with fade out
   useEffect(() => {
@@ -341,7 +352,13 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     if (!userMessage || loading || limitReached) return;
 
     setLastUserMsg(userMessage);
-    if (!retryMsg) setInput("");
+    if (!retryMsg) {
+      setInput("");
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "44px";
+        textareaRef.current.style.overflowY = "hidden";
+      }
+    }
 
     // Remove any previous error message on retry
     setMessages((prev) => {
@@ -700,7 +717,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                 <button type="button" onClick={() => setPendingImage(null)} className="text-lg leading-none px-1" style={{ color: "var(--text-muted)" }}>×</button>
               </div>
             )}
-            <form onSubmit={sendMessage} className="flex gap-2 items-center">
+            <form onSubmit={sendMessage} className="flex gap-2 items-end">
             {/* Hidden file input for Ultima */}
             {isUltima && (
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
@@ -727,17 +744,35 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                 </svg>
               </button>
             )}
-            <input
+            <textarea
+              ref={textareaRef}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              rows={1}
+              onChange={(e) => {
+                setInput(e.target.value);
+                adjustTextareaHeight();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (input.trim() || pendingImage) {
+                    sendMessage(e as unknown as React.FormEvent);
+                  }
+                }
+              }}
               placeholder={pendingImage ? "Задай вопрос к фото (или отправь без текста)..." : "Задай вопрос..."}
               disabled={loading}
               className="flex-1 px-5 py-3 text-[15px] disabled:opacity-50 focus:outline-none transition-all"
               style={{
-                borderRadius: "9999px",
+                borderRadius: "16px",
                 border: "1px solid var(--border)",
                 background: "var(--bg-secondary)",
                 color: "var(--text)",
+                resize: "none",
+                minHeight: "44px",
+                maxHeight: "160px",
+                overflowY: "hidden",
+                lineHeight: "1.5",
               }}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = "var(--brand)";

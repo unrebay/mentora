@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
+import { getEffectivePlan, LEVEL_REWARDS, computeNewReward } from "@/lib/plan";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -121,16 +122,14 @@ export async function POST(req: NextRequest) {
     // Get user profile (no messages_today/window — handled atomically below)
     const { data: profile } = await supabase
       .from("users")
-      .select("onboarding_style, onboarding_level, onboarding_goal, plan, trial_expires_at, streak_reward_claimed")
+      .select("onboarding_style, onboarding_level, onboarding_goal, plan, trial_expires_at, streak_reward_claimed, reward_plan, reward_expires_at")
       .eq("id", user.id)
       .single();
 
-    // --- Plan check ---
-    const isTrialActive = profile?.trial_expires_at
-      ? new Date(profile.trial_expires_at) > new Date()
-      : false;
-    const isPro = profile?.plan === "pro" || profile?.plan === "ultima" || isTrialActive;
-    const isUltima = profile?.plan === "ultima";
+    // --- Plan check (accounts for paid plan + trial + level reward) ---
+    const effectivePlan = getEffectivePlan(profile ?? {});
+    const isPro   = effectivePlan === "pro" || effectivePlan === "ultima";
+    const isUltima = effectivePlan === "ultima";
 
     // Atomic window check-and-increment for free users (prevents race condition)
     let messagesRemaining: number | null = null;
@@ -363,7 +362,7 @@ ${ragContext}
     })();
 
     // Detect level up + Update XP atomically (+10 per message) — non-blocking
-    let levelUp: { newLevel: string; oldLevel: string; message: string; color: string } | null = null;
+    let levelUp: { newLevel: string; oldLevel: string; message: string; color: string; reward?: { plan: string; days: number } } | null = null;
     try {
       const { data: prog } = await supabase
         .from("user_progress")
@@ -375,12 +374,33 @@ ${ragContext}
       const oldLevel = getLevelName(oldXP);
       const newLevel = getLevelName(oldXP + 10);
       if (newLevel !== oldLevel) {
+        const reward = LEVEL_REWARDS[newLevel] ?? null;
         levelUp = {
           newLevel,
           oldLevel,
           message: getLevelUpMessage(newLevel, subjectLabel),
           color: getLevelColor(newLevel),
+          ...(reward ? { reward } : {}),
         };
+
+        // Grant level reward via admin client (bypass RLS)
+        if (reward) {
+          try {
+            const admin = createClient(
+              process.env.NEXT_PUBLIC_SUPABASE_URL!,
+              process.env.SUPABASE_SERVICE_ROLE_KEY!,
+            );
+            const { data: u } = await admin
+              .from("users")
+              .select("reward_plan, reward_expires_at")
+              .eq("id", user.id)
+              .single();
+            const newReward = computeNewReward(reward, u ?? {});
+            await admin.from("users").update(newReward).eq("id", user.id);
+          } catch (rewardErr) {
+            console.error("Level reward grant failed (non-blocking):", rewardErr);
+          }
+        }
       }
     } catch { /* non-critical */ }
 
@@ -436,6 +456,7 @@ ${ragContext}
       messagesRemaining,
       resetAt: windowResetAt,
       trialExpiresAt: profile?.trial_expires_at ?? null,
+      rewardExpiresAt: profile?.reward_expires_at ?? null,
       ...(levelUp ? { levelUp } : {}),
       ...(imageUrl ? { imageUrl } : {}),
       ...(streakRewardEarned ? { streakRewardEarned: true } : {}),

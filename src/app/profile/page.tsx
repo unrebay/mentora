@@ -40,7 +40,7 @@ type BadgeDef = {
   tier: "bronze" | "silver" | "gold" | "special";
   check: (s: Stats) => boolean;
 };
-type Stats = { totalXP: number; bestStreak: number; totalMessages: number; isPro: boolean; isUltima: boolean; joinedDaysAgo: number };
+type Stats = { totalXP: number; bestStreak: number; totalMessages: number; isPro: boolean; isUltima: boolean; joinedDaysAgo: number; joinedBefore?: number };
 
 // SVG badge icons
 const BadgeIcon = {
@@ -159,7 +159,7 @@ const BADGES: BadgeDef[] = [
   { id: "xp100", icon: BadgeIcon.spark("#d97706"), name: "Первые шаги", desc: "Набрал 100 мент", tier: "bronze", check: s => s.totalXP >= 100 },
   { id: "xp500", icon: BadgeIcon.medal("#6b7280"), name: "Знаток", desc: "Набрал 500 мент", tier: "silver", check: s => s.totalXP >= 500 },
   { id: "xp1000", icon: BadgeIcon.gem("#f59e0b"), name: "Мастер", desc: "Набрал 1000 мент", tier: "gold", check: s => s.totalXP >= 1000 },
-  { id: "early_bird", icon: BadgeIcon.bird("#8b5cf6"), name: "Первопроходец", desc: "Присоединился в первые 90 дней", tier: "special", check: s => s.joinedDaysAgo <= 90 },
+  { id: "early_bird", icon: BadgeIcon.bird("#8b5cf6"), name: "Первопроходец", desc: "Присоединился до официального запуска 1 июня 2026", tier: "special", check: s => !!(s.joinedBefore && s.joinedBefore < new Date("2026-06-01").getTime()) },
   { id: "pro", icon: BadgeIcon.crown("#8b5cf6"), name: "Pro подписчик", desc: "Поддержал развитие Mentora", tier: "special", check: s => s.isPro },
   { id: "ultima", icon: BadgeIcon.infinity("#8b5cf6"), name: "Ultra", desc: "Максимальный план Mentora", tier: "special", check: s => s.isUltima },
 ];
@@ -198,8 +198,9 @@ export default async function ProfilePage() {
   const joinedDaysAgo = profile?.created_at
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 86400000)
     : 999;
+  const joinedBefore = profile?.created_at ? new Date(profile.created_at).getTime() : undefined;
 
-  const stats: Stats = { totalXP, bestStreak, totalMessages, isPro, isUltima, joinedDaysAgo };
+  const stats: Stats = { totalXP, bestStreak, totalMessages, isPro, isUltima, joinedDaysAgo, joinedBefore };
   const lvl = getLevel(totalXP);
   const changesLeft = Math.max(0, 2 - (profile?.name_changes_count ?? 0));
   const name = profile?.full_name ?? profile?.display_name ?? user.email?.split("@")[0] ?? "Пользователь";

@@ -120,10 +120,10 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
           if (!isActive) {
             return (
               <div key={subject.id}
-                className="relative rounded-2xl border overflow-hidden"
+                className="relative rounded-2xl border overflow-hidden h-full flex flex-col"
                 style={{ background: "var(--bg-secondary)", borderColor: "var(--border)", opacity: 0.5 }}
               >
-                <div className="p-5">
+                <div className="p-5 flex flex-col flex-1">
                   <span className="absolute top-3 right-3 text-[9px] font-bold px-1.5 py-0.5 rounded-md tracking-wide"
                     style={{ background: "var(--bg-card)", color: "var(--text-muted)" }}>
                     СКОРО
@@ -141,7 +141,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
           /* ── Verified card — premium gradient dark ─── */
           if (isVerified) {
             return (
-              <div key={subject.id} className="relative group">
+              <div key={subject.id} className="relative group h-full">
                 <button
                   onClick={(e) => askRemove(e, subject)}
                   disabled={isRemoving}
@@ -155,7 +155,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                 </button>
                 <div
                   data-tilt data-tilt-strength="5"
-                  className="relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-200"
+                  className="relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 h-full flex flex-col"
                   style={{
                     background: `linear-gradient(145deg, ${color}ee, ${color}99 60%, ${color}cc)`,
                     opacity: isRemoving ? 0.4 : 1,
@@ -176,7 +176,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                     }}
                   />
 
-                  <div className="relative z-10 p-5">
+                  <div className="relative z-10 p-5 flex flex-col flex-1">
                     <div className="absolute top-3 right-3 group/badge" onClick={e => e.stopPropagation()}>
                       <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md cursor-default"
                         style={{ background: "rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.9)" }}>
@@ -200,7 +200,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                     <div className="font-semibold text-sm text-white leading-snug mb-0.5">{subject.title}</div>
                     <div className="text-xs text-white/65">{subject.description}</div>
 
-                    <div className="mt-3 pt-3 border-t border-white/20">
+                    <div className="mt-auto pt-3 border-t border-white/20" style={{ marginTop: "auto" }}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] font-semibold text-white/65">{lvl.name}</span>
                         {xp > 0 && (
@@ -234,7 +234,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
 
           /* ── Beta / active card ───────────────── */
           return (
-            <div key={subject.id} className="relative group">
+            <div key={subject.id} className="relative group h-full">
               <button
                 onClick={(e) => askRemove(e, subject)}
                 disabled={isRemoving}
@@ -248,7 +248,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
               </button>
               <div
                 data-tilt data-tilt-strength="5"
-                className="relative rounded-2xl border overflow-hidden cursor-pointer transition-all duration-200"
+                className="relative rounded-2xl border overflow-hidden cursor-pointer transition-all duration-200 h-full flex flex-col"
                 style={{
                   background: "var(--bg-card)",
                   opacity: isRemoving ? 0.4 : 1,
@@ -265,7 +265,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"
                   style={{ background: `radial-gradient(ellipse at 30% 0%, ${color}10 0%, transparent 60%)` }} />
 
-                <div className="relative z-10 p-5">
+                <div className="relative z-10 p-5 flex flex-col flex-1">
                   <div className="absolute top-4 right-3 group/badge" onClick={e => e.stopPropagation()}>
                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md cursor-default"
                       style={{ background: `${color}18`, color }}>
@@ -288,7 +288,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                   <div className="font-semibold text-sm leading-snug mb-0.5" style={{ color: "var(--text)" }}>{subject.title}</div>
                   <div className="text-xs" style={{ color: "var(--text-muted)" }}>{subject.description}</div>
 
-                  <div className="mt-3 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
+                  <div className="mt-auto pt-3 border-t" style={{ marginTop: "auto", borderColor: "var(--border)" }}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[10px] font-semibold" style={{ color: "var(--text-muted)" }}>{lvl.name}</span>
                       {xp > 0 && (
@@ -326,7 +326,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
         {/* Add subject button */}
         <button
           onClick={() => setAddOpen(true)}
-          className="relative rounded-2xl border-dashed border-2 flex flex-col items-center justify-center p-5 min-h-[160px] gap-2.5 transition-all duration-200 group"
+          className="relative rounded-2xl border-dashed border-2 flex flex-col items-center justify-center p-5 h-full min-h-[160px] gap-2.5 transition-all duration-200 group"
           style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(69,97,232,0.5)";
