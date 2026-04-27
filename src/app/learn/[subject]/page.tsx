@@ -125,16 +125,21 @@ export default async function LearnPage({ params, searchParams }: Props) {
   // Calculate remaining messages for today
   const { data: profile } = await supabase
     .from("users")
-    .select("plan, messages_today, messages_window_start")
+    .select("plan, trial_expires_at, messages_today, messages_window_start")
     .eq("id", user.id)
     .single();
 
   const isUltima = profile?.plan === "ultima";
+  const isTrialActive = profile?.trial_expires_at
+    ? new Date(profile.trial_expires_at) > new Date()
+    : false;
+  const isPaidOrTrial = profile?.plan === "pro" || profile?.plan === "ultima" || isTrialActive;
+
   let initialMessagesRemaining: number | null = null;
 
   // Calendar day reset: expired if window_start is from a previous UTC day
   let initialResetAt: string | null = null;
-  if (profile?.plan !== "pro" && profile?.plan !== "ultima") {
+  if (!isPaidOrTrial) {
     const windowStart = profile?.messages_window_start ? new Date(profile.messages_window_start) : null;
     const todayUtc = new Date(); todayUtc.setUTCHours(0, 0, 0, 0);
     const windowExpired = !windowStart || windowStart < todayUtc;
