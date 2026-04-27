@@ -1,27 +1,24 @@
 "use client";
 import { useEffect, useRef } from "react";
 
-interface Particle {
+interface Node {
   x: number; y: number;
   vx: number; vy: number;
-  size: number;
-  opacity: number;
-  r: number; g: number; b: number;
+  r: number;
+  alpha: number;
 }
 
 interface Props {
   className?: string;
-  /** Number of particles (default 110) */
   count?: number;
 }
 
 /**
- * ParticleField — lightweight canvas particle system.
- * Particles gently drift and flow toward the cursor on desktop.
- * On mobile they float autonomously (no cursor available).
- * pointer-events: none — sits behind interactive layers.
+ * ParticleField — exact same canvas animation as the Boosty banner.
+ * Blue-tinted nodes with connecting constellation lines.
+ * Cursor attraction on desktop.
  */
-export default function ParticleField({ className, count = 110 }: Props) {
+export default function ParticleField({ className, count = 160 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -32,107 +29,85 @@ export default function ParticleField({ className, count = 110 }: Props) {
 
     let animId: number;
     let mouseX = -9999, mouseY = -9999;
-    let particles: Particle[] = [];
+    let nodes: Node[] = [];
     let W = 0, H = 0;
-    let dpr = 1;
-
-    // white, soft blue, soft violet — matches galaxy palette
-    const PALETTE: [number, number, number][] = [
-      [255, 255, 255],
-      [100, 140, 255],
-      [180, 140, 255],
-    ];
 
     function resize() {
-      dpr = Math.min(window.devicePixelRatio ?? 1, 2);
       W = canvas.offsetWidth;
       H = canvas.offsetHeight;
-      canvas.width = Math.round(W * dpr);
-      canvas.height = Math.round(H * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      canvas.width  = W;
+      canvas.height = H;
     }
 
-    function spawn(): Particle {
-      const [r, g, b] = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+    function spawnNode(): Node {
       return {
         x: Math.random() * W,
         y: Math.random() * H,
-        vx: (Math.random() - 0.5) * 0.22,
-        vy: (Math.random() - 0.5) * 0.22,
-        size: Math.random() * 2.0 + 0.6,
-        opacity: Math.random() * 0.55 + 0.30,
-        r, g, b,
+        vx: (Math.random() - 0.5) * 0.20,
+        vy: (Math.random() - 0.5) * 0.20,
+        r: Math.random() * 1.5 + 0.4,
+        alpha: Math.random() * 0.4 + 0.15,
       };
     }
 
     function init() {
       resize();
-      particles = Array.from({ length: count }, spawn);
-      // Sprinkle ~12% bright "foreground" stars on top
-      const bright = Math.floor(count * 0.12);
-      for (let i = 0; i < bright; i++) {
-        particles[i].size = Math.random() * 1.8 + 1.2;
-        particles[i].opacity = Math.random() * 0.25 + 0.70;
-        particles[i].r = 255; particles[i].g = 255; particles[i].b = 255;
-      }
+      nodes = Array.from({ length: count }, spawnNode);
     }
 
     function tick() {
       ctx.clearRect(0, 0, W, H);
 
-      // ── Constellation lines ──
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
+      // ── Constellation lines (same as banner) ──
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 120) {
             ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(107,143,255,${(1 - dist / 120) * 0.07})`;
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.strokeStyle = `rgba(107,143,255,${(1 - dist / 120) * 0.09})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
         }
       }
 
-      for (const p of particles) {
+      // ── Nodes (same as banner) ──
+      for (const n of nodes) {
         // Cursor attraction
-        const dx = mouseX - p.x;
-        const dy = mouseY - p.y;
+        const dx = mouseX - n.x;
+        const dy = mouseY - n.y;
         const dist2 = dx * dx + dy * dy;
-        if (dist2 < 200 * 200 && dist2 > 1) {
+        if (dist2 < 180 * 180 && dist2 > 1) {
           const dist = Math.sqrt(dist2);
-          const f = ((200 - dist) / 200) * 0.011;
-          p.vx += (dx / dist) * f;
-          p.vy += (dy / dist) * f;
+          const f = ((180 - dist) / 180) * 0.012;
+          n.vx += (dx / dist) * f;
+          n.vy += (dy / dist) * f;
         }
 
-        // Tiny random drift — keeps particles alive on mobile
-        p.vx += (Math.random() - 0.5) * 0.008;
-        p.vy += (Math.random() - 0.5) * 0.008;
+        // Tiny random drift
+        n.vx += (Math.random() - 0.5) * 0.008;
+        n.vy += (Math.random() - 0.5) * 0.008;
 
-        // Damping
-        p.vx *= 0.975;
-        p.vy *= 0.975;
+        // Damping + speed cap
+        n.vx *= 0.975;
+        n.vy *= 0.975;
+        const spd = Math.sqrt(n.vx * n.vx + n.vy * n.vy);
+        if (spd > 1.4) { n.vx = (n.vx / spd) * 1.4; n.vy = (n.vy / spd) * 1.4; }
 
-        // Speed cap
-        const spd = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-        if (spd > 1.4) { p.vx = (p.vx / spd) * 1.4; p.vy = (p.vy / spd) * 1.4; }
+        n.x += n.vx;
+        n.y += n.vy;
 
-        p.x += p.vx;
-        p.y += p.vy;
-
-        // Wrap around edges
-        if (p.x < -4) p.x = W + 4;
-        else if (p.x > W + 4) p.x = -4;
-        if (p.y < -4) p.y = H + 4;
-        else if (p.y > H + 4) p.y = -4;
+        // Wrap
+        if (n.x < 0) n.x = W; else if (n.x > W) n.x = 0;
+        if (n.y < 0) n.y = H; else if (n.y > H) n.y = 0;
 
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${p.r},${p.g},${p.b},${p.opacity})`;
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(107,143,255,${n.alpha})`;
         ctx.fill();
       }
 
@@ -145,21 +120,19 @@ export default function ParticleField({ className, count = 110 }: Props) {
       mouseY = e.clientY - rect.top;
     };
     const onLeave = () => { mouseX = -9999; mouseY = -9999; };
-    const onResize = () => { init(); };
 
     init();
     tick();
 
-    // Use document-level listener so cursor outside canvas still attracts
     document.addEventListener("mousemove", onMove);
     document.addEventListener("mouseleave", onLeave);
-    window.addEventListener("resize", onResize);
+    window.addEventListener("resize", init);
 
     return () => {
       cancelAnimationFrame(animId);
       document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseleave", onLeave);
-      window.removeEventListener("resize", onResize);
+      window.removeEventListener("resize", init);
     };
   }, [count]);
 
