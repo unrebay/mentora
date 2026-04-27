@@ -231,7 +231,7 @@ export async function POST(req: NextRequest) {
 - /profile — профиль: имя, достижения/бейджи, реферальная ссылка для приглашения друзей.
 - /pricing — тарифы: сравнение Free, Pro, Ultima с ценами и кнопками оплаты.
 - /dashboard/about — о платформе: миссия, роадмап, поддержка.
-- Поддержка: @mentora_support_bot в Telegram или hello@mentora.su.
+- Поддержка: @mentora_su_bot в Telegram или hello@mentora.su.
 
 ТАРИФЫ ПЛАТФОРМЫ:
 - Free: до 20 сообщений в сутки (сброс в полночь UTC), все 14 предметов доступны, без загрузки фото, без PDF-конспектов.

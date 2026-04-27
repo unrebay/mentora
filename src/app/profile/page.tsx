@@ -389,7 +389,7 @@ export default async function ProfilePage() {
         <div className="pb-8 flex flex-col items-center gap-2 text-center">
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>Вопросы или проблемы?</p>
           <div className="flex items-center gap-4 flex-wrap justify-center">
-            <a href="https://t.me/mentora_support_bot" target="_blank" rel="noopener noreferrer"
+            <a href="https://t.me/mentora_su_bot" target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
               style={{
                 background: "rgba(42,171,238,0.10)",

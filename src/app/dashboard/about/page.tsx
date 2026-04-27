@@ -630,7 +630,7 @@ export default function AboutPage() {
                       Ko-fi — из других стран
                     </a>
                     <a
-                      href="https://t.me/mentora_support_bot?start=donate"
+                      href="https://t.me/mentora_su_bot?start=donate"
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
@@ -691,7 +691,7 @@ export default function AboutPage() {
               hello@mentora.su
             </a>
             <span style={{ color: "var(--border)" }}>·</span>
-            <a href="https://t.me/mentora_support_bot" target="_blank" rel="noopener noreferrer"
+            <a href="https://t.me/mentora_su_bot" target="_blank" rel="noopener noreferrer"
               style={{ fontSize: 14, fontWeight: 500, color: "#2AABEE", display: "inline-flex", alignItems: "center", gap: 5 }}>
               <svg viewBox="0 0 24 24" width="15" height="15" fill="#2AABEE">
                 <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.008 9.461c-.148.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.604.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.24 14.605l-2.95-.924c-.642-.2-.654-.642.136-.951l11.527-4.448c.537-.194 1.006.131.609.966z"/>
