@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 const TOUR_KEY = "mentora_tour_v1";
@@ -48,7 +49,6 @@ const STEPS: Step[] = [
     tip: "Займёт меньше минуты",
   },
   {
-    // Spotlight: subjects grid — what to click
     targetSelector: "[data-tour='subjects']",
     cardSide: "bottom",
     icon: "book",
@@ -58,7 +58,6 @@ const STEPS: Step[] = [
     tip: "Можно менять предмет в любое время",
   },
   {
-    // Spotlight: the "Продолжить обучение" banner — what the chat looks like
     targetSelector: "[data-tour='continue-learning']",
     cardSide: "bottom",
     icon: "chat",
@@ -68,7 +67,6 @@ const STEPS: Step[] = [
     tip: "Можно переспрашивать сколько угодно",
   },
   {
-    // Spotlight: XP + streak counters in the nav — what "Me 160 · 2 дня" means
     targetSelector: "[data-tour='nav-stats']",
     cardSide: "bottom",
     icon: "flame",
@@ -86,7 +84,6 @@ const STEPS: Step[] = [
     tip: "Пробные дни дают новым пользователям",
   },
   {
-    // Spotlight: referral widget at bottom of page
     targetSelector: "[data-tour='referral']",
     cardSide: "top",
     icon: "gift",
@@ -114,10 +111,6 @@ function querySpot(selector: string): SpotRect | null {
   };
 }
 
-/**
- * Position the card adjacent to the spotlight on the preferred side.
- * Falls back through sides in priority order if no room. Never sends to a far corner.
- */
 function cardPos(
   spot: SpotRect | null,
   side: Step["cardSide"],
@@ -128,14 +121,12 @@ function cardPos(
 ): { x: number; y: number } {
   const cw = Math.min(CARD_W, vw - 32);
   const ch = CARD_H;
-  const NAV_H = 92; // below sticky nav pill
+  const NAV_H = 92;
 
-  // Mobile: always pin to bottom-center
   if (isMobile) {
     return { x: Math.max(8, (vw - cw) / 2), y: vh - ch - 36 };
   }
 
-  // No spotlight or center step: center of screen
   if (!spot || side === "center") {
     return {
       x: clamp(vw / 2 - cw / 2, 16, vw - cw - 16),
@@ -172,7 +163,6 @@ function cardPos(
       if (dir === "right" && hasRoomRight) return { x: rightX, y: cardY };
       if (dir === "left"  && hasRoomLeft)  return { x: leftX,  y: cardY };
     }
-    // Truly no room on any side — place at top center (in dark overlay above spotlight)
     return { x: clamp(vw / 2 - cw / 2, 16, vw - cw - 16), y: NAV_H };
   }
 
@@ -186,6 +176,48 @@ function cardPos(
   }
 }
 
+/* ── Spotlight overlay using 4 divs (reliable across all browsers) ── */
+function SpotlightOverlay({
+  spot,
+  onClose,
+}: {
+  spot: SpotRect | null;
+  onClose: () => void;
+}) {
+  const OVERLAY = "rgba(4,4,18,0.72)";
+  const style: React.CSSProperties = { position: "fixed", background: OVERLAY, pointerEvents: "all", cursor: "default" };
+
+  if (!spot) {
+    return <div style={{ ...style, inset: 0 }} onClick={onClose} />;
+  }
+
+  const { x, y, w, h } = spot;
+
+  return (
+    <>
+      {/* Top */}
+      <div style={{ ...style, top: 0, left: 0, right: 0, height: Math.max(0, y) }} onClick={onClose} />
+      {/* Bottom */}
+      <div style={{ ...style, top: y + h, left: 0, right: 0, bottom: 0 }} onClick={onClose} />
+      {/* Left */}
+      <div style={{ ...style, top: y, left: 0, width: Math.max(0, x), height: h }} onClick={onClose} />
+      {/* Right */}
+      <div style={{ ...style, top: y, left: x + w, right: 0, height: h }} onClick={onClose} />
+      {/* Spotlight glow ring */}
+      <div style={{
+        position: "fixed",
+        top: y - 2, left: x - 2,
+        width: w + 4, height: h + 4,
+        border: "2px solid rgba(107,135,255,0.75)",
+        borderRadius: 16,
+        boxShadow: "0 0 0 1px rgba(107,135,255,0.15), 0 0 28px rgba(107,135,255,0.2), inset 0 0 20px rgba(107,135,255,0.05)",
+        pointerEvents: "none",
+        transition: "all 0.35s cubic-bezier(0.4,0,0.2,1)",
+      }} />
+    </>
+  );
+}
+
 /* ── Main component ────────────────────────────────────────────────── */
 export default function OnboardingTour() {
   const [visible, setVisible]   = useState(false);
@@ -194,6 +226,7 @@ export default function OnboardingTour() {
   const [pos, setPos]           = useState({ x: 0, y: 0 });
   const [isMobile, setIsMobile] = useState(false);
   const [ready, setReady]       = useState(false);
+  const searchParams = useSearchParams();
 
   const refreshLayout = useCallback((stepIdx: number, mobile: boolean) => {
     const s = STEPS[stepIdx];
@@ -208,21 +241,20 @@ export default function OnboardingTour() {
 
     const el = document.querySelector(s.targetSelector) as HTMLElement | null;
     if (!el) {
-      // Element not found (e.g. continue-learning for new users) → center
       setSpot(null);
       setPos(cardPos(null, "center", stepIdx, vw, vh, mobile));
       return;
     }
 
     // Scroll element into view with nav clearance
-    const scrollY = window.scrollY + el.getBoundingClientRect().top - 120;
+    const scrollY = window.scrollY + el.getBoundingClientRect().top - 130;
     window.scrollTo({ top: Math.max(0, scrollY), behavior: "smooth" });
 
     const timer = setTimeout(() => {
       const r = querySpot(s.targetSelector!);
       setSpot(r);
       setPos(cardPos(r, s.cardSide, stepIdx, vw, vh, mobile));
-    }, 450);
+    }, 420);
     return timer;
   }, []);
 
@@ -231,14 +263,20 @@ export default function OnboardingTour() {
     setIsMobile(mobile);
     setReady(true);
 
-    if (!localStorage.getItem(TOUR_KEY)) {
+    // Auto-open: either on first visit OR when ?tour=1 in URL
+    const forceOpen = searchParams.get("tour") === "1";
+    if (!localStorage.getItem(TOUR_KEY) || forceOpen) {
       const timer = setTimeout(() => {
         setVisible(true);
         refreshLayout(0, mobile);
-      }, 900);
+      }, forceOpen ? 400 : 900);
       return () => clearTimeout(timer);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  useEffect(() => {
+    if (!ready) return;
     const openHandler = () => {
       const m = window.innerWidth < 768;
       setIsMobile(m);
@@ -253,20 +291,6 @@ export default function OnboardingTour() {
       window.removeEventListener("mentora:open-tour", openHandler);
       window.removeEventListener("resize", onResize);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (!ready) return;
-    const openHandler = () => {
-      const m = window.innerWidth < 768;
-      setIsMobile(m);
-      setStep(0);
-      setVisible(true);
-      refreshLayout(0, m);
-    };
-    window.addEventListener("mentora:open-tour", openHandler);
-    return () => window.removeEventListener("mentora:open-tour", openHandler);
   }, [ready, refreshLayout]);
 
   useEffect(() => {
@@ -290,69 +314,37 @@ export default function OnboardingTour() {
   const isLast = step === STEPS.length - 1;
   const vw = typeof window !== "undefined" ? window.innerWidth : 1280;
   const cardW = Math.min(CARD_W, vw - 24);
-  const hasSpotlight = !!spot;
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 9998, pointerEvents: "none" }}>
-      {/* ── SVG backdrop with rectangular spotlight cutout ── */}
-      <svg
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "all" }}
-        onClick={() => close(true)}
-      >
-        <defs>
-          <mask id="tourMask">
-            <rect width="100%" height="100%" fill="white" />
-            {hasSpotlight && (
-              <motion.rect
-                x={spot.x} y={spot.y} width={spot.w} height={spot.h} rx={14}
-                fill="black"
-                initial={false}
-                animate={{ x: spot.x, y: spot.y, width: spot.w, height: spot.h }}
-                transition={{ type: "spring", stiffness: 220, damping: 28 }}
-              />
-            )}
-          </mask>
-        </defs>
 
-        {/* Dark overlay */}
-        <rect width="100%" height="100%" fill="rgba(4,4,18,0.68)" mask="url(#tourMask)" />
+      {/* ── 4-div spotlight overlay ───────────────────────────────── */}
+      <SpotlightOverlay spot={spot} onClose={() => close(true)} />
 
-        {/* Spotlight glow ring */}
-        {hasSpotlight && (
-          <motion.rect
-            x={spot.x - 2} y={spot.y - 2} width={spot.w + 4} height={spot.h + 4} rx={15}
-            fill="none" stroke="rgba(107,135,255,0.65)" strokeWidth="1.5"
-            initial={false}
-            animate={{ x: spot.x - 2, y: spot.y - 2, width: spot.w + 4, height: spot.h + 4 }}
-            transition={{ type: "spring", stiffness: 220, damping: 28 }}
-          />
-        )}
-      </svg>
-
-      {/* ── Connector line from card to spotlight (when not center) ── */}
-      {hasSpotlight && (
+      {/* ── Dashed connector from card to spotlight ───────────────── */}
+      {spot && (
         <svg
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+          style={{ position: "fixed", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 9999 }}
         >
           <line
             x1={pos.x + cardW / 2}
             y1={pos.y + (pos.y < spot.y ? CARD_H : 0)}
             x2={spot.x + spot.w / 2}
             y2={pos.y < spot.y ? spot.y : spot.y + spot.h}
-            stroke="rgba(107,135,255,0.25)"
+            stroke="rgba(107,135,255,0.30)"
             strokeWidth="1"
-            strokeDasharray="4 4"
+            strokeDasharray="5 4"
           />
         </svg>
       )}
 
-      {/* ── Floating card ── */}
+      {/* ── Floating card ─────────────────────────────────────────── */}
       <motion.div
         animate={{ x: pos.x, y: pos.y }}
         transition={{ type: "spring", stiffness: 240, damping: 30, mass: 0.85 }}
         style={{
-          position: "absolute", top: 0, left: 0,
-          width: cardW, pointerEvents: "all", zIndex: 9999,
+          position: "fixed", top: 0, left: 0,
+          width: cardW, pointerEvents: "all", zIndex: 10000,
         }}
       >
         {/* Step counter badge */}

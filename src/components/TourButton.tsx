@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 /** Book SVG icon — subtle, monochrome */
@@ -14,13 +15,24 @@ function BookIcon({ size = 16, color = "currentColor" }: { size?: number; color?
   );
 }
 
-function openTour() {
-  window.dispatchEvent(new CustomEvent("mentora:open-tour"));
+function useOpenTour() {
+  const pathname = usePathname();
+  const router = useRouter();
+  return () => {
+    if (pathname === "/dashboard") {
+      // Already on dashboard — dispatch event directly
+      window.dispatchEvent(new CustomEvent("mentora:open-tour"));
+    } else {
+      // Navigate to dashboard with ?tour=1 so the tour auto-opens there
+      router.push("/dashboard?tour=1");
+    }
+  };
 }
 
 /* ── Desktop button (injected into DashboardNav) ──────────────────── */
 export function TourButtonDesktop({ forceDark = false }: { forceDark?: boolean }) {
   const [hovered, setHovered] = useState(false);
+  const openTour = useOpenTour();
 
   return (
     <button
@@ -54,6 +66,7 @@ const INACTIVITY_MS = 10_000;
 export function TourButtonMobile() {
   const [visible, setVisible] = useState(false);
   const [pulsed, setPulsed] = useState(false);
+  const openTour = useOpenTour();
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
@@ -94,7 +107,7 @@ export function TourButtonMobile() {
           aria-label="Как пользоваться"
           style={{
             position: "fixed",
-            bottom: 88, // above mobile bottom nav if present
+            bottom: 88,
             right: 18,
             zIndex: 9000,
             width: 46, height: 46,
@@ -110,7 +123,6 @@ export function TourButtonMobile() {
           }}
         >
           <BookIcon size={18} />
-          {/* Pulse ring on first appearance */}
           {pulsed && (
             <motion.span
               initial={{ scale: 1, opacity: 0.6 }}
