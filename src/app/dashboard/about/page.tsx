@@ -89,15 +89,13 @@ export default function AboutPage() {
     );
   }
 
-  function Card({ children, accent = false, light = false }: { children: React.ReactNode; accent?: boolean; light?: boolean }) {
+  function Card({ children, accent = false }: { children: React.ReactNode; accent?: boolean }) {
     return (
       <div style={{
-        background: light
-          ? (accent ? "rgba(69,97,232,0.06)" : "rgba(0,0,0,0.03)")
-          : (accent ? "rgba(69,97,232,0.1)" : "rgba(255,255,255,0.04)"),
-        border: `1px solid ${accent ? "rgba(69,97,232,0.22)" : light ? "rgba(0,0,0,0.07)" : "rgba(255,255,255,0.07)"}`,
+        background: accent ? "rgba(69,97,232,0.07)" : "var(--bg-secondary)",
+        border: `1px solid ${accent ? "rgba(69,97,232,0.2)" : "var(--border-light)"}`,
         borderRadius: 20,
-        padding: "28px 28px",
+        padding: "28px",
       }}>
         {children}
       </div>
@@ -109,10 +107,25 @@ export default function AboutPage() {
   return (
     <div
       className="min-h-screen"
-      style={{ background: "#080814", color: "white", paddingBottom: 80 }}
+      style={{ color: "var(--text)", paddingBottom: 80 }}
     >
-      {/* ── Ambient ─────────────────────────────────────────────── */}
-      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+      {/* ── Ambient orbs — visible in both themes ───────────────── */}
+      <div className="fixed inset-0 pointer-events-none dark:hidden" style={{ zIndex: 0 }}>
+        <div style={{
+          position: "absolute", top: "-10%", left: "5%",
+          width: "55%", height: "50%",
+          background: "radial-gradient(ellipse, rgba(69,97,232,0.18) 0%, transparent 70%)",
+          filter: "blur(60px)",
+        }} />
+        <div style={{
+          position: "absolute", bottom: "5%", right: "5%",
+          width: "40%", height: "40%",
+          background: "radial-gradient(ellipse, rgba(167,139,250,0.14) 0%, transparent 70%)",
+          filter: "blur(60px)",
+        }} />
+      </div>
+      {/* Dark-mode ambient (kept from original) */}
+      <div className="fixed inset-0 pointer-events-none hidden dark:block" style={{ zIndex: 0 }}>
         <div style={{
           position: "absolute", top: "-10%", left: "5%",
           width: "55%", height: "50%",
@@ -135,13 +148,13 @@ export default function AboutPage() {
           <h1 style={{
             fontSize: "clamp(30px, 5vw, 52px)",
             fontWeight: 900, lineHeight: 1.1,
-            letterSpacing: "-1.5px", color: "white",
+            letterSpacing: "-1.5px", color: "var(--text)",
             margin: "20px 0 18px",
           }}>
             Ментор, которого<br />
-            <span style={{ color: "#6b87ff" }}>ты всегда хотел иметь</span>
+            <span style={{ color: "#4561E8" }} className="dark:text-[#6b87ff]">ты всегда хотел иметь</span>
           </h1>
-          <p style={{ fontSize: 17, lineHeight: 1.75, color: "rgba(255,255,255,0.52)", maxWidth: 580 }}>
+          <p style={{ fontSize: 17, lineHeight: 1.75, color: "var(--text-secondary)", maxWidth: 580 }}>
             Хороший наставник знает, как ты мыслишь. Помнит, где ты застрял в прошлый раз.
             Объясняет по-новому, если с первого раза не понял. Не устаёт. Не осуждает.
             Mentora — наша попытка сделать такого учителя доступным каждому.
@@ -152,8 +165,8 @@ export default function AboutPage() {
         {!countdown.done && (
           <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
             <div style={{
-              background: "linear-gradient(135deg, rgba(69,97,232,0.18) 0%, rgba(107,135,255,0.1) 100%)",
-              border: "1px solid rgba(107,135,255,0.25)",
+              background: "rgba(69,97,232,0.07)",
+              border: "1px solid rgba(69,97,232,0.18)",
               borderRadius: 20,
               padding: "24px 28px",
               display: "flex",
@@ -163,30 +176,30 @@ export default function AboutPage() {
               gap: 16,
             }}>
               <div>
-                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "#6b87ff", marginBottom: 4 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "#4561E8", marginBottom: 4 }}>
                   Официальный запуск
                 </div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: "white" }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: "var(--text)" }}>
                   1 июня 2026 — открытие для всех
                 </div>
-                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", marginTop: 4, lineHeight: 1.5 }}>
+                <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4, lineHeight: 1.5 }}>
                   Сейчас идёт бета — ты уже внутри. Поделись с другом, пока мест не стало меньше.
                 </p>
-              <div style={{
-                marginTop: 12,
-                display: "inline-flex", alignItems: "center", gap: 8,
-                background: "rgba(16,185,129,0.12)",
-                border: "1px solid rgba(16,185,129,0.28)",
-                borderRadius: 10,
-                padding: "7px 14px",
-              }}>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 12v10H4V12M22 7H2v5h20V7zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
-                </svg>
-                <span style={{ fontSize: 13, fontWeight: 600, color: "#10B981" }}>
-                  Каждому зарегистрированному пользователю — подарок: месяц Pro бесплатно
-                </span>
-              </div>
+                <div style={{
+                  marginTop: 12,
+                  display: "inline-flex", alignItems: "center", gap: 8,
+                  background: "rgba(16,185,129,0.1)",
+                  border: "1px solid rgba(16,185,129,0.25)",
+                  borderRadius: 10,
+                  padding: "7px 14px",
+                }}>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 12v10H4V12M22 7H2v5h20V7zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+                  </svg>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "#10B981" }}>
+                    Каждому зарегистрированному пользователю — подарок: месяц Pro бесплатно
+                  </span>
+                </div>
               </div>
               <div style={{ display: "flex", gap: 12, flexShrink: 0 }}>
                 {[
@@ -198,11 +211,11 @@ export default function AboutPage() {
                   <div key={l} style={{ textAlign: "center" as const }}>
                     <div style={{
                       fontSize: "clamp(22px, 4vw, 32px)", fontWeight: 900,
-                      color: "white", lineHeight: 1,
+                      color: "var(--text)", lineHeight: 1,
                       fontVariantNumeric: "tabular-nums",
                       fontFamily: "ui-monospace, monospace",
                     }}>{num(v)}</div>
-                    <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", marginTop: 3 }}>{l}</div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 3 }}>{l}</div>
                   </div>
                 ))}
               </div>
@@ -215,20 +228,20 @@ export default function AboutPage() {
           <div className="grid md:grid-cols-2 gap-5">
             <Card>
               <Tag color="#FF7A00">Проблема</Tag>
-              <h3 style={{ fontSize: 20, fontWeight: 800, color: "white", margin: "16px 0 10px", lineHeight: 1.25 }}>
+              <h3 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", margin: "16px 0 10px", lineHeight: 1.25 }}>
                 Репетитор — это роскошь
               </h3>
-              <p style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,0.5)" }}>
+              <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--text-secondary)" }}>
                 Средняя цена занятия в Москве — 2 500 ₽. Восемь занятий в месяц = 20 000 ₽.
                 Для большинства семей это недостижимо. А хороший учитель нужен каждому ребёнку — не только тем, чьи родители могут себе это позволить.
               </p>
             </Card>
             <Card accent>
               <Tag color="#4561E8">Решение</Tag>
-              <h3 style={{ fontSize: 20, fontWeight: 800, color: "white", margin: "16px 0 10px", lineHeight: 1.25 }}>
+              <h3 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", margin: "16px 0 10px", lineHeight: 1.25 }}>
                 Персональный ментор без ограничений
               </h3>
-              <p style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,0.5)" }}>
+              <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--text-secondary)" }}>
                 Mentora помнит тебя. Знает твой уровень, стиль мышления и пробелы.
                 Объяснит трижды разными словами, не раздражаясь. 14 предметов, 24/7,
                 без VPN — за 499 ₽ в месяц.
@@ -240,10 +253,10 @@ export default function AboutPage() {
         {/* ── HOW LEARNING WORKS ───────────────────────────────── */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
           <Tag color="#A78BFA">Как это работает</Tag>
-          <h2 style={{ fontSize: 26, fontWeight: 900, color: "white", margin: "16px 0 8px", letterSpacing: "-0.5px" }}>
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: "var(--text)", margin: "16px 0 8px", letterSpacing: "-0.5px" }}>
             Не поиск по ключевым словам —<br />живой разговор
           </h2>
-          <p style={{ fontSize: 15, color: "rgba(255,255,255,0.45)", marginBottom: 28, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 15, color: "var(--text-muted)", marginBottom: 28, lineHeight: 1.6 }}>
             Ты просто пишешь, как написал бы другу. Ментора разбирается в теме и отвечает именно тебе.
           </p>
 
@@ -272,12 +285,12 @@ export default function AboutPage() {
             ].map(item => (
               <div key={item.n}
                 className="flex gap-5 p-5 rounded-2xl"
-                style={{ background: "rgba(255,255,255,0.035)", border: "1px solid rgba(255,255,255,0.07)" }}
+                style={{ background: "var(--bg-secondary)", border: "1px solid var(--border-light)" }}
               >
                 <div style={{ color: item.color, fontSize: 12, fontWeight: 900, minWidth: 28, paddingTop: 2, flexShrink: 0 }}>{item.n}</div>
                 <div>
-                  <div style={{ fontWeight: 700, color: "white", fontSize: 14, marginBottom: 5 }}>{item.title}</div>
-                  <p style={{ fontSize: 13, lineHeight: 1.65, color: "rgba(255,255,255,0.47)" }}>{item.desc}</p>
+                  <div style={{ fontWeight: 700, color: "var(--text)", fontSize: 14, marginBottom: 5 }}>{item.title}</div>
+                  <p style={{ fontSize: 13, lineHeight: 1.65, color: "var(--text-secondary)" }}>{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -287,14 +300,13 @@ export default function AboutPage() {
         {/* ── COMPARISON TABLE ──────────────────────────────── */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
           <Tag color="#10B981">Сравнение</Tag>
-          <h2 style={{ fontSize: 26, fontWeight: 900, color: "white", margin: "16px 0 6px", letterSpacing: "-0.5px" }}>
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: "var(--text)", margin: "16px 0 6px", letterSpacing: "-0.5px" }}>
             Mentora против альтернатив
           </h2>
-          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", marginBottom: 24, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 24, lineHeight: 1.6 }}>
             Мы честно сравниваем — включая свои ограничения.
           </p>
 
-          {/* Table */}
           <div style={{ overflowX: "auto" as const }}>
             <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 0 }}>
               <thead>
@@ -303,12 +315,12 @@ export default function AboutPage() {
                     <th key={h} style={{
                       padding: "10px 14px",
                       fontSize: 12, fontWeight: 700, textAlign: "left" as const,
-                      color: i === 3 ? "#6b87ff" : "rgba(255,255,255,0.4)",
-                      background: i === 3 ? "rgba(69,97,232,0.12)" : "rgba(255,255,255,0.03)",
-                      borderBottom: i === 3 ? "1px solid rgba(107,135,255,0.3)" : "1px solid rgba(255,255,255,0.06)",
-                      borderTop: i === 3 ? "1px solid rgba(107,135,255,0.3)" : "1px solid rgba(255,255,255,0.06)",
-                      borderLeft: i === 3 ? "1px solid rgba(107,135,255,0.3)" : i === 0 ? "1px solid rgba(255,255,255,0.06)" : "none",
-                      borderRight: i === 3 ? "1px solid rgba(107,135,255,0.3)" : i === 4 ? "1px solid rgba(255,255,255,0.06)" : "none",
+                      color: i === 3 ? "#4561E8" : "var(--text-muted)",
+                      background: i === 3 ? "rgba(69,97,232,0.09)" : "var(--bg-secondary)",
+                      borderBottom: i === 3 ? "1px solid rgba(69,97,232,0.22)" : "1px solid var(--border)",
+                      borderTop: "1px solid var(--border-light)",
+                      borderLeft: i === 3 ? "1px solid rgba(69,97,232,0.22)" : i === 0 ? "1px solid var(--border-light)" : "none",
+                      borderRight: i === 3 ? "1px solid rgba(69,97,232,0.22)" : i === 4 ? "1px solid var(--border-light)" : "none",
                       borderRadius: i === 0 ? "12px 0 0 0" : i === 4 ? "0 12px 0 0" : 0,
                       whiteSpace: "nowrap" as const,
                       letterSpacing: "0.03em",
@@ -320,68 +332,36 @@ export default function AboutPage() {
               </thead>
               <tbody>
                 {[
-                  {
-                    criterion: "Знает твой уровень",
-                    search: "✗", ai: "Частично", mentora: "✓", tutor: "✓",
-                    note: "Ментора запоминает профиль с первого диалога",
-                  },
-                  {
-                    criterion: "Помнит прошлые сессии",
-                    search: "✗", ai: "✗", mentora: "✓", tutor: "Обычно",
-                    note: "История и прогресс хранятся бессрочно",
-                  },
-                  {
-                    criterion: "Доступен в 3 часа ночи",
-                    search: "✓", ai: "✓", mentora: "✓", tutor: "✗",
-                    note: "",
-                  },
-                  {
-                    criterion: "Объясняет, а не ищет",
-                    search: "✗", ai: "✓", mentora: "✓", tutor: "✓",
-                    note: "Поисковик даёт ссылки — разбираться приходится самому",
-                  },
-                  {
-                    criterion: "Настроен на рос. программу",
-                    search: "Частично", ai: "✗", mentora: "✓", tutor: "✓",
-                    note: "Контекст, терминология и задания адаптированы",
-                  },
-                  {
-                    criterion: "Стоимость в месяц",
-                    search: "Бесплатно", ai: "~2 000 ₽", mentora: "499 ₽", tutor: "12 000+ ₽",
-                    note: "",
-                  },
-                  {
-                    criterion: "Объяснит 10 раз по-разному",
-                    search: "✗", ai: "✓", mentora: "✓", tutor: "Не всегда",
-                    note: "Репетитор тоже устаёт объяснять одно и то же",
-                  },
-                  {
-                    criterion: "Живая эмпатия",
-                    search: "✗", ai: "✗", mentora: "✗", tutor: "✓",
-                    note: "Честный минус — настоящего человека AI не заменит",
-                  },
+                  { criterion: "Знает твой уровень",       search: "✗", ai: "Частично", mentora: "✓", tutor: "✓",         note: "Ментора запоминает профиль с первого диалога" },
+                  { criterion: "Помнит прошлые сессии",     search: "✗", ai: "✗",        mentora: "✓", tutor: "Обычно",    note: "История и прогресс хранятся бессрочно" },
+                  { criterion: "Доступен в 3 часа ночи",    search: "✓", ai: "✓",        mentora: "✓", tutor: "✗",         note: "" },
+                  { criterion: "Объясняет, а не ищет",      search: "✗", ai: "✓",        mentora: "✓", tutor: "✓",         note: "Поисковик даёт ссылки — разбираться приходится самому" },
+                  { criterion: "Настроен на рос. программу",search: "Частично", ai: "✗", mentora: "✓", tutor: "✓",         note: "Контекст, терминология и задания адаптированы" },
+                  { criterion: "Стоимость в месяц",         search: "Бесплатно", ai: "~2 000 ₽", mentora: "499 ₽", tutor: "12 000+ ₽", note: "" },
+                  { criterion: "Объяснит 10 раз по-разному",search: "✗", ai: "✓",        mentora: "✓", tutor: "Не всегда", note: "Репетитор тоже устаёт объяснять одно и то же" },
+                  { criterion: "Живая эмпатия",             search: "✗", ai: "✗",        mentora: "✗", tutor: "✓",         note: "Честный минус — настоящего человека AI не заменит" },
                 ].map((row, ri) => {
                   const isLast = ri === 7;
                   const cellStyle = (i: number, val: string): React.CSSProperties => ({
                     padding: "11px 14px",
                     fontSize: 13,
                     color: val === "✓" ? "#10B981"
-                      : val === "✗" ? "rgba(255,255,255,0.25)"
-                      : i === 3 ? "#a5b4fc"
-                      : "rgba(255,255,255,0.5)",
+                      : val === "✗" ? "var(--text-muted)"
+                      : i === 3 ? "#4561E8"
+                      : "var(--text-secondary)",
                     fontWeight: val === "✓" || val === "✗" ? 700 : 500,
-                    background: i === 3 ? "rgba(69,97,232,0.08)" : i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
-                    borderBottom: isLast ? "1px solid rgba(255,255,255,0.06)" : "1px solid rgba(255,255,255,0.04)",
-                    borderLeft: i === 3 ? "1px solid rgba(107,135,255,0.2)" : i === 0 ? "1px solid rgba(255,255,255,0.06)" : "none",
-                    borderRight: i === 3 ? "1px solid rgba(107,135,255,0.2)" : i === 4 ? "1px solid rgba(255,255,255,0.06)" : "none",
+                    background: i === 3 ? "rgba(69,97,232,0.06)" : ri % 2 === 0 ? "var(--bg-secondary)" : "transparent",
+                    borderBottom: isLast ? "1px solid var(--border-light)" : "1px solid var(--border-light)",
+                    borderLeft: i === 3 ? "1px solid rgba(69,97,232,0.18)" : i === 0 ? "1px solid var(--border-light)" : "none",
+                    borderRight: i === 3 ? "1px solid rgba(69,97,232,0.18)" : i === 4 ? "1px solid var(--border-light)" : "none",
                     borderRadius: isLast && i === 0 ? "0 0 0 12px" : isLast && i === 4 ? "0 0 12px 0" : 0,
                     lineHeight: 1.4,
                   });
                   return (
                     <tr key={row.criterion}>
                       <td style={cellStyle(0, "")}>
-                        <div style={{ color: "rgba(255,255,255,0.7)", fontWeight: 600, fontSize: 13 }}>{row.criterion}</div>
-                        {row.note && <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 2, lineHeight: 1.4 }}>{row.note}</div>}
+                        <div style={{ color: "var(--text)", fontWeight: 600, fontSize: 13 }}>{row.criterion}</div>
+                        {row.note && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2, lineHeight: 1.4 }}>{row.note}</div>}
                       </td>
                       <td style={cellStyle(1, row.search)}>{row.search}</td>
                       <td style={cellStyle(2, row.ai)}>{row.ai}</td>
@@ -398,16 +378,16 @@ export default function AboutPage() {
         {/* ── VALUES ───────────────────────────────────────────── */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
           <Tag color="#FF7A00">Ценности</Tag>
-          <h2 style={{ fontSize: 26, fontWeight: 900, color: "white", margin: "16px 0 24px", letterSpacing: "-0.5px" }}>Во что мы верим</h2>
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: "var(--text)", margin: "16px 0 24px", letterSpacing: "-0.5px" }}>Во что мы верим</h2>
           <div className="grid md:grid-cols-2 gap-4">
             {VALUES.map(v => (
               <div key={v.title}
                 className="flex gap-4 p-5 rounded-2xl"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+                style={{ background: "var(--bg-secondary)", border: "1px solid var(--border-light)" }}
               >
                 <div style={{
                   width: 40, height: 40, borderRadius: 12, flexShrink: 0,
-                  background: `${v.color}18`, border: `1px solid ${v.color}35`,
+                  background: `${v.color}16`, border: `1px solid ${v.color}30`,
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke={v.color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -415,8 +395,8 @@ export default function AboutPage() {
                   </svg>
                 </div>
                 <div>
-                  <div style={{ fontWeight: 700, color: "white", fontSize: 14, marginBottom: 5 }}>{v.title}</div>
-                  <p style={{ fontSize: 13, lineHeight: 1.65, color: "rgba(255,255,255,0.48)" }}>{v.desc}</p>
+                  <div style={{ fontWeight: 700, color: "var(--text)", fontSize: 14, marginBottom: 5 }}>{v.title}</div>
+                  <p style={{ fontSize: 13, lineHeight: 1.65, color: "var(--text-secondary)" }}>{v.desc}</p>
                 </div>
               </div>
             ))}
@@ -426,26 +406,26 @@ export default function AboutPage() {
         {/* ── ROADMAP ──────────────────────────────────────────── */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
           <Tag color="#6366F1">Дорожная карта</Tag>
-          <h2 style={{ fontSize: 26, fontWeight: 900, color: "white", margin: "16px 0 28px", letterSpacing: "-0.5px" }}>Куда мы движемся</h2>
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: "var(--text)", margin: "16px 0 28px", letterSpacing: "-0.5px" }}>Куда мы движемся</h2>
 
-          <div className="relative pl-6" style={{ borderLeft: "1px solid rgba(255,255,255,0.08)" }}>
+          <div className="relative pl-6" style={{ borderLeft: "1px solid var(--border)" }}>
             {TIMELINE.map(item => (
               <div key={item.q} className="relative mb-6 last:mb-0">
                 <div className="absolute -left-8 top-1 w-3 h-3 rounded-full" style={{
-                  background: item.done ? "#4561E8" : "rgba(255,255,255,0.12)",
-                  border: item.done ? "none" : "1px solid rgba(255,255,255,0.2)",
-                  boxShadow: item.done ? "0 0 10px rgba(69,97,232,0.6)" : "none",
+                  background: item.done ? "#4561E8" : "var(--border)",
+                  border: item.done ? "none" : "1px solid var(--border)",
+                  boxShadow: item.done ? "0 0 10px rgba(69,97,232,0.5)" : "none",
                 }} />
                 <div className="flex items-start gap-3 flex-wrap">
                   <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{
-                    background: item.done ? "rgba(69,97,232,0.2)" : "rgba(255,255,255,0.06)",
-                    color: item.done ? "#6b87ff" : "rgba(255,255,255,0.35)",
+                    background: item.done ? "rgba(69,97,232,0.12)" : "var(--bg-secondary)",
+                    color: item.done ? "#4561E8" : "var(--text-muted)",
                     flexShrink: 0,
                   }}>
                     {item.q}
                   </span>
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: "white", marginBottom: 3 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text)", marginBottom: 3 }}>
                       {item.label}
                       {item.done && (
                         <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 400, color: "#4561E8" }}>
@@ -455,7 +435,7 @@ export default function AboutPage() {
                         </span>
                       )}
                     </div>
-                    <p style={{ fontSize: 12, color: "rgba(255,255,255,0.38)", lineHeight: 1.5 }}>{item.desc}</p>
+                    <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5 }}>{item.desc}</p>
                   </div>
                 </div>
               </div>
@@ -466,7 +446,7 @@ export default function AboutPage() {
         {/* ── ULTIMA NOTE ──────────────────────────────────────── */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
           <div style={{
-            background: "rgba(245,158,11,0.08)",
+            background: "rgba(245,158,11,0.07)",
             border: "1px solid rgba(245,158,11,0.2)",
             borderRadius: 16,
             padding: "16px 20px",
@@ -479,7 +459,7 @@ export default function AboutPage() {
             </svg>
             <div>
               <div style={{ fontSize: 13, fontWeight: 700, color: "#F59E0B", marginBottom: 4 }}>Про тариф Ultima</div>
-              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.6 }}>
+              <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6 }}>
                 Мы активно разрабатываем новые функции. Часть возможностей, описанных в тарифе Ultima,
                 ещё находится в тестировании и будет запускаться поэтапно до 1 июня 2026 года.
                 Все подписчики Ultima получат доступ к ним автоматически по мере появления.
@@ -490,15 +470,15 @@ export default function AboutPage() {
 
         {/* ── CTA ──────────────────────────────────────────────── */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-4 text-center">
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.3)", marginBottom: 14 }}>
+          <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 14 }}>
             Вопросы, партнёрство, обратная связь
           </p>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, flexWrap: "wrap" as const }}>
-            <a href="mailto:hello@mentora.su" style={{ fontSize: 14, fontWeight: 500, color: "rgba(255,255,255,0.45)", textDecoration: "underline", textDecorationStyle: "dotted" as const }}>
+            <a href="mailto:hello@mentora.su" style={{ fontSize: 14, fontWeight: 500, color: "var(--text-secondary)", textDecoration: "underline", textDecorationStyle: "dotted" as const }}>
               hello@mentora.su
             </a>
-            <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
-            <Link href="/dashboard" style={{ fontSize: 14, fontWeight: 500, color: "#6b87ff" }}>
+            <span style={{ color: "var(--border)" }}>·</span>
+            <Link href="/dashboard" style={{ fontSize: 14, fontWeight: 500, color: "#4561E8" }}>
               Вернуться к учёбе →
             </Link>
           </div>

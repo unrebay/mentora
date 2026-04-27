@@ -6,7 +6,7 @@ import OnboardingTour from "@/components/OnboardingTour";
 import { TourButtonMobile } from "@/components/TourButton";
 
 // Pages with a forced dark background — nav should always be dark on these
-const DARK_PAGES = ["/dashboard/about"];
+const DARK_PAGES: string[] = [];
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
