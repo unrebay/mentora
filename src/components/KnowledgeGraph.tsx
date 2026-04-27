@@ -67,11 +67,9 @@ function getStatus(id: string, progress: UserProgress[]): Status {
   return "beta";
 }
 
-// ── Smaller radii: stars, not planets ────────────────────────────────────────
 function getRadius(status: Status, xp = 0): number {
   if (status === "beta") return 5;
   if (status === "full") return 8;
-  // active / active_full: base 6, tiny XP bonus up to +4
   const bonus = Math.min(4, Math.sqrt(Math.max(0, xp)) * 0.15);
   return Math.round(6 + bonus);
 }
@@ -82,8 +80,8 @@ function seededRand(seed: number): number {
 }
 
 // ── Zoom config ───────────────────────────────────────────────────────────────
-const ZOOM_MAX = 3.0;   // how close we fly in
-const ZOOM_MS  = 700;   // ms for zoom animation
+const ZOOM_MAX = 3.2;
+const ZOOM_MS  = 800;
 
 function easeInOut(t: number): number {
   return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
@@ -91,44 +89,53 @@ function easeInOut(t: number): number {
 
 interface ZoomState {
   id:       string | null;
-  cx:       number;
+  cx:       number;   // canvas-space star coords
   cy:       number;
   phase:    "idle" | "in" | "done" | "out";
-  startT:   number;   // performance.now() at phase start
+  startT:   number;
   progress: number;   // 0..1
+}
+
+// Topics stored as orbital parameters, not static coords
+interface TopicOrbit {
+  label:      string;
+  baseAngle:  number;   // radians, starting angle
+  orbitR:     number;   // pixels orbit radius
+  speed:      number;   // rad/ms (tiny, can be negative for CCW)
+  phase:      number;   // phase offset for pulse animation
+  baseR:      number;   // dot radius
 }
 
 interface GNode {
   id: string; label: string; emoji: string; status: Status;
   x: number; y: number; r: number; xp: number; phase: number;
-  // decorative orbiting dots (not clickable directly — appear after zoom)
-  topics: { x: number; y: number; label: string; phase: number; baseR: number }[];
+  topics: TopicOrbit[];
 }
 
 function buildGraph(W: number, H: number, progress: UserProgress[]): GNode[] {
-  const nodes: GNode[] = SUBJECTS.map((s, si) => {
+  return SUBJECTS.map((s, si) => {
     const status = getStatus(s.id, progress);
     const xp = progress.find(x => x.subject === s.id)?.xp_total ?? 0;
     const r = getRadius(status, xp);
     const pos = LAYOUT[s.id] ?? { cx: 0.5, cy: 0.5 };
     const cx = pos.cx * W, cy = pos.cy * H;
     const topicLabels = TOPICS[s.id] ?? [];
-    const topics = topicLabels.map((label, i) => {
-      const seed1 = si * 100 + i * 7;
+
+    const topics: TopicOrbit[] = topicLabels.map((label, i) => {
+      const seed = si * 100 + i * 7;
       const baseAngle = (i / topicLabels.length) * Math.PI * 2 - Math.PI / 2;
-      const angleJitter = (seededRand(seed1) - 0.5) * 0.3;
-      const angle = baseAngle + angleJitter;
-      const minCircumference = topicLabels.length * 30;
-      const minOrbit = Math.max(r * 4 + 8, minCircumference / (2 * Math.PI));
-      const orbitR = minOrbit + seededRand(seed1 + 1) * 12;
-      const baseR = 1.2 + seededRand(seed1 + 2) * 0.8;
-      return { x: cx + Math.cos(angle) * orbitR, y: cy + Math.sin(angle) * orbitR,
-               label, phase: seededRand(seed1 + 50) * Math.PI * 2, baseR };
+      // orbit radius: enough that N dots don't overlap
+      const minOrbit = Math.max(r * 5 + 14, topicLabels.length * 8);
+      const orbitR = minOrbit + seededRand(seed + 1) * 18;
+      // slow orbit — some CW, some CCW
+      const speed = (seededRand(seed + 3) * 0.3 + 0.15) * (seededRand(seed + 4) > 0.5 ? 1 : -1) * 0.00005;
+      const baseR = 1.1 + seededRand(seed + 2) * 0.7;
+      return { label, baseAngle, orbitR, speed, phase: seededRand(seed + 50) * Math.PI * 2, baseR };
     });
+
     return { id: s.id, label: s.title, emoji: s.emoji, status, x: cx, y: cy, r, xp,
              phase: seededRand(si * 13) * Math.PI * 2, topics };
   });
-  return nodes;
 }
 
 const BG_STARS = Array.from({ length: 200 }, (_, i) => ({
@@ -164,68 +171,95 @@ function render(
 ) {
   ctx.clearRect(0, 0, W, H);
 
-  // Apply zoom transform: fly toward the target star
+  // ── FIXED zoom transform: smooth, no jump at t=0 ─────────────────────────
+  // Formula: star at (cx,cy) moves smoothly to screen center (W/2,H/2)
+  // tx(t) = t * (W/2 - cx*ZOOM_MAX)  →  at t=0: tx=0 (identity), at t=1: star centered
   const scale = 1 + (ZOOM_MAX - 1) * zoom.progress;
-  const tx = zoom.cx !== 0 ? W / 2 - zoom.cx * scale : 0;
-  const ty = zoom.cy !== 0 ? H / 2 - zoom.cy * scale : 0;
+  const tx = zoom.progress * (W / 2 - zoom.cx * ZOOM_MAX);
+  const ty = zoom.progress * (H / 2 - zoom.cy * ZOOM_MAX);
 
   ctx.save();
-  if (zoom.progress > 0) {
+  if (zoom.progress > 0.001) {
     ctx.translate(tx, ty);
     ctx.scale(scale, scale);
   }
 
   drawBg(ctx, W, H, t);
 
-  // Connection lines (decorative — faint always, slightly visible when active)
+  // ── Topic orbit dots — always visible around every star ───────────────────
   for (const n of nodes) {
-    const pal = PAL[n.status], isActive = n.id === activeId;
-    if (!isActive && zoom.phase !== "idle" && n.id !== zoom.id) continue; // hide other connections during zoom
-    for (const tp of n.topics) {
-      ctx.save();
-      ctx.strokeStyle = pal.ring.replace(/[\d.]+\)$/, `${isActive ? 0.18 : 0.04})`);
-      ctx.lineWidth = isActive ? 0.5 : 0.25;
-      ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(tp.x, tp.y);
-      ctx.stroke(); ctx.restore();
-    }
-  }
+    const pal = PAL[n.status];
+    const isActive = n.id === activeId;
+    const isZoomedTarget = zoom.id === n.id && zoom.phase === "done";
+    const isAnyZoom = zoom.phase !== "idle";
 
-  // Topic dots — small decorative dots (not clickable)
-  for (const n of nodes) {
-    const pal = PAL[n.status], isActive = n.id === activeId;
-    // Only render topic dots for the active/hovered star, and fade them out during zoom-out
-    if (!isActive && !(zoom.id === n.id && zoom.phase !== "idle")) continue;
-    const dotOpacityMultiplier = zoom.id === n.id && zoom.phase === "done" ? 0 : 1; // hide when panel is shown
+    // Hide dots for zoomed target (panel takes over)
+    if (isZoomedTarget) continue;
+
+    // Fade all non-target dots when zooming in on another star
+    let nodeAlpha = 1;
+    if (isAnyZoom && zoom.id !== n.id) {
+      nodeAlpha = Math.max(0, 1 - zoom.progress * 0.85);
+    }
+    if (nodeAlpha < 0.01) continue;
+
     n.topics.forEach((tp) => {
-      const sh = 0.6 + 0.4 * Math.sin(t * 0.0005 + tp.phase);
-      const opacity = (0.45 + 0.35 * sh) * dotOpacityMultiplier;
-      const dotR = tp.baseR * (1 + 0.3 * sh);
+      // Animated orbit position
+      const angle = tp.baseAngle + tp.speed * t;
+      const tpx = n.x + Math.cos(angle) * tp.orbitR;
+      const tpy = n.y + Math.sin(angle) * tp.orbitR;
+
+      const pulse = 0.7 + 0.3 * Math.sin(t * 0.001 + tp.phase);
+      // Base opacity: faint for idle stars, visible for hovered/active
+      const baseOp = isActive ? 0.65 : 0.14;
+      const opacity = baseOp * pulse * nodeAlpha;
+
+      // Glow halo
+      const gR = tp.baseR * (isActive ? 5 : 3.5);
+      const grad = ctx.createRadialGradient(tpx, tpy, 0, tpx, tpy, gR);
+      grad.addColorStop(0, pal.glow.replace(/[\d.]+\)$/, `${opacity * 0.55})`));
+      grad.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(tpx, tpy, gR, 0, Math.PI * 2); ctx.fill();
+
+      // Core dot
       ctx.save();
-      const g = ctx.createRadialGradient(tp.x, tp.y, 0, tp.x, tp.y, dotR * 3);
-      g.addColorStop(0, pal.glow.replace(/[\d.]+\)$/, `${opacity * 0.6})`));
-      g.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(tp.x, tp.y, dotR * 3, 0, Math.PI * 2); ctx.fill();
-      ctx.shadowBlur = 4; ctx.shadowColor = pal.glow;
-      ctx.fillStyle = pal.core; ctx.globalAlpha = opacity;
-      ctx.beginPath(); ctx.arc(tp.x, tp.y, dotR, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = opacity;
+      ctx.shadowBlur = isActive ? 7 : 3;
+      ctx.shadowColor = pal.glow;
+      ctx.fillStyle = pal.core;
+      ctx.beginPath(); ctx.arc(tpx, tpy, tp.baseR * (1 + 0.2 * pulse), 0, Math.PI * 2);
+      ctx.fill();
       ctx.restore();
+
+      // Topic label on hover
+      if (isActive) {
+        ctx.save();
+        ctx.globalAlpha = opacity * 0.92;
+        ctx.font = '9px "Golos Text", system-ui';
+        ctx.textAlign = "center"; ctx.textBaseline = "top";
+        ctx.fillStyle = "#fff";
+        ctx.shadowColor = "rgba(0,0,0,0.95)"; ctx.shadowBlur = 10;
+        ctx.fillText(tp.label, tpx, tpy + tp.baseR + 3);
+        ctx.restore();
+      }
     });
   }
 
-  // Subject stars — draw smaller, all still visible
+  // ── Subject stars ─────────────────────────────────────────────────────────
   for (const n of [...nodes].sort((a, b) => a.r - b.r)) {
     const isActive = n.id === activeId;
     const sh = 0.72 + 0.28 * Math.sin(t * 0.0007 + n.phase);
     const pal = PAL[n.status];
 
-    // Fade non-zoomed stars when zooming toward one
+    // Fade non-target stars during zoom
     let globalAlpha = 1;
     if (zoom.phase !== "idle" && zoom.id !== n.id) {
-      globalAlpha = 1 - zoom.progress * 0.6;
+      globalAlpha = 1 - zoom.progress * 0.7;
     }
+    if (globalAlpha < 0.01) continue;
     ctx.save(); ctx.globalAlpha = globalAlpha;
 
-    // Glow halo
     const glowR = n.r * (isActive ? 5 : 3.5) * sh;
     const coreR = n.r * (isActive ? 1.3 : 1) * sh;
     const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, glowR);
@@ -238,19 +272,17 @@ function render(
       ctx.fillStyle = g2; ctx.beginPath(); ctx.arc(n.x, n.y, glowR * 1.8, 0, Math.PI * 2); ctx.fill();
     }
 
-    // Core star
     ctx.shadowBlur = isActive ? 18 * sh : 10 * sh; ctx.shadowColor = pal.glow;
     ctx.fillStyle = pal.core;
     ctx.beginPath(); ctx.arc(n.x, n.y, coreR, 0, Math.PI * 2); ctx.fill();
 
-    // Ring
     ctx.strokeStyle = pal.ring; ctx.lineWidth = isActive ? 1.2 : 0.6;
     ctx.shadowBlur = isActive ? 8 : 4;
     ctx.beginPath(); ctx.arc(n.x, n.y, coreR + 3 * sh, 0, Math.PI * 2); ctx.stroke();
     ctx.restore();
 
-    // Label — only when not zooming away from this star
-    if (globalAlpha > 0.1) {
+    // Label
+    if (globalAlpha > 0.08) {
       ctx.save(); ctx.globalAlpha = globalAlpha;
       ctx.font = isActive ? 'bold 12px "Golos Text", system-ui' : '500 10px "Golos Text", system-ui';
       ctx.textAlign = "center"; ctx.textBaseline = "top";
@@ -261,6 +293,8 @@ function render(
       ctx.restore();
     }
   }
+
+  ctx.restore(); // end zoom transform
 }
 
 export default function KnowledgeGraph({ className = "", userProgress = [] }: Props) {
@@ -271,15 +305,47 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
   const clickStart = useRef({ x: 0, y: 0 });
   const touchStart = useRef({ x: 0, y: 0, t: 0 });
   const t0Ref      = useRef<number>(0);
+  const zoomRef    = useRef<ZoomState>({ id: null, cx: 0, cy: 0, phase: "idle", startT: 0, progress: 0 });
 
-  const zoomRef = useRef<ZoomState>({ id: null, cx: 0, cy: 0, phase: "idle", startT: 0, progress: 0 });
-
-  const [activeId,  setActiveId]  = useState<string | null>(null);
-  const [showPanel, setShowPanel] = useState(false);
-  const [panelId,   setPanelId]   = useState<string | null>(null);
-  // panel slide-in animation
+  const [activeId,     setActiveId]     = useState<string | null>(null);
+  const [showPanel,    setShowPanel]    = useState(false);
+  const [panelId,      setPanelId]      = useState<string | null>(null);
   const [panelVisible, setPanelVisible] = useState(false);
+  const [isZoomed,     setIsZoomed]     = useState(false); // for back button
 
+  // ── Glass hint pill ───────────────────────────────────────────────────────
+  const [hintMounted,  setHintMounted]  = useState(false); // in DOM
+  const [hintVisible,  setHintVisible]  = useState(false); // CSS transition
+  const hintTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const lastInteractionRef = useRef<number>(Date.now());
+
+  const showHintPill = useCallback(() => {
+    setHintMounted(true);
+    requestAnimationFrame(() => requestAnimationFrame(() => setHintVisible(true)));
+  }, []);
+
+  const hideHintPill = useCallback(() => {
+    setHintVisible(false);
+    setTimeout(() => setHintMounted(false), 400);
+  }, []);
+
+  const scheduleHint = useCallback(() => {
+    clearTimeout(hintTimerRef.current);
+    hintTimerRef.current = setTimeout(showHintPill, 5000);
+  }, [showHintPill]);
+
+  const resetHint = useCallback(() => {
+    lastInteractionRef.current = Date.now();
+    hideHintPill();
+    scheduleHint();
+  }, [hideHintPill, scheduleHint]);
+
+  useEffect(() => {
+    scheduleHint();
+    return () => clearTimeout(hintTimerRef.current);
+  }, [scheduleHint]);
+
+  // ── Canvas init ───────────────────────────────────────────────────────────
   const init = useCallback(() => {
     const canvas = canvasRef.current; if (!canvas) return;
     const p = canvas.parentElement!;
@@ -308,6 +374,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
             zoom.phase = "done";
             zoom.progress = 1;
             setShowPanel(true);
+            setIsZoomed(true);
             setTimeout(() => setPanelVisible(true), 20);
           } else {
             zoom.phase = "idle";
@@ -316,6 +383,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
             setShowPanel(false);
             setPanelVisible(false);
             setPanelId(null);
+            setIsZoomed(false);
           }
         }
       }
@@ -334,48 +402,48 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
   const startZoomIn = useCallback((id: string) => {
     const node = nodesRef.current.find(n => n.id === id);
     if (!node) return;
+    resetHint();
     zoomRef.current = { id, cx: node.x, cy: node.y, phase: "in", startT: performance.now(), progress: 0 };
     setPanelId(id);
     setShowPanel(false);
     setPanelVisible(false);
-  }, []);
+  }, [resetHint]);
 
   const startZoomOut = useCallback(() => {
     const zoom = zoomRef.current;
     if (zoom.phase === "idle") return;
+    resetHint();
     setPanelVisible(false);
     setTimeout(() => {
       zoomRef.current = { ...zoom, phase: "out", startT: performance.now(), progress: zoom.progress };
       setShowPanel(false);
-    }, 180); // let panel slide out first
-  }, []);
+    }, 180);
+  }, [resetHint]);
 
   const hitSubject = useCallback((mx: number, my: number) => {
     let best: GNode | null = null, bestD = Infinity;
     for (const n of nodesRef.current) {
       const d = Math.hypot(n.x - mx, n.y - my);
-      // Hit area scales with zoom so it's always easy to tap
       const hitR = n.r * 4 + 12;
       if (d < hitR && d < bestD) { bestD = d; best = n; }
     }
     return best;
   }, []);
 
-  // Convert screen coords to canvas-space (accounting for zoom transform)
+  // Convert screen → canvas-space accounting for zoom
   const toCanvasSpace = useCallback((screenX: number, screenY: number): [number, number] => {
     const c = canvasRef.current; if (!c) return [screenX, screenY];
     const rect = c.getBoundingClientRect();
     const mx = screenX - rect.left, my = screenY - rect.top;
     const zoom = zoomRef.current;
-    if (zoom.progress === 0) return [mx, my];
+    if (zoom.progress < 0.001) return [mx, my];
     const scale = 1 + (ZOOM_MAX - 1) * zoom.progress;
-    const tx = c.clientWidth / 2 - zoom.cx * scale;
-    const ty = c.clientHeight / 2 - zoom.cy * scale;
+    const tx = zoom.progress * (c.clientWidth / 2 - zoom.cx * ZOOM_MAX);
+    const ty = zoom.progress * (c.clientHeight / 2 - zoom.cy * ZOOM_MAX);
     return [(mx - tx) / scale, (my - ty) / scale];
   }, []);
 
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    // Disable hover when zoomed-in (panel visible)
     if (zoomRef.current.phase === "done") return;
     const [cx, cy] = toCanvasSpace(e.clientX, e.clientY);
     const s = hitSubject(cx, cy);
@@ -394,14 +462,8 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
   const onClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (Math.hypot(e.clientX - clickStart.current.x, e.clientY - clickStart.current.y) > 10) return;
     const zoom = zoomRef.current;
-
-    // If panel is open, click on canvas = zoom out
-    if (zoom.phase === "done") {
-      startZoomOut();
-      return;
-    }
-    if (zoom.phase === "in" || zoom.phase === "out") return; // animating
-
+    if (zoom.phase === "done") { startZoomOut(); return; }
+    if (zoom.phase === "in" || zoom.phase === "out") return;
     const [cx, cy] = toCanvasSpace(e.clientX, e.clientY);
     const s = hitSubject(cx, cy);
     if (s) {
@@ -420,10 +482,8 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
     const dy = e.changedTouches[0].clientY - touchStart.current.y;
     if (Math.hypot(dx, dy) > 14 || Date.now() - touchStart.current.t > 420) return;
     const zoom = zoomRef.current;
-
     if (zoom.phase === "done") { startZoomOut(); return; }
     if (zoom.phase === "in" || zoom.phase === "out") return;
-
     const [cx, cy] = toCanvasSpace(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
     const s = hitSubject(cx, cy);
     if (s) startZoomIn(s.id);
@@ -438,6 +498,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
 
   return (
     <div className={`relative w-full h-full ${className}`} style={{ background: "#06060f" }}>
+
       {/* Legend */}
       <div className="absolute top-4 right-4 flex flex-col gap-1.5 z-10 pointer-events-none">
         {([
@@ -452,12 +513,69 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
         ))}
       </div>
 
-      {/* Hint */}
-      <p className="absolute top-4 left-4 z-10 text-[10px] text-white/25 pointer-events-none">
-        {showPanel ? "Тапни на космос — вернуться" : "Нажми на звезду"}
-      </p>
+      {/* ── Glass pill hint — appears after 5s idle ────────────────────────── */}
+      {hintMounted && (
+        <div
+          className="absolute bottom-28 left-1/2 z-30 pointer-events-none"
+          style={{
+            transform: `translateX(-50%) translateY(${hintVisible ? "0px" : "12px"}) scale(${hintVisible ? 1 : 0.88})`,
+            opacity: hintVisible ? 1 : 0,
+            transition: "transform 0.45s cubic-bezier(0.34,1.2,0.64,1), opacity 0.35s ease",
+          }}
+        >
+          <div
+            style={{
+              background: "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)",
+              backdropFilter: "blur(20px) saturate(1.6)",
+              WebkitBackdropFilter: "blur(20px) saturate(1.6)",
+              border: "1px solid rgba(255,255,255,0.18)",
+              borderRadius: "999px",
+              padding: "10px 20px",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.12) inset, 0 -1px 0 rgba(0,0,0,0.2) inset",
+            }}
+            className="flex items-center gap-2.5"
+          >
+            {/* Pulsing dot */}
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-40" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-white/70" />
+            </span>
+            <span className="text-xs font-medium text-white/85 whitespace-nowrap" style={{ letterSpacing: "0.01em" }}>
+              Нажми на звезду
+            </span>
+          </div>
+        </div>
+      )}
 
-      {/* ── Topics panel — slides up after zoom ─────────────────────────── */}
+      {/* ── Back button — visible when zoomed in ──────────────────────────── */}
+      <div
+        className="absolute top-4 left-4 z-30"
+        style={{
+          transition: "opacity 0.3s ease, transform 0.3s cubic-bezier(0.34,1.2,0.64,1)",
+          opacity: isZoomed ? 1 : 0,
+          transform: isZoomed ? "translateX(0)" : "translateX(-12px)",
+          pointerEvents: isZoomed ? "auto" : "none",
+        }}
+      >
+        <button
+          onClick={startZoomOut}
+          className="flex items-center gap-2 rounded-full text-xs font-medium text-white/80 hover:text-white transition-colors"
+          style={{
+            background: "rgba(255,255,255,0.08)",
+            backdropFilter: "blur(16px)",
+            border: "1px solid rgba(255,255,255,0.14)",
+            padding: "8px 14px 8px 10px",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Галактика
+        </button>
+      </div>
+
+      {/* ── Topics panel — slides up after zoom ───────────────────────────── */}
       {showPanel && panelNode && panelSub && (
         <div
           className="absolute inset-x-0 bottom-0 z-40 pointer-events-auto"
