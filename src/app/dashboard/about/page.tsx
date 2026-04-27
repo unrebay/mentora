@@ -502,10 +502,11 @@ export default function AboutPage() {
                   boxShadow: item.done ? "0 0 10px rgba(69,97,232,0.5)" : "none",
                 }} />
                 <div className="flex items-start gap-3 flex-wrap">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full text-center" style={{
                     background: item.done ? "rgba(69,97,232,0.12)" : "var(--bg-secondary)",
                     color: item.done ? "#4561E8" : "var(--text-muted)",
                     flexShrink: 0,
+                    minWidth: 64,
                   }}>
                     {item.q}
                   </span>
