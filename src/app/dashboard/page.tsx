@@ -118,25 +118,37 @@ export default async function DashboardPage() {
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden dark:block hidden">
         <SphereBlobScene spheres={SUBTLE_SPHERES} intensity={0.5} />
       </div>
-      {/* Ambient glow orbs — both themes, visible through glass nav */}
-      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
-        {/* Top-left: brand blue — strong enough to show through glass blur */}
+      {/* Ambient glow orbs — light theme; hidden in dark (SphereBlobScene handles that) */}
+      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden dark:hidden">
+        {/* Top-left: brand blue */}
         <div className="absolute rounded-full" style={{
-          width: 640, height: 640, top: "-220px", left: "-120px",
-          background: "radial-gradient(circle, rgba(69,97,232,0.13) 0%, transparent 65%)",
+          width: 700, height: 700, top: "-240px", left: "-160px",
+          background: "radial-gradient(circle, rgba(69,97,232,0.22) 0%, transparent 60%)",
           animation: "ambientDrift1 18s ease-in-out infinite",
         }} />
         {/* Top-right: violet */}
         <div className="absolute rounded-full" style={{
-          width: 480, height: 480, top: "-160px", right: "-100px",
-          background: "radial-gradient(circle, rgba(159,122,255,0.10) 0%, transparent 65%)",
+          width: 520, height: 520, top: "-180px", right: "-120px",
+          background: "radial-gradient(circle, rgba(130,80,255,0.17) 0%, transparent 60%)",
           animation: "ambientDrift2 22s ease-in-out infinite",
         }} />
-        {/* Center-right: warm orange accent */}
+        {/* Center-right: warm orange */}
         <div className="absolute rounded-full" style={{
-          width: 400, height: 400, top: "35%", right: "-80px",
-          background: "radial-gradient(circle, rgba(255,122,0,0.07) 0%, transparent 65%)",
+          width: 460, height: 460, top: "30%", right: "-100px",
+          background: "radial-gradient(circle, rgba(255,110,0,0.13) 0%, transparent 60%)",
           animation: "ambientDrift3 26s ease-in-out infinite",
+        }} />
+        {/* Bottom-left: soft blue-green */}
+        <div className="absolute rounded-full" style={{
+          width: 500, height: 500, bottom: "-160px", left: "-80px",
+          background: "radial-gradient(circle, rgba(40,180,200,0.12) 0%, transparent 60%)",
+          animation: "ambientDrift2 30s ease-in-out infinite reverse",
+        }} />
+        {/* Center: faint brand fill */}
+        <div className="absolute rounded-full" style={{
+          width: 600, height: 600, top: "40%", left: "25%",
+          background: "radial-gradient(circle, rgba(69,97,232,0.07) 0%, transparent 65%)",
+          animation: "ambientDrift1 24s ease-in-out infinite reverse",
         }} />
       </div>
       <style>{`

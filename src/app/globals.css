@@ -5,10 +5,10 @@
 @layer base {
   :root {
     /* ── Light theme ────────────────────────────────────────────────── */
-    --bg:            #ffffff;
-    --bg-secondary:  #f5f5fa;
+    --bg:            #f7f8ff;
+    --bg-secondary:  #f0f1f8;
     --bg-card:       #ffffff;
-    --bg-nav:        rgba(255,255,255,0.92);
+    --bg-nav:        rgba(247,248,255,0.45);
     --text:          #111827;
     --text-secondary:#374151;
     --text-muted:    #6b7280;
@@ -25,7 +25,7 @@
     --bg:            #0a0a18;
     --bg-secondary:  #0f0f22;
     --bg-card:       #16162c;
-    --bg-nav:        rgba(10,10,24,0.94);
+    --bg-nav:        rgba(10,10,24,0.58);
     --text:          #eeeef8;
     --text-secondary:#b0b0d0;
     --text-muted:    #7878a8;
