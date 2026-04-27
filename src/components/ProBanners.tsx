@@ -92,7 +92,7 @@ export function ProActivationBanner({ plan }: { plan: string }) {
   );
 }
 
-// ─── Expiry Warning Banner (shown when Pro/trial expires within 3 days) ────────
+// ─── Expiry Warning Banner (shown when Pro/trial expires within 7 days) ────────
 export function ProExpiryBanner({
   trialExpiresAt,
   planExpiresAt,
@@ -114,15 +114,15 @@ export function ProExpiryBanner({
   const msDiff = expiresDate.getTime() - now.getTime();
   const daysLeft = Math.ceil(msDiff / (1000 * 3600 * 24));
 
-  // Only show within 3 days before expiry
-  if (daysLeft > 3 || daysLeft <= 0) return null;
+  // Show within 7 days before expiry — more time for user to feel urgency and convert
+  if (daysLeft > 7 || daysLeft <= 0) return null;
 
   const dismiss = () => {
     setFading(true);
     setTimeout(() => setDismissed(true), 400);
   };
 
-  const label = daysLeft === 1 ? "завтра" : daysLeft === 2 ? "послезавтра" : `через ${daysLeft} дня`;
+  const label = daysLeft === 1 ? "завтра" : daysLeft === 2 ? "послезавтра" : `через ${daysLeft} ${daysLeft < 5 ? "дня" : "дней"}`;
   const expiresFormatted = expiresDate.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
 
   return (

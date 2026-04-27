@@ -3,9 +3,9 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 // Gift Pro: free 1-month Pro trial for all registered users, activatable from June 1, 2026
-// Expires: January 1, 2027
+// Expires: July 1, 2026 (exactly 1 month — so expiry banner kicks in and drives conversion)
 const GIFT_AVAILABLE_FROM = new Date("2026-06-01T00:00:00+03:00");
-const GIFT_EXPIRES_AT = "2027-01-01T00:00:00Z";
+const GIFT_EXPIRES_AT = "2026-07-01T00:00:00Z";
 
 export async function POST() {
   try {
