@@ -467,7 +467,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                 <polyline points="9 15 12 18 15 15"/>
               </svg>
             )}
-            {exportingPdf ? "Создаю..." : "Конспект"}
+            <span className="hidden sm:inline">{exportingPdf ? "Создаю..." : "Конспект"}</span>
           </button>
         )}
       </header>
