@@ -297,7 +297,7 @@ export default function OnboardingTour() {
       {/* ── SVG backdrop with rectangular spotlight cutout ── */}
       <svg
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "all" }}
-        onClick={() => close(false)}
+        onClick={() => close(true)}
       >
         <defs>
           <mask id="tourMask">
@@ -399,7 +399,7 @@ export default function OnboardingTour() {
                 </div>
               </div>
               <button
-                onClick={() => close(false)}
+                onClick={() => close(true)}
                 style={{
                   width: 26, height: 26, borderRadius: 8,
                   border: "1px solid rgba(255,255,255,0.12)",
