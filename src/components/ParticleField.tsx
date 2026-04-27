@@ -73,6 +73,23 @@ export default function ParticleField({ className, count = 110 }: Props) {
     function tick() {
       ctx.clearRect(0, 0, W, H);
 
+      // ── Constellation lines ──
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(107,143,255,${(1 - dist / 120) * 0.07})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+
       for (const p of particles) {
         // Cursor attraction
         const dx = mouseX - p.x;

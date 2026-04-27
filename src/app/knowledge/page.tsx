@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 
 const KnowledgeGraph = dynamic(() => import("@/components/KnowledgeGraph"), { ssr: false });
 const ParticleField = dynamic(() => import("@/components/ParticleField"), { ssr: false });
+const DeepSpaceBlobs = dynamic(() => import("@/components/DeepSpaceBlobs"), { ssr: false });
 
 export default async function KnowledgePage() {
   const supabase = await createClient();
@@ -67,8 +68,10 @@ export default async function KnowledgePage() {
 
       {/* Galaxy — fills all remaining height */}
       <div className="flex-1 relative min-h-0" style={{ background: "#06060f" }}>
-        {/* Native particle system — responds to cursor, no iframe needed */}
-        <ParticleField className="absolute inset-0 w-full h-full z-0" count={120} />
+        {/* Deep-space frosted-glass blobs — behind everything */}
+        <DeepSpaceBlobs className="absolute inset-0 w-full h-full z-0" />
+        {/* Constellation particle field */}
+        <ParticleField className="absolute inset-0 w-full h-full z-[1]" count={120} />
         {/* Interactive galaxy canvas on top */}
         <KnowledgeGraph className="absolute inset-0 w-full h-full z-10" userProgress={userProgress} />
       </div>
