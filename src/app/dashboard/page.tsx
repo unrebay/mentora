@@ -122,34 +122,34 @@ export default async function DashboardPage() {
       </div>
       {/* Ambient glow orbs — light theme; hidden in dark (SphereBlobScene handles that) */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden dark:hidden">
-        {/* Top-left: brand blue — bleeds across top and down left edge */}
+        {/* Top-left: brand blue — centered IN viewport so glow spans nav + content uniformly */}
         <div className="absolute rounded-full" style={{
-          width: 800, height: 800, top: "-300px", left: "-200px",
-          background: "radial-gradient(circle, rgba(69,97,232,0.28) 0%, transparent 58%)",
+          width: 900, height: 900, top: "3%", left: "-250px",
+          background: "radial-gradient(circle, rgba(69,97,232,0.18) 0%, transparent 55%)",
           animation: "ambientDrift1 18s ease-in-out infinite",
         }} />
-        {/* Top-right: violet */}
+        {/* Top-right: violet — starts at viewport top so it's visible behind nav AND below */}
         <div className="absolute rounded-full" style={{
-          width: 580, height: 580, top: "-200px", right: "-150px",
-          background: "radial-gradient(circle, rgba(130,80,255,0.20) 0%, transparent 58%)",
+          width: 680, height: 680, top: "0%", right: "-180px",
+          background: "radial-gradient(circle, rgba(130,80,255,0.14) 0%, transparent 55%)",
           animation: "ambientDrift2 22s ease-in-out infinite",
         }} />
         {/* Mid-right: warm orange */}
         <div className="absolute rounded-full" style={{
           width: 500, height: 500, top: "38%", right: "-120px",
-          background: "radial-gradient(circle, rgba(255,110,0,0.16) 0%, transparent 58%)",
+          background: "radial-gradient(circle, rgba(255,110,0,0.14) 0%, transparent 58%)",
           animation: "ambientDrift3 26s ease-in-out infinite",
         }} />
         {/* Bottom-left: teal */}
         <div className="absolute rounded-full" style={{
           width: 560, height: 560, bottom: "-180px", left: "-100px",
-          background: "radial-gradient(circle, rgba(40,180,200,0.16) 0%, transparent 58%)",
+          background: "radial-gradient(circle, rgba(40,180,200,0.14) 0%, transparent 58%)",
           animation: "ambientDrift2 30s ease-in-out infinite reverse",
         }} />
-        {/* Center fill: very faint blue so mid-page isn't blank */}
+        {/* Center fill: faint blue so mid-page has uniform warmth */}
         <div className="absolute rounded-full" style={{
-          width: 700, height: 700, top: "45%", left: "20%",
-          background: "radial-gradient(circle, rgba(69,97,232,0.09) 0%, transparent 62%)",
+          width: 800, height: 800, top: "40%", left: "15%",
+          background: "radial-gradient(circle, rgba(69,97,232,0.08) 0%, transparent 62%)",
           animation: "ambientDrift1 28s ease-in-out infinite reverse",
         }} />
       </div>
