@@ -589,25 +589,44 @@ export default function AboutPage() {
                     Задонатить
                   </p>
                   <p style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.55, marginBottom: 12 }}>
-                    Разовый перевод любой суммы на Boosty. Каждый рубль идёт на серверы, AI-модели и новые функции.
+                    Из России — Boosty (Мир/СБП), из других стран — Ko-fi (карта/PayPal).
                   </p>
-                  <a
-                    href="https://boosty.to/mentora"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: "inline-flex", alignItems: "center", gap: 6,
-                      fontSize: 12, fontWeight: 600,
-                      padding: "8px 14px", borderRadius: 10,
-                      background: "#f97316", color: "#fff",
-                      textDecoration: "none",
-                    }}
-                  >
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                    </svg>
-                    Поддержать на Boosty
-                  </a>
+                  <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
+                    <a
+                      href="https://boosty.to/mentora"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 6,
+                        fontSize: 12, fontWeight: 600,
+                        padding: "8px 14px", borderRadius: 10,
+                        background: "#f97316", color: "#fff",
+                        textDecoration: "none",
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                      </svg>
+                      Boosty — из России
+                    </a>
+                    <a
+                      href="https://ko-fi.com/mentora"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 6,
+                        fontSize: 12, fontWeight: 600,
+                        padding: "8px 14px", borderRadius: 10,
+                        background: "#29ABE0", color: "#fff",
+                        textDecoration: "none",
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                        <path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682-.Conservative-.947-1.35l.006-.055c.078-.564.643-2.699-1.29-3.245 0 0 1.496-1.466 3.752-.105 1.744 1.061 1.454 3.386-.521 4.755z"/>
+                      </svg>
+                      Ko-fi — из других стран
+                    </a>
+                  </div>
                 </div>
 
                 {/* Investor / Partner */}
