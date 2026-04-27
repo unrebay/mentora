@@ -53,7 +53,7 @@ export default function AboutPage() {
       icon: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
       color: "#4561E8",
       title: "Спрашивай без стыда",
-      desc: "Ментора не осудит, не расскажет учителю, не посмеётся. Здесь нет «тупых» вопросов — есть только твой прогресс.",
+      desc: "Ментора не осудит, не расскажет учителю, не посмеётся. Здесь нет «глупых» вопросов — есть только твой прогресс.",
     },
     {
       icon: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
@@ -71,7 +71,53 @@ export default function AboutPage() {
       icon: "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11",
       color: "#A78BFA",
       title: "Честные ответы",
-      desc: "Если чего-то не знает — скажет прямо. Мы не генерируем уверенную чушь для красоты — нам важен твой результат.",
+      desc: "Если чего-то не знает — скажет прямо. Мы не выдаём неверное за правду ради красивого ответа — нам важен твой результат.",
+    },
+  ];
+
+  /* ── Guide tips ──────────────────────────────────────────────── */
+  const TIPS = [
+    {
+      n: "01", accent: "#4561E8",
+      title: "Задавай любые вопросы",
+      body: "Mentora не знает слова «глупый вопрос». Спрашивай всё, что не решаешься спросить вслух — именно для этого она здесь.",
+      example: "«Почему вообще нужно знать эту тему?»",
+    },
+    {
+      n: "02", accent: "#7C3AED",
+      title: "Проси объяснить иначе",
+      body: "Если не понял — не молчи. Напиши «объясни другими словами» или «приведи пример из жизни».",
+      example: "«Объясни квантовую физику как будто я школьник».",
+    },
+    {
+      n: "03", accent: "#0EA5E9",
+      title: "Используй режим проверки",
+      body: "Напиши «проверь меня» или «квиз» — Mentora задаст вопросы и покажет, что ты знаешь, а что нет.",
+      example: "«Сделай мне квиз по Смутному времени — 5 вопросов».",
+    },
+    {
+      n: "04", accent: "#10B981",
+      title: "Настрой свой стиль",
+      body: "Скажи как объяснять: «как историю», «через задания», «чёткая схема» — Mentora подстроится.",
+      example: "«Объясняй через тест с вариантами ответов».",
+    },
+    {
+      n: "05", accent: "#F59E0B",
+      title: "Проси подвести итог",
+      body: "В конце сессии напиши «что я сегодня узнал» — получишь краткие тезисы для повторения.",
+      example: "«Что я узнал за сессию?» — конспект в 3–5 точках.",
+    },
+    {
+      n: "06", accent: "#FF7A00",
+      title: "Учись каждый день",
+      body: "Стрик (цепочка дней подряд) виден в профиле. Даже 5 минут лучше, чем двухчасовой порыв раз в неделю.",
+      example: "За 7 дней стрика — 3 дня Pro бесплатно.",
+    },
+    {
+      n: "07", accent: "#9F7AFF",
+      title: "Пробуй режим Кругозор",
+      body: "Не знаешь, что узнать сегодня? Просто спроси — Mentora поделится чем-то удивительным из любой области.",
+      example: "«Удиви меня каким-нибудь фактом о космосе».",
     },
   ];
 
@@ -403,6 +449,45 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* ── GUIDE ────────────────────────────────────────────── */}
+        <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
+          <Tag color="#4561E8">Как учиться</Tag>
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: "var(--text)", margin: "16px 0 6px", letterSpacing: "-0.5px" }}>
+            Гайд по{" "}
+            <span style={{ fontStyle: "italic", fontFamily: "var(--font-playfair), Georgia, serif" }}>
+              M<span style={{ color: "#4561E8", fontStyle: "italic", marginRight: "0.02em" }}>e</span>ntora
+            </span>
+          </h2>
+          <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 24 }}>
+            7 приёмов, которые помогут учиться эффективнее и запоминать больше
+          </p>
+          <div className="space-y-3">
+            {TIPS.map(tip => (
+              <div key={tip.n}
+                className="relative rounded-2xl border overflow-hidden"
+                style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
+              >
+                <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
+                  style={{ background: `linear-gradient(180deg, ${tip.accent}, ${tip.accent}55)` }} />
+                <div className="flex items-start gap-4 p-5 pl-6 relative z-10">
+                  <div>
+                    <div className="flex items-center gap-2.5 mb-1.5">
+                      <span className="text-[10px] font-bold tracking-[0.15em]" style={{ color: tip.accent }}>{tip.n}</span>
+                      <span className="font-bold text-[15px]" style={{ color: "var(--text)" }}>{tip.title}</span>
+                    </div>
+                    <p className="text-sm leading-relaxed mb-2" style={{ color: "var(--text-secondary)" }}>{tip.body}</p>
+                    <div className="inline-flex items-start gap-1.5 px-3 py-1.5 rounded-xl text-sm italic"
+                      style={{ background: "var(--bg-secondary)", color: "var(--text-muted)", borderLeft: `2px solid ${tip.accent}40` }}>
+                      <span className="shrink-0 font-semibold not-italic text-xs" style={{ color: tip.accent }}>→</span>
+                      {tip.example}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* ── ROADMAP ──────────────────────────────────────────── */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
           <Tag color="#6366F1">Дорожная карта</Tag>
@@ -476,6 +561,14 @@ export default function AboutPage() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, flexWrap: "wrap" as const }}>
             <a href="mailto:hello@mentora.su" style={{ fontSize: 14, fontWeight: 500, color: "var(--text-secondary)", textDecoration: "underline", textDecorationStyle: "dotted" as const }}>
               hello@mentora.su
+            </a>
+            <span style={{ color: "var(--border)" }}>·</span>
+            <a href="https://t.me/mentora_support_bot" target="_blank" rel="noopener noreferrer"
+              style={{ fontSize: 14, fontWeight: 500, color: "#2AABEE", display: "inline-flex", alignItems: "center", gap: 5 }}>
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="#2AABEE">
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.008 9.461c-.148.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.604.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.24 14.605l-2.95-.924c-.642-.2-.654-.642.136-.951l11.527-4.448c.537-.194 1.006.131.609.966z"/>
+              </svg>
+              Написать в поддержку
             </a>
             <span style={{ color: "var(--border)" }}>·</span>
             <Link href="/dashboard" style={{ fontSize: 14, fontWeight: 500, color: "#4561E8" }}>

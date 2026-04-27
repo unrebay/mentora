@@ -69,14 +69,18 @@ export default async function ProgressPage() {
     .eq("role", "user")
     .gte("created_at", sevenDaysAgo);
 
-  // Build last-7-days array
+  // Build current ISO week Mon–Sun (Russian format starts Monday)
   const countByDate: Record<string, number> = {};
   for (const row of activityData ?? []) {
     const d = row.created_at.slice(0, 10);
     countByDate[d] = (countByDate[d] ?? 0) + 1;
   }
+  const nowDate = new Date();
+  const dowToday = (nowDate.getDay() + 6) % 7; // Mon=0 … Sun=6
+  const monday = new Date(nowDate);
+  monday.setDate(monday.getDate() - dowToday);
   const activityDays = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(Date.now() - (6 - i) * 86400000);
+    const d = new Date(monday.getTime() + i * 86400000);
     const key = d.toISOString().slice(0, 10);
     return { date: key, count: countByDate[key] ?? 0 };
   });

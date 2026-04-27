@@ -142,14 +142,8 @@ export default function GuidePage() {
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: "var(--text)" }}>
             Гайд по{" "}
-            <span style={{
-              background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              fontStyle: "italic",
-            }}>
-              Mentora
+            <span style={{ fontStyle: "italic", fontFamily: "var(--font-playfair), Georgia, serif" }}>
+              M<span style={{ color: "#4561E8", fontStyle: "italic", marginRight: "0.02em" }}>e</span>ntora
             </span>
           </h1>
           <p className="text-lg max-w-xl mx-auto leading-relaxed" style={{ color: "var(--text-secondary)" }}>

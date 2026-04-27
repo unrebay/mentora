@@ -384,6 +384,30 @@ export default async function ProfilePage() {
           <ReferralWidget />
         </div>
 
+        {/* ── Support ──────────────────────────────────────── */}
+        <div className="pb-8 flex flex-col items-center gap-2 text-center">
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>Вопросы или проблемы?</p>
+          <div className="flex items-center gap-4 flex-wrap justify-center">
+            <a href="https://t.me/mentora_support_bot" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+              style={{
+                background: "rgba(42,171,238,0.10)",
+                border: "1px solid rgba(42,171,238,0.25)",
+                color: "#2AABEE",
+              }}>
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="#2AABEE">
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.008 9.461c-.148.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.604.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.24 14.605l-2.95-.924c-.642-.2-.654-.642.136-.951l11.527-4.448c.537-.194 1.006.131.609.966z"/>
+              </svg>
+              Поддержка в Telegram
+            </a>
+            <a href="mailto:hello@mentora.su"
+              className="text-xs"
+              style={{ color: "var(--text-muted)", textDecoration: "underline", textDecorationStyle: "dotted" }}>
+              hello@mentora.su
+            </a>
+          </div>
+        </div>
+
       </main>
     </div>
   );
