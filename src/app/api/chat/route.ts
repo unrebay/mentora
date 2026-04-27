@@ -330,7 +330,7 @@ ${PLATFORM_BLOCK}`;
 
     const response = await anthropic.messages.create({
       model: hasImage ? "claude-sonnet-4-6" : "claude-haiku-4-5-20251001",
-      max_tokens: hasImage ? 2048 : 1024,
+      max_tokens: hasImage ? 4096 : 2048,
       system: systemPrompt,
       messages: [
         ...((history ?? []).filter((m: {role: string}) => m.role === "user" || m.role === "assistant").slice(-10)),
