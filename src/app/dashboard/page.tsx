@@ -383,7 +383,7 @@ export default async function DashboardPage() {
 
         {/* ── Продолжить обучение ─────────────────────────── */}
         {lastActiveSubject && (
-          <div className="mt-8 mb-6 rounded-2xl overflow-hidden border"
+          <div data-tour="continue-learning" className="mt-8 mb-6 rounded-2xl overflow-hidden border"
             style={{
               background: `linear-gradient(135deg, ${subjectColor(lastActiveSubject.id)}22, ${subjectColor(lastActiveSubject.id)}08)`,
               borderColor: `${subjectColor(lastActiveSubject.id)}30`,
