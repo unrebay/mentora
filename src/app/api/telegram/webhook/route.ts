@@ -12,6 +12,22 @@ async function sendMessage(chatId: string | number, text: string, parseMode = "H
   });
 }
 
+async function sendInvoice(chatId: string | number, amount: number) {
+  if (!BOT_TOKEN) return;
+  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendInvoice`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: chatId,
+      title: "Поддержать Mentora",
+      description: "Каждый рубль идёт на серверы, AI-модели и новые функции платформы.",
+      payload: `donate_${chatId}_${Date.now()}`,
+      currency: "XTR", // Telegram Stars
+      prices: [{ label: "Поддержка проекта", amount }],
+    }),
+  });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const update = await req.json();
@@ -29,8 +45,49 @@ export async function POST(req: NextRequest) {
       await sendMessage(chatId,
         "👋 Привет! Это поддержка <b>Mentora</b>.\n\n" +
         "Напиши своё сообщение — мы получим его и ответим в ближайшее время.\n\n" +
+        "Хочешь поддержать проект? Напишите /donate\n\n" +
         "Сайт: <a href=\"https://mentora.su\">mentora.su</a>"
       );
+      return NextResponse.json({ ok: true });
+    }
+
+    // /donate command — send Stars invoice with amount options
+    if (text === "/donate") {
+      await sendMessage(chatId,
+        "💙 Спасибо, что хочешь поддержать Mentora!\n\n" +
+        "Выбери сумму в Telegram Stars:\n" +
+        "/donate_50 — 50 Stars\n" +
+        "/donate_100 — 100 Stars\n" +
+        "/donate_250 — 250 Stars\n" +
+        "/donate_500 — 500 Stars\n\n" +
+        "Или напиши /donate_[число] — любую сумму."
+      );
+      return NextResponse.json({ ok: true });
+    }
+
+    if (text.startsWith("/donate_")) {
+      const raw = text.replace("/donate_", "").trim();
+      const amount = parseInt(raw, 10);
+      if (!isNaN(amount) && amount >= 1 && amount <= 10000) {
+        await sendInvoice(chatId, amount);
+      } else {
+        await sendMessage(chatId, "Укажи сумму от 1 до 10000 Stars. Например: /donate_100");
+      }
+      return NextResponse.json({ ok: true });
+    }
+
+    // Handle successful payment
+    const payment = update?.message?.successful_payment;
+    if (payment) {
+      await sendMessage(chatId,
+        `💙 Огромное спасибо! Получили ${payment.total_amount} Stars.\n` +
+        "Это очень помогает развитию Mentora!"
+      );
+      if (ADMIN_CHAT_ID) {
+        await sendMessage(ADMIN_CHAT_ID,
+          `⭐ Донат: ${payment.total_amount} Stars от ${fromName} (${fromUsername}, ID: ${fromId})`
+        );
+      }
       return NextResponse.json({ ok: true });
     }
 

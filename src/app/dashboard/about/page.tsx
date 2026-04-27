@@ -592,7 +592,7 @@ export default function AboutPage() {
                     Задонатить
                   </p>
                   <p style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.55, marginBottom: 12 }}>
-                    Из России — Boosty (Мир/СБП), из других стран — Ko-fi (карта/PayPal).
+                    Из России — Boosty или Telegram Stars, из других стран — Ko-fi (карта/PayPal).
                   </p>
                   <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
                     <a
@@ -628,6 +628,24 @@ export default function AboutPage() {
                         <path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682-.Conservative-.947-1.35l.006-.055c.078-.564.643-2.699-1.29-3.245 0 0 1.496-1.466 3.752-.105 1.744 1.061 1.454 3.386-.521 4.755z"/>
                       </svg>
                       Ko-fi — из других стран
+                    </a>
+                    <a
+                      href="https://t.me/mentora_support_bot?start=donate"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 6,
+                        fontSize: 12, fontWeight: 600,
+                        padding: "8px 14px", borderRadius: 10,
+                        background: "linear-gradient(135deg, #2AABEE, #229ED9)",
+                        color: "#fff",
+                        textDecoration: "none",
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.008 9.461c-.148.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.604.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.24 14.605l-2.95-.924c-.642-.2-.654-.642.136-.951l11.527-4.448c.537-.194 1.006.131.609.966z"/>
+                      </svg>
+                      Telegram Stars
                     </a>
                   </div>
                 </div>
