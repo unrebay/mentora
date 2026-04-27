@@ -81,8 +81,9 @@ function seededRand(seed: number): number {
 }
 
 // ── Zoom config ───────────────────────────────────────────────────────────────
-const ZOOM_MAX = 3.2;
-const ZOOM_MS  = 800;
+const ZOOM_MAX     = 2.6;   // less aggressive — topic orbits stay visible
+const ZOOM_MS      = 800;
+const PANEL_RESERVE = 230;  // px — bottom panel height, shift star above it
 
 function easeInOut(t: number): number {
   return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
@@ -132,8 +133,9 @@ function buildGraph(W: number, H: number, progress: UserProgress[]): GNode[] {
     const topics: TopicOrbit[] = topicLabels.map((label, i) => {
       const seed = si * 100 + i * 7;
       const baseAngle = (i / topicLabels.length) * Math.PI * 2 - Math.PI / 2;
-      const minOrbit = Math.max(r * 5 + 14, topicLabels.length * 8);
-      const orbitR = minOrbit + seededRand(seed + 1) * 18;
+      // Orbit radius: compact enough that topics fit within canvas above panel at zoom
+      const minOrbit = Math.max(r * 3 + 10, topicLabels.length * 6);
+      const orbitR = minOrbit + seededRand(seed + 1) * 10;
       const speed = (seededRand(seed + 3) * 0.3 + 0.15) * (seededRand(seed + 4) > 0.5 ? 1 : -1) * 0.00005;
       const baseR = 1.1 + seededRand(seed + 2) * 0.7;
       return { label, baseAngle, orbitR, speed, phase: seededRand(seed + 50) * Math.PI * 2, baseR };
@@ -196,8 +198,10 @@ function render(
   ctx.clearRect(0, 0, W, H);
 
   const scale = 1 + (ZOOM_MAX - 1) * zoom.progress;
+  // Target Y: center star in the area ABOVE the bottom panel
+  const targetCY = (H - PANEL_RESERVE) / 2;
   const tx = zoom.progress * (W / 2 - zoom.cx * ZOOM_MAX);
-  const ty = zoom.progress * (H / 2 - zoom.cy * ZOOM_MAX);
+  const ty = zoom.progress * (targetCY - zoom.cy * ZOOM_MAX);
 
   ctx.save();
   if (zoom.progress > 0.001) {
@@ -470,16 +474,18 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
     return best;
   }, [getNodePos]);
 
-  // Convert screen → canvas-space accounting for zoom
+  // Convert screen → canvas-space accounting for zoom (must match render formula)
   const toCanvasSpace = useCallback((screenX: number, screenY: number): [number, number] => {
     const c = canvasRef.current; if (!c) return [screenX, screenY];
     const rect = c.getBoundingClientRect();
     const mx = screenX - rect.left, my = screenY - rect.top;
     const zoom = zoomRef.current;
     if (zoom.progress < 0.001) return [mx, my];
+    const W = c.clientWidth, H = c.clientHeight;
     const scale = 1 + (ZOOM_MAX - 1) * zoom.progress;
-    const tx = zoom.progress * (c.clientWidth / 2 - zoom.cx * ZOOM_MAX);
-    const ty = zoom.progress * (c.clientHeight / 2 - zoom.cy * ZOOM_MAX);
+    const targetCY = (H - PANEL_RESERVE) / 2;
+    const tx = zoom.progress * (W / 2 - zoom.cx * ZOOM_MAX);
+    const ty = zoom.progress * (targetCY - zoom.cy * ZOOM_MAX);
     return [(mx - tx) / scale, (my - ty) / scale];
   }, []);
 
