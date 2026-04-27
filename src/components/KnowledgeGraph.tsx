@@ -164,9 +164,10 @@ function driftedPos(n: GNode, t: number, frozen?: { cx: number; cy: number }) {
   };
 }
 
-const BG_STARS = Array.from({ length: 200 }, (_, i) => ({
+const BG_STARS = Array.from({ length: 220 }, (_, i) => ({
   x: ((i * 137.5) % 1000) / 10, y: ((i * 97.3 + 17) % 1000) / 10,
-  r: 0.08 + (i % 5) * 0.06, a: 0.10 + (i % 7) * 0.05,
+  r: 0.5 + (i % 5) * 0.35,
+  a: 0.30 + (i % 7) * 0.08,
   twinkle: (i % 3 === 0), phase: (i * 0.73) % (Math.PI * 2),
 }));
 
@@ -543,7 +544,7 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
   const pal = panelNode ? PAL[panelNode.status] : PAL.beta;
 
   return (
-    <div className={`relative w-full h-full ${className}`} style={{ background: "#06060f" }}>
+    <div className={`relative w-full h-full ${className}`} style={{ background: "transparent" }}>
 
       {/* Legend */}
       <div className="absolute top-4 right-4 flex flex-col gap-1.5 z-10 pointer-events-none">
