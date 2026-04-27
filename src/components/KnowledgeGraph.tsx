@@ -5,28 +5,28 @@ import { SUBJECTS } from "@/lib/types";
 import { RUSSIAN_HISTORY_TOPICS } from "@/lib/topics";
 
 const PAL = {
-  active:      { core: "#ffa040", glow: "rgba(255,160,64,0.80)",  ring: "rgba(255,160,64,0.30)",   label: "Изучается" },
-  active_full: { core: "#ffa040", glow: "rgba(255,160,64,0.80)",  ring: "rgba(107,143,255,0.45)",  label: "Изучается" },
-  full:        { core: "#6b8fff", glow: "rgba(107,143,255,0.70)", ring: "rgba(107,143,255,0.25)",  label: "Полный" },
-  beta:        { core: "#c8d4ff", glow: "rgba(200,212,255,0.55)", ring: "rgba(200,212,255,0.20)",  label: "Бета" },
+  active:      { core: "#ffa040", glow: "rgba(255,160,64,0.85)",  ring: "rgba(255,160,64,0.35)",   label: "Изучается" },
+  active_full: { core: "#ffa040", glow: "rgba(255,160,64,0.85)",  ring: "rgba(107,143,255,0.45)",  label: "Изучается" },
+  full:        { core: "#6b8fff", glow: "rgba(107,143,255,0.75)", ring: "rgba(107,143,255,0.30)",  label: "Полный" },
+  beta:        { core: "#c8d4ff", glow: "rgba(200,212,255,0.60)", ring: "rgba(200,212,255,0.20)",  label: "Бета" },
 };
 type Status = "active" | "active_full" | "full" | "beta";
 
 const LAYOUT: Record<string, { cx: number; cy: number }> = {
-  "russian-history":  { cx: 0.46, cy: 0.38 }, // чуть левее центра
-  "discovery":        { cx: 0.63, cy: 0.60 }, // правее центра — не перекрывает историю
-  "world-history":    { cx: 0.22, cy: 0.27 }, // верх-лево
-  "mathematics":      { cx: 0.70, cy: 0.20 }, // верх-право
-  "physics":          { cx: 0.82, cy: 0.50 }, // правый
-  "chemistry":        { cx: 0.72, cy: 0.72 }, // право-низ
-  "biology":          { cx: 0.46, cy: 0.78 }, // низ-центр
-  "russian-language": { cx: 0.24, cy: 0.72 }, // лево-низ
-  "literature":       { cx: 0.13, cy: 0.50 }, // левый
-  "english":          { cx: 0.16, cy: 0.22 }, // верх-лево
-  "social-studies":   { cx: 0.37, cy: 0.13 }, // верх-центр
-  "geography":        { cx: 0.62, cy: 0.14 }, // верх-право
-  "computer-science": { cx: 0.82, cy: 0.32 }, // право-верх
-  "astronomy":        { cx: 0.56, cy: 0.86 }, // низ
+  "russian-history":  { cx: 0.46, cy: 0.38 },
+  "discovery":        { cx: 0.63, cy: 0.60 },
+  "world-history":    { cx: 0.22, cy: 0.27 },
+  "mathematics":      { cx: 0.70, cy: 0.20 },
+  "physics":          { cx: 0.82, cy: 0.50 },
+  "chemistry":        { cx: 0.72, cy: 0.72 },
+  "biology":          { cx: 0.46, cy: 0.78 },
+  "russian-language": { cx: 0.24, cy: 0.72 },
+  "literature":       { cx: 0.13, cy: 0.50 },
+  "english":          { cx: 0.16, cy: 0.22 },
+  "social-studies":   { cx: 0.37, cy: 0.13 },
+  "geography":        { cx: 0.62, cy: 0.14 },
+  "computer-science": { cx: 0.82, cy: 0.32 },
+  "astronomy":        { cx: 0.56, cy: 0.86 },
 };
 
 const TOPICS: Record<string, string[]> = {
@@ -45,13 +45,12 @@ const TOPICS: Record<string, string[]> = {
   "astronomy":        ["Солнечная система","Звёзды","Галактики","Космонавтика"],
 };
 
-// Nebula clusters — visible soft glow behind groups of related subjects
 const NEBULAE = [
-  { cx: 0.82, cy: 0.44, rx: 0.26, color: [80, 110, 255],  a: 0.18 }, // Sciences (blue)
-  { cx: 0.36, cy: 0.38, rx: 0.24, color: [255, 140, 60],  a: 0.15 }, // History (amber)
-  { cx: 0.11, cy: 0.48, rx: 0.18, color: [60, 200, 180],  a: 0.14 }, // Languages/Lit (teal)
-  { cx: 0.52, cy: 0.83, rx: 0.22, color: [80, 210, 120],  a: 0.13 }, // Life sciences (green)
-  { cx: 0.50, cy: 0.10, rx: 0.20, color: [180, 120, 255], a: 0.14 }, // Social/Geo (purple)
+  { cx: 0.82, cy: 0.44, rx: 0.26, color: [80, 110, 255],  a: 0.18 },
+  { cx: 0.36, cy: 0.38, rx: 0.24, color: [255, 140, 60],  a: 0.15 },
+  { cx: 0.11, cy: 0.48, rx: 0.18, color: [60, 200, 180],  a: 0.14 },
+  { cx: 0.52, cy: 0.83, rx: 0.22, color: [80, 210, 120],  a: 0.13 },
+  { cx: 0.50, cy: 0.10, rx: 0.20, color: [180, 120, 255], a: 0.14 },
 ];
 
 interface UserProgress { subject: string; xp_total: number }
@@ -68,13 +67,13 @@ function getStatus(id: string, progress: UserProgress[]): Status {
   return "beta";
 }
 
-// Star radius scales with XP for active subjects
+// ── Smaller radii: stars, not planets ────────────────────────────────────────
 function getRadius(status: Status, xp = 0): number {
-  if (status === "beta") return 30;
-  if (status === "full") return 42;
-  // active / active_full: base 34, grows up to ~56 with XP
-  const bonus = Math.min(22, Math.sqrt(Math.max(0, xp)) * 0.7);
-  return Math.round(34 + bonus);
+  if (status === "beta") return 5;
+  if (status === "full") return 8;
+  // active / active_full: base 6, tiny XP bonus up to +4
+  const bonus = Math.min(4, Math.sqrt(Math.max(0, xp)) * 0.15);
+  return Math.round(6 + bonus);
 }
 
 function seededRand(seed: number): number {
@@ -82,9 +81,27 @@ function seededRand(seed: number): number {
   return x - Math.floor(x);
 }
 
+// ── Zoom config ───────────────────────────────────────────────────────────────
+const ZOOM_MAX = 3.0;   // how close we fly in
+const ZOOM_MS  = 700;   // ms for zoom animation
+
+function easeInOut(t: number): number {
+  return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+}
+
+interface ZoomState {
+  id:       string | null;
+  cx:       number;
+  cy:       number;
+  phase:    "idle" | "in" | "done" | "out";
+  startT:   number;   // performance.now() at phase start
+  progress: number;   // 0..1
+}
+
 interface GNode {
   id: string; label: string; emoji: string; status: Status;
   x: number; y: number; r: number; xp: number; phase: number;
+  // decorative orbiting dots (not clickable directly — appear after zoom)
   topics: { x: number; y: number; label: string; phase: number; baseR: number }[];
 }
 
@@ -101,67 +118,36 @@ function buildGraph(W: number, H: number, progress: UserProgress[]): GNode[] {
       const baseAngle = (i / topicLabels.length) * Math.PI * 2 - Math.PI / 2;
       const angleJitter = (seededRand(seed1) - 0.5) * 0.3;
       const angle = baseAngle + angleJitter;
-      // Ensure minimum arc spacing: circumference ≥ N * 55px
-      const minCircumference = topicLabels.length * 55;
-      const minOrbitFromSpacing = minCircumference / (2 * Math.PI);
-      const minOrbit = Math.max(r * 2.8 + 10, minOrbitFromSpacing);
-      const maxOrbit = minOrbit + 20;
-      const orbitR = minOrbit + seededRand(seed1 + 1) * (maxOrbit - minOrbit);
-      const baseR = 2.8 + seededRand(seed1 + 2) * 1.6;
+      const minCircumference = topicLabels.length * 30;
+      const minOrbit = Math.max(r * 4 + 8, minCircumference / (2 * Math.PI));
+      const orbitR = minOrbit + seededRand(seed1 + 1) * 12;
+      const baseR = 1.2 + seededRand(seed1 + 2) * 0.8;
       return { x: cx + Math.cos(angle) * orbitR, y: cy + Math.sin(angle) * orbitR,
                label, phase: seededRand(seed1 + 50) * Math.PI * 2, baseR };
     });
     return { id: s.id, label: s.title, emoji: s.emoji, status, x: cx, y: cy, r, xp,
              phase: seededRand(si * 13) * Math.PI * 2, topics };
   });
-
-  // Minimum distance repulsion between topic dots within each star
-  const MIN_TOPIC_DIST = 58;
-  for (let iter = 0; iter < 12; iter++) {
-    for (const node of nodes) {
-      for (let ti = 0; ti < node.topics.length; ti++) {
-        const tpa = node.topics[ti];
-        for (let tj = ti + 1; tj < node.topics.length; tj++) {
-          const tpb = node.topics[tj];
-          const ddx = tpb.x - tpa.x, ddy = tpb.y - tpa.y;
-          const d = Math.sqrt(ddx*ddx + ddy*ddy) || 1;
-          if (d < MIN_TOPIC_DIST) {
-            const push = (MIN_TOPIC_DIST - d) * 0.55;
-            const nnx = ddx/d, nny = ddy/d;
-            // Push outward along the topic's radial vector from star center
-            const rxa = tpa.x - node.x, rya = tpa.y - node.y, rla = Math.sqrt(rxa*rxa+rya*rya)||1;
-            const rxb = tpb.x - node.x, ryb = tpb.y - node.y, rlb = Math.sqrt(rxb*rxb+ryb*ryb)||1;
-            tpa.x -= nnx * push * 0.4 + (rxa/rla) * push * 0.4;
-            tpa.y -= nny * push * 0.4 + (rya/rla) * push * 0.4;
-            tpb.x += nnx * push * 0.4 + (rxb/rlb) * push * 0.4;
-            tpb.y += nny * push * 0.4 + (ryb/rlb) * push * 0.4;
-          }
-        }
-      }
-    }
-  }
   return nodes;
 }
 
-const BG_STARS = Array.from({ length: 160 }, (_, i) => ({
+const BG_STARS = Array.from({ length: 200 }, (_, i) => ({
   x: ((i * 137.5) % 1000) / 10, y: ((i * 97.3 + 17) % 1000) / 10,
-  r: 0.10 + (i % 5) * 0.07, a: 0.12 + (i % 6) * 0.06,
+  r: 0.08 + (i % 5) * 0.06, a: 0.10 + (i % 7) * 0.05,
   twinkle: (i % 3 === 0), phase: (i * 0.73) % (Math.PI * 2),
 }));
 
 function drawBg(ctx: CanvasRenderingContext2D, W: number, H: number, t: number) {
-  // Nebulae — visible radial glow clouds
   for (const nb of NEBULAE) {
     const cx = nb.cx * W, cy = nb.cy * H, r = nb.rx * Math.min(W, H);
     const [r0, g0, b0] = nb.color;
     const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-    g.addColorStop(0,   `rgba(${r0},${g0},${b0},${nb.a})`);
+    g.addColorStop(0,    `rgba(${r0},${g0},${b0},${nb.a})`);
     g.addColorStop(0.45, `rgba(${r0},${g0},${b0},${nb.a * 0.5})`);
-    g.addColorStop(1,   `rgba(${r0},${g0},${b0},0)`);
+    g.addColorStop(1,    `rgba(${r0},${g0},${b0},0)`);
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
   }
-  // Background stars with subtle twinkle
   for (const s of BG_STARS) {
     const a = s.twinkle ? s.a * (0.7 + 0.3 * Math.sin(t * 0.0008 + s.phase)) : s.a;
     ctx.fillStyle = `rgba(255,255,255,${a})`;
@@ -170,97 +156,129 @@ function drawBg(ctx: CanvasRenderingContext2D, W: number, H: number, t: number) 
 }
 
 function render(
-  ctx: CanvasRenderingContext2D, nodes: GNode[],
-  activeId: string | null, hovTopicIdx: [string, number] | null,
+  ctx: CanvasRenderingContext2D,
+  nodes: GNode[],
+  activeId: string | null,
   t: number, W: number, H: number,
+  zoom: ZoomState,
 ) {
-  ctx.clearRect(0, 0, W, H); drawBg(ctx, W, H, t);
+  ctx.clearRect(0, 0, W, H);
 
-  // Connection lines
+  // Apply zoom transform: fly toward the target star
+  const scale = 1 + (ZOOM_MAX - 1) * zoom.progress;
+  const tx = zoom.cx !== 0 ? W / 2 - zoom.cx * scale : 0;
+  const ty = zoom.cy !== 0 ? H / 2 - zoom.cy * scale : 0;
+
+  ctx.save();
+  if (zoom.progress > 0) {
+    ctx.translate(tx, ty);
+    ctx.scale(scale, scale);
+  }
+
+  drawBg(ctx, W, H, t);
+
+  // Connection lines (decorative — faint always, slightly visible when active)
   for (const n of nodes) {
     const pal = PAL[n.status], isActive = n.id === activeId;
+    if (!isActive && zoom.phase !== "idle" && n.id !== zoom.id) continue; // hide other connections during zoom
     for (const tp of n.topics) {
       ctx.save();
-      ctx.strokeStyle = pal.ring.replace(/[\d.]+\)$/, `${isActive ? 0.22 : 0.06})`);
-      ctx.lineWidth = isActive ? 0.6 : 0.3;
+      ctx.strokeStyle = pal.ring.replace(/[\d.]+\)$/, `${isActive ? 0.18 : 0.04})`);
+      ctx.lineWidth = isActive ? 0.5 : 0.25;
       ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(tp.x, tp.y);
       ctx.stroke(); ctx.restore();
     }
   }
 
-  // Topic dots
+  // Topic dots — small decorative dots (not clickable)
   for (const n of nodes) {
     const pal = PAL[n.status], isActive = n.id === activeId;
-    n.topics.forEach((tp, idx) => {
+    // Only render topic dots for the active/hovered star, and fade them out during zoom-out
+    if (!isActive && !(zoom.id === n.id && zoom.phase !== "idle")) continue;
+    const dotOpacityMultiplier = zoom.id === n.id && zoom.phase === "done" ? 0 : 1; // hide when panel is shown
+    n.topics.forEach((tp) => {
       const sh = 0.6 + 0.4 * Math.sin(t * 0.0005 + tp.phase);
-      const isHovTopic = hovTopicIdx?.[0] === n.id && hovTopicIdx?.[1] === idx;
-      const opacity = isHovTopic ? 1 : isActive ? (0.55 + 0.35 * sh) : (0.18 + 0.12 * sh);
-      const dotR = tp.baseR * (isHovTopic ? 1.8 : isActive ? (1 + 0.3 * sh) : 0.85);
+      const opacity = (0.45 + 0.35 * sh) * dotOpacityMultiplier;
+      const dotR = tp.baseR * (1 + 0.3 * sh);
       ctx.save();
       const g = ctx.createRadialGradient(tp.x, tp.y, 0, tp.x, tp.y, dotR * 3);
-      g.addColorStop(0, pal.glow.replace(/[\d.]+\)$/, `${opacity * 0.7})`));
+      g.addColorStop(0, pal.glow.replace(/[\d.]+\)$/, `${opacity * 0.6})`));
       g.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(tp.x, tp.y, dotR * 3, 0, Math.PI * 2); ctx.fill();
-      ctx.shadowBlur = isActive ? 8 : 3; ctx.shadowColor = pal.glow;
+      ctx.shadowBlur = 4; ctx.shadowColor = pal.glow;
       ctx.fillStyle = pal.core; ctx.globalAlpha = opacity;
       ctx.beginPath(); ctx.arc(tp.x, tp.y, dotR, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
-      if (isActive || isHovTopic) {
-        const labelAlpha = isHovTopic ? 1 : (0.6 + 0.3 * sh) * opacity;
-        ctx.save(); ctx.font = isHovTopic ? 'bold 12px "Golos Text", system-ui' : '600 11px "Golos Text", system-ui';
-        ctx.textAlign = "center"; ctx.textBaseline = "top";
-        ctx.fillStyle = pal.core; ctx.globalAlpha = labelAlpha;
-        ctx.shadowColor = "rgba(0,0,0,0.95)"; ctx.shadowBlur = 7;
-        const dx = tp.x - n.x, dy = tp.y - n.y, len = Math.sqrt(dx*dx+dy*dy)||1;
-        const offset = tp.baseR * 2.2 + 10; ctx.fillText(tp.label, tp.x + dx/len*offset, tp.y + dy/len*offset); ctx.restore();
-      }
     });
   }
 
-  // Subject stars
-  for (const n of [...nodes].sort((a,b)=>a.r-b.r)) {
-    const isActive = n.id === activeId, sh = 0.72 + 0.28 * Math.sin(t * 0.0007 + n.phase);
-    const pal = PAL[n.status], glowR = n.r*(isActive?3.6:2.2)*sh, coreR = n.r*(isActive?1.25:1)*sh;
-    ctx.save();
+  // Subject stars — draw smaller, all still visible
+  for (const n of [...nodes].sort((a, b) => a.r - b.r)) {
+    const isActive = n.id === activeId;
+    const sh = 0.72 + 0.28 * Math.sin(t * 0.0007 + n.phase);
+    const pal = PAL[n.status];
+
+    // Fade non-zoomed stars when zooming toward one
+    let globalAlpha = 1;
+    if (zoom.phase !== "idle" && zoom.id !== n.id) {
+      globalAlpha = 1 - zoom.progress * 0.6;
+    }
+    ctx.save(); ctx.globalAlpha = globalAlpha;
+
+    // Glow halo
+    const glowR = n.r * (isActive ? 5 : 3.5) * sh;
+    const coreR = n.r * (isActive ? 1.3 : 1) * sh;
     const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, glowR);
     g.addColorStop(0, pal.glow); g.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(n.x, n.y, glowR, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(n.x, n.y, glowR, 0, Math.PI * 2); ctx.fill();
+
     if (n.status === "active_full") {
-      const g2 = ctx.createRadialGradient(n.x, n.y, coreR, n.x, n.y, glowR * 1.6);
-      g2.addColorStop(0, "rgba(107,143,255,0.35)"); g2.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = g2; ctx.beginPath(); ctx.arc(n.x, n.y, glowR * 1.6, 0, Math.PI*2); ctx.fill();
+      const g2 = ctx.createRadialGradient(n.x, n.y, coreR, n.x, n.y, glowR * 1.8);
+      g2.addColorStop(0, "rgba(107,143,255,0.30)"); g2.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = g2; ctx.beginPath(); ctx.arc(n.x, n.y, glowR * 1.8, 0, Math.PI * 2); ctx.fill();
     }
-    ctx.shadowBlur = isActive ? 24*sh : 14*sh; ctx.shadowColor = pal.glow;
-    ctx.fillStyle = pal.core; ctx.beginPath(); ctx.arc(n.x, n.y, coreR, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = pal.ring; ctx.lineWidth = isActive ? 1.5 : 0.8;
-    ctx.shadowBlur = isActive ? 12 : 6;
-    ctx.shadowColor = n.status === "active_full" ? "rgba(107,143,255,0.8)" : pal.glow;
-    ctx.beginPath(); ctx.arc(n.x, n.y, coreR+4*sh, 0, Math.PI*2); ctx.stroke();
+
+    // Core star
+    ctx.shadowBlur = isActive ? 18 * sh : 10 * sh; ctx.shadowColor = pal.glow;
+    ctx.fillStyle = pal.core;
+    ctx.beginPath(); ctx.arc(n.x, n.y, coreR, 0, Math.PI * 2); ctx.fill();
+
+    // Ring
+    ctx.strokeStyle = pal.ring; ctx.lineWidth = isActive ? 1.2 : 0.6;
+    ctx.shadowBlur = isActive ? 8 : 4;
+    ctx.beginPath(); ctx.arc(n.x, n.y, coreR + 3 * sh, 0, Math.PI * 2); ctx.stroke();
     ctx.restore();
-    ctx.save(); ctx.font = isActive ? 'bold 14px "Golos Text", system-ui' : '600 12px "Golos Text", system-ui';
-    ctx.textAlign = "center"; ctx.textBaseline = "top";
-    ctx.fillStyle = isActive ? "#fff" : pal.core;
-    ctx.globalAlpha = isActive ? 1 : (0.65+0.3*sh);
-    ctx.shadowColor = "rgba(0,0,0,0.95)"; ctx.shadowBlur = 10;
-    ctx.fillText(n.label, n.x, n.y+coreR+7); ctx.restore();
+
+    // Label — only when not zooming away from this star
+    if (globalAlpha > 0.1) {
+      ctx.save(); ctx.globalAlpha = globalAlpha;
+      ctx.font = isActive ? 'bold 12px "Golos Text", system-ui' : '500 10px "Golos Text", system-ui';
+      ctx.textAlign = "center"; ctx.textBaseline = "top";
+      ctx.fillStyle = isActive ? "#fff" : pal.core;
+      ctx.globalAlpha *= isActive ? 1 : (0.65 + 0.3 * sh);
+      ctx.shadowColor = "rgba(0,0,0,0.97)"; ctx.shadowBlur = 8;
+      ctx.fillText(n.label, n.x, n.y + coreR + 5);
+      ctx.restore();
+    }
   }
 }
 
 export default function KnowledgeGraph({ className = "", userProgress = [] }: Props) {
-  const canvasRef    = useRef<HTMLCanvasElement>(null);
-  const nodesRef     = useRef<GNode[]>([]);
-  const rafRef       = useRef<number>(0);
-  const activeRef    = useRef<string | null>(null);
-  const timerRef     = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hovTopicRef  = useRef<[string, number] | null>(null);
-  const clickStart   = useRef({ x: 0, y: 0 });
-  const touchStart   = useRef({ x: 0, y: 0, t: 0 });
-  const [activeId,    setActiveId]    = useState<string | null>(null);
-  const [hovTopicIdx, setHovTopicIdx] = useState<[string, number] | null>(null);
-  const [selectedId,  setSelectedId]  = useState<string | null>(null);
-  const [selectedTopic, setSelectedTopic] = useState<{ nodeId: string; label: string; x: number; y: number; status: Status } | null>(null);
-  // Popup position in canvas-space pixels
-  const [popupAnchor, setPopupAnchor] = useState<{ x: number; y: number; r: number } | null>(null);
+  const canvasRef  = useRef<HTMLCanvasElement>(null);
+  const nodesRef   = useRef<GNode[]>([]);
+  const rafRef     = useRef<number>(0);
+  const activeRef  = useRef<string | null>(null);
+  const clickStart = useRef({ x: 0, y: 0 });
+  const touchStart = useRef({ x: 0, y: 0, t: 0 });
+  const t0Ref      = useRef<number>(0);
+
+  const zoomRef = useRef<ZoomState>({ id: null, cx: 0, cy: 0, phase: "idle", startT: 0, progress: 0 });
+
+  const [activeId,  setActiveId]  = useState<string | null>(null);
+  const [showPanel, setShowPanel] = useState(false);
+  const [panelId,   setPanelId]   = useState<string | null>(null);
+  // panel slide-in animation
+  const [panelVisible, setPanelVisible] = useState(false);
 
   const init = useCallback(() => {
     const canvas = canvasRef.current; if (!canvas) return;
@@ -273,60 +291,101 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
   }, [userProgress]);
 
   useEffect(() => {
-    init(); window.addEventListener("resize", init);
-    const t0 = performance.now();
+    init();
+    window.addEventListener("resize", init);
+    t0Ref.current = performance.now();
+
     function loop(now: number) {
+      const zoom = zoomRef.current;
+      const elapsed = now - zoom.startT;
+
+      if (zoom.phase === "in" || zoom.phase === "out") {
+        const raw = Math.min(1, elapsed / ZOOM_MS);
+        zoom.progress = zoom.phase === "in" ? easeInOut(raw) : 1 - easeInOut(raw);
+
+        if (raw >= 1) {
+          if (zoom.phase === "in") {
+            zoom.phase = "done";
+            zoom.progress = 1;
+            setShowPanel(true);
+            setTimeout(() => setPanelVisible(true), 20);
+          } else {
+            zoom.phase = "idle";
+            zoom.progress = 0;
+            zoom.id = null;
+            setShowPanel(false);
+            setPanelVisible(false);
+            setPanelId(null);
+          }
+        }
+      }
+
       const c = canvasRef.current;
-      if (c) render(c.getContext("2d")!, nodesRef.current, activeRef.current, hovTopicRef.current, now - t0, c.clientWidth, c.clientHeight);
+      if (c) render(
+        c.getContext("2d")!, nodesRef.current, activeRef.current,
+        now - t0Ref.current, c.clientWidth, c.clientHeight, zoom,
+      );
       rafRef.current = requestAnimationFrame(loop);
     }
     rafRef.current = requestAnimationFrame(loop);
     return () => { cancelAnimationFrame(rafRef.current); window.removeEventListener("resize", init); };
   }, [init]);
 
-  const activate = useCallback((id: string | null) => {
-    if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
-    if (id) { activeRef.current = id; setActiveId(id); }
-    else {
-      timerRef.current = setTimeout(() => { activeRef.current = null; setActiveId(null); timerRef.current = null; }, 10000);
-    }
+  const startZoomIn = useCallback((id: string) => {
+    const node = nodesRef.current.find(n => n.id === id);
+    if (!node) return;
+    zoomRef.current = { id, cx: node.x, cy: node.y, phase: "in", startT: performance.now(), progress: 0 };
+    setPanelId(id);
+    setShowPanel(false);
+    setPanelVisible(false);
+  }, []);
+
+  const startZoomOut = useCallback(() => {
+    const zoom = zoomRef.current;
+    if (zoom.phase === "idle") return;
+    setPanelVisible(false);
+    setTimeout(() => {
+      zoomRef.current = { ...zoom, phase: "out", startT: performance.now(), progress: zoom.progress };
+      setShowPanel(false);
+    }, 180); // let panel slide out first
   }, []);
 
   const hitSubject = useCallback((mx: number, my: number) => {
     let best: GNode | null = null, bestD = Infinity;
     for (const n of nodesRef.current) {
       const d = Math.hypot(n.x - mx, n.y - my);
-      if (d < n.r * 2.2 + 10 && d < bestD) { bestD = d; best = n; }
+      // Hit area scales with zoom so it's always easy to tap
+      const hitR = n.r * 4 + 12;
+      if (d < hitR && d < bestD) { bestD = d; best = n; }
     }
     return best;
   }, []);
 
-  const hitTopic = useCallback((mx: number, my: number): [GNode, number] | null => {
-    for (const n of nodesRef.current) {
-      for (let i = 0; i < n.topics.length; i++) {
-        const tp = n.topics[i];
-        if (Math.hypot(tp.x - mx, tp.y - my) < tp.baseR * 5 + 14) return [n, i];
-      }
-    }
-    return null;
+  // Convert screen coords to canvas-space (accounting for zoom transform)
+  const toCanvasSpace = useCallback((screenX: number, screenY: number): [number, number] => {
+    const c = canvasRef.current; if (!c) return [screenX, screenY];
+    const rect = c.getBoundingClientRect();
+    const mx = screenX - rect.left, my = screenY - rect.top;
+    const zoom = zoomRef.current;
+    if (zoom.progress === 0) return [mx, my];
+    const scale = 1 + (ZOOM_MAX - 1) * zoom.progress;
+    const tx = c.clientWidth / 2 - zoom.cx * scale;
+    const ty = c.clientHeight / 2 - zoom.cy * scale;
+    return [(mx - tx) / scale, (my - ty) / scale];
   }, []);
 
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    const c = canvasRef.current; if (!c) return;
-    const r = c.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
-    const th = hitTopic(mx, my);
-    if (th) {
-      hovTopicRef.current = [th[0].id, th[1]]; setHovTopicIdx([th[0].id, th[1]]);
-      activate(th[0].id); return;
-    }
-    hovTopicRef.current = null; setHovTopicIdx(null);
-    const s = hitSubject(mx, my);
-    activate(s ? s.id : null);
-  }, [activate, hitSubject, hitTopic]);
+    // Disable hover when zoomed-in (panel visible)
+    if (zoomRef.current.phase === "done") return;
+    const [cx, cy] = toCanvasSpace(e.clientX, e.clientY);
+    const s = hitSubject(cx, cy);
+    activeRef.current = s?.id ?? null;
+    setActiveId(s?.id ?? null);
+  }, [hitSubject, toCanvasSpace]);
 
   const onMouseLeave = useCallback(() => {
-    hovTopicRef.current = null; setHovTopicIdx(null); activate(null);
-  }, [activate]);
+    activeRef.current = null; setActiveId(null);
+  }, []);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     clickStart.current = { x: e.clientX, y: e.clientY };
@@ -334,97 +393,48 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
 
   const onClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (Math.hypot(e.clientX - clickStart.current.x, e.clientY - clickStart.current.y) > 10) return;
-    const c = canvasRef.current; if (!c) return;
-    const r = c.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
-    // Check topic dot first
-    const th = hitTopic(mx, my);
-    if (th) {
-      const [node, idx] = th;
-      const tp = node.topics[idx];
-      setSelectedTopic({ nodeId: node.id, label: tp.label, x: tp.x, y: tp.y, status: node.status });
-      setSelectedId(null); setPopupAnchor(null);
-      activate(node.id);
+    const zoom = zoomRef.current;
+
+    // If panel is open, click on canvas = zoom out
+    if (zoom.phase === "done") {
+      startZoomOut();
       return;
     }
-    setSelectedTopic(null);
-    const s = hitSubject(mx, my);
+    if (zoom.phase === "in" || zoom.phase === "out") return; // animating
+
+    const [cx, cy] = toCanvasSpace(e.clientX, e.clientY);
+    const s = hitSubject(cx, cy);
     if (s) {
-      setSelectedId(prev => {
-        if (prev === s.id) { setPopupAnchor(null); return null; }
-        setPopupAnchor({ x: s.x, y: s.y, r: s.r });
-        return s.id;
-      });
-      activate(s.id);
-    } else {
-      setSelectedId(null); setPopupAnchor(null);
+      startZoomIn(s.id);
+      activeRef.current = s.id;
+      setActiveId(s.id);
     }
-  }, [hitSubject, hitTopic, activate]);
+  }, [hitSubject, startZoomIn, startZoomOut, toCanvasSpace]);
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() };
   }, []);
-  const onTouchMove = useCallback((e: React.TouchEvent) => {
-    const c = canvasRef.current; if (!c) return;
-    const r = c.getBoundingClientRect(), mx = e.touches[0].clientX - r.left, my = e.touches[0].clientY - r.top;
-    const th = hitTopic(mx, my);
-    if (th) { hovTopicRef.current = [th[0].id, th[1]]; setHovTopicIdx([th[0].id, th[1]]); activate(th[0].id); return; }
-    hovTopicRef.current = null; setHovTopicIdx(null);
-    const s = hitSubject(mx, my); activate(s?.id ?? null);
-  }, [activate, hitSubject, hitTopic]);
+
   const onTouchEnd = useCallback((e: React.TouchEvent) => {
     const dx = e.changedTouches[0].clientX - touchStart.current.x;
     const dy = e.changedTouches[0].clientY - touchStart.current.y;
-    if (Math.hypot(dx, dy) < 10 && Date.now() - touchStart.current.t < 400) {
-      const c = canvasRef.current; if (!c) return;
-      const r = c.getBoundingClientRect(), mx = e.changedTouches[0].clientX - r.left, my = e.changedTouches[0].clientY - r.top;
-      const s = hitSubject(mx, my);
-      if (s) {
-        setSelectedTopic(null);
-      setSelectedId(prev => {
-          if (prev === s.id) { setPopupAnchor(null); return null; }
-          setPopupAnchor({ x: s.x, y: s.y, r: s.r });
-          return s.id;
-        });
-        activate(s.id);
-      }
-    }
-    activate(null);
-  }, [activate, hitSubject]);
+    if (Math.hypot(dx, dy) > 14 || Date.now() - touchStart.current.t > 420) return;
+    const zoom = zoomRef.current;
 
-  const selNode = nodesRef.current.find(n => n.id === selectedId);
-  const selSub  = SUBJECTS.find(s => s.id === selectedId);
-  const selTops = selectedId === "russian-history" ? RUSSIAN_HISTORY_TOPICS : null;
-  // Simple topic list for non-history subjects
-  const selTopicStrings = selectedId && selectedId !== "russian-history" ? (TOPICS[selectedId] ?? []) : [];
+    if (zoom.phase === "done") { startZoomOut(); return; }
+    if (zoom.phase === "in" || zoom.phase === "out") return;
 
-  // Topic mini-popup position
-  const TOPIC_POP_W = 220;
-  let topicPopStyle: React.CSSProperties = { display: "none" };
-  if (selectedTopic && canvasRef.current) {
-    const W = canvasRef.current.clientWidth, H = canvasRef.current.clientHeight;
-    let px = selectedTopic.x - TOPIC_POP_W / 2;
-    const py = selectedTopic.y < H * 0.6 ? selectedTopic.y + 18 : selectedTopic.y - 100;
-    px = Math.max(8, Math.min(px, W - TOPIC_POP_W - 8));
-    topicPopStyle = { display: "block", left: px, top: Math.max(8, py), width: TOPIC_POP_W };
-  }
-  // Find node for selected topic
-  // topicNode removed — status stored directly in selectedTopic
+    const [cx, cy] = toCanvasSpace(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    const s = hitSubject(cx, cy);
+    if (s) startZoomIn(s.id);
+  }, [hitSubject, startZoomIn, startZoomOut, toCanvasSpace]);
 
-  // Compute popup CSS position — anchor to star, clamp within canvas
-  const POPUP_W = 300, POPUP_H_EST = 180;
-  let popupStyle: React.CSSProperties = { display: "none" };
-  if (popupAnchor && canvasRef.current) {
-    const W = canvasRef.current.clientWidth, H = canvasRef.current.clientHeight;
-    let px = popupAnchor.x - POPUP_W / 2;
-    // Place above star if enough room, else below
-    const aboveY = popupAnchor.y - popupAnchor.r - POPUP_H_EST - 16;
-    const belowY = popupAnchor.y + popupAnchor.r + 16;
-    let py = aboveY >= 4 ? aboveY : belowY;
-    // Clamp horizontally
-    px = Math.max(8, Math.min(px, W - POPUP_W - 8));
-    py = Math.max(8, Math.min(py, H - POPUP_H_EST - 8));
-    popupStyle = { display: "block", left: px, top: py, width: POPUP_W };
-  }
+  // Panel data
+  const panelNode = nodesRef.current.find(n => n.id === panelId);
+  const panelSub  = SUBJECTS.find(s => s.id === panelId);
+  const panelTops = panelId === "russian-history" ? RUSSIAN_HISTORY_TOPICS : null;
+  const panelTopicStrings = panelId && panelId !== "russian-history" ? (TOPICS[panelId] ?? []) : [];
+  const pal = panelNode ? PAL[panelNode.status] : PAL.beta;
 
   return (
     <div className={`relative w-full h-full ${className}`} style={{ background: "#06060f" }}>
@@ -436,135 +446,116 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
           { key: "beta",   core: "#c8d4ff", label: "Бета" },
         ] as { key: string; core: string; label: string }[]).map(item => (
           <div key={item.key} className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full" style={{ background: item.core, boxShadow: `0 0 5px ${item.core}` }} />
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: item.core, boxShadow: `0 0 4px ${item.core}` }} />
             <span className="text-[10px] text-white/40 font-medium">{item.label}</span>
           </div>
         ))}
       </div>
-      <p className="absolute top-4 left-4 z-10 text-[10px] text-white/25 pointer-events-none md:hidden">Нажми на звезду</p>
 
-      {/* Topic mini-popup */}
-      {selectedTopic && (
-        <div className="absolute z-40 rounded-xl overflow-hidden pointer-events-auto"
-          style={{
-            ...topicPopStyle,
-            background: "rgba(10,10,28,0.95)",
-            backdropFilter: "blur(20px)",
-            border: `1px solid ${PAL[selectedTopic.status].core}40`,
-            boxShadow: `0 4px 24px rgba(0,0,0,0.5)`,
-          }}
-        >
-          <div className="px-3 py-2.5 flex items-start justify-between gap-2">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wide mb-0.5"
-                style={{ color: PAL[selectedTopic.status].core }}>Тема</p>
-              <p className="text-sm font-semibold text-white leading-tight">{selectedTopic.label}</p>
-            </div>
-            <button onClick={() => setSelectedTopic(null)}
-              className="shrink-0 text-white/30 hover:text-white/70 transition-colors text-xs leading-none mt-0.5">✕</button>
-          </div>
-          <div className="px-3 pb-3">
-            <a href={`/learn/${selectedTopic.nodeId}?topic=${encodeURIComponent(selectedTopic.label)}`}
-              className="block w-full text-center py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90"
-              style={{ background: PAL[selectedTopic.status].core }}>
-              Обсудить эту тему →
-            </a>
-          </div>
-        </div>
-      )}
+      {/* Hint */}
+      <p className="absolute top-4 left-4 z-10 text-[10px] text-white/25 pointer-events-none">
+        {showPanel ? "Тапни на космос — вернуться" : "Нажми на звезду"}
+      </p>
 
-      {/* Floating popup card */}
-      {selNode && selSub && (
+      {/* ── Topics panel — slides up after zoom ─────────────────────────── */}
+      {showPanel && panelNode && panelSub && (
         <div
-          className="absolute z-30 rounded-2xl overflow-hidden pointer-events-auto"
+          className="absolute inset-x-0 bottom-0 z-40 pointer-events-auto"
           style={{
-            ...popupStyle,
-            background: "rgba(10,10,28,0.92)",
-            backdropFilter: "blur(20px)",
-            border: `1px solid ${PAL[selNode.status].core}30`,
-            boxShadow: `0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px ${PAL[selNode.status].core}15`,
+            transition: "transform 0.32s cubic-bezier(0.34,1.2,0.64,1), opacity 0.28s ease",
+            transform: panelVisible ? "translateY(0)" : "translateY(100%)",
+            opacity: panelVisible ? 1 : 0,
           }}
         >
-          {/* Header */}
-          <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-2"
-            style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-            <div className="flex items-center gap-3 min-w-0">
-              <span className="text-2xl shrink-0">{selSub.emoji}</span>
-              <div className="min-w-0">
-                <h3 className="font-bold text-white text-sm leading-snug break-words">{selSub.title}</h3>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md"
-                    style={{ background: PAL[selNode.status].core + "25", color: PAL[selNode.status].core }}>
-                    {PAL[selNode.status].label}
-                  </span>
-                  {selNode.xp > 0 && (
-                    <span className="text-[10px] text-white/35">{selNode.xp} мент</span>
-                  )}
+          <div
+            className="mx-2 mb-2 rounded-2xl overflow-hidden"
+            style={{
+              background: "rgba(8,8,22,0.96)",
+              backdropFilter: "blur(24px)",
+              border: `1px solid ${pal.core}28`,
+              boxShadow: `0 -8px 48px rgba(0,0,0,0.7), 0 0 0 1px ${pal.core}12`,
+            }}
+          >
+            {/* Header */}
+            <div className="px-5 pt-4 pb-3 flex items-center justify-between gap-3"
+              style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="text-2xl shrink-0">{panelSub.emoji}</span>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-white text-sm leading-snug">{panelSub.title}</h3>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md"
+                      style={{ background: pal.core + "20", color: pal.core }}>
+                      {pal.label}
+                    </span>
+                    {panelNode.xp > 0 && (
+                      <span className="text-[10px] text-white/30">{panelNode.xp} мент</span>
+                    )}
+                  </div>
                 </div>
               </div>
+              <button
+                onClick={startZoomOut}
+                className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+              </button>
             </div>
-            <button onClick={() => { setSelectedId(null); setPopupAnchor(null); }}
-              className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors text-sm leading-none">
-              ✕
-            </button>
-          </div>
 
-          {/* Description */}
-          <div className="px-4 py-3">
-            <p className="text-xs text-white/40 mb-3 leading-relaxed">{selSub.description}</p>
-
-            {/* Topics preview — all subjects */}
-            {(selTops || selTopicStrings.length > 0) && (
-              <div className="overflow-x-auto -mx-1" style={{
-                scrollbarWidth: "thin",
-                scrollbarColor: "rgba(255,255,255,0.15) transparent",
-              }}>
-                <style>{".galaxy-scroll::-webkit-scrollbar{height:4px}.galaxy-scroll::-webkit-scrollbar-track{background:transparent}.galaxy-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:4px}"}</style>
-                <div className="galaxy-scroll flex gap-1.5 pb-2 min-w-max px-1" style={{ overflowX: "auto" }}>
-                  {selTops
-                    ? selTops.map(p => (
+            {/* Topics */}
+            <div className="px-4 py-3">
+              <p className="text-[10px] text-white/30 mb-2.5 font-medium uppercase tracking-wide">Выбери тему для изучения</p>
+              <div className="overflow-x-auto -mx-1" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.12) transparent" }}>
+                <style>{".gx-scroll::-webkit-scrollbar{height:3px}.gx-scroll::-webkit-scrollbar-track{background:transparent}.gx-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:4px}"}</style>
+                <div className="gx-scroll flex gap-2 pb-2 min-w-max px-1" style={{ overflowX: "auto" }}>
+                  {panelTops
+                    ? panelTops.map(p => (
                         <a key={p.id}
-                          href={`/learn/${selNode.id}?topic=${encodeURIComponent(p.title)}`}
-                          className="flex-shrink-0 rounded-xl px-2.5 py-2 text-center transition-all hover:scale-105 hover:bg-white/10 cursor-pointer"
-                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", minWidth: 72, maxWidth: 120 }}>
-                          <div className="text-sm mb-1">{p.emoji}</div>
+                          href={`/learn/${panelNode.id}?topic=${encodeURIComponent(p.title)}`}
+                          className="flex-shrink-0 rounded-xl px-3 py-2.5 text-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                          style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${pal.core}20`, minWidth: 72, maxWidth: 110 }}>
+                          <div className="text-base mb-1">{p.emoji}</div>
                           <div className="text-[9px] font-medium text-white/75 leading-tight line-clamp-2">{p.title}</div>
                         </a>
                       ))
-                    : selTopicStrings.map((label, i) => (
+                    : panelTopicStrings.map((label, i) => (
                         <a key={i}
-                          href={`/learn/${selNode.id}?topic=${encodeURIComponent(label)}`}
-                          className="flex-shrink-0 rounded-xl px-2.5 py-2 text-center transition-all hover:scale-105 hover:bg-white/10 cursor-pointer"
-                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", minWidth: 72, maxWidth: 120 }}>
-                          <div className="text-[9px] font-medium text-white/75 leading-tight">{label}</div>
+                          href={`/learn/${panelNode.id}?topic=${encodeURIComponent(label)}`}
+                          className="flex-shrink-0 rounded-xl px-3 py-2.5 text-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                          style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${pal.core}20`, minWidth: 72, maxWidth: 110 }}>
+                          <div className="text-[10px] font-medium text-white/80 leading-tight">{label}</div>
                         </a>
                       ))
                   }
                 </div>
               </div>
-            )}
-            {!selTops && selTopicStrings.length === 0 && (
-              <p className="text-[10px] text-white/30 italic">Mentora подстроится с первого сообщения</p>
-            )}
-          </div>
+            </div>
 
-          {/* CTA */}
-          <div className="px-4 pb-4">
-            <a href={`/learn/${selNode.id}`}
-              className="block w-full text-center py-2 rounded-xl text-xs font-semibold text-white transition-all hover:opacity-90"
-              style={{ background: `linear-gradient(135deg, ${PAL[selNode.status].core}, ${PAL[selNode.status].core}cc)` }}>
-              {selNode.status === "active" || selNode.status === "active_full" ? "Продолжить →" : "Начать →"}
-            </a>
+            {/* CTA */}
+            <div className="px-4 pb-4">
+              <a href={`/learn/${panelNode.id}`}
+                className="block w-full text-center py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-98"
+                style={{ background: `linear-gradient(135deg, ${pal.core}, ${pal.core}bb)` }}>
+                {panelNode.status === "active" || panelNode.status === "active_full" ? "Продолжить учёбу →" : "Начать изучение →"}
+              </a>
+            </div>
           </div>
         </div>
       )}
 
-      <canvas ref={canvasRef}
-        onMouseMove={onMouseMove} onMouseLeave={onMouseLeave}
-        onMouseDown={onMouseDown} onClick={onClick}
-        onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
+      <canvas
+        ref={canvasRef}
+        onMouseMove={onMouseMove}
+        onMouseLeave={onMouseLeave}
+        onMouseDown={onMouseDown}
+        onClick={onClick}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
         className="block w-full h-full"
-        style={{ cursor: activeId ? "pointer" : "default" }} />
+        style={{ cursor: activeId && zoomRef.current.phase === "idle" ? "pointer" : showPanel ? "pointer" : "default" }}
+      />
     </div>
   );
 }
