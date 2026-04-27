@@ -59,8 +59,8 @@ export default function ParticleField({ className, count = 110 }: Props) {
         y: Math.random() * H,
         vx: (Math.random() - 0.5) * 0.22,
         vy: (Math.random() - 0.5) * 0.22,
-        size: Math.random() * 1.6 + 0.4,
-        opacity: Math.random() * 0.50 + 0.15,
+        size: Math.random() * 2.0 + 0.6,
+        opacity: Math.random() * 0.55 + 0.30,
         r, g, b,
       };
     }
@@ -68,6 +68,13 @@ export default function ParticleField({ className, count = 110 }: Props) {
     function init() {
       resize();
       particles = Array.from({ length: count }, spawn);
+      // Sprinkle ~12% bright "foreground" stars on top
+      const bright = Math.floor(count * 0.12);
+      for (let i = 0; i < bright; i++) {
+        particles[i].size = Math.random() * 1.8 + 1.2;
+        particles[i].opacity = Math.random() * 0.25 + 0.70;
+        particles[i].r = 255; particles[i].g = 255; particles[i].b = 255;
+      }
     }
 
     function tick() {
