@@ -596,7 +596,7 @@ export default function AboutPage() {
                   </p>
                   <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
                     <a
-                      href="https://boosty.to/mentora"
+                      href="https://boosty.to/mentora/donate"
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
