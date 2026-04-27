@@ -197,8 +197,8 @@ export default function AboutPage() {
             letterSpacing: "-1.5px", color: "var(--text)",
             margin: "20px 0 18px",
           }}>
-            Ментор, которого<br />
-            <span style={{ color: "#4561E8" }} className="dark:text-[#6b87ff]">ты всегда хотел иметь</span>
+            Ментор,<br />
+            <span style={{ color: "#4561E8" }} className="dark:text-[#6b87ff]">которого ты всегда хотел</span>
           </h1>
           <p style={{ fontSize: 17, lineHeight: 1.75, color: "var(--text-secondary)", maxWidth: 580 }}>
             Хороший наставник знает, как ты мыслишь. Помнит, где ты застрял в прошлый раз.
@@ -558,52 +558,104 @@ export default function AboutPage() {
           <h2 style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase" as const, color: "var(--text-muted)", marginBottom: 16 }}>
             Поддержать платформу
           </h2>
-          <div className="rounded-2xl p-6 border" style={{ background: "linear-gradient(135deg, rgba(69,97,232,0.07) 0%, rgba(159,122,255,0.05) 100%)", borderColor: "rgba(69,97,232,0.18)" }}>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 16, flexWrap: "wrap" as const }}>
-              <div style={{ flex: 1, minWidth: 200 }}>
-                <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>
-                  Mentora — независимый проект
-                </p>
-                <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 0 }}>
-                  Платформа создаётся без венчурных инвесторов и рекламы. Если тебе нравится то, что мы делаем, —
-                  лучшая поддержка это подписка Pro или Ultima, реферальная ссылка другу и отзыв.
-                </p>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: 8, flexShrink: 0 }}>
-                <Link
-                  href="/pricing"
-                  style={{
-                    display: "inline-flex", alignItems: "center", gap: 7,
-                    fontSize: 13, fontWeight: 600,
-                    padding: "9px 18px", borderRadius: 12,
-                    background: "var(--brand)", color: "#fff",
-                    textDecoration: "none",
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "rgba(69,97,232,0.18)" }}>
+            {/* Top gradient strip */}
+            <div style={{ height: 3, background: "linear-gradient(90deg, #4561E8, #9F7AFF, #f59e0b)" }} />
+
+            <div className="p-6" style={{ background: "linear-gradient(135deg, rgba(69,97,232,0.06) 0%, rgba(159,122,255,0.04) 100%)" }}>
+              {/* Header */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(69,97,232,0.12)", border: "1px solid rgba(69,97,232,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#4561E8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                   </svg>
-                  Поддержать подпиской
-                </Link>
-                <Link
-                  href="/profile"
-                  style={{
-                    display: "inline-flex", alignItems: "center", gap: 7,
-                    fontSize: 13, fontWeight: 600,
-                    padding: "9px 18px", borderRadius: 12,
-                    background: "rgba(69,97,232,0.10)",
-                    color: "var(--brand)",
-                    border: "1px solid rgba(69,97,232,0.2)",
-                    textDecoration: "none",
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-                  </svg>
-                  Пригласить друга
-                </Link>
+                </div>
+                <div>
+                  <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>
+                    Mentora растёт без венчура и рекламы
+                  </p>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5 }}>
+                    Проект живёт за счёт подписок пользователей и партнёрской поддержки
+                  </p>
+                </div>
+              </div>
+
+              {/* Two columns */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                {/* Donation */}
+                <div className="rounded-xl p-4 border" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.12em", color: "var(--text-muted)", marginBottom: 8 }}>
+                    Задонатить
+                  </p>
+                  <p style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.55, marginBottom: 12 }}>
+                    Разовый перевод любой суммы через СБП или Boosty. Каждый рубль идёт на серверы, AI-модели и новые функции.
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
+                    <a
+                      href="https://boosty.to/mentora"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 6,
+                        fontSize: 12, fontWeight: 600,
+                        padding: "8px 14px", borderRadius: 10,
+                        background: "#f97316", color: "#fff",
+                        textDecoration: "none",
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                      </svg>
+                      Поддержать на Boosty
+                    </a>
+                    <a
+                      href="https://t.me/mentora_support_bot"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 6,
+                        fontSize: 12, fontWeight: 600,
+                        padding: "8px 14px", borderRadius: 10,
+                        background: "rgba(69,97,232,0.10)",
+                        color: "var(--brand)",
+                        border: "1px solid rgba(69,97,232,0.2)",
+                        textDecoration: "none",
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style={{ color: "#2AABEE" }}>
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.008 9.461c-.148.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.604.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.24 14.605l-2.95-.924c-.642-.2-.654-.642.136-.951l11.527-4.448c.537-.194 1.006.131.609.966z"/>
+                      </svg>
+                      Написать по СБП
+                    </a>
+                  </div>
+                </div>
+
+                {/* Investor / Partner */}
+                <div className="rounded-xl p-4 border" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.12em", color: "var(--text-muted)", marginBottom: 8 }}>
+                    Инвестировать / партнёрство
+                  </p>
+                  <p style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.55, marginBottom: 12 }}>
+                    Ищем партнёров для масштабирования на школы и B2B. Если интересно — пишите напрямую.
+                  </p>
+                  <a
+                    href="mailto:hello@mentora.su?subject=Инвестиции / партнёрство"
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: 6,
+                      fontSize: 12, fontWeight: 600,
+                      padding: "8px 14px", borderRadius: 10,
+                      background: "linear-gradient(135deg, #4561E8, #7C3AED)",
+                      color: "#fff",
+                      textDecoration: "none",
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                      <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                    Написать команде
+                  </a>
+                </div>
               </div>
             </div>
           </div>
