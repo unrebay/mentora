@@ -12,8 +12,6 @@ import MeLogo from "@/components/MeLogo";
 import WhatsNewBanner from "@/components/WhatsNewBanner";
 import ReferralWidget from "@/components/ReferralWidget";
 import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
-import dynamic from "next/dynamic";
-const ChatParticles = dynamic(() => import("@/components/ChatParticles"), { ssr: false });
 
 const DAILY_LIMIT = 20;
 
@@ -116,25 +114,47 @@ export default async function DashboardPage() {
 
   return (
     <main className="min-h-screen text-[var(--text)]" style={{ background: "var(--bg)" }}>
-      {/* Ambient sphere background — subtle, theme-aware */}
+      {/* Dark theme: 3D sphere blobs */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden dark:block hidden">
         <SphereBlobScene spheres={SUBTLE_SPHERES} intensity={0.5} />
       </div>
-      {/* Floating math/science symbols — always visible in both themes */}
+      {/* Ambient glow orbs — both themes, visible through glass nav */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
-        <ChatParticles subject="discovery" />
-      </div>
-      {/* Light theme: soft gradient orbs */}
-      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden dark:hidden">
+        {/* Top-left: brand blue — strong enough to show through glass blur */}
         <div className="absolute rounded-full" style={{
-          width: 700, height: 700, top: "-200px", left: "-150px",
-          background: "radial-gradient(circle, rgba(69,97,232,0.05) 0%, transparent 65%)",
+          width: 640, height: 640, top: "-220px", left: "-120px",
+          background: "radial-gradient(circle, rgba(69,97,232,0.13) 0%, transparent 65%)",
+          animation: "ambientDrift1 18s ease-in-out infinite",
         }} />
+        {/* Top-right: violet */}
         <div className="absolute rounded-full" style={{
-          width: 500, height: 500, top: "30%", right: "-80px",
-          background: "radial-gradient(circle, rgba(255,122,0,0.04) 0%, transparent 65%)",
+          width: 480, height: 480, top: "-160px", right: "-100px",
+          background: "radial-gradient(circle, rgba(159,122,255,0.10) 0%, transparent 65%)",
+          animation: "ambientDrift2 22s ease-in-out infinite",
+        }} />
+        {/* Center-right: warm orange accent */}
+        <div className="absolute rounded-full" style={{
+          width: 400, height: 400, top: "35%", right: "-80px",
+          background: "radial-gradient(circle, rgba(255,122,0,0.07) 0%, transparent 65%)",
+          animation: "ambientDrift3 26s ease-in-out infinite",
         }} />
       </div>
+      <style>{`
+        @keyframes ambientDrift1 {
+          0%,100% { transform: translate(0,0) scale(1); }
+          40% { transform: translate(40px, 30px) scale(1.08); }
+          70% { transform: translate(-20px, 15px) scale(0.96); }
+        }
+        @keyframes ambientDrift2 {
+          0%,100% { transform: translate(0,0) scale(1); }
+          35% { transform: translate(-35px, 20px) scale(1.1); }
+          65% { transform: translate(15px, -10px) scale(0.94); }
+        }
+        @keyframes ambientDrift3 {
+          0%,100% { transform: translate(0,0) scale(1); }
+          50% { transform: translate(-30px, -25px) scale(1.06); }
+        }
+      `}</style>
 
       <PostHogIdentify userId={user.id} email={user.email ?? ""} />
       <div className="max-w-5xl mx-auto px-6 py-10">

@@ -112,7 +112,7 @@ export default function DashboardNav({
           background: navBg,
           backdropFilter: navBlur,
           WebkitBackdropFilter: navBlur,
-          borderRadius: 20,
+          borderRadius: 28,
           border: dk
             ? "1px solid rgba(255,255,255,0.1)"
             : "1px solid var(--border-light)",
@@ -284,7 +284,7 @@ export default function DashboardNav({
             background: dk ? "rgba(8,8,20,0.92)" : "var(--bg-nav)",
             backdropFilter: "blur(28px) saturate(1.8)",
             WebkitBackdropFilter: "blur(28px) saturate(1.8)",
-            borderRadius: 20,
+            borderRadius: 28,
             border: dk ? "1px solid rgba(255,255,255,0.09)" : "1px solid var(--border-light)",
             boxShadow: dk ? "0 8px 40px rgba(0,0,0,0.5)" : "0 4px 24px rgba(0,0,0,0.1)",
           }}
