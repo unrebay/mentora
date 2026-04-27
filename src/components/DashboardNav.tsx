@@ -99,7 +99,7 @@ export default function DashboardNav({
       className="sticky top-0 z-20"
       style={{
         padding: "10px 14px",
-        background: "transparent",
+        background: "var(--bg)",
         pointerEvents: "none", // clicks pass through the padding gaps
       }}
     >
