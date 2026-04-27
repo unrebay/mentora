@@ -589,46 +589,25 @@ export default function AboutPage() {
                     Задонатить
                   </p>
                   <p style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.55, marginBottom: 12 }}>
-                    Разовый перевод любой суммы через СБП или Boosty. Каждый рубль идёт на серверы, AI-модели и новые функции.
+                    Разовый перевод любой суммы на Boosty. Каждый рубль идёт на серверы, AI-модели и новые функции.
                   </p>
-                  <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
-                    <a
-                      href="https://boosty.to/mentora"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: "inline-flex", alignItems: "center", gap: 6,
-                        fontSize: 12, fontWeight: 600,
-                        padding: "8px 14px", borderRadius: 10,
-                        background: "#f97316", color: "#fff",
-                        textDecoration: "none",
-                      }}
-                    >
-                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                      </svg>
-                      Поддержать на Boosty
-                    </a>
-                    <a
-                      href="https://t.me/mentora_support_bot"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: "inline-flex", alignItems: "center", gap: 6,
-                        fontSize: 12, fontWeight: 600,
-                        padding: "8px 14px", borderRadius: 10,
-                        background: "rgba(69,97,232,0.10)",
-                        color: "var(--brand)",
-                        border: "1px solid rgba(69,97,232,0.2)",
-                        textDecoration: "none",
-                      }}
-                    >
-                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style={{ color: "#2AABEE" }}>
-                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.008 9.461c-.148.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.604.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.24 14.605l-2.95-.924c-.642-.2-.654-.642.136-.951l11.527-4.448c.537-.194 1.006.131.609.966z"/>
-                      </svg>
-                      Написать по СБП
-                    </a>
-                  </div>
+                  <a
+                    href="https://boosty.to/mentora"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: 6,
+                      fontSize: 12, fontWeight: 600,
+                      padding: "8px 14px", borderRadius: 10,
+                      background: "#f97316", color: "#fff",
+                      textDecoration: "none",
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                    Поддержать на Boosty
+                  </a>
                 </div>
 
                 {/* Investor / Partner */}
