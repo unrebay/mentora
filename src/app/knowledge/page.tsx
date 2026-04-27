@@ -71,7 +71,7 @@ export default async function KnowledgePage() {
         {/* Deep-space frosted-glass blobs — behind everything */}
         <DeepSpaceBlobs className="absolute inset-0 w-full h-full z-0" />
         {/* Constellation particle field */}
-        <ParticleField className="absolute inset-0 w-full h-full z-[1]" count={120} />
+        <ParticleField className="absolute inset-0 w-full h-full z-[1]" count={180} />
         {/* Interactive galaxy canvas on top */}
         <KnowledgeGraph className="absolute inset-0 w-full h-full z-10" userProgress={userProgress} />
       </div>

@@ -59,8 +59,8 @@ export default function ParticleField({ className, count = 110 }: Props) {
         y: Math.random() * H,
         vx: (Math.random() - 0.5) * 0.22,
         vy: (Math.random() - 0.5) * 0.22,
-        size: Math.random() * 1.3 + 0.3,
-        opacity: Math.random() * 0.42 + 0.07,
+        size: Math.random() * 1.6 + 0.4,
+        opacity: Math.random() * 0.50 + 0.15,
         r, g, b,
       };
     }
