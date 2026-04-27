@@ -197,6 +197,10 @@ export default async function HomePage() {
         <div className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-12">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5 text-xs font-bold tracking-widest uppercase"
+                style={{ background: "rgba(69,97,232,0.15)", color: "#6B8FFF", border: "1px solid rgba(69,97,232,0.25)" }}>
+                Ментора — просто спроси
+              </div>
               <h1 className="text-[2.1rem] sm:text-[2.8rem] md:text-[3.2rem] lg:text-[4rem] font-black leading-[1.05] mb-6 tracking-tight text-white">
                 Забудь про{" "}
                 <span className="line-through text-gray-600 font-bold">скучные</span>{" "}

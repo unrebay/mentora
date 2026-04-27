@@ -195,11 +195,14 @@ export default function AboutPage() {
             fontSize: "clamp(30px, 5vw, 52px)",
             fontWeight: 900, lineHeight: 1.1,
             letterSpacing: "-1.5px", color: "var(--text)",
-            margin: "20px 0 18px",
+            margin: "20px 0 12px",
           }}>
             Ментор,<br />
             <span style={{ color: "#4561E8" }} className="dark:text-[#6b87ff]">которого ты всегда хотел</span>
           </h1>
+          <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "var(--text-muted)", marginBottom: 18 }}>
+            Ментора — просто спроси
+          </p>
           <p style={{ fontSize: 17, lineHeight: 1.75, color: "var(--text-secondary)", maxWidth: 580 }}>
             Хороший наставник знает, как ты мыслишь. Помнит, где ты застрял в прошлый раз.
             Объясняет по-новому, если с первого раза не понял. Не устаёт. Не осуждает.
