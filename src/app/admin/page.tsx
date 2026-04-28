@@ -159,7 +159,20 @@ const EMPLOYEES: Employee[] = [
   { id: "growth",    name: "Саша",  role: "Growth Hacker",  desc: "Конверсии, виральность, эксперименты", color: "#10b981", available: true, avatar: "С" },
 ];
 
-interface Msg { role: "user" | "assistant"; content: string }
+interface Msg { role: "user" | "assistant"; content: string; ts?: number }
+
+function chatKey(empId: string) { return `mentora_admin_chat_${empId}`; }
+
+function loadHistory(empId: string): Msg[] {
+  try { return JSON.parse(localStorage.getItem(chatKey(empId)) ?? "[]"); }
+  catch { return []; }
+}
+
+function saveHistory(empId: string, msgs: Msg[]) {
+  // Keep last 200 messages to avoid localStorage bloat
+  const trimmed = msgs.slice(-200);
+  localStorage.setItem(chatKey(empId), JSON.stringify(trimmed));
+}
 
 function TeamTab() {
   const { CARD, BOR, TEXT, MUTED, inp, isDark, SHADOW, GLASS } = useTok();
@@ -175,22 +188,30 @@ function TeamTab() {
 
   const openChat = (emp: Employee) => {
     setSelected(emp);
-    setMessages([]);
+    setMessages(loadHistory(emp.id));
     setInput("");
+  };
+
+  const clearHistory = () => {
+    if (!selected) return;
+    localStorage.removeItem(chatKey(selected.id));
+    setMessages([]);
   };
 
   const send = async () => {
     if (!selected || !input.trim() || streaming) return;
-    const userMsg: Msg = { role: "user", content: input.trim() };
+    const userMsg: Msg = { role: "user", content: input.trim(), ts: Date.now() };
     const next = [...messages, userMsg];
     setMessages(next);
+    saveHistory(selected.id, next);
     setInput("");
     setStreaming(true);
 
     const res = await fetch("/api/admin/team", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ employeeId: selected.id, messages: next }),
+      // Send only role+content to API (no ts field)
+      body: JSON.stringify({ employeeId: selected.id, messages: next.map(m => ({ role: m.role, content: m.content })) }),
     });
 
     if (!res.body) { setStreaming(false); return; }
@@ -199,7 +220,7 @@ function TeamTab() {
     const decoder = new TextDecoder();
     let text = "";
 
-    setMessages(prev => [...prev, { role: "assistant", content: "" }]);
+    setMessages(prev => [...prev, { role: "assistant", content: "", ts: Date.now() }]);
 
     while (true) {
       const { done, value } = await reader.read();
@@ -207,10 +228,16 @@ function TeamTab() {
       text += decoder.decode(value, { stream: true });
       setMessages(prev => {
         const copy = [...prev];
-        copy[copy.length - 1] = { role: "assistant", content: text };
+        copy[copy.length - 1] = { ...copy[copy.length - 1], content: text };
         return copy;
       });
     }
+
+    // Save final state with completed assistant message
+    setMessages(prev => {
+      saveHistory(selected.id, prev);
+      return prev;
+    });
     setStreaming(false);
   };
 
@@ -256,11 +283,22 @@ function TeamTab() {
                 )}
               </div>
               <p style={{ margin: 0, fontSize: 12.5, color: MUTED, lineHeight: 1.5 }}>{emp.desc}</p>
-              {emp.available && (
-                <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: emp.color, fontWeight: 600 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: emp.color }} />
-                  Открыть чат →
-                </div>
+              {emp.available && (() => {
+                const hist = typeof window !== "undefined" ? loadHistory(emp.id) : [];
+                return (
+                  <div style={{ marginTop: 14, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: emp.color, fontWeight: 600 }}>
+                      <div style={{ width: 6, height: 6, borderRadius: "50%", background: emp.color }} />
+                      {hist.length > 0 ? `${hist.length} сообщ.` : "Открыть чат"} →
+                    </div>
+                    {hist.length > 0 && (
+                      <span style={{ fontSize: 10, color: MUTED }}>
+                        {new Date(hist[hist.length - 1].ts ?? 0).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}
+                      </span>
+                    )}
+                  </div>
+                );
+              })()}
               )}
             </div>
           ))}
@@ -293,9 +331,18 @@ function TeamTab() {
           <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: TEXT }}>{emp.name}</p>
           <p style={{ margin: 0, fontSize: 11, color: emp.color, fontWeight: 600 }}>{emp.role}</p>
         </div>
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#22c55e" }}>
-          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e" }} />
-          онлайн
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#22c55e" }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e" }} />
+            {messages.length > 0 ? `${messages.length} сообщ.` : "онлайн"}
+          </div>
+          {messages.length > 0 && (
+            <button
+              onClick={clearHistory}
+              title="Очистить историю"
+              style={{ padding: "4px 10px", borderRadius: 7, border: `1px solid rgba(239,68,68,0.25)`, background: "transparent", color: "#ef4444", fontSize: 11, cursor: "pointer", opacity: 0.7 }}
+            >Очистить</button>
+          )}
         </div>
       </div>
 
