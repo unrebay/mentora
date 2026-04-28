@@ -235,72 +235,94 @@ export default async function PricingPage() {
             </div>
           </div>
 
-          {/* ULTRA */}
-          <div data-tilt data-tilt-strength="4" className="relative rounded-2xl p-7 flex flex-col overflow-hidden mt-3 md:mt-0"
-            style={{ background: "#060610" }}>
-            <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full pointer-events-none"
-              style={{ background: "radial-gradient(circle, rgba(255,122,0,0.28) 0%, transparent 65%)" }} />
-            <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full pointer-events-none"
-              style={{ background: "radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 65%)" }} />
-            <div className="absolute top-1/2 right-8 w-32 h-32 -translate-y-1/2 rounded-full pointer-events-none"
-              style={{ background: "radial-gradient(circle, rgba(69,97,232,0.18) 0%, transparent 70%)" }} />
-            <div className="absolute inset-0 pointer-events-none"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E")`,
-                opacity: 0.035, mixBlendMode: "overlay",
-              }} />
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
+          {/* ULTRA — outer wrapper without overflow-hidden so НОВИНКА pill is visible */}
+          <div data-tilt data-tilt-strength="4" className="relative flex flex-col mt-3 md:mt-0">
+            {/* НОВИНКА pill — lives on outer wrapper, never clipped */}
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap">
               <span className="text-white text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase"
                 style={{
-                  background: "linear-gradient(135deg, rgba(255,122,0,0.6), rgba(124,58,237,0.6))",
-                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "linear-gradient(135deg, rgba(255,122,0,0.75), rgba(124,58,237,0.75))",
+                  border: "1px solid rgba(255,255,255,0.12)",
                   backdropFilter: "blur(8px)",
+                  boxShadow: "0 2px 12px rgba(255,122,0,0.25)",
                 }}>
                 {t("common.new").toUpperCase()}
               </span>
             </div>
-            <div className="mb-6 relative z-10">
-              <p className="text-[11px] font-bold tracking-[0.15em] uppercase mb-4"
-                style={{ background: "linear-gradient(90deg, #FF7A00, #9F7AFF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                {t("pricing.ultra.name")}
-              </p>
-              <div className="flex items-end gap-1.5">
-                <span className="text-5xl font-bold tracking-tight text-white">{t("pricing.ultra.price")}</span>
-                <span className="text-gray-400 text-sm mb-2">{t("pricing.ultra.period")}</span>
-              </div>
-              {locale === "ru" && (
-                <div className="flex items-center gap-2 mt-3 rounded-xl px-3 py-2.5"
-                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <span className="text-sm font-semibold text-white/80">5 990 ₽ / год</span>
-                  <span className="text-white/20 text-xs">·</span>
-                  <span className="text-xs text-white/40">499 ₽/мес</span>
-                  <span className="ml-auto text-[11px] font-bold text-emerald-400 bg-emerald-900/30 px-2 py-0.5 rounded-lg">−37%</span>
+            {/* Inner card — overflow-hidden only here to clip decorative blobs */}
+            <div className="relative rounded-2xl p-7 flex flex-col flex-1 overflow-hidden"
+              style={{ background: "#060610" }}>
+              <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full pointer-events-none"
+                style={{ background: "radial-gradient(circle, rgba(255,122,0,0.28) 0%, transparent 65%)" }} />
+              <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full pointer-events-none"
+                style={{ background: "radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 65%)" }} />
+              <div className="absolute top-1/2 right-8 w-32 h-32 -translate-y-1/2 rounded-full pointer-events-none"
+                style={{ background: "radial-gradient(circle, rgba(69,97,232,0.18) 0%, transparent 70%)" }} />
+              <div className="absolute inset-0 pointer-events-none"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E")`,
+                  opacity: 0.035, mixBlendMode: "overlay",
+                }} />
+              <div className="mb-6 relative z-10">
+                <p className="text-[11px] font-bold tracking-[0.15em] uppercase mb-4"
+                  style={{ background: "linear-gradient(90deg, #FF7A00, #9F7AFF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                  {t("pricing.ultra.name")}
+                </p>
+                <div className="flex items-end gap-1.5">
+                  <span className="text-5xl font-bold tracking-tight text-white">{t("pricing.ultra.price")}</span>
+                  <span className="text-gray-400 text-sm mb-2">{t("pricing.ultra.period")}</span>
                 </div>
+                {locale === "ru" && (
+                  <div className="flex items-center gap-2 mt-3 rounded-xl px-3 py-2.5"
+                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    <span className="text-sm font-semibold text-white/80">5 990 ₽ / год</span>
+                    <span className="text-white/20 text-xs">·</span>
+                    <span className="text-xs text-white/40">499 ₽/мес</span>
+                    <span className="ml-auto text-[11px] font-bold text-emerald-400 bg-emerald-900/30 px-2 py-0.5 rounded-lg">−37%</span>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2 mb-7 relative z-10">
+                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_monthly" />
+                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_annual" />
+              </div>
+              <ul className="space-y-3 flex-1 relative z-10">
+                {ultraFeatures.map((label: string, i: number) => {
+                  const isSoon = locale === "ru" ? (i === 2 || i === 3) : false;
+                  return (
+                    <li key={label} className="flex items-start gap-2.5 text-sm text-white/70">
+                      <Check dark />
+                      <span className="flex items-center gap-2 flex-wrap">
+                        {label}
+                        {isSoon && (
+                          <span className="inline-flex items-center gap-1">
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md tracking-wide"
+                              style={{ background: "rgba(255,122,0,0.18)", color: "#FF9A3C", border: "1px solid rgba(255,122,0,0.25)" }}>
+                              {t("pricing.soon")}
+                            </span>
+                            {/* 8-pointed star asterisk */}
+                            <svg viewBox="0 0 12 12" width="9" height="9" aria-hidden style={{ flexShrink: 0 }}>
+                              <path d="M6 0.5L7.1 4.1L10.5 2.5L8.9 5.9L12.5 6L8.9 6.1L10.5 9.5L7.1 7.9L6 11.5L4.9 7.9L1.5 9.5L3.1 6.1L-0.5 6L3.1 5.9L1.5 2.5L4.9 4.1Z"
+                                fill="#FF9A3C" opacity="0.75" />
+                            </svg>
+                          </span>
+                        )}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+              {/* Ultima dev disclaimer */}
+              {locale === "ru" && (
+                <p className="mt-5 text-[10px] text-white/30 leading-relaxed relative z-10">
+                  <svg viewBox="0 0 12 12" width="8" height="8" style={{ display: "inline", verticalAlign: "middle", marginRight: 3 }}>
+                    <path d="M6 0.5L7.1 4.1L10.5 2.5L8.9 5.9L12.5 6L8.9 6.1L10.5 9.5L7.1 7.9L6 11.5L4.9 7.9L1.5 9.5L3.1 6.1L-0.5 6L3.1 5.9L1.5 2.5L4.9 4.1Z"
+                      fill="currentColor" />
+                  </svg>
+                  Отмечено «скоро» — функции в активной разработке, появятся в ближайшие месяцы.
+                </p>
               )}
             </div>
-            <div className="space-y-2 mb-7 relative z-10">
-              <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_monthly" />
-              <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_annual" />
-            </div>
-            <ul className="space-y-3 flex-1 relative z-10">
-              {ultraFeatures.map((label: string, i: number) => {
-                const isSoon = locale === "ru" ? (i === 2 || i === 3) : false;
-                return (
-                  <li key={label} className="flex items-start gap-2.5 text-sm text-white/70">
-                    <Check dark />
-                    <span className="flex items-center gap-2 flex-wrap">
-                      {label}
-                      {isSoon && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md tracking-wide"
-                          style={{ background: "rgba(255,122,0,0.18)", color: "#FF9A3C", border: "1px solid rgba(255,122,0,0.25)" }}>
-                          {t("pricing.soon")}
-                        </span>
-                      )}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
           </div>
 
         </div>
@@ -368,7 +390,7 @@ export default async function PricingPage() {
           <PricingFAQ />
           <div className="mt-12 flex flex-col items-center gap-3">
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t("pricing.supportQuestion")}</p>
-            <div className="flex gap-2 flex-wrap justify-center">
+            <div className="flex gap-2 flex-wrap justify-center items-start">
               <TelegramSupportButton label="Написать в поддержку" />
               <InstagramButton label="@mentora.su" />
             </div>

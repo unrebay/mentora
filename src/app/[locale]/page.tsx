@@ -193,8 +193,8 @@ export default async function HomePage() {
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/auth"
-                  className="px-7 py-3.5 font-semibold rounded-xl text-white transition-all"
-                  style={{ background: "linear-gradient(135deg, #4561E8 0%, #6B8FFF 100%)", boxShadow: "0 4px 16px rgba(69,97,232,0.4)" }}>
+                  className="px-7 py-3.5 font-semibold rounded-full text-white transition-all hover:scale-[1.03] active:scale-95"
+                  style={{ background: "linear-gradient(135deg, #5575FF 0%, #4561E8 50%, #6B4FF0 100%)", boxShadow: "0 4px 20px rgba(69,97,232,0.45), 0 1px 0 rgba(255,255,255,0.2) inset" }}>
                   {t("landing.heroCtaStart")}
                 </Link>
                 <DemoScrollButton />
@@ -235,7 +235,7 @@ export default async function HomePage() {
                   {" "}{locale === "ru" ? "— только тебе." : "— only for you."}
                 </p>
                 <Link href="/auth"
-                  className="inline-flex px-7 py-3.5 bg-[#4561E8] text-white font-medium rounded-xl hover:bg-[#3651d8] transition-colors">
+                  className="inline-flex px-7 py-3.5 bg-[#4561E8] text-white font-medium rounded-full hover:bg-[#3651d8] transition-all hover:scale-[1.03] active:scale-95">
                   {t("landing.heroCta2")}
                 </Link>
               </div>
@@ -253,7 +253,7 @@ export default async function HomePage() {
                 {" "}{t("landing.teacherLine2")}
               </p>
               <Link href="/auth"
-                className="inline-flex px-7 py-3.5 bg-[#4561E8] text-white font-medium rounded-xl hover:bg-[#3651d8] transition-colors">
+                className="inline-flex px-7 py-3.5 bg-[#4561E8] text-white font-medium rounded-full hover:bg-[#3651d8] transition-all hover:scale-[1.03] active:scale-95">
                 {t("landing.heroCtaStart")}
               </Link>
             </div>
@@ -499,7 +499,7 @@ export default async function HomePage() {
                     </div>
                     <div className="text-xs text-gray-500 mt-2">До экзамена: 40 дней · История России · ЕГЭ 2026</div>
                   </div>
-                  <Link href="/auth" className="block text-center py-3 px-6 bg-brand-600 text-white font-semibold rounded-xl hover:bg-brand-700 transition-colors text-sm">
+                  <Link href="/auth" className="block text-center py-3 px-6 bg-brand-600 text-white font-semibold rounded-full hover:bg-brand-700 transition-colors text-sm">
                     Начать готовиться уже сейчас
                   </Link>
                 </div>
@@ -598,7 +598,7 @@ export default async function HomePage() {
             {t("landing.ctaLine2")}
           </p>
           <Link href="/auth"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors text-sm">
+            className="inline-flex items-center gap-2 px-8 py-4 bg-white text-gray-900 font-semibold rounded-full hover:bg-gray-100 transition-all hover:scale-[1.03] active:scale-95 text-sm">
             {t("landing.ctaButton")}
           </Link>
           <p className="text-gray-600 text-xs mt-5">{t("landing.ctaNoCard")}</p>

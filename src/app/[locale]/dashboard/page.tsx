@@ -433,7 +433,7 @@ export default async function DashboardPage() {
         {/* ── Support ──────────────────────────────────────── */}
         <div className="mt-6 mb-6 flex flex-col items-center gap-2 text-center">
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>Нужна помощь?</p>
-          <div className="flex gap-2 flex-wrap justify-center">
+          <div className="flex gap-2 flex-wrap justify-center items-start">
             <TelegramSupportButton size="sm" label="Поддержка" />
             <InstagramButton size="sm" label="@mentora.su" />
           </div>

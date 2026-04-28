@@ -11,8 +11,8 @@ export default function DemoScrollButton() {
           document.querySelector<HTMLInputElement>("#demo input")?.focus();
         }, 400);
       }}
-      className="px-7 py-3.5 border border-white/20 text-gray-300 font-medium rounded-xl hover:border-white/40 hover:text-white transition-colors backdrop-blur-sm"
-      style={{ background: "rgba(255,255,255,0.04)" }}
+      className="px-7 py-3.5 border border-white/20 text-gray-300 font-medium rounded-full hover:border-white/40 hover:text-white transition-colors backdrop-blur-sm"
+      style={{ background: "rgba(255,255,255,0.06)" }}
     >
       Посмотреть демо
     </button>
