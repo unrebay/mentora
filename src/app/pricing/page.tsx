@@ -3,6 +3,7 @@ import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
 import BuyProButton from "@/components/BuyProButton";
 import PricingFAQ from "@/components/PricingFAQ";
+import TelegramSupportButton from "@/components/TelegramSupportButton";
 import MobileMenuButton from "@/components/MobileMenuButton";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
@@ -500,6 +501,12 @@ export default async function PricingPage() {
           <h2 className="text-3xl font-bold tracking-tight t-primary">Часто спрашивают</h2>
         </div>
         <PricingFAQ />
+
+        {/* Support CTA */}
+        <div className="mt-12 flex flex-col items-center gap-3">
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Остались вопросы?</p>
+          <TelegramSupportButton label="Написать в поддержку Telegram" />
+        </div>
       </section>
 
       {/* FOOTER CTA */}

@@ -6,6 +6,7 @@ import { MessageRole } from "@/lib/types";
 import ChatParticles from "@/components/ChatParticles";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
 import MeLogo from "@/components/MeLogo";
+import TelegramSupportButton from "@/components/TelegramSupportButton";
 
 const DAILY_LIMIT = 20; // matches WINDOW_LIMIT in api/chat/route.ts
 
@@ -638,11 +639,12 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
               </svg>
               <span className="text-base font-mono font-semibold tracking-widest" style={{ color: "var(--text)" }}>{countdown}</span>
             </div>
-            <div>
+            <div className="flex flex-col items-center gap-2">
               <Link href="/pricing" className="btn-glow inline-flex items-center gap-2 text-xs font-semibold px-5 py-2.5 rounded-full">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                 Pro — безлимитный доступ
               </Link>
+              <TelegramSupportButton size="sm" label="Есть вопросы? Поддержка" />
             </div>
           </div>
         ) : (
