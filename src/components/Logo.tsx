@@ -15,6 +15,10 @@ const sizes = {
   lg: { fontSize: "2.125rem" }, // ~34px
 };
 
+// Beta badge auto-expires on June 1st 2026
+const BETA_EXPIRES = new Date("2026-06-01T00:00:00Z");
+const showBeta = () => new Date() < BETA_EXPIRES;
+
 export default function Logo({
   size = "md",
   fontSize: fontSizeOverride,
@@ -26,7 +30,7 @@ export default function Logo({
 
   const mark = (
     <span
-      className={`inline-flex items-baseline select-none ${className}`}
+      className={`relative inline-flex items-baseline select-none ${className}`}
       style={{
         fontFamily: "var(--font-playfair), Georgia, serif",
         fontSize,
@@ -43,6 +47,31 @@ export default function Logo({
         marginRight: "0.05em",
       }}>e</span>
       ntora
+      {showBeta() && (
+        <span
+          style={{
+            position: "absolute",
+            top: "-0.55em",
+            right: "-1.6em",
+            fontSize: "0.38em",
+            fontFamily: "system-ui, -apple-system, sans-serif",
+            fontStyle: "normal",
+            fontWeight: 700,
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+            padding: "0.2em 0.5em",
+            borderRadius: "99px",
+            background: "rgba(69,97,232,0.13)",
+            border: "1px solid rgba(69,97,232,0.28)",
+            color: "#4561E8",
+            lineHeight: 1.4,
+            whiteSpace: "nowrap",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          beta
+        </span>
+      )}
     </span>
   );
 
