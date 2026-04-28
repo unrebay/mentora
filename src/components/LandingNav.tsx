@@ -64,12 +64,14 @@ export default function LandingNav() {
   const mobileBorder = isDark ? "rgba(255,255,255,0.06)" : "var(--border-light)";
 
   return (
-    /* Outer sticky strip — transparent padding area, clicks pass through gaps */
+    /* Outer sticky strip — background matches hero so the 10px gap is seamless */
     <nav
       className="sticky top-0 z-50"
       style={{
         padding: "10px 14px",
-        background: "transparent",
+        // Dark hero color when over hero, page bg when over light section.
+        // This fills the gap above the floating pill so no white strip shows.
+        background: isDark ? "#04060f" : "var(--bg)",
         pointerEvents: "none",
       }}
     >

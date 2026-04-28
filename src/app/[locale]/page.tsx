@@ -141,8 +141,8 @@ export default async function HomePage() {
       {/* NAV — scroll-aware dark/light */}
       <LandingNav />
 
-      {/* HERO */}
-      <section className="relative overflow-hidden" style={{ background: "var(--bg)" }}>
+      {/* HERO — always dark; NeuralNetworkCanvas is a dark starfield design */}
+      <section className="relative overflow-hidden" style={{ background: "#04060f" }}>
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
           <NeuralNetworkCanvas className="absolute inset-0 w-full h-full" />
         </div>
