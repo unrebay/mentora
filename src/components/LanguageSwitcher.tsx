@@ -1,7 +1,7 @@
 "use client";
 import { useLocale } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
-import { useTransition } from "react";
+import { useTransition, useState } from "react";
 
 interface Props {
   /** Force dark styling (for landing hero / dark nav) */
@@ -14,6 +14,7 @@ export default function LanguageSwitcher({ dark, className }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
+  const [hovered, setHovered] = useState(false);
 
   function toggle() {
     const next = locale === "ru" ? "en" : "ru";
@@ -22,46 +23,39 @@ export default function LanguageSwitcher({ dark, className }: Props) {
     });
   }
 
-  const textColor = dark
-    ? "rgba(255,255,255,0.65)"
-    : "var(--text-secondary)";
-
   return (
     <button
       onClick={toggle}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       disabled={isPending}
       aria-label={locale === "ru" ? "Switch to English" : "Переключить на русский"}
       className={className}
       style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 4,
-        padding: "4px 10px",
-        borderRadius: 8,
-        border: dark
-          ? "1px solid rgba(255,255,255,0.14)"
-          : "1px solid var(--border)",
-        background: dark
-          ? "rgba(255,255,255,0.07)"
-          : "var(--card)",
-        color: textColor,
-        fontSize: 12,
+        width: 34,
+        height: 34,
+        borderRadius: 10,
+        border: `1px solid ${dark ? "rgba(255,255,255,0.1)" : "var(--border)"}`,
+        background: hovered
+          ? dark ? "rgba(255,255,255,0.10)" : "var(--bg-secondary)"
+          : "transparent",
+        backdropFilter: hovered ? "blur(12px)" : undefined,
+        WebkitBackdropFilter: hovered ? "blur(12px)" : undefined,
+        color: dark ? "rgba(255,255,255,0.65)" : "var(--text-secondary)",
+        fontSize: 11,
         fontWeight: 700,
-        letterSpacing: "0.04em",
+        letterSpacing: "0.07em",
         cursor: isPending ? "wait" : "pointer",
-        opacity: isPending ? 0.6 : 1,
-        transition: "opacity 0.15s, background 0.15s",
-        lineHeight: 1,
-        whiteSpace: "nowrap",
+        opacity: isPending ? 0.5 : 1,
+        transition: "background 0.15s ease, color 0.15s ease, border-color 0.15s ease",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         flexShrink: 0,
+        userSelect: "none",
       }}
     >
-      {/* Globe icon */}
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-      </svg>
-      {locale === "ru" ? "EN" : "RU"}
+      {locale.toUpperCase()}
     </button>
   );
 }
