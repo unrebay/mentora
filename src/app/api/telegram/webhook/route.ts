@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { waitUntil } from "@vercel/functions";
 import Anthropic from "@anthropic-ai/sdk";
 import { BOT_PLATFORM_KNOWLEDGE } from "@/lib/bot-knowledge";
 
@@ -127,139 +128,149 @@ async function getAIReply(
   }
 }
 
+// ── Message processing (runs async after 200 is returned to Telegram) ──────────
+
+async function handleUpdate(update: Record<string, unknown>) {
+  const message = update?.message as Record<string, unknown> | undefined;
+  if (!message) return;
+
+  const chatId       = (message.chat as Record<string, unknown>)?.id as number;
+  const text         = (message.text ?? "") as string;
+  const fromId       = (message.from as Record<string, unknown>)?.id as number;
+  const fromName     = [(message.from as Record<string, unknown>)?.first_name, (message.from as Record<string, unknown>)?.last_name]
+                         .filter(Boolean).join(" ") || "Аноним";
+  const fromUsername = (message.from as Record<string, unknown>)?.username
+    ? `@${(message.from as Record<string, unknown>).username}`
+    : "без username";
+
+  // ── Successful payment ────────────────────────────────────────────────
+  const payment = message.successful_payment as Record<string, unknown> | undefined;
+  if (payment) {
+    await sendMessage(chatId,
+      `💙 Огромное спасибо! Получили <b>${payment.total_amount} Stars</b>.\n` +
+      "Это очень помогает развитию Mentora!"
+    );
+    if (ADMIN_CHAT_ID) {
+      await sendMessage(ADMIN_CHAT_ID,
+        `⭐ Донат: ${payment.total_amount} Stars от ${fromName} (${fromUsername}, ID: ${fromId})`
+      );
+    }
+    return;
+  }
+
+  // ── /start ────────────────────────────────────────────────────────────
+  if (text.startsWith("/start")) {
+    sessions.delete(fromId);
+    await sendMessage(chatId,
+      `Привет! Я AI-ассистент <b>Mentora</b> 👋\n\n` +
+      `Помогу разобраться с платформой, отвечу на любые вопросы — про сайт, предметы, тарифы, или просто поболтаем.\n\n` +
+      `Если у тебя вопрос по аккаунту — найди свой <b>Код поддержки</b> в профиле (mentora.su/profile, самый низ) и пришли мне.\n\n` +
+      `<i>Команды:</i>\n` +
+      `/help — частые вопросы\n` +
+      `/reset — сбросить историю диалога\n` +
+      `/donate — поддержать проект\n\n` +
+      `Сайт: <a href="https://mentora.su">mentora.su</a>`
+    );
+    return;
+  }
+
+  // ── /help ─────────────────────────────────────────────────────────────
+  if (text === "/help") {
+    await sendMessage(chatId,
+      `<b>Частые вопросы:</b>\n\n` +
+      `• <b>Как начать учиться?</b> — зайди на mentora.su, зарегистрируйся, выбери предмет на дашборде\n\n` +
+      `• <b>Лимит сообщений?</b> — сбрасывается каждую ночь в 03:00 МСК\n\n` +
+      `• <b>Как загрузить фото задачи?</b> — в чате нажми скрепку рядом с полем ввода\n\n` +
+      `• <b>Как получить Pro?</b> — mentora.su/pricing или пригласи друга по реф-ссылке из профиля\n\n` +
+      `• <b>Код поддержки</b> — в самом низу страницы /profile, нужен для идентификации аккаунта\n\n` +
+      `• <b>Контакт команды:</b> hello@mentora.su\n\n` +
+      `Есть другой вопрос? Просто напиши — отвечу!`
+    );
+    return;
+  }
+
+  // ── /reset ────────────────────────────────────────────────────────────
+  if (text === "/reset") {
+    sessions.delete(fromId);
+    await sendMessage(chatId, "История диалога очищена. Начинаем с чистого листа!");
+    return;
+  }
+
+  // ── /donate ───────────────────────────────────────────────────────────
+  if (text === "/donate") {
+    await sendMessage(chatId,
+      `💙 Спасибо, что хочешь поддержать Mentora!\n\n` +
+      `<b>Из России:</b> <a href="https://boosty.to/mentora/donate">Boosty</a> (карта, СБП)\n` +
+      `<b>Из-за рубежа:</b> <a href="https://ko-fi.com/mentora">Ko-fi</a> (Visa/PayPal)\n\n` +
+      `<b>Telegram Stars:</b>\n` +
+      `/donate_50 — 50 ⭐\n` +
+      `/donate_100 — 100 ⭐\n` +
+      `/donate_250 — 250 ⭐\n` +
+      `/donate_500 — 500 ⭐`
+    );
+    return;
+  }
+
+  if (text.startsWith("/donate_")) {
+    const amount = parseInt(text.replace("/donate_", "").trim(), 10);
+    if (!isNaN(amount) && amount >= 1 && amount <= 10000) {
+      await sendInvoice(chatId, amount);
+    } else {
+      await sendMessage(chatId, "Укажи сумму от 1 до 10000 Stars. Например: /donate_100");
+    }
+    return;
+  }
+
+  // ── Admin reply: /reply_CHATID message ───────────────────────────────
+  if (text.startsWith("/reply_") && String(chatId) === String(ADMIN_CHAT_ID)) {
+    const parts    = text.split(" ");
+    const targetId = parts[0].replace("/reply_", "");
+    const reply    = parts.slice(1).join(" ");
+    if (targetId && reply) {
+      await sendMessage(targetId, `💬 <b>Ответ от команды Mentora:</b>\n\n${reply}`);
+      await sendMessage(ADMIN_CHAT_ID, "✅ Ответ отправлен");
+    }
+    return;
+  }
+
+  // ── AI response for all other messages ───────────────────────────────
+  await sendTyping(chatId);
+
+  const aiReply = await getAIReply(fromId, text);
+
+  // Если бот нашёл support_code — включить в уведомление для админа
+  const codeMatch = aiReply.match(/\[SUPPORT_CODE:\s*([A-F0-9-]+)\]/i);
+  const supportCode = codeMatch ? codeMatch[1] : null;
+  // Убираем служебный тег из ответа пользователю
+  const userReply = aiReply.replace(/\[SUPPORT_CODE:[^\]]+\]/gi, "").trim();
+
+  await sendMessage(chatId, userReply);
+
+  // Уведомляем админа о новом обращении (только первое сообщение в сессии, тихо)
+  const history = sessions.get(fromId) ?? [];
+  if (history.length <= 2 && ADMIN_CHAT_ID) {
+    const codeInfo = supportCode ? `\n🔑 Код поддержки: <code>${supportCode}</code>` : "";
+    await sendMessage(ADMIN_CHAT_ID,
+      `📨 <b>Новый диалог поддержки</b>\n` +
+      `👤 ${fromName} (${fromUsername}, TG: <code>${fromId}</code>)${codeInfo}\n` +
+      `💬 ${text.slice(0, 200)}`,
+      { disable_notification: true },
+    );
+  }
+}
+
 // ── Main webhook handler ────────────────────────────────────────────────────
+// Responds 200 to Telegram immediately (< 5s requirement),
+// processes the AI response in background via waitUntil.
 
 export async function POST(req: NextRequest) {
   try {
     const update = await req.json();
-    const message = update?.message;
-    if (!message) return NextResponse.json({ ok: true });
-
-    const chatId       = message.chat?.id as number;
-    const text         = (message.text ?? "") as string;
-    const fromId       = message.from?.id as number;
-    const fromName     = [message.from?.first_name, message.from?.last_name]
-                           .filter(Boolean).join(" ") || "Аноним";
-    const fromUsername = message.from?.username ? `@${message.from.username}` : "без username";
-
-    // ── Successful payment ──────────────────────────────────────────────
-    const payment = message.successful_payment;
-    if (payment) {
-      await sendMessage(chatId,
-        `💙 Огромное спасибо! Получили <b>${payment.total_amount} Stars</b>.\n` +
-        "Это очень помогает развитию Mentora!"
-      );
-      if (ADMIN_CHAT_ID) {
-        await sendMessage(ADMIN_CHAT_ID,
-          `⭐ Донат: ${payment.total_amount} Stars от ${fromName} (${fromUsername}, ID: ${fromId})`
-        );
-      }
-      return NextResponse.json({ ok: true });
-    }
-
-    // ── /start ──────────────────────────────────────────────────────────
-    if (text.startsWith("/start")) {
-      sessions.delete(fromId);
-      await sendMessage(chatId,
-        `Привет! Я AI-ассистент <b>Mentora</b> 👋\n\n` +
-        `Помогу разобраться с платформой, отвечу на любые вопросы — про сайт, предметы, тарифы, или просто поболтаем.\n\n` +
-        `Если у тебя вопрос по аккаунту — найди свой <b>Код поддержки</b> в профиле (mentora.su/profile, самый низ) и пришли мне.\n\n` +
-        `<i>Команды:</i>\n` +
-        `/help — частые вопросы\n` +
-        `/reset — сбросить историю диалога\n` +
-        `/donate — поддержать проект\n\n` +
-        `Сайт: <a href="https://mentora.su">mentora.su</a>`
-      );
-      return NextResponse.json({ ok: true });
-    }
-
-    // ── /help ───────────────────────────────────────────────────────────
-    if (text === "/help") {
-      await sendMessage(chatId,
-        `<b>Частые вопросы:</b>\n\n` +
-        `• <b>Как начать учиться?</b> — зайди на mentora.su, зарегистрируйся, выбери предмет на дашборде\n\n` +
-        `• <b>Лимит сообщений?</b> — сбрасывается каждую ночь в 03:00 МСК\n\n` +
-        `• <b>Как загрузить фото задачи?</b> — в чате нажми скрепку рядом с полем ввода\n\n` +
-        `• <b>Как получить Pro?</b> — mentora.su/pricing или пригласи друга по реф-ссылке из профиля\n\n` +
-        `• <b>Код поддержки</b> — в самом низу страницы /profile, нужен для идентификации аккаунта\n\n` +
-        `• <b>Контакт команды:</b> hello@mentora.su\n\n` +
-        `Есть другой вопрос? Просто напиши — отвечу!`
-      );
-      return NextResponse.json({ ok: true });
-    }
-
-    // ── /reset ──────────────────────────────────────────────────────────
-    if (text === "/reset") {
-      sessions.delete(fromId);
-      await sendMessage(chatId, "История диалога очищена. Начинаем с чистого листа!");
-      return NextResponse.json({ ok: true });
-    }
-
-    // ── /donate ─────────────────────────────────────────────────────────
-    if (text === "/donate") {
-      await sendMessage(chatId,
-        `💙 Спасибо, что хочешь поддержать Mentora!\n\n` +
-        `<b>Из России:</b> <a href="https://boosty.to/mentora/donate">Boosty</a> (карта, СБП)\n` +
-        `<b>Из-за рубежа:</b> <a href="https://ko-fi.com/mentora">Ko-fi</a> (Visa/PayPal)\n\n` +
-        `<b>Telegram Stars:</b>\n` +
-        `/donate_50 — 50 ⭐\n` +
-        `/donate_100 — 100 ⭐\n` +
-        `/donate_250 — 250 ⭐\n` +
-        `/donate_500 — 500 ⭐`
-      );
-      return NextResponse.json({ ok: true });
-    }
-
-    if (text.startsWith("/donate_")) {
-      const amount = parseInt(text.replace("/donate_", "").trim(), 10);
-      if (!isNaN(amount) && amount >= 1 && amount <= 10000) {
-        await sendInvoice(chatId, amount);
-      } else {
-        await sendMessage(chatId, "Укажи сумму от 1 до 10000 Stars. Например: /donate_100");
-      }
-      return NextResponse.json({ ok: true });
-    }
-
-    // ── Admin reply: /reply_CHATID message ──────────────────────────────
-    if (text.startsWith("/reply_") && String(chatId) === String(ADMIN_CHAT_ID)) {
-      const parts    = text.split(" ");
-      const targetId = parts[0].replace("/reply_", "");
-      const reply    = parts.slice(1).join(" ");
-      if (targetId && reply) {
-        await sendMessage(targetId, `💬 <b>Ответ от команды Mentora:</b>\n\n${reply}`);
-        await sendMessage(ADMIN_CHAT_ID, "✅ Ответ отправлен");
-      }
-      return NextResponse.json({ ok: true });
-    }
-
-    // ── AI response for all other messages ──────────────────────────────
-    await sendTyping(chatId);
-
-    const aiReply = await getAIReply(fromId, text);
-
-    // Если бот нашёл support_code — включить в уведомление для админа
-    const codeMatch = aiReply.match(/\[SUPPORT_CODE:\s*([A-F0-9-]+)\]/i);
-    const supportCode = codeMatch ? codeMatch[1] : null;
-    // Убираем служебный тег из ответа пользователю
-    const userReply = aiReply.replace(/\[SUPPORT_CODE:[^\]]+\]/gi, "").trim();
-
-    await sendMessage(chatId, userReply);
-
-    // Уведомляем админа о новом обращении (только первое сообщение в сессии, тихо)
-    const history = sessions.get(fromId) ?? [];
-    if (history.length <= 2 && ADMIN_CHAT_ID) {
-      const codeInfo = supportCode ? `\n🔑 Код поддержки: <code>${supportCode}</code>` : "";
-      await sendMessage(ADMIN_CHAT_ID,
-        `📨 <b>Новый диалог поддержки</b>\n` +
-        `👤 ${fromName} (${fromUsername}, TG: <code>${fromId}</code>)${codeInfo}\n` +
-        `💬 ${text.slice(0, 200)}`,
-        { disable_notification: true },
-      );
-    }
-
+    // Fire-and-forget: Vercel keeps the function alive until handleUpdate resolves
+    waitUntil(handleUpdate(update).catch((e) => console.error("handleUpdate error:", e)));
     return NextResponse.json({ ok: true });
   } catch (e) {
-    console.error("Telegram webhook error:", e);
+    console.error("Telegram webhook parse error:", e);
     return NextResponse.json({ ok: false }, { status: 200 });
   }
 }

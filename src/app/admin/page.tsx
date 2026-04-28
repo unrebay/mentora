@@ -213,7 +213,15 @@ function EmpCardFooter({ emp, color, muted }: { emp: Employee; color: string; mu
 }
 
 function loadHistory(empId: string): Msg[] {
-  try { return JSON.parse(localStorage.getItem(chatKey(empId)) ?? "[]"); }
+  try {
+    const raw: Msg[] = JSON.parse(localStorage.getItem(chatKey(empId)) ?? "[]");
+    // Drop messages that are empty or contain API error markers (stale from old bugs)
+    return raw.filter(m =>
+      m.content.trim() !== "" &&
+      !m.content.startsWith("[Ошибка") &&
+      !m.content.startsWith("[Error")
+    );
+  }
   catch { return []; }
 }
 
