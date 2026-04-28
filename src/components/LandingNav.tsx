@@ -69,9 +69,9 @@ export default function LandingNav() {
       className="sticky top-0 z-50"
       style={{
         padding: "10px 14px",
-        // Dark hero color when over hero, page bg when over light section.
-        // This fills the gap above the floating pill so no white strip shows.
-        background: isDark ? "#04060f" : "var(--bg)",
+        // Transparent over dark hero so content bleeds through the gaps;
+        // matches page bg when over the light section (same as DashboardNav).
+        background: isDark ? "transparent" : "var(--bg)",
         pointerEvents: "none",
       }}
     >
