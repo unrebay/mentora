@@ -163,6 +163,24 @@ interface Msg { role: "user" | "assistant"; content: string; ts?: number }
 
 function chatKey(empId: string) { return `mentora_admin_chat_${empId}`; }
 
+function EmpCardFooter({ emp, color, muted }: { emp: Employee; color: string; muted: string }) {
+  const [hist, setHist] = useState<Msg[]>([]);
+  useEffect(() => { setHist(loadHistory(emp.id)); }, [emp.id]);
+  return (
+    <div style={{ marginTop: 14, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color, fontWeight: 600 }}>
+        <div style={{ width: 6, height: 6, borderRadius: "50%", background: color }} />
+        {hist.length > 0 ? `${hist.length} сообщ.` : "Открыть чат"} →
+      </div>
+      {hist.length > 0 && hist[hist.length - 1].ts && (
+        <span style={{ fontSize: 10, color: muted }}>
+          {new Date(hist[hist.length - 1].ts!).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function loadHistory(empId: string): Msg[] {
   try { return JSON.parse(localStorage.getItem(chatKey(empId)) ?? "[]"); }
   catch { return []; }
@@ -214,7 +232,14 @@ function TeamTab() {
       body: JSON.stringify({ employeeId: selected.id, messages: next.map(m => ({ role: m.role, content: m.content })) }),
     });
 
-    if (!res.body) { setStreaming(false); return; }
+    if (!res.ok || !res.body) {
+      const errText = `[Ошибка ${res.status}: не удалось получить ответ]`;
+      const errMsgs = [...next, { role: "assistant" as const, content: errText, ts: Date.now() }];
+      setMessages(errMsgs);
+      saveHistory(selected.id, errMsgs);
+      setStreaming(false);
+      return;
+    }
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
@@ -283,23 +308,7 @@ function TeamTab() {
                 )}
               </div>
               <p style={{ margin: 0, fontSize: 12.5, color: MUTED, lineHeight: 1.5 }}>{emp.desc}</p>
-              {emp.available && (() => {
-                const hist = typeof window !== "undefined" ? loadHistory(emp.id) : [];
-                return (
-                  <div style={{ marginTop: 14, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: emp.color, fontWeight: 600 }}>
-                      <div style={{ width: 6, height: 6, borderRadius: "50%", background: emp.color }} />
-                      {hist.length > 0 ? `${hist.length} сообщ.` : "Открыть чат"} →
-                    </div>
-                    {hist.length > 0 && (
-                      <span style={{ fontSize: 10, color: MUTED }}>
-                        {new Date(hist[hist.length - 1].ts ?? 0).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}
-                      </span>
-                    )}
-                  </div>
-                );
-              })()}
-              )}
+              {emp.available && <EmpCardFooter emp={emp} color={emp.color} muted={MUTED} />}
             </div>
           ))}
         </div>

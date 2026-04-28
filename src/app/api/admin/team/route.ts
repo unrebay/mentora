@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
       try {
         const response = await anthropic.messages.stream({
           model: "claude-sonnet-4-6",
-          max_tokens: 1024,
+          max_tokens: 1500,
           system: persona.system,
           messages: messages.map(m => ({ role: m.role, content: m.content })),
         });
@@ -171,7 +171,9 @@ export async function POST(req: NextRequest) {
         }
         controller.close();
       } catch (err) {
-        controller.error(err);
+        const msg = err instanceof Error ? err.message : "Ошибка соединения с AI";
+        controller.enqueue(encoder.encode(`[Ошибка: ${msg}]`));
+        controller.close();
       }
     },
   });
@@ -180,6 +182,7 @@ export async function POST(req: NextRequest) {
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
       "X-Content-Type-Options": "nosniff",
+      "Cache-Control": "no-cache",
     },
   });
 }
