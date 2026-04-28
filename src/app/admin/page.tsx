@@ -159,22 +159,37 @@ const EMPLOYEES: Employee[] = [
   { id: "growth",    name: "Саша",  role: "Growth Hacker",  desc: "Конверсии, виральность, эксперименты", color: "#10b981", available: true, avatar: "С" },
 ];
 
-interface Msg { role: "user" | "assistant"; content: string; ts?: number }
+interface Msg { role: "user" | "assistant"; content: string; ts?: number; thinking?: string }
 
-function renderMd(text: string): React.ReactNode {
+function inlineMd(text: string, offset = 0): React.ReactNode {
   const parts: React.ReactNode[] = [];
   const regex = /\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`/g;
-  let last = 0, ki = 0;
+  let last = 0, ki = offset;
   let m: RegExpExecArray | null;
   while ((m = regex.exec(text)) !== null) {
     if (m.index > last) parts.push(text.slice(last, m.index));
     if (m[1] !== undefined) parts.push(<strong key={ki++}>{m[1]}</strong>);
-    else if (m[2] !== undefined) parts.push(<em key={ki++}>{m[2]}</em>);
-    else if (m[3] !== undefined) parts.push(<code key={ki++} style={{ background: "rgba(128,128,128,0.15)", borderRadius: 3, padding: "1px 5px", fontSize: "0.88em", fontFamily: "monospace" }}>{m[3]}</code>);
+    else if (m[2] !== undefined) parts.push(<em key={ki++} style={{ color: "inherit", opacity: 0.8 }}>{m[2]}</em>);
+    else if (m[3] !== undefined) parts.push(<code key={ki++} style={{ background: "rgba(128,128,128,0.15)", borderRadius: 3, padding: "1px 5px", fontSize: "0.87em", fontFamily: "monospace" }}>{m[3]}</code>);
     last = m.index + m[0].length;
   }
   if (last < text.length) parts.push(text.slice(last));
   return <>{parts}</>;
+}
+
+function renderMd(text: string): React.ReactNode {
+  const lines = text.split("\n");
+  const nodes: React.ReactNode[] = [];
+  let ki = 0;
+  lines.forEach((line, i) => {
+    const trimmed = line.trim();
+    if (/^---+$/.test(trimmed)) {
+      nodes.push(<hr key={ki++} style={{ border: "none", borderTop: "1px solid rgba(128,128,128,0.18)", margin: "6px 0" }} />);
+    } else {
+      const k = ki++; nodes.push(<span key={k}>{inlineMd(line, k * 100)}{i < lines.length - 1 ? "\n" : ""}</span>);
+    }
+  });
+  return <>{nodes}</>;
 }
 
 function chatKey(empId: string) { return `mentora_admin_chat_${empId}`; }
@@ -247,7 +262,6 @@ function TeamTab() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput]       = useState("");
   const [streaming, setStreaming] = useState(false);
-  const [thinkingPhrase, setThinkingPhrase] = useState("");
   const bottomRef  = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -282,7 +296,6 @@ function TeamTab() {
     setMessages(next);
     saveHistory(selected.id, next);
     setInput("");
-    setThinkingPhrase(pickThinking(selected.id));
     setStreaming(true);
 
     const res = await fetch("/api/admin/team", {
@@ -305,7 +318,7 @@ function TeamTab() {
     const decoder = new TextDecoder();
     let text = "";
 
-    setMessages(prev => [...prev, { role: "assistant", content: "", ts: Date.now() }]);
+    setMessages(prev => [...prev, { role: "assistant", content: "", ts: Date.now(), thinking: pickThinking(selected.id) }]);
 
     while (true) {
       const { done, value } = await reader.read();
@@ -436,7 +449,7 @@ function TeamTab() {
               whiteSpace: "pre-wrap", wordBreak: "break-word",
             }}>
               {m.content ? renderMd(m.content) : (streaming && i === messages.length - 1
-                ? <span style={{ opacity: 0.5, fontStyle: "italic" }}>{thinkingPhrase}</span>
+                ? <span style={{ opacity: 0.55, fontStyle: "italic" }}>{m.thinking ?? "думаю..."}</span>
                 : "")}
             </div>
           </div>
