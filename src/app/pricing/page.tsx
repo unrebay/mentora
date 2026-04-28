@@ -570,12 +570,17 @@ export default async function PricingPage() {
         className="py-8 border-t"
         style={{ background: "var(--bg)", borderColor: "var(--border)" }}
       >
-        <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm t-muted">
-          <span>© 2026 Mentora</span>
-          <div className="flex gap-6">
-            <Link href="/privacy" className="hover:t-secondary transition-colors">Конфиденциальность</Link>
-            <Link href="/terms" className="hover:t-secondary transition-colors">Условия</Link>
+        <div className="max-w-5xl mx-auto px-6 flex flex-col items-center gap-4 text-sm t-muted">
+          <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
+            <span>© 2026 Mentora</span>
+            <div className="flex gap-6">
+              <Link href="/privacy" className="hover:t-secondary transition-colors">Конфиденциальность</Link>
+              <Link href="/terms" className="hover:t-secondary transition-colors">Условия</Link>
+            </div>
           </div>
+          <p className="text-center" style={{ fontSize: "10px", opacity: 0.4, maxWidth: 480, lineHeight: 1.4 }}>
+            Instagram — продукт компании Meta Platforms Inc. Деятельность организации Meta Platforms признана экстремистской и запрещена на территории Российской Федерации.
+          </p>
         </div>
       </footer>
     </div>

@@ -582,12 +582,17 @@ export default async function HomePage() {
       </section>
 
       <footer className="py-8 border-t border-[var(--border)]" style={{ background: "var(--bg)" }}>
-        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[var(--text-muted)]">
-          <span>© 2026 Mentora</span>
-          <div className="flex gap-6">
-            <Link href="/privacy" className="hover:text-[var(--text)] transition-colors">Конфиденциальность</Link>
-            <Link href="/terms" className="hover:text-[var(--text)] transition-colors">Условия использования</Link>
+        <div className="max-w-6xl mx-auto px-6 flex flex-col items-center gap-4 text-xs text-[var(--text-muted)]">
+          <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
+            <span>© 2026 Mentora</span>
+            <div className="flex gap-6">
+              <Link href="/privacy" className="hover:text-[var(--text)] transition-colors">Конфиденциальность</Link>
+              <Link href="/terms" className="hover:text-[var(--text)] transition-colors">Условия использования</Link>
+            </div>
           </div>
+          <p className="text-center" style={{ fontSize: "10px", opacity: 0.4, maxWidth: 480, lineHeight: 1.4 }}>
+            Instagram — продукт компании Meta Platforms Inc. Деятельность организации Meta Platforms признана экстремистской и запрещена на территории Российской Федерации.
+          </p>
         </div>
       </footer>
     </div>

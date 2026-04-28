@@ -3,6 +3,9 @@ import { useState } from "react";
 
 const IG_URL = "https://www.instagram.com/mentora.su";
 
+// Pink/rose palette
+const C = "225,48,108";
+
 function IgIcon({ size = 15 }: { size?: number }) {
   return (
     <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden>
@@ -15,48 +18,65 @@ interface Props {
   size?: "sm" | "md";
   label?: string;
   className?: string;
+  /** Show Meta disclaimer below button. Defaults to true for md, false for sm. */
+  showDisclaimer?: boolean;
 }
 
-/**
- * Glass Instagram button — links to @mentora.su
- * Warm pink/purple palette with hover glow.
- */
 export default function InstagramButton({
   size = "md",
   label = "Instagram",
   className = "",
+  showDisclaimer,
 }: Props) {
   const [hover, setHover] = useState(false);
   const sm = size === "sm";
+  const disclaimer = showDisclaimer ?? !sm;
 
   return (
-    <a
-      href={IG_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Instagram Mentora"
-      className={`inline-flex items-center gap-2 font-medium transition-all duration-200 select-none ${
-        sm ? "px-3 py-1.5 text-[11.5px] rounded-xl" : "px-5 py-2.5 text-sm rounded-2xl"
-      } ${className}`}
-      style={{
-        background: hover
-          ? "rgba(225,48,108,0.11)"
-          : "rgba(225,48,108,0.06)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        border: `1px solid ${hover ? "rgba(225,48,108,0.28)" : "rgba(225,48,108,0.15)"}`,
-        color: hover ? "#f472b6" : "#e879a0",
-        boxShadow: hover
-          ? "0 0 22px rgba(225,48,108,0.16), 0 2px 12px rgba(225,48,108,0.10), inset 0 1px 0 rgba(255,255,255,0.07)"
-          : "0 0 10px rgba(225,48,108,0.06), inset 0 1px 0 rgba(255,255,255,0.05)",
-        transform: hover ? "translateY(-1px)" : "none",
-        textDecoration: "none",
-      }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-    >
-      <IgIcon size={sm ? 13 : 15} />
-      {label}
-    </a>
+    <div className="inline-flex flex-col items-center gap-1">
+      <a
+        href={IG_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Открыть Instagram Mentora"
+        className={`inline-flex items-center gap-2 font-semibold transition-all duration-200 select-none ${
+          sm ? "px-3 py-1.5 text-[11.5px] rounded-xl" : "px-5 py-2.5 text-sm rounded-2xl"
+        } ${className}`}
+        style={{
+          background: hover
+            ? `linear-gradient(180deg, rgba(${C},0.26) 0%, rgba(${C},0.10) 100%)`
+            : `linear-gradient(180deg, rgba(${C},0.18) 0%, rgba(${C},0.06) 100%)`,
+          backdropFilter: "blur(16px) saturate(1.4)",
+          WebkitBackdropFilter: "blur(16px) saturate(1.4)",
+          border: `1px solid rgba(${C},${hover ? "0.38" : "0.22"})`,
+          color: hover ? `rgb(${C})` : `rgba(${C},0.85)`,
+          boxShadow: hover
+            ? `0 2px 8px rgba(0,0,0,0.12), 0 6px 24px rgba(${C},0.22), inset 0 1.5px 0 rgba(255,255,255,0.35), inset 0 -1px 0 rgba(${C},0.18)`
+            : `0 1px 3px rgba(0,0,0,0.08), 0 3px 12px rgba(${C},0.14), inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -1px 0 rgba(${C},0.10)`,
+          transform: hover ? "translateY(-1.5px)" : "none",
+          textDecoration: "none",
+          textShadow: `0 1px 2px rgba(${C},0.20)`,
+        }}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+      >
+        <IgIcon size={sm ? 13 : 15} />
+        {label}
+      </a>
+      {disclaimer && (
+        <p
+          className="text-center"
+          style={{
+            fontSize: "9px",
+            lineHeight: 1.3,
+            color: "var(--text-muted)",
+            opacity: 0.45,
+            maxWidth: 220,
+          }}
+        >
+          Instagram — продукт Meta Platforms Inc. Деятельность Meta признана экстремистской и запрещена в РФ
+        </p>
+      )}
+    </div>
   );
 }
