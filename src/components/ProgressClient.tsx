@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useTranslations, useLocale } from "next-intl";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -53,20 +54,27 @@ function ChevronIcon({ open }: { open: boolean }) {
   );
 }
 
-function relTime(iso: string | null): string {
+type TFn = ReturnType<typeof useTranslations<"progress">>;
+
+function relTime(iso: string | null, locale: string, t: TFn): string {
   if (!iso) return "";
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days === 0) return "сегодня";
-  if (days === 1) return "вчера";
-  if (days < 7) return `${days} дн. назад`;
-  return new Date(iso).toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
+  if (days === 0) return t("today");
+  if (days === 1) return t("yesterday");
+  if (days < 7) return t("daysAgo", { count: days });
+  const dtLocale = locale === "en" ? "en-US" : "ru-RU";
+  return new Date(iso).toLocaleDateString(dtLocale, { day: "numeric", month: "short" });
 }
 
 // ── Weekly activity strip ─────────────────────────────────────────────────────
 
 function WeeklyActivity({ days }: { days: ActivityDayClient[] }) {
+  const t = useTranslations("progress");
   const today = new Date().toISOString().slice(0, 10);
-  const DAY_NAMES = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+  const DAY_NAMES = [
+    t("dayMon"), t("dayTue"), t("dayWed"), t("dayThu"),
+    t("dayFri"), t("daySat"), t("daySun"),
+  ];
   const totalThisWeek = days.reduce((s, d) => s + d.count, 0);
   const activeDays = days.filter(d => d.count > 0).length;
 
@@ -74,10 +82,10 @@ function WeeklyActivity({ days }: { days: ActivityDayClient[] }) {
     <div className="rounded-2xl border p-5" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
       <div className="flex items-center justify-between mb-4">
         <p className="text-xs font-bold tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>
-          Активность за неделю
+          {t("weeklyActivity")}
         </p>
         <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
-          {activeDays}/7 {activeDays === 7 ? "· идеально" : activeDays >= 5 ? "· отлично" : ""}
+          {activeDays}/7 {activeDays === 7 ? t("qualityPerfect") : activeDays >= 5 ? t("qualityGreat") : ""}
         </span>
       </div>
       <div style={{ display: "flex", gap: 6, justifyContent: "space-between" }}>
@@ -126,7 +134,7 @@ function WeeklyActivity({ days }: { days: ActivityDayClient[] }) {
       </div>
       {totalThisWeek > 0 && (
         <p className="mt-3 text-xs text-center" style={{ color: "var(--text-muted)" }}>
-          {totalThisWeek} вопросов за неделю
+          {t("questionsThisWeek", { count: totalThisWeek })}
         </p>
       )}
     </div>
@@ -136,6 +144,7 @@ function WeeklyActivity({ days }: { days: ActivityDayClient[] }) {
 // ── Glass 3D bar chart ────────────────────────────────────────────────────────
 
 function XPBarChart({ subjects }: { subjects: SubjectStatClient[] }) {
+  const t = useTranslations("progress");
   const [mounted, setMounted] = useState(false);
   useEffect(() => { const t = setTimeout(() => setMounted(true), 120); return () => clearTimeout(t); }, []);
 
@@ -145,7 +154,7 @@ function XPBarChart({ subjects }: { subjects: SubjectStatClient[] }) {
   return (
     <div className="rounded-2xl border p-5" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
       <p className="text-xs font-bold tracking-[0.18em] uppercase mb-5" style={{ color: "var(--text-muted)" }}>
-        Мент по предметам
+        {t("mentBySubject")}
       </p>
       <div style={{ display: "flex", alignItems: "flex-end", gap: 8, minHeight: MAX_H + 64 }}>
         {subjects.map(s => {
@@ -228,10 +237,13 @@ function XPBarChart({ subjects }: { subjects: SubjectStatClient[] }) {
 // ── Subject detail list ───────────────────────────────────────────────────────
 
 function SubjectCards({ subjects }: { subjects: SubjectStatClient[] }) {
+  const t = useTranslations("progress");
+  const locale = useLocale();
+
   return (
     <div>
       <p className="text-xs font-bold tracking-[0.18em] uppercase mb-3" style={{ color: "var(--text-muted)" }}>
-        По предметам
+        {t("bySubject")}
       </p>
       <div className="space-y-2">
         {subjects.map(s => {
@@ -262,7 +274,7 @@ function SubjectCards({ subjects }: { subjects: SubjectStatClient[] }) {
                       </span>
                     </div>
                     <span className="text-xs shrink-0 ml-2" style={{ color: "var(--text-muted)" }}>
-                      {relTime(s.lastActive)}
+                      {relTime(s.lastActive, locale, t)}
                     </span>
                   </div>
 
@@ -276,22 +288,22 @@ function SubjectCards({ subjects }: { subjects: SubjectStatClient[] }) {
 
                   {/* Stats row */}
                   <div className="flex items-center gap-3 text-xs" style={{ color: "var(--text-muted)" }}>
-                    <span style={{ color, fontWeight: 600 }}>{s.xp} мент</span>
+                    <span style={{ color, fontWeight: 600 }}>{s.xp} {t("xpUnit")}</span>
                     <span>·</span>
-                    <span>{s.messages} вопр.</span>
+                    <span>{s.messages} {t("questUnit")}</span>
                     {s.streak > 0 && (
                       <>
                         <span>·</span>
                         <span style={{ color: "#FF7A00", display: "flex", alignItems: "center", gap: 3 }}>
                           <FlameIcon size={11} />
-                          {s.streak} дн.
+                          {s.streak} {t("dayUnit")}
                         </span>
                       </>
                     )}
                     {xpToNext !== null && xpToNext > 0 && (
                       <>
                         <span>·</span>
-                        <span>{xpToNext} до ур.</span>
+                        <span>{xpToNext} {t("toLevelUnit")}</span>
                       </>
                     )}
                   </div>
@@ -316,6 +328,8 @@ function SubjectCards({ subjects }: { subjects: SubjectStatClient[] }) {
 // ── Recent questions (collapsible) ────────────────────────────────────────────
 
 function RecentQuestions({ msgs }: { msgs: RecentMsgClient[] }) {
+  const t = useTranslations("progress");
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
   if (msgs.length === 0) return null;
 
@@ -332,7 +346,7 @@ function RecentQuestions({ msgs }: { msgs: RecentMsgClient[] }) {
         style={{ color: "var(--text-muted)", cursor: "pointer" }}
       >
         <span className="text-xs font-bold tracking-[0.18em] uppercase">
-          Недавние вопросы
+          {t("recentQuestions")}
           <span className="ml-2 font-normal normal-case" style={{ fontSize: 11 }}>
             ({msgs.length})
           </span>
@@ -358,7 +372,7 @@ function RecentQuestions({ msgs }: { msgs: RecentMsgClient[] }) {
               <div className="flex-1 min-w-0">
                 <p className="text-sm leading-snug" style={{ color: "var(--text)" }}>{preview}</p>
                 <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                  {msg.subjectTitle} · {relTime(msg.created_at)}
+                  {msg.subjectTitle} · {relTime(msg.created_at, locale, t)}
                 </p>
               </div>
             </Link>
@@ -373,7 +387,7 @@ function RecentQuestions({ msgs }: { msgs: RecentMsgClient[] }) {
           className="w-full py-3 text-xs font-semibold border-t transition-opacity hover:opacity-70"
           style={{ borderColor: "var(--border)", color: "var(--brand)" }}
         >
-          {open ? "Свернуть" : `Показать ещё ${hidden}`}
+          {open ? t("collapse") : t("showMore", { count: hidden })}
         </button>
       )}
     </div>

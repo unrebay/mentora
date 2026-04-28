@@ -71,21 +71,66 @@
     "footerAbout": "About"
   },
   "subjects": {
-    "russian-history": { "title": "Russian History", "desc": "51 topics · 5 levels" },
-    "world-history": { "title": "World History", "desc": "60 topics · 5 levels" },
-    "mathematics": { "title": "Mathematics", "desc": "Algebra, geometry, calculus" },
-    "physics": { "title": "Physics", "desc": "Mechanics to quantum world" },
-    "chemistry": { "title": "Chemistry", "desc": "Substances, reactions, laws" },
-    "biology": { "title": "Biology", "desc": "Cell to ecosystems" },
-    "russian-language": { "title": "Russian Language", "desc": "Grammar and spelling" },
-    "literature": { "title": "Literature", "desc": "Classics and modern prose" },
-    "english": { "title": "English", "desc": "A1 — C2, conversational" },
-    "social-studies": { "title": "Social Studies", "desc": "Law, economics, sociology" },
-    "geography": { "title": "Geography", "desc": "Nature, countries, climate" },
-    "computer-science": { "title": "Computer Science", "desc": "Algorithms, programming" },
-    "astronomy": { "title": "Astronomy", "desc": "Stars, planets, universe" },
-    "discovery": { "title": "Discovery", "desc": "Facts, breakthroughs, phenomena" },
-    "suggest": { "title": "Suggest a subject", "desc": "Vote for a topic" }
+    "russian-history": {
+      "title": "Russian History",
+      "desc": "51 topics · 5 levels"
+    },
+    "world-history": {
+      "title": "World History",
+      "desc": "60 topics · 5 levels"
+    },
+    "mathematics": {
+      "title": "Mathematics",
+      "desc": "Algebra, geometry, calculus"
+    },
+    "physics": {
+      "title": "Physics",
+      "desc": "Mechanics to quantum world"
+    },
+    "chemistry": {
+      "title": "Chemistry",
+      "desc": "Substances, reactions, laws"
+    },
+    "biology": {
+      "title": "Biology",
+      "desc": "Cell to ecosystems"
+    },
+    "russian-language": {
+      "title": "Russian Language",
+      "desc": "Grammar and spelling"
+    },
+    "literature": {
+      "title": "Literature",
+      "desc": "Classics and modern prose"
+    },
+    "english": {
+      "title": "English",
+      "desc": "A1 — C2, conversational"
+    },
+    "social-studies": {
+      "title": "Social Studies",
+      "desc": "Law, economics, sociology"
+    },
+    "geography": {
+      "title": "Geography",
+      "desc": "Nature, countries, climate"
+    },
+    "computer-science": {
+      "title": "Computer Science",
+      "desc": "Algorithms, programming"
+    },
+    "astronomy": {
+      "title": "Astronomy",
+      "desc": "Stars, planets, universe"
+    },
+    "discovery": {
+      "title": "Discovery",
+      "desc": "Facts, breakthroughs, phenomena"
+    },
+    "suggest": {
+      "title": "Suggest a subject",
+      "desc": "Vote for a topic"
+    }
   },
   "steps": {
     "01": {
@@ -304,5 +349,43 @@
     "free": "free",
     "perMonth": "/ mo",
     "unlimited": "unlimited"
+  },
+  "progress": {
+    "pageTitle": "My Progress — Mentora",
+    "statXP": "XP",
+    "statStreak": "Streak",
+    "statMessages": "Messages",
+    "statBadges": "Achievements",
+    "emptyTitle": "No data yet",
+    "emptyDesc": "Start learning — your progress will appear here",
+    "emptyBtn": "Go to subjects →",
+    "weeklyActivity": "Activity this week",
+    "qualityPerfect": "· perfect",
+    "qualityGreat": "· great",
+    "questionsThisWeek": "{count} questions this week",
+    "mentBySubject": "XP by subject",
+    "bySubject": "By subject",
+    "xpUnit": "XP",
+    "questUnit": "q.",
+    "dayUnit": "d.",
+    "toLevelUnit": "to lvl",
+    "recentQuestions": "Recent questions",
+    "collapse": "Collapse",
+    "showMore": "Show {count} more",
+    "today": "today",
+    "yesterday": "yesterday",
+    "daysAgo": "{count}d ago",
+    "dayMon": "Mon",
+    "dayTue": "Tue",
+    "dayWed": "Wed",
+    "dayThu": "Thu",
+    "dayFri": "Fri",
+    "daySat": "Sat",
+    "daySun": "Sun",
+    "levelBeginner": "Beginner",
+    "levelExplorer": "Explorer",
+    "levelScholar": "Scholar",
+    "levelHistorian": "Historian",
+    "levelExpert": "Expert"
   }
 }

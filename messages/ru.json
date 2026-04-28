@@ -71,21 +71,66 @@
     "footerAbout": "О проекте"
   },
   "subjects": {
-    "russian-history": { "title": "История России", "desc": "51 тема · 5 уровней" },
-    "world-history": { "title": "Всемирная история", "desc": "60 тем · 5 уровней" },
-    "mathematics": { "title": "Математика", "desc": "Алгебра, геометрия, анализ" },
-    "physics": { "title": "Физика", "desc": "Механика до квантового мира" },
-    "chemistry": { "title": "Химия", "desc": "Вещества, реакции, законы" },
-    "biology": { "title": "Биология", "desc": "Клетка до экосистем" },
-    "russian-language": { "title": "Русский язык", "desc": "Грамматика и орфография" },
-    "literature": { "title": "Литература", "desc": "Классика и современная проза" },
-    "english": { "title": "Английский язык", "desc": "A1 — C2, разговорный" },
-    "social-studies": { "title": "Обществознание", "desc": "Право, экономика, социология" },
-    "geography": { "title": "География", "desc": "Природа, страны, климат" },
-    "computer-science": { "title": "Информатика", "desc": "Алгоритмы, программирование" },
-    "astronomy": { "title": "Астрономия", "desc": "Звёзды, планеты, вселенная" },
-    "discovery": { "title": "Кругозор", "desc": "Факты, открытия, феномены" },
-    "suggest": { "title": "Предложить тему", "desc": "Голосуй за предмет" }
+    "russian-history": {
+      "title": "История России",
+      "desc": "51 тема · 5 уровней"
+    },
+    "world-history": {
+      "title": "Всемирная история",
+      "desc": "60 тем · 5 уровней"
+    },
+    "mathematics": {
+      "title": "Математика",
+      "desc": "Алгебра, геометрия, анализ"
+    },
+    "physics": {
+      "title": "Физика",
+      "desc": "Механика до квантового мира"
+    },
+    "chemistry": {
+      "title": "Химия",
+      "desc": "Вещества, реакции, законы"
+    },
+    "biology": {
+      "title": "Биология",
+      "desc": "Клетка до экосистем"
+    },
+    "russian-language": {
+      "title": "Русский язык",
+      "desc": "Грамматика и орфография"
+    },
+    "literature": {
+      "title": "Литература",
+      "desc": "Классика и современная проза"
+    },
+    "english": {
+      "title": "Английский язык",
+      "desc": "A1 — C2, разговорный"
+    },
+    "social-studies": {
+      "title": "Обществознание",
+      "desc": "Право, экономика, социология"
+    },
+    "geography": {
+      "title": "География",
+      "desc": "Природа, страны, климат"
+    },
+    "computer-science": {
+      "title": "Информатика",
+      "desc": "Алгоритмы, программирование"
+    },
+    "astronomy": {
+      "title": "Астрономия",
+      "desc": "Звёзды, планеты, вселенная"
+    },
+    "discovery": {
+      "title": "Кругозор",
+      "desc": "Факты, открытия, феномены"
+    },
+    "suggest": {
+      "title": "Предложить тему",
+      "desc": "Голосуй за предмет"
+    }
   },
   "steps": {
     "01": {
@@ -304,5 +349,43 @@
     "free": "бесплатно",
     "perMonth": "/ мес",
     "unlimited": "безлимит"
+  },
+  "progress": {
+    "pageTitle": "Мой прогресс — Mentora",
+    "statXP": "Мент",
+    "statStreak": "Стрик сейчас",
+    "statMessages": "Сообщений",
+    "statBadges": "Достижений",
+    "emptyTitle": "Пока нет данных",
+    "emptyDesc": "Начни учиться — здесь появится твой прогресс",
+    "emptyBtn": "К предметам →",
+    "weeklyActivity": "Активность за неделю",
+    "qualityPerfect": "· идеально",
+    "qualityGreat": "· отлично",
+    "questionsThisWeek": "{count} вопросов за неделю",
+    "mentBySubject": "Мент по предметам",
+    "bySubject": "По предметам",
+    "xpUnit": "мент",
+    "questUnit": "вопр.",
+    "dayUnit": "дн.",
+    "toLevelUnit": "до ур.",
+    "recentQuestions": "Недавние вопросы",
+    "collapse": "Свернуть",
+    "showMore": "Показать ещё {count}",
+    "today": "сегодня",
+    "yesterday": "вчера",
+    "daysAgo": "{count} дн. назад",
+    "dayMon": "Пн",
+    "dayTue": "Вт",
+    "dayWed": "Ср",
+    "dayThu": "Чт",
+    "dayFri": "Пт",
+    "daySat": "Сб",
+    "daySun": "Вс",
+    "levelBeginner": "Новичок",
+    "levelExplorer": "Исследователь",
+    "levelScholar": "Знаток",
+    "levelHistorian": "Историк",
+    "levelExpert": "Эксперт"
   }
 }

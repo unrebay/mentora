@@ -1,42 +1,41 @@
 import React from "react";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { SUBJECTS } from "@/lib/types";
 import StatCard, { MentIcon, FlameIcon, MessageIcon, StarIcon } from "@/components/StatCard";
 import ProgressClient from "@/components/ProgressClient";
 
-export const metadata = { title: "Мой прогресс — Mentora" };
-
-function pluralMenty(n: number): string {
-  const m10 = n % 10, m100 = n % 100;
-  if (m100 >= 11 && m100 <= 14) return "мент";
-  if (m10 === 1) return "мента";
-  if (m10 >= 2 && m10 <= 4) return "менты";
-  return "мент";
+export async function generateMetadata() {
+  const t = await getTranslations("progress");
+  return { title: t("pageTitle") };
 }
 
-const XP_LEVELS = [
-  { name: "Новичок",    minXP: 0,    maxXP: 100 },
-  { name: "Исследователь", minXP: 100,  maxXP: 300 },
-  { name: "Знаток",    minXP: 300,  maxXP: 600 },
-  { name: "Историк",   minXP: 600,  maxXP: 1000 },
-  { name: "Эксперт",   minXP: 1000, maxXP: Infinity },
+const XP_THRESHOLDS = [
+  { key: "levelBeginner",  minXP: 0,    maxXP: 100 },
+  { key: "levelExplorer",  minXP: 100,  maxXP: 300 },
+  { key: "levelScholar",   minXP: 300,  maxXP: 600 },
+  { key: "levelHistorian", minXP: 600,  maxXP: 1000 },
+  { key: "levelExpert",    minXP: 1000, maxXP: Infinity },
 ];
 
-function getLevel(xp: number) {
-  const level = XP_LEVELS.slice().reverse().find((l) => xp >= l.minXP) ?? XP_LEVELS[0];
-  const idx = XP_LEVELS.indexOf(level);
-  const next = XP_LEVELS[idx + 1];
+function getLevelData(xp: number) {
+  const level = XP_THRESHOLDS.slice().reverse().find((l) => xp >= l.minXP) ?? XP_THRESHOLDS[0];
+  const idx = XP_THRESHOLDS.indexOf(level);
+  const next = XP_THRESHOLDS[idx + 1];
   const progress = next
     ? Math.min(100, Math.round(((xp - level.minXP) / (next.minXP - level.minXP)) * 100))
     : 100;
-  return { ...level, idx, next: next ?? null, progress };
+  return { key: level.key, idx, nextXP: next?.minXP ?? null, progress };
 }
 
 export default async function ProgressPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth");
+
+  const t = await getTranslations("progress");
+  const tSubjects = await getTranslations("subjects");
 
   // ── User progress per subject ──────────────────────────────────────────────
   const { data: progressRows } = await supabase
@@ -69,7 +68,7 @@ export default async function ProgressPage() {
     .eq("role", "user")
     .gte("created_at", sevenDaysAgo);
 
-  // Build current ISO week Mon–Sun (Russian format starts Monday)
+  // Build current ISO week Mon–Sun
   const countByDate: Record<string, number> = {};
   for (const row of activityData ?? []) {
     const d = row.created_at.slice(0, 10);
@@ -96,7 +95,7 @@ export default async function ProgressPage() {
   const bestStreak    = progressRows?.reduce((m, p) => Math.max(m, p.best_streak ?? p.streak_days ?? 0), 0) ?? 0;
   const totalMessages = msgRows?.length ?? 0;
 
-  // Badge count — mirror profile logic
+  // Badge count
   const BADGE_CHECKS = [
     (m: number, _b: number, _x: number) => m >= 1,
     (m: number, _b: number, _x: number) => m >= 50,
@@ -116,30 +115,36 @@ export default async function ProgressPage() {
 
   const subjectStats = activeSubjects.map(p => {
     const meta = SUBJECTS.find(s => s.id === p.subject);
-    const lvl  = getLevel(p.xp_total ?? 0);
+    const lvlData = getLevelData(p.xp_total ?? 0);
+    // Use translated subject title if available, fallback to SUBJECTS title, then id
+    const subjectTitle: string = tSubjects(`${p.subject}.title` as never) ?? meta?.title ?? p.subject;
     return {
       id:         p.subject,
-      title:      meta?.title ?? p.subject,
+      title:      subjectTitle,
       xp:         p.xp_total ?? 0,
       streak:     p.streak_days ?? 0,
       messages:   msgCountBySubject[p.subject] ?? 0,
       lastActive: p.last_active_at ?? null,
       lvl: {
-        name:    lvl.name,
-        progress: lvl.progress,
-        idx:     lvl.idx,
-        nextXP:  lvl.next?.minXP ?? null,
+        name:     t(lvlData.key as never),
+        progress: lvlData.progress,
+        idx:      lvlData.idx,
+        nextXP:   lvlData.nextXP,
       },
     };
   });
 
   // ── Recent messages for client component ───────────────────────────────────
-  const recentMsgsMapped = (recentMsgs ?? []).map(m => ({
-    subject:      m.subject,
-    subjectTitle: SUBJECTS.find(s => s.id === m.subject)?.title ?? m.subject,
-    content:      m.content,
-    created_at:   m.created_at,
-  }));
+  const recentMsgsMapped = (recentMsgs ?? []).map(m => {
+    const meta = SUBJECTS.find(s => s.id === m.subject);
+    const subjectTitle: string = tSubjects(`${m.subject}.title` as never) ?? meta?.title ?? m.subject;
+    return {
+      subject:      m.subject,
+      subjectTitle,
+      content:      m.content,
+      created_at:   m.created_at,
+    };
+  });
 
   return (
     <main className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
@@ -147,13 +152,13 @@ export default async function ProgressPage() {
 
         {/* ── Summary stat cards ─────────────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatCard label="Мент"         value={totalXP}       icon={<MentIcon />}    accent="var(--brand)" isBrand />
-          <StatCard label="Стрик сейчас" value={currentStreak} icon={<FlameIcon />}   accent="#FF7A00" />
-          <StatCard label="Сообщений"    value={totalMessages} icon={<MessageIcon />} accent="#10B981" />
-          <StatCard label="Достижений"   value={earnedBadges}  icon={<StarIcon />}    accent="#f59e0b" />
+          <StatCard label={t("statXP")}       value={totalXP}       icon={<MentIcon />}    accent="var(--brand)" isBrand />
+          <StatCard label={t("statStreak")}   value={currentStreak} icon={<FlameIcon />}   accent="#FF7A00" />
+          <StatCard label={t("statMessages")} value={totalMessages} icon={<MessageIcon />} accent="#10B981" />
+          <StatCard label={t("statBadges")}   value={earnedBadges}  icon={<StarIcon />}    accent="#f59e0b" />
         </div>
 
-        {/* ── Interactive sections (activity, charts, subject list, questions) */}
+        {/* ── Interactive sections ──────────────────────────────────────── */}
         {subjectStats.length > 0 ? (
           <ProgressClient
             subjectStats={subjectStats}
@@ -166,12 +171,12 @@ export default async function ProgressPage() {
               style={{ background: "rgba(69,97,232,0.08)", border: "1px solid rgba(69,97,232,0.15)" }}>
               <span style={{ fontSize: 40 }}>📚</span>
             </div>
-            <p className="font-semibold mb-1" style={{ color: "var(--text)" }}>Пока нет данных</p>
+            <p className="font-semibold mb-1" style={{ color: "var(--text)" }}>{t("emptyTitle")}</p>
             <p className="text-sm mb-5" style={{ color: "var(--text-muted)" }}>
-              Начни учиться — здесь появится твой прогресс
+              {t("emptyDesc")}
             </p>
             <a href="/dashboard" className="btn-glow inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white">
-              К предметам →
+              {t("emptyBtn")}
             </a>
           </div>
         )}
