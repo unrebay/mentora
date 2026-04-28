@@ -1,253 +1,550 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-type ServiceStatus = { ok: boolean; latencyMs: number; error?: string };
-type EnvVar = { name: string; present: boolean; preview: string | null };
-type HealthData = {
-  status: "healthy" | "degraded";
-  services: { anthropic: ServiceStatus; openai: ServiceStatus; supabase: ServiceStatus };
-  envVars: EnvVar[];
-  checkedAt: string;
-};
-type StatsData = {
-  users: { total: number; pro: number; free: number; newToday: number; activeToday: number; activeWeek: number; trialExpired: number };
-  chat: { totalMessages: number; messagesToday: number; userMessagesWeek: number; aiResponsesWeek: number; aiResponseRate: number; topSubjects: { subject: string; count: number }[] };
+// ── Pricing ───────────────────────────────────────────────────────────────────
+const PRO_M = 399, PRO_Y = 2990, ULT_M = 799, ULT_Y = 5990;
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+interface Stats {
+  users: { total: number; pro: number; ultima: number; free: number; newToday: number; activeToday: number; activeWeek: number; trialExpired: number };
+  chat:  { totalMessages: number; messagesToday: number; userMessagesWeek: number; aiResponsesWeek: number; aiResponseRate: number; topSubjects: { subject: string; count: number }[] };
   billing: { activeSubscriptions: number };
   knowledge: { chunks: number };
-  recentUsers: { id: string; email: string; plan: string; created_at: string; last_active_at: string; messages_today: number }[];
+  recentUsers: UserRow[];
   generatedAt: string;
-};
-
-const SUBJECT_LABELS: Record<string, string> = {
-  "russian-history": "История России", "world-history": "Всемирная история",
-  history: "История", math: "Математика", physics: "Физика",
-  chemistry: "Химия", biology: "Биология", literature: "Литература",
-  geography: "География", english: "Английский",
-};
-
-function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins} мин назад`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} ч назад`;
-  return `${Math.floor(hours / 24)} дн назад`;
+}
+interface UserRow {
+  id: string; email: string; plan: string; created_at: string;
+  last_active_at: string | null; messages_today: number;
+  messages_total?: number; subjects_count?: number;
+  trial_expires_at: string | null; referred_by: string | null;
+}
+interface ChunkRow {
+  id: string; subject: string; topic: string | null; content: string; source: string | null; created_at: string;
 }
 
-function StatusBadge({ ok, label, latency, error }: { ok: boolean; label: string; latency: number; error?: string }) {
+// ── Tokens ────────────────────────────────────────────────────────────────────
+const BG    = "#07080e";
+const SIDE  = "#0c0e1a";
+const CARD  = "rgba(255,255,255,0.038)";
+const BOR   = "rgba(255,255,255,0.08)";
+const BRAND = "#4561E8";
+const GREEN = "#22c55e";
+const AMBER = "#f59e0b";
+const RED   = "#ef4444";
+const TEXT  = "#e2e8f0";
+const MUTED = "#64748b";
+const inp   = { padding: "9px 12px", background: "rgba(255,255,255,0.05)", border: `1px solid ${BOR}`, borderRadius: 10, color: TEXT, fontSize: 13, outline: "none", width: "100%", boxSizing: "border-box" as const };
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+const N = (n: number, sfx = "") => n.toLocaleString("ru-RU") + sfx;
+const R = (n: number) => N(n) + " ₽";
+function ago(iso: string | null) {
+  if (!iso) return "—";
+  const s = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (s < 120) return "только что";
+  if (s < 3600) return Math.floor(s / 60) + " мин";
+  if (s < 86400) return Math.floor(s / 3600) + " ч";
+  return Math.floor(s / 86400) + " дн";
+}
+function planMeta(p: string) {
+  if (p === "ultima") return { l: "Ultima", c: "#a78bfa" };
+  if (p === "pro")    return { l: "Pro",    c: "#60a5fa" };
+  return { l: "Free", c: MUTED };
+}
+
+// ── SUBJECT names ─────────────────────────────────────────────────────────────
+const SN: Record<string, string> = {
+  "russian-history":"История РФ","world-history":"Всемирная история","mathematics":"Математика",
+  "physics":"Физика","chemistry":"Химия","biology":"Биология","russian-language":"Русский язык",
+  "literature":"Литература","english":"Английский","social-studies":"Обществознание",
+  "geography":"География","computer-science":"Информатика","astronomy":"Астрономия",
+};
+const SUBS = Object.keys(SN);
+
+// ── Primitive components ──────────────────────────────────────────────────────
+function Card({ ch, style }: { ch: React.ReactNode; style?: React.CSSProperties }) {
+  return <div style={{ background: CARD, border: `1px solid ${BOR}`, borderRadius: 16, padding: "20px 24px", ...style }}>{ch}</div>;
+}
+function Metric({ label, value, sub, color = TEXT }: { label: string; value: string | number; sub?: string; color?: string }) {
+  return <Card ch={<>
+    <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED, marginBottom: 8 }}>{label}</p>
+    <p style={{ fontSize: 28, fontWeight: 700, color, lineHeight: 1, marginBottom: sub ? 4 : 0 }}>{typeof value === "number" ? N(value) : value}</p>
+    {sub && <p style={{ fontSize: 12, color: MUTED }}>{sub}</p>}
+  </>} />;
+}
+function Badge({ plan }: { plan: string }) {
+  const { l, c } = planMeta(plan);
+  return <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 100, fontSize: 11, fontWeight: 600, background: c + "20", border: `1px solid ${c}40`, color: c }}>{l}</span>;
+}
+function NavBtn({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick(): void }) {
+  return <button onClick={onClick} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 10, border: "none", cursor: "pointer", background: active ? BRAND+"22" : "transparent", color: active ? "#a0b4ff" : MUTED, fontSize: 14, fontWeight: active ? 600 : 400, transition: "all .15s", outline: "none" }}>
+    <span style={{ opacity: active ? 1 : 0.6 }}>{icon}</span>{label}
+  </button>;
+}
+function TH({ label }: { label: string }) {
+  return <th style={{ textAlign: "left", padding: "10px 14px", fontWeight: 500, borderBottom: `1px solid ${BOR}`, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: MUTED }}>{label}</th>;
+}
+function TD({ children, color = TEXT, muted = false }: { children: React.ReactNode; color?: string; muted?: boolean }) {
+  return <td style={{ padding: "10px 14px", color: muted ? MUTED : color, fontSize: 13 }}>{children}</td>;
+}
+
+// ── Icons ──────────────────────────────────────────────────────────────────────
+const IGrid    = <svg w="16" h="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>;
+const IUsers   = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+const IRevenue = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>;
+const IKb      = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
+const IRefresh = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>;
+const ISearch  = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+type Tab = "overview" | "users" | "revenue" | "knowledge";
+
+export default function AdminPanel() {
+  const [tab, setTab]       = useState<Tab>("overview");
+  const [stats, setStats]   = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const reload = useCallback(async () => {
+    setLoading(true);
+    try { const r = await fetch("/api/admin/stats"); if (r.ok) setStats(await r.json()); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { reload(); }, [reload]);
+
+  // Revenue calc (70% monthly / 30% yearly assumed)
+  const pro = stats?.users.pro ?? 0, ult = stats?.users.ultima ?? 0;
+  const mrrPro  = Math.round(pro * (PRO_M * 0.7 + (PRO_Y / 12) * 0.3));
+  const mrrUlt  = Math.round(ult * (ULT_M * 0.7 + (ULT_Y / 12) * 0.3));
+  const mrr     = mrrPro + mrrUlt;
+  const arr     = mrr * 12;
+
+  const TABS: { id: Tab; icon: React.ReactNode; label: string }[] = [
+    { id: "overview",   icon: IGrid,    label: "Обзор" },
+    { id: "users",      icon: IUsers,   label: "Пользователи" },
+    { id: "revenue",    icon: IRevenue, label: "Доходы" },
+    { id: "knowledge",  icon: IKb,      label: "База знаний" },
+  ];
+
   return (
-    <div className={`flex items-center gap-3 p-3 rounded-xl border ${ok ? "border-green-500/20 bg-green-500/5" : "border-red-500/20 bg-red-500/5"}`}>
-      <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${ok ? "bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.6)]" : "bg-red-400 shadow-[0_0_6px_rgba(248,113,113,0.6)]"}`} />
-      <div className="min-w-0">
-        <div className="text-sm font-semibold text-white">{label}</div>
-        {ok ? <div className="text-xs text-white/40">{latency}ms</div> : <div className="text-xs text-red-400 truncate">{error}</div>}
+    <div style={{ display: "flex", minHeight: "100vh", background: BG, color: TEXT, fontFamily: "system-ui,-apple-system,sans-serif" }}>
+
+      {/* Sidebar */}
+      <aside style={{ width: 220, flexShrink: 0, background: SIDE, borderRight: `1px solid ${BOR}`, padding: "24px 14px", display: "flex", flexDirection: "column", gap: 4, position: "sticky", top: 0, height: "100vh" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 14px 24px" }}>
+          <div style={{ width: 30, height: 30, borderRadius: 8, background: BRAND, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <div><p style={{ fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>Mentora</p><p style={{ fontSize: 10, color: MUTED, margin: 0 }}>Admin · только ты</p></div>
+        </div>
+
+        {TABS.map(t => <NavBtn key={t.id} icon={t.icon} label={t.label} active={tab === t.id} onClick={() => setTab(t.id)} />)}
+
+        <div style={{ flex: 1 }} />
+        <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", color: MUTED, fontSize: 13, textDecoration: "none", borderRadius: 10 }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
+          На сайт
+        </Link>
+        {stats && <p style={{ fontSize: 10, color: MUTED, padding: "2px 14px", opacity: 0.4 }}>{new Date(stats.generatedAt).toLocaleTimeString("ru-RU")}</p>}
+      </aside>
+
+      {/* Content */}
+      <main style={{ flex: 1, padding: "32px 36px", overflowY: "auto", minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{TABS.find(t => t.id === tab)?.label}</h1>
+            <p style={{ fontSize: 13, color: MUTED, marginTop: 4, marginBottom: 0 }}>mentora.su / admin</p>
+          </div>
+          <button onClick={reload} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, border: `1px solid ${BOR}`, background: CARD, color: MUTED, fontSize: 13, cursor: "pointer" }}>
+            {IRefresh} Обновить
+          </button>
+        </div>
+
+        {loading && <p style={{ color: MUTED }}>Загрузка...</p>}
+
+        {/* ── OVERVIEW ─────────────────────────────────────────────────────── */}
+        {!loading && stats && tab === "overview" && <>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 16 }}>
+            <Metric label="Пользователей"     value={stats.users.total}      sub={`+${stats.users.newToday} сегодня`} />
+            <Metric label="Активны сегодня"   value={stats.users.activeToday} sub={`неделя: ${N(stats.users.activeWeek)}`} color={GREEN} />
+            <Metric label="Сообщений сегодня" value={stats.chat.messagesToday} sub={`всего: ${N(stats.chat.totalMessages)}`} />
+            <Metric label="MRR (оценка)"      value={R(mrr)} sub={`Pro×${pro} + Ultima×${ult}`} color="#a78bfa" />
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginBottom: 16 }}>
+            <Metric label="Pro"    value={stats.users.pro}    sub={`≈${R(mrrPro)}/мес`} color="#60a5fa" />
+            <Metric label="Ultima" value={stats.users.ultima} sub={`≈${R(mrrUlt)}/мес`} color="#a78bfa" />
+            <Metric label="Free"   value={stats.users.free}   sub={`Пробный истёк: ${stats.users.trialExpired}`} />
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+            <Card ch={<>
+              <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>AI за 7 дней</p>
+              {[
+                ["Запросов пользователей", N(stats.chat.userMessagesWeek)],
+                ["Ответов AI",             N(stats.chat.aiResponsesWeek)],
+                ["Скорость ответа",        stats.chat.aiResponseRate + "%"],
+                ["Чанков в базе",          N(stats.knowledge.chunks)],
+              ].map(([l, v]) => (
+                <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: `1px solid ${BOR}20` }}>
+                  <span style={{ fontSize: 13, color: MUTED }}>{l}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{v}</span>
+                </div>
+              ))}
+            </>} />
+
+            <Card ch={<>
+              <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Топ предметов (30 дн)</p>
+              {stats.chat.topSubjects.map(({ subject, count }, i) => {
+                const max = stats.chat.topSubjects[0]?.count ?? 1;
+                return (
+                  <div key={subject} style={{ marginBottom: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                      <span style={{ fontSize: 12, color: TEXT }}>{SN[subject] ?? subject}</span>
+                      <span style={{ fontSize: 12, color: MUTED }}>{N(count)}</span>
+                    </div>
+                    <div style={{ height: 4, borderRadius: 99, background: BOR }}>
+                      <div style={{ height: "100%", width: (count/max*100) + "%", borderRadius: 99, background: i === 0 ? BRAND : BRAND+"70", transition: "width .4s" }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </>} />
+          </div>
+
+          <Card ch={<>
+            <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Последние регистрации</p>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead><tr>{["Email","Тариф","Регистрация","Последний визит","Сообщ. сегодня"].map(h => <TH key={h} label={h} />)}</tr></thead>
+              <tbody>{stats.recentUsers.map(u => (
+                <tr key={u.id} style={{ borderBottom: `1px solid ${BOR}20` }}>
+                  <TD>{u.email}</TD>
+                  <TD><Badge plan={u.plan} /></TD>
+                  <TD muted>{ago(u.created_at)} назад</TD>
+                  <TD muted>{ago(u.last_active_at)} назад</TD>
+                  <TD color={u.messages_today > 0 ? GREEN : MUTED}>{u.messages_today || "—"}</TD>
+                </tr>
+              ))}</tbody>
+            </table>
+          </>} />
+        </>}
+
+        {/* ── USERS ────────────────────────────────────────────────────────── */}
+        {tab === "users" && <UsersTab />}
+
+        {/* ── REVENUE ──────────────────────────────────────────────────────── */}
+        {!loading && stats && tab === "revenue" && <>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginBottom: 16 }}>
+            <Metric label="MRR (оценка)" value={R(mrr)} sub="Monthly Recurring Revenue" color={GREEN} />
+            <Metric label="ARR (оценка)" value={R(arr)} sub="Annual Run Rate" color={GREEN} />
+            <Metric label="Платящих"     value={pro + ult} sub={`из ${N(stats.users.total)} пользователей`} color="#f472b6" />
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+            <Card ch={<>
+              <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 20 }}>Разбивка по тарифам</p>
+              {[
+                { l: "Pro ежемес. (399₽)",    n: Math.round(pro * .7), mrr: Math.round(pro * .7 * PRO_M), c: "#60a5fa" },
+                { l: "Pro годовой (249₽/мес)", n: Math.round(pro * .3), mrr: Math.round(pro * .3 * PRO_Y/12), c: "#60a5fa88" },
+                { l: "Ultima ежемес. (799₽)",  n: Math.round(ult * .7), mrr: Math.round(ult * .7 * ULT_M), c: "#a78bfa" },
+                { l: "Ultima годовой (499₽)",  n: Math.round(ult * .3), mrr: Math.round(ult * .3 * ULT_Y/12), c: "#a78bfa88" },
+              ].map(r => (
+                <div key={r.l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${BOR}` }}>
+                  <div><p style={{ fontSize: 13, color: r.c, fontWeight: 500, margin: 0 }}>{r.l}</p><p style={{ fontSize: 11, color: MUTED, margin: "2px 0 0" }}>~{N(r.n)} пользователей</p></div>
+                  <p style={{ fontSize: 18, fontWeight: 700, color: TEXT, margin: 0 }}>{R(r.mrr)}</p>
+                </div>
+              ))}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 12 }}>
+                <span style={{ fontSize: 14, fontWeight: 600, color: TEXT }}>Итого MRR</span>
+                <span style={{ fontSize: 22, fontWeight: 700, color: GREEN }}>{R(mrr)}</span>
+              </div>
+            </>} />
+
+            <Card ch={<>
+              <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 20 }}>Сценарии роста</p>
+              {[
+                { l: "Сейчас",          p: pro,   u: ult,   c: TEXT },
+                { l: "×2 платящих",     p: pro*2, u: ult*2, c: AMBER },
+                { l: "×5 платящих",     p: pro*5, u: ult*5, c: GREEN },
+                { l: "Цель: 100 Pro",   p: 100,   u: 10,    c: BRAND },
+                { l: "Цель: 500 Pro",   p: 500,   u: 50,    c: "#f472b6" },
+              ].map(s => {
+                const m = Math.round(s.p*(PRO_M*.7+PRO_Y/12*.3) + s.u*(ULT_M*.7+ULT_Y/12*.3));
+                return (
+                  <div key={s.l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: `1px solid ${BOR}30` }}>
+                    <span style={{ fontSize: 13, color: MUTED }}>{s.l}</span>
+                    <div style={{ textAlign: "right" }}>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: s.c }}>{R(m)}/мес</span>
+                      <p style={{ fontSize: 10, color: MUTED, margin: "2px 0 0" }}>{R(m*12)}/год</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </>} />
+          </div>
+
+          <Card ch={<>
+            <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Конверсия</p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
+              {[
+                ["Всего платящих",  stats.users.total ? ((pro+ult)/stats.users.total*100).toFixed(1)+"%" : "—"],
+                ["Free → Pro",      stats.users.total ? (pro/stats.users.total*100).toFixed(1)+"%" : "—"],
+                ["Free → Ultima",   stats.users.total ? (ult/stats.users.total*100).toFixed(1)+"%" : "—"],
+                ["Активных/неделю", stats.users.total ? (stats.users.activeWeek/stats.users.total*100).toFixed(0)+"%" : "—"],
+              ].map(([l, v]) => (
+                <div key={l} style={{ textAlign: "center" }}>
+                  <p style={{ fontSize: 26, fontWeight: 700, color: GREEN, margin: 0 }}>{v}</p>
+                  <p style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>{l}</p>
+                </div>
+              ))}
+            </div>
+          </>} />
+
+          <div style={{ marginTop: 16, padding: "14px 18px", borderRadius: 12, background: "rgba(239,68,68,0.05)", border: `1px solid rgba(239,68,68,0.15)` }}>
+            <p style={{ fontSize: 12, color: RED, fontWeight: 600, margin: "0 0 4px" }}>⚠️ Оценка</p>
+            <p style={{ fontSize: 13, color: MUTED, margin: 0, lineHeight: 1.6 }}>MRR рассчитан с допущением 70% месячных / 30% годовых подписок. Для точных данных смотри транзакции в YooKassa.</p>
+          </div>
+        </>}
+
+        {/* ── KNOWLEDGE ────────────────────────────────────────────────────── */}
+        {tab === "knowledge" && <KnowledgeTab />}
+      </main>
+    </div>
+  );
+}
+
+// ── Users Tab ─────────────────────────────────────────────────────────────────
+function UsersTab() {
+  const [users, setUsers]     = useState<UserRow[]>([]);
+  const [total, setTotal]     = useState(0);
+  const [page, setPage]       = useState(1);
+  const [search, setSearch]   = useState("");
+  const [planF, setPlanF]     = useState("");
+  const [loading, setLoading] = useState(false);
+  const [sortBy, setSortBy]   = useState<"created_at" | "messages_total" | "messages_today">("created_at");
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const p = new URLSearchParams({ page: String(page), limit: "30" });
+    if (search) p.set("search", search);
+    if (planF)  p.set("plan", planF);
+    const r = await fetch(`/api/admin/users?${p}`);
+    if (r.ok) { const d = await r.json(); setUsers(d.users); setTotal(d.total); }
+    setLoading(false);
+  }, [page, search, planF]);
+
+  useEffect(() => { load(); }, [load]);
+  useEffect(() => { setPage(1); }, [search, planF]);
+
+  // Client-side sort
+  const sorted = [...users].sort((a, b) => {
+    if (sortBy === "messages_total") return (b.messages_total ?? 0) - (a.messages_total ?? 0);
+    if (sortBy === "messages_today") return (b.messages_today ?? 0) - (a.messages_today ?? 0);
+    return 0; // default: server-side by created_at
+  });
+
+  const exportCSV = () => {
+    const rows = [["Email","Тариф","Регистрация","Последний визит","Сообщ сегодня","Сообщ всего","Предметы","Реферал"]];
+    users.forEach(u => rows.push([u.email, u.plan, u.created_at, u.last_active_at ?? "", String(u.messages_today), String(u.messages_total ?? ""), String(u.subjects_count ?? ""), u.referred_by ? "да" : "нет"]));
+    const blob = new Blob([rows.map(r => r.join(",")).join("\n")], { type: "text/csv" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "mentora_users.csv"; a.click();
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Filters */}
+      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ position: "relative", maxWidth: 320, flex: 1 }}>
+          <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: MUTED }}>{ISearch}</span>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Поиск по email..."
+            style={{ ...inp, paddingLeft: 32, maxWidth: 320 }} />
+        </div>
+        <select value={planF} onChange={e => setPlanF(e.target.value)} style={{ ...inp, width: "auto" }}>
+          <option value="">Все тарифы</option>
+          <option value="free">Free</option>
+          <option value="pro">Pro</option>
+          <option value="ultima">Ultima</option>
+        </select>
+        <select value={sortBy} onChange={e => setSortBy(e.target.value as typeof sortBy)} style={{ ...inp, width: "auto" }}>
+          <option value="created_at">По дате регистрации</option>
+          <option value="messages_total">По всего сообщений</option>
+          <option value="messages_today">По сообщ. сегодня</option>
+        </select>
+        <span style={{ color: MUTED, fontSize: 13, flex: 1 }}>Найдено: {N(total)}</span>
+        <button onClick={exportCSV} style={{ padding: "9px 14px", borderRadius: 10, border: `1px solid ${BOR}`, background: CARD, color: MUTED, fontSize: 13, cursor: "pointer" }}>
+          Экспорт CSV
+        </button>
+      </div>
+
+      <Card ch={<>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <thead><tr>
+            {["Email","Тариф","Предметы","Регистрация","Активность","Сегодня","Всего","Реферал"].map(h => <TH key={h} label={h} />)}
+          </tr></thead>
+          <tbody>
+            {loading && <tr><td colSpan={8} style={{ padding: 24, textAlign: "center", color: MUTED }}>Загрузка...</td></tr>}
+            {!loading && sorted.map(u => (
+              <tr key={u.id} style={{ borderBottom: `1px solid ${BOR}15` }}>
+                <TD><span style={{ maxWidth: 240, display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.email}</span></TD>
+                <TD><Badge plan={u.plan} /></TD>
+                <TD muted>{u.subjects_count ? `${u.subjects_count} предм.` : "—"}</TD>
+                <TD muted>{ago(u.created_at)} назад</TD>
+                <TD muted>{u.last_active_at ? ago(u.last_active_at) + " назад" : "—"}</TD>
+                <TD color={u.messages_today > 0 ? GREEN : MUTED}>{u.messages_today || "—"}</TD>
+                <TD color={u.messages_total && u.messages_total > 50 ? BRAND : TEXT}>{u.messages_total ? N(u.messages_total) : "—"}</TD>
+                <TD muted>{u.referred_by ? "✓" : "—"}</TD>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </>} style={{ padding: 0, overflow: "hidden" }} />
+
+      {/* Pagination */}
+      <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
+        {page > 1 && <button onClick={() => setPage(p => p-1)} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${BOR}`, background: CARD, color: MUTED, cursor: "pointer", fontSize: 13 }}>← Назад</button>}
+        {[...Array(Math.min(Math.ceil(total/30), 7))].map((_, i) => (
+          <button key={i} onClick={() => setPage(i+1)} style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${BOR}`, background: page===i+1 ? BRAND : CARD, color: page===i+1 ? "white" : MUTED, cursor: "pointer", fontSize: 13 }}>{i+1}</button>
+        ))}
+        {Math.ceil(total/30) > 7 && <button onClick={() => setPage(p=>p+1)} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${BOR}`, background: CARD, color: MUTED, cursor: "pointer", fontSize: 13 }}>Ещё →</button>}
       </div>
     </div>
   );
 }
 
-function MetricCard({ label, value, sub, accent }: { label: string; value: string | number; sub?: string; accent?: boolean }) {
+// ── Knowledge Tab ─────────────────────────────────────────────────────────────
+const emptyF = { subject: "mathematics", topic: "", content: "", source: "", language: "ru" };
+
+function KnowledgeTab() {
+  const [chunks, setChunks]   = useState<ChunkRow[]>([]);
+  const [total, setTotal]     = useState(0);
+  const [page, setPage]       = useState(1);
+  const [filter, setFilter]   = useState("");
+  const [search, setSearch]   = useState("");
+  const [form, setForm]       = useState(emptyF);
+  const [editId, setEditId]   = useState<string | null>(null);
+  const [view, setView]       = useState<"list"|"add">("list");
+  const [busy, setBusy]       = useState(false);
+  const [bulk, setBulk]       = useState(false);
+  const [bulkTxt, setBulkTxt] = useState("");
+  const [bulkSub, setBulkSub] = useState("mathematics");
+  const [flash, setFlash]     = useState("");
+
+  const ok = (m: string) => { setFlash(m); setTimeout(() => setFlash(""), 3000); };
+
+  const load = useCallback(async () => {
+    const p = new URLSearchParams({ page: String(page), limit: "20" });
+    if (filter) p.set("subject", filter);
+    if (search) p.set("search", search);
+    const r = await fetch(`/api/admin/knowledge?${p}`);
+    if (r.ok) { const d = await r.json(); setChunks(d.chunks); setTotal(d.total); }
+  }, [page, filter, search]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const save = async () => {
+    setBusy(true);
+    const url = editId ? `/api/admin/knowledge/${editId}` : "/api/admin/knowledge";
+    await fetch(url, { method: editId ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+    setBusy(false); setForm(emptyF); setEditId(null); setView("list"); ok("Сохранено"); load();
+  };
+
+  const del = async (id: string) => {
+    if (!confirm("Удалить чанк?")) return;
+    await fetch(`/api/admin/knowledge/${id}`, { method: "DELETE" });
+    ok("Удалено"); load();
+  };
+
+  const bulkImport = async () => {
+    const lines = bulkTxt.split("\n").map(l => l.trim()).filter(Boolean);
+    setBusy(true);
+    for (const line of lines) {
+      const [t, ...rest] = line.split("|");
+      await fetch("/api/admin/knowledge", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ subject: bulkSub, topic: t?.trim(), content: rest.join("|").trim() || t?.trim(), source: "Импорт", language: "ru" }) });
+    }
+    setBusy(false); setBulkTxt(""); setBulk(false); ok(`Добавлено ${lines.length} чанков`); load();
+  };
+
   return (
-    <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-4">
-      <div className="text-xs text-white/40 mb-1">{label}</div>
-      <div className={`text-2xl font-bold ${accent ? "text-[#4561E8]" : "text-white"}`}>{value}</div>
-      {sub && <div className="text-xs text-white/30 mt-0.5">{sub}</div>}
-    </div>
-  );
-}
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {flash && <div style={{ padding: "10px 16px", background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)", borderRadius: 10, color: GREEN, fontSize: 13 }}>{flash}</div>}
 
-export default function AdminDashboard() {
-  const router = useRouter();
-  const [health, setHealth] = useState<HealthData | null>(null);
-  const [stats, setStats] = useState<StatsData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [healthLoading, setHealthLoading] = useState(true);
-  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
-
-  const loadStats = useCallback(async () => {
-    setLoading(true);
-    const res = await fetch("/api/admin/stats");
-    if (res.status === 403) { router.push("/dashboard"); return; }
-    if (res.ok) setStats(await res.json());
-    setLoading(false);
-    setLastRefresh(new Date());
-  }, [router]);
-
-  const loadHealth = useCallback(async () => {
-    setHealthLoading(true);
-    const res = await fetch("/api/admin/health");
-    if (res.ok) setHealth(await res.json());
-    setHealthLoading(false);
-  }, []);
-
-  useEffect(() => {
-    loadStats(); loadHealth();
-    const interval = setInterval(() => { loadStats(); loadHealth(); }, 60_000);
-    return () => clearInterval(interval);
-  }, [loadStats, loadHealth]);
-
-  const aiRateColor = (r: number) => r >= 80 ? "text-green-400" : r >= 50 ? "text-yellow-400" : "text-red-400";
-
-  return (
-    <div className="min-h-screen bg-[#06060f] text-white">
-      <header className="sticky top-0 z-50 border-b border-white/8 px-6 py-4 flex items-center justify-between"
-        style={{ background: "rgba(6,6,15,0.92)", backdropFilter: "blur(12px)" }}>
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-sm text-white/40 hover:text-white/70 transition-colors">← Дашборд</Link>
-          <div className="w-px h-4 bg-white/10" />
-          <span className="text-sm font-semibold text-white/80 tracking-wide">ADMIN PANEL</span>
-          {health && (
-            <div className={`text-xs px-2 py-0.5 rounded-full border ${health.status === "healthy" ? "border-green-500/30 text-green-400 bg-green-500/10" : "border-red-500/30 text-red-400 bg-red-500/10"}`}>
-              {health.status === "healthy" ? "● Всё работает" : "● Есть проблемы"}
-            </div>
-          )}
+      {/* Toolbar */}
+      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ position: "relative" }}>
+          <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: MUTED }}>{ISearch}</span>
+          <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="Поиск в контенте..."
+            style={{ ...inp, width: 220, paddingLeft: 32 }} />
         </div>
-        <div className="flex items-center gap-3">
-          {lastRefresh && <span className="text-xs text-white/30">обновлено {lastRefresh.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>}
-          <button onClick={() => { loadStats(); loadHealth(); }}
-            className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/50 hover:text-white/80 hover:border-white/20 transition-all">
-            ↻ Обновить
-          </button>
+        <select value={filter} onChange={e => { setFilter(e.target.value); setPage(1); }} style={{ ...inp, width: "auto" }}>
+          <option value="">Все предметы</option>
+          {SUBS.map(s => <option key={s} value={s}>{SN[s]}</option>)}
+        </select>
+        <span style={{ color: MUTED, fontSize: 13, flex: 1 }}>{N(total)} чанков</span>
+        <button onClick={() => { setBulk(!bulk); setView("list"); }} style={{ padding: "9px 14px", borderRadius: 10, border: `1px solid ${BOR}`, background: CARD, color: MUTED, cursor: "pointer", fontSize: 13 }}>Массовый импорт</button>
+        <button onClick={() => { setView(view==="add"?"list":"add"); setBulk(false); setEditId(null); setForm(emptyF); }}
+          style={{ padding: "9px 16px", borderRadius: 10, border: "none", background: BRAND, color: "white", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
+          {view==="add" ? "Отмена" : "+ Добавить"}
+        </button>
+      </div>
+
+      {bulk && <Card ch={<>
+        <p style={{ fontSize: 13, fontWeight: 600, color: TEXT, marginBottom: 10 }}>Массовый импорт — одна строка = один чанк</p>
+        <p style={{ fontSize: 12, color: MUTED, marginBottom: 12 }}>Формат: <code style={{ background: "rgba(255,255,255,0.07)", padding: "1px 6px", borderRadius: 4 }}>Тема | Контент</code></p>
+        <select value={bulkSub} onChange={e => setBulkSub(e.target.value)} style={{ ...inp, marginBottom: 10 }}>
+          {SUBS.map(s => <option key={s} value={s}>{SN[s]}</option>)}
+        </select>
+        <textarea value={bulkTxt} onChange={e => setBulkTxt(e.target.value)} rows={7}
+          placeholder={"Тема 1 | Контент 1\nТема 2 | Контент 2"}
+          style={{ ...inp, resize: "vertical", marginBottom: 12, display: "block" }} />
+        <button onClick={bulkImport} disabled={busy || !bulkTxt.trim()}
+          style={{ padding: "10px 20px", borderRadius: 10, border: "none", background: busy ? MUTED : BRAND, color: "white", cursor: busy ? "not-allowed" : "pointer", fontSize: 14, fontWeight: 600 }}>
+          {busy ? "Импорт..." : "Импортировать"}
+        </button>
+      </>} />}
+
+      {view === "add" && <Card ch={<>
+        <p style={{ fontSize: 13, fontWeight: 600, color: TEXT, marginBottom: 14 }}>{editId ? "Редактировать" : "Новый чанк"}</p>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+          <select value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} style={inp}>
+            {SUBS.map(s => <option key={s} value={s}>{SN[s]}</option>)}
+          </select>
+          <input value={form.topic} onChange={e => setForm(f => ({ ...f, topic: e.target.value }))} placeholder="Тема" style={inp} />
         </div>
-      </header>
+        <textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} rows={5} placeholder="Содержимое..." style={{ ...inp, resize: "vertical", marginBottom: 10, display: "block" }} />
+        <input value={form.source} onChange={e => setForm(f => ({ ...f, source: e.target.value }))} placeholder="Источник (напр. ЕГЭ физика)" style={{ ...inp, marginBottom: 14 }} />
+        <button onClick={save} disabled={busy || !form.content.trim()}
+          style={{ padding: "10px 24px", borderRadius: 10, border: "none", background: busy ? MUTED : BRAND, color: "white", cursor: busy ? "not-allowed" : "pointer", fontSize: 14, fontWeight: 600 }}>
+          {busy ? "Сохраняю..." : "Сохранить"}
+        </button>
+      </>} />}
 
-      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+      {view === "list" && <>
+        <Card ch={<table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <thead><tr>{["Предмет / Тема","Контент","Источник",""].map(h => <TH key={h} label={h} />)}</tr></thead>
+          <tbody>{chunks.map(c => (
+            <tr key={c.id} style={{ borderBottom: `1px solid ${BOR}15` }}>
+              <TD><p style={{ color: BRAND, fontWeight: 500, margin: 0 }}>{SN[c.subject] ?? c.subject}</p><p style={{ color: MUTED, fontSize: 11, margin: "2px 0 0" }}>{c.topic ?? "—"}</p></TD>
+              <TD muted><span style={{ display: "block", maxWidth: 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.content}</span></TD>
+              <TD muted>{c.source ?? "—"}</TD>
+              <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
+                <button onClick={() => { setForm({ subject: c.subject, topic: c.topic??"", content: c.content, source: c.source??"", language: "ru" }); setEditId(c.id); setView("add"); }}
+                  style={{ marginRight: 6, padding: "4px 10px", borderRadius: 6, border: `1px solid ${BOR}`, background: "transparent", color: TEXT, cursor: "pointer", fontSize: 12 }}>Изм.</button>
+                <button onClick={() => del(c.id)}
+                  style={{ padding: "4px 10px", borderRadius: 6, border: "1px solid rgba(239,68,68,0.3)", background: "transparent", color: RED, cursor: "pointer", fontSize: 12 }}>Удал.</button>
+              </td>
+            </tr>
+          ))}</tbody>
+        </table>} style={{ padding: 0, overflow: "hidden" }} />
 
-        <section>
-          <h2 className="text-xs font-semibold text-white/40 tracking-[0.15em] uppercase mb-3">Состояние сервисов</h2>
-          {healthLoading
-            ? <div className="grid grid-cols-3 gap-3">{[0,1,2].map(i => <div key={i} className="h-16 bg-white/[0.03] rounded-xl animate-pulse border border-white/5" />)}</div>
-            : health && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <StatusBadge ok={health.services.anthropic.ok} label="Anthropic API" latency={health.services.anthropic.latencyMs} error={health.services.anthropic.error} />
-                <StatusBadge ok={health.services.openai.ok} label="OpenAI API" latency={health.services.openai.latencyMs} error={health.services.openai.error} />
-                <StatusBadge ok={health.services.supabase.ok} label="Supabase DB" latency={health.services.supabase.latencyMs} error={health.services.supabase.error} />
-              </div>
-            )}
-        </section>
-
-        <section>
-          <h2 className="text-xs font-semibold text-white/40 tracking-[0.15em] uppercase mb-3">Пользователи</h2>
-          {!loading && stats && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-              <MetricCard label="Всего" value={stats.users.total} />
-              <MetricCard label="Pro" value={stats.users.pro} accent sub={`${Math.round(stats.users.pro / Math.max(stats.users.total, 1) * 100)}% платят`} />
-              <MetricCard label="Free" value={stats.users.free} />
-              <MetricCard label="Новых сегодня" value={stats.users.newToday} />
-              <MetricCard label="Активных сегодня" value={stats.users.activeToday} />
-              <MetricCard label="Активных за неделю" value={stats.users.activeWeek} />
-              <MetricCard label="Подписок активных" value={stats.billing.activeSubscriptions} />
-            </div>
-          )}
-        </section>
-
-        <section>
-          <h2 className="text-xs font-semibold text-white/40 tracking-[0.15em] uppercase mb-3">Чаты и сообщения</h2>
-          {!loading && stats && (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3">
-                <MetricCard label="Сообщений всего" value={stats.chat.totalMessages} />
-                <MetricCard label="Сегодня" value={stats.chat.messagesToday} />
-                <MetricCard label="Запросов за неделю" value={stats.chat.userMessagesWeek} />
-                <MetricCard label="AI ответов за неделю" value={stats.chat.aiResponsesWeek} />
-                <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-4">
-                  <div className="text-xs text-white/40 mb-1">AI Response Rate</div>
-                  <div className={`text-2xl font-bold ${aiRateColor(stats.chat.aiResponseRate)}`}>{stats.chat.aiResponseRate}%</div>
-                  <div className="text-xs text-white/30 mt-0.5">{stats.chat.aiResponseRate < 80 ? "⚠ Возможны сбои" : "Норма"}</div>
-                </div>
-              </div>
-              {stats.chat.topSubjects.length > 0 && (
-                <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-4">
-                  <div className="text-xs text-white/40 mb-3">Топ предметов (30 дней)</div>
-                  <div className="space-y-2">
-                    {stats.chat.topSubjects.map(({ subject, count }) => (
-                      <div key={subject} className="flex items-center gap-3">
-                        <div className="text-sm text-white/70 w-40 truncate flex-shrink-0">{SUBJECT_LABELS[subject] ?? subject}</div>
-                        <div className="flex-1 bg-white/5 rounded-full h-2 overflow-hidden">
-                          <div className="h-full bg-[#4561E8] rounded-full" style={{ width: `${Math.round(count / stats.chat.topSubjects[0].count * 100)}%` }} />
-                        </div>
-                        <div className="text-xs text-white/40 w-8 text-right">{count}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </section>
-
-        <section>
-          <h2 className="text-xs font-semibold text-white/40 tracking-[0.15em] uppercase mb-3">Переменные окружения</h2>
-          {!healthLoading && health && (
-            <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {health.envVars.map(({ name, present, preview }) => (
-                  <div key={name} className="flex items-center gap-2.5 py-1.5">
-                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${present ? "bg-green-400" : "bg-red-400"}`} />
-                    <span className="text-sm font-mono text-white/70 flex-1 truncate">{name}</span>
-                    {present ? <span className="text-xs font-mono text-white/25">{preview}</span> : <span className="text-xs text-red-400">НЕ ЗАДАН</span>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
-
-        <section>
-          <h2 className="text-xs font-semibold text-white/40 tracking-[0.15em] uppercase mb-3">Последние пользователи</h2>
-          {!loading && stats && (
-            <div className="bg-white/[0.03] border border-white/8 rounded-2xl overflow-hidden">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/5">
-                    <th className="text-left text-xs text-white/30 px-4 py-3 font-normal">Email</th>
-                    <th className="text-left text-xs text-white/30 px-4 py-3 font-normal">План</th>
-                    <th className="text-left text-xs text-white/30 px-4 py-3 font-normal hidden sm:table-cell">Зарегистрирован</th>
-                    <th className="text-left text-xs text-white/30 px-4 py-3 font-normal hidden md:table-cell">Был активен</th>
-                    <th className="text-right text-xs text-white/30 px-4 py-3 font-normal">Сообщ. сегодня</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stats.recentUsers.map((u) => (
-                    <tr key={u.id} className="border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02]">
-                      <td className="px-4 py-3 text-white/70 truncate max-w-[180px]">{u.email || "—"}</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${u.plan === "pro" ? "bg-[#4561E8]/20 text-[#6b8fff]" : "bg-white/5 text-white/40"}`}>{u.plan}</span>
-                      </td>
-                      <td className="px-4 py-3 text-white/40 text-xs hidden sm:table-cell">{timeAgo(u.created_at)}</td>
-                      <td className="px-4 py-3 text-white/40 text-xs hidden md:table-cell">{u.last_active_at ? timeAgo(u.last_active_at) : "—"}</td>
-                      <td className="px-4 py-3 text-right"><span className={u.messages_today > 0 ? "text-white/70" : "text-white/20"}>{u.messages_today}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-
-        <section>
-          <h2 className="text-xs font-semibold text-white/40 tracking-[0.15em] uppercase mb-3">Быстрые ссылки</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label: "База знаний", href: "/dashboard/admin", desc: "Управление чанками" },
-              { label: "Supabase", href: "https://supabase.com/dashboard/project/bhpkpkqzkvjuincqksow", desc: "DB + Auth + Logs" },
-              { label: "Vercel", href: "https://vercel.com/unrebay", desc: "Деплои + Env" },
-              { label: "Anthropic", href: "https://console.anthropic.com", desc: "API + Баланс" },
-            ].map(({ label, href, desc }) => (
-              <a key={href} href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer"
-                className="bg-white/[0.03] border border-white/8 rounded-xl p-4 hover:border-white/15 hover:bg-white/[0.05] transition-all group">
-                <div className="text-sm font-medium text-white/80 group-hover:text-white transition-colors">{label}</div>
-                <div className="text-xs text-white/30 mt-0.5">{desc}</div>
-              </a>
-            ))}
-          </div>
-        </section>
-
-        <div className="text-center text-xs text-white/20 pb-4">Mentora Admin · только для unrebay@gmail.com</div>
-      </main>
+        <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
+          {[...Array(Math.min(Math.ceil(total/20), 8))].map((_, i) => (
+            <button key={i} onClick={() => setPage(i+1)} style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${BOR}`, background: page===i+1 ? BRAND : CARD, color: page===i+1 ? "white" : MUTED, cursor: "pointer", fontSize: 13 }}>{i+1}</button>
+          ))}
+        </div>
+      </>}
     </div>
   );
 }
