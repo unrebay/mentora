@@ -163,7 +163,7 @@ interface Msg { role: "user" | "assistant"; content: string; ts?: number }
 
 function renderMd(text: string): React.ReactNode {
   const parts: React.ReactNode[] = [];
-  const regex = /\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`/gs;
+  const regex = /\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`/g;
   let last = 0, ki = 0;
   let m: RegExpExecArray | null;
   while ((m = regex.exec(text)) !== null) {
@@ -208,17 +208,60 @@ function saveHistory(empId: string, msgs: Msg[]) {
   localStorage.setItem(chatKey(empId), JSON.stringify(trimmed));
 }
 
+const THINKING: Record<string, string[]> = {
+  marketing: [
+    "листаю тренды...",
+    "гуглю что вирусится...",
+    "смотрю что залетело вчера...",
+    "перематываю рилсы в голове...",
+    "проверяю, не умер ли формат...",
+    "ищу панч...",
+    "сохраняю референс...",
+  ],
+  analytics: [
+    "пишу SQL запрос...",
+    "строю воронку...",
+    "смотрю дашборд...",
+    "считаю когорту...",
+    "проверяю данные...",
+    "строю гипотезу...",
+  ],
+  growth: [
+    "хакаю рост...",
+    "прикидываю эксперимент...",
+    "считаю конверсию...",
+    "думаю над виральной петлёй...",
+    "проверяю гипотезу...",
+    "придумываю A/B тест...",
+  ],
+};
+
+function pickThinking(empId: string): string {
+  const list = THINKING[empId] ?? ["думаю..."];
+  return list[Math.floor(Math.random() * list.length)];
+}
+
 function TeamTab() {
   const { CARD, BOR, TEXT, MUTED, inp, isDark, SHADOW, GLASS } = useTok();
   const [selected, setSelected] = useState<Employee | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput]       = useState("");
   const [streaming, setStreaming] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [thinkingPhrase, setThinkingPhrase] = useState("");
+  const bottomRef  = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streaming]);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.style.height = "auto";
+    ta.style.height = Math.min(ta.scrollHeight, 160) + "px";
+  }, [input]);
 
   const openChat = (emp: Employee) => {
     setSelected(emp);
@@ -239,6 +282,7 @@ function TeamTab() {
     setMessages(next);
     saveHistory(selected.id, next);
     setInput("");
+    setThinkingPhrase(pickThinking(selected.id));
     setStreaming(true);
 
     const res = await fetch("/api/admin/team", {
@@ -391,7 +435,9 @@ function TeamTab() {
               fontSize: 13.5, lineHeight: 1.6, color: TEXT,
               whiteSpace: "pre-wrap", wordBreak: "break-word",
             }}>
-              {m.content ? renderMd(m.content) : (streaming && i === messages.length - 1 ? <span style={{ opacity: 0.5 }}>...</span> : "")}
+              {m.content ? renderMd(m.content) : (streaming && i === messages.length - 1
+                ? <span style={{ opacity: 0.5, fontStyle: "italic" }}>{thinkingPhrase}</span>
+                : "")}
             </div>
           </div>
         ))}
@@ -399,14 +445,19 @@ function TeamTab() {
       </div>
 
       {/* Input */}
-      <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-        <input
+      <div style={{ marginTop: 12, display: "flex", gap: 8, alignItems: "flex-end" }}>
+        <textarea
+          ref={textareaRef}
           value={input}
+          rows={1}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-          placeholder={`Написать ${emp.name}...`}
+          placeholder={`Написать ${emp.name}... (Shift+Enter — новая строка)`}
           disabled={streaming}
-          style={{ ...inp, flex: 1 }}
+          style={{
+            ...inp, flex: 1, resize: "none", overflow: "hidden",
+            lineHeight: 1.5, minHeight: 38, maxHeight: 160,
+          }}
         />
         <button
           onClick={send}
@@ -415,9 +466,9 @@ function TeamTab() {
             padding: "9px 18px", borderRadius: 10, border: "none",
             background: streaming || !input.trim() ? MUTED : emp.color,
             color: "white", cursor: streaming || !input.trim() ? "not-allowed" : "pointer",
-            fontSize: 13, fontWeight: 600, flexShrink: 0,
+            fontSize: 13, fontWeight: 600, flexShrink: 0, height: 38,
           }}
-        >{streaming ? "..." : "→"}</button>
+        >{streaming ? "·" : "→"}</button>
       </div>
     </div>
   );
