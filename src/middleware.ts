@@ -39,7 +39,8 @@ export async function middleware(request: NextRequest) {
   }
 
   // Let next-intl handle locale routing (prefix, detection, rewrite)
-  const response = handleI18nRouting(request);
+  // next-intl v4 middleware is async — must await the result
+  const response = await handleI18nRouting(request);
   response.headers.set("x-pathname", pathname);
   return response;
 }
