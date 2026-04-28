@@ -43,7 +43,7 @@ export default function TelegramSupportButton({
       rel="noopener noreferrer"
       aria-label="Открыть Telegram-поддержку Mentora"
       className={`inline-flex items-center gap-2 font-semibold transition-all duration-200 select-none ${
-        sm ? "px-3 py-1.5 text-[11.5px] rounded-xl" : "px-5 py-2.5 text-sm rounded-2xl"
+        sm ? "px-3 py-1.5 text-[11.5px] rounded-xl" : "px-4 py-2 text-sm rounded-xl"
       } ${className}`}
       style={{
         background: hover
