@@ -161,6 +161,22 @@ const EMPLOYEES: Employee[] = [
 
 interface Msg { role: "user" | "assistant"; content: string; ts?: number }
 
+function renderMd(text: string): React.ReactNode {
+  const parts: React.ReactNode[] = [];
+  const regex = /\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`/gs;
+  let last = 0, ki = 0;
+  let m: RegExpExecArray | null;
+  while ((m = regex.exec(text)) !== null) {
+    if (m.index > last) parts.push(text.slice(last, m.index));
+    if (m[1] !== undefined) parts.push(<strong key={ki++}>{m[1]}</strong>);
+    else if (m[2] !== undefined) parts.push(<em key={ki++}>{m[2]}</em>);
+    else if (m[3] !== undefined) parts.push(<code key={ki++} style={{ background: "rgba(128,128,128,0.15)", borderRadius: 3, padding: "1px 5px", fontSize: "0.88em", fontFamily: "monospace" }}>{m[3]}</code>);
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return <>{parts}</>;
+}
+
 function chatKey(empId: string) { return `mentora_admin_chat_${empId}`; }
 
 function EmpCardFooter({ emp, color, muted }: { emp: Employee; color: string; muted: string }) {
@@ -375,7 +391,7 @@ function TeamTab() {
               fontSize: 13.5, lineHeight: 1.6, color: TEXT,
               whiteSpace: "pre-wrap", wordBreak: "break-word",
             }}>
-              {m.content || (streaming && i === messages.length - 1 ? <span style={{ opacity: 0.5 }}>...</span> : "")}
+              {m.content ? renderMd(m.content) : (streaming && i === messages.length - 1 ? <span style={{ opacity: 0.5 }}>...</span> : "")}
             </div>
           </div>
         ))}
