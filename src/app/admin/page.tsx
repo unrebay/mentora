@@ -36,27 +36,35 @@ const RED   = "#ef4444";
 // ── Theme token sets ──────────────────────────────────────────────────────────
 interface Tok {
   BG: string; SIDE: string; CARD: string; BOR: string; TEXT: string; MUTED: string;
+  SHADOW: string; GLASS: string;
+  isDark: boolean;
   inp: React.CSSProperties;
 }
 
 const darkTok: Tok = {
-  BG:   "#07080e",
-  SIDE: "#0c0e1a",
-  CARD: "rgba(255,255,255,0.038)",
-  BOR:  "rgba(255,255,255,0.08)",
-  TEXT: "#e2e8f0",
-  MUTED:"#64748b",
-  inp:  { padding: "9px 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, color: "#e2e8f0", fontSize: 13, outline: "none", width: "100%", boxSizing: "border-box" as const },
+  BG:     "#07080e",
+  SIDE:   "#0c0e1a",
+  CARD:   "rgba(255,255,255,0.038)",
+  BOR:    "rgba(255,255,255,0.08)",
+  TEXT:   "#e2e8f0",
+  MUTED:  "#64748b",
+  SHADOW: "none",
+  GLASS:  "blur(0px)",
+  isDark: true,
+  inp: { padding: "9px 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, color: "#e2e8f0", fontSize: 13, outline: "none", width: "100%", boxSizing: "border-box" as const },
 };
 
 const lightTok: Tok = {
-  BG:   "#f0f4ff",
-  SIDE: "#ffffff",
-  CARD: "rgba(69,97,232,0.04)",
-  BOR:  "rgba(69,97,232,0.1)",
-  TEXT: "#1e293b",
-  MUTED:"#94a3b8",
-  inp:  { padding: "9px 12px", background: "rgba(69,97,232,0.04)", border: "1px solid rgba(69,97,232,0.1)", borderRadius: 10, color: "#1e293b", fontSize: 13, outline: "none", width: "100%", boxSizing: "border-box" as const },
+  BG:     "linear-gradient(135deg, #eef2ff 0%, #f5f0ff 50%, #eff6ff 100%)",
+  SIDE:   "rgba(255,255,255,0.72)",
+  CARD:   "rgba(255,255,255,0.62)",
+  BOR:    "rgba(69,97,232,0.13)",
+  TEXT:   "#1a2340",
+  MUTED:  "#7284a8",
+  SHADOW: "0 2px 16px rgba(69,97,232,0.08), 0 1px 4px rgba(69,97,232,0.06)",
+  GLASS:  "blur(16px) saturate(1.6)",
+  isDark: false,
+  inp: { padding: "9px 12px", background: "rgba(255,255,255,0.7)", border: "1px solid rgba(69,97,232,0.18)", borderRadius: 10, color: "#1a2340", fontSize: 13, outline: "none", width: "100%", boxSizing: "border-box" as const },
 };
 
 // ── Token context ─────────────────────────────────────────────────────────────
@@ -91,8 +99,8 @@ const SUBS = Object.keys(SN);
 
 // ── Primitive components ──────────────────────────────────────────────────────
 function Card({ ch, style }: { ch: React.ReactNode; style?: React.CSSProperties }) {
-  const { CARD, BOR } = useTok();
-  return <div style={{ background: CARD, border: `1px solid ${BOR}`, borderRadius: 16, padding: "20px 24px", ...style }}>{ch}</div>;
+  const { CARD, BOR, SHADOW, GLASS } = useTok();
+  return <div style={{ background: CARD, border: `1px solid ${BOR}`, borderRadius: 16, padding: "20px 24px", backdropFilter: GLASS, WebkitBackdropFilter: GLASS, boxShadow: SHADOW, ...style }}>{ch}</div>;
 }
 function Metric({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color?: string }) {
   const { TEXT, MUTED } = useTok();
@@ -108,8 +116,11 @@ function Badge({ plan }: { plan: string }) {
   return <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 100, fontSize: 11, fontWeight: 600, background: c + "20", border: `1px solid ${c}40`, color: c }}>{l}</span>;
 }
 function NavBtn({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick(): void }) {
-  const { MUTED } = useTok();
-  return <button onClick={onClick} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 10, border: "none", cursor: "pointer", background: active ? BRAND+"22" : "transparent", color: active ? "#a0b4ff" : MUTED, fontSize: 14, fontWeight: active ? 600 : 400, transition: "all .15s", outline: "none" }}>
+  const { MUTED, isDark, SHADOW } = useTok();
+  const activeBg = isDark ? BRAND+"22" : "rgba(69,97,232,0.1)";
+  const activeColor = isDark ? "#a0b4ff" : BRAND;
+  const activeShadow = isDark ? "none" : "0 1px 8px rgba(69,97,232,0.12)";
+  return <button onClick={onClick} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 10, border: active && !isDark ? `1px solid rgba(69,97,232,0.18)` : "1px solid transparent", cursor: "pointer", background: active ? activeBg : "transparent", color: active ? activeColor : MUTED, fontSize: 14, fontWeight: active ? 600 : 400, transition: "all .15s", outline: "none", boxShadow: active ? activeShadow : "none" }}>
     <span style={{ opacity: active ? 1 : 0.6 }}>{icon}</span>{label}
   </button>;
 }
@@ -167,10 +178,16 @@ export default function AdminPanel() {
 
   return (
     <TokCtx.Provider value={tok}>
-      <div style={{ display: "flex", minHeight: "100vh", background: BG, color: TEXT, fontFamily: "system-ui,-apple-system,sans-serif" }}>
+      <div style={{ display: "flex", minHeight: "100vh", background: BG, color: TEXT, fontFamily: "system-ui,-apple-system,sans-serif", position: "relative" }}>
+        {/* Light-mode ambient orbs */}
+        {!isDark && <>
+          <div style={{ position: "fixed", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(69,97,232,0.13) 0%, transparent 70%)", top: -100, left: 80, pointerEvents: "none", zIndex: 0 }} />
+          <div style={{ position: "fixed", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(159,122,255,0.10) 0%, transparent 70%)", top: 200, right: 100, pointerEvents: "none", zIndex: 0 }} />
+          <div style={{ position: "fixed", width: 350, height: 350, borderRadius: "50%", background: "radial-gradient(circle, rgba(56,189,213,0.08) 0%, transparent 70%)", bottom: 50, left: 300, pointerEvents: "none", zIndex: 0 }} />
+        </>}
 
         {/* Sidebar */}
-        <aside style={{ width: 220, flexShrink: 0, background: SIDE, borderRight: `1px solid ${BOR}`, padding: "24px 14px", display: "flex", flexDirection: "column", gap: 4, position: "sticky", top: 0, height: "100vh", boxShadow: isDark ? "none" : "2px 0 12px rgba(69,97,232,0.06)" }}>
+        <aside style={{ width: 220, flexShrink: 0, background: SIDE, borderRight: `1px solid ${BOR}`, padding: "24px 14px", display: "flex", flexDirection: "column", gap: 4, position: "sticky", top: 0, height: "100vh", zIndex: 10, backdropFilter: isDark ? "none" : "blur(20px) saturate(1.8)", WebkitBackdropFilter: isDark ? "none" : "blur(20px) saturate(1.8)", boxShadow: isDark ? "none" : "2px 0 24px rgba(69,97,232,0.1), 1px 0 0 rgba(69,97,232,0.08)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 14px 24px" }}>
             <div style={{ width: 30, height: 30, borderRadius: 8, background: BRAND, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
@@ -196,7 +213,7 @@ export default function AdminPanel() {
         </aside>
 
         {/* Content */}
-        <main style={{ flex: 1, padding: "32px 36px", overflowY: "auto", minWidth: 0 }}>
+        <main style={{ flex: 1, padding: "32px 36px", overflowY: "auto", minWidth: 0, position: "relative", zIndex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
             <div>
               <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{TABS.find(t => t.id === tab)?.label}</h1>
@@ -356,7 +373,7 @@ export default function AdminPanel() {
           {/* ── KNOWLEDGE ────────────────────────────────────────────────────── */}
           {tab === "knowledge" && <KnowledgeTab />}
         </main>
-      </div>
+      </div> {/* end flex row */}
     </TokCtx.Provider>
   );
 }
