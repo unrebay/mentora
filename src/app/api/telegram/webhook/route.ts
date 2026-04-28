@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { waitUntil } from "@vercel/functions";
 import Anthropic from "@anthropic-ai/sdk";
 import { BOT_PLATFORM_KNOWLEDGE } from "@/lib/bot-knowledge";
 
@@ -266,8 +265,9 @@ async function handleUpdate(update: Record<string, unknown>) {
 export async function POST(req: NextRequest) {
   try {
     const update = await req.json();
-    // Fire-and-forget: Vercel keeps the function alive until handleUpdate resolves
-    waitUntil(handleUpdate(update).catch((e) => console.error("handleUpdate error:", e)));
+    // On VPS (pm2 / long-running process) we can just fire-and-forget without waitUntil.
+    // We return 200 to Telegram immediately; handleUpdate runs in the background.
+    handleUpdate(update).catch((e) => console.error("handleUpdate error:", e));
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("Telegram webhook parse error:", e);
