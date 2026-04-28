@@ -1,0 +1,224 @@
+{
+  "nav": {
+    "subjects": "Subjects",
+    "how": "How it works",
+    "pricing": "Pricing",
+    "login": "Sign in",
+    "tryFree": "Try for free",
+    "tryFreeShort": "Sign in",
+    "dashboard": "Dashboard →",
+    "langSwitch": "RU",
+    "closeMenu": "Close menu",
+    "openMenu": "Open menu"
+  },
+  "landing": {
+    "badge": "Next-generation AI education",
+    "hero": {
+      "title": "Learn with a mentor\nwho's always there",
+      "subtitle": "AI tutor for 13 subjects: history, math, physics, chemistry and more. Explains, answers, remembers. Free.",
+      "cta": "Start for free",
+      "demo": "Watch demo"
+    },
+    "subjectsTitle": "13 subjects available now",
+    "subjectsSubtitle": "From school curriculum to exam preparation",
+    "howTitle": "How it works",
+    "howSubtitle": "Four steps from your first question to real progress",
+    "featuresTitle": "Why Mentora",
+    "featuresSubtitle": "Not just a chatbot — a real mentor",
+    "testimonialsTitle": "What users say",
+    "ctaTitle": "Ready to start?",
+    "ctaSubtitle": "First 20 messages per day — free. No card required.",
+    "ctaButton": "Start for free →",
+    "footerRights": "© 2024–2025 Mentora. All rights reserved.",
+    "footerPrivacy": "Privacy",
+    "footerTerms": "Terms",
+    "footerAbout": "About"
+  },
+  "subjects": {
+    "russian-history": { "title": "Russian History", "desc": "51 topics · 5 levels" },
+    "world-history": { "title": "World History", "desc": "60 topics · 5 levels" },
+    "mathematics": { "title": "Mathematics", "desc": "Algebra, geometry, calculus" },
+    "physics": { "title": "Physics", "desc": "Mechanics to quantum world" },
+    "chemistry": { "title": "Chemistry", "desc": "Substances, reactions, laws" },
+    "biology": { "title": "Biology", "desc": "Cell to ecosystems" },
+    "russian-language": { "title": "Russian Language", "desc": "Grammar and spelling" },
+    "literature": { "title": "Literature", "desc": "Classics and modern prose" },
+    "english": { "title": "English", "desc": "A1 — C2, conversational" },
+    "social-studies": { "title": "Social Studies", "desc": "Law, economics, sociology" },
+    "geography": { "title": "Geography", "desc": "Nature, countries, climate" },
+    "computer-science": { "title": "Computer Science", "desc": "Algorithms, programming" },
+    "astronomy": { "title": "Astronomy", "desc": "Stars, planets, universe" },
+    "discovery": { "title": "Discovery", "desc": "Facts, breakthroughs, phenomena" },
+    "suggest": { "title": "Suggest a subject", "desc": "Vote for a topic" }
+  },
+  "steps": {
+    "01": {
+      "title": "Open and try immediately",
+      "desc": "No registration required. Ask your first question and get a detailed answer in a second."
+    },
+    "02": {
+      "title": "Choose your subject",
+      "desc": "13 topics from school curriculum to exam prep. Switch anytime — your progress is saved."
+    },
+    "03": {
+      "title": "Mentora remembers you",
+      "desc": "Your style, level, pace. No need to re-explain yourself — Mentora already knows how to talk with you."
+    },
+    "04": {
+      "title": "Progress becomes visible",
+      "desc": "XP, streaks, levels per subject. See how far you've come — that's what keeps you going."
+    },
+    "05": {
+      "title": "Prepare for what matters",
+      "desc": "Exam mode with real tasks and readiness tracker. Launching summer 2026."
+    }
+  },
+  "stats": {
+    "subjects": "subjects available now",
+    "accuracy": "AI answer accuracy",
+    "availability": "available without VPN",
+    "free": "to start learning"
+  },
+  "features": {
+    "security": {
+      "title": "Ask without fear",
+      "desc": "Conversations are encrypted with AES-256 — the same standard used by banks and Apple Pay. Data is never shared with third parties or used for advertising. Ask the question you wouldn't type into Google.",
+      "tag": "AES-256"
+    },
+    "memory": {
+      "title": "Learns alongside you",
+      "desc": "Mentora's contextual memory remembers every conversation: your level, gaps, and style. With each session, explanations become more precise. Personalized learning is 76% more effective than standard.*",
+      "tag": "+76% effectiveness"
+    },
+    "supportive": {
+      "title": "Always on your side",
+      "desc": "Won't judge, won't tire, won't get frustrated. Explains the same thing a third time from a different angle, supports you when things get tough, and genuinely celebrates when you succeed. That's how a real mentor works."
+    },
+    "ai": {
+      "title": "Top AI lab quality",
+      "desc": "Mentora runs on frontier models — the same transformer architecture powering the world's leading AI companies. RAG-retrieval, multi-level context and a specialized stack make answers more accurate than any search engine.",
+      "tag": "Frontier AI"
+    },
+    "global": {
+      "title": "Knowledge without borders",
+      "desc": "A student from India, a kid from Siberia, or an adult from Berlin — you can learn from anywhere, without a teacher or schedule. Streaks, levels and XP turn daily studying into a habit, not a chore."
+    },
+    "price": {
+      "title": "Do the math",
+      "desc": "8 sessions with a tutor per month or unlimited access to Mentora — the choice is obvious.",
+      "tutorLabel": "Private tutor",
+      "tutorValue": "$150–300",
+      "tutorSub": "8 sessions × $20–40/hour",
+      "proLabel": "Mentora Pro",
+      "proValue": "499 ₽",
+      "proSub": "per month, unlimited, 24/7"
+    }
+  },
+  "pricing": {
+    "badge": "Simple, honest pricing",
+    "hero": {
+      "title": "Start free.",
+      "titleGradient": "Grow with us.",
+      "subtitle": "No hidden fees. No contracts. Cancel anytime."
+    },
+    "free": {
+      "name": "Free",
+      "price": "0 ₽",
+      "period": "",
+      "desc": "Try without a card",
+      "cta": "Start for free",
+      "features": [
+        "1 subject of your choice",
+        "20 messages per day",
+        "XP, levels and achievements",
+        "Streak and progress",
+        "No registration required"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "499 ₽",
+      "period": "/ month",
+      "badge": "Popular",
+      "desc": "For serious learning",
+      "cta": "Upgrade to Pro",
+      "features": [
+        "All subjects, no limits",
+        "Unlimited messages",
+        "Full knowledge map",
+        "Progress analytics",
+        "Priority support"
+      ]
+    },
+    "ultra": {
+      "name": "Ultima",
+      "price": "799 ₽",
+      "period": "/ month",
+      "badge": "Maximum",
+      "desc": "For perfectionists",
+      "cta": "Upgrade to Ultima",
+      "features": [
+        "Everything in Pro",
+        "Photo and task recognition",
+        "Presentation generation by topic",
+        "Audio explanations",
+        "Early access to new features"
+      ]
+    },
+    "currentPlan": "Current plan",
+    "activePro": "Pro active",
+    "activeUltima": "Ultima active",
+    "soon": "soon"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Create account",
+    "email": "Email",
+    "password": "Password",
+    "emailPlaceholder": "your@email.com",
+    "passwordPlaceholder": "At least 6 characters",
+    "continueGoogle": "Continue with Google",
+    "orEmail": "or with email",
+    "switchToSignUp": "No account? Sign up",
+    "switchToSignIn": "Already have an account? Sign in",
+    "checkEmail": "Check your email",
+    "checkEmailDesc": "We sent a sign-in link to",
+    "loading": "Loading...",
+    "sending": "Sending...",
+    "signingIn": "Signing in...",
+    "errorOAuth": "Sign-in error. Please try again.",
+    "forgotPassword": "Forgot password?",
+    "terms": "By signing up, you agree to our",
+    "termsLink": "terms",
+    "and": "and",
+    "privacyLink": "privacy policy"
+  },
+  "dashboard": {
+    "nav": {
+      "home": "Home",
+      "progress": "Progress",
+      "analytics": "Analytics",
+      "about": "About"
+    },
+    "welcome": "Welcome",
+    "chooseSubject": "Choose a subject",
+    "continueSubject": "Continue",
+    "yourProgress": "Your progress",
+    "streak": "day streak",
+    "totalXP": "total XP",
+    "level": "level",
+    "logout": "Sign out"
+  },
+  "common": {
+    "learnMore": "Learn more",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "tryAgain": "Try again",
+    "soon": "soon",
+    "new": "new",
+    "free": "free",
+    "perMonth": "/ mo",
+    "unlimited": "unlimited"
+  }
+}
