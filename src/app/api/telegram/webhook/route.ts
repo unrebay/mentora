@@ -157,19 +157,43 @@ async function handleUpdate(update: Record<string, unknown>) {
     return;
   }
 
-  // ── /start ────────────────────────────────────────────────────────────
+  // ── /start [deep-link code] ───────────────────────────────────────────
   if (text.startsWith("/start")) {
     sessions.delete(fromId);
-    await sendMessage(chatId,
-      `Привет! Я AI-ассистент <b>Mentora</b> 👋\n\n` +
-      `Помогу разобраться с платформой, отвечу на любые вопросы — про сайт, предметы, тарифы, или просто поболтаем.\n\n` +
-      `Если у тебя вопрос по аккаунту — найди свой <b>Код поддержки</b> в профиле (mentora.su/profile, самый низ) и пришли мне.\n\n` +
-      `<i>Команды:</i>\n` +
-      `/help — частые вопросы\n` +
-      `/reset — сбросить историю диалога\n` +
-      `/donate — поддержать проект\n\n` +
-      `Сайт: <a href="https://mentora.su">mentora.su</a>`
-    );
+    // Deep link from profile: /start 7A24B-80B9A
+    const startPayload = text.slice(6).trim();
+    const codeMatch = startPayload.match(/^([A-F0-9]{5}-[A-F0-9]{5})$/i);
+    const deepCode = codeMatch ? codeMatch[1].toUpperCase() : null;
+
+    if (deepCode) {
+      // User arrived via profile deep link — we already know who they are
+      await sendMessage(chatId,
+        `Привет, ${fromName}! 👋 Я AI-ассистент <b>Mentora</b>.\n\n` +
+        `Вижу, что ты пришёл со своего профиля — аккаунт уже определён (<code>${deepCode}</code>).\n\n` +
+        `Спрашивай — отвечу на любой вопрос про платформу или просто помогу с учёбой.\n\n` +
+        `/help — частые вопросы · /donate — поддержать проект`
+      );
+      // Notify admin silently
+      if (ADMIN_CHAT_ID) {
+        await sendMessage(ADMIN_CHAT_ID,
+          `📨 <b>Новый диалог поддержки (deep link)</b>\n` +
+          `👤 ${fromName} (${fromUsername}, TG: <code>${fromId}</code>)\n` +
+          `🔑 Код поддержки: <code>${deepCode}</code>`,
+          { disable_notification: true },
+        );
+      }
+    } else {
+      await sendMessage(chatId,
+        `Привет! Я AI-ассистент <b>Mentora</b> 👋\n\n` +
+        `Помогу разобраться с платформой, отвечу на любые вопросы — про сайт, предметы, тарифы, или просто поболтаем.\n\n` +
+        `Если у тебя вопрос по аккаунту — найди свой <b>Код поддержки</b> в профиле (mentora.su/profile, самый низ) и пришли мне.\n\n` +
+        `<i>Команды:</i>\n` +
+        `/help — частые вопросы\n` +
+        `/reset — сбросить историю диалога\n` +
+        `/donate — поддержать проект\n\n` +
+        `Сайт: <a href="https://mentora.su">mentora.su</a>`
+      );
+    }
     return;
   }
 

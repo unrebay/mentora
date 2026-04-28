@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-const TG_URL = "https://t.me/mentora_su_bot";
+const TG_BOT = "mentora_su_bot";
 
 // Teal palette
 const C = "56,189,213";
@@ -18,19 +18,27 @@ interface Props {
   size?: "sm" | "md";
   label?: string;
   className?: string;
+  /** When provided, opens bot with deep link: t.me/bot?start=CODE — bot auto-identifies user */
+  supportCode?: string;
 }
 
 export default function TelegramSupportButton({
   size = "md",
   label = "Написать в поддержку",
   className = "",
+  supportCode,
 }: Props) {
   const [hover, setHover] = useState(false);
   const sm = size === "sm";
 
+  // Deep link: t.me/bot?start=CODE passes code directly to /start handler
+  const href = supportCode
+    ? `https://t.me/${TG_BOT}?start=${encodeURIComponent(supportCode)}`
+    : `https://t.me/${TG_BOT}`;
+
   return (
     <a
-      href={TG_URL}
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Открыть Telegram-поддержку Mentora"
