@@ -10,6 +10,7 @@ import DashboardNav from "@/components/DashboardNav";
 import StatCard, { MentIcon, FlameIcon, MessageIcon, StarIcon } from "@/components/StatCard";
 import SupportCodeCopy from "@/components/SupportCodeCopy";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
+import InstagramButton from "@/components/InstagramButton";
 
 /** Deterministic 10-char support code derived from UUID — no DB needed */
 function makeSupportCode(userId: string): string {
@@ -401,7 +402,10 @@ export default async function ProfilePage() {
         {/* ── Support ──────────────────────────────────────── */}
         <div className="pb-8 flex flex-col items-center gap-3 text-center">
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>Вопросы или проблемы?</p>
-          <TelegramSupportButton label="Написать в поддержку" />
+          <div className="flex gap-2 flex-wrap justify-center">
+            <TelegramSupportButton label="Написать в поддержку" />
+            <InstagramButton label="@mentora.su" />
+          </div>
           <a href="mailto:hello@mentora.su"
             className="text-xs"
             style={{ color: "var(--text-muted)", textDecoration: "underline", textDecorationStyle: "dotted" }}>
