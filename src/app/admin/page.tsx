@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, createContext, useContext } from "react";
+import { useEffect, useState, useCallback, createContext, useContext, useRef } from "react";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -138,11 +138,221 @@ const IGrid    = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 const IUsers   = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
 const IRevenue = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>;
 const IKb      = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
+const ITeam    = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><circle cx="19" cy="4" r="2" fill="currentColor" stroke="none" opacity="0.6"/></svg>;
 const IRefresh = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>;
 const ISearch  = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
 
+// ── Team Tab ──────────────────────────────────────────────────────────────────
+interface Employee {
+  id: string;
+  name: string;
+  role: string;
+  desc: string;
+  color: string;
+  available: boolean;
+  avatar: string; // initials
+}
+
+const EMPLOYEES: Employee[] = [
+  { id: "marketing", name: "Ника",  role: "Маркетолог",    desc: "Instagram, контент, тренды, рилсы", color: "#e8458a", available: true,  avatar: "Н" },
+  { id: "analytics", name: "Миша",  role: "Аналитик",      desc: "PostHog, воронки, когорты, метрики", color: "#4561E8", available: true,  avatar: "М" },
+  { id: "growth",    name: "Саша",  role: "Growth Hacker",  desc: "Конверсии, виральность, эксперименты", color: "#10b981", available: true, avatar: "С" },
+];
+
+interface Msg { role: "user" | "assistant"; content: string }
+
+function TeamTab() {
+  const { CARD, BOR, TEXT, MUTED, inp, isDark, SHADOW, GLASS } = useTok();
+  const [selected, setSelected] = useState<Employee | null>(null);
+  const [messages, setMessages] = useState<Msg[]>([]);
+  const [input, setInput]       = useState("");
+  const [streaming, setStreaming] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, streaming]);
+
+  const openChat = (emp: Employee) => {
+    setSelected(emp);
+    setMessages([]);
+    setInput("");
+  };
+
+  const send = async () => {
+    if (!selected || !input.trim() || streaming) return;
+    const userMsg: Msg = { role: "user", content: input.trim() };
+    const next = [...messages, userMsg];
+    setMessages(next);
+    setInput("");
+    setStreaming(true);
+
+    const res = await fetch("/api/admin/team", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ employeeId: selected.id, messages: next }),
+    });
+
+    if (!res.body) { setStreaming(false); return; }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let text = "";
+
+    setMessages(prev => [...prev, { role: "assistant", content: "" }]);
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      text += decoder.decode(value, { stream: true });
+      setMessages(prev => {
+        const copy = [...prev];
+        copy[copy.length - 1] = { role: "assistant", content: text };
+        return copy;
+      });
+    }
+    setStreaming(false);
+  };
+
+  // Employee list view
+  if (!selected) {
+    return (
+      <div>
+        <p style={{ fontSize: 13, color: MUTED, marginBottom: 24 }}>
+          Выбери сотрудника — откроется чат с ним. Каждый знает свою роль и контекст Mentora.
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+          {EMPLOYEES.map(emp => (
+            <div
+              key={emp.id}
+              onClick={() => emp.available && openChat(emp)}
+              style={{
+                background: CARD, border: `1px solid ${BOR}`, borderRadius: 16,
+                padding: "20px 22px", cursor: emp.available ? "pointer" : "default",
+                backdropFilter: GLASS, WebkitBackdropFilter: GLASS, boxShadow: SHADOW,
+                opacity: emp.available ? 1 : 0.5,
+                transition: "transform 0.15s, box-shadow 0.15s",
+                position: "relative", overflow: "hidden",
+              }}
+              onMouseEnter={e => { if (emp.available) { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; }}}
+              onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "none"; }}
+            >
+              {/* Colour accent line */}
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: emp.color, opacity: 0.7 }} />
+              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
+                {/* Avatar */}
+                <div style={{
+                  width: 44, height: 44, borderRadius: 14, flexShrink: 0,
+                  background: emp.color + "22", border: `1px solid ${emp.color}44`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 18, fontWeight: 700, color: emp.color,
+                }}>{emp.avatar}</div>
+                <div>
+                  <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: TEXT }}>{emp.name}</p>
+                  <p style={{ margin: 0, fontSize: 11, color: emp.color, fontWeight: 600, letterSpacing: "0.04em" }}>{emp.role}</p>
+                </div>
+                {!emp.available && (
+                  <span style={{ marginLeft: "auto", fontSize: 10, padding: "3px 8px", borderRadius: 99, background: MUTED + "22", color: MUTED, fontWeight: 600 }}>Скоро</span>
+                )}
+              </div>
+              <p style={{ margin: 0, fontSize: 12.5, color: MUTED, lineHeight: 1.5 }}>{emp.desc}</p>
+              {emp.available && (
+                <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: emp.color, fontWeight: 600 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: emp.color }} />
+                  Открыть чат →
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Chat view
+  const emp = selected;
+  const msgBg = (role: "user" | "assistant") =>
+    role === "user"
+      ? isDark ? "rgba(69,97,232,0.18)" : "rgba(69,97,232,0.10)"
+      : isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.8)";
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 140px)" }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, paddingBottom: 16, borderBottom: `1px solid ${BOR}` }}>
+        <button
+          onClick={() => setSelected(null)}
+          style={{ padding: "6px 10px", borderRadius: 8, border: `1px solid ${BOR}`, background: "transparent", color: MUTED, cursor: "pointer", fontSize: 13 }}
+        >← Назад</button>
+        <div style={{
+          width: 36, height: 36, borderRadius: 10, background: emp.color + "22",
+          border: `1px solid ${emp.color}44`, display: "flex", alignItems: "center",
+          justifyContent: "center", fontSize: 15, fontWeight: 700, color: emp.color,
+        }}>{emp.avatar}</div>
+        <div>
+          <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: TEXT }}>{emp.name}</p>
+          <p style={{ margin: 0, fontSize: 11, color: emp.color, fontWeight: 600 }}>{emp.role}</p>
+        </div>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#22c55e" }}>
+          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e" }} />
+          онлайн
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 12, paddingRight: 4 }}>
+        {messages.length === 0 && (
+          <div style={{ textAlign: "center", padding: "40px 20px" }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>
+              <div style={{ width: 56, height: 56, borderRadius: 16, background: emp.color + "22", border: `1px solid ${emp.color}44`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 700, color: emp.color, margin: "0 auto 12px" }}>{emp.avatar}</div>
+            </div>
+            <p style={{ color: TEXT, fontWeight: 600, fontSize: 15, margin: "0 0 6px" }}>Чат с {emp.name}</p>
+            <p style={{ color: MUTED, fontSize: 13, margin: 0 }}>{emp.desc}</p>
+          </div>
+        )}
+        {messages.map((m, i) => (
+          <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}>
+            <div style={{
+              maxWidth: "78%", padding: "10px 14px", borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+              background: msgBg(m.role),
+              border: `1px solid ${m.role === "user" ? BRAND + "33" : BOR}`,
+              fontSize: 13.5, lineHeight: 1.6, color: TEXT,
+              whiteSpace: "pre-wrap", wordBreak: "break-word",
+            }}>
+              {m.content || (streaming && i === messages.length - 1 ? <span style={{ opacity: 0.5 }}>...</span> : "")}
+            </div>
+          </div>
+        ))}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
+        <input
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
+          placeholder={`Написать ${emp.name}...`}
+          disabled={streaming}
+          style={{ ...inp, flex: 1 }}
+        />
+        <button
+          onClick={send}
+          disabled={streaming || !input.trim()}
+          style={{
+            padding: "9px 18px", borderRadius: 10, border: "none",
+            background: streaming || !input.trim() ? MUTED : emp.color,
+            color: "white", cursor: streaming || !input.trim() ? "not-allowed" : "pointer",
+            fontSize: 13, fontWeight: 600, flexShrink: 0,
+          }}
+        >{streaming ? "..." : "→"}</button>
+      </div>
+    </div>
+  );
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
-type Tab = "overview" | "users" | "revenue" | "knowledge";
+type Tab = "overview" | "users" | "revenue" | "knowledge" | "team";
 
 export default function AdminPanel() {
   const { theme } = useTheme();
@@ -174,6 +384,7 @@ export default function AdminPanel() {
     { id: "users",     icon: IUsers,   label: "Пользователи" },
     { id: "revenue",   icon: IRevenue, label: "Доходы" },
     { id: "knowledge", icon: IKb,      label: "База знаний" },
+    { id: "team",      icon: ITeam,    label: "Команда" },
   ];
 
   return (
@@ -219,9 +430,11 @@ export default function AdminPanel() {
               <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{TABS.find(t => t.id === tab)?.label}</h1>
               <p style={{ fontSize: 13, color: MUTED, marginTop: 4, marginBottom: 0 }}>mentora.su / admin</p>
             </div>
-            <button onClick={reload} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, border: `1px solid ${BOR}`, background: CARD, color: MUTED, fontSize: 13, cursor: "pointer" }}>
-              {IRefresh} Обновить
-            </button>
+            {tab !== "team" && (
+              <button onClick={reload} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, border: `1px solid ${BOR}`, background: CARD, color: MUTED, fontSize: 13, cursor: "pointer" }}>
+                {IRefresh} Обновить
+              </button>
+            )}
           </div>
 
           {loading && <p style={{ color: MUTED }}>Загрузка...</p>}
@@ -372,6 +585,7 @@ export default function AdminPanel() {
 
           {/* ── KNOWLEDGE ────────────────────────────────────────────────────── */}
           {tab === "knowledge" && <KnowledgeTab />}
+          {tab === "team"      && <TeamTab />}
         </main>
       </div> {/* end flex row */}
     </TokCtx.Provider>
