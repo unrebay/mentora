@@ -164,11 +164,18 @@ function driftedPos(n: GNode, t: number, frozen?: { cx: number; cy: number }) {
   };
 }
 
-const BG_STARS = Array.from({ length: 220 }, (_, i) => ({
-  x: ((i * 137.5) % 1000) / 10, y: ((i * 97.3 + 17) % 1000) / 10,
-  r: 0.5 + (i % 5) * 0.35,
-  a: 0.30 + (i % 7) * 0.08,
-  twinkle: (i % 3 === 0), phase: (i * 0.73) % (Math.PI * 2),
+// Chaos hash — deterministic but visually random (no diagonal patterns)
+function ch(n: number): number {
+  const s = Math.sin(n * 127.1 + 311.7) * 43758.5453123;
+  return Math.abs(s - Math.floor(s));
+}
+const BG_STARS = Array.from({ length: 280 }, (_, i) => ({
+  x:       ch(i * 5 + 1) * 100,
+  y:       ch(i * 7 + 2) * 100,
+  r:       0.4 + ch(i * 11 + 3) * 1.8,
+  a:       0.25 + ch(i * 13 + 4) * 0.60,
+  twinkle: ch(i * 17 + 5) > 0.65,
+  phase:   ch(i * 19 + 6) * Math.PI * 2,
 }));
 
 function drawBg(ctx: CanvasRenderingContext2D, W: number, H: number, t: number) {
