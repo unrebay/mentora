@@ -25,7 +25,26 @@
 const fs   = require("fs");
 const path = require("path");
 
-const ROOT         = path.resolve(__dirname, "..");
+// ── auto-detect project root ──────────────────────────────────────────────────
+// Works whether called as `node scripts/update-bot-knowledge.js` from any dir
+// or via `npm run update-bot-knowledge` from the project root.
+
+function findRoot() {
+  // __dirname is the scripts/ folder; root is one level up
+  const byDirname = path.resolve(__dirname, "..");
+  if (fs.existsSync(path.join(byDirname, "package.json"))) return byDirname;
+  // fallback: walk upward from cwd
+  let dir = process.cwd();
+  while (dir !== path.parse(dir).root) {
+    if (fs.existsSync(path.join(dir, "package.json"))) return dir;
+    dir = path.dirname(dir);
+  }
+  console.error("❌  Не удалось найти корень проекта (package.json).");
+  console.error("   Запусти из папки проекта: cd /path/to/mentora && npm run update-bot-knowledge");
+  process.exit(1);
+}
+
+const ROOT         = findRoot();
 const KNOWLEDGE_TS = path.join(ROOT, "src", "lib", "bot-knowledge.ts");
 
 // ── helpers ──────────────────────────────────────────────────────────────────

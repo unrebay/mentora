@@ -8,6 +8,13 @@ import GiftProBanner from "@/components/GiftProBanner";
 import MeLogo from "@/components/MeLogo";
 import DashboardNav from "@/components/DashboardNav";
 import StatCard, { MentIcon, FlameIcon, MessageIcon, StarIcon } from "@/components/StatCard";
+import SupportCodeCopy from "@/components/SupportCodeCopy";
+
+/** Deterministic 10-char support code derived from UUID — no DB needed */
+function makeSupportCode(userId: string): string {
+  const hex = userId.replace(/-/g, "").toUpperCase();
+  return hex.slice(0, 5) + "-" + hex.slice(5, 10);
+}
 
 export const metadata = { title: "Профиль — Mentora" };
 
@@ -383,6 +390,11 @@ export default async function ProfilePage() {
         {/* ── Referral ─────────────────────────────────────── */}
         <div className="pb-4">
           <ReferralWidget />
+        </div>
+
+        {/* ── Support code ─────────────────────────────────── */}
+        <div className="pb-4 flex justify-center">
+          <SupportCodeCopy code={makeSupportCode(user.id)} />
         </div>
 
         {/* ── Support ──────────────────────────────────────── */}
