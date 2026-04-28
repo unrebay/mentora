@@ -92,7 +92,7 @@ function TD({ children, color = TEXT, muted = false }: { children: React.ReactNo
 }
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
-const IGrid    = <svg w="16" h="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>;
+const IGrid    = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>;
 const IUsers   = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
 const IRevenue = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>;
 const IKb      = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
@@ -439,7 +439,7 @@ function KnowledgeTab() {
     if (filter) p.set("subject", filter);
     if (search) p.set("search", search);
     const r = await fetch(`/api/admin/knowledge?${p}`);
-    if (r.ok) { const d = await r.json(); setChunks(d.chunks); setTotal(d.total); }
+    if (r.ok) { const d = await r.json(); setChunks(d.data ?? []); setTotal(d.count ?? 0); }
   }, [page, filter, search]);
 
   useEffect(() => { load(); }, [load]);
