@@ -7,6 +7,7 @@ const TOUR_KEY = "mentora_tour_v1";
 const CARD_W = 360;
 const CARD_H = 310;
 const SPOT_PAD = 12;
+const SPOT_R   = 16; // rounded corners on spotlight
 const CARD_GAP = 18;
 
 /* ── Step icon SVG paths ──────────────────────────────────────────── */
@@ -176,43 +177,68 @@ function cardPos(
   }
 }
 
-/* ── Spotlight overlay using 4 divs (reliable across all browsers) ── */
+/* ── Spotlight overlay — SVG mask for rounded cutout ─────────────── */
 function SpotlightOverlay({
   spot,
+  isDark,
   onClose,
 }: {
   spot: SpotRect | null;
+  isDark: boolean;
   onClose: () => void;
 }) {
-  const OVERLAY = "rgba(4,4,18,0.72)";
-  const style: React.CSSProperties = { position: "fixed", background: OVERLAY, pointerEvents: "all", cursor: "default" };
+  const overlayColor = isDark ? "rgba(4,4,18,0.78)" : "rgba(160,165,200,0.55)";
+  const ringColor = isDark ? "rgba(107,135,255,0.75)" : "rgba(69,97,232,0.7)";
+  const glowColor = isDark ? "rgba(107,135,255,0.2)" : "rgba(69,97,232,0.15)";
 
   if (!spot) {
-    return <div style={{ ...style, inset: 0 }} onClick={onClose} />;
+    return (
+      <div
+        style={{ position: "fixed", inset: 0, background: overlayColor, pointerEvents: "all", cursor: "default" }}
+        onClick={onClose}
+      />
+    );
   }
 
   const { x, y, w, h } = spot;
 
   return (
     <>
-      {/* Top */}
-      <div style={{ ...style, top: 0, left: 0, right: 0, height: Math.max(0, y) }} onClick={onClose} />
-      {/* Bottom */}
-      <div style={{ ...style, top: y + h, left: 0, right: 0, bottom: 0 }} onClick={onClose} />
-      {/* Left */}
-      <div style={{ ...style, top: y, left: 0, width: Math.max(0, x), height: h }} onClick={onClose} />
-      {/* Right */}
-      <div style={{ ...style, top: y, left: x + w, right: 0, height: h }} onClick={onClose} />
-      {/* Spotlight glow ring */}
+      {/* SVG visual overlay with rounded rectangle cutout */}
+      <svg
+        style={{ position: "fixed", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }}
+      >
+        <defs>
+          <mask id="tour-spotlight-mask">
+            <rect width="100%" height="100%" fill="white" />
+            <rect x={x} y={y} width={w} height={h} rx={SPOT_R} ry={SPOT_R} fill="black" />
+          </mask>
+        </defs>
+        <rect
+          width="100%"
+          height="100%"
+          fill={overlayColor}
+          mask="url(#tour-spotlight-mask)"
+        />
+      </svg>
+
+      {/* Click-to-close divs (4 quadrants, transparent) */}
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: Math.max(0, y), pointerEvents: "all", cursor: "default" }} onClick={onClose} />
+      <div style={{ position: "fixed", top: y + h, left: 0, right: 0, bottom: 0, pointerEvents: "all", cursor: "default" }} onClick={onClose} />
+      <div style={{ position: "fixed", top: y, left: 0, width: Math.max(0, x), height: h, pointerEvents: "all", cursor: "default" }} onClick={onClose} />
+      <div style={{ position: "fixed", top: y, left: x + w, right: 0, height: h, pointerEvents: "all", cursor: "default" }} onClick={onClose} />
+
+      {/* Glow ring with matching border radius */}
       <div style={{
         position: "fixed",
         top: y - 2, left: x - 2,
         width: w + 4, height: h + 4,
-        border: "2px solid rgba(107,135,255,0.75)",
-        borderRadius: 16,
-        boxShadow: "0 0 0 1px rgba(107,135,255,0.15), 0 0 28px rgba(107,135,255,0.2), inset 0 0 20px rgba(107,135,255,0.05)",
+        border: `2px solid ${ringColor}`,
+        borderRadius: SPOT_R + 2,
+        boxShadow: `0 0 0 1px ${glowColor.replace("0.2", "0.12")}, 0 0 28px ${glowColor}, inset 0 0 20px ${glowColor.replace("0.2", "0.05")}`,
         pointerEvents: "none",
         transition: "all 0.35s cubic-bezier(0.4,0,0.2,1)",
+        zIndex: 1,
       }} />
     </>
   );
@@ -226,7 +252,17 @@ export default function OnboardingTour() {
   const [pos, setPos]           = useState({ x: 0, y: 0 });
   const [isMobile, setIsMobile] = useState(false);
   const [ready, setReady]       = useState(false);
+  const [isDark, setIsDark]     = useState(true);
   const searchParams = useSearchParams();
+
+  /* ── Theme detection ──────────────────────────────────────────── */
+  useEffect(() => {
+    const check = () => setIsDark(document.documentElement.classList.contains("dark"));
+    check();
+    const obs = new MutationObserver(check);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
 
   const refreshLayout = useCallback((stepIdx: number, mobile: boolean) => {
     const s = STEPS[stepIdx];
@@ -263,10 +299,13 @@ export default function OnboardingTour() {
     setIsMobile(mobile);
     setReady(true);
 
-    // Auto-open: either on first visit OR when ?tour=1 in URL
+    // Auto-open on first visit or ?tour=1
     const forceOpen = searchParams.get("tour") === "1";
     if (!localStorage.getItem(TOUR_KEY) || forceOpen) {
       const timer = setTimeout(() => {
+        // Mark as seen immediately on auto-open (not just on close)
+        // so closing the browser tab doesn't cause it to repeat
+        if (!forceOpen) localStorage.setItem(TOUR_KEY, "1");
         setVisible(true);
         refreshLayout(0, mobile);
       }, forceOpen ? 400 : 900);
@@ -315,11 +354,38 @@ export default function OnboardingTour() {
   const vw = typeof window !== "undefined" ? window.innerWidth : 1280;
   const cardW = Math.min(CARD_W, vw - 24);
 
+  /* ── Theme-aware colours ──────────────────────────────────────── */
+  const C = {
+    cardBg:       isDark ? "rgba(10,10,26,0.92)"         : "rgba(255,255,255,0.97)",
+    cardBorder:   isDark ? "rgba(255,255,255,0.13)"       : "rgba(0,0,0,0.09)",
+    cardShadow:   isDark
+      ? "0 8px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(69,97,232,0.18), inset 0 1px 0 rgba(255,255,255,0.08)"
+      : "0 8px 48px rgba(0,0,0,0.10), 0 0 0 1px rgba(69,97,232,0.10), inset 0 1px 0 rgba(255,255,255,1)",
+    topAccent:    "linear-gradient(90deg, #4561E8, #a78bfa, transparent)",
+    tagColor:     "#6b87ff",
+    titleColor:   isDark ? "white"                        : "var(--text)",
+    descColor:    isDark ? "rgba(255,255,255,0.70)"       : "rgba(0,0,0,0.62)",
+    tipColor:     isDark ? "rgba(255,255,255,0.33)"       : "rgba(0,0,0,0.32)",
+    counterBg:    isDark ? "rgba(10,10,26,0.92)"          : "rgba(255,255,255,0.95)",
+    counterText:  isDark ? "rgba(255,255,255,0.45)"       : "rgba(0,0,0,0.38)",
+    counterBorder:isDark ? "rgba(255,255,255,0.10)"       : "rgba(0,0,0,0.10)",
+    iconBg:       isDark ? "rgba(69,97,232,0.20)"         : "rgba(69,97,232,0.10)",
+    iconBorder:   isDark ? "rgba(69,97,232,0.32)"         : "rgba(69,97,232,0.22)",
+    closeBg:      isDark ? "rgba(255,255,255,0.06)"       : "rgba(0,0,0,0.05)",
+    closeBorder:  isDark ? "rgba(255,255,255,0.12)"       : "rgba(0,0,0,0.10)",
+    closeColor:   isDark ? "rgba(255,255,255,0.40)"       : "rgba(0,0,0,0.35)",
+    dotInactive:  isDark ? "rgba(255,255,255,0.18)"       : "rgba(0,0,0,0.15)",
+    prevBg:       isDark ? "rgba(255,255,255,0.06)"       : "rgba(0,0,0,0.05)",
+    prevBorder:   isDark ? "rgba(255,255,255,0.12)"       : "rgba(0,0,0,0.10)",
+    prevColor:    isDark ? "rgba(255,255,255,0.55)"       : "rgba(0,0,0,0.45)",
+    connectorColor: isDark ? "rgba(107,135,255,0.30)"    : "rgba(69,97,232,0.25)",
+  };
+
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 9998, pointerEvents: "none" }}>
 
-      {/* ── 4-div spotlight overlay ───────────────────────────────── */}
-      <SpotlightOverlay spot={spot} onClose={() => close(true)} />
+      {/* ── Spotlight overlay ─────────────────────────────────────── */}
+      <SpotlightOverlay spot={spot} isDark={isDark} onClose={() => close(true)} />
 
       {/* ── Dashed connector from card to spotlight ───────────────── */}
       {spot && (
@@ -331,7 +397,7 @@ export default function OnboardingTour() {
             y1={pos.y + (pos.y < spot.y ? CARD_H : 0)}
             x2={spot.x + spot.w / 2}
             y2={pos.y < spot.y ? spot.y : spot.y + spot.h}
-            stroke="rgba(107,135,255,0.30)"
+            stroke={C.connectorColor}
             strokeWidth="1"
             strokeDasharray="5 4"
           />
@@ -350,8 +416,8 @@ export default function OnboardingTour() {
         {/* Step counter badge */}
         <div style={{
           position: "absolute", top: -11, right: 14,
-          fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.5)",
-          background: "rgba(10,10,26,0.92)", border: "1px solid rgba(255,255,255,0.1)",
+          fontSize: 10, fontWeight: 700, color: C.counterText,
+          background: C.counterBg, border: `1px solid ${C.counterBorder}`,
           borderRadius: 99, padding: "2px 8px", zIndex: 1,
         }}>
           {step + 1} / {STEPS.length}
@@ -359,16 +425,16 @@ export default function OnboardingTour() {
 
         {/* Glass card */}
         <div style={{
-          background: "rgba(10,10,26,0.90)",
-          backdropFilter: "blur(24px) saturate(1.5)",
-          WebkitBackdropFilter: "blur(24px) saturate(1.5)",
-          border: "1px solid rgba(255,255,255,0.13)",
+          background: C.cardBg,
+          backdropFilter: "blur(24px) saturate(1.6)",
+          WebkitBackdropFilter: "blur(24px) saturate(1.6)",
+          border: `1px solid ${C.cardBorder}`,
           borderRadius: 20,
-          boxShadow: "0 8px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(69,97,232,0.18), inset 0 1px 0 rgba(255,255,255,0.08)",
+          boxShadow: C.cardShadow,
           overflow: "hidden",
         }}>
           {/* Top accent */}
-          <div style={{ height: 2, background: "linear-gradient(90deg, #4561E8, #a78bfa, transparent)", opacity: 0.85 }} />
+          <div style={{ height: 2, background: C.topAccent, opacity: 0.85 }} />
 
           <div style={{ padding: "18px 20px 20px" }}>
             {/* Header */}
@@ -376,16 +442,16 @@ export default function OnboardingTour() {
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{
                   width: 40, height: 40, borderRadius: 12, flexShrink: 0,
-                  background: "rgba(69,97,232,0.2)", border: "1px solid rgba(69,97,232,0.32)",
+                  background: C.iconBg, border: `1px solid ${C.iconBorder}`,
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
                   <StepIcon name={s.icon} color="#6b87ff" />
                 </div>
                 <div>
-                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#6b87ff", marginBottom: 2 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: C.tagColor, marginBottom: 2 }}>
                     {s.tag}
                   </div>
-                  <div style={{ fontSize: 15, fontWeight: 800, color: "white", lineHeight: 1.2 }}>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: C.titleColor, lineHeight: 1.2 }}>
                     {s.title}
                   </div>
                 </div>
@@ -394,9 +460,9 @@ export default function OnboardingTour() {
                 onClick={() => close(true)}
                 style={{
                   width: 26, height: 26, borderRadius: 8,
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  background: "rgba(255,255,255,0.06)",
-                  color: "rgba(255,255,255,0.4)",
+                  border: `1px solid ${C.closeBorder}`,
+                  background: C.closeBg,
+                  color: C.closeColor,
                   cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
                   flexShrink: 0, fontSize: 14, lineHeight: 1,
                 }}
@@ -412,11 +478,11 @@ export default function OnboardingTour() {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.22 }}
               >
-                <p style={{ fontSize: 13.5, lineHeight: 1.65, color: "rgba(255,255,255,0.70)", marginBottom: s.tip ? 12 : 0 }}>
+                <p style={{ fontSize: 13.5, lineHeight: 1.65, color: C.descColor, marginBottom: s.tip ? 12 : 0 }}>
                   {s.desc}
                 </p>
                 {s.tip && (
-                  <span style={{ fontSize: 11.5, color: "rgba(255,255,255,0.33)", fontStyle: "italic", lineHeight: 1.4 }}>
+                  <span style={{ fontSize: 11.5, color: C.tipColor, fontStyle: "italic", lineHeight: 1.4 }}>
                     {s.tip}
                   </span>
                 )}
@@ -434,7 +500,7 @@ export default function OnboardingTour() {
                     style={{
                       width: i === step ? 18 : 6, height: 6, borderRadius: 99,
                       border: "none", cursor: "pointer",
-                      background: i === step ? "#4561E8" : "rgba(255,255,255,0.18)",
+                      background: i === step ? "#4561E8" : C.dotInactive,
                       transition: "all 0.2s ease", padding: 0,
                     }}
                   />
@@ -447,9 +513,9 @@ export default function OnboardingTour() {
                     onClick={prev}
                     style={{
                       padding: "7px 14px", borderRadius: 10,
-                      border: "1px solid rgba(255,255,255,0.12)",
-                      background: "rgba(255,255,255,0.06)",
-                      color: "rgba(255,255,255,0.55)",
+                      border: `1px solid ${C.prevBorder}`,
+                      background: C.prevBg,
+                      color: C.prevColor,
                       cursor: "pointer", fontSize: 12.5, fontWeight: 600,
                     }}
                   >Назад</button>

@@ -20,13 +20,94 @@ function useOpenTour() {
   const router = useRouter();
   return () => {
     if (pathname === "/dashboard") {
-      // Already on dashboard — dispatch event directly
       window.dispatchEvent(new CustomEvent("mentora:open-tour"));
     } else {
-      // Navigate to dashboard with ?tour=1 so the tour auto-opens there
       router.push("/dashboard?tour=1");
     }
   };
+}
+
+/* ── One-time hint bubble pointing at the tour button ─────────────── */
+const HINT_KEY = "mentora_tour_hint_v1";
+
+function TourHintBubble({ forceDark }: { forceDark: boolean }) {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (localStorage.getItem(HINT_KEY)) return;
+
+    const timer = setTimeout(() => {
+      setShow(true);
+      localStorage.setItem(HINT_KEY, "1");
+      // Auto-hide after 5 seconds
+      setTimeout(() => setShow(false), 5000);
+    }, 2800);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          initial={{ opacity: 0, y: -4, scale: 0.94 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -4, scale: 0.94 }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
+          onClick={() => setShow(false)}
+          style={{
+            position: "absolute",
+            top: "calc(100% + 10px)",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 9999,
+            cursor: "pointer",
+            userSelect: "none",
+          }}
+        >
+          {/* Arrow pointing up */}
+          <div style={{
+            position: "absolute",
+            top: -5,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 10,
+            height: 5,
+            overflow: "hidden",
+          }}>
+            <div style={{
+              width: 8,
+              height: 8,
+              background: forceDark ? "rgba(18,18,38,0.95)" : "rgba(255,255,255,0.97)",
+              border: `1px solid ${forceDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.10)"}`,
+              transform: "rotate(45deg) translate(1px, 1px)",
+            }} />
+          </div>
+
+          {/* Bubble */}
+          <div style={{
+            whiteSpace: "nowrap",
+            padding: "6px 11px",
+            borderRadius: 10,
+            fontSize: 11.5,
+            fontWeight: 600,
+            lineHeight: 1.4,
+            background: forceDark ? "rgba(18,18,38,0.95)" : "rgba(255,255,255,0.97)",
+            border: `1px solid ${forceDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.10)"}`,
+            color: forceDark ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.55)",
+            boxShadow: forceDark
+              ? "0 4px 20px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06)"
+              : "0 4px 20px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,1)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+          }}>
+            туториал будет доступен здесь
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 }
 
 /* ── Desktop button (injected into DashboardNav) ──────────────────── */
@@ -35,28 +116,32 @@ export function TourButtonDesktop({ forceDark = false }: { forceDark?: boolean }
   const openTour = useOpenTour();
 
   return (
-    <button
-      onClick={openTour}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      title="Как пользоваться Mentora"
-      aria-label="Открыть обучение"
-      style={{
-        width: 34, height: 34,
-        borderRadius: 10,
-        border: `1px solid ${forceDark ? "rgba(255,255,255,0.1)" : "var(--border)"}`,
-        background: hovered
-          ? forceDark ? "rgba(255,255,255,0.10)" : "var(--bg-secondary)"
-          : "transparent",
-        color: forceDark ? "rgba(255,255,255,0.38)" : "var(--text-muted)",
-        cursor: "pointer",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        transition: "background 0.15s ease, color 0.15s ease, border-color 0.15s ease",
-        flexShrink: 0,
-      }}
-    >
-      <BookIcon size={15} />
-    </button>
+    <div style={{ position: "relative" }}>
+      <button
+        onClick={openTour}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        title="Как пользоваться Mentora"
+        aria-label="Открыть обучение"
+        style={{
+          width: 34, height: 34,
+          borderRadius: 10,
+          border: `1px solid ${forceDark ? "rgba(255,255,255,0.1)" : "var(--border)"}`,
+          background: hovered
+            ? forceDark ? "rgba(255,255,255,0.10)" : "var(--bg-secondary)"
+            : "transparent",
+          color: forceDark ? "rgba(255,255,255,0.38)" : "var(--text-muted)",
+          cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "background 0.15s ease, color 0.15s ease, border-color 0.15s ease",
+          flexShrink: 0,
+        }}
+      >
+        <BookIcon size={15} />
+      </button>
+
+      <TourHintBubble forceDark={forceDark} />
+    </div>
   );
 }
 
@@ -81,12 +166,11 @@ export function TourButtonMobile() {
       }, INACTIVITY_MS);
     };
 
-    // Only run on mobile
     if (window.innerWidth >= 768) return;
 
     const events = ["mousemove", "touchstart", "keydown", "scroll", "click"];
     events.forEach(e => window.addEventListener(e, reset, { passive: true }));
-    reset(); // start timer immediately
+    reset();
 
     return () => {
       clearTimeout(timer);
