@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Logo from "@/components/Logo";
 import MathField from "@/components/MathField";
@@ -47,11 +49,12 @@ function AuthPageContent() {
   const searchParams = useSearchParams();
   const supabase    = createClient();
   const captchaRef  = useRef<HTMLDivElement>(null);
+  const t = useTranslations("auth");
 
   // Show OAuth errors from callback redirect
   useEffect(() => {
     const oauthError = searchParams.get("error");
-    if (oauthError) setError("Ошибка входа через внешний сервис. Попробуй снова.");
+    if (oauthError) setError(t("errorOAuth"));
   }, [searchParams]);
 
   // Register hCaptcha callbacks on window
@@ -96,8 +99,8 @@ function AuthPageContent() {
         // Redirect to Supabase magic link — it verifies and sends to /auth/callback
         window.location.href = json.action_link;
       } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : "попробуй снова";
-        setError("Ошибка входа через Telegram: " + msg);
+        const msg = e instanceof Error ? e.message : t("tryAgain");
+        setError(t("errorTelegramLogin") + msg);
         setTgLoading(false);
       }
     };
@@ -135,7 +138,7 @@ function AuthPageContent() {
       },
     });
     if (error) {
-      setError("Не удалось подключиться. Попробуй ещё раз.");
+      setError(t("errorConnect"));
       setOauthLoading(null);
     }
     // On success browser will redirect — no need to reset state
@@ -149,7 +152,7 @@ function AuthPageContent() {
 
     if (mode === "signup") {
       if (HCAPTCHA_SITE_KEY && !captchaToken) {
-        setError("Пожалуйста, подтверди, что ты не робот.");
+        setError(t("errorRobot"));
         setLoading(false);
         return;
       }
@@ -162,9 +165,9 @@ function AuthPageContent() {
       });
       if (error) {
         if (error.message.includes("already registered")) {
-          setError("Этот email уже зарегистрирован. Войди или восстанови пароль.");
+          setError(t("errorEmailExists"));
         } else if (error.message.includes("captcha")) {
-          setError("Не прошла проверка капчи. Попробуй снова.");
+          setError(t("errorCaptcha"));
         } else {
           setError(error.message);
         }
@@ -189,7 +192,7 @@ function AuthPageContent() {
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        setError("Неверный email или пароль.");
+        setError(t("errorCredentials"));
       } else {
         router.push("/dashboard");
         router.refresh();
@@ -221,17 +224,17 @@ function AuthPageContent() {
               </svg>
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white mb-2">Проверь почту</h2>
+              <h2 className="text-xl font-bold text-white mb-2">{t("checkEmail")}</h2>
               <p className="text-gray-400 text-sm leading-relaxed">
-                Письмо отправлено на{" "}
+                {t("checkEmailDesc")}{" "}
                 <span className="text-white font-semibold">{emailSent}</span>.<br/>
-                Перейди по ссылке, чтобы активировать аккаунт.
+                {t("checkEmailActivate")}
               </p>
             </div>
             <div className="rounded-xl p-3 text-xs text-gray-500" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
-              Не получил письмо? Проверь «Спам» или{" "}
+              {t("checkEmailNoReceive")}{" "}
               <button className="text-[#6B8FFF] hover:underline font-medium" onClick={() => setEmailSent(null)}>
-                попробуй снова
+                {t("tryAgain")}
               </button>
             </div>
           </div>
@@ -263,23 +266,23 @@ function AuthPageContent() {
           <div className="flex-1 flex flex-col justify-center pt-8">
             <p className="text-[11px] font-bold tracking-[0.2em] uppercase mb-5"
                style={{ color: "rgba(107,143,255,0.7)" }}>
-              Персональный AI-ментор
+              {t("leftTagline")}
             </p>
             <h2 className="text-3xl xl:text-4xl font-black text-white leading-tight mb-5">
-              Задай вопрос,<br />
-              который не решаешься<br />
+              {t("leftHeading1")}<br />
+              {t("leftHeading2")}<br />
               <span style={{
                 background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 45%, #9F7AFF 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
               }}>
-                произнести вслух.
+                {t("leftHeading3")}
               </span>
             </h2>
             <p className="text-sm leading-relaxed max-w-xs"
                style={{ color: "rgba(255,255,255,0.55)" }}>
-              Ментора не осуждает. Объясняет столько раз, сколько нужно — на твоём языке.
+              {t("leftSubtitle")}
             </p>
           </div>
 
@@ -291,11 +294,11 @@ function AuthPageContent() {
               ))}
             </div>
             <div className="flex items-center gap-3 text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-              <span>13 предметов</span>
+              <span>{t("leftStats1")}</span>
               <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
-              <span>Без VPN</span>
+              <span>{t("leftStats2")}</span>
               <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
-              <span>Без карты</span>
+              <span>{t("leftStats3")}</span>
             </div>
           </div>
         </div>
@@ -332,14 +335,14 @@ function AuthPageContent() {
               className="relative flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors z-10"
               style={{ color: !isSignup ? "var(--text)" : "var(--text-muted)" }}
             >
-              Войти
+              {t("signIn")}
             </button>
             <button
               onClick={() => switchMode("signup")}
               className="relative flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors z-10"
               style={{ color: isSignup ? "var(--text)" : "var(--text-muted)" }}
             >
-              Регистрация
+              {t("signUpTab")}
             </button>
           </div>
 
@@ -353,10 +356,10 @@ function AuthPageContent() {
 
             <div className="mb-1">
               <h1 className="text-xl font-bold" style={{ color: "var(--text)" }}>
-                {isSignup ? "Создай аккаунт бесплатно" : "С возвращением"}
+                {isSignup ? t("createFreeAccount") : t("welcomeBack")}
               </h1>
               <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-                {isSignup ? "Без карты · Без обязательств" : "Войди чтобы продолжить учёбу"}
+                {isSignup ? t("noCard") : t("continueLearn")}
               </p>
             </div>
 
@@ -376,13 +379,13 @@ function AuthPageContent() {
                 <span className="w-4 h-4 border-2 rounded-full animate-spin"
                   style={{ borderColor: "var(--border)", borderTopColor: "var(--text-secondary)" }} />
               ) : <GoogleIcon />}
-              {isSignup ? "Зарегистрироваться через Google" : "Войти через Google"}
+              {t("continueGoogle")}
             </button>
 
             {/* ── Divider ── */}
             <div className="relative flex items-center gap-3 py-1">
               <div className="flex-1 border-t" style={{ borderColor: "var(--border-light)" }} />
-              <span className="text-xs" style={{ color: "var(--text-muted)" }}>или через email</span>
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>{t("orEmail")}</span>
               <div className="flex-1 border-t" style={{ borderColor: "var(--border-light)" }} />
             </div>
 
@@ -405,7 +408,7 @@ function AuthPageContent() {
               </div>
               <div>
                 <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-muted)" }}>
-                  Пароль
+                  {t("password")}
                 </label>
                 <input
                   type="password"
@@ -416,7 +419,7 @@ function AuthPageContent() {
                   autoComplete={isSignup ? "new-password" : "current-password"}
                   className="w-full px-4 py-3 rounded-xl border text-sm transition focus:outline-none focus:ring-2 focus:ring-[#4561E8]"
                   style={{ background: "var(--bg-secondary)", borderColor: "var(--border)", color: "var(--text)" }}
-                  placeholder={isSignup ? "минимум 6 символов" : "••••••••"}
+                  placeholder={isSignup ? t("passwordPlaceholder") : t("passwordPlaceholderSignIn")}
                 />
               </div>
 
@@ -452,9 +455,9 @@ function AuthPageContent() {
                 {loading
                   ? <span className="flex items-center justify-center gap-2">
                       <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Загружаем...
+                      {t("loading")}
                     </span>
-                  : isSignup ? "Создать аккаунт →" : "Войти →"
+                  : isSignup ? t("createAccountBtn") : t("signInBtn")
                 }
               </button>
             </form>
@@ -470,7 +473,7 @@ function AuthPageContent() {
                   <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0 opacity-50" fill="currentColor">
                     <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/>
                   </svg>
-                  Telegram недоступен без VPN
+                  {t("telegramUnavailable")}
                 </div>
               ) : (
                 <button
@@ -485,12 +488,12 @@ function AuthPageContent() {
                           if (user && window.onTelegramAuth) {
                             window.onTelegramAuth(user);
                           } else if (!user) {
-                            setError("Не удалось войти через Telegram. Попробуй ещё раз.");
+                            setError(t("errorTelegramFailed"));
                           }
                         }
                       );
                     } else {
-                      setError("Telegram недоступен. Попробуй обновить страницу или использовать VPN.");
+                      setError(t("errorTelegramUnavailable"));
                     }
                 }}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-60"
@@ -500,20 +503,20 @@ function AuthPageContent() {
                     <>
                       <span className="w-4 h-4 border-2 rounded-full animate-spin"
                         style={{ borderColor: "var(--border)", borderTopColor: "var(--text-secondary)" }} />
-                      Входим через Telegram...
+                      {t("signingInTelegram")}
                     </>
                   ) : tgAvailable === null ? (
                     <>
                       <span className="w-4 h-4 border-2 rounded-full animate-spin"
                         style={{ borderColor: "var(--border-light)", borderTopColor: "var(--text-muted)" }} />
-                      Проверяем Telegram...
+                      {t("checkingTelegram")}
                     </>
                   ) : (
                     <>
                       <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#2AABEE]">
                         <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/>
                       </svg>
-                      Войти через Telegram
+                      {t("signInTelegram")}
                     </>
                   )}
                 </button>
@@ -525,17 +528,17 @@ function AuthPageContent() {
           {/* Switch mode link */}
           <p className="text-center text-sm mt-5" style={{ color: "var(--text-muted)" }}>
             {isSignup ? (
-              <>Уже есть аккаунт?{" "}
+              <>{t("hasAccount")}{" "}
                 <button onClick={() => switchMode("signin")}
                   className="font-semibold hover:underline" style={{ color: "var(--brand)" }}>
-                  Войти
+                  {t("signIn")}
                 </button>
               </>
             ) : (
-              <>Нет аккаунта?{" "}
+              <>{t("noAccount")}{" "}
                 <button onClick={() => switchMode("signup")}
                   className="font-semibold hover:underline" style={{ color: "var(--brand)" }}>
-                  Зарегистрироваться бесплатно
+                  {t("signUpFreeLink")}
                 </button>
               </>
             )}

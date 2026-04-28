@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { getTranslations, getLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import DemoChat from "@/components/DemoChat";
 import { createClient } from "@/lib/supabase/server";
 import NeuralNetworkCanvas from "@/components/NeuralNetworkCanvas";
@@ -34,114 +35,58 @@ export const metadata: Metadata = {
   },
 };
 
-const SUBJECTS = [
-  { id: "russian-history", emoji: "🏰", title: "История России", desc: "51 тема · 5 уровней", live: true },
-  { id: "world-history", emoji: "🌍", title: "Всемирная история", desc: "60 тем · 5 уровней", live: true },
-  { id: "mathematics", emoji: "📐", title: "Математика", desc: "Алгебра, геометрия, анализ", live: true },
-  { id: "physics", emoji: "⚡", title: "Физика", desc: "Механика до квантового мира", live: true },
-  { id: "chemistry", emoji: "🧪", title: "Химия", desc: "Вещества, реакции, законы", live: true },
-  { id: "biology", emoji: "🧬", title: "Биология", desc: "Клетка до экосистем", live: true },
-  { id: "russian-language", emoji: "📝", title: "Русский язык", desc: "Грамматика и орфография", live: true },
-  { id: "literature", emoji: "📚", title: "Литература", desc: "Классика и современная проза", live: true },
-  { id: "english", emoji: "🇬🇧", title: "Английский язык", desc: "A1 — C2, разговорный", live: true },
-  { id: "social-studies", emoji: "🏛️", title: "Обществознание", desc: "Право, экономика, социология", live: true },
-  { id: "geography", emoji: "🗺️", title: "География", desc: "Природа, страны, климат", live: true },
-  { id: "computer-science", emoji: "💻", title: "Информатика", desc: "Алгоритмы, программирование", live: true },
-  { id: "astronomy", emoji: "🔭", title: "Астрономия", desc: "Звёзды, планеты, вселенная", live: true },
-  { id: "discovery", emoji: "🌐", title: "Кругозор", desc: "Факты, открытия, феномены", live: true },
-  { id: "suggest", emoji: "+", title: "Предложить тему", desc: "Голосуй за предмет", suggest: true },
-];
-
-const STEPS = [
-  {
-    n: "01",
-    title: "Открываешь — и сразу пробуешь",
-    desc: "Никакой регистрации сначала. Задай первый вопрос и получи развёрнутый ответ за секунду.",
-  },
-  {
-    n: "02",
-    title: "Выбираешь свой предмет",
-    desc: "13 тем от школьной программы до подготовки к ЕГЭ. Меняй в любое время — прогресс сохраняется.",
-  },
-  {
-    n: "03",
-    title: "Ментора запоминает тебя",
-    desc: "Стиль, уровень, темп. Не нужно объяснять себя заново — Ментора уже знает, как с тобой говорить.",
-    badge: true,
-  },
-  {
-    n: "04",
-    title: "Прогресс становится видимым",
-    desc: "Менты, стрики, уровни по каждому предмету. Видно насколько далеко ты продвинулся — это мотивирует.",
-  },
-  {
-    n: "05",
-    title: "Готовишься к главному",
-    desc: "Режим ЕГЭ/ОГЭ с реальными заданиями и трекером готовности. Старт — лето 2026.",
-  },
-];
-
-const STATS = [
-  { value: "13", label: "предметов уже доступны", color: "#4561E8", icon: `<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
-  { value: "90%", label: "точность ответов AI", color: "#10B981", icon: `<circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.2" fill="none"/><path d="M8 12l3 3 5-5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
-  { value: "24/7", label: "доступен без VPN", color: "#FF7A00", icon: `<circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.2" fill="none"/><path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" fill="none"/>` },
-  { value: "0 ₽", label: "чтобы начать учиться", color: "#A78BFA", icon: `<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
-];
-
-type Feature = {
-  icon: string;
-  title: string;
-  desc: string;
-  color: string;
-  tag?: string;
-  comparison?: { label: string; value: string; sub: string; highlight?: boolean }[];
+const SUBJECT_EMOJIS: Record<string, string> = {
+  "russian-history": "🏰",
+  "world-history": "🌍",
+  "mathematics": "📐",
+  "physics": "⚡",
+  "chemistry": "🧪",
+  "biology": "🧬",
+  "russian-language": "📝",
+  "literature": "📚",
+  "english": "🇬🇧",
+  "social-studies": "🏛️",
+  "geography": "🗺️",
+  "computer-science": "💻",
+  "astronomy": "🔭",
+  "discovery": "🌐",
+  "suggest": "+",
 };
 
-const FEATURES: Feature[] = [
-  {
-    icon: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>`,
-    title: "Спрашивай без страха",
-    desc: "Диалоги шифруются по стандарту AES-256 — тому же, что используют банки и Apple Pay. Данные не передаются третьим лицам и не используются для рекламы. Задай вопрос, который не стал бы вводить в Google.",
-    color: "#4561E8",
-    tag: "AES-256",
-  },
-  {
-    icon: `<circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" fill="none"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>`,
-    title: "Учится вместе с тобой",
-    desc: "Контекстная память Менторы запоминает каждый диалог: уровень, пробелы, стиль. С каждым разговором объяснения становятся точнее. Персонализированное обучение эффективнее стандартного на 76%.*",
-    color: "#10B981",
-    tag: "+76% эффективность",
-  },
-  {
-    icon: `<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>`,
-    title: "Всегда на твоей стороне",
-    desc: "Не осудит, не устанет, не раздражится. Объяснит в третий раз с другого угла, поддержит когда что-то не выходит, и искренне порадуется когда получится. Именно так должен работать настоящий ментор.",
-    color: "#FF7A00",
-  },
-  {
-    icon: `<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>`,
-    title: "Уровень топовых AI-лабораторий",
-    desc: "Mentora работает на frontier-моделях — той же архитектуре трансформеров, что лежит в основе продуктов ведущих AI-компаний мира. RAG-retrieval, многоуровневый контекст и специализированный стек делают ответы точнее любого поисковика.",
-    color: "#A78BFA",
-    tag: "Frontier AI",
-  },
-  {
-    icon: `<circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>`,
-    title: "Знания — без границ",
-    desc: "Ребёнок из Индии, студент из Якутии или взрослый из Берлина — учиться можно из любой точки, без учителя и расписания. Стрики, уровни и менты превращают ежедневную учёбу в привычку, а не обязанность.",
-    color: "#06B6D4",
-  },
-  {
-    icon: `<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>`,
-    title: "Считаем вместе",
-    desc: "8 занятий с репетитором в месяц или неограниченный доступ к Менторе — выбор очевиден.",
-    color: "#F59E0B",
-    comparison: [
-      { label: "Репетитор", value: "12 000–24 000 ₽", sub: "8 занятий × 1 500–3 000 ₽/час" },
-      { label: "Mentora Pro", value: "399 ₽", sub: "месяц, безлимит, 24/7", highlight: true },
-    ],
-  },
+const SUBJECT_LIVE: Record<string, boolean> = {
+  "russian-history": true, "world-history": true, "mathematics": true, "physics": true,
+  "chemistry": true, "biology": true, "russian-language": true, "literature": true,
+  "english": true, "social-studies": true, "geography": true, "computer-science": true,
+  "astronomy": true, "discovery": true,
+};
+
+const SUBJECT_IDS = [
+  "russian-history", "world-history", "mathematics", "physics", "chemistry", "biology",
+  "russian-language", "literature", "english", "social-studies", "geography",
+  "computer-science", "astronomy", "discovery", "suggest",
 ];
+
+const STEP_NUMS = ["01", "02", "03", "04", "05"];
+const STEP_BADGE_IDX = 2; // step 03 gets the badge
+
+const STATS_DATA = [
+  { value: "13", key: "subjects" as const, color: "#4561E8", icon: `<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
+  { value: "90%", key: "accuracy" as const, color: "#10B981", icon: `<circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.2" fill="none"/><path d="M8 12l3 3 5-5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
+  { value: "24/7", key: "availability" as const, color: "#FF7A00", icon: `<circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.2" fill="none"/><path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" fill="none"/>` },
+  { value: "0 ₽", key: "free" as const, color: "#A78BFA", icon: `<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
+];
+
+const FEATURE_ICONS = [
+  `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>`,
+  `<circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" fill="none"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>`,
+  `<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>`,
+  `<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>`,
+  `<circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>`,
+  `<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>`,
+];
+
+const FEATURE_COLORS = ["#4561E8", "#10B981", "#FF7A00", "#A78BFA", "#06B6D4", "#F59E0B"];
+const FEATURE_KEYS = ["security", "memory", "supportive", "ai", "global", "price"] as const;
 
 const TESTIMONIALS = [
   {
@@ -178,6 +123,18 @@ export default async function HomePage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (user) redirect("/dashboard");
 
+  const locale = await getLocale();
+  const t = await getTranslations();
+
+  const subjects = SUBJECT_IDS.map((id) => ({
+    id,
+    emoji: SUBJECT_EMOJIS[id],
+    title: t(`subjects.${id}.title`),
+    desc: t(`subjects.${id}.desc`),
+    live: SUBJECT_LIVE[id] ?? false,
+    suggest: id === "suggest",
+  }));
+
   return (
     <div className="min-h-screen text-[var(--text)]" style={{ background: "var(--bg)" }}>
 
@@ -199,31 +156,46 @@ export default async function HomePage() {
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5 text-xs font-bold tracking-widest uppercase"
                 style={{ background: "rgba(69,97,232,0.15)", color: "#6B8FFF", border: "1px solid rgba(69,97,232,0.25)" }}>
-                Ментора — просто спроси
+                {t("landing.heroBadge")}
               </div>
               <h1 className="text-[2.1rem] sm:text-[2.8rem] md:text-[3.2rem] lg:text-[4rem] font-black leading-[1.05] mb-6 tracking-tight text-white">
-                Забудь про{" "}
-                <span className="line-through text-gray-600 font-bold">скучные</span>{" "}
-                учебники.<br />
-                Учись в{" "}
-                <span style={{
-                  background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  fontStyle: "italic",
-                }}>
-                  диалоге.
-                </span>
+                {locale === "en" ? (
+                  <>
+                    Forget boring{" "}
+                    <span className="line-through text-gray-600 font-bold">textbooks</span>.<br />
+                    Learn in{" "}
+                    <span style={{
+                      background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                      fontStyle: "italic",
+                    }}>dialogue.</span>
+                  </>
+                ) : (
+                  <>
+                    Забудь про{" "}
+                    <span className="line-through text-gray-600 font-bold">скучные</span>{" "}
+                    учебники.<br />
+                    Учись в{" "}
+                    <span style={{
+                      background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                      fontStyle: "italic",
+                    }}>диалоге.</span>
+                  </>
+                )}
               </h1>
               <p className="text-lg text-gray-400 leading-relaxed mb-8 max-w-md">
-                AI-ментор, который знает твой уровень, помнит тебя и объясняет так, как тебе удобно. История, математика, физика и ещё 11 предметов.
+                {t("landing.heroSubtitle")}
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/auth"
                   className="px-7 py-3.5 font-semibold rounded-xl text-white transition-all"
                   style={{ background: "linear-gradient(135deg, #4561E8 0%, #6B8FFF 100%)", boxShadow: "0 4px 16px rgba(69,97,232,0.4)" }}>
-                  Начать учиться
+                  {t("landing.heroCtaStart")}
                 </Link>
                 <DemoScrollButton />
               </div>
@@ -232,34 +204,60 @@ export default async function HomePage() {
             <div id="demo" className="flex flex-col gap-4">
               <DemoChat />
               <p className="text-sm text-gray-500 text-center leading-relaxed">
-                Задай вопрос, который не решался{" "}
-                <span className="text-[#4561E8] font-medium">произнести вслух</span>
+                {locale === "en" ? (
+                  <>Ask the question you couldn&apos;t{" "}
+                    <span className="text-[#4561E8] font-medium">say out loud</span>
+                  </>
+                ) : (
+                  <>Задай вопрос, который не решался{" "}
+                    <span className="text-[#4561E8] font-medium">произнести вслух</span>
+                  </>
+                )}
               </p>
             </div>
           </div>
 
-          {/* Floating questions */}
-          <div className="relative z-10 mt-20 max-w-4xl mx-auto px-4">
-            <div className="mb-24 space-y-10">
-              <p className="text-xl sm:text-2xl font-semibold text-white w-fit">Подожди, а почему именно 1941-й?</p>
-              <p className="text-base sm:text-lg font-medium text-gray-400 w-fit ml-auto mr-[8%]">Это вообще базово знать или нет?</p>
-              <p className="text-2xl sm:text-3xl font-bold text-white w-fit sm:ml-[14%]">Объясни ещё раз, другими словами.</p>
-              <p className="text-base sm:text-xl font-medium text-gray-500 w-fit ml-[28%] sm:ml-[52%]">А зачем это вообще учить?</p>
+          {/* Floating questions — Russian only */}
+          {locale === "ru" && (
+            <div className="relative z-10 mt-20 max-w-4xl mx-auto px-4">
+              <div className="mb-24 space-y-10">
+                <p className="text-xl sm:text-2xl font-semibold text-white w-fit">Подожди, а почему именно 1941-й?</p>
+                <p className="text-base sm:text-lg font-medium text-gray-400 w-fit ml-auto mr-[8%]">Это вообще базово знать или нет?</p>
+                <p className="text-2xl sm:text-3xl font-bold text-white w-fit sm:ml-[14%]">Объясни ещё раз, другими словами.</p>
+                <p className="text-base sm:text-xl font-medium text-gray-500 w-fit ml-[28%] sm:ml-[52%]">А зачем это вообще учить?</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl sm:text-2xl font-semibold text-white mb-1">{t("landing.teacherLine1")}</p>
+                <p className="text-xl sm:text-2xl font-semibold mb-12 text-white">
+                  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700 }}>
+                    M<span style={{ color: "#4561E8", fontStyle: "italic", marginRight: "0.05em" }}>e</span>ntora
+                  </span>
+                  {" "}{locale === "ru" ? "— только тебе." : "— only for you."}
+                </p>
+                <Link href="/auth"
+                  className="inline-flex px-7 py-3.5 bg-[#4561E8] text-white font-medium rounded-xl hover:bg-[#3651d8] transition-colors">
+                  {t("landing.heroCta2")}
+                </Link>
+              </div>
             </div>
-            <div className="text-center">
-              <p className="text-xl sm:text-2xl font-semibold text-white mb-1">Преподаватель объясняет всем.</p>
-              <p className="text-xl sm:text-2xl font-semibold mb-12 text-white">
+          )}
+
+          {/* English CTA mid-hero */}
+          {locale === "en" && (
+            <div className="relative z-10 mt-16 text-center">
+              <p className="text-xl sm:text-2xl font-semibold text-white mb-1">{t("landing.teacherLine1")}</p>
+              <p className="text-xl sm:text-2xl font-semibold mb-8 text-white">
                 <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700 }}>
                   M<span style={{ color: "#4561E8", fontStyle: "italic", marginRight: "0.05em" }}>e</span>ntora
                 </span>
-                {" "}— только тебе.
+                {" "}{t("landing.teacherLine2")}
               </p>
               <Link href="/auth"
                 className="inline-flex px-7 py-3.5 bg-[#4561E8] text-white font-medium rounded-xl hover:bg-[#3651d8] transition-colors">
-                Начать
+                {t("landing.heroCtaStart")}
               </Link>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
@@ -269,7 +267,7 @@ export default async function HomePage() {
         {/* STATS */}
         <section className="text-white pt-14 pb-10 px-6">
           <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-            {STATS.map((s) => (
+            {STATS_DATA.map((s) => (
               <div key={s.value} className="flex flex-col items-center text-center gap-3">
                 <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
                   style={{ background: `${s.color}25`, color: s.color }}>
@@ -277,7 +275,7 @@ export default async function HomePage() {
                 </div>
                 <div>
                   <div className="text-3xl font-black tracking-tight" style={{ color: s.color }}>{s.value}</div>
-                  <div className="text-sm text-gray-400 mt-0.5 leading-tight">{s.label}</div>
+                  <div className="text-sm text-gray-400 mt-0.5 leading-tight">{t(`stats.${s.key}`)}</div>
                 </div>
               </div>
             ))}
@@ -293,58 +291,72 @@ export default async function HomePage() {
         <section className="text-white px-6 pt-16 pb-24">
           <div className="max-w-6xl mx-auto">
             <p className="text-xs font-bold tracking-[0.22em] uppercase mb-4 text-center" style={{ color: "rgba(255,255,255,0.35)" }}>
-              Почему Mentora
+              {t("landing.featuresLabel")}
             </p>
             <h2 className="text-4xl md:text-5xl font-black mb-3 leading-tight text-center text-white">
-              Совершенно другой подход
+              {t("landing.featuresTitle")}
             </h2>
             <p className="text-center text-base mb-12 max-w-xl mx-auto" style={{ color: "rgba(255,255,255,0.45)" }}>
-              Не очередной учебник онлайн. Живой ментор, который работает только для тебя.
+              {t("landing.featuresSubtitle")}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {FEATURES.map((f) => (
-                <div key={f.title}
-                  className="rounded-2xl p-6 flex flex-col gap-4 transition-all duration-200 hover:scale-[1.01]"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                      style={{ background: `${f.color}22`, color: f.color }}>
-                      <svg viewBox="0 0 24 24" className="w-5 h-5" dangerouslySetInnerHTML={{ __html: f.icon }} />
+              {FEATURE_KEYS.map((key, i) => {
+                const color = FEATURE_COLORS[i];
+                const icon = FEATURE_ICONS[i];
+                const title = t(`features.${key}.title`);
+                const desc = t(`features.${key}.desc`);
+                const tag = key === "security" ? t("features.security.tag")
+                  : key === "memory" ? t("features.memory.tag")
+                  : key === "ai" ? t("features.ai.tag")
+                  : undefined;
+                const isPrice = key === "price";
+                return (
+                  <div key={key}
+                    className="rounded-2xl p-6 flex flex-col gap-4 transition-all duration-200 hover:scale-[1.01]"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                        style={{ background: `${color}22`, color }}>
+                        <svg viewBox="0 0 24 24" className="w-5 h-5" dangerouslySetInnerHTML={{ __html: icon }} />
+                      </div>
+                      {tag && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 mt-1"
+                          style={{ background: `${color}22`, color, border: `1px solid ${color}40` }}>
+                          {tag}
+                        </span>
+                      )}
                     </div>
-                    {f.tag && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 mt-1"
-                        style={{ background: `${f.color}22`, color: f.color, border: `1px solid ${f.color}40` }}>
-                        {f.tag}
-                      </span>
+                    <div>
+                      <h3 className="font-semibold text-sm mb-1.5 text-white">{title}</h3>
+                      <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{desc}</p>
+                    </div>
+                    {isPrice && (
+                      <div className="mt-1 space-y-2">
+                        {[
+                          { label: t("features.price.tutorLabel"), value: t("features.price.tutorValue"), sub: t("features.price.tutorSub"), highlight: false },
+                          { label: t("features.price.proLabel"), value: t("features.price.proValue"), sub: t("features.price.proSub"), highlight: true },
+                        ].map((c) => (
+                          <div key={c.label}
+                            className="rounded-xl px-3 py-2.5 flex items-center justify-between gap-3"
+                            style={c.highlight
+                              ? { background: `${color}18`, border: `1px solid ${color}40` }
+                              : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }
+                            }>
+                            <div>
+                              <div className="text-[11px] font-semibold" style={{ color: c.highlight ? color : "rgba(255,255,255,0.4)" }}>{c.label}</div>
+                              <div className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>{c.sub}</div>
+                            </div>
+                            <div className="text-sm font-bold shrink-0"
+                              style={{ color: c.highlight ? color : "rgba(255,255,255,0.35)", textDecoration: c.highlight ? "none" : "line-through" }}>
+                              {c.value}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-sm mb-1.5 text-white">{f.title}</h3>
-                    <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{f.desc}</p>
-                  </div>
-                  {f.comparison && (
-                    <div className="mt-1 space-y-2">
-                      {f.comparison.map((c) => (
-                        <div key={c.label}
-                          className="rounded-xl px-3 py-2.5 flex items-center justify-between gap-3"
-                          style={c.highlight
-                            ? { background: `${f.color}18`, border: `1px solid ${f.color}40` }
-                            : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }
-                          }>
-                          <div>
-                            <div className="text-[11px] font-semibold" style={{ color: c.highlight ? f.color : "rgba(255,255,255,0.4)" }}>{c.label}</div>
-                            <div className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>{c.sub}</div>
-                          </div>
-                          <div className="text-sm font-bold shrink-0"
-                            style={{ color: c.highlight ? f.color : "rgba(255,255,255,0.35)", textDecoration: c.highlight ? "none" : "line-through" }}>
-                            {c.value}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
@@ -360,7 +372,7 @@ export default async function HomePage() {
       </div>
 
       {/* SUBJECTS */}
-      {/* ── Что нового ───────────────────────────────────────────────── */}
+      {/* ── What's new ── */}
       <section className="max-w-6xl mx-auto px-6 pb-4">
         <a href="/auth" className="flex items-center gap-3 group rounded-2xl px-4 py-3 border transition-all hover:border-[#4561E8]/40"
           style={{ background: "linear-gradient(135deg, rgba(69,97,232,0.05), rgba(107,143,255,0.03))", borderColor: "rgba(69,97,232,0.15)" }}>
@@ -368,7 +380,7 @@ export default async function HomePage() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5">
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md" style={{ background: "rgba(69,97,232,0.12)", color: "#4561E8" }}>
-                v{LATEST.version} · Новое
+                v{LATEST.version} · {t("landing.newBadge")}
               </span>
               <span className="text-xs font-semibold text-[var(--text)]">{LATEST.title}</span>
             </div>
@@ -383,16 +395,16 @@ export default async function HomePage() {
       <section id="subjects" className="max-w-6xl mx-auto px-6 py-16">
         <div className="flex items-center gap-3 mb-4">
           <div className="h-px flex-1 bg-[var(--border)]" />
-          <span className="text-xs font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase">Библиотека знаний</span>
+          <span className="text-xs font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase">{t("landing.libraryLabel")}</span>
           <div className="h-px flex-1 bg-[var(--border)]" />
         </div>
         <h2 className="text-4xl md:text-5xl font-black mb-3 leading-tight text-center">
-          Выбери предмет
+          {t("landing.subjectsHeading")}
         </h2>
         <p className="text-center text-[var(--text-muted)] text-base mb-10">
-          13 предметов · от школьной программы до университета
+          {t("landing.subjectsDesc")}
         </p>
-        <SubjectGrid subjects={SUBJECTS} />
+        <SubjectGrid subjects={subjects} />
       </section>
 
       {/* HOW TO LEARN */}
@@ -400,13 +412,16 @@ export default async function HomePage() {
         <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-3xl p-5 sm:p-8 md:p-10">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
-              <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">Как учиться</div>
+              <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">{t("landing.howLearnTitle")}</div>
               <h2 className="text-3xl font-bold mb-4 leading-tight">
-                3 приёма, которые делают<br />
-                <span className="text-brand-600 dark:text-brand-500 italic">учёбу эффективной</span>
+                {locale === "en" ? (
+                  <>3 techniques that make<br /><span className="text-brand-600 dark:text-brand-500 italic">learning effective</span></>
+                ) : (
+                  <>3 приёма, которые делают<br /><span className="text-brand-600 dark:text-brand-500 italic">учёбу эффективной</span></>
+                )}
               </h2>
               <Link href="/guide" className="inline-flex items-center gap-2 text-brand-600 dark:text-brand-500 text-sm font-medium hover:underline">
-                Полный гайд →
+                {t("landing.howLearnGuide")}
               </Link>
             </div>
             <div className="space-y-4">
@@ -417,8 +432,8 @@ export default async function HomePage() {
                   </svg>
                 </span>
                 <div>
-                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">Не понял — попроси объяснить иначе</div>
-                  <div className="text-xs text-[var(--text-secondary)]">«Объясни как будто я школьник» — Ментора перестроит ответ</div>
+                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">{t("landing.tip1Title")}</div>
+                  <div className="text-xs text-[var(--text-secondary)]">{t("landing.tip1Desc")}</div>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -428,8 +443,8 @@ export default async function HomePage() {
                   </svg>
                 </span>
                 <div>
-                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">Напиши «квиз» — получи 5 вопросов</div>
-                  <div className="text-xs text-[var(--text-secondary)]">Ментора проверит, что ты знаешь, а что нет</div>
+                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">{t("landing.tip2Title")}</div>
+                  <div className="text-xs text-[var(--text-secondary)]">{t("landing.tip2Desc")}</div>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -439,8 +454,8 @@ export default async function HomePage() {
                   </svg>
                 </span>
                 <div>
-                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">В конце — попроси «что я узнал»</div>
-                  <div className="text-xs text-[var(--text-secondary)]">Ментора даст итог сессии в 3–5 тезисах</div>
+                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">{t("landing.tip3Title")}</div>
+                  <div className="text-xs text-[var(--text-secondary)]">{t("landing.tip3Desc")}</div>
                 </div>
               </div>
             </div>
@@ -448,70 +463,76 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ЕГЭ/ОГЭ COMING SOON */}
-      <section className="px-6 py-16">
-        <div className="max-w-6xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl bg-gray-900 dark:bg-[#0a0a18] text-white p-8 md:p-12">
-            <div className="absolute inset-0 pointer-events-none" aria-hidden>
-              <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 80% 50%, #4561E820 0%, transparent 60%)" }} />
-            </div>
-            <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-600/20 text-brand-400 text-xs font-bold rounded-full mb-5 tracking-widest uppercase">
-                  Скоро — июнь 2026
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
-                  Режим подготовки<br />
-                  <span className="text-brand-400 italic">к ЕГЭ и ОГЭ</span>
-                </h2>
-                <p className="text-gray-400 leading-relaxed mb-6">
-                  Специальный режим с реальными заданиями, трекером готовности и прогнозом результата. Идеально к сезону экзаменов.
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-300">
-                  <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Реальные задания ЕГЭ/ОГЭ</span>
-                  <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Трекер готовности к экзамену</span>
-                  <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Прогноз результата</span>
-                  <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Все 13 предметов</span>
-                </div>
+      {/* ЕГЭ/ОГЭ COMING SOON — Russian only */}
+      {locale === "ru" && (
+        <section className="px-6 py-16">
+          <div className="max-w-6xl mx-auto">
+            <div className="relative overflow-hidden rounded-3xl bg-gray-900 dark:bg-[#0a0a18] text-white p-8 md:p-12">
+              <div className="absolute inset-0 pointer-events-none" aria-hidden>
+                <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 80% 50%, #4561E820 0%, transparent 60%)" }} />
               </div>
-              <div className="flex flex-col gap-4">
-                <div className="bg-white/5 rounded-2xl p-5 border border-white/10">
-                  <div className="text-xs text-gray-400 mb-1">Пример: трекер готовности</div>
-                  <div className="text-xl font-bold mb-3">60% программы пройдено</div>
-                  <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-                    <div className="h-full rounded-full bg-brand-500" style={{ width: "60%" }} />
+              <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-600/20 text-brand-400 text-xs font-bold rounded-full mb-5 tracking-widest uppercase">
+                    Скоро — июнь 2026
                   </div>
-                  <div className="text-xs text-gray-500 mt-2">До экзамена: 40 дней · История России · ЕГЭ 2026</div>
+                  <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
+                    Режим подготовки<br />
+                    <span className="text-brand-400 italic">к ЕГЭ и ОГЭ</span>
+                  </h2>
+                  <p className="text-gray-400 leading-relaxed mb-6">
+                    Специальный режим с реальными заданиями, трекером готовности и прогнозом результата. Идеально к сезону экзаменов.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-300">
+                    <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Реальные задания ЕГЭ/ОГЭ</span>
+                    <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Трекер готовности к экзамену</span>
+                    <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Прогноз результата</span>
+                    <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Все 13 предметов</span>
+                  </div>
                 </div>
-                <Link href="/auth" className="block text-center py-3 px-6 bg-brand-600 text-white font-semibold rounded-xl hover:bg-brand-700 transition-colors text-sm">
-                  Начать готовиться уже сейчас
-                </Link>
+                <div className="flex flex-col gap-4">
+                  <div className="bg-white/5 rounded-2xl p-5 border border-white/10">
+                    <div className="text-xs text-gray-400 mb-1">Пример: трекер готовности</div>
+                    <div className="text-xl font-bold mb-3">60% программы пройдено</div>
+                    <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                      <div className="h-full rounded-full bg-brand-500" style={{ width: "60%" }} />
+                    </div>
+                    <div className="text-xs text-gray-500 mt-2">До экзамена: 40 дней · История России · ЕГЭ 2026</div>
+                  </div>
+                  <Link href="/auth" className="block text-center py-3 px-6 bg-brand-600 text-white font-semibold rounded-xl hover:bg-brand-700 transition-colors text-sm">
+                    Начать готовиться уже сейчас
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* HOW IT WORKS */}
       <section id="how" className="px-6 py-20" style={{ background: "var(--bg-secondary)" }}>
         <div className="max-w-6xl mx-auto">
-          <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">Как это работает</div>
+          <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">{t("landing.howLabel")}</div>
           <h2 className="text-4xl font-bold mb-3 leading-tight">
-            От первого вопроса<br />
-            до <span className="text-brand-600 dark:text-brand-500 italic">реального знания</span>
+            {t("landing.howHeading1")}<br />
+            {locale === "en" ? (
+              <span className="text-brand-600 dark:text-brand-500 italic">{t("landing.howHeading2")}</span>
+            ) : (
+              <>до <span className="text-brand-600 dark:text-brand-500 italic">{t("landing.howHeading2")}</span></>
+            )}
           </h2>
           <p className="text-[var(--text-secondary)] mb-12 max-w-lg">
-            Никаких лекций и скучных тестов. Только живой диалог — ты спрашиваешь, Ментора объясняет.
+            {t("landing.howIntroSub")}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
-            {STEPS.map((s) => (
-              <div key={s.n} className="bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border)] relative">
-                {s.badge && (
-                  <span className="absolute top-3 right-3 text-[9px] font-bold bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 px-1.5 py-0.5 rounded">ВАУ</span>
+            {STEP_NUMS.map((n, i) => (
+              <div key={n} className="bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border)] relative">
+                {i === STEP_BADGE_IDX && (
+                  <span className="absolute top-3 right-3 text-[9px] font-bold bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 px-1.5 py-0.5 rounded">{t("landing.stepBadge")}</span>
                 )}
-                <div className="text-xs font-bold text-[var(--text-muted)] mb-3">{s.n}</div>
-                <div className="font-semibold text-sm mb-1.5 text-[var(--text)]">{s.title}</div>
-                <div className="text-xs text-[var(--text-secondary)] leading-relaxed">{s.desc}</div>
+                <div className="text-xs font-bold text-[var(--text-muted)] mb-3">{n}</div>
+                <div className="font-semibold text-sm mb-1.5 text-[var(--text)]">{t(`steps.${n}.title`)}</div>
+                <div className="text-xs text-[var(--text-secondary)] leading-relaxed">{t(`steps.${n}.desc`)}</div>
               </div>
             ))}
           </div>
@@ -520,34 +541,34 @@ export default async function HomePage() {
 
       {/* TESTIMONIALS */}
       <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">Отзывы</div>
-        <h2 className="text-4xl font-bold mb-3 leading-tight">Уже учатся с Mentora</h2>
-        <p className="text-[var(--text-secondary)] mb-10 text-lg">Реальные истории реальных учеников</p>
+        <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">{t("landing.testimonialsLabel")}</div>
+        <h2 className="text-4xl font-bold mb-3 leading-tight">{t("landing.testimonialsTitle")}</h2>
+        <p className="text-[var(--text-secondary)] mb-10 text-lg">{t("landing.testimonialsSub")}</p>
         <div className="grid md:grid-cols-3 gap-6">
-          {TESTIMONIALS.map((t, i) => {
+          {TESTIMONIALS.map((testimonial, i) => {
             const accentColors = ["#4561E8", "#FF7A00", "#10B981"];
             const accent = accentColors[i % accentColors.length];
             return (
-              <div key={t.name} className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col gap-4 relative overflow-hidden">
+              <div key={testimonial.name} className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col gap-4 relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style={{ background: accent }} />
-                <div className="text-5xl leading-none font-black select-none -mt-1 -mb-2" style={{ color: accent, opacity: 0.2 }}>"</div>
+                <div className="text-5xl leading-none font-black select-none -mt-1 -mb-2" style={{ color: accent, opacity: 0.2 }}>&quot;</div>
                 <div className="flex gap-0.5">
-                  {Array.from({ length: t.stars }).map((_, j) => (
+                  {Array.from({ length: testimonial.stars }).map((_, j) => (
                     <span key={j} className="text-amber-400 text-sm">★</span>
                   ))}
-                  {Array.from({ length: 5 - t.stars }).map((_, j) => (
+                  {Array.from({ length: 5 - testimonial.stars }).map((_, j) => (
                     <span key={`e-${j}`} className="text-gray-300 dark:text-gray-700 text-sm">★</span>
                   ))}
                 </div>
-                <p className="text-[var(--text-secondary)] text-sm leading-relaxed flex-1">{t.text}</p>
-                <div className="text-xs font-semibold px-2 py-1 rounded-md w-fit" style={{ background: `${accent}15`, color: accent }}>{t.xp}</div>
+                <p className="text-[var(--text-secondary)] text-sm leading-relaxed flex-1">{testimonial.text}</p>
+                <div className="text-xs font-semibold px-2 py-1 rounded-md w-fit" style={{ background: `${accent}15`, color: accent }}>{testimonial.xp}</div>
                 <div className="flex items-center gap-3 pt-2 border-t border-[var(--border-light)]">
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${t.avatarBg}`}>
-                    {t.avatar}
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${testimonial.avatarBg}`}>
+                    {testimonial.avatar}
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-[var(--text)]">{t.name}</div>
-                    <div className="text-xs text-[var(--text-muted)]">{t.role}</div>
+                    <div className="text-sm font-semibold text-[var(--text)]">{testimonial.name}</div>
+                    <div className="text-xs text-[var(--text-muted)]">{testimonial.role}</div>
                   </div>
                 </div>
               </div>
@@ -563,36 +584,41 @@ export default async function HomePage() {
             style={{ background: "radial-gradient(ellipse at 50% 120%, #4561E840 0%, transparent 70%)" }} />
         </div>
         <div className="relative z-10">
-          <p className="text-gray-500 text-xs font-semibold tracking-[0.2em] uppercase mb-8">Твой персональный AI-ментор</p>
+          <p className="text-gray-500 text-xs font-semibold tracking-[0.2em] uppercase mb-8">{t("landing.ctaTagline")}</p>
           <h2 className="text-3xl sm:text-5xl font-bold mb-5 leading-tight">
-            Учись так,<br />
-            как тебе{" "}
-            <span className="text-[#4561E8] italic">удобно.</span>
+            {t("landing.ctaHero1")}<br />
+            {locale === "en" ? (
+              t("landing.ctaHero2")
+            ) : (
+              <>как тебе{" "}<span className="text-[#4561E8] italic">удобно.</span></>
+            )}
           </h2>
           <p className="text-gray-400 text-lg mb-12 max-w-md mx-auto leading-relaxed">
-            В своём темпе. Задавай любые вопросы.<br />
-            Твои вопросы видишь только ты.
+            {t("landing.ctaLine1")}<br />
+            {t("landing.ctaLine2")}
           </p>
           <Link href="/auth"
             className="inline-flex items-center gap-2 px-8 py-4 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors text-sm">
-            Начать бесплатно
+            {t("landing.ctaButton")}
           </Link>
-          <p className="text-gray-600 text-xs mt-5">Без карты. Без обязательств.</p>
+          <p className="text-gray-600 text-xs mt-5">{t("landing.ctaNoCard")}</p>
         </div>
       </section>
 
       <footer className="py-8 border-t border-[var(--border)]" style={{ background: "var(--bg)" }}>
         <div className="max-w-6xl mx-auto px-6 flex flex-col items-center gap-4 text-xs text-[var(--text-muted)]">
           <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
-            <span>© 2026 Mentora</span>
+            <span>{t("landing.footerRights")}</span>
             <div className="flex gap-6">
-              <Link href="/privacy" className="hover:text-[var(--text)] transition-colors">Конфиденциальность</Link>
-              <Link href="/terms" className="hover:text-[var(--text)] transition-colors">Условия использования</Link>
+              <Link href="/privacy" className="hover:text-[var(--text)] transition-colors">{t("landing.footerPrivacy")}</Link>
+              <Link href="/terms" className="hover:text-[var(--text)] transition-colors">{t("landing.footerTerms")}</Link>
             </div>
           </div>
-          <p className="text-center" style={{ fontSize: "10px", opacity: 0.4, maxWidth: 480, lineHeight: 1.4 }}>
-            Instagram — продукт компании Meta Platforms Inc. Деятельность организации Meta Platforms признана экстремистской и запрещена на территории Российской Федерации.
-          </p>
+          {locale === "ru" && (
+            <p className="text-center" style={{ fontSize: "10px", opacity: 0.4, maxWidth: 480, lineHeight: 1.4 }}>
+              Instagram — продукт компании Meta Platforms Inc. Деятельность организации Meta Platforms признана экстремистской и запрещена на территории Российской Федерации.
+            </p>
+          )}
         </div>
       </footer>
     </div>
