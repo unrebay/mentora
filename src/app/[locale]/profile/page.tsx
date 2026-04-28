@@ -402,7 +402,7 @@ export default async function ProfilePage() {
         {/* ── Support ──────────────────────────────────────── */}
         <div className="pb-8 flex flex-col items-center gap-3 text-center">
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>Вопросы или проблемы?</p>
-          <div className="flex gap-2 flex-wrap justify-center">
+          <div className="flex gap-2 flex-wrap justify-center items-start">
             <TelegramSupportButton label="Написать в поддержку" supportCode={makeSupportCode(user.id)} />
             <InstagramButton label="@mentora.su" />
           </div>
