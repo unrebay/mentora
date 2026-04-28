@@ -51,8 +51,8 @@ export default function Logo({
         <span
           style={{
             position: "absolute",
-            top: "-0.72em",
-            right: "-2.4em",
+            top: "-0.9em",
+            right: "-2.9em",
             fontSize: "0.30em",
             fontFamily: "system-ui, -apple-system, sans-serif",
             fontStyle: "normal",

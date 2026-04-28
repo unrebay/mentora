@@ -1,10 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function LandingNav() {
+  const t = useTranslations("nav");
   const [isDark, setIsDark] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -19,7 +22,6 @@ export default function LandingNav() {
     return () => window.removeEventListener("scroll", update);
   }, []);
 
-  // Close menu when user scrolls
   useEffect(() => {
     if (!mobileOpen) return;
     function close() { setMobileOpen(false); }
@@ -49,13 +51,14 @@ export default function LandingNav() {
           className="hidden md:flex items-center justify-center gap-8 text-sm transition-colors duration-300"
           style={{ color: linkColor }}
         >
-          <a href="#subjects" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.9 }}>Предметы</a>
-          <a href="#how" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.9 }}>Как работает</a>
-          <Link href="/pricing" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.9 }}>Тарифы</Link>
+          <a href="#subjects" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.9 }}>{t("subjects")}</a>
+          <a href="#how" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.9 }}>{t("how")}</a>
+          <Link href="/pricing" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.9 }}>{t("pricing")}</Link>
         </div>
 
         {/* Right actions */}
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex items-center justify-end gap-2">
+          <LanguageSwitcher dark={isDark} />
           <ThemeToggle />
 
           {/* Desktop: Войти */}
@@ -64,7 +67,7 @@ export default function LandingNav() {
             className="hidden md:inline px-4 py-2 text-sm font-medium transition-colors duration-300"
             style={{ color: linkColor }}
           >
-            Войти
+            {t("login")}
           </Link>
 
           {/* Desktop: CTA */}
@@ -72,7 +75,7 @@ export default function LandingNav() {
             href="/auth"
             className="hidden md:inline-flex px-5 py-2.5 bg-brand-600 text-white text-sm font-semibold rounded-xl hover:bg-brand-700 transition-colors"
           >
-            Попробовать бесплатно
+            {t("tryFree")}
           </Link>
 
           {/* Mobile: CTA (compact) */}
@@ -80,7 +83,7 @@ export default function LandingNav() {
             href="/auth"
             className="md:hidden inline-flex px-3 py-2 bg-brand-600 text-white text-sm font-semibold rounded-xl hover:bg-brand-700 transition-colors"
           >
-            Войти
+            {t("tryFreeShort")}
           </Link>
 
           {/* Mobile: hamburger */}
@@ -88,7 +91,7 @@ export default function LandingNav() {
             className="md:hidden flex flex-col justify-center items-center w-9 h-9 gap-[5px] rounded-lg transition-colors shrink-0"
             style={{ color: isDark ? "rgba(255,255,255,0.8)" : "var(--text)" }}
             onClick={() => setMobileOpen((v) => !v)}
-            aria-label={mobileOpen ? "Закрыть меню" : "Открыть меню"}
+            aria-label={mobileOpen ? t("closeMenu") : t("openMenu")}
           >
             <span
               className="block w-5 h-0.5 bg-current transition-all duration-200 origin-center"
@@ -121,7 +124,7 @@ export default function LandingNav() {
             style={{ color: linkColor, borderColor }}
             onClick={() => setMobileOpen(false)}
           >
-            Предметы
+            {t("subjects")}
           </a>
           <a
             href="#how"
@@ -129,16 +132,20 @@ export default function LandingNav() {
             style={{ color: linkColor, borderColor }}
             onClick={() => setMobileOpen(false)}
           >
-            Как работает
+            {t("how")}
           </a>
           <Link
             href="/pricing"
-            className="text-sm font-medium py-2.5"
-            style={{ color: linkColor }}
+            className="text-sm font-medium py-2.5 border-b"
+            style={{ color: linkColor, borderColor }}
             onClick={() => setMobileOpen(false)}
           >
-            Тарифы
+            {t("pricing")}
           </Link>
+          {/* Language switcher in mobile menu */}
+          <div className="pt-3 flex items-center gap-3">
+            <LanguageSwitcher dark={isDark} />
+          </div>
         </div>
       )}
     </nav>

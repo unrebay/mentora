@@ -1,61 +1,50 @@
+import createIntlMiddleware from "next-intl/middleware";
+import { routing } from "./i18n/routing";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const handleI18nRouting = createIntlMiddleware(routing);
+
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+  const { pathname } = request.nextUrl;
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
-
-  const { data: { user } } = await supabase.auth.getUser();
+  // Strip /en prefix for path matching (ru is default, no prefix)
+  const localelessPath = pathname.replace(/^\/(en)(\/|$)/, "/").replace(/\/+/g, "/") || "/";
 
   const protectedPaths = ["/dashboard", "/learn", "/onboarding", "/profile"];
-  const isProtected = protectedPaths.some((p) =>
-    request.nextUrl.pathname.startsWith(p)
-  );
+  const isProtected = protectedPaths.some((p) => localelessPath.startsWith(p));
+  const isAuthPage = localelessPath === "/auth" || localelessPath.startsWith("/auth/");
 
-  // Build canonical origin — same pattern as auth/callback/route.ts.
-  // request.url contains localhost:3000 when nginx doesn't forward
-  // x-forwarded-host, so we prefer NEXT_PUBLIC_BASE_URL first.
+  // Build canonical origin
   const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL ?? "").replace(/\/$/, "");
   const forwardedHost = request.headers.get("x-forwarded-host");
   const proto = request.headers.get("x-forwarded-proto") ?? "https";
   const origin = baseUrl || (forwardedHost ? `${proto}://${forwardedHost}` : new URL(request.url).origin);
 
-  // Redirect unauthenticated users to auth
+  // Supabase auth check (read-only — no cookie refresh here to keep middleware simple)
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll: () => request.cookies.getAll(), setAll: () => {} } }
+  );
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Locale-aware redirects
+  const localePrefix = pathname.startsWith("/en") ? "/en" : "";
   if (!user && isProtected) {
-    return NextResponse.redirect(new URL("/auth", origin));
+    return NextResponse.redirect(new URL(`${localePrefix}/auth`, origin));
+  }
+  if (user && isAuthPage) {
+    return NextResponse.redirect(new URL(`${localePrefix}/dashboard`, origin));
   }
 
-  // Redirect logged-in users away from auth page
-  if (user && request.nextUrl.pathname === "/auth") {
-    return NextResponse.redirect(new URL("/dashboard", origin));
-  }
-
-  // Expose pathname to server layouts via header
-  supabaseResponse.headers.set("x-pathname", request.nextUrl.pathname);
-
-  return supabaseResponse;
+  // Let next-intl handle locale routing (prefix, detection, rewrite)
+  const response = handleI18nRouting(request);
+  response.headers.set("x-pathname", pathname);
+  return response;
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api|auth/callback).*)"],
+  // Exclude: API, _next, static files, admin, auth/callback
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|admin|auth/callback|.*\\..*).*)"],
 };

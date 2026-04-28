@@ -1,13 +1,15 @@
 "use client";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import { usePathname, Link } from "@/i18n/navigation";
 import MeLogo from "@/components/MeLogo";
-import Link from "next/link";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
 import { TourButtonDesktop } from "@/components/TourButton";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
-function pluralDays(n: number): string {
+function getDaysLabel(n: number, locale: string): string {
+  if (locale === "en") return n === 1 ? "day" : "days";
   const m10 = n % 10, m100 = n % 100;
   if (m100 >= 11 && m100 <= 14) return "дней";
   if (m10 === 1) return "день";
@@ -15,7 +17,8 @@ function pluralDays(n: number): string {
   return "дней";
 }
 
-function pluralMenty(n: number): string {
+function getMentyLabel(n: number, locale: string): string {
+  if (locale === "en") return "XP";
   const m10 = n % 10, m100 = n % 100;
   if (m100 >= 11 && m100 <= 14) return "мент";
   if (m10 === 1) return "мента";
@@ -39,6 +42,8 @@ export default function DashboardNav({
 }: DashboardNavProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const locale = useLocale();
+  const t = useTranslations();
   const dk = variant === "dark";
 
   function isActive(href: string) {
@@ -93,6 +98,22 @@ export default function DashboardNav({
     : "var(--bg-nav)";
   const navBlur = "blur(28px) saturate(1.8)";
 
+  const navLinks = [
+    { href: "/dashboard",           label: t("dashboard.nav.subjects") },
+    { href: "/dashboard/progress",  label: t("dashboard.nav.progress") },
+    { href: "/dashboard/analytics", label: t("dashboard.nav.analytics") },
+    { href: "/knowledge",           label: t("dashboard.nav.galaxy") },
+    { href: "/profile",             label: t("dashboard.nav.profile") },
+    { href: "/dashboard/about",     label: t("dashboard.nav.about") },
+  ];
+
+  const mobileLinks = [
+    ...navLinks.slice(0, 3),
+    { href: "/knowledge", label: t("dashboard.nav.galaxyFull") },
+    ...navLinks.slice(4),
+    ...(!isPro ? [{ href: "/pricing", label: t("nav.pricing") }] : []),
+  ];
+
   return (
     /* Outer sticky strip — transparent, just provides the floating gap */
     <nav
@@ -140,22 +161,15 @@ export default function DashboardNav({
           <Logo size="sm" textColor={dk ? "rgba(255,255,255,0.95)" : undefined} />
 
           <div className="hidden md:flex items-center gap-0.5 ml-6">
-            {[
-              { href: "/dashboard",          label: "Предметы" },
-              { href: "/dashboard/progress", label: "Прогресс" },
-              { href: "/dashboard/analytics",label: "Аналитика" },
-              { href: "/knowledge",          label: "Галактика" },
-              { href: "/profile",            label: "Профиль" },
-              { href: "/dashboard/about",    label: "О проекте" },
-            ].map(({ href, label }) => (
-              <a
+            {navLinks.map(({ href, label }) => (
+              <Link
                 key={href}
                 href={href}
                 className={navLinkClass(href)}
                 style={navLinkStyle(href)}
               >
                 {label}
-              </a>
+              </Link>
             ))}
           </div>
         </div>
@@ -164,6 +178,7 @@ export default function DashboardNav({
         <div className="flex items-center gap-1.5">
           <TourButtonDesktop forceDark={dk} />
           <ThemeToggle forceDark={dk} />
+          <LanguageSwitcher dark={dk} />
 
           {totalXP > 0 && (
             <div className="hidden sm:flex items-center gap-1.5" data-tour="nav-stats">
@@ -209,7 +224,7 @@ export default function DashboardNav({
                   <svg viewBox="0 0 24 24" fill="none" style={{ width: 14, height: 14, flexShrink: 0 }}>
                     <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="rgba(255,255,255,0.95)"/>
                   </svg>
-                  <span style={{ lineHeight: 1 }}>{currentStreak} {pluralDays(currentStreak)}</span>
+                  <span style={{ lineHeight: 1 }}>{currentStreak} {getDaysLabel(currentStreak, locale)}</span>
                 </div>
               )}
             </div>
@@ -233,7 +248,7 @@ export default function DashboardNav({
                 lineHeight: 1,
               }}
             >
-              Тарифы
+              {t("nav.pricing")}
             </Link>
           )}
 
@@ -243,14 +258,14 @@ export default function DashboardNav({
               className="text-xs transition-colors px-2 py-1.5"
               style={{ color: dk ? "rgba(255,255,255,0.35)" : "var(--text-muted)" }}
             >
-              Выйти
+              {t("dashboard.logout")}
             </button>
           </form>
 
           {/* Burger — mobile */}
           <button
             onClick={() => setOpen((o) => !o)}
-            aria-label={open ? "Закрыть меню" : "Открыть меню"}
+            aria-label={open ? t("nav.closeMenu") : t("nav.openMenu")}
             aria-expanded={open}
             className="md:hidden flex items-center justify-center w-8 h-8 rounded-full transition-all"
             style={{
@@ -290,16 +305,8 @@ export default function DashboardNav({
           }}
         >
           <div className="px-3 py-2 flex flex-col gap-0.5">
-            {[
-              { href: "/dashboard",           label: "Предметы" },
-              { href: "/dashboard/progress",  label: "Прогресс" },
-              { href: "/dashboard/analytics", label: "Аналитика" },
-              { href: "/knowledge",           label: "Галактика знаний" },
-              { href: "/profile",             label: "Профиль" },
-              { href: "/dashboard/about",     label: "О проекте" },
-              ...(!isPro ? [{ href: "/pricing", label: "Тарифы" }] : []),
-            ].map(({ href, label }) => (
-              <a
+            {mobileLinks.map(({ href, label }) => (
+              <Link
                 key={href}
                 href={href}
                 onClick={() => setOpen(false)}
@@ -313,7 +320,7 @@ export default function DashboardNav({
                 }}
               >
                 {label}
-              </a>
+              </Link>
             ))}
 
             {totalXP > 0 && (
@@ -326,14 +333,14 @@ export default function DashboardNav({
                     colorM={dk ? "rgba(255,255,255,0.95)" : undefined}
                     colorE={dk ? "#6b87ff" : undefined}
                   />
-                  {totalXP} {pluralMenty(totalXP)}
+                  {totalXP} {getMentyLabel(totalXP, locale)}
                 </span>
                 {currentStreak > 0 && (
                   <span className="flex items-center gap-1 text-orange-500 font-medium text-xs">
                     <svg viewBox="0 0 14 14" fill="currentColor" className="w-3.5 h-3.5">
                       <path d="M7 13C4.79 13 3 11.21 3 9c0-1.63.93-3.33 1.86-4.5.31-.39.93-.16.93.31v.15c0 .47.31.85.78.93.31.08.62-.08.78-.31C7.82 4.73 8.07 4.2 8.07 4.2c.23-.39.78-.31.93.08.31.78.47 1.63.23 2.33.7-.62.78-1.63.78-1.63 0-.47.54-.78.93-.54C11.7 5.12 12.4 6.36 12.4 7.77 12.4 10.55 10.44 13 7 13z"/>
                     </svg>
-                    {currentStreak} {pluralDays(currentStreak)}
+                    {currentStreak} {getDaysLabel(currentStreak, locale)}
                   </span>
                 )}
               </div>
@@ -343,13 +350,17 @@ export default function DashboardNav({
               className="border-t mt-1 pt-1"
               style={{ borderColor: dk ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)" }}
             >
+              {/* Language switcher in mobile */}
+              <div className="px-3 py-2">
+                <LanguageSwitcher dark={dk} />
+              </div>
               <form action={logoutAction}>
                 <button
                   type="submit"
                   className="w-full text-left flex items-center px-3 py-2.5 rounded-xl text-sm transition-colors"
                   style={{ color: dk ? "rgba(255,255,255,0.3)" : "var(--text-muted)" }}
                 >
-                  Выйти
+                  {t("dashboard.logout")}
                 </button>
               </form>
             </div>
