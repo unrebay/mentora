@@ -3,9 +3,16 @@
  * update-bot-knowledge.js
  * ─────────────────────────────────────────────────────────────────────────────
  * Обновляет файл src/lib/bot-knowledge.ts на основе актуального состояния
- * платформы Mentora. Запускать после значимых изменений в платформе:
+ * платформы Mentora.
  *
- *   npm run update-bot-knowledge
+ * КАК ЗАПУСКАТЬ:
+ *   Скрипт живёт в GitHub-репо (unrebay/mentora). Запускается через AI-ассистента
+ *   в Cowork — просто скажи: "обнови знания бота".
+ *
+ *   Если клонировал репо локально:
+ *     cd /path/to/mentora
+ *     node scripts/update-bot-knowledge.js
+ *     node scripts/update-bot-knowledge.js --auto   # без вопросов (для CI)
  *
  * Что делает скрипт:
  *  1. Читает текущий bot-knowledge.ts
