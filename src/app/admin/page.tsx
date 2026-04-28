@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, createContext, useContext } from "react";
 import Link from "next/link";
+import { useTheme } from "@/components/ThemeProvider";
+import ThemeToggle from "@/components/ThemeToggle";
 
 // ── Pricing ───────────────────────────────────────────────────────────────────
 const PRO_M = 399, PRO_Y = 2990, ULT_M = 799, ULT_Y = 5990;
@@ -25,18 +27,41 @@ interface ChunkRow {
   id: string; subject: string; topic: string | null; content: string; source: string | null; created_at: string;
 }
 
-// ── Tokens ────────────────────────────────────────────────────────────────────
-const BG    = "#07080e";
-const SIDE  = "#0c0e1a";
-const CARD  = "rgba(255,255,255,0.038)";
-const BOR   = "rgba(255,255,255,0.08)";
+// ── Fixed accent colours (same in both themes) ────────────────────────────────
 const BRAND = "#4561E8";
 const GREEN = "#22c55e";
 const AMBER = "#f59e0b";
 const RED   = "#ef4444";
-const TEXT  = "#e2e8f0";
-const MUTED = "#64748b";
-const inp   = { padding: "9px 12px", background: "rgba(255,255,255,0.05)", border: `1px solid ${BOR}`, borderRadius: 10, color: TEXT, fontSize: 13, outline: "none", width: "100%", boxSizing: "border-box" as const };
+
+// ── Theme token sets ──────────────────────────────────────────────────────────
+interface Tok {
+  BG: string; SIDE: string; CARD: string; BOR: string; TEXT: string; MUTED: string;
+  inp: React.CSSProperties;
+}
+
+const darkTok: Tok = {
+  BG:   "#07080e",
+  SIDE: "#0c0e1a",
+  CARD: "rgba(255,255,255,0.038)",
+  BOR:  "rgba(255,255,255,0.08)",
+  TEXT: "#e2e8f0",
+  MUTED:"#64748b",
+  inp:  { padding: "9px 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, color: "#e2e8f0", fontSize: 13, outline: "none", width: "100%", boxSizing: "border-box" as const },
+};
+
+const lightTok: Tok = {
+  BG:   "#f0f4ff",
+  SIDE: "#ffffff",
+  CARD: "rgba(69,97,232,0.04)",
+  BOR:  "rgba(69,97,232,0.1)",
+  TEXT: "#1e293b",
+  MUTED:"#94a3b8",
+  inp:  { padding: "9px 12px", background: "rgba(69,97,232,0.04)", border: "1px solid rgba(69,97,232,0.1)", borderRadius: 10, color: "#1e293b", fontSize: 13, outline: "none", width: "100%", boxSizing: "border-box" as const },
+};
+
+// ── Token context ─────────────────────────────────────────────────────────────
+const TokCtx = createContext<Tok>(darkTok);
+const useTok = () => useContext(TokCtx);
 
 // ── Utils ─────────────────────────────────────────────────────────────────────
 const N = (n: number, sfx = "") => n.toLocaleString("ru-RU") + sfx;
@@ -52,7 +77,7 @@ function ago(iso: string | null) {
 function planMeta(p: string) {
   if (p === "ultima") return { l: "Ultima", c: "#a78bfa" };
   if (p === "pro")    return { l: "Pro",    c: "#60a5fa" };
-  return { l: "Free", c: MUTED };
+  return { l: "Free", c: "#94a3b8" };
 }
 
 // ── SUBJECT names ─────────────────────────────────────────────────────────────
@@ -66,12 +91,15 @@ const SUBS = Object.keys(SN);
 
 // ── Primitive components ──────────────────────────────────────────────────────
 function Card({ ch, style }: { ch: React.ReactNode; style?: React.CSSProperties }) {
+  const { CARD, BOR } = useTok();
   return <div style={{ background: CARD, border: `1px solid ${BOR}`, borderRadius: 16, padding: "20px 24px", ...style }}>{ch}</div>;
 }
-function Metric({ label, value, sub, color = TEXT }: { label: string; value: string | number; sub?: string; color?: string }) {
+function Metric({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color?: string }) {
+  const { TEXT, MUTED } = useTok();
+  const c = color ?? TEXT;
   return <Card ch={<>
     <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED, marginBottom: 8 }}>{label}</p>
-    <p style={{ fontSize: 28, fontWeight: 700, color, lineHeight: 1, marginBottom: sub ? 4 : 0 }}>{typeof value === "number" ? N(value) : value}</p>
+    <p style={{ fontSize: 28, fontWeight: 700, color: c, lineHeight: 1, marginBottom: sub ? 4 : 0 }}>{typeof value === "number" ? N(value) : value}</p>
     {sub && <p style={{ fontSize: 12, color: MUTED }}>{sub}</p>}
   </>} />;
 }
@@ -80,15 +108,18 @@ function Badge({ plan }: { plan: string }) {
   return <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 100, fontSize: 11, fontWeight: 600, background: c + "20", border: `1px solid ${c}40`, color: c }}>{l}</span>;
 }
 function NavBtn({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick(): void }) {
+  const { MUTED } = useTok();
   return <button onClick={onClick} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 10, border: "none", cursor: "pointer", background: active ? BRAND+"22" : "transparent", color: active ? "#a0b4ff" : MUTED, fontSize: 14, fontWeight: active ? 600 : 400, transition: "all .15s", outline: "none" }}>
     <span style={{ opacity: active ? 1 : 0.6 }}>{icon}</span>{label}
   </button>;
 }
 function TH({ label }: { label: string }) {
+  const { BOR, MUTED } = useTok();
   return <th style={{ textAlign: "left", padding: "10px 14px", fontWeight: 500, borderBottom: `1px solid ${BOR}`, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: MUTED }}>{label}</th>;
 }
-function TD({ children, color = TEXT, muted = false }: { children: React.ReactNode; color?: string; muted?: boolean }) {
-  return <td style={{ padding: "10px 14px", color: muted ? MUTED : color, fontSize: 13 }}>{children}</td>;
+function TD({ children, color, muted = false }: { children: React.ReactNode; color?: string; muted?: boolean }) {
+  const { TEXT, MUTED } = useTok();
+  return <td style={{ padding: "10px 14px", color: muted ? MUTED : (color ?? TEXT), fontSize: 13 }}>{children}</td>;
 }
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
@@ -103,8 +134,13 @@ const ISearch  = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 type Tab = "overview" | "users" | "revenue" | "knowledge";
 
 export default function AdminPanel() {
-  const [tab, setTab]       = useState<Tab>("overview");
-  const [stats, setStats]   = useState<Stats | null>(null);
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const tok = isDark ? darkTok : lightTok;
+  const { BG, SIDE, CARD, BOR, TEXT, MUTED } = tok;
+
+  const [tab, setTab]         = useState<Tab>("overview");
+  const [stats, setStats]     = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
   const reload = useCallback(async () => {
@@ -123,201 +159,211 @@ export default function AdminPanel() {
   const arr     = mrr * 12;
 
   const TABS: { id: Tab; icon: React.ReactNode; label: string }[] = [
-    { id: "overview",   icon: IGrid,    label: "Обзор" },
-    { id: "users",      icon: IUsers,   label: "Пользователи" },
-    { id: "revenue",    icon: IRevenue, label: "Доходы" },
-    { id: "knowledge",  icon: IKb,      label: "База знаний" },
+    { id: "overview",  icon: IGrid,    label: "Обзор" },
+    { id: "users",     icon: IUsers,   label: "Пользователи" },
+    { id: "revenue",   icon: IRevenue, label: "Доходы" },
+    { id: "knowledge", icon: IKb,      label: "База знаний" },
   ];
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: BG, color: TEXT, fontFamily: "system-ui,-apple-system,sans-serif" }}>
+    <TokCtx.Provider value={tok}>
+      <div style={{ display: "flex", minHeight: "100vh", background: BG, color: TEXT, fontFamily: "system-ui,-apple-system,sans-serif" }}>
 
-      {/* Sidebar */}
-      <aside style={{ width: 220, flexShrink: 0, background: SIDE, borderRight: `1px solid ${BOR}`, padding: "24px 14px", display: "flex", flexDirection: "column", gap: 4, position: "sticky", top: 0, height: "100vh" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 14px 24px" }}>
-          <div style={{ width: 30, height: 30, borderRadius: 8, background: BRAND, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-          </div>
-          <div><p style={{ fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>Mentora</p><p style={{ fontSize: 10, color: MUTED, margin: 0 }}>Admin · только ты</p></div>
-        </div>
-
-        {TABS.map(t => <NavBtn key={t.id} icon={t.icon} label={t.label} active={tab === t.id} onClick={() => setTab(t.id)} />)}
-
-        <div style={{ flex: 1 }} />
-        <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", color: MUTED, fontSize: 13, textDecoration: "none", borderRadius: 10 }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
-          На сайт
-        </Link>
-        {stats && <p style={{ fontSize: 10, color: MUTED, padding: "2px 14px", opacity: 0.4 }}>{new Date(stats.generatedAt).toLocaleTimeString("ru-RU")}</p>}
-      </aside>
-
-      {/* Content */}
-      <main style={{ flex: 1, padding: "32px 36px", overflowY: "auto", minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
-          <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{TABS.find(t => t.id === tab)?.label}</h1>
-            <p style={{ fontSize: 13, color: MUTED, marginTop: 4, marginBottom: 0 }}>mentora.su / admin</p>
-          </div>
-          <button onClick={reload} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, border: `1px solid ${BOR}`, background: CARD, color: MUTED, fontSize: 13, cursor: "pointer" }}>
-            {IRefresh} Обновить
-          </button>
-        </div>
-
-        {loading && <p style={{ color: MUTED }}>Загрузка...</p>}
-
-        {/* ── OVERVIEW ─────────────────────────────────────────────────────── */}
-        {!loading && stats && tab === "overview" && <>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 16 }}>
-            <Metric label="Пользователей"     value={stats.users.total}      sub={`+${stats.users.newToday} сегодня`} />
-            <Metric label="Активны сегодня"   value={stats.users.activeToday} sub={`неделя: ${N(stats.users.activeWeek)}`} color={GREEN} />
-            <Metric label="Сообщений сегодня" value={stats.chat.messagesToday} sub={`всего: ${N(stats.chat.totalMessages)}`} />
-            <Metric label="MRR (оценка)"      value={R(mrr)} sub={`Pro×${pro} + Ultima×${ult}`} color="#a78bfa" />
+        {/* Sidebar */}
+        <aside style={{ width: 220, flexShrink: 0, background: SIDE, borderRight: `1px solid ${BOR}`, padding: "24px 14px", display: "flex", flexDirection: "column", gap: 4, position: "sticky", top: 0, height: "100vh", boxShadow: isDark ? "none" : "2px 0 12px rgba(69,97,232,0.06)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 14px 24px" }}>
+            <div style={{ width: 30, height: 30, borderRadius: 8, background: BRAND, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+            <div><p style={{ fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>Mentora</p><p style={{ fontSize: 10, color: MUTED, margin: 0 }}>Admin · только ты</p></div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginBottom: 16 }}>
-            <Metric label="Pro"    value={stats.users.pro}    sub={`≈${R(mrrPro)}/мес`} color="#60a5fa" />
-            <Metric label="Ultima" value={stats.users.ultima} sub={`≈${R(mrrUlt)}/мес`} color="#a78bfa" />
-            <Metric label="Free"   value={stats.users.free}   sub={`Пробный истёк: ${stats.users.trialExpired}`} />
+          {TABS.map(t => <NavBtn key={t.id} icon={t.icon} label={t.label} active={tab === t.id} onClick={() => setTab(t.id)} />)}
+
+          <div style={{ flex: 1 }} />
+
+          {/* Theme toggle */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderTop: `1px solid ${BOR}`, marginTop: 8 }}>
+            <span style={{ fontSize: 12, color: MUTED }}>{isDark ? "Тёмная" : "Светлая"}</span>
+            <ThemeToggle />
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
-            <Card ch={<>
-              <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>AI за 7 дней</p>
-              {[
-                ["Запросов пользователей", N(stats.chat.userMessagesWeek)],
-                ["Ответов AI",             N(stats.chat.aiResponsesWeek)],
-                ["Скорость ответа",        stats.chat.aiResponseRate + "%"],
-                ["Чанков в базе",          N(stats.knowledge.chunks)],
-              ].map(([l, v]) => (
-                <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: `1px solid ${BOR}20` }}>
-                  <span style={{ fontSize: 13, color: MUTED }}>{l}</span>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{v}</span>
-                </div>
-              ))}
-            </>} />
+          <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", color: MUTED, fontSize: 13, textDecoration: "none", borderRadius: 10 }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
+            На сайт
+          </Link>
+          {stats && <p style={{ fontSize: 10, color: MUTED, padding: "2px 14px", opacity: 0.4 }}>{new Date(stats.generatedAt).toLocaleTimeString("ru-RU")}</p>}
+        </aside>
 
-            <Card ch={<>
-              <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Топ предметов (30 дн)</p>
-              {stats.chat.topSubjects.map(({ subject, count }, i) => {
-                const max = stats.chat.topSubjects[0]?.count ?? 1;
-                return (
-                  <div key={subject} style={{ marginBottom: 10 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                      <span style={{ fontSize: 12, color: TEXT }}>{SN[subject] ?? subject}</span>
-                      <span style={{ fontSize: 12, color: MUTED }}>{N(count)}</span>
-                    </div>
-                    <div style={{ height: 4, borderRadius: 99, background: BOR }}>
-                      <div style={{ height: "100%", width: (count/max*100) + "%", borderRadius: 99, background: i === 0 ? BRAND : BRAND+"70", transition: "width .4s" }} />
-                    </div>
+        {/* Content */}
+        <main style={{ flex: 1, padding: "32px 36px", overflowY: "auto", minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
+            <div>
+              <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{TABS.find(t => t.id === tab)?.label}</h1>
+              <p style={{ fontSize: 13, color: MUTED, marginTop: 4, marginBottom: 0 }}>mentora.su / admin</p>
+            </div>
+            <button onClick={reload} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, border: `1px solid ${BOR}`, background: CARD, color: MUTED, fontSize: 13, cursor: "pointer" }}>
+              {IRefresh} Обновить
+            </button>
+          </div>
+
+          {loading && <p style={{ color: MUTED }}>Загрузка...</p>}
+
+          {/* ── OVERVIEW ─────────────────────────────────────────────────────── */}
+          {!loading && stats && tab === "overview" && <>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 16 }}>
+              <Metric label="Пользователей"     value={stats.users.total}       sub={`+${stats.users.newToday} сегодня`} />
+              <Metric label="Активны сегодня"   value={stats.users.activeToday} sub={`неделя: ${N(stats.users.activeWeek)}`} color={GREEN} />
+              <Metric label="Сообщений сегодня" value={stats.chat.messagesToday} sub={`всего: ${N(stats.chat.totalMessages)}`} />
+              <Metric label="MRR (оценка)"      value={R(mrr)} sub={`Pro×${pro} + Ultima×${ult}`} color="#a78bfa" />
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginBottom: 16 }}>
+              <Metric label="Pro"    value={stats.users.pro}    sub={`≈${R(mrrPro)}/мес`} color="#60a5fa" />
+              <Metric label="Ultima" value={stats.users.ultima} sub={`≈${R(mrrUlt)}/мес`} color="#a78bfa" />
+              <Metric label="Free"   value={stats.users.free}   sub={`Пробный истёк: ${stats.users.trialExpired}`} />
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+              <Card ch={<>
+                <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>AI за 7 дней</p>
+                {[
+                  ["Запросов пользователей", N(stats.chat.userMessagesWeek)],
+                  ["Ответов AI",             N(stats.chat.aiResponsesWeek)],
+                  ["Скорость ответа",        stats.chat.aiResponseRate + "%"],
+                  ["Чанков в базе",          N(stats.knowledge.chunks)],
+                ].map(([l, v]) => (
+                  <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: `1px solid ${BOR}` }}>
+                    <span style={{ fontSize: 13, color: MUTED }}>{l}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{v}</span>
                   </div>
-                );
-              })}
-            </>} />
-          </div>
+                ))}
+              </>} />
 
-          <Card ch={<>
-            <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Последние регистрации</p>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-              <thead><tr>{["Email","Тариф","Регистрация","Последний визит","Сообщ. сегодня"].map(h => <TH key={h} label={h} />)}</tr></thead>
-              <tbody>{stats.recentUsers.map(u => (
-                <tr key={u.id} style={{ borderBottom: `1px solid ${BOR}20` }}>
-                  <TD>{u.email}</TD>
-                  <TD><Badge plan={u.plan} /></TD>
-                  <TD muted>{ago(u.created_at)} назад</TD>
-                  <TD muted>{ago(u.last_active_at)} назад</TD>
-                  <TD color={u.messages_today > 0 ? GREEN : MUTED}>{u.messages_today || "—"}</TD>
-                </tr>
-              ))}</tbody>
-            </table>
-          </>} />
-        </>}
+              <Card ch={<>
+                <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Топ предметов (30 дн)</p>
+                {stats.chat.topSubjects.map(({ subject, count }, i) => {
+                  const max = stats.chat.topSubjects[0]?.count ?? 1;
+                  return (
+                    <div key={subject} style={{ marginBottom: 10 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                        <span style={{ fontSize: 12, color: TEXT }}>{SN[subject] ?? subject}</span>
+                        <span style={{ fontSize: 12, color: MUTED }}>{N(count)}</span>
+                      </div>
+                      <div style={{ height: 4, borderRadius: 99, background: BOR }}>
+                        <div style={{ height: "100%", width: (count/max*100) + "%", borderRadius: 99, background: i === 0 ? BRAND : BRAND+"70", transition: "width .4s" }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </>} />
+            </div>
 
-        {/* ── USERS ────────────────────────────────────────────────────────── */}
-        {tab === "users" && <UsersTab />}
-
-        {/* ── REVENUE ──────────────────────────────────────────────────────── */}
-        {!loading && stats && tab === "revenue" && <>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginBottom: 16 }}>
-            <Metric label="MRR (оценка)" value={R(mrr)} sub="Monthly Recurring Revenue" color={GREEN} />
-            <Metric label="ARR (оценка)" value={R(arr)} sub="Annual Run Rate" color={GREEN} />
-            <Metric label="Платящих"     value={pro + ult} sub={`из ${N(stats.users.total)} пользователей`} color="#f472b6" />
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
             <Card ch={<>
-              <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 20 }}>Разбивка по тарифам</p>
-              {[
-                { l: "Pro ежемес. (399₽)",    n: Math.round(pro * .7), mrr: Math.round(pro * .7 * PRO_M), c: "#60a5fa" },
-                { l: "Pro годовой (249₽/мес)", n: Math.round(pro * .3), mrr: Math.round(pro * .3 * PRO_Y/12), c: "#60a5fa88" },
-                { l: "Ultima ежемес. (799₽)",  n: Math.round(ult * .7), mrr: Math.round(ult * .7 * ULT_M), c: "#a78bfa" },
-                { l: "Ultima годовой (499₽)",  n: Math.round(ult * .3), mrr: Math.round(ult * .3 * ULT_Y/12), c: "#a78bfa88" },
-              ].map(r => (
-                <div key={r.l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${BOR}` }}>
-                  <div><p style={{ fontSize: 13, color: r.c, fontWeight: 500, margin: 0 }}>{r.l}</p><p style={{ fontSize: 11, color: MUTED, margin: "2px 0 0" }}>~{N(r.n)} пользователей</p></div>
-                  <p style={{ fontSize: 18, fontWeight: 700, color: TEXT, margin: 0 }}>{R(r.mrr)}</p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Последние регистрации</p>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead><tr>{["Email","Тариф","Регистрация","Последний визит","Сообщ. сегодня"].map(h => <TH key={h} label={h} />)}</tr></thead>
+                <tbody>{stats.recentUsers.map(u => (
+                  <tr key={u.id} style={{ borderBottom: `1px solid ${BOR}` }}>
+                    <TD>{u.email}</TD>
+                    <TD><Badge plan={u.plan} /></TD>
+                    <TD muted>{ago(u.created_at)} назад</TD>
+                    <TD muted>{ago(u.last_active_at)} назад</TD>
+                    <TD color={u.messages_today > 0 ? GREEN : MUTED}>{u.messages_today || "—"}</TD>
+                  </tr>
+                ))}</tbody>
+              </table>
+            </>} />
+          </>}
+
+          {/* ── USERS ────────────────────────────────────────────────────────── */}
+          {tab === "users" && <UsersTab />}
+
+          {/* ── REVENUE ──────────────────────────────────────────────────────── */}
+          {!loading && stats && tab === "revenue" && <>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginBottom: 16 }}>
+              <Metric label="MRR (оценка)" value={R(mrr)} sub="Monthly Recurring Revenue" color={GREEN} />
+              <Metric label="ARR (оценка)" value={R(arr)} sub="Annual Run Rate" color={GREEN} />
+              <Metric label="Платящих"     value={pro + ult} sub={`из ${N(stats.users.total)} пользователей`} color="#f472b6" />
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+              <Card ch={<>
+                <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 20 }}>Разбивка по тарифам</p>
+                {[
+                  { l: "Pro ежемес. (399₽)",    n: Math.round(pro * .7), mrr: Math.round(pro * .7 * PRO_M), c: "#60a5fa" },
+                  { l: "Pro годовой (249₽/мес)", n: Math.round(pro * .3), mrr: Math.round(pro * .3 * PRO_Y/12), c: "#60a5fa88" },
+                  { l: "Ultima ежемес. (799₽)",  n: Math.round(ult * .7), mrr: Math.round(ult * .7 * ULT_M), c: "#a78bfa" },
+                  { l: "Ultima годовой (499₽)",  n: Math.round(ult * .3), mrr: Math.round(ult * .3 * ULT_Y/12), c: "#a78bfa88" },
+                ].map(r => (
+                  <div key={r.l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${BOR}` }}>
+                    <div><p style={{ fontSize: 13, color: r.c, fontWeight: 500, margin: 0 }}>{r.l}</p><p style={{ fontSize: 11, color: MUTED, margin: "2px 0 0" }}>~{N(r.n)} пользователей</p></div>
+                    <p style={{ fontSize: 18, fontWeight: 700, color: TEXT, margin: 0 }}>{R(r.mrr)}</p>
+                  </div>
+                ))}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 12 }}>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: TEXT }}>Итого MRR</span>
+                  <span style={{ fontSize: 22, fontWeight: 700, color: GREEN }}>{R(mrr)}</span>
                 </div>
-              ))}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 12 }}>
-                <span style={{ fontSize: 14, fontWeight: 600, color: TEXT }}>Итого MRR</span>
-                <span style={{ fontSize: 22, fontWeight: 700, color: GREEN }}>{R(mrr)}</span>
+              </>} />
+
+              <Card ch={<>
+                <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 20 }}>Сценарии роста</p>
+                {[
+                  { l: "Сейчас",          p: pro,   u: ult,   c: TEXT },
+                  { l: "×2 платящих",     p: pro*2, u: ult*2, c: AMBER },
+                  { l: "×5 платящих",     p: pro*5, u: ult*5, c: GREEN },
+                  { l: "Цель: 100 Pro",   p: 100,   u: 10,    c: BRAND },
+                  { l: "Цель: 500 Pro",   p: 500,   u: 50,    c: "#f472b6" },
+                ].map(s => {
+                  const m = Math.round(s.p*(PRO_M*.7+PRO_Y/12*.3) + s.u*(ULT_M*.7+ULT_Y/12*.3));
+                  return (
+                    <div key={s.l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: `1px solid ${BOR}` }}>
+                      <span style={{ fontSize: 13, color: MUTED }}>{s.l}</span>
+                      <div style={{ textAlign: "right" }}>
+                        <span style={{ fontSize: 15, fontWeight: 700, color: s.c }}>{R(m)}/мес</span>
+                        <p style={{ fontSize: 10, color: MUTED, margin: "2px 0 0" }}>{R(m*12)}/год</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </>} />
+            </div>
+
+            <Card ch={<>
+              <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Конверсия</p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
+                {[
+                  ["Всего платящих",  stats.users.total ? ((pro+ult)/stats.users.total*100).toFixed(1)+"%" : "—"],
+                  ["Free → Pro",      stats.users.total ? (pro/stats.users.total*100).toFixed(1)+"%" : "—"],
+                  ["Free → Ultima",   stats.users.total ? (ult/stats.users.total*100).toFixed(1)+"%" : "—"],
+                  ["Активных/неделю", stats.users.total ? (stats.users.activeWeek/stats.users.total*100).toFixed(0)+"%" : "—"],
+                ].map(([l, v]) => (
+                  <div key={l} style={{ textAlign: "center" }}>
+                    <p style={{ fontSize: 26, fontWeight: 700, color: GREEN, margin: 0 }}>{v}</p>
+                    <p style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>{l}</p>
+                  </div>
+                ))}
               </div>
             </>} />
 
-            <Card ch={<>
-              <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 20 }}>Сценарии роста</p>
-              {[
-                { l: "Сейчас",          p: pro,   u: ult,   c: TEXT },
-                { l: "×2 платящих",     p: pro*2, u: ult*2, c: AMBER },
-                { l: "×5 платящих",     p: pro*5, u: ult*5, c: GREEN },
-                { l: "Цель: 100 Pro",   p: 100,   u: 10,    c: BRAND },
-                { l: "Цель: 500 Pro",   p: 500,   u: 50,    c: "#f472b6" },
-              ].map(s => {
-                const m = Math.round(s.p*(PRO_M*.7+PRO_Y/12*.3) + s.u*(ULT_M*.7+ULT_Y/12*.3));
-                return (
-                  <div key={s.l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: `1px solid ${BOR}30` }}>
-                    <span style={{ fontSize: 13, color: MUTED }}>{s.l}</span>
-                    <div style={{ textAlign: "right" }}>
-                      <span style={{ fontSize: 15, fontWeight: 700, color: s.c }}>{R(m)}/мес</span>
-                      <p style={{ fontSize: 10, color: MUTED, margin: "2px 0 0" }}>{R(m*12)}/год</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </>} />
-          </div>
-
-          <Card ch={<>
-            <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Конверсия</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
-              {[
-                ["Всего платящих",  stats.users.total ? ((pro+ult)/stats.users.total*100).toFixed(1)+"%" : "—"],
-                ["Free → Pro",      stats.users.total ? (pro/stats.users.total*100).toFixed(1)+"%" : "—"],
-                ["Free → Ultima",   stats.users.total ? (ult/stats.users.total*100).toFixed(1)+"%" : "—"],
-                ["Активных/неделю", stats.users.total ? (stats.users.activeWeek/stats.users.total*100).toFixed(0)+"%" : "—"],
-              ].map(([l, v]) => (
-                <div key={l} style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 26, fontWeight: 700, color: GREEN, margin: 0 }}>{v}</p>
-                  <p style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>{l}</p>
-                </div>
-              ))}
+            <div style={{ marginTop: 16, padding: "14px 18px", borderRadius: 12, background: "rgba(239,68,68,0.05)", border: `1px solid rgba(239,68,68,0.15)` }}>
+              <p style={{ fontSize: 12, color: RED, fontWeight: 600, margin: "0 0 4px" }}>⚠️ Оценка</p>
+              <p style={{ fontSize: 13, color: MUTED, margin: 0, lineHeight: 1.6 }}>MRR рассчитан с допущением 70% месячных / 30% годовых подписок. Для точных данных смотри транзакции в YooKassa.</p>
             </div>
-          </>} />
+          </>}
 
-          <div style={{ marginTop: 16, padding: "14px 18px", borderRadius: 12, background: "rgba(239,68,68,0.05)", border: `1px solid rgba(239,68,68,0.15)` }}>
-            <p style={{ fontSize: 12, color: RED, fontWeight: 600, margin: "0 0 4px" }}>⚠️ Оценка</p>
-            <p style={{ fontSize: 13, color: MUTED, margin: 0, lineHeight: 1.6 }}>MRR рассчитан с допущением 70% месячных / 30% годовых подписок. Для точных данных смотри транзакции в YooKassa.</p>
-          </div>
-        </>}
-
-        {/* ── KNOWLEDGE ────────────────────────────────────────────────────── */}
-        {tab === "knowledge" && <KnowledgeTab />}
-      </main>
-    </div>
+          {/* ── KNOWLEDGE ────────────────────────────────────────────────────── */}
+          {tab === "knowledge" && <KnowledgeTab />}
+        </main>
+      </div>
+    </TokCtx.Provider>
   );
 }
 
 // ── Users Tab ─────────────────────────────────────────────────────────────────
 function UsersTab() {
+  const { CARD, BOR, TEXT, MUTED, inp } = useTok();
   const [users, setUsers]     = useState<UserRow[]>([]);
   const [total, setTotal]     = useState(0);
   const [page, setPage]       = useState(1);
@@ -339,11 +385,10 @@ function UsersTab() {
   useEffect(() => { load(); }, [load]);
   useEffect(() => { setPage(1); }, [search, planF]);
 
-  // Client-side sort
   const sorted = [...users].sort((a, b) => {
     if (sortBy === "messages_total") return (b.messages_total ?? 0) - (a.messages_total ?? 0);
     if (sortBy === "messages_today") return (b.messages_today ?? 0) - (a.messages_today ?? 0);
-    return 0; // default: server-side by created_at
+    return 0;
   });
 
   const exportCSV = () => {
@@ -355,7 +400,6 @@ function UsersTab() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* Filters */}
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
         <div style={{ position: "relative", maxWidth: 320, flex: 1 }}>
           <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: MUTED }}>{ISearch}</span>
@@ -387,7 +431,7 @@ function UsersTab() {
           <tbody>
             {loading && <tr><td colSpan={8} style={{ padding: 24, textAlign: "center", color: MUTED }}>Загрузка...</td></tr>}
             {!loading && sorted.map(u => (
-              <tr key={u.id} style={{ borderBottom: `1px solid ${BOR}15` }}>
+              <tr key={u.id} style={{ borderBottom: `1px solid ${BOR}` }}>
                 <TD><span style={{ maxWidth: 240, display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.email}</span></TD>
                 <TD><Badge plan={u.plan} /></TD>
                 <TD muted>{u.subjects_count ? `${u.subjects_count} предм.` : "—"}</TD>
@@ -402,7 +446,6 @@ function UsersTab() {
         </table>
       </>} style={{ padding: 0, overflow: "hidden" }} />
 
-      {/* Pagination */}
       <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
         {page > 1 && <button onClick={() => setPage(p => p-1)} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${BOR}`, background: CARD, color: MUTED, cursor: "pointer", fontSize: 13 }}>← Назад</button>}
         {[...Array(Math.min(Math.ceil(total/30), 7))].map((_, i) => (
@@ -418,6 +461,7 @@ function UsersTab() {
 const emptyF = { subject: "mathematics", topic: "", content: "", source: "", language: "ru" };
 
 function KnowledgeTab() {
+  const { CARD, BOR, TEXT, MUTED, inp } = useTok();
   const [chunks, setChunks]   = useState<ChunkRow[]>([]);
   const [total, setTotal]     = useState(0);
   const [page, setPage]       = useState(1);
@@ -471,7 +515,6 @@ function KnowledgeTab() {
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {flash && <div style={{ padding: "10px 16px", background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)", borderRadius: 10, color: GREEN, fontSize: 13 }}>{flash}</div>}
 
-      {/* Toolbar */}
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
         <div style={{ position: "relative" }}>
           <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: MUTED }}>{ISearch}</span>
@@ -492,7 +535,7 @@ function KnowledgeTab() {
 
       {bulk && <Card ch={<>
         <p style={{ fontSize: 13, fontWeight: 600, color: TEXT, marginBottom: 10 }}>Массовый импорт — одна строка = один чанк</p>
-        <p style={{ fontSize: 12, color: MUTED, marginBottom: 12 }}>Формат: <code style={{ background: "rgba(255,255,255,0.07)", padding: "1px 6px", borderRadius: 4 }}>Тема | Контент</code></p>
+        <p style={{ fontSize: 12, color: MUTED, marginBottom: 12 }}>Формат: <code style={{ background: "rgba(127,127,127,0.12)", padding: "1px 6px", borderRadius: 4 }}>Тема | Контент</code></p>
         <select value={bulkSub} onChange={e => setBulkSub(e.target.value)} style={{ ...inp, marginBottom: 10 }}>
           {SUBS.map(s => <option key={s} value={s}>{SN[s]}</option>)}
         </select>
@@ -525,7 +568,7 @@ function KnowledgeTab() {
         <Card ch={<table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
           <thead><tr>{["Предмет / Тема","Контент","Источник",""].map(h => <TH key={h} label={h} />)}</tr></thead>
           <tbody>{chunks.map(c => (
-            <tr key={c.id} style={{ borderBottom: `1px solid ${BOR}15` }}>
+            <tr key={c.id} style={{ borderBottom: `1px solid ${BOR}` }}>
               <TD><p style={{ color: BRAND, fontWeight: 500, margin: 0 }}>{SN[c.subject] ?? c.subject}</p><p style={{ color: MUTED, fontSize: 11, margin: "2px 0 0" }}>{c.topic ?? "—"}</p></TD>
               <TD muted><span style={{ display: "block", maxWidth: 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.content}</span></TD>
               <TD muted>{c.source ?? "—"}</TD>
