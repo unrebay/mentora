@@ -127,7 +127,7 @@ export default function DashboardNav({
       {/* ── The actual pill ── */}
       <div
         data-tour="nav-pill"
-        className="max-w-5xl mx-auto"
+        className="max-w-6xl mx-auto"
         style={{
           pointerEvents: "all",
           background: navBg,
@@ -160,7 +160,7 @@ export default function DashboardNav({
         <div className="flex items-center gap-1">
           <Logo size="sm" textColor={dk ? "rgba(255,255,255,0.95)" : undefined} />
 
-          <div className="hidden md:flex items-center gap-0.5 ml-6">
+          <div className="hidden md:flex items-center gap-1 ml-7">
             {navLinks.map(({ href, label }) => (
               <Link
                 key={href}
@@ -175,7 +175,7 @@ export default function DashboardNav({
         </div>
 
         {/* Right: stats + actions */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <TourButtonDesktop forceDark={dk} />
           <ThemeToggle forceDark={dk} />
           <LanguageSwitcher dark={dk} />
