@@ -139,7 +139,7 @@ export default function DashboardNav({
         <div className="flex items-center gap-1">
           <Logo size="sm" textColor={dk ? "rgba(255,255,255,0.95)" : undefined} />
 
-          <div className="hidden md:flex items-center gap-0.5 ml-3">
+          <div className="hidden md:flex items-center gap-0.5 ml-6">
             {[
               { href: "/dashboard",          label: "Предметы" },
               { href: "/dashboard/progress", label: "Прогресс" },
