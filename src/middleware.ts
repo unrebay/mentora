@@ -40,7 +40,34 @@ export async function middleware(request: NextRequest) {
 
   // Let next-intl handle locale routing (prefix, detection, rewrite)
   // next-intl v4 middleware is async — must await the result
-  const response = await handleI18nRouting(request);
+  //
+  // VPS-behind-nginx fix: when x-forwarded-proto: https is present, Next.js
+  // reconstructs request.url as https://localhost:3000/... instead of http://localhost:3000/...
+  // next-intl then builds its internal rewrite URLs with https://localhost:3000/ru which
+  // causes Next.js standalone to fail with 500 (it runs on HTTP internally).
+  // Fix: pass a request with http:// scheme so rewrite URLs use the correct protocol.
+  let intlRequest = request;
+  if (
+    request.nextUrl.protocol === "https:" &&
+    request.nextUrl.hostname === "localhost"
+  ) {
+    const httpUrl =
+      "http://" +
+      request.nextUrl.host +
+      request.nextUrl.pathname +
+      request.nextUrl.search;
+    intlRequest = new NextRequest(httpUrl, { headers: request.headers });
+  }
+
+  const response = await handleI18nRouting(intlRequest);
+
+  // Fix redirect Location headers: replace http://localhost:3000 with the real external origin
+  // (so browser redirects like Accept-Language: en → /en go to mentora.su, not localhost)
+  const location = response.headers.get("location");
+  if (location?.startsWith("http://localhost:")) {
+    response.headers.set("location", location.replace(/^http:\/\/localhost:\d+/, origin));
+  }
+
   response.headers.set("x-pathname", pathname);
   return response;
 }
