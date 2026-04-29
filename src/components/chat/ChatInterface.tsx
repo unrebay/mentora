@@ -794,7 +794,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
               }}
               placeholder={pendingImage ? tChat("placeholderWithImage") : tChat("placeholder")}
               disabled={loading}
-              className="flex-1 px-5 py-3 text-[15px] disabled:opacity-50 focus:outline-none transition-all"
+              className="flex-1 px-5 py-3 disabled:opacity-50 focus:outline-none transition-all"
               style={{
                 borderRadius: "16px",
                 border: "1px solid var(--border)",
@@ -805,6 +805,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                 maxHeight: "160px",
                 overflowY: "hidden",
                 lineHeight: "1.5",
+                fontSize: "16px", /* prevents iOS Safari auto-zoom on focus */
               }}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = "var(--brand)";
