@@ -30,12 +30,19 @@ export default function LandingNav() {
     return () => window.removeEventListener("scroll", close);
   }, [mobileOpen]);
 
-  // Nav is always transparent — only text/logo color changes based on section
+  // ── Glass pill styles (same as DashboardNav) ─────────────────────────────
   const linkColor = isDark ? "rgba(255,255,255,0.80)" : "rgba(30,30,50,0.75)";
   const loginColor = isDark ? "rgba(255,255,255,0.85)" : "rgba(30,30,50,0.80)";
+  const navBg = isDark ? "rgba(6,6,18,0.55)" : "rgba(255,255,255,0.72)";
+  const navBlur = "blur(40px) saturate(2.0) brightness(1.02)";
+  const navBorder = isDark
+    ? "1px solid rgba(255,255,255,0.09)"
+    : "1px solid rgba(255,255,255,0.70)";
+  const navShadow = isDark
+    ? "0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 48px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.08) inset"
+    : "0 0 0 1px rgba(255,255,255,0.95) inset, 0 8px 40px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.05)";
 
   // ── Mobile dropdown bg ────────────────────────────────────────────────────
-  const mobileBg = isDark ? "rgba(6,6,18,0.97)" : "rgba(255,255,255,0.95)";
   const mobileBorder = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)";
 
   return (
@@ -51,11 +58,30 @@ export default function LandingNav() {
       {/* ── Nav content ─────────────────────────────────────────────── */}
       <div
         className="max-w-5xl mx-auto"
-        style={{
-          pointerEvents: "all",
-          position: "relative",
-        }}
+        style={{ pointerEvents: "all", position: "relative" }}
       >
+        {/* ── Glass pill ─────────────────────────────────────────────── */}
+        <div
+          style={{
+            background: navBg,
+            backdropFilter: navBlur,
+            WebkitBackdropFilter: navBlur,
+            borderRadius: 28,
+            border: navBorder,
+            boxShadow: navShadow,
+            overflow: "hidden",
+            position: "relative",
+            transition: "background 0.3s, box-shadow 0.3s",
+          }}
+        >
+          {/* Thin top shimmer */}
+          <div style={{
+            height: 1,
+            background: isDark
+              ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)"
+              : "linear-gradient(90deg, transparent, rgba(255,255,255,0.90), transparent)",
+            position: "absolute", top: 0, left: 0, right: 0,
+          }} />
 
         {/* Main row */}
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-3">
@@ -136,11 +162,11 @@ export default function LandingNav() {
           </div>
         </div>
 
-        {/* Mobile dropdown */}
+        {/* Mobile dropdown — inside the glass pill */}
         {mobileOpen && (
           <div
             className="md:hidden border-t px-5 py-4 flex flex-col gap-1"
-            style={{ background: mobileBg, borderColor: mobileBorder }}
+            style={{ borderColor: mobileBorder }}
           >
             <a href="#subjects" className="text-sm font-medium py-2.5 border-b"
               style={{ color: linkColor, borderColor: mobileBorder }}
@@ -156,6 +182,7 @@ export default function LandingNav() {
             </div>
           </div>
         )}
+        </div>{/* end glass pill */}
       </div>
     </nav>
   );
