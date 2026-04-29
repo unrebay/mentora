@@ -155,8 +155,8 @@ export default async function HomePage() {
               <h1 className="text-[2.1rem] sm:text-[2.8rem] md:text-[3.2rem] lg:text-[4rem] font-black leading-[1.05] mb-6 tracking-tight text-white">
                 {locale === "en" ? (
                   <>
-                    Forget boring{" "}
-                    <span className="line-through text-gray-600 font-bold">textbooks</span>.<br />
+                    Forget <span className="line-through text-gray-600 font-bold">boring</span>{" "}
+                    textbooks.<br />
                     Learn in{" "}
                     <span style={{
                       background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
