@@ -150,7 +150,7 @@ function SuggestCard({ s, i }: { s: Subject; i: number }) {
     >
       <Link href="/auth" className="block h-full">
         <motion.div
-          className="relative p-4 rounded-2xl flex flex-col items-center justify-center group"
+          className="relative p-4 rounded-2xl flex flex-col items-center justify-center group h-full"
           style={{
             background: "rgba(69,97,232,0.04)",
             border: "2px dashed rgba(69,97,232,0.28)",
