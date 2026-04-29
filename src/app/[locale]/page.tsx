@@ -628,6 +628,17 @@ export default async function HomePage() {
             </div>
           );
         })()}
+
+        {/* Ultima disclaimer */}
+        <p className="mt-5 text-center text-xs leading-relaxed max-w-xl mx-auto" style={{ color: "var(--text-muted)", opacity: 0.6 }}>
+          <svg viewBox="0 0 12 12" width="9" height="9" style={{ display: "inline", verticalAlign: "middle", marginRight: 4, marginTop: -1 }}>
+            <path d="M6 0.5L7.1 4.1L10.5 2.5L8.9 5.9L12.5 6L8.9 6.1L10.5 9.5L7.1 7.9L6 11.5L4.9 7.9L1.5 9.5L3.1 6.1L-0.5 6L3.1 5.9L1.5 2.5L4.9 4.1Z"
+              fill="currentColor" />
+          </svg>
+          {locale === "ru"
+            ? "Тариф Ultima сейчас включает все возможности Pro. Функции распознавания фото, презентаций и аудио находятся в активной разработке и будут добавлены в ближайшие месяцы."
+            : "Ultima currently includes all Pro features. Photo recognition, presentation and audio generation are in active development and will be available soon."}
+        </p>
       </section>
 
       {/* ЕГЭ/ОГЭ COMING SOON — Russian only */}
