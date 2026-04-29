@@ -324,9 +324,9 @@ export default async function HomePage() {
                   : undefined;
                 const isPrice = key === "price";
                 return (
-                  <FadeUp key={key} delay={i * 0.07}>
+                  <FadeUp key={key} delay={i * 0.07} className="h-full">
                   <div
-                    className="rounded-2xl p-6 flex flex-col gap-4 transition-all duration-200 hover:scale-[1.01]"
+                    className="rounded-2xl p-6 flex flex-col gap-4 transition-all duration-200 hover:scale-[1.01] h-full"
                     style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
                     <div className="flex items-start justify-between gap-2">
                       <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
@@ -722,7 +722,7 @@ export default async function HomePage() {
           </FadeUp>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
             {STEP_NUMS.map((n, i) => (
-              <FadeUp key={n} delay={i * 0.07}>
+              <FadeUp key={n} delay={i * 0.07} className="h-full">
               <div className="bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border)] relative h-full">
                 {i === STEP_BADGE_IDX && (
                   <span className="absolute top-3 right-3 text-[9px] font-bold bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 px-1.5 py-0.5 rounded">{t("landing.stepBadge")}</span>
@@ -749,7 +749,7 @@ export default async function HomePage() {
             const accentColors = ["#4561E8", "#FF7A00", "#10B981"];
             const accent = accentColors[i % accentColors.length];
             return (
-              <FadeUp key={testimonial.name} delay={i * 0.1}>
+              <FadeUp key={testimonial.name} delay={i * 0.1} className="h-full">
               <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col gap-4 relative overflow-hidden h-full">
                 <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style={{ background: accent }} />
                 <div className="text-5xl leading-none font-black select-none -mt-1 -mb-2" style={{ color: accent, opacity: 0.2 }}>&quot;</div>
