@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { SUBJECTS } from "@/lib/types";
@@ -20,7 +21,7 @@ const StreakRewardCelebration = dynamic(() => import("@/components/StreakRewardC
 
 const DAILY_LIMIT = 20;
 
-function pluralDays(n: number): string {
+function pluralDaysRu(n: number): string {
   const m10 = n % 10, m100 = n % 100;
   if (m100 >= 11 && m100 <= 14) return "дней";
   if (m10 === 1) return "день";
@@ -36,10 +37,10 @@ function pluralMenty(n: number): string {
   return "мент";
 }
 
-function getFirstName(fullName?: string | null, email?: string | null): string {
+function getFirstName(fullName?: string | null, email?: string | null, fallback?: string): string {
   if (fullName) return fullName.split(" ")[0];
   if (email) return email.split("@")[0];
-  return "Студент";
+  return fallback ?? "Student";
 }
 
 export const metadata: Metadata = {
@@ -47,6 +48,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardPage() {
+  const [locale, t] = await Promise.all([getLocale(), getTranslations("dashboard")]);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth");
@@ -64,7 +66,7 @@ export default async function DashboardPage() {
   const isPro = isUltima || profile?.plan === "pro" || isTrialActive;
 
   const trialExpiresDate = profile?.trial_expires_at
-    ? new Date(profile.trial_expires_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })
+    ? new Date(profile.trial_expires_at).toLocaleDateString(locale === "en" ? "en-US" : "ru-RU", { day: "numeric", month: "long" })
     : null;
 
   const WINDOW_HOURS = 24;
@@ -104,8 +106,13 @@ export default async function DashboardPage() {
 
   const firstName = getFirstName(
     user.user_metadata?.full_name ?? user.user_metadata?.name,
-    user.email
+    user.email,
+    locale === "en" ? "Student" : "Студент"
   );
+  // Locale helpers for streak pluralization
+  const streakDaysLabel = (n: number) => locale === "en"
+    ? `${n} ${n === 1 ? "day" : "days"}`
+    : `${n} ${pluralDaysRu(n)}`;
 
   async function handleLogout() {
     "use server";
@@ -210,12 +217,10 @@ export default async function DashboardPage() {
             </div>
             <div className="flex-1">
               <p className="font-semibold text-sm" style={{ color: profile?.streak_reward_claimed ? "#FF7A00" : "var(--brand)" }}>
-                Pro активен до {trialExpiresDate}
+                {t("trialActive", { date: trialExpiresDate ?? "" })}
               </p>
               <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                {profile?.streak_reward_claimed
-                  ? "Ты собрал 7-дневный стрик — и получил 3 дня Pro. Безлимитные сообщения уже работают."
-                  : "Пробный доступ активирован. Безлимитные сообщения работают."}
+                {profile?.streak_reward_claimed ? t("trialStreakMsg") : t("trialGenericMsg")}
               </p>
             </div>
           </div>
@@ -247,12 +252,14 @@ export default async function DashboardPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
                   <p className="font-semibold text-sm" style={{ color: "rgba(180,80,0,1)" }}>
-                    {currentStreak === 0 ? "Начни стрик — получи 3 дня Pro" : `${currentStreak} из 7 дней → 3 дня Pro бесплатно`}
+                    {currentStreak === 0 ? t("streakBannerStart") : t("streakBannerProgress", { current: currentStreak })}
                   </p>
                   <span className="text-sm font-bold shrink-0 ml-3" style={{ color: "#FF7A00" }}>{currentStreak}/7</span>
                 </div>
                 <p className="text-xs mb-2" style={{ color: "rgba(200,100,20,0.8)" }}>
-                  Учись {daysLeft} {daysLeft === 1 ? "день" : daysLeft < 5 ? "дня" : "дней"} подряд и получи 3 дня Pro без карты.
+                  {locale === "en"
+                    ? t("streakBannerDesc", { n: daysLeft })
+                    : `${t("streakBannerDesc", { n: daysLeft, days: pluralDaysRu(daysLeft) })}`}
                 </p>
                 <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,122,0,0.15)" }}>
                   <div className="h-full rounded-full transition-all" style={{
@@ -276,11 +283,11 @@ export default async function DashboardPage() {
               </svg>
             </div>
             <div>
-              <p className="font-semibold text-sm" style={{ color: "var(--text)" }}>Pro trial использован</p>
+              <p className="font-semibold text-sm" style={{ color: "var(--text)" }}>{t("trialUsedTitle")}</p>
               <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                Понравилось?{" "}
+                {t("trialUsedDesc")}{" "}
                 <Link href="/pricing" style={{ color: "var(--brand)" }} className="font-medium hover:underline">
-                  Оформи подписку →
+                  {t("trialUsedCta")}
                 </Link>
               </p>
             </div>
@@ -290,10 +297,10 @@ export default async function DashboardPage() {
         {/* ── Greeting ─────────────────────────────────────── */}
         <div className="mb-10">
           <p className="text-xs font-bold tracking-[0.18em] uppercase mb-2" style={{ color: "var(--text-muted)" }}>
-            Библиотека знаний
+            {t("libraryTitle")}
           </p>
           <h1 className="text-3xl md:text-4xl font-bold mb-2 leading-tight">
-            Привет,{" "}
+            {locale === "en" ? "Hello," : "Привет,"}{" "}
             <span style={{
               background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
               WebkitBackgroundClip: "text",
@@ -304,7 +311,7 @@ export default async function DashboardPage() {
             </span>
           </h1>
           <p className="mb-6 text-sm" style={{ color: "var(--text-muted)" }}>
-            Продолжай учиться — прогресс накапливается каждый день
+            {t("subGreeting")}
           </p>
 
           <WhatsNewBanner />
@@ -321,7 +328,7 @@ export default async function DashboardPage() {
                   <path d="M7.5 8h4M7.5 11h3M2.5 9a5.5 5.5 0 1 0 9.8 3.4L14 14l-1.7-1.6" />
                 </svg>
                 <span style={{ color: "var(--text-secondary)" }}>
-                  Сообщений:{" "}
+                  {t("messages")}{" "}
                   <span className="font-semibold" style={{
                     color: messagesRemaining === 0 ? "#ef4444" : messagesRemaining !== null && messagesRemaining <= 5 ? "#f97316" : "var(--text)",
                   }}>
@@ -347,7 +354,7 @@ export default async function DashboardPage() {
                 <svg className="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round">
                   <path d="M4.5 10c0-1.93 1.57-3.5 3.5-3.5S11.5 8.07 11.5 10s-1.57 3.5-3.5 3.5S4.5 11.93 4.5 10zm7 0c0-1.93 1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5" />
                 </svg>
-                <span style={{ color: "var(--brand)" }} className="font-medium">Безлимитные сообщения</span>
+                <span style={{ color: "var(--brand)" }} className="font-medium">{t("unlimitedMessages")}</span>
               </div>
             )}
 
@@ -365,7 +372,7 @@ export default async function DashboardPage() {
                   <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00" />
                 </svg>
                 <span style={{ color: "var(--text-secondary)" }}>
-                  Стрик: <span className="font-semibold" style={{ color: "#FF7A00" }}>{currentStreak} {pluralDays(currentStreak)}</span>
+                  {t("streakLabel")} <span className="font-semibold" style={{ color: "#FF7A00" }}>{streakDaysLabel(currentStreak)}</span>
                 </span>
               </div>
             )}
@@ -381,7 +388,7 @@ export default async function DashboardPage() {
                 <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
                   <path d="M8 1l1.5 4.5H14l-3.75 2.72 1.43 4.38L8 10l-3.68 2.6 1.43-4.38L2 5.5h4.5L8 1z" />
                 </svg>
-                Убрать лимит
+                {t("removeLimit")}
               </Link>
             )}
           </div>
@@ -399,17 +406,19 @@ export default async function DashboardPage() {
               <SubjectIcon id={lastActiveSubject.id} size={52} />
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold tracking-[0.15em] uppercase mb-1" style={{ color: subjectColor(lastActiveSubject.id) }}>
-                  Продолжить обучение
+                  {t("continueLearning")}
                 </p>
                 <p className="font-bold text-base truncate" style={{ color: "var(--text)" }}>{lastActiveSubject.title}</p>
                 <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                  {lastActiveProgress?.xp_total ?? 0} {pluralMenty(lastActiveProgress?.xp_total ?? 0)}
-                  {(lastActiveProgress?.streak_days ?? 0) > 0 && ` · 🔥 ${lastActiveProgress!.streak_days} дн. подряд`}
+                  {locale === "en"
+                    ? `${lastActiveProgress?.xp_total ?? 0} XP`
+                    : `${lastActiveProgress?.xp_total ?? 0} ${pluralMenty(lastActiveProgress?.xp_total ?? 0)}`}
+                  {(lastActiveProgress?.streak_days ?? 0) > 0 && ` · 🔥 ${lastActiveProgress!.streak_days} ${t("xpInRow")}`}
                 </p>
               </div>
               <Link href={`/learn/${lastActiveSubject.id}`}
                 className="btn-glow shrink-0 px-4 py-2 rounded-xl text-sm font-semibold text-white">
-                Продолжить →
+                {t("continueBtn")}
               </Link>
             </div>
           </div>
@@ -432,9 +441,9 @@ export default async function DashboardPage() {
 
         {/* ── Support ──────────────────────────────────────── */}
         <div className="mt-6 mb-6 flex flex-col items-center gap-2 text-center">
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>Нужна помощь?</p>
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>{t("needHelp")}</p>
           <div className="flex gap-2 flex-wrap justify-center items-start">
-            <TelegramSupportButton size="sm" label="Поддержка" />
+            <TelegramSupportButton size="sm" label={t("support")} />
             <InstagramButton size="sm" label="@mentora.su" />
           </div>
         </div>
