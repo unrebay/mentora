@@ -7,6 +7,7 @@ import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
 import { TourButtonDesktop } from "@/components/TourButton";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useTheme } from "@/components/ThemeProvider";
 
 function getDaysLabel(n: number, locale: string): string {
   if (locale === "en") return n === 1 ? "day" : "days";
@@ -44,7 +45,9 @@ export default function DashboardNav({
   const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations();
-  const dk = variant === "dark";
+  const { theme } = useTheme();
+  // dk: forced dark (e.g. galaxy page) OR user's dark theme
+  const dk = variant === "dark" || theme === "dark";
 
   function isActive(href: string) {
     return pathname === href || (href !== "/dashboard" && pathname.startsWith(href));

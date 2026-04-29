@@ -48,7 +48,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
         logoutAction={handleLogout}
         variant={navVariant}
       />
-      {children}
+      {/*
+        Overlap trick: pull content up behind the transparent nav (76px = pill height + gaps).
+        The paddingTop compensates so actual content starts at the right visual position.
+        background: var(--bg) fills the 76px strip that shows through the nav.
+      */}
+      <div style={{ marginTop: "-76px", paddingTop: "76px", background: "var(--bg)" }}>
+        {children}
+      </div>
       <OnboardingTour />
       <TourButtonMobile />
     </>
