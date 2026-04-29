@@ -779,6 +779,136 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── MISSION / VISION ─────────────────────────────────────── */}
+      <section className="relative px-6 py-28 overflow-hidden" style={{ background: "var(--bg)" }}>
+        {/* Ambient glow background */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{ width: 900, height: 600, background: "radial-gradient(ellipse, rgba(69,97,232,0.07) 0%, transparent 70%)" }} />
+          <div className="absolute right-0 bottom-0 rounded-full"
+            style={{ width: 500, height: 500, background: "radial-gradient(ellipse, rgba(159,122,255,0.05) 0%, transparent 70%)" }} />
+        </div>
+
+        <div className="max-w-4xl mx-auto relative z-10 text-center">
+
+          {/* Eyebrow */}
+          <FadeUp fade>
+            <p className="text-[11px] font-bold tracking-[0.25em] uppercase mb-6"
+              style={{ color: "var(--text-muted)" }}>
+              {locale === "ru" ? "Наша миссия" : "Our mission"}
+            </p>
+          </FadeUp>
+
+          {/* Big headline */}
+          <FadeUp delay={0.07}>
+            <h2 className="text-5xl md:text-7xl font-black leading-[1.05] mb-8 tracking-tight">
+              <span style={{ color: "var(--text)" }}>
+                {locale === "ru" ? "Знания — " : "Knowledge is "}
+              </span>
+              <br className="hidden sm:block" />
+              <span style={{
+                background: "linear-gradient(120deg, #4561E8 0%, #9F7AFF 55%, #4561E8 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}>
+                {locale === "ru" ? "не привилегия." : "not a privilege."}
+              </span>
+            </h2>
+          </FadeUp>
+
+          {/* Manifesto paragraph */}
+          <FadeUp delay={0.14}>
+            <p className="text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-16"
+              style={{ color: "var(--text-secondary)" }}>
+              {locale === "ru"
+                ? "Хорошего репетитора всегда могли позволить себе не все. Ребёнок из Новосибирска заслуживает такого же наставника, как ребёнок в Москве с дорогим тьютором. Mentora строит мир, где это правда — живой диалог вместо учебника, глубокое понимание вместо зазубренных параграфов."
+                : "Quality mentorship has always been a luxury. A student in rural India deserves the same guide as one with an expensive private tutor in London. Mentora is building the world where that's true — real dialogue instead of textbooks, deep understanding instead of memorization."}
+            </p>
+          </FadeUp>
+
+          {/* Three belief pillars */}
+          <div className="grid sm:grid-cols-3 gap-10 md:gap-14 mb-20 text-left">
+            {[
+              {
+                icon: (
+                  <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                  </svg>
+                ),
+                color: "#4561E8",
+                title: locale === "ru" ? "Для каждого на планете" : "For everyone, everywhere",
+                desc: locale === "ru"
+                  ? "Неважно, где ты живёшь и какой у тебя бюджет. Качественное образование — это право, а не награда для избранных."
+                  : "It doesn't matter where you live or what your budget is. Quality education is a right, not a reward for the lucky few.",
+              },
+              {
+                icon: (
+                  <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                  </svg>
+                ),
+                color: "#9F7AFF",
+                title: locale === "ru" ? "Понимать, а не заучивать" : "Understand, don't memorize",
+                desc: locale === "ru"
+                  ? "Зубрить параграфы — не образование. Мы учим задавать вопросы, видеть связи и думать самостоятельно."
+                  : "Cramming paragraphs isn't education. We teach you to ask questions, see connections, and think for yourself.",
+              },
+              {
+                icon: (
+                  <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                ),
+                color: "#FF7A00",
+                title: locale === "ru" ? "Наставник, который помнит тебя" : "A mentor who knows you",
+                desc: locale === "ru"
+                  ? "Он помнит твой прогресс, знает твои пробелы и никогда не устаёт объяснять. Именно так работает настоящий ментор."
+                  : "It remembers your progress, knows your gaps, and never gets tired of explaining. That's what a real mentor does.",
+              },
+            ].map((pillar, i) => (
+              <FadeUp key={i} delay={0.22 + i * 0.1}>
+                <div className="flex flex-col gap-4">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                    style={{ background: `${pillar.color}15`, color: pillar.color }}>
+                    {pillar.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-base mb-2 leading-snug" style={{ color: "var(--text)" }}>
+                      {pillar.title}
+                    </h3>
+                    <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                      {pillar.desc}
+                    </p>
+                  </div>
+                </div>
+              </FadeUp>
+            ))}
+          </div>
+
+          {/* Closing manifesto quote */}
+          <FadeUp delay={0.5} fade>
+            <div className="relative max-w-2xl mx-auto">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-px"
+                style={{ background: "linear-gradient(90deg, transparent, rgba(69,97,232,0.4), transparent)" }} />
+              <blockquote className="pt-8">
+                <p className="text-xl md:text-2xl font-light italic leading-relaxed"
+                  style={{ color: "var(--text)" }}>
+                  {locale === "ru"
+                    ? "«Мы не продаём подписку. Мы возвращаем право на знание тем, у кого его раньше не было.»"
+                    : "\"We're not selling a subscription. We're giving back the right to knowledge to those who never had it.\""}
+                </p>
+                <footer className="mt-4 text-sm font-semibold" style={{ color: "var(--text-muted)" }}>
+                  — {locale === "ru" ? "Команда Mentora" : "Mentora team"}
+                </footer>
+              </blockquote>
+            </div>
+          </FadeUp>
+
+        </div>
+      </section>
+
       {/* Wave: light → dark CTA */}
       <div aria-hidden style={{ marginBottom: -2, position: "relative", zIndex: 1, lineHeight: 0 }}>
         <svg viewBox="0 0 1440 90" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
