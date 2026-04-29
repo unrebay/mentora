@@ -6,13 +6,23 @@ import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
-export default function LandingNav() {
+interface LandingNavProps {
+  /** Lock to light mode (e.g. on pages with no dark hero section) */
+  alwaysLight?: boolean;
+  /** Show "Dashboard" CTA instead of "Try for free" */
+  isLoggedIn?: boolean;
+  /** Which nav link to highlight as active */
+  activePage?: "pricing";
+}
+
+export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: LandingNavProps = {}) {
   const t = useTranslations("nav");
   /** true while viewport is over the dark hero section */
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(alwaysLight ? false : true);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
+    if (alwaysLight) { setIsDark(false); return; }
     function update() {
       const subjects = document.getElementById("subjects");
       if (!subjects) { setIsDark(true); return; }
@@ -21,7 +31,7 @@ export default function LandingNav() {
     update();
     window.addEventListener("scroll", update, { passive: true });
     return () => window.removeEventListener("scroll", update);
-  }, []);
+  }, [alwaysLight]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -99,7 +109,11 @@ export default function LandingNav() {
             <a href="#how" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.9 }}>
               {t("how")}
             </a>
-            <Link href="/pricing" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.9 }}>
+            <Link
+              href="/pricing"
+              className="hover:opacity-100 transition-opacity"
+              style={{ opacity: 0.9, fontWeight: activePage === "pricing" ? 600 : undefined, color: activePage === "pricing" ? (isDark ? "white" : "var(--text)") : undefined }}
+            >
               {t("pricing")}
             </Link>
           </div>
@@ -109,37 +123,39 @@ export default function LandingNav() {
             <LanguageSwitcher dark={isDark} />
             <ThemeToggle />
 
-            {/* Desktop: Войти — ghost */}
-            <Link
-              href="/auth"
-              className="hidden md:inline-flex items-center px-4 py-2 text-sm font-medium rounded-full transition-all duration-200"
-              style={{ color: loginColor }}
-            >
-              {t("login")}
-            </Link>
+            {/* Desktop: Войти — ghost (only when not logged in) */}
+            {!isLoggedIn && (
+              <Link
+                href="/auth"
+                className="hidden md:inline-flex items-center px-4 py-2 text-sm font-medium rounded-full transition-all duration-200"
+                style={{ color: loginColor }}
+              >
+                {t("login")}
+              </Link>
+            )}
 
             {/* Desktop: CTA pill */}
             <Link
-              href="/auth"
+              href={isLoggedIn ? "/dashboard" : "/auth"}
               className="hidden md:inline-flex items-center px-5 py-2 text-sm font-semibold rounded-full text-white transition-all duration-200 hover:scale-[1.03] active:scale-95"
               style={{
                 background: "linear-gradient(135deg, #5575FF 0%, #4561E8 50%, #6B4FF0 100%)",
                 boxShadow: "0 2px 12px rgba(69,97,232,0.45), 0 1px 0 rgba(255,255,255,0.2) inset",
               }}
             >
-              {t("tryFree")}
+              {isLoggedIn ? t("dashboard") : t("tryFree")}
             </Link>
 
             {/* Mobile: CTA pill (compact) */}
             <Link
-              href="/auth"
+              href={isLoggedIn ? "/dashboard" : "/auth"}
               className="md:hidden inline-flex items-center px-4 py-2 text-sm font-semibold rounded-full text-white transition-all duration-200"
               style={{
                 background: "linear-gradient(135deg, #5575FF 0%, #4561E8 100%)",
                 boxShadow: "0 2px 10px rgba(69,97,232,0.4)",
               }}
             >
-              {t("tryFreeShort")}
+              {isLoggedIn ? t("dashboard") : t("tryFreeShort")}
             </Link>
 
             {/* Mobile: hamburger */}
@@ -175,7 +191,7 @@ export default function LandingNav() {
               style={{ color: linkColor, borderColor: mobileBorder }}
               onClick={() => setMobileOpen(false)}>{t("how")}</a>
             <Link href="/pricing" className="text-sm font-medium py-2.5 border-b"
-              style={{ color: linkColor, borderColor: mobileBorder }}
+              style={{ color: activePage === "pricing" ? (isDark ? "white" : "var(--text)") : linkColor, fontWeight: activePage === "pricing" ? 600 : undefined, borderColor: mobileBorder }}
               onClick={() => setMobileOpen(false)}>{t("pricing")}</Link>
             <div className="pt-3 flex items-center gap-3">
               <LanguageSwitcher dark={isDark} />

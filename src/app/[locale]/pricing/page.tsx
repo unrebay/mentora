@@ -1,12 +1,10 @@
 import { getTranslations, getLocale, getMessages } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import Logo from "@/components/Logo";
-import ThemeToggle from "@/components/ThemeToggle";
+import LandingNav from "@/components/LandingNav";
 import BuyProButton from "@/components/BuyProButton";
 import PricingFAQ from "@/components/PricingFAQ";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
 import InstagramButton from "@/components/InstagramButton";
-import MobileMenuButton from "@/components/MobileMenuButton";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
@@ -60,42 +58,7 @@ export default async function PricingPage() {
     <div className="min-h-screen s-page t-primary">
 
       {/* NAV */}
-      <nav
-        className="sticky top-0 z-50 backdrop-blur-md border-b px-6 py-4"
-        style={{ background: "var(--bg-nav)", borderColor: "var(--border-light)" }}
-      >
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <Logo size="sm" fontSize="1.44rem" />
-          <div className="hidden md:flex items-center gap-8 text-sm" style={{ color: "var(--text-secondary)" }}>
-            <Link href="/#subjects" className="hover:opacity-70 transition-opacity">{t("nav.subjects")}</Link>
-            <Link href="/#how" className="hover:opacity-70 transition-opacity">{t("nav.how")}</Link>
-            <Link href="/pricing" className="font-medium" style={{ color: "var(--text)" }}>{t("nav.pricing")}</Link>
-          </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            {!isLoggedIn && (
-              <Link
-                href="/auth"
-                className="hidden sm:inline px-4 py-2 text-sm font-medium transition-colors"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                {t("nav.login")}
-              </Link>
-            )}
-            <Link
-              href={isLoggedIn ? "/dashboard" : "/auth"}
-              className="btn-glow px-5 py-2.5 text-sm font-semibold rounded-xl text-white"
-            >
-              {isLoggedIn ? t("nav.dashboard") : t("nav.tryFree")}
-            </Link>
-            <MobileMenuButton links={[
-              { href: "/#subjects", label: t("nav.subjects") },
-              { href: "/#how", label: t("nav.how") },
-              { href: "/pricing", label: t("nav.pricing"), active: true },
-            ]} />
-          </div>
-        </div>
-      </nav>
+      <LandingNav alwaysLight isLoggedIn={isLoggedIn} activePage="pricing" />
 
       {/* HERO */}
       <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
