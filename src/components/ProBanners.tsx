@@ -1,11 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
 import posthog from "posthog-js";
 
 // ─── Activation Banner (shown after successful payment) ───────────────────────
 export function ProActivationBanner({ plan }: { plan: string }) {
+  const t = useTranslations("probanners");
   const searchParams = useSearchParams();
   const [visible, setVisible] = useState(false);
   const [fading, setFading] = useState(false);
@@ -20,9 +22,8 @@ export function ProActivationBanner({ plan }: { plan: string }) {
         billing_plan: billingPlan,
         amount: billingPlan === "annual" ? 2990 : 499,
       });
-      // Auto-dismiss after 12s
-      const t = setTimeout(() => dismiss(), 12000);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => dismiss(), 12000);
+      return () => clearTimeout(timer);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -72,12 +73,10 @@ export function ProActivationBanner({ plan }: { plan: string }) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-bold text-base text-white leading-tight">
-            {isUltima ? "Ultra активирован!" : "Pro активирован!"}
+            {isUltima ? t("ultraActivated") : t("proActivated")}
           </p>
           <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.85)" }}>
-            {isUltima
-              ? "Безлимитные сообщения, фото задач и AI-иллюстрации — всё доступно прямо сейчас."
-              : "Безлимитные сообщения активированы. Учись без ограничений!"}
+            {isUltima ? t("ultraDesc") : t("proDesc")}
           </p>
         </div>
         <button onClick={dismiss}
@@ -102,6 +101,8 @@ export function ProExpiryBanner({
   planExpiresAt?: string | null;
   isPro: boolean;
 }) {
+  const t = useTranslations("probanners");
+  const locale = useLocale();
   const [dismissed, setDismissed] = useState(false);
   const [fading, setFading] = useState(false);
 
@@ -114,7 +115,6 @@ export function ProExpiryBanner({
   const msDiff = expiresDate.getTime() - now.getTime();
   const daysLeft = Math.ceil(msDiff / (1000 * 3600 * 24));
 
-  // Show within 7 days before expiry — more time for user to feel urgency and convert
   if (daysLeft > 7 || daysLeft <= 0) return null;
 
   const dismiss = () => {
@@ -122,8 +122,17 @@ export function ProExpiryBanner({
     setTimeout(() => setDismissed(true), 400);
   };
 
-  const label = daysLeft === 1 ? "завтра" : daysLeft === 2 ? "послезавтра" : `через ${daysLeft} ${daysLeft < 5 ? "дня" : "дней"}`;
-  const expiresFormatted = expiresDate.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+  const dateLocale = locale === "ru" ? "ru-RU" : "en-US";
+  const expiresFormatted = expiresDate.toLocaleDateString(dateLocale, { day: "numeric", month: "long" });
+
+  let label: string;
+  if (daysLeft === 1) {
+    label = t("expiresTomorrow");
+  } else if (daysLeft === 2) {
+    label = t("expiresDayAfter");
+  } else {
+    label = t("expiresIn", { n: daysLeft, days: locale === "ru" ? (daysLeft < 5 ? "дня" : "дней") : (daysLeft === 1 ? "day" : "days") });
+  }
 
   return (
     <div
@@ -145,17 +154,17 @@ export function ProExpiryBanner({
       </div>
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-sm" style={{ color: "#b45309" }}>
-          Pro истекает {label} — {expiresFormatted}
+          {t("expiringTitle", { label, date: expiresFormatted })}
         </p>
         <p className="text-xs mt-0.5" style={{ color: "rgba(180,83,9,0.75)" }}>
-          Продли подписку, чтобы не потерять безлимитный доступ.
+          {t("expiringDesc")}
         </p>
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <Link href="/pricing"
           className="text-xs font-semibold px-4 py-2 rounded-xl transition-colors text-white"
           style={{ background: "#f59e0b" }}>
-          Продлить
+          {t("renewBtn")}
         </Link>
         <button onClick={dismiss}
           className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"

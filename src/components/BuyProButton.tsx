@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 type PlanKey = "monthly" | "annual" | "ultima_monthly" | "ultima_annual";
 
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function BuyProButton({ isLoggedIn, isPro, isUltima = false, plan }: Props) {
+  const t = useTranslations("buyPro");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -22,14 +24,14 @@ export default function BuyProButton({ isLoggedIn, isPro, isUltima = false, plan
   if (isUltimaPlan && isUltima) {
     return (
       <div className="block text-center py-2.5 px-5 bg-emerald-800/60 text-emerald-300 font-semibold rounded-xl border border-emerald-700/50 text-sm">
-        ✓ Ultra активна
+        {t("ultraActive")}
       </div>
     );
   }
   if (!isUltimaPlan && isPro) {
     return (
       <div className="block text-center py-2.5 px-5 bg-green-50 text-green-700 font-semibold rounded-xl border-2 border-green-200 text-sm">
-        ✓ Подписка активна
+        {t("proActive")}
       </div>
     );
   }
@@ -49,17 +51,17 @@ export default function BuyProButton({ isLoggedIn, isPro, isUltima = false, plan
       } else if (data.error === "Already subscribed") {
         router.push("/dashboard");
       } else {
-        alert("Что-то пошло не так. Попробуйте снова.");
+        alert(t("errorGeneric"));
       }
-    } catch { alert("Ошибка соединения. Попробуйте снова."); }
+    } catch { alert(t("errorConnection")); }
     finally { setLoading(false); }
   };
 
   const label = loading
-    ? "Переходим к оплате..."
+    ? t("loading")
     : isAnnual
-      ? (isUltimaPlan ? "Оформить Ultra на год →" : "Оформить годовой план →")
-      : (isUltimaPlan ? "Получить Ultra →" : "Попробовать Pro →");
+      ? (isUltimaPlan ? t("getUltraAnnual") : t("getAnnual"))
+      : (isUltimaPlan ? t("getUltra") : t("getPro"));
 
   const buttonStyle = isUltimaPlan
     ? "bg-white text-gray-900 hover:bg-gray-100"

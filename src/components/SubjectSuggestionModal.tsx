@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useTranslations } from "next-intl";
 
 interface Props {
   open: boolean;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function SubjectSuggestionModal({ open, onClose, userId }: Props) {
+  const t = useTranslations("suggestModal");
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -48,16 +50,16 @@ export default function SubjectSuggestionModal({ open, onClose, userId }: Props)
         {status === "success" ? (
           <div className="text-center py-6">
             <div className="text-4xl mb-3">✅</div>
-            <p className="font-semibold text-[var(--text)]">Отправлено, спасибо!</p>
-            <p className="text-sm text-[var(--text-secondary)] mt-1">Мы рассмотрим предложение.</p>
+            <p className="font-semibold text-[var(--text)]">{t("successTitle")}</p>
+            <p className="text-sm text-[var(--text-secondary)] mt-1">{t("successDesc")}</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
             <div className="flex items-start justify-between mb-5">
               <div>
-                <h2 className="text-lg font-bold text-[var(--text)]">Предложить предмет</h2>
+                <h2 className="text-lg font-bold text-[var(--text)]">{t("title")}</h2>
                 <p className="text-sm text-[var(--text-secondary)] mt-0.5">
-                  Расскажи, какой предмет добавить в Mentora
+                  {t("subtitle")}
                 </p>
               </div>
               <button
@@ -72,13 +74,13 @@ export default function SubjectSuggestionModal({ open, onClose, userId }: Props)
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-[var(--text)] mb-1.5">
-                  Название предмета <span className="text-red-500">*</span>
+                  {t("nameLabel")} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Например: Обществознание, Английский..."
+                  placeholder={t("namePlaceholder")}
                   required
                   maxLength={80}
                   className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all"
@@ -94,13 +96,13 @@ export default function SubjectSuggestionModal({ open, onClose, userId }: Props)
 
               <div>
                 <label className="block text-sm font-medium text-[var(--text)] mb-1.5">
-                  Комментарий{" "}
-                  <span className="text-[var(--text-muted)] font-normal">(необязательно)</span>
+                  {t("commentLabel")}{" "}
+                  <span className="text-[var(--text-muted)] font-normal">{t("commentOptional")}</span>
                 </label>
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder="Зачем нужен этот предмет, для какого класса или цели..."
+                  placeholder={t("commentPlaceholder")}
                   rows={3}
                   maxLength={500}
                   className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all resize-none"
@@ -122,14 +124,14 @@ export default function SubjectSuggestionModal({ open, onClose, userId }: Props)
                 className="flex-1 px-4 py-2.5 rounded-xl border text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors"
                 style={{ borderColor: "var(--border)" }}
               >
-                Отмена
+                {t("cancel")}
               </button>
               <button
                 type="submit"
                 disabled={!name.trim() || status === "loading"}
                 className="flex-1 px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {status === "loading" ? "Отправка..." : status === "error" ? "Ошибка, повторить" : "Отправить →"}
+                {status === "loading" ? t("submitting") : status === "error" ? t("error") : t("submit")}
               </button>
             </div>
           </form>

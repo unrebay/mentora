@@ -535,7 +535,13 @@
     "removeDesc": "The subject will be removed from your library. You can add it back later — all progress is saved.",
     "cancel": "Cancel",
     "remove": "Remove",
-    "removeAriaLabel": "Remove subject"
+    "removeAriaLabel": "Remove subject",
+    "levelBeginner": "Beginner",
+    "levelExplorer": "Explorer",
+    "levelAdept": "Adept",
+    "levelScholar": "Scholar",
+    "levelExpert": "Expert",
+    "xpUnit": "XP"
   },
   "addSubjectModal": {
     "title": "Add subject",

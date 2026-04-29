@@ -2,17 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
-
-const INITIAL_MESSAGE: Message = {
-  role: "assistant",
-  content:
-    "Привет! Я Mentora — твой персональный AI-ментор по истории. Спроси меня про любую эпоху, личность или событие — расскажу так, что запомнишь надолго.",
-};
 
 const SOFT_LIMIT = 3;  // After this many messages — show dismissible soft banner
 const DEMO_LIMIT = 5;  // After this many — disable input entirely
@@ -25,6 +20,8 @@ function renderMarkdown(text: string): string {
 }
 
 export default function DemoChat() {
+  const t = useTranslations("demo");
+  const INITIAL_MESSAGE: Message = { role: "assistant", content: t("initialMessage") };
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -83,10 +80,7 @@ export default function DemoChat() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: "Что-то пошло не так. Попробуй ещё раз.",
-        },
+        { role: "assistant", content: t("somethingWentWrong") },
       ]);
     } finally {
       setLoading(false);
@@ -101,11 +95,7 @@ export default function DemoChat() {
     }
   }
 
-  const suggestions = [
-    "Расскажи про реформы Петра I",
-    "Почему пала Римская империя?",
-    "Как началась Первая мировая?",
-  ];
+  const suggestions = t.raw("suggestions") as string[];
 
   const showSoftBanner = used >= SOFT_LIMIT && !softBannerDismissed && !limitReached;
   const remaining = DEMO_LIMIT - used;
@@ -119,12 +109,12 @@ export default function DemoChat() {
             М
           </div>
           <div>
-            <p className="text-xs font-semibold text-gray-800">Mentora · персональный AI-ментор</p>
-            <p className="text-[10px] text-green-500 font-medium">● онлайн сейчас</p>
+            <p className="text-xs font-semibold text-gray-800">{t("botTitle")}</p>
+            <p className="text-[10px] text-green-500 font-medium">{t("onlineLabel")}</p>
           </div>
         </div>
         <span className="text-xs text-gray-400 bg-white border border-gray-100 px-2 py-1 rounded-lg">
-          📜 История
+          {t("historyBadge")}
         </span>
       </div>
 
@@ -150,7 +140,7 @@ export default function DemoChat() {
             />
             {m.role === "user" && (
               <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
-                Я
+                {t("userAvatar")}
               </div>
             )}
           </div>
@@ -192,16 +182,16 @@ export default function DemoChat() {
           style={{ background: "rgba(69,97,232,0.07)", border: "1px solid rgba(69,97,232,0.18)" }}>
           <div className="flex-1 min-w-0">
             <p className="text-[11px] font-medium text-gray-600">
-              Осталось {remaining} {remaining === 1 ? "сообщение" : "сообщения"} в демо
+              {t("softBannerRemaining", { n: remaining })}
             </p>
             <Link href="/auth" className="text-[11px] text-brand-600 font-semibold hover:underline">
-              Зарегистрируйся — 30 в день бесплатно →
+              {t("softBannerCta")}
             </Link>
           </div>
           <button
             onClick={() => setSoftBannerDismissed(true)}
             className="shrink-0 text-gray-400 hover:text-gray-600 transition-colors p-0.5"
-            aria-label="Закрыть"
+            aria-label={t("inputAriaClose")}
           >
             <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <path d="M1 1l10 10M11 1L1 11" />
@@ -214,22 +204,22 @@ export default function DemoChat() {
       {limitReached ? (
         <div className="border-t border-gray-100 px-4 py-3 shrink-0" style={{ background: "linear-gradient(to bottom, #fff, #f9fafb)" }}>
           <div className="flex items-center justify-between gap-3 mb-2">
-            <p className="text-xs text-gray-500">Демо-лимит исчерпан 🚀</p>
+            <p className="text-xs text-gray-500">{t("hardLimitTitle")}</p>
             <Link
               href="/auth"
               className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors shrink-0"
             >
-              Продолжить бесплатно →
+              {t("hardLimitCta")}
             </Link>
           </div>
           {/* Grayed-out disabled input to show what they're missing */}
           <div className="flex gap-2 items-center opacity-35 pointer-events-none select-none">
             <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-400">
-              Напиши Менторе про любую эпоху...
+              {t("placeholder")}
             </div>
             <div className="w-7 h-7 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-xs">↑</div>
           </div>
-          <p className="text-[10px] text-gray-400 text-center mt-2">30 сообщений в день · без карты · бесплатно</p>
+          <p className="text-[10px] text-gray-400 text-center mt-2">{t("disclaimer")}</p>
         </div>
       ) : (
         /* Normal input */
@@ -244,7 +234,7 @@ export default function DemoChat() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKey}
-            placeholder="Напиши Менторе про любую эпоху..."
+            placeholder={t("placeholder")}
             disabled={loading}
             // fontSize 16px prevents iOS Safari from auto-zooming the page on focus
             style={{ fontSize: "16px" }}

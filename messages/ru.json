@@ -535,7 +535,13 @@
     "removeDesc": "Предмет будет убран из твоей библиотеки. Позже ты сможешь добавить его обратно — весь прогресс сохранится.",
     "cancel": "Отмена",
     "remove": "Удалить",
-    "removeAriaLabel": "Удалить предмет"
+    "removeAriaLabel": "Удалить предмет",
+    "levelBeginner": "Новичок",
+    "levelExplorer": "Исследователь",
+    "levelAdept": "Знаток",
+    "levelScholar": "Историк",
+    "levelExpert": "Эксперт",
+    "xpUnit": "мент"
   },
   "addSubjectModal": {
     "title": "Добавить предмет",

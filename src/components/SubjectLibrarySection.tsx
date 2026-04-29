@@ -6,26 +6,27 @@ import AddSubjectModal from "@/components/AddSubjectModal";
 import SubjectSuggestionModal from "@/components/SubjectSuggestionModal";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
 import { removeUserSubject } from "@/app/dashboard/actions";
+import { useTranslations, useLocale } from "next-intl";
 
-const XP_LEVELS = [
-  { name: "Новичок",       minXP: 0,    maxXP: 100  },
-  { name: "Исследователь", minXP: 100,  maxXP: 300  },
-  { name: "Знаток",        minXP: 300,  maxXP: 600  },
-  { name: "Историк",       minXP: 600,  maxXP: 1000 },
-  { name: "Эксперт",       minXP: 1000, maxXP: Infinity },
+const XP_THRESHOLDS = [
+  { key: "levelBeginner",  minXP: 0,    maxXP: 100  },
+  { key: "levelExplorer",  minXP: 100,  maxXP: 300  },
+  { key: "levelAdept",     minXP: 300,  maxXP: 600  },
+  { key: "levelScholar",   minXP: 600,  maxXP: 1000 },
+  { key: "levelExpert",    minXP: 1000, maxXP: Infinity },
 ];
 
-function getLevel(xp: number) {
-  const level = XP_LEVELS.slice().reverse().find((l) => xp >= l.minXP) ?? XP_LEVELS[0];
-  const idx = XP_LEVELS.indexOf(level);
-  const next = XP_LEVELS[idx + 1];
+function getLevelData(xp: number) {
+  const level = XP_THRESHOLDS.slice().reverse().find((l) => xp >= l.minXP) ?? XP_THRESHOLDS[0];
+  const idx = XP_THRESHOLDS.indexOf(level);
+  const next = XP_THRESHOLDS[idx + 1];
   const progress = next
     ? Math.min(100, Math.round(((xp - level.minXP) / (next.minXP - level.minXP)) * 100))
     : 100;
-  return { ...level, idx, next, progress };
+  return { key: level.key, idx, next, progress };
 }
 
-function pluralDays(n: number): string {
+function pluralDaysRu(n: number): string {
   const m10 = n % 10, m100 = n % 100;
   if (m100 >= 11 && m100 <= 14) return "дней";
   if (m10 === 1) return "день";
@@ -33,7 +34,7 @@ function pluralDays(n: number): string {
   return "дней";
 }
 
-function pluralMenty(n: number): string {
+function pluralMentyRu(n: number): string {
   const m10 = n % 10, m100 = n % 100;
   if (m100 >= 11 && m100 <= 14) return "мент";
   if (m10 === 1) return "мента";
@@ -56,6 +57,8 @@ interface Props {
 }
 
 export default function SubjectLibrarySection({ userSubjects, existingSubjectIds, userId, progressEntries }: Props) {
+  const t = useTranslations("subjectsSection");
+  const locale = useLocale();
   const [addOpen, setAddOpen] = useState(false);
   const [suggestOpen, setSuggestOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(
@@ -66,6 +69,16 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
   const [, startRemoveTransition] = useTransition();
 
   const progressMap = new Map(progressEntries.map((p) => [p.subject, p]));
+
+  function xpLabel(xp: number): string {
+    if (locale === "ru") return `${xp} ${pluralMentyRu(xp)}`;
+    return `${xp} XP`;
+  }
+
+  function streakLabel(n: number): string {
+    if (locale === "ru") return `${n} ${pluralDaysRu(n)} ${t("inARow")}`;
+    return `${n} ${n === 1 ? "day" : "days"} ${t("inARow")}`;
+  }
 
   function askRemove(e: React.MouseEvent, subject: SubjectItem) {
     e.stopPropagation();
@@ -88,7 +101,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
       {/* Section header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xs font-bold tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>
-          Предметы
+          {t("title")}
         </h2>
         <button
           onClick={() => setSuggestOpen(true)}
@@ -100,7 +113,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
           }}
         >
           <span className="text-sm leading-none">+</span>
-          Предложить предмет
+          {t("suggest")}
         </button>
       </div>
 
@@ -112,9 +125,10 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
           const isActive = subject.available && (isBeta || isVerified);
           const isSelected = subject.id === selectedId;
           const isRemoving = removing === subject.id;
-          const lvl = getLevel(progress?.xp_total ?? 0);
+          const lvl = getLevelData(progress?.xp_total ?? 0);
           const xp = progress?.xp_total ?? 0;
           const color = subjectColor(subject.id);
+          const levelName = t(lvl.key as "levelBeginner" | "levelExplorer" | "levelAdept" | "levelScholar" | "levelExpert");
 
           /* ── Coming soon card ─────────────────── */
           if (!isActive) {
@@ -126,7 +140,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                 <div className="p-5 flex flex-col flex-1">
                   <span className="absolute top-3 right-3 text-[9px] font-bold px-1.5 py-0.5 rounded-md tracking-wide"
                     style={{ background: "var(--bg-card)", color: "var(--text-muted)" }}>
-                    СКОРО
+                    {t("soon")}
                   </span>
                   <div className="mb-3">
                     <SubjectIcon id={subject.id} size={36} style={{ filter: "grayscale(0.5) opacity(0.7)" }} />
@@ -145,7 +159,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                 <button
                   onClick={(e) => askRemove(e, subject)}
                   disabled={isRemoving}
-                  aria-label="Удалить предмет"
+                  aria-label={t("removeAriaLabel")}
                   className="absolute -top-2.5 -left-2.5 z-30 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 disabled:cursor-not-allowed"
                   style={{ background: "rgba(0,0,0,0.55)", color: "#fff", boxShadow: "0 1px 4px rgba(0,0,0,0.3)" }}
                 >
@@ -185,9 +199,9 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                       <div className="absolute right-0 top-full mt-1.5 w-44 pointer-events-none opacity-0 group-hover/badge:opacity-100 transition-opacity duration-200 z-30">
                         <div className="rounded-xl px-3 py-2.5 shadow-xl border"
                           style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-                          <p className="text-[11px] font-semibold mb-0.5" style={{ color: "var(--text)" }}>✶ Verified</p>
+                          <p className="text-[11px] font-semibold mb-0.5" style={{ color: "var(--text)" }}>{t("verifiedTitle")}</p>
                           <p className="text-[10px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                            Полный курс с базой знаний и регулярными обновлениями
+                            {t("verifiedDesc")}
                           </p>
                         </div>
                       </div>
@@ -202,10 +216,10 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
 
                     <div className="mt-auto pt-3 border-t border-white/20" style={{ marginTop: "auto" }}>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-semibold text-white/65">{lvl.name}</span>
+                        <span className="text-[10px] font-semibold text-white/65">{levelName}</span>
                         {xp > 0 && (
                           <span className="text-[10px] font-bold text-white">
-                            <MeLogo height={11} variant="white" style={{ marginRight: 1 }} />{xp} {pluralMenty(xp)}
+                            <MeLogo height={11} variant="white" style={{ marginRight: 1 }} />{xpLabel(xp)}
                           </span>
                         )}
                       </div>
@@ -217,13 +231,13 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                           <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none">
                             <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="currentColor" />
                           </svg>
-                          {progress!.streak_days} {pluralDays(progress!.streak_days)} подряд
+                          {streakLabel(progress!.streak_days)}
                         </div>
                       )}
                       <Link href={`/learn/${subject.id}`}
                         onClick={e => e.stopPropagation()}
                         className="inline-flex text-xs font-semibold text-white/90 hover:text-white transition-colors">
-                        {xp > 0 ? "Продолжить →" : "Начать →"}
+                        {xp > 0 ? t("continue") : t("start")}
                       </Link>
                     </div>
                   </div>
@@ -238,7 +252,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
               <button
                 onClick={(e) => askRemove(e, subject)}
                 disabled={isRemoving}
-                aria-label="Удалить предмет"
+                aria-label={t("removeAriaLabel")}
                 className="absolute -top-2.5 -left-2.5 z-30 w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 disabled:cursor-not-allowed"
                 style={{ background: "rgba(0,0,0,0.18)", color: "var(--text-secondary)", boxShadow: "0 1px 4px rgba(0,0,0,0.15)" }}
               >
@@ -274,9 +288,9 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                     <div className="absolute right-0 top-full mt-1.5 w-44 pointer-events-none opacity-0 group-hover/badge:opacity-100 transition-opacity duration-200 z-30">
                       <div className="rounded-xl px-3 py-2.5 shadow-xl border"
                         style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-                        <p className="text-[11px] font-semibold mb-0.5" style={{ color: "var(--text)" }}>✶ Beta</p>
+                        <p className="text-[11px] font-semibold mb-0.5" style={{ color: "var(--text)" }}>{t("betaTitle")}</p>
                         <p className="text-[10px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                          Предмет в разработке — контент активно пополняется
+                          {t("betaDesc")}
                         </p>
                       </div>
                     </div>
@@ -290,10 +304,10 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
 
                   <div className="mt-auto pt-3 border-t" style={{ marginTop: "auto", borderColor: "var(--border)" }}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-semibold" style={{ color: "var(--text-muted)" }}>{lvl.name}</span>
+                      <span className="text-[10px] font-semibold" style={{ color: "var(--text-muted)" }}>{levelName}</span>
                       {xp > 0 && (
                         <span className="text-[10px] font-bold" style={{ color }}>
-                          <MeLogo height={11} colorM={color} colorE={color} style={{ marginRight: 1 }} />{xp} {pluralMenty(xp)}
+                          <MeLogo height={11} colorM={color} colorE={color} style={{ marginRight: 1 }} />{xpLabel(xp)}
                         </span>
                       )}
                     </div>
@@ -307,14 +321,14 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                         <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none">
                           <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="currentColor" />
                         </svg>
-                        {progress!.streak_days} {pluralDays(progress!.streak_days)} подряд
+                        {streakLabel(progress!.streak_days)}
                       </div>
                     )}
                     <Link href={`/learn/${subject.id}`}
                       onClick={e => e.stopPropagation()}
                       className="inline-flex text-xs font-semibold transition-colors hover:opacity-80"
                       style={{ color }}>
-                      {xp > 0 ? "Продолжить →" : "Начать →"}
+                      {xp > 0 ? t("continue") : t("start")}
                     </Link>
                   </div>
                 </div>
@@ -342,7 +356,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
             <span className="text-xl font-light" style={{ color: "var(--text-muted)" }}>+</span>
           </div>
           <span className="text-xs font-semibold text-center" style={{ color: "var(--text-muted)" }}>
-            Добавить предмет
+            {t("add")}
           </span>
         </button>
       </div>
@@ -362,12 +376,12 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
             <div className="flex items-center gap-3 mb-4">
               <SubjectIcon id={confirmSubject.id} size={40} />
               <div>
-                <p className="font-bold text-sm" style={{ color: "var(--text)" }}>Удалить предмет?</p>
+                <p className="font-bold text-sm" style={{ color: "var(--text)" }}>{t("removeTitle")}</p>
                 <p className="text-xs mt-0.5 font-medium" style={{ color: subjectColor(confirmSubject.id) }}>{confirmSubject.title}</p>
               </div>
             </div>
             <p className="text-sm leading-relaxed mb-5" style={{ color: "var(--text-secondary)" }}>
-              Предмет будет убран из твоей библиотеки. Позже ты сможешь добавить его обратно — весь прогресс сохранится.
+              {t("removeDesc")}
             </p>
             <div className="flex gap-2">
               <button
@@ -375,14 +389,14 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                 className="flex-1 py-2 rounded-xl text-sm font-semibold transition-colors"
                 style={{ background: "var(--bg-secondary)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
               >
-                Отмена
+                {t("cancel")}
               </button>
               <button
                 onClick={confirmRemove}
                 className="flex-1 py-2 rounded-xl text-sm font-semibold transition-colors"
                 style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
               >
-                Удалить
+                {t("remove")}
               </button>
             </div>
           </div>

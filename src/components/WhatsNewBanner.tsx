@@ -1,15 +1,17 @@
 "use client";
 
 /**
- * WhatsNewBanner — показывается залогиненным пользователям в дашборде.
- * Скрывается после клика на ✕ и запоминает закрытую версию в localStorage.
- * При следующем обновлении CHANGELOG[0].version покажется снова.
+ * WhatsNewBanner — shown to logged-in users on the dashboard.
+ * Dismissed on ✕ click and stores the dismissed version in localStorage.
+ * Re-appears when CHANGELOG[0].version changes.
  */
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { LATEST } from "@/lib/changelog";
 
 export default function WhatsNewBanner() {
+  const t = useTranslations("whatsNew");
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function WhatsNewBanner() {
             className="text-[10px] font-bold px-1.5 py-0.5 rounded-md"
             style={{ background: "rgba(69,97,232,0.12)", color: "#4561E8" }}
           >
-            v{LATEST.version} · Новое
+            v{LATEST.version} · {t("label")}
           </span>
           <span className="text-xs font-semibold" style={{ color: "var(--text)" }}>
             {LATEST.title}
@@ -60,7 +62,7 @@ export default function WhatsNewBanner() {
       {/* Закрыть */}
       <button
         onClick={dismiss}
-        aria-label="Скрыть"
+        aria-label={t("hide")}
         className="shrink-0 mt-0.5 rounded-lg p-1 transition-colors hover:bg-[var(--bg-secondary)]"
         style={{ color: "var(--text-muted)" }}
       >

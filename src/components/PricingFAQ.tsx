@@ -1,28 +1,25 @@
 "use client";
 
 import { useState } from "react";
-
-const FAQ = [
-  { q: "Можно ли попробовать без оплаты?",
-    a: "Да. Бесплатный план не требует карты — регистрируйся и начинай сразу. Даже без аккаунта можно попробовать демо-чат на главной." },
-  { q: "Что значит «безлимитные сообщения»?",
-    a: "На Pro нет ограничений на количество сообщений в день. Учись столько, сколько хочешь." },
-  { q: "Когда появятся новые предметы?",
-    a: "Математика, биология и английский выйдут в первую очередь. Подписчики Pro получат доступ сразу при релизе." },
-  { q: "Как работает Ultra?",
-    a: "Ultra добавляет к Pro три возможности: сфотографируй задачу — Mentora объяснит решение (уже работает), создай презентацию по любой теме (скоро), получи аудио-разбор сложного раздела (скоро)." },
-  { q: "Как отменить подписку?",
-    a: "В любой момент в настройках аккаунта — без звонков и объяснений." },
-];
+import { useTranslations } from "next-intl";
 
 export default function PricingFAQ() {
+  const t = useTranslations("faq");
   const [open, setOpen] = useState<number | null>(null);
+
+  const FAQ = [
+    { q: t("q1"), a: t("a1") },
+    { q: t("q2"), a: t("a2") },
+    { q: t("q3"), a: t("a3") },
+    { q: t("q4"), a: t("a4") },
+    { q: t("q5"), a: t("a5") },
+  ];
 
   return (
     <div className="space-y-2">
       {FAQ.map(({ q, a }, i) => (
         <div
-          key={q}
+          key={i}
           className="border rounded-2xl overflow-hidden transition-all duration-200"
           style={{
             background: "var(--bg-card)",
@@ -43,7 +40,7 @@ export default function PricingFAQ() {
               }}
             >
               <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d={open === i ? "M2 6h8M6 2v8" : "M2 6h8M6 2v8"} style={{ color: open === i ? "white" : "var(--text-muted)" }} />
+                <path d="M2 6h8M6 2v8" style={{ color: open === i ? "white" : "var(--text-muted)" }} />
               </svg>
             </span>
           </button>

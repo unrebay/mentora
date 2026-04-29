@@ -3,6 +3,7 @@ import { useState, useTransition } from "react";
 import { SUBJECTS } from "@/lib/types";
 import { addUserSubject } from "@/app/dashboard/actions";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
+import { useTranslations } from "next-intl";
 
 interface Props {
   open: boolean;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function AddSubjectModal({ open, onClose, existingSubjectIds }: Props) {
+  const t = useTranslations("addSubjectModal");
   const [pending, startTransition] = useTransition();
   const [adding, setAdding] = useState<string | null>(null);
 
@@ -41,8 +43,8 @@ export default function AddSubjectModal({ open, onClose, existingSubjectIds }: P
         <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b"
           style={{ borderColor: "var(--border)" }}>
           <div>
-            <h2 className="text-lg font-bold" style={{ color: "var(--text)" }}>Добавить предмет</h2>
-            <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Выбери из каталога Mentora</p>
+            <h2 className="text-lg font-bold" style={{ color: "var(--text)" }}>{t("title")}</h2>
+            <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>{t("subtitle")}</p>
           </div>
           <button
             onClick={onClose}
@@ -57,7 +59,7 @@ export default function AddSubjectModal({ open, onClose, existingSubjectIds }: P
         <div className="p-4 max-h-[65vh] overflow-y-auto">
           {available.length === 0 ? (
             <p className="text-center text-sm py-8" style={{ color: "var(--text-muted)" }}>
-              Все доступные предметы уже добавлены 🎉
+              {t("allAdded")}
             </p>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -109,7 +111,7 @@ export default function AddSubjectModal({ open, onClose, existingSubjectIds }: P
                           border: `1px solid ${color}30`,
                         }}
                       >
-                        {isAdding ? "Добавляю..." : "Добавить"}
+                        {isAdding ? t("adding") : t("add")}
                       </button>
                     </div>
                   </div>
