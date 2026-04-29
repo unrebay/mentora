@@ -367,14 +367,16 @@ export default async function HomePage() {
 
       </div>
 
-      {/* Gradient fade: dark universe → light page bg — no hard edge */}
-      <div aria-hidden style={{
-        height: 180,
-        background: "linear-gradient(to bottom, #060912 0%, var(--bg) 100%)",
-        marginTop: -1,
-        position: "relative",
-        zIndex: 1,
-      }} />
+      {/* SVG wave: dark universe → light page */}
+      <div aria-hidden style={{ marginTop: -2, position: "relative", zIndex: 1, lineHeight: 0 }}>
+        <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
+          style={{ display: "block", width: "100%", height: 120 }}>
+          <path
+            d="M0,40 C240,100 480,0 720,60 C960,120 1200,20 1440,70 L1440,0 L0,0 Z"
+            fill="#060912"
+          />
+        </svg>
+      </div>
 
       </div>{/* /DARK UNIVERSE */}
 
