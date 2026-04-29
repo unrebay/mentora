@@ -92,11 +92,17 @@ export default function DashboardNav({
         ? "hover:text-white/90 hover:bg-white/[0.06]"
         : "hover:text-[var(--text)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]";
 
-  /* ── background / blur ── */
+  /* ── iOS 26 Liquid Glass pill ── */
   const navBg = dk
-    ? "rgba(8,8,20,0.62)"
-    : "var(--bg-nav)";
-  const navBlur = "blur(28px) saturate(1.8)";
+    ? "rgba(6,6,18,0.55)"
+    : "rgba(255,255,255,0.68)";
+  const navBlur = "blur(40px) saturate(2.2) brightness(1.03)";
+  const navBorder = dk
+    ? "1px solid rgba(255,255,255,0.09)"
+    : "1px solid rgba(255,255,255,0.60)";
+  const navShadow = dk
+    ? "0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 48px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.08) inset"
+    : "0 0 0 1px rgba(255,255,255,0.95) inset, 0 8px 40px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.05)";
 
   const navLinks = [
     { href: "/dashboard",           label: t("dashboard.nav.subjects") },
@@ -120,8 +126,8 @@ export default function DashboardNav({
       className="sticky top-0 z-20"
       style={{
         padding: "10px 14px",
-        background: dk ? "transparent" : "var(--bg)",
-        pointerEvents: "none", // clicks pass through the padding gaps
+        background: "transparent",  // always transparent — pill handles its own bg
+        pointerEvents: "none",
       }}
     >
       {/* ── The actual pill ── */}
@@ -134,12 +140,8 @@ export default function DashboardNav({
           backdropFilter: navBlur,
           WebkitBackdropFilter: navBlur,
           borderRadius: 28,
-          border: dk
-            ? "1px solid rgba(255,255,255,0.1)"
-            : "1px solid var(--border-light)",
-          boxShadow: dk
-            ? "0 2px 0 rgba(255,255,255,0.04) inset, 0 8px 40px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset"
-            : "0 4px 24px rgba(0,0,0,0.09), 0 1px 0 rgba(255,255,255,0.8) inset",
+          border: navBorder,
+          boxShadow: navShadow,
           overflow: "hidden",
           position: "relative",
         }}
@@ -148,8 +150,8 @@ export default function DashboardNav({
         <div style={{
           height: 1,
           background: dk
-            ? "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 40%, rgba(107,135,255,0.35) 65%, transparent 100%)"
-            : "linear-gradient(90deg, transparent 0%, rgba(69,97,232,0.1) 40%, rgba(69,97,232,0.22) 65%, transparent 100%)",
+            ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)"
+            : "linear-gradient(90deg, transparent, rgba(255,255,255,0.90), transparent)",
           position: "absolute", top: 0, left: 0, right: 0,
         }} />
 
@@ -296,12 +298,12 @@ export default function DashboardNav({
           className="md:hidden max-w-5xl mx-auto mt-2"
           style={{
             pointerEvents: "all",
-            background: dk ? "rgba(8,8,20,0.92)" : "var(--bg-nav)",
-            backdropFilter: "blur(28px) saturate(1.8)",
-            WebkitBackdropFilter: "blur(28px) saturate(1.8)",
+            background: dk ? "rgba(6,6,18,0.96)" : "rgba(255,255,255,0.82)",
+            backdropFilter: "blur(40px) saturate(2.2)",
+            WebkitBackdropFilter: "blur(40px) saturate(2.2)",
             borderRadius: 28,
-            border: dk ? "1px solid rgba(255,255,255,0.09)" : "1px solid var(--border-light)",
-            boxShadow: dk ? "0 8px 40px rgba(0,0,0,0.5)" : "0 4px 24px rgba(0,0,0,0.1)",
+            border: navBorder,
+            boxShadow: navShadow,
           }}
         >
           <div className="px-3 py-2 flex flex-col gap-0.5">
