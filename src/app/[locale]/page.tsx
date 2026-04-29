@@ -734,8 +734,19 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Wave: light → dark CTA */}
+      <div aria-hidden style={{ marginBottom: -2, position: "relative", zIndex: 1, lineHeight: 0 }}>
+        <svg viewBox="0 0 1440 90" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
+          style={{ display: "block", width: "100%", height: 90 }}>
+          <path
+            d="M0,55 C180,20 360,80 560,42 C740,8 920,72 1120,38 C1260,18 1360,58 1440,44 L1440,90 L0,90 Z"
+            fill="#111827"
+          />
+        </svg>
+      </div>
+
       {/* CTA */}
-      <section className="bg-gray-900 dark:bg-[#04040c] text-white px-6 py-24 text-center relative overflow-hidden">
+      <section style={{ background: "#111827" }} className="text-white px-6 py-24 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-30" aria-hidden>
           <div className="absolute inset-0"
             style={{ background: "radial-gradient(ellipse at 50% 120%, #4561E840 0%, transparent 70%)" }} />
@@ -763,17 +774,17 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <footer className="py-8 border-t border-[var(--border)]" style={{ background: "var(--bg)" }}>
-        <div className="max-w-6xl mx-auto px-6 flex flex-col items-center gap-4 text-xs text-[var(--text-muted)]">
+      <footer className="py-8" style={{ background: "#111827", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="max-w-6xl mx-auto px-6 flex flex-col items-center gap-4 text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
           <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
             <span>{t("landing.footerRights")}</span>
             <div className="flex gap-6">
-              <Link href="/privacy" className="hover:text-[var(--text)] transition-colors">{t("landing.footerPrivacy")}</Link>
-              <Link href="/terms" className="hover:text-[var(--text)] transition-colors">{t("landing.footerTerms")}</Link>
+              <Link href="/privacy" className="transition-colors hover:text-white/70">{t("landing.footerPrivacy")}</Link>
+              <Link href="/terms" className="transition-colors hover:text-white/70">{t("landing.footerTerms")}</Link>
             </div>
           </div>
           {locale === "ru" && (
-            <p className="text-center" style={{ fontSize: "10px", opacity: 0.4, maxWidth: 480, lineHeight: 1.4 }}>
+            <p className="text-center" style={{ fontSize: "10px", opacity: 0.3, maxWidth: 480, lineHeight: 1.4 }}>
               Instagram — продукт компании Meta Platforms Inc. Деятельность организации Meta Platforms признана экстремистской и запрещена на территории Российской Федерации.
             </p>
           )}
