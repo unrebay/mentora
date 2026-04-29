@@ -7,7 +7,6 @@ import { createClient } from "@/lib/supabase/server";
 import NeuralNetworkCanvas from "@/components/NeuralNetworkCanvas";
 import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
 import SubjectGrid from "@/components/SubjectGrid";
-import { LATEST } from "@/lib/changelog";
 import DemoScrollButton from "@/components/DemoScrollButton";
 import LandingNav from "@/components/LandingNav";
 import BuyProButton from "@/components/BuyProButton";
@@ -283,7 +282,7 @@ export default async function HomePage() {
         </div>
 
         {/* FEATURES */}
-        <section className="text-white px-6 pt-16 pb-24">
+        <section className="text-white px-6 pt-16 pb-10">
           <div className="max-w-6xl mx-auto">
             <p className="text-xs font-bold tracking-[0.22em] uppercase mb-4 text-center" style={{ color: "rgba(255,255,255,0.35)" }}>
               {t("landing.featuresLabel")}
@@ -358,39 +357,18 @@ export default async function HomePage() {
 
       </div>
 
-      {/* SVG wave: dark universe → light page */}
+      </div>{/* /DARK UNIVERSE */}
+
+      {/* SVG wave: outside the dark div so transparency shows light page bg */}
       <div aria-hidden style={{ marginTop: -2, position: "relative", zIndex: 1, lineHeight: 0 }}>
-        <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
-          style={{ display: "block", width: "100%", height: 120 }}>
+        <svg viewBox="0 0 1440 90" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
+          style={{ display: "block", width: "100%", height: 90 }}>
           <path
-            d="M0,40 C240,100 480,0 720,60 C960,120 1200,20 1440,70 L1440,0 L0,0 Z"
+            d="M0,0 C120,70 280,90 480,55 C640,25 800,75 960,50 C1120,25 1300,65 1440,40 L1440,0 Z"
             fill="#060912"
           />
         </svg>
       </div>
-
-      </div>{/* /DARK UNIVERSE */}
-
-      {/* SUBJECTS */}
-      {/* ── What's new ── */}
-      <section className="max-w-6xl mx-auto px-6 pb-4">
-        <a href="/auth" className="flex items-center gap-3 group rounded-2xl px-4 py-3 border transition-all hover:border-[#4561E8]/40"
-          style={{ background: "linear-gradient(135deg, rgba(69,97,232,0.05), rgba(107,143,255,0.03))", borderColor: "rgba(69,97,232,0.15)" }}>
-          <span className="text-2xl shrink-0">{LATEST.badge}</span>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md" style={{ background: "rgba(69,97,232,0.12)", color: "#4561E8" }}>
-                v{LATEST.version} · {t("landing.newBadge")}
-              </span>
-              <span className="text-xs font-semibold text-[var(--text)]">{LATEST.title}</span>
-            </div>
-            <p className="text-xs text-[var(--text-muted)] leading-relaxed">{LATEST.description}</p>
-          </div>
-          <svg className="w-4 h-4 shrink-0 text-[var(--text-muted)] group-hover:text-[#4561E8] transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 18l6-6-6-6"/>
-          </svg>
-        </a>
-      </section>
 
       <section id="subjects" className="max-w-6xl mx-auto px-6 py-16">
         <div className="flex items-center gap-3 mb-4">
