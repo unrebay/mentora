@@ -99,14 +99,6 @@ export default async function PricingPage() {
 
       {/* HERO */}
       <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8 text-xs font-bold tracking-widest uppercase"
-          style={{ background: "rgba(69,97,232,0.1)", color: "var(--brand)", border: "1px solid rgba(69,97,232,0.2)" }}>
-          <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor">
-            <circle cx="6" cy="6" r="2.5" />
-            <circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5" />
-          </svg>
-          {t("pricing.badge")}
-        </div>
         <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-5 leading-[1.1]">
           {t("pricing.hero.title")}<br />
           <span style={{

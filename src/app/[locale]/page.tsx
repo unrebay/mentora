@@ -90,34 +90,11 @@ const FEATURE_ICONS = [
 const FEATURE_COLORS = ["#4561E8", "#10B981", "#FF7A00", "#A78BFA", "#06B6D4", "#F59E0B"];
 const FEATURE_KEYS = ["security", "memory", "supportive", "ai", "global", "price"] as const;
 
-const TESTIMONIALS = [
-  {
-    name: "Алина Соколова",
-    role: "Школьница, 10 класс",
-    avatar: "А",
-    avatarBg: "bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400",
-    text: "Готовлюсь к ЕГЭ по истории. Раньше зазубривала даты — теперь просто разговариваю с Менторой, и всё складывается само. За две недели прошла больше, чем за всю четверть с учителем.",
-    stars: 5,
-    xp: "340 мент · 14 дней подряд",
-  },
-  {
-    name: "Кирилл Носов",
-    role: "Школьник, 8 класс",
-    avatar: "К",
-    avatarBg: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-    text: "Зашёл спросить про уравнения, задержался на час — оказывается, математика может быть интересной. Попросил объяснить три раза по-разному, Ментора ни разу не раздражалась.",
-    stars: 5,
-    xp: "210 мент · 7 дней подряд",
-  },
-  {
-    name: "Марина Захарова",
-    role: "Взрослая, учусь для себя",
-    avatar: "М",
-    avatarBg: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
-    text: "Очень нравится — давно хотела разобраться в истории для себя, не для экзамена. Ставлю 4 звезды, потому что хочется мобильное приложение: иногда неудобно открывать браузер на телефоне. Но сам продукт — огонь.",
-    stars: 4,
-    xp: "520 мент · 8 дней подряд",
-  },
+// Static non-localizable per-testimonial data (avatarBg CSS classes)
+const TESTIMONIAL_META = [
+  { avatarBg: "bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400" },
+  { avatarBg: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" },
+  { avatarBg: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" },
 ];
 
 export default async function HomePage() {
@@ -127,6 +104,12 @@ export default async function HomePage() {
 
   const locale = await getLocale();
   const t = await getTranslations();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const TESTIMONIALS = (t.raw("landing.testimonials") as any[]).map((item, idx) => ({
+    ...item,
+    avatarBg: TESTIMONIAL_META[idx]?.avatarBg ?? "",
+  }));
 
   const subjects = SUBJECT_IDS.map((id) => ({
     id,

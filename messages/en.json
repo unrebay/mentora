@@ -25,7 +25,7 @@
     "heroCtaStart": "Start learning",
     "demoChatSub": "Ask the question you couldn't say out loud",
     "teacherLine1": "A teacher explains to everyone.",
-    "teacherLine2": "Mentora — only for you.",
+    "teacherLine2": "— only for you.",
     "heroCta2": "Get started",
     "libraryLabel": "Knowledge library",
     "subjectsHeading": "Choose a subject",
@@ -68,7 +68,34 @@
     "footerRights": "© 2024–2025 Mentora. All rights reserved.",
     "footerPrivacy": "Privacy",
     "footerTerms": "Terms",
-    "footerAbout": "About"
+    "footerAbout": "About",
+    "demo": "Watch demo",
+    "testimonials": [
+      {
+        "name": "Alina S.",
+        "role": "High school, grade 10",
+        "avatar": "A",
+        "text": "Preparing for history exams. I used to just memorize dates — now I actually talk with Mentora and everything clicks. In two weeks I covered more than a whole semester with a teacher.",
+        "stars": 5,
+        "xp": "340 xp · 14-day streak"
+      },
+      {
+        "name": "Kirill N.",
+        "role": "School, grade 8",
+        "avatar": "K",
+        "text": "Came in to ask about equations, stayed an hour — turns out math can be interesting. Asked to explain three different ways, Mentora never got annoyed.",
+        "stars": 5,
+        "xp": "210 xp · 7-day streak"
+      },
+      {
+        "name": "Marina Z.",
+        "role": "Adult learner, studying for myself",
+        "avatar": "M",
+        "text": "Really love it — always wanted to understand history for myself, not for an exam. Giving 4 stars because I want a mobile app: opening a browser on my phone is a bit annoying. But the product itself — fire.",
+        "stars": 4,
+        "xp": "520 xp · 8-day streak"
+      }
+    ]
   },
   "subjects": {
     "russian-history": {
