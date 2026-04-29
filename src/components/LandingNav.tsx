@@ -44,7 +44,7 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
   const linkColor = isDark ? "rgba(255,255,255,0.80)" : "rgba(30,30,50,0.75)";
   const loginColor = isDark ? "rgba(255,255,255,0.85)" : "rgba(30,30,50,0.80)";
   const navBg = isDark ? "rgba(6,6,18,0.38)" : "rgba(255,255,255,0.50)";
-  const navBlur = "blur(40px) saturate(2.0) brightness(1.02)";
+  const navBlur = "blur(16px) saturate(1.6) brightness(1.02)";
   const navBorder = isDark
     ? "1px solid rgba(255,255,255,0.09)"
     : "1px solid rgba(255,255,255,0.70)";

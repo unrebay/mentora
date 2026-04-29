@@ -97,7 +97,7 @@ export default function DashboardNav({
 
   /* ── iOS 26 Liquid Glass pill ── */
   const navBg = dk ? "rgba(6,6,18,0.38)" : "rgba(255,255,255,0.50)";
-  const navBlur = "blur(40px) saturate(2.0) brightness(1.02)";
+  const navBlur = "blur(16px) saturate(1.6) brightness(1.02)";
   // No visible border — white border on light is invisible, subtle glow on dark
   const navBorder = dk
     ? "1px solid rgba(255,255,255,0.09)"
