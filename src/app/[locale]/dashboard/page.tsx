@@ -105,6 +105,24 @@ export default async function DashboardPage() {
     ? SUBJECTS.find(s => s.id === lastActiveProgress.subject) ?? null
     : null;
 
+  // Last message the user sent for the active subject — used as "last topic" hint
+  let lastTopicHint: string | null = null;
+  if (lastActiveProgress) {
+    const { data: lastMsg } = await supabase
+      .from("chat_messages")
+      .select("content")
+      .eq("user_id", user.id)
+      .eq("subject", lastActiveProgress.subject)
+      .eq("role", "user")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+    if (lastMsg?.content) {
+      const raw = lastMsg.content.trim().replace(/\s+/g, " ");
+      lastTopicHint = raw.length > 52 ? raw.slice(0, 52) + "…" : raw;
+    }
+  }
+
   const firstName = getFirstName(
     user.user_metadata?.full_name ?? user.user_metadata?.name,
     user.email,
@@ -435,7 +453,7 @@ export default async function DashboardPage() {
                 {/* Header row: icon + label + title */}
                 <div className="flex items-center gap-3 mb-3">
                   <SubjectIcon id={lastActiveSubject.id} size={44} />
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="text-[10px] font-bold tracking-[0.15em] uppercase"
                       style={{ color: accent }}>
                       {t("continueLearning")}
@@ -443,6 +461,11 @@ export default async function DashboardPage() {
                     <p className="font-bold text-lg leading-tight mt-0.5" style={{ color: "var(--text)" }}>
                       {lastActiveSubject.title}
                     </p>
+                    {lastTopicHint && (
+                      <p className="text-xs mt-0.5 truncate" style={{ color: "var(--text-muted)", opacity: 0.7 }}>
+                        {lastTopicHint}
+                      </p>
+                    )}
                   </div>
                 </div>
 

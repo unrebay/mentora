@@ -583,7 +583,7 @@ export default async function HomePage() {
               <div className="relative flex flex-col mt-3 md:mt-0">
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap">
                   <span className="text-white text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase"
-                    style={{ background: "linear-gradient(135deg, rgba(255,122,0,0.75), rgba(124,58,237,0.75))", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", boxShadow: "0 2px 12px rgba(255,122,0,0.25)" }}>
+                    style={{ background: "linear-gradient(135deg, #FF7A00, #7C3AED)", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 2px 16px rgba(255,122,0,0.4)" }}>
                     {t("common.new").toUpperCase()}
                   </span>
                 </div>
