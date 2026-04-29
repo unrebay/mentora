@@ -95,17 +95,9 @@ export default function DashboardNav({
         ? "hover:text-white/90 hover:bg-white/[0.06]"
         : "hover:text-[var(--text)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]";
 
-  /* ── iOS 26 Liquid Glass pill ── */
-  const navBg = dk
-    ? "rgba(6,6,18,0.55)"
-    : "rgba(255,255,255,0.68)";
-  const navBlur = "blur(40px) saturate(2.2) brightness(1.03)";
-  const navBorder = dk
-    ? "1px solid rgba(255,255,255,0.09)"
-    : "1px solid rgba(255,255,255,0.60)";
-  const navShadow = dk
-    ? "0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 48px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.08) inset"
-    : "0 0 0 1px rgba(255,255,255,0.95) inset, 0 8px 40px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.05)";
+  /* ── Nav is always transparent — only text colors change ── */
+  const navBorder = "1px solid transparent";
+  const navShadow = "none";
 
   const navLinks = [
     { href: "/dashboard",           label: t("dashboard.nav.subjects") },
@@ -133,30 +125,15 @@ export default function DashboardNav({
         pointerEvents: "none",
       }}
     >
-      {/* ── The actual pill ── */}
+      {/* ── Nav content ── */}
       <div
         data-tour="nav-pill"
         className="max-w-6xl mx-auto"
         style={{
           pointerEvents: "all",
-          background: navBg,
-          backdropFilter: navBlur,
-          WebkitBackdropFilter: navBlur,
-          borderRadius: 28,
-          border: navBorder,
-          boxShadow: navShadow,
-          overflow: "hidden",
           position: "relative",
         }}
       >
-        {/* thin top shimmer line */}
-        <div style={{
-          height: 1,
-          background: dk
-            ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)"
-            : "linear-gradient(90deg, transparent, rgba(255,255,255,0.90), transparent)",
-          position: "absolute", top: 0, left: 0, right: 0,
-        }} />
 
       {/* ── Top bar ── */}
       <div className="flex items-center justify-between px-4" style={{ height: 52 }}>

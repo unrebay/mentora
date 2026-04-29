@@ -10,14 +10,10 @@ export default function LandingNav() {
   const t = useTranslations("nav");
   /** true while viewport is over the dark hero section */
   const [isDark, setIsDark] = useState(true);
-  /** true once user has scrolled enough to reveal the pill bg */
-  const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     function update() {
-      const y = window.scrollY;
-      setScrolled(y > 40);
       const subjects = document.getElementById("subjects");
       if (!subjects) { setIsDark(true); return; }
       setIsDark(subjects.getBoundingClientRect().top > 72);
@@ -34,32 +30,12 @@ export default function LandingNav() {
     return () => window.removeEventListener("scroll", close);
   }, [mobileOpen]);
 
-  // ── iOS 26 Liquid Glass pill visual states ────────────────────────────────
-  const showPill = scrolled || !isDark;
-
-  const navBg = isDark
-    ? (showPill ? "rgba(6,6,18,0.55)" : "transparent")
-    : "rgba(255,255,255,0.62)";
-
-  const navBlur = showPill ? "blur(40px) saturate(2.2) brightness(1.04)" : "none";
-
-  const navBorder = showPill
-    ? (isDark
-        ? "1px solid rgba(255,255,255,0.09)"
-        : "1px solid rgba(255,255,255,0.55)")
-    : "1px solid transparent";
-
-  const navShadow = showPill
-    ? (isDark
-        ? "0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 48px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.08) inset"
-        : "0 0 0 1px rgba(255,255,255,0.9) inset, 0 8px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06)")
-    : "none";
-
-  const linkColor = isDark ? "rgba(255,255,255,0.70)" : "rgba(30,30,50,0.75)";
-  const loginColor = isDark ? "rgba(255,255,255,0.75)" : "rgba(30,30,50,0.80)";
+  // Nav is always transparent — only text/logo color changes based on section
+  const linkColor = isDark ? "rgba(255,255,255,0.80)" : "rgba(30,30,50,0.75)";
+  const loginColor = isDark ? "rgba(255,255,255,0.85)" : "rgba(30,30,50,0.80)";
 
   // ── Mobile dropdown bg ────────────────────────────────────────────────────
-  const mobileBg = isDark ? "rgba(6,6,18,0.97)" : "rgba(255,255,255,0.92)";
+  const mobileBg = isDark ? "rgba(6,6,18,0.97)" : "rgba(255,255,255,0.95)";
   const mobileBorder = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)";
 
   return (
@@ -72,33 +48,14 @@ export default function LandingNav() {
         pointerEvents: "none",
       }}
     >
-      {/* ── The actual pill ─────────────────────────────────────────────── */}
+      {/* ── Nav content ─────────────────────────────────────────────── */}
       <div
-        className="max-w-5xl mx-auto transition-all duration-300"
+        className="max-w-5xl mx-auto"
         style={{
           pointerEvents: "all",
-          background: navBg,
-          backdropFilter: navBlur,
-          WebkitBackdropFilter: navBlur,
-          borderRadius: 28,
-          border: navBorder,
-          boxShadow: navShadow,
-          overflow: "hidden",
           position: "relative",
         }}
       >
-        {/* thin top shimmer line */}
-        {showPill && (
-          <div style={{
-            position: "absolute",
-            top: 0, left: 0, right: 0,
-            height: 1,
-            background: isDark
-              ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)"
-              : "linear-gradient(90deg, transparent, rgba(255,255,255,0.85), transparent)",
-            pointerEvents: "none",
-          }} />
-        )}
 
         {/* Main row */}
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-3">
@@ -164,7 +121,7 @@ export default function LandingNav() {
               className="md:hidden flex flex-col justify-center items-center w-9 h-9 gap-[5.5px] rounded-full transition-colors shrink-0"
               style={{
                 color: isDark ? "rgba(255,255,255,0.8)" : "var(--text)",
-                background: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)",
+                background: "transparent",
               }}
               onClick={() => setMobileOpen((v) => !v)}
               aria-label={mobileOpen ? t("closeMenu") : t("openMenu")}
