@@ -205,10 +205,11 @@ export default async function ProfilePage() {
   const isTrialActive = profile?.trial_expires_at ? new Date(profile.trial_expires_at) > new Date() : false;
   const isPro = isUltima || profile?.plan === "pro" || isTrialActive;
 
-  // Daily message counter for free users (window resets at midnight UTC)
-  const FREE_LIMIT = 20;
+  // Rolling 8-hour window counter for free users (starts from first message sent)
+  const FREE_LIMIT = 10;
+  const WINDOW_HOURS = 8;
   const windowStart = profile?.messages_window_start ? new Date(profile.messages_window_start) : null;
-  const windowExpired = !windowStart || windowStart.toISOString().slice(0, 10) !== new Date().toISOString().slice(0, 10);
+  const windowExpired = !windowStart || (Date.now() - windowStart.getTime()) >= WINDOW_HOURS * 3600_000;
   const usedToday = windowExpired ? 0 : (profile?.messages_today ?? 0);
   const remainingToday = Math.max(0, FREE_LIMIT - usedToday);
 

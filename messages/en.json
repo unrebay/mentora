@@ -63,7 +63,7 @@
     "featuresSubtitle": "Not just an online textbook. A live mentor working only for you.",
     "statsLabel": "By the numbers",
     "ctaTitle": "Ready to start?",
-    "ctaSubtitle": "First 20 messages per day — free. No card required.",
+    "ctaSubtitle": "First 10 messages every 8 hours — free. No card required.",
     "ctaButton": "Start for free →",
     "footerRights": "© 2024–2025 Mentora. All rights reserved.",
     "footerPrivacy": "Privacy",
@@ -95,7 +95,8 @@
         "stars": 4,
         "xp": "520 xp · 8-day streak"
       }
-    ]
+    ],
+    "footerCtaSub2": "10 messages every 8 hours — free forever."
   },
   "subjects": {
     "russian-history": {
@@ -237,7 +238,7 @@
       "cta": "Start for free",
       "features": [
         "All subjects",
-        "20 messages per day",
+        "10 messages / 8 hours",
         "XP, levels and achievements",
         "Streak and progress",
         "No registration required"
@@ -580,7 +581,9 @@
       "defaultQ1": "Where to start studying?",
       "defaultQ2": "Explain the basic concepts",
       "defaultQ3": "Give me a study plan"
-    }
+    },
+    "softBannerCta": "Sign up — 10 per 8 hrs free →",
+    "disclaimer": "10 messages / 8 hours · no card · free"
   },
   "subjectsSection": {
     "title": "Subjects",
@@ -869,7 +872,7 @@
     "heroSubtitle": "7 techniques that will help you learn more effectively",
     "startFreeBtn": "Start for free →",
     "limitTitle": "About the free tier limit",
-    "limitDesc": "Free: 20 messages in a 24-hour window — no card required, forever.",
+    "limitDesc": "Free: 10 messages in an 8-hour window — no card required, forever.",
     "limitLink": "Learn about Pro and Ultra →",
     "ctaBtn": "Start learning for free →",
     "ctaNote": "No card. No commitments.",

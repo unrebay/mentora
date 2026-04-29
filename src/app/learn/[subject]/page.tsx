@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import { SUBJECTS } from "@/lib/types";
 import ChatInterface from "@/components/chat/ChatInterface";
 
-const WINDOW_LIMIT = 20; // rolling 24h window, matches api/chat/route.ts
-const WINDOW_HOURS = 24;
+const WINDOW_LIMIT = 10; // 10 messages per 8-hour rolling window, matches api/chat/route.ts
+const WINDOW_HOURS = 8;
 
 interface Props {
   params: Promise<{ subject: string }>;
@@ -137,17 +137,18 @@ export default async function LearnPage({ params, searchParams }: Props) {
 
   let initialMessagesRemaining: number | null = null;
 
-  // Calendar day reset: expired if window_start is from a previous UTC day
+  // Rolling 8-hour window: expired if window_start is older than WINDOW_HOURS ago
   let initialResetAt: string | null = null;
   if (!isPaidOrTrial) {
     const windowStart = profile?.messages_window_start ? new Date(profile.messages_window_start) : null;
-    const todayUtc = new Date(); todayUtc.setUTCHours(0, 0, 0, 0);
-    const windowExpired = !windowStart || windowStart < todayUtc;
-    const usedToday = windowExpired ? 0 : (profile?.messages_today ?? 0);
-    initialMessagesRemaining = Math.max(0, WINDOW_LIMIT - usedToday);
-    // Next midnight UTC
-    const nextMidnight = new Date(); nextMidnight.setUTCHours(24, 0, 0, 0);
-    initialResetAt = nextMidnight.toISOString();
+    const windowExpired = !windowStart || (Date.now() - windowStart.getTime()) >= WINDOW_HOURS * 3600_000;
+    const usedInWindow = windowExpired ? 0 : (profile?.messages_today ?? 0);
+    initialMessagesRemaining = Math.max(0, WINDOW_LIMIT - usedInWindow);
+    // Reset at: window_start + WINDOW_HOURS (or WINDOW_HOURS from now if expired)
+    const resetDate = windowStart && !windowExpired
+      ? new Date(windowStart.getTime() + WINDOW_HOURS * 3600_000)
+      : new Date(Date.now() + WINDOW_HOURS * 3600_000);
+    initialResetAt = resetDate.toISOString();
   }
 
   // If topic passed from topics map — prepend as initial message

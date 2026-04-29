@@ -9,7 +9,7 @@ import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
 import MeLogo from "@/components/MeLogo";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
 
-const DAILY_LIMIT = 20; // matches WINDOW_LIMIT in api/chat/route.ts
+const DAILY_LIMIT = 10; // matches WINDOW_LIMIT in api/chat/route.ts
 
 const SUBJECT_CONFIG: Record<string, { emoji: string; hint: string; quickQuestions: string[] }> = {
   "russian-history": { emoji: "🏰", hint: "Спроси о любом периоде истории России — от древней Руси до современности", quickQuestions: ["Расскажи о Петре I и его реформах", "Что такое Смутное время?", "Как началась Великая Отечественная война?"] },

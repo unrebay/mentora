@@ -54,8 +54,8 @@ function getLevelUpMessage(newLevel: string, subjectTitle: string, locale?: stri
   return msgs[newLevel] ?? `Новый уровень — ${newLevel}!`;
 }
 
-const WINDOW_HOURS = 24;
-const WINDOW_LIMIT = 20;
+const WINDOW_HOURS = 8;
+const WINDOW_LIMIT = 10;
 
 // Subject display names for system prompt
 const SUBJECT_NAME: Record<string, string> = {
@@ -172,20 +172,24 @@ export async function POST(req: NextRequest) {
         p_window_limit: WINDOW_LIMIT,
       });
       const w = windowRows?.[0];
-      // Next midnight UTC
-      const nextMidnightUTC = (() => {
-        const d = new Date();
-        d.setUTCHours(24, 0, 0, 0);
-        return d.toISOString();
+      // Window resets WINDOW_HOURS after it started — compute from window_start returned by RPC
+      const windowResetISO = (() => {
+        if (w?.window_start) {
+          const d = new Date(w.window_start);
+          d.setTime(d.getTime() + WINDOW_HOURS * 3600_000);
+          return d.toISOString();
+        }
+        // Fallback: WINDOW_HOURS from now
+        return new Date(Date.now() + WINDOW_HOURS * 3600_000).toISOString();
       })();
       if (!w?.allowed) {
         return NextResponse.json(
-          { error: "limit_reached", messagesRemaining: 0, resetAt: nextMidnightUTC },
+          { error: "limit_reached", messagesRemaining: 0, resetAt: windowResetISO },
           { status: 429 }
         );
       }
       messagesRemaining = Math.max(0, WINDOW_LIMIT - (w?.messages_today ?? WINDOW_LIMIT));
-      windowResetAt = nextMidnightUTC;
+      windowResetAt = windowResetISO;
     } else {
       // Pro: fire-and-forget last_active_at update
       supabase.from("users").update({ last_active_at: new Date().toISOString() }).eq("id", user.id);
