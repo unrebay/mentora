@@ -234,13 +234,14 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-resize textarea
+  // Auto-resize textarea — grows with content, scrollable after maxH
   const adjustTextareaHeight = useCallback(() => {
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = "auto";
-    const maxH = 160; // ~6 lines
-    el.style.height = Math.min(el.scrollHeight, maxH) + "px";
+    const maxH = 240; // 10 lines at 16px × 1.5 line-height
+    const newH = Math.min(el.scrollHeight, maxH);
+    el.style.height = newH + "px";
     el.style.overflowY = el.scrollHeight > maxH ? "auto" : "hidden";
   }, []);
 
@@ -785,7 +786,8 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                 adjustTextareaHeight();
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
+                // Ctrl/Cmd+Enter sends on desktop; plain Enter always adds newline
+                if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
                   e.preventDefault();
                   if (input.trim() || pendingImage) {
                     sendMessage(e as unknown as React.FormEvent);
@@ -802,10 +804,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                 color: "var(--text)",
                 resize: "none",
                 minHeight: "44px",
-                maxHeight: "160px",
-                overflowY: "hidden",
+                maxHeight: "240px",
+                overflowY: "hidden", /* overridden by adjustTextareaHeight when needed */
                 lineHeight: "1.5",
                 fontSize: "16px", /* prevents iOS Safari auto-zoom on focus */
+                WebkitOverflowScrolling: "touch", /* smooth scroll on iOS */
               }}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = "var(--brand)";
