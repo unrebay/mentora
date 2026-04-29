@@ -192,7 +192,7 @@ export default async function ProfilePage() {
   if (!user) redirect("/auth");
 
   const [{ data: profile }, { data: progressData }, { count: msgCount }] = await Promise.all([
-    supabase.from("users").select("plan, trial_expires_at, created_at, display_name, name_changes_count, full_name, age, phone, gift_pro_claimed").eq("id", user.id).single(),
+    supabase.from("users").select("plan, trial_expires_at, created_at, display_name, name_changes_count, full_name, age, phone, gift_pro_claimed, messages_today, messages_window_start").eq("id", user.id).single(),
     supabase.from("user_progress").select("xp_total, streak_days, best_streak").eq("user_id", user.id),
     supabase.from("chat_messages").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("role", "user"),
   ]);
@@ -204,6 +204,14 @@ export default async function ProfilePage() {
   const isUltima = profile?.plan === "ultima";
   const isTrialActive = profile?.trial_expires_at ? new Date(profile.trial_expires_at) > new Date() : false;
   const isPro = isUltima || profile?.plan === "pro" || isTrialActive;
+
+  // Daily message counter for free users (window resets at midnight UTC)
+  const FREE_LIMIT = 20;
+  const windowStart = profile?.messages_window_start ? new Date(profile.messages_window_start) : null;
+  const windowExpired = !windowStart || windowStart.toISOString().slice(0, 10) !== new Date().toISOString().slice(0, 10);
+  const usedToday = windowExpired ? 0 : (profile?.messages_today ?? 0);
+  const remainingToday = Math.max(0, FREE_LIMIT - usedToday);
+
   const joinedDaysAgo = profile?.created_at
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 86400000)
     : 999;
@@ -262,10 +270,18 @@ export default async function ProfilePage() {
                 style={{ background: `${lvl.color}18`, color: lvl.color }}>
                 {lvl.name}
               </span>
-              {isPro && (
+              {isPro ? (
                 <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white"
                   style={{ background: isUltima ? "linear-gradient(135deg, #4561E8, #7C3AED)" : "linear-gradient(135deg, #4561E8, #6B8FFF)" }}>
                   {isUltima ? "ULTRA" : "PRO"}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full"
+                  style={{ background: "rgba(100,116,139,0.12)", color: "var(--text-muted)", border: "1px solid rgba(100,116,139,0.2)" }}>
+                  FREE
+                  <span className="font-bold" style={{ color: remainingToday <= 5 ? "#f59e0b" : "var(--text-secondary)" }}>
+                    · {remainingToday}/{FREE_LIMIT}
+                  </span>
                 </span>
               )}
             </div>
