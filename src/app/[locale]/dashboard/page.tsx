@@ -399,6 +399,20 @@ export default async function DashboardPage() {
           const accent = subjectColor(lastActiveSubject.id);
           const xp = lastActiveProgress?.xp_total ?? 0;
           const streak = lastActiveProgress?.streak_days ?? 0;
+          // XP progress within current level
+          const XP_THRESHOLDS = [
+            { minXP: 0,    maxXP: 100  },
+            { minXP: 100,  maxXP: 300  },
+            { minXP: 300,  maxXP: 600  },
+            { minXP: 600,  maxXP: 1000 },
+            { minXP: 1000, maxXP: Infinity },
+          ];
+          const lvl = [...XP_THRESHOLDS].reverse().find(l => xp >= l.minXP) ?? XP_THRESHOLDS[0];
+          const next = XP_THRESHOLDS[XP_THRESHOLDS.indexOf(lvl) + 1];
+          const pct = next
+            ? Math.min(100, Math.round(((xp - lvl.minXP) / (next.minXP - lvl.minXP)) * 100))
+            : 100;
+
           return (
             <div data-tour="continue-learning" className="mt-8 mb-6 rounded-2xl relative overflow-hidden"
               style={{
@@ -416,7 +430,7 @@ export default async function DashboardPage() {
               }} />
 
               <div className="p-5">
-                {/* Header row: icon + label */}
+                {/* Header row: icon + label + title */}
                 <div className="flex items-center gap-3 mb-3">
                   <SubjectIcon id={lastActiveSubject.id} size={44} />
                   <div>
@@ -431,19 +445,38 @@ export default async function DashboardPage() {
                 </div>
 
                 {/* Meta row */}
-                <div className="flex items-center gap-2 mb-4 text-xs" style={{ color: "var(--text-muted)" }}>
+                <div className="flex items-center gap-2 mb-3 text-xs" style={{ color: "var(--text-muted)" }}>
                   <span>
-                    {locale === "en"
-                      ? `${xp} XP`
-                      : `${xp} ${pluralMenty(xp)}`}
+                    {locale === "en" ? `${xp} XP` : `${xp} ${pluralMenty(xp)}`}
                   </span>
                   {streak > 0 && (
                     <>
                       <span style={{ opacity: 0.4 }}>·</span>
-                      <svg viewBox="0 0 24 24" width="12" height="12" fill="#f97316"><path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z"/></svg>
+                      <svg viewBox="0 0 24 24" width="11" height="11" fill="#f97316">
+                        <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z"/>
+                      </svg>
                       <span>{streak} {t("xpInRow")}</span>
                     </>
                   )}
+                  {next && (
+                    <>
+                      <span style={{ opacity: 0.4 }}>·</span>
+                      <span>{pct}%</span>
+                    </>
+                  )}
+                </div>
+
+                {/* Progress bar */}
+                <div className="mb-4 rounded-full overflow-hidden" style={{ height: 5, background: `${accent}18` }}>
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${pct}%`,
+                      background: `linear-gradient(90deg, ${accent}99, ${accent})`,
+                      boxShadow: `0 0 6px ${accent}60`,
+                      transition: "width 0.6s cubic-bezier(0.4,0,0.2,1)",
+                    }}
+                  />
                 </div>
 
                 {/* CTA button — full width */}
