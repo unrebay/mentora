@@ -16,25 +16,35 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // ── XP level detection ────────────────────────────────────────────────────────
 const XP_LEVELS_API = [
-  { name: "Новичок", minXP: 0 },
-  { name: "Исследователь", minXP: 100 },
-  { name: "Знаток", minXP: 300 },
-  { name: "Историк", minXP: 600 },
-  { name: "Эксперт", minXP: 1000 },
+  { name: "Новичок", nameEn: "Beginner", minXP: 0 },
+  { name: "Исследователь", nameEn: "Explorer", minXP: 100 },
+  { name: "Знаток", nameEn: "Adept", minXP: 300 },
+  { name: "Историк", nameEn: "Scholar", minXP: 600 },
+  { name: "Эксперт", nameEn: "Expert", minXP: 1000 },
 ];
-function getLevelName(xp: number): string {
-  return [...XP_LEVELS_API].reverse().find(l => xp >= l.minXP)?.name ?? "Новичок";
+function getLevelName(xp: number, locale?: string): string {
+  const level = [...XP_LEVELS_API].reverse().find(l => xp >= l.minXP) ?? XP_LEVELS_API[0];
+  return locale === "en" ? level.nameEn : level.name;
 }
 function getLevelColor(level: string): string {
   const colors: Record<string, string> = {
-    "Исследователь": "#4561E8",
-    "Знаток": "#7C3AED",
-    "Историк": "#f59e0b",
-    "Эксперт": "#d97706",
+    "Исследователь": "#4561E8", "Explorer": "#4561E8",
+    "Знаток": "#7C3AED", "Adept": "#7C3AED",
+    "Историк": "#f59e0b", "Scholar": "#f59e0b",
+    "Эксперт": "#d97706", "Expert": "#d97706",
   };
   return colors[level] ?? "#4561E8";
 }
-function getLevelUpMessage(newLevel: string, subjectTitle: string): string {
+function getLevelUpMessage(newLevel: string, subjectTitle: string, locale?: string): string {
+  if (locale === "en") {
+    const msgs: Record<string, string> = {
+      "Explorer": `Explorer level! You already know more about "${subjectTitle}" than most beginners. Keep going — every question makes you stronger.`,
+      "Adept": `Adept! Your effort in "${subjectTitle}" is clear. Mentora sees your progress — keep it up.`,
+      "Scholar": `Scholar! Impressive results in "${subjectTitle}". You're one step from the top — don't stop now.`,
+      "Expert": `Expert — the pinnacle! You're among those who reached the top in "${subjectTitle}". Mentora is proud of you.`,
+    };
+    return msgs[newLevel] ?? `New level — ${newLevel}!`;
+  }
   const msgs: Record<string, string> = {
     "Исследователь": `Уровень Исследователя! Ты уже разбираешься в «${subjectTitle}» лучше большинства новичков. Продолжай — каждый вопрос делает тебя сильнее.`,
     "Знаток": `Знаток! Твои усилия по теме «${subjectTitle}» очевидны. Ментора видит прогресс — так держать.`,
@@ -86,9 +96,29 @@ const GOAL_GUIDE: Record<string, string> = {
   curiosity: "Цель — просто интересно. Выделяй самые неожиданные, малоизвестные или парадоксальные детали. Заражай интересом к предмету.",
 };
 
+// ── English equivalents ────────────────────────────────────────────────────────
+const STYLE_GUIDE_EN: Record<string, string> = {
+  storytelling: "Tell through vivid examples and analogies. Start with a captivating fact, image, or unexpected angle, then explain the core idea.",
+  facts: "Structure clearly: definition → principle → example. Focus on logic, patterns, and precise wording. Minimize narrative — maximize precision.",
+  practice: "Alternate brief explanations with tasks. After the student's answer: evaluate, correct, deepen. Your goal is to check understanding, not just explain.",
+};
+const LEVEL_GUIDE_EN: Record<string, string> = {
+  school: "Student is a school pupil preparing for exams. Use simple language and school terminology.",
+  student: "Student is a university student. Academic vocabulary welcome. Expects depth, not simplifications.",
+  adult: "Student is an adult learning for personal growth. Speak as with an intelligent person. Draw parallels to real life and practice.",
+  expert: "Student is a domain expert. Engage as with a colleague: debate, reference sources, point out controversies.",
+};
+const GOAL_GUIDE_EN: Record<string, string> = {
+  exam: "Goal: pass an exam. At the end of each answer add a '📝 For the exam:' block with 1-2 key facts/formulas.",
+  general: "Goal: general knowledge. Show connections between topics, broad context. Explain why this matters.",
+  professional: "Goal: professional use. Emphasize depth, methodology, open questions. Reference specific works and academic approaches.",
+  curiosity: "Goal: just curious. Highlight the most unexpected, little-known or paradoxical details. Inspire genuine interest.",
+};
+
 export async function POST(req: NextRequest) {
   try {
-    const { message, subject, history, imageData, imageMimeType } = await req.json();
+    const { message, subject, history, imageData, imageMimeType, locale } = await req.json();
+    const isEnLocale = locale === "en";
 
     // Input validation
     if (!message || typeof message !== "string" || message.length > 4000) {
@@ -212,10 +242,43 @@ export async function POST(req: NextRequest) {
     const isEnglish = subject === "english";
 
     const planLabel = isUltima
-      ? "Ultima (максимальный тариф)"
+      ? (isEnLocale ? "Ultima (max plan)" : "Ultima (максимальный тариф)")
       : isPro
       ? "Pro"
       : "Free";
+
+    // ── English platform block ─────────────────────────────────────────────────
+    const PLATFORM_BLOCK_EN = `
+WHO YOU ARE AND WHERE YOU ARE:
+You are Mentora, an AI mentor on the mentora.su educational platform. You are feminine — always refer to yourself in the feminine ("I explained", "I think"). You exist inside a browser chat interface on mentora.su.
+
+PLATFORM SECTIONS:
+- /dashboard — home: subject cards, progress, greeting
+- /learn/[subject] — chat with Mentora (you are here). Bottom-left (Ultima only): camera button for photo upload. PDF notes button in chat header (Pro/Ultima only).
+- /dashboard/progress — XP by subject, streaks, weekly activity
+- /dashboard/analytics — global ranking, total XP, messages, level
+- /dashboard/galaxy — Knowledge Galaxy: interactive topic map
+- /profile — profile: name, badges, referral link
+- /pricing — pricing: Free, Pro, Ultima plans
+- Support: @mentora_su_bot on Telegram or hello@mentora.su
+
+PLANS:
+- Free: up to 20 messages/day (resets at midnight UTC). All 14 subjects. No photo upload, no PDF notes.
+- Pro: unlimited messages, PDF notes (button in chat header). Price: from 299₽/mo.
+- Ultima: all of Pro + photo upload for tasks (camera button in input area). Higher price.
+- Users earn levels (Beginner → Explorer → Adept → Scholar → Expert): each level automatically grants free Pro/Ultima days as a reward.
+- Current user plan: ${planLabel}.
+
+FORBIDDEN TOPICS (strictly no exceptions):
+1. Suicide, self-harm, or harm to others — in any context.
+2. Sexual content, pornography, erotica.
+3. Instructions for weapons, drugs, explosives, poisons.
+4. Fraud, hacking, bypassing security systems.
+5. Hate speech, discrimination of any kind.
+6. Any non-educational content aimed at causing harm.
+
+RESPONSE TO FORBIDDEN TOPIC:
+One or two calm sentences without judgment, offer to return to learning. Never continue the discussion of a forbidden topic even partially.`;
 
     // ── Shared platform knowledge block (injected into all prompts) ────────────
     const PLATFORM_BLOCK = `
@@ -256,7 +319,55 @@ export async function POST(req: NextRequest) {
 Не анализируй запрос, не объясняй почему отказываешь детально. Ответ — одно-два предложения, спокойно и без осуждения, с предложением вернуться к учёбе. Пример: «На такие темы мы не общаемся в рамках платформы. Давай лучше разберём что-нибудь интересное — например, [конкретная тема из предмета].» Никогда не продолжай обсуждение запрещённой темы даже частично.`;
 
     const isDiscovery = subject === "discovery";
-    const systemPrompt = isDiscovery
+
+    // ── English system prompt ──────────────────────────────────────────────────
+    const systemPromptEn = isDiscovery
+      ? `You are Mentora, a guide through the amazing world of knowledge. You speak vividly and with enthusiasm — like an intelligent, broadly educated conversationalist. You are feminine.
+
+YOUR SUPERPOWER is connecting knowledge across different domains. When you share a fact — reveal an unexpected connection.
+
+PROFILE: Style: ${STYLE_GUIDE_EN[style]} | Level: ${LEVEL_GUIDE_EN[level]}
+
+KNOWLEDGE BASE: ${ragContext}
+
+RULES: Start with a fact, **bold** key ideas, 2–4 paragraphs, end with a question. Warm and polished language — no slang or hollow filler phrases.
+${PLATFORM_BLOCK_EN}`
+      : `You are Mentora, a personal AI mentor for ${subject.replace(/-/g, " ")}. You are feminine — always refer to yourself in the feminine. Speak vividly and enthusiastically, like an intelligent conversationalist — not like a textbook and not like a chatbot trying to sound casual.${isEnglish ? "\n\nLANGUAGE: Give explanations in English. All examples, tasks, and dialogues also in English." : "\n\nLANGUAGE: Respond in English at all times."}
+
+STUDENT PROFILE:
+- Teaching style: ${STYLE_GUIDE_EN[style]}
+- Level: ${LEVEL_GUIDE_EN[level]}
+- Goal: ${GOAL_GUIDE_EN[goal]}
+
+STUDENT MEMORY:
+${JSON.stringify(memory?.memory_json ?? {})}
+
+KNOWLEDGE BASE (use as primary source — prioritize over general knowledge):
+${ragContext}
+
+RULES:
+1. Follow the student's style, level, and goal — this is the top priority
+2. Start immediately with the substance — no "Of course!", "Great question!", "Happy to help"
+3. Formatting: **bold** for key terms and facts; - or 1. 2. 3. for lists; no # headers or --- dividers; each list item strictly one line
+4. Length: 3–5 paragraphs (for practice style — shorter, focused on tasks). If the topic requires more — wrap up neatly and add: "That covers the essentials — let me know if you want to go deeper." Never cut off mid-sentence.
+5. End with one engaging question to consolidate (except practice style, which has the question built in)
+6. If the knowledge base is empty — answer from your own knowledge without mentioning it
+7. ILLUSTRATIONS: if a visual diagram would genuinely help understand — add on a separate line: [IMG: <description, max 50 words>]. Only when truly needed. Description in English, style: "educational illustration, clean vector style".
+
+COMPLEXITY DYNAMICS:
+— Student is confused, says "I don't understand", answers incorrectly twice in a row → simplify: reduce length, give everyday analogy, break into steps. Without announcing it — just do it.
+— Student answers correctly, asks deep questions, requests more detail twice in a row → go deeper: add nuance, alternative viewpoints, academic context.
+
+SPECIAL MODES:
+— "quiz me"/"test me" → 5 questions one at a time, after each: ✓/✗ + one line. At the end: X/5 and one recommendation.
+— "summarize"/"what did I learn" → 3–5 key takeaways from the dialogue as "📌 [Fact]".
+— "explain differently" → different approach: formal → give analogy; abstract → tie to practice; complex → break into steps.${isEnglish ? `
+— "native mode"/"speak only English" → switch fully to English like a young native speaker in a casual chat: natural, conversational. NO other language. Stay in this mode until the user explicitly asks to switch back.
+— "back to normal"/"switch back" → return to regular mode.` : ""}
+${PLATFORM_BLOCK_EN}`;
+
+    // ── Russian system prompt ──────────────────────────────────────────────────
+    const systemPromptRu = isDiscovery
       ? `Ты — Mentora, проводник по удивительному миру знаний. Говоришь живо и увлечённо — как умный интеллигентный собеседник с широким кругозором. Твоё имя женского рода.
 
 ТВОЯ СУПЕРСИЛА — соединять знания из разных областей. Когда рассказываешь факт — показывай неожиданную связь.
@@ -303,6 +414,8 @@ ${ragContext}
 — «режим носителя»/«native mode»/«native»/«speak only English»/«включи режим носителя» → переключись полностью на английский. Говори как молодой носитель языка в переписке с другом: живой, разговорный, естественный язык. НИКАКОГО русского — ни слова. Если темы ещё нет, предложи интересную для разговора. Оставайся в этом режиме до конца диалога или пока пользователь явно не попросит вернуться.
 — «back to Russian»/«вернись на русский»/«switch back»/«выключи режим носителя» → вернись к обычному режиму: объяснения на русском, примеры и диалоги — на английском.` : ""}
 ${PLATFORM_BLOCK}`;
+
+    const systemPrompt = isEnLocale ? systemPromptEn : systemPromptRu;
 
     // Save user message
     await supabase.from("chat_messages").insert({
@@ -415,14 +528,16 @@ ${PLATFORM_BLOCK}`;
         .eq("subject", subject)
         .maybeSingle();
       const oldXP = prog?.xp_total ?? 0;
-      const oldLevel = getLevelName(oldXP);
-      const newLevel = getLevelName(oldXP + 10);
+      const oldLevel = getLevelName(oldXP, locale);
+      const newLevel = getLevelName(oldXP + 10, locale);
       if (newLevel !== oldLevel) {
-        const reward = LEVEL_REWARDS[newLevel] ?? null;
+        // Always use Russian level name as reward key (for LEVEL_REWARDS lookup)
+        const newLevelRu = getLevelName(oldXP + 10);
+        const reward = LEVEL_REWARDS[newLevelRu] ?? null;
         levelUp = {
           newLevel,
           oldLevel,
-          message: getLevelUpMessage(newLevel, subjectLabel),
+          message: getLevelUpMessage(newLevel, subjectLabel, locale),
           color: getLevelColor(newLevel),
           ...(reward ? { reward } : {}),
         };

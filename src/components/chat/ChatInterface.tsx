@@ -2,6 +2,7 @@
 import posthog from "posthog-js";
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { MessageRole } from "@/lib/types";
 import ChatParticles from "@/components/ChatParticles";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
@@ -183,10 +184,35 @@ function MarkdownMessage({ content }: { content: string }) {
 
 // ─── Main Component ────────────────────────────────────────────────────────
 export default function ChatInterface({ subject, subjectTitle, initialHistory, initialMessagesRemaining, initialResetAt, initialTopic, isUltima = false }: Props) {
+  const locale = useLocale();
+  const tChat = useTranslations("chat");
+  const tUi = useTranslations("chat.ui");
+
+  // Build subject config from translations
+  const subjectKey = subject as string;
+  const subjectHint = (() => {
+    try { return tChat(`subjects.${subjectKey}.hint`); } catch { return tUi("defaultHint"); }
+  })();
+  const subjectQuickQ = (() => {
+    try {
+      return [tChat(`subjects.${subjectKey}.q1`), tChat(`subjects.${subjectKey}.q2`), tChat(`subjects.${subjectKey}.q3`)];
+    } catch { return [tUi("defaultQ1"), tUi("defaultQ2"), tUi("defaultQ3")]; }
+  })();
+
+  // Legacy emoji map (emojis stay the same regardless of locale)
+  const SUBJECT_EMOJI: Record<string, string> = {
+    "russian-history": "🏰", "world-history": "🌍", "mathematics": "📐", "physics": "⚛️",
+    "chemistry": "🧪", "biology": "🧬", "russian-language": "📝", "literature": "📚",
+    "english": "🇬🇧", "social-studies": "🏛️", "geography": "🗺️", "computer-science": "💻",
+    "astronomy": "🔭", "discovery": "🌐",
+  };
+  const subjectEmoji = SUBJECT_EMOJI[subject] ?? "🎓";
+
   const [messages, setMessages] = useState<Message[]>(
     initialHistory.map((m) => ({ role: m.role as MessageRole, content: m.content }))
   );
-  const [input, setInput] = useState(initialTopic ? `Расскажи про: ${initialTopic}` : "");
+  const topicPrefix = tChat("topicPrefix");
+  const [input, setInput] = useState(initialTopic ? `${topicPrefix}${initialTopic}` : "");
   const [loading, setLoading] = useState(false);
   const [messagesRemaining, setMessagesRemaining] = useState<number | null>(initialMessagesRemaining);
   // resetAt stored for potential future use (e.g. displaying exact timestamp)
@@ -323,18 +349,18 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, subject, history: messages.filter(m => !m.isError).slice(-10) }),
+        body: JSON.stringify({ message: text, subject, history: messages.filter(m => !m.isError).slice(-10), locale }),
       });
       const data = await res.json();
       if (res.status === 429) { setMessagesRemaining(0); setMessages(prev => prev.filter(m => !(m.role === "user" && m.content === text))); return; }
       if (!res.ok || !data.message) {
-        setMessages(prev => [...prev, { role: "assistant", content: data.error ?? "Произошла ошибка. Попробуй ещё раз 🔄", isError: true }]);
+        setMessages(prev => [...prev, { role: "assistant", content: data.error ?? tChat("errorGeneric"), isError: true }]);
         return;
       }
       setMessages(prev => [...prev, { role: "assistant", content: data.message, imageUrl: data.imageUrl ?? undefined }]);
       if (data.messagesRemaining !== undefined) setMessagesRemaining(data.messagesRemaining);
     } catch {
-      setMessages(prev => [...prev, { role: "assistant", content: "Нет связи с сервером. Проверь интернет и попробуй ещё раз 🔄", isError: true }]);
+      setMessages(prev => [...prev, { role: "assistant", content: tChat("errorNoInternet"), isError: true }]);
     } finally {
       setLoading(false);
     }
@@ -380,6 +406,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           message: userMessage,
           subject,
           history: messages.filter(m => !m.isError).slice(-10),
+          locale,
           ...(pendingImage ? { imageData: pendingImage.data, imageMimeType: pendingImage.mimeType } : {}),
         }),
       });
@@ -397,8 +424,8 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       if (!res.ok || !data.message) {
         // Show error with retry button
         const errText = data.error === "Internal server error"
-          ? "Сервер временно недоступен. Попробуй ещё раз 🔄"
-          : (data.error ?? "Произошла ошибка. Попробуй ещё раз 🔄");
+          ? tChat("errorServer")
+          : (data.error ?? tChat("errorGeneric"));
         setMessages((prev) => [...prev, { role: "assistant", content: errText, isError: true }]);
         posthog.capture("chat_error", { subject, status: res.status, error: data.error });
         return;
@@ -427,7 +454,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     } catch {
       setMessages((prev) => [...prev, {
         role: "assistant",
-        content: "Нет связи с сервером. Проверь интернет и попробуй ещё раз 🔄",
+        content: tChat("errorNoInternet"),
         isError: true,
       }]);
     } finally {
@@ -452,13 +479,14 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
               </span>
             )}
           </div>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>AI-ментор · Mentora</p>
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>{tChat("aiMentor")}</p>
         </div>
         {showCounter && (
           <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-full px-3 py-1 shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
             <span className="text-xs font-medium text-amber-700 whitespace-nowrap">
-              <span className="hidden sm:inline">осталось </span>{messagesRemaining}<span className="hidden sm:inline"> из {DAILY_LIMIT}</span>
+              <span className="hidden sm:inline">{tChat("remainingFull", { n: messagesRemaining ?? 0, limit: DAILY_LIMIT })}</span>
+              <span className="sm:hidden">{tChat("remainingShort", { n: messagesRemaining ?? 0 })}</span>
             </span>
           </div>
         )}
@@ -467,7 +495,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           <button
             onClick={handleExportPdf}
             disabled={exportingPdf}
-            title="Скачать конспект PDF"
+            title={tChat("exportTitle")}
             className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all disabled:opacity-50"
             style={{
               background: "var(--bg-secondary)",
@@ -485,7 +513,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                 <polyline points="9 15 12 18 15 15"/>
               </svg>
             )}
-            <span className="hidden sm:inline">{exportingPdf ? "Создаю..." : "Конспект"}</span>
+            <span className="hidden sm:inline">{exportingPdf ? tChat("exporting") : tChat("export")}</span>
           </button>
         )}
       </header>
@@ -509,11 +537,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
               </div>
             </div>
             <h2 className="text-xl font-semibold text-[var(--text)] mb-2">
-              Привет! Я твой ментор по теме «{subjectTitle}»
+              {tChat("greeting", { subject: subjectTitle })}
             </h2>
-            <p className="text-[var(--text-muted)] text-sm max-w-sm mx-auto leading-relaxed">{config.hint}</p>
+            <p className="text-[var(--text-muted)] text-sm max-w-sm mx-auto leading-relaxed">{subjectHint}</p>
             <div className="mt-6 flex flex-wrap gap-2 justify-center">
-              {config.quickQuestions.map((q) => (
+              {subjectQuickQ.map((q) => (
                 <button
                   key={q}
                   onClick={() => setInput(q)}
@@ -583,12 +611,12 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                     <div className="mt-3">
                       <img
                         src={msg.imageUrl}
-                        alt="Иллюстрация к ответу"
+                        alt={tChat("imageAlt")}
                         className="rounded-xl w-full max-w-sm object-cover"
                         style={{ border: "1px solid var(--border-light)" }}
                         loading="lazy"
                       />
-                      <p className="text-[10px] mt-1" style={{ color: "var(--text-muted)" }}>Иллюстрация сгенерирована AI</p>
+                      <p className="text-[10px] mt-1" style={{ color: "var(--text-muted)" }}>{tChat("imageCaption")}</p>
                     </div>
                   )}
                   {msg.isError && (
@@ -596,7 +624,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                       onClick={(e) => sendMessage(e as unknown as React.FormEvent, lastUserMsg)}
                       className="mt-2 text-xs text-red-600 underline hover:text-red-800"
                     >
-                      Повторить запрос
+                      {tChat("retry")}
                     </button>
                   )}
                 </>
@@ -629,8 +657,8 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         {limitReached ? (
           <div className="rounded-2xl p-5 text-center space-y-3" style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)" }}>
             <div>
-              <p className="text-sm font-semibold mb-0.5" style={{ color: "var(--text)" }}>Лимит на сегодня исчерпан</p>
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Обновится в 00:00 UTC</p>
+              <p className="text-sm font-semibold mb-0.5" style={{ color: "var(--text)" }}>{tChat("limit.title")}</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>{tChat("limit.resetsAt")}</p>
             </div>
             {/* Countdown timer */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
@@ -642,9 +670,9 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             <div className="flex flex-col items-center gap-2">
               <Link href="/pricing" className="btn-glow inline-flex items-center gap-2 text-xs font-semibold px-5 py-2.5 rounded-full">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                Pro — безлимитный доступ
+                {tChat("limit.proCta")}
               </Link>
-              <TelegramSupportButton size="sm" label="Есть вопросы? Поддержка" />
+              <TelegramSupportButton size="sm" label={tChat("limit.support")} />
             </div>
           </div>
         ) : (
@@ -662,15 +690,15 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold mb-0.5" style={{ color: "#3B82F6" }}>
-                    Подсказка:
+                    {tChat("native.hintTitle")}
                   </p>
                   <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                    Нажми кнопку ниже — и Ментора перейдёт на живой английский как native speaker
+                    {tChat("native.hintText")}
                   </p>
                 </div>
                 <button
                   onClick={dismissNativeHint}
-                  aria-label="Скрыть подсказку"
+                  aria-label={tChat("native.hintDismiss")}
                   className="shrink-0 rounded-lg p-1 transition-colors hover:bg-[var(--bg-secondary)]"
                   style={{ color: "var(--text-muted)" }}
                 >
@@ -708,14 +736,14 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                   }}
                 >
                   <span>🗣️</span>
-                  {nativeModeActive ? "Native mode · выйти" : "Режим носителя"}
+                  {nativeModeActive ? tChat("native.buttonActive") : tChat("native.button")}
                 </button>
               </div>
             )}
             {pendingImage && (
               <div className="flex items-center gap-2 mb-2 p-2 rounded-xl border" style={{ background: "var(--bg-secondary)", borderColor: "var(--border)" }}>
-                <img src={pendingImage.preview} alt="Фото задачи" className="w-12 h-12 rounded-lg object-cover shrink-0" />
-                <span className="text-xs flex-1" style={{ color: "var(--text-secondary)" }}>Фото прикреплено — напиши вопрос или отправь сразу</span>
+                <img src={pendingImage.preview} alt={tChat("imagePhotoAlt")} className="w-12 h-12 rounded-lg object-cover shrink-0" />
+                <span className="text-xs flex-1" style={{ color: "var(--text-secondary)" }}>{tChat("imageAttached")}</span>
                 <button type="button" onClick={() => setPendingImage(null)} className="text-lg leading-none px-1" style={{ color: "var(--text-muted)" }}>×</button>
               </div>
             )}
@@ -729,7 +757,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                title="Прикрепить фото задачи"
+                title={tChat("cameraTitle")}
                 className="shrink-0 flex items-center justify-center transition-colors"
                 style={{
                   width: "36px",
@@ -764,7 +792,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                   }
                 }
               }}
-              placeholder={pendingImage ? "Задай вопрос к фото (или отправь без текста)..." : "Задай вопрос..."}
+              placeholder={pendingImage ? tChat("placeholderWithImage") : tChat("placeholder")}
               disabled={loading}
               className="flex-1 px-5 py-3 text-[15px] disabled:opacity-50 focus:outline-none transition-all"
               style={{
@@ -838,7 +866,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           <div className="relative z-10 px-5 pt-5 pb-5">
             <button
               onClick={dismissLevelUp}
-              aria-label="Закрыть"
+              aria-label={tChat("closeAriaLabel")}
               className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-white/20"
               style={{ color: "rgba(255,255,255,0.8)" }}
             >
@@ -848,7 +876,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             </button>
 
             <p className="text-[10px] font-bold tracking-[0.2em] uppercase mb-1" style={{ color: "rgba(255,255,255,0.7)" }}>
-              Новый уровень
+              {tChat("levelUp.label")}
             </p>
             <p className="text-2xl font-bold text-white mb-2">{levelUpData.newLevel} ✦</p>
             <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.88)" }}>

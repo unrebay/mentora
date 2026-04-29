@@ -517,6 +517,19 @@
         "q2": "Explain the key concepts",
         "q3": "Give me a study plan"
       }
+    },
+    "ui": {
+      "errorGeneric": "An error occurred. Please try again 🔄",
+      "errorServer": "Server is temporarily unavailable. Please try again 🔄",
+      "errorConnection": "No connection to server. Check your internet and try again 🔄",
+      "limitReachedTitle": "Daily limit reached",
+      "limitReachedDesc": "You have used all {n} free messages for today.",
+      "limitReset": "Limit resets at midnight UTC.",
+      "upgradeBtn": "Upgrade to Pro →",
+      "defaultHint": "Ask anything — I will help you understand",
+      "defaultQ1": "Where to start studying?",
+      "defaultQ2": "Explain the basic concepts",
+      "defaultQ3": "Give me a study plan"
     }
   },
   "subjectsSection": {
