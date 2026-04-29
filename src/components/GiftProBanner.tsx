@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 interface Props {
   giftClaimed: boolean;
@@ -9,9 +10,9 @@ interface Props {
 }
 
 const GIFT_FROM = new Date("2026-06-01T00:00:00+03:00").getTime();
-const EXPIRES_LABEL = "1 января 2027";
 
 export default function GiftProBanner({ giftClaimed: initialClaimed, isUltima, eligible }: Props) {
+  const t = useTranslations("giftBanner");
   // Not eligible — registered after June 1
   if (!eligible) return null;
   const [claimed, setClaimed] = useState(initialClaimed);
@@ -37,10 +38,10 @@ export default function GiftProBanner({ giftClaimed: initialClaimed, isUltima, e
     try {
       const res = await fetch("/api/claim-gift", { method: "POST" });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Ошибка");
+      if (!res.ok) throw new Error(data.error ?? t("errorFallback"));
       setClaimed(true);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Что-то пошло не так");
+      setError(e instanceof Error ? e.message : t("errorFallback"));
     } finally {
       setLoading(false);
     }
@@ -70,12 +71,12 @@ export default function GiftProBanner({ giftClaimed: initialClaimed, isUltima, e
         </div>
         <div>
           <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>
-            {isUltima ? "Подарок зарезервирован" : "Pro активирован"}
+            {isUltima ? t("reserved") : t("proActivated")}
           </div>
           <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
             {isUltima
-              ? "Ты уже на Ultima — максимальном плане. Подарок зафиксирован в твоём аккаунте."
-              : `Pro работает до ${EXPIRES_LABEL}. Спасибо, что с нами с самого начала!`}
+              ? t("ultimaDesc")
+              : t("proDesc", { date: "1 января 2027" })}
           </div>
         </div>
       </div>
@@ -107,10 +108,10 @@ export default function GiftProBanner({ giftClaimed: initialClaimed, isUltima, e
         </div>
         <div style={{ flex: 1, minWidth: 180 }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>
-            Подарок от Mentora — Pro до {EXPIRES_LABEL}
+            {t("title", { date: "1 января 2027" })}
           </div>
           <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
-            Ты зарегистрировался до официального запуска. Активируй Pro бесплатно прямо сейчас.
+            {t("desc")}
           </div>
           {error && <div style={{ fontSize: 12, color: "#ef4444", marginTop: 4 }}>{error}</div>}
         </div>
@@ -132,7 +133,7 @@ export default function GiftProBanner({ giftClaimed: initialClaimed, isUltima, e
             transition: "opacity 0.15s ease",
           }}
         >
-          {loading ? "Активируем..." : "Получить подарок"}
+          {loading ? t("activating") : t("activate")}
         </button>
       </div>
     );
@@ -162,14 +163,14 @@ export default function GiftProBanner({ giftClaimed: initialClaimed, isUltima, e
       </div>
       <div style={{ flex: 1 }}>
         <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>
-          Подарок откроется 1 июня — Pro до {EXPIRES_LABEL}
+          {t("soonTitle", { date: "1 января 2027" })}
         </div>
         <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
-          Ты в числе первых пользователей Mentora. Через{" "}
+          {t("soonDesc")}{" "}
           <span style={{ color: "#6b87ff", fontWeight: 600 }}>
-            {daysLeft > 0 ? `${daysLeft} дн. ${hoursLeft} ч.` : `${hoursLeft} ч.`}
+            {daysLeft > 0 ? t("soonTimer", { days: daysLeft, hours: hoursLeft }) : t("soonTimerHoursOnly", { hours: hoursLeft })}
           </span>{" "}
-          кнопка активации появится прямо здесь.
+          {t("soonCta")}
         </div>
       </div>
       <button
@@ -186,7 +187,7 @@ export default function GiftProBanner({ giftClaimed: initialClaimed, isUltima, e
           flexShrink: 0,
         }}
       >
-        1 июня →
+        {t("soonBtn")}
       </button>
     </div>
   );

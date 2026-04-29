@@ -3,6 +3,7 @@ import { useState } from "react";
 import Logo from "@/components/Logo";
 import SubjectIcon from "@/components/SubjectIcon";
 import SphereBlobScene from "@/components/SphereBlobScene";
+import { useTranslations } from "next-intl";
 
 async function completeOnboarding(answers: Record<string, string>): Promise<boolean> {
   try {
@@ -43,64 +44,36 @@ const ONBOARDING_SPHERES = [
   { highlight: "#D4B8FF", mid: "#7C3AED", shadow: "#2E1278", deepShadow: "#0A0418", glow: "rgba(124,58,237,0.3)", size: 160, top: "45%", left: "8%", float: "sphereFloat3" as const, duration: "15s", delay: "4s", opacity: 0.55 },
 ];
 
-const STEPS = [
-  {
-    step: 1,
-    title: "Как тебе удобнее учиться?",
-    subtitle: "Подберём стиль подачи материала под тебя",
-    field: "style",
-    options: [
-      { value: "storytelling", label: "Через истории", desc: "Живые рассказы, образы, детали эпохи" },
-      { value: "facts", label: "Факты и хронология", desc: "Чёткие даты, события, причинно-следственные связи" },
-      { value: "practice", label: "Вопросы и задания", desc: "Учусь через практику и проверку знаний" },
-    ],
-  },
-  {
-    step: 2,
-    title: "Какой у тебя уровень?",
-    subtitle: "Ментор адаптирует сложность объяснений",
-    field: "level",
-    options: [
-      { value: "school", label: "Школьник", desc: "Готовлюсь к урокам, ОГЭ или ЕГЭ" },
-      { value: "student", label: "Студент", desc: "Учусь в вузе или колледже" },
-      { value: "adult", label: "Взрослый", desc: "Изучаю историю для себя" },
-      { value: "expert", label: "Историк / профи", desc: "Глубокие знания, хочу детали" },
-    ],
-  },
-  {
-    step: 3,
-    title: "Что хочешь получить?",
-    subtitle: "Поможет нам расставить акценты",
-    field: "goal",
-    options: [
-      { value: "exam", label: "Сдать ЕГЭ / ОГЭ", desc: "Нужна подготовка к экзамену" },
-      { value: "general", label: "Общее развитие", desc: "Хочу понимать историю страны и мира" },
-      { value: "professional", label: "Работа / профессия", desc: "История нужна для карьеры" },
-      { value: "curiosity", label: "Просто интересно", desc: "Люблю историю, хочу узнать больше" },
-    ],
-  },
-  {
-    step: 4,
-    title: "С чего начнём?",
-    subtitle: "Выбери первый предмет — сразу откроем чат",
-    field: "first_subject",
-    options: [
-      { value: "russian-history", label: "История России", desc: "От Древней Руси до современности" },
-      { value: "world-history", label: "Всемирная история", desc: "Цивилизации, войны, революции" },
-      { value: "mathematics", label: "Математика", desc: "Алгебра, геометрия, задачи" },
-      { value: "physics", label: "Физика", desc: "Механика, электричество, оптика" },
-      { value: "english", label: "Английский язык", desc: "Грамматика, лексика, разговорный" },
-      { value: "russian-language", label: "Русский язык", desc: "Орфография, пунктуация, ЕГЭ" },
-    ],
-  },
+const STEP_FIELDS = [
+  { step: 1, field: "style",         values: ["storytelling", "facts", "practice"] },
+  { step: 2, field: "level",         values: ["school", "student", "adult", "expert"] },
+  { step: 3, field: "goal",          values: ["exam", "general", "professional", "curiosity"] },
+  { step: 4, field: "first_subject", values: ["russian-history", "world-history", "mathematics", "physics", "english", "russian-language"] },
 ];
 
 export default function OnboardingPage() {
+  const t = useTranslations("onboarding");
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [selected, setSelected] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Build localized steps from stable keys
+  const STEPS = STEP_FIELDS.map(sf => ({
+    ...sf,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    title: (t as any)(`${sf.field}.title`),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    subtitle: (t as any)(`${sf.field}.subtitle`),
+    options: sf.values.map(v => ({
+      value: v,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      label: (t as any)(`${sf.field}.${v}.label`),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      desc: (t as any)(`${sf.field}.${v}.desc`),
+    })),
+  }));
 
   const step = STEPS[currentStep];
   const isLast = currentStep === STEPS.length - 1;
@@ -118,7 +91,7 @@ export default function OnboardingPage() {
         fetch("/api/email/welcome", { method: "POST" }).catch(() => {});
         window.location.href = `/learn/${firstSubject}`;
       } else {
-        setError("Не удалось сохранить. Попробуй ещё раз."); setSaving(false);
+        setError(t("errorSave")); setSaving(false);
       }
     } else {
       setCurrentStep((s) => s + 1); setSelected(null);
@@ -135,7 +108,7 @@ export default function OnboardingPage() {
       first_subject: "russian-history",
     });
     if (ok) { window.location.href = "/learn/russian-history"; }
-    else { setError("Не удалось пропустить. Попробуй ещё раз."); setSaving(false); }
+    else { setError(t("errorSkip")); setSaving(false); }
   }
 
   return (
@@ -182,7 +155,7 @@ export default function OnboardingPage() {
             backgroundClip: "text",
           }}
         >
-          Шаг {step.step} из {STEPS.length}
+          {t("step", { step: step.step, total: STEPS.length })}
         </p>
         <h1 className="text-2xl font-bold text-white mb-1 leading-snug">{step.title}</h1>
         <p className="text-sm mb-7" style={{ color: "rgba(255,255,255,0.5)" }}>{step.subtitle}</p>
@@ -267,7 +240,7 @@ export default function OnboardingPage() {
           disabled={!selected || saving}
           className="btn-glow w-full py-3.5 rounded-2xl font-semibold text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
         >
-          {saving ? "Сохраняем..." : isLast ? "Начать учиться →" : "Далее →"}
+          {saving ? t("saving") : isLast ? t("start") : t("next")}
         </button>
       </div>
 
@@ -280,7 +253,7 @@ export default function OnboardingPage() {
         onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.5)")}
         onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.25)")}
       >
-        {saving ? "Подождите..." : "Пропустить →"}
+        {saving ? t("wait") : t("skip")}
       </button>
     </main>
   );

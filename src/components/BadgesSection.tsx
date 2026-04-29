@@ -1,18 +1,20 @@
 "use client";
 import { BADGE_DEFINITIONS } from "@/lib/types";
+import { useTranslations } from "next-intl";
 
 interface Props {
   earnedBadgeIds: string[];
 }
 
 export default function BadgesSection({ earnedBadgeIds }: Props) {
+  const t = useTranslations("badges");
   if (earnedBadgeIds.length === 0) return null;
   const earnedSet = new Set(earnedBadgeIds);
   const earnedBadges = BADGE_DEFINITIONS.filter((b) => earnedSet.has(b.id));
   return (
     <div className="mt-10">
       <p className="text-xs font-bold tracking-[0.18em] uppercase mb-4" style={{ color: "var(--text-muted)" }}>
-        Достижения
+        {t("title")}
       </p>
       <div className="flex flex-wrap gap-3">
         {earnedBadges.map((badge) => (

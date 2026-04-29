@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 type Phase = "hidden" | "glass" | "crack" | "reveal" | "card" | "done";
 
@@ -29,6 +30,7 @@ const CRACKS = [
 ];
 
 export default function StreakRewardCelebration() {
+  const t = useTranslations("streakReward");
   const searchParams = useSearchParams();
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>("hidden");
@@ -227,7 +229,7 @@ export default function StreakRewardCelebration() {
 
           {/* "7 дней подряд!" */}
           <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,107,0,0.9)", marginBottom: 8 }}>
-            7 дней подряд!
+            {t("days")}
           </div>
 
           {/* Main reward text */}
@@ -235,19 +237,18 @@ export default function StreakRewardCelebration() {
             fontSize: "clamp(26px,6vw,36px)", fontWeight: 900, color: "white",
             lineHeight: 1.15, marginBottom: 6, letterSpacing: "-0.5px",
           }}>
-            3 дня Pro
+            {t("proDays")}
           </div>
           <div style={{
             fontSize: 15, fontWeight: 700, color: "#6b87ff", marginBottom: 20,
           }}>
-            бесплатно — уже активировано
+            {t("free")}
           </div>
 
           <p style={{
             fontSize: 13, color: "rgba(255,255,255,0.48)", lineHeight: 1.6, marginBottom: 28,
           }}>
-            Безлимитные сообщения разблокированы на&nbsp;3&nbsp;дня.
-            Учись без ограничений — ты заслужил это.
+            {t("desc")}
           </p>
 
           {/* CTA button */}
@@ -264,12 +265,12 @@ export default function StreakRewardCelebration() {
             onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.02)"; e.currentTarget.style.boxShadow = "0 6px 28px rgba(69,97,232,0.6), inset 0 1px 0 rgba(255,255,255,0.2)"; }}
             onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(69,97,232,0.45), inset 0 1px 0 rgba(255,255,255,0.2)"; }}
           >
-            Продолжить учёбу →
+            {t("cta")}
           </button>
 
           {/* Bottom tap hint */}
           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", marginTop: 12 }}>
-            нажми куда угодно, чтобы закрыть
+            {t("dismiss")}
           </div>
         </div>
       </div>

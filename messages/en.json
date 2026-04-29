@@ -680,7 +680,8 @@
     "noLabel": "No name",
     "copied": "Copied",
     "copy": "Copy",
-    "noLinks": "No links yet — create the first one"
+    "noLinks": "No links yet — create the first one",
+    "deleteTitle": "Delete link"
   },
   "giftBanner": {
     "reserved": "Gift reserved",
@@ -696,6 +697,431 @@
     "soonTimer": "{days} d. {hours} h.",
     "soonTimerHoursOnly": "{hours} h.",
     "soonCta": "the activation button will appear right here.",
-    "soonBtn": "June 1 →"
+    "soonBtn": "June 1 →",
+    "errorFallback": "Something went wrong"
+  },
+  "analytics": {
+    "title": "My Analytics",
+    "subtitle": "Personal stats · updates in real time",
+    "globalRankOf": "of {n}",
+    "stats": {
+      "totalXP": "Total XP",
+      "streak": "Streak",
+      "streakValue": "{n} days",
+      "messages": "Messages",
+      "subjects": "Subjects",
+      "subjectsValue": "{active} of 14"
+    },
+    "level": {
+      "next": "Next",
+      "toNextXP": "{n} XP away"
+    },
+    "activity": {
+      "title": "Activity",
+      "subtitle": "last 8 days",
+      "tooltip": "{date}: {count} msg."
+    },
+    "subjects": {
+      "title": "By subject",
+      "active": "{n} active"
+    },
+    "bestStreak": {
+      "title": "Best streak: {n} days",
+      "legendary": "Legendary achievement",
+      "impressive": "Impressive persistence",
+      "good": "Great habit",
+      "toWeek": "{n} more days to a week"
+    },
+    "empty": {
+      "title": "Start learning — stats will appear",
+      "desc": "Ask your first question in any subject to start earning XP"
+    }
+  },
+  "badges": {
+    "title": "Achievements"
+  },
+  "onboarding": {
+    "step": "Step {step} of {total}",
+    "saving": "Saving...",
+    "next": "Next →",
+    "start": "Start learning →",
+    "skip": "Skip →",
+    "wait": "Please wait...",
+    "errorSave": "Failed to save. Please try again.",
+    "errorSkip": "Failed to skip. Please try again.",
+    "style": {
+      "title": "How do you prefer to learn?",
+      "subtitle": "We'll tailor the teaching style to you",
+      "storytelling": {
+        "label": "Through stories",
+        "desc": "Vivid narratives, imagery, historical details"
+      },
+      "facts": {
+        "label": "Facts and timelines",
+        "desc": "Clear dates, events, cause-and-effect"
+      },
+      "practice": {
+        "label": "Questions and tasks",
+        "desc": "I learn through practice and testing"
+      }
+    },
+    "level": {
+      "title": "What's your level?",
+      "subtitle": "The mentor will adapt the complexity of explanations",
+      "school": {
+        "label": "Student",
+        "desc": "Preparing for lessons, exams"
+      },
+      "student": {
+        "label": "University student",
+        "desc": "Studying at university or college"
+      },
+      "adult": {
+        "label": "Adult",
+        "desc": "Learning for myself"
+      },
+      "expert": {
+        "label": "Expert / professional",
+        "desc": "Deep knowledge, I want details"
+      }
+    },
+    "goal": {
+      "title": "What do you want to achieve?",
+      "subtitle": "Helps us set the right focus",
+      "exam": {
+        "label": "Exam preparation",
+        "desc": "I need exam prep"
+      },
+      "general": {
+        "label": "General knowledge",
+        "desc": "I want to understand the world"
+      },
+      "professional": {
+        "label": "Work / career",
+        "desc": "I need knowledge for my career"
+      },
+      "curiosity": {
+        "label": "Just curious",
+        "desc": "I love the subject, I want to learn more"
+      }
+    },
+    "first_subject": {
+      "title": "Where do we start?",
+      "subtitle": "Choose your first subject — we'll open a chat right away",
+      "russian-history": {
+        "label": "Russian History",
+        "desc": "From Ancient Rus to modern times"
+      },
+      "world-history": {
+        "label": "World History",
+        "desc": "Civilizations, wars, revolutions"
+      },
+      "mathematics": {
+        "label": "Mathematics",
+        "desc": "Algebra, geometry, problems"
+      },
+      "physics": {
+        "label": "Physics",
+        "desc": "Mechanics, electricity, optics"
+      },
+      "english": {
+        "label": "English",
+        "desc": "Grammar, vocabulary, speaking"
+      },
+      "russian-language": {
+        "label": "Russian Language",
+        "desc": "Spelling, punctuation, exam prep"
+      }
+    }
+  },
+  "guide": {
+    "metaTitle": "How to learn with Mentora | Guide",
+    "metaDesc": "7 tips to get the most from your AI mentor. Modes, styles, and tips for students.",
+    "badge": "How to learn",
+    "heroTitle": "Guide to",
+    "heroSubtitle": "7 techniques that will help you learn more effectively",
+    "startFreeBtn": "Start for free →",
+    "limitTitle": "About the free tier limit",
+    "limitDesc": "Free: 20 messages in a 24-hour window — no card required, forever.",
+    "limitLink": "Learn about Pro and Ultra →",
+    "ctaBtn": "Start learning for free →",
+    "ctaNote": "No card. No commitments.",
+    "footerCtaTitle": "Try it right now",
+    "footerCtaDesc": "13 subjects. No VPN. No card.",
+    "footerCtaBtn": "Start for free →",
+    "footerPrivacy": "Privacy",
+    "footerPricing": "Pricing",
+    "tip1": {
+      "title": "Ask any question",
+      "body": "Mentora doesn't know the word «stupid question». Ask anything you're afraid to ask out loud — that's exactly what she's here for.",
+      "example": "«Why do I even need to know this topic?» — a great starter question."
+    },
+    "tip2": {
+      "title": "Ask for a different explanation",
+      "body": "If you didn't understand — don't stay silent. Write «explain differently» or «give a real-life example». Mentora will rephrase without hesitation.",
+      "example": "«Explain quantum physics as if I'm in school»."
+    },
+    "tip3": {
+      "title": "Use quiz mode",
+      "body": "Write «test me» or «quiz» — Mentora will ask 5 questions and show what you know and what you don't. Great for exam prep.",
+      "example": "«Give me a quiz on the Time of Troubles — 5 questions»."
+    },
+    "tip4": {
+      "title": "Customize your learning style",
+      "body": "At registration you choose a style: «textbook», «facts and figures», or «through tasks». To change — write «explain as a story» or «give a clear scheme».",
+      "example": "«Explain using a multiple-choice test»."
+    },
+    "tip5": {
+      "title": "Ask for a summary",
+      "body": "At the end of a session write «what did I learn today» or «summary». Mentora will make concise bullet points — easy to review or write down.",
+      "example": "«What did I learn this session?» — and you'll get a 3–5 point summary."
+    },
+    "tip6": {
+      "title": "Learn every day",
+      "body": "Your streak (consecutive days) is visible in your profile. Even 5 minutes a day — a focused question or one fact — beats a two-hour binge once a week.",
+      "example": "After a 7-day streak — 3 days of Pro for free."
+    },
+    "tip7": {
+      "title": "Try Discovery mode",
+      "body": "Not sure what to learn today? Just ask Mentora about anything — she'll share something amazing from any field.",
+      "example": "«Surprise me with a fact about space»."
+    }
+  },
+  "about": {
+    "heroTag": "About us",
+    "heroTitle1": "The mentor",
+    "heroTitle2": "you always wanted",
+    "heroTagline": "Mentora — just ask",
+    "heroBody": "A great mentor knows how you think. Remembers where you got stuck last time. Explains things differently when you didn't get it the first time. Never gets tired. Never judges. Mentora is our attempt to make that kind of teacher available to everyone.",
+    "launchTag": "Official launch",
+    "launchTitle": "June 1, 2026 — open to everyone",
+    "launchBody": "Beta is running now — you're already inside. Share with a friend while spots last.",
+    "launchGift": "Every registered user gets a gift: one month of Pro free",
+    "countdownLabels": [
+      "days",
+      "hours",
+      "mins",
+      "secs"
+    ],
+    "problemTag": "Problem",
+    "problemTitle": "A tutor is a luxury",
+    "problemBody": "The average lesson in Moscow costs 2,500 ₽. Eight lessons a month = 20,000 ₽. For most families, that's out of reach. But every child needs a good teacher — not just those whose parents can afford it.",
+    "solutionTag": "Solution",
+    "solutionTitle": "A personal mentor without limits",
+    "solutionBody": "Mentora remembers you. Knows your level, thinking style, and gaps. Explains three times in different words without getting annoyed. 14 subjects, 24/7, no VPN — for 499 ₽/month.",
+    "howTag": "How it works",
+    "howTitle": "Not keyword search — a real conversation",
+    "howSubtitle": "You just write, like you would to a friend. Mentora understands the topic and responds to you specifically.",
+    "howSteps": [
+      {
+        "n": "01",
+        "title": "Start with any question",
+        "desc": "No need to plan a curriculum or choose a topic. Just write: 'explain sines', 'help with an essay', 'why did the Cold War start'. Mentora navigates by context."
+      },
+      {
+        "n": "02",
+        "title": "Mentora adapts to you",
+        "desc": "After just a few messages, the system understands your level and style: explains through examples, formulas, or practice — depending on how you learn best. This is remembered and applied each session."
+      },
+      {
+        "n": "03",
+        "title": "Progress builds automatically",
+        "desc": "Every conversation adds to your learning memory. Mentora remembers what you already know, where you got stuck, and what you've asked — and doesn't start from scratch every time. XP and streaks show how consistent you are."
+      },
+      {
+        "n": "04",
+        "title": "Notes and reinforcement",
+        "desc": "After covering a topic, Mentora can generate a PDF summary with key facts, terms, and a self-test question — so you can review and come back to it anytime."
+      }
+    ],
+    "compTag": "Comparison",
+    "compTitle": "Mentora vs alternatives",
+    "compSubtitle": "We compare honestly — including our own limitations.",
+    "compHeaders": [
+      "Criterion",
+      "Search engine",
+      "AI models",
+      "Mentora",
+      "Human tutor"
+    ],
+    "compRows": [
+      {
+        "criterion": "Knows your level",
+        "search": "✗",
+        "ai": "Partially",
+        "mentora": "✓",
+        "tutor": "✓",
+        "note": "Mentora learns your profile from the first conversation"
+      },
+      {
+        "criterion": "Remembers past sessions",
+        "search": "✗",
+        "ai": "✗",
+        "mentora": "✓",
+        "tutor": "Usually",
+        "note": "History and progress stored permanently"
+      },
+      {
+        "criterion": "Available at 3 AM",
+        "search": "✓",
+        "ai": "✓",
+        "mentora": "✓",
+        "tutor": "✗",
+        "note": ""
+      },
+      {
+        "criterion": "Explains, not just links",
+        "search": "✗",
+        "ai": "✓",
+        "mentora": "✓",
+        "tutor": "✓",
+        "note": "Search gives links — you figure out the rest yourself"
+      },
+      {
+        "criterion": "Tuned to local curriculum",
+        "search": "Partially",
+        "ai": "✗",
+        "mentora": "✓",
+        "tutor": "✓",
+        "note": "Context, terminology, and tasks are adapted"
+      },
+      {
+        "criterion": "Cost per month",
+        "search": "Free",
+        "ai": "~$20",
+        "mentora": "$5",
+        "tutor": "$130+",
+        "note": ""
+      },
+      {
+        "criterion": "Explains 10 different ways",
+        "search": "✗",
+        "ai": "✓",
+        "mentora": "✓",
+        "tutor": "Not always",
+        "note": "Even tutors get tired of explaining the same thing"
+      },
+      {
+        "criterion": "Real human empathy",
+        "search": "✗",
+        "ai": "✗",
+        "mentora": "✗",
+        "tutor": "✓",
+        "note": "Honest limitation — AI cannot replace a real person"
+      }
+    ],
+    "valuesTag": "Values",
+    "valuesTitle": "What we believe in",
+    "values": [
+      {
+        "title": "Ask without shame",
+        "desc": "Mentora won't judge you, won't tell your teacher, won't laugh. There are no 'stupid' questions here — only your progress."
+      },
+      {
+        "title": "Accessible to everyone",
+        "desc": "A tutor in Moscow costs from 2,000 ₽/hour. The Mentora Pro plan is 499 ₽/month. This isn't a compromise — it's a fair choice."
+      },
+      {
+        "title": "Classes are never cancelled",
+        "desc": "No holidays, no illness, no bad mood. Mentora is available at 3 AM — exactly when you need it."
+      },
+      {
+        "title": "Honest answers",
+        "desc": "If it doesn't know something — it'll say so. We don't pass wrong things off as truth for the sake of a pretty answer — your result matters to us."
+      }
+    ],
+    "guideTag": "How to learn",
+    "guideTitle": "Guide to",
+    "guideSubtitle": "7 techniques that will help you learn more effectively",
+    "tips": [
+      {
+        "n": "01",
+        "title": "Ask any question",
+        "body": "Mentora doesn't know the word 'stupid question'. Ask anything you're afraid to ask out loud — that's exactly what she's here for.",
+        "example": "«Why do I even need to know this topic?»"
+      },
+      {
+        "n": "02",
+        "title": "Ask for a different explanation",
+        "body": "If you didn't understand — don't stay silent. Write 'explain differently' or 'give a real-life example'.",
+        "example": "«Explain quantum physics as if I'm a student»."
+      },
+      {
+        "n": "03",
+        "title": "Use quiz mode",
+        "body": "Write 'test me' or 'quiz' — Mentora will ask questions and show what you know and what you don't.",
+        "example": "«Give me a quiz on the Time of Troubles — 5 questions»."
+      },
+      {
+        "n": "04",
+        "title": "Customize your style",
+        "body": "Say how to explain: 'as a story', 'through tasks', 'clear scheme' — Mentora will adapt.",
+        "example": "«Explain using a multiple-choice test»."
+      },
+      {
+        "n": "05",
+        "title": "Ask for a summary",
+        "body": "At the end of a session write 'what did I learn today' — you'll get bullet points for review.",
+        "example": "«What did I learn this session?» — summary in 3–5 points."
+      },
+      {
+        "n": "06",
+        "title": "Learn every day",
+        "body": "Your streak is visible in your profile. Even 5 minutes is better than a two-hour binge once a week.",
+        "example": "After 7 days — 3 days of Pro for free."
+      },
+      {
+        "n": "07",
+        "title": "Try Discovery mode",
+        "body": "Not sure what to learn today? Just ask — Mentora will share something amazing from any field.",
+        "example": "«Surprise me with a fact about space»."
+      }
+    ],
+    "roadmapTag": "Roadmap",
+    "roadmapTitle": "Where we're heading",
+    "roadmapDone": "done",
+    "timeline": [
+      {
+        "q": "Q1 2026",
+        "label": "Platform launch",
+        "desc": "14 subjects, personal mentor, Pro and Ultima plans, referral system"
+      },
+      {
+        "q": "Q2 2026",
+        "label": "Curricula and learning tracks",
+        "desc": "Structured courses by topic, 'Teach me from scratch' mode, topic coverage tracker"
+      },
+      {
+        "q": "Q3 2026",
+        "label": "Mobile app",
+        "desc": "iOS and Android — learn on the go, push notifications, offline notes"
+      },
+      {
+        "q": "Q4 2026",
+        "label": "B2B: schools and organizations",
+        "desc": "After 1000+ active users: teacher dashboard, group licenses"
+      },
+      {
+        "q": "2027",
+        "label": "International expansion",
+        "desc": "English version, Kazakhstan, other languages and education systems"
+      }
+    ],
+    "ultimaTag": "About Ultima plan",
+    "ultimaBody": "We are actively developing new features. Some capabilities described in the Ultima plan are still in testing and will be rolled out gradually by June 1, 2026. All Ultima subscribers will get access to them automatically as they become available.",
+    "supportTag": "Support the platform",
+    "supportTitle": "Mentora grows without VC or ads",
+    "supportSubtitle": "The project is sustained by user subscriptions and partner support",
+    "donateTitle": "Donate",
+    "donateBody": "From Russia — Boosty or Telegram Stars, from other countries — Ko-fi (card/PayPal).",
+    "boostyBtn": "Boosty — from Russia",
+    "kofiBtn": "Ko-fi — from other countries",
+    "tgStarsBtn": "Telegram Stars",
+    "investTitle": "Invest / partnership",
+    "investBody": "Looking for partners to scale to schools and B2B. If interested — reach out directly.",
+    "contactBtn": "Write to the team",
+    "ctaNote": "Questions, partnerships, feedback",
+    "supportBtn": "Write to support",
+    "backBtn": "Back to learning →"
   }
 }
