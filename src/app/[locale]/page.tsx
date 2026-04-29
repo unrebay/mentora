@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { getTranslations, getLocale } from "next-intl/server";
+import { getTranslations, getLocale, getMessages } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import DemoChat from "@/components/DemoChat";
 import { createClient } from "@/lib/supabase/server";
@@ -10,6 +10,7 @@ import SubjectGrid from "@/components/SubjectGrid";
 import { LATEST } from "@/lib/changelog";
 import DemoScrollButton from "@/components/DemoScrollButton";
 import LandingNav from "@/components/LandingNav";
+import BuyProButton from "@/components/BuyProButton";
 import nextDynamic from "next/dynamic";
 const LandingStarsCanvas = nextDynamic(() => import("@/components/LandingStarsCanvas"), { ssr: false });
 
@@ -104,6 +105,13 @@ export default async function HomePage() {
 
   const locale = await getLocale();
   const t = await getTranslations();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const messages = await getMessages() as any;
+  const pricingMsg = messages.pricing;
+  const freeFeatures: string[] = pricingMsg.free.features;
+  const proFeatures: string[] = pricingMsg.pro.features;
+  const ultraFeatures: string[] = pricingMsg.ultra.features;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const TESTIMONIALS = (t.raw("landing.testimonials") as any[]).map((item, idx) => ({
@@ -453,6 +461,173 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* ── PRICING ─────────────────────────────────────────────────── */}
+      <section id="pricing" className="max-w-6xl mx-auto px-6 py-16 scroll-mt-24">
+        {/* Section header */}
+        <div className="text-center mb-12">
+          <p className="text-[11px] font-bold tracking-[0.15em] uppercase mb-3" style={{ color: "var(--brand)" }}>
+            {t("nav.pricing")}
+          </p>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-[1.1]">
+            {t("pricing.hero.title")}<br />
+            <span style={{
+              background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", fontStyle: "italic",
+            }}>
+              {t("pricing.hero.titleGradient")}
+            </span>
+          </h2>
+          <p className="text-base" style={{ color: "var(--text-secondary)" }}>{t("pricing.hero.subtitle")}</p>
+        </div>
+
+        {/* Promo banner — Russian only */}
+        {locale === "ru" && (
+          <div className="mb-6 flex items-center gap-4 rounded-2xl px-5 py-4 border"
+            style={{ background: "linear-gradient(135deg,rgba(69,97,232,0.06) 0%,rgba(159,122,255,0.04) 100%)", borderColor: "rgba(69,97,232,0.18)" }}>
+            <div className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(245,158,11,0.12)" }}>
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#f59e0b" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="font-bold text-sm" style={{ color: "var(--text)" }}>Только до 1 июня —</span>{" "}
+              <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                при покупке годового плана <strong style={{ color: "var(--brand)" }}>+3 месяца в подарок</strong>. Платишь за 12 — пользуешься 15.
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Pricing cards */}
+        {(() => {
+          const Check = ({ dark }: { dark?: boolean }) => (
+            <svg className="w-4 h-4 shrink-0 mt-0.5" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="7" fill={dark ? "rgba(255,255,255,0.12)" : "rgba(69,97,232,0.12)"} />
+              <path d="M5 8l2 2 4-4" stroke={dark ? "rgba(255,255,255,0.7)" : "#4561E8"} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          );
+          return (
+            <div className="grid md:grid-cols-3 gap-6 md:gap-4 items-stretch">
+              {/* FREE */}
+              <div className="rounded-2xl p-7 flex flex-col border"
+                style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+                <div className="mb-6">
+                  <p className="text-[11px] font-bold t-muted tracking-[0.15em] uppercase mb-4">{t("pricing.free.name")}</p>
+                  <div className="flex items-end gap-1.5">
+                    <span className="text-5xl font-bold tracking-tight t-primary">{t("pricing.free.price")}</span>
+                  </div>
+                  <p className="text-sm t-muted mt-2">{t("pricing.freeDesc")}</p>
+                </div>
+                <Link href="/auth" className="block text-center py-3 px-5 font-semibold rounded-xl transition-all duration-200 mb-8 text-sm border"
+                  style={{ color: "var(--text-secondary)", borderColor: "var(--border)", background: "var(--bg-secondary)" }}>
+                  {t("pricing.free.cta")}
+                </Link>
+                <ul className="space-y-3 flex-1">
+                  {freeFeatures.map((f: string) => (
+                    <li key={f} className="flex items-start gap-2.5 text-sm t-secondary"><Check />{f}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* PRO */}
+              <div className="relative rounded-[17px] p-[1.5px] flex flex-col mt-3 md:mt-0"
+                style={{ background: "linear-gradient(145deg, #6B8FFF, #4561E8 45%, #9F7AFF)", boxShadow: "0 8px 40px rgba(69,97,232,0.25), 0 2px 8px rgba(69,97,232,0.15)" }}>
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
+                  <span className="text-white text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase"
+                    style={{ background: "linear-gradient(135deg, #4561E8, #6B8FFF)" }}>
+                    {t("pricing.pro.badge")}
+                  </span>
+                </div>
+                <div className="rounded-2xl p-7 flex flex-col flex-1" style={{ background: "var(--bg-card)" }}>
+                  <div className="mb-6">
+                    <p className="text-[11px] font-bold tracking-[0.15em] uppercase mb-4" style={{ color: "var(--brand)" }}>{t("pricing.pro.name")}</p>
+                    <div className="flex items-end gap-1.5">
+                      <span className="text-5xl font-bold tracking-tight t-primary">{t("pricing.pro.price")}</span>
+                      <span className="t-muted text-sm mb-2">{t("pricing.pro.period")}</span>
+                    </div>
+                    {locale === "ru" && (
+                      <div className="flex items-center gap-2 mt-3 rounded-xl px-3 py-2.5" style={{ background: "var(--bg-secondary)" }}>
+                        <span className="text-sm font-semibold t-secondary">2 990 ₽ / год</span>
+                        <span className="t-muted text-xs">·</span>
+                        <span className="text-xs t-muted">249 ₽/мес</span>
+                        <span className="ml-auto text-[11px] font-bold px-2 py-0.5 rounded-lg" style={{ color: "#15803d", background: "rgba(21,128,61,0.1)" }}>−37%</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2 mb-7">
+                    <BuyProButton isLoggedIn={false} isPro={false} plan="monthly" />
+                    <BuyProButton isLoggedIn={false} isPro={false} plan="annual" />
+                  </div>
+                  <ul className="space-y-3 flex-1">
+                    {proFeatures.map((f: string) => (
+                      <li key={f} className="flex items-start gap-2.5 text-sm t-secondary"><Check />{f}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* ULTRA */}
+              <div className="relative flex flex-col mt-3 md:mt-0">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap">
+                  <span className="text-white text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase"
+                    style={{ background: "linear-gradient(135deg, rgba(255,122,0,0.75), rgba(124,58,237,0.75))", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", boxShadow: "0 2px 12px rgba(255,122,0,0.25)" }}>
+                    {t("common.new").toUpperCase()}
+                  </span>
+                </div>
+                <div className="relative rounded-2xl p-7 flex flex-col flex-1 overflow-hidden" style={{ background: "#060610" }}>
+                  <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full pointer-events-none"
+                    style={{ background: "radial-gradient(circle, rgba(255,122,0,0.28) 0%, transparent 65%)" }} />
+                  <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full pointer-events-none"
+                    style={{ background: "radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 65%)" }} />
+                  <div className="mb-6 relative z-10">
+                    <p className="text-[11px] font-bold tracking-[0.15em] uppercase mb-4"
+                      style={{ background: "linear-gradient(90deg, #FF7A00, #9F7AFF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                      {t("pricing.ultra.name")}
+                    </p>
+                    <div className="flex items-end gap-1.5">
+                      <span className="text-5xl font-bold tracking-tight text-white">{t("pricing.ultra.price")}</span>
+                      <span className="text-gray-400 text-sm mb-2">{t("pricing.ultra.period")}</span>
+                    </div>
+                    {locale === "ru" && (
+                      <div className="flex items-center gap-2 mt-3 rounded-xl px-3 py-2.5"
+                        style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                        <span className="text-sm font-semibold text-white/80">5 990 ₽ / год</span>
+                        <span className="text-white/20 text-xs">·</span>
+                        <span className="text-xs text-white/40">499 ₽/мес</span>
+                        <span className="ml-auto text-[11px] font-bold text-emerald-400 bg-emerald-900/30 px-2 py-0.5 rounded-lg">−37%</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2 mb-7 relative z-10">
+                    <BuyProButton isLoggedIn={false} isPro={false} isUltima={false} plan="ultima_monthly" />
+                    <BuyProButton isLoggedIn={false} isPro={false} isUltima={false} plan="ultima_annual" />
+                  </div>
+                  <ul className="space-y-3 flex-1 relative z-10">
+                    {ultraFeatures.map((label: string, i: number) => {
+                      const isSoon = locale === "ru" ? (i === 2 || i === 3) : false;
+                      return (
+                        <li key={label} className="flex items-start gap-2.5 text-sm text-white/70">
+                          <Check dark />
+                          <span className="flex items-center gap-2 flex-wrap">
+                            {label}
+                            {isSoon && (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md tracking-wide"
+                                style={{ background: "rgba(255,122,0,0.18)", color: "#FF9A3C", border: "1px solid rgba(255,122,0,0.25)" }}>
+                                {t("pricing.soon")}
+                              </span>
+                            )}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </section>
 
       {/* ЕГЭ/ОГЭ COMING SOON — Russian only */}

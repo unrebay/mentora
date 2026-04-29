@@ -103,14 +103,14 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
             className="hidden md:flex items-center justify-center gap-8 text-sm transition-colors duration-300"
             style={{ color: linkColor }}
           >
-            <a href="#subjects" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.9 }}>
+            <Link href="/#subjects" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.9 }}>
               {t("subjects")}
-            </a>
-            <a href="#how" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.9 }}>
+            </Link>
+            <Link href="/#how" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.9 }}>
               {t("how")}
-            </a>
+            </Link>
             <Link
-              href="/pricing"
+              href="/#pricing"
               className="hover:opacity-100 transition-opacity"
               style={{ opacity: 0.9, fontWeight: activePage === "pricing" ? 600 : undefined, color: activePage === "pricing" ? (isDark ? "white" : "var(--text)") : undefined }}
             >
@@ -184,13 +184,13 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
             className="md:hidden border-t px-5 py-4 flex flex-col gap-1"
             style={{ borderColor: mobileBorder }}
           >
-            <a href="#subjects" className="text-sm font-medium py-2.5 border-b"
+            <Link href="/#subjects" className="text-sm font-medium py-2.5 border-b"
               style={{ color: linkColor, borderColor: mobileBorder }}
-              onClick={() => setMobileOpen(false)}>{t("subjects")}</a>
-            <a href="#how" className="text-sm font-medium py-2.5 border-b"
+              onClick={() => setMobileOpen(false)}>{t("subjects")}</Link>
+            <Link href="/#how" className="text-sm font-medium py-2.5 border-b"
               style={{ color: linkColor, borderColor: mobileBorder }}
-              onClick={() => setMobileOpen(false)}>{t("how")}</a>
-            <Link href="/pricing" className="text-sm font-medium py-2.5 border-b"
+              onClick={() => setMobileOpen(false)}>{t("how")}</Link>
+            <Link href="/#pricing" className="text-sm font-medium py-2.5 border-b"
               style={{ color: activePage === "pricing" ? (isDark ? "white" : "var(--text)") : linkColor, fontWeight: activePage === "pricing" ? 600 : undefined, borderColor: mobileBorder }}
               onClick={() => setMobileOpen(false)}>{t("pricing")}</Link>
             <div className="pt-3 flex items-center gap-3">
