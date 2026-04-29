@@ -2,6 +2,7 @@
 import MeLogo from "@/components/MeLogo";
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import AddSubjectModal from "@/components/AddSubjectModal";
 import SubjectSuggestionModal from "@/components/SubjectSuggestionModal";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
@@ -99,7 +100,12 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
   return (
     <>
       {/* Section header */}
-      <div className="flex items-center justify-between mb-4">
+      <motion.div
+        className="flex items-center justify-between mb-4"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      >
         <h2 className="text-xs font-bold tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>
           {t("title")}
         </h2>
@@ -115,10 +121,10 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
           <span className="text-sm leading-none">+</span>
           {t("suggest")}
         </button>
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {userSubjects.map((subject) => {
+        {userSubjects.map((subject, i) => {
           const progress = progressMap.get(subject.id);
           const isVerified = subject.verified;
           const isBeta = subject.beta && !isVerified;
@@ -130,10 +136,17 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
           const color = subjectColor(subject.id);
           const levelName = t(lvl.key as "levelBeginner" | "levelExplorer" | "levelAdept" | "levelScholar" | "levelExpert");
 
+          const cardAnim = {
+            initial: { opacity: 0, y: 22, scale: 0.97 },
+            animate: { opacity: 1, y: 0, scale: 1 },
+            transition: { duration: 0.4, delay: i * 0.055, ease: [0.22, 1, 0.36, 1] as const },
+          };
+
           /* ── Coming soon card ─────────────────── */
           if (!isActive) {
             return (
-              <div key={subject.id}
+              <motion.div key={subject.id}
+                {...cardAnim}
                 className="relative rounded-2xl border overflow-hidden h-full flex flex-col"
                 style={{ background: "var(--bg-secondary)", borderColor: "var(--border)", opacity: 0.5 }}
               >
@@ -148,14 +161,14 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                   <div className="font-semibold text-sm leading-snug" style={{ color: "var(--text-secondary)" }}>{subject.title}</div>
                   <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{subject.description}</div>
                 </div>
-              </div>
+              </motion.div>
             );
           }
 
           /* ── Verified card — premium gradient dark ─── */
           if (isVerified) {
             return (
-              <div key={subject.id} className="relative group h-full">
+              <motion.div key={subject.id} {...cardAnim} className="relative group h-full">
                 <button
                   onClick={(e) => askRemove(e, subject)}
                   disabled={isRemoving}
@@ -243,13 +256,13 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           }
 
           /* ── Beta / active card ───────────────── */
           return (
-            <div key={subject.id} className="relative group h-full">
+            <motion.div key={subject.id} {...cardAnim} className="relative group h-full">
               <button
                 onClick={(e) => askRemove(e, subject)}
                 disabled={isRemoving}
@@ -335,11 +348,17 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           );
         })}
 
         {/* Add subject button */}
+        <motion.div
+          initial={{ opacity: 0, y: 22, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.4, delay: (userSubjects.length) * 0.055, ease: [0.22, 1, 0.36, 1] }}
+          className="h-full"
+        >
         <button
           onClick={() => setAddOpen(true)}
           className="relative rounded-2xl border-dashed border-2 flex flex-col items-center justify-center p-5 h-full min-h-[160px] gap-2.5 transition-all duration-200 group"
@@ -361,6 +380,7 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
             {t("add")}
           </span>
         </button>
+        </motion.div>
       </div>
 
       {/* ── Confirm remove dialog ─────────────────────────────── */}

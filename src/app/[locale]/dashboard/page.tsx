@@ -16,6 +16,7 @@ import ReferralWidget from "@/components/ReferralWidget";
 import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
 import InstagramButton from "@/components/InstagramButton";
+import FadeUp from "@/components/FadeUp";
 import dynamic from "next/dynamic";
 const StreakRewardCelebration = dynamic(() => import("@/components/StreakRewardCelebration"), { ssr: false });
 
@@ -295,7 +296,7 @@ export default async function DashboardPage() {
         )}
 
         {/* ── Greeting ─────────────────────────────────────── */}
-        <div className="mb-10">
+        <FadeUp className="mb-10">
           <p className="text-xs font-bold tracking-[0.18em] uppercase mb-2" style={{ color: "var(--text-muted)" }}>
             {t("libraryTitle")}
           </p>
@@ -392,7 +393,7 @@ export default async function DashboardPage() {
               </Link>
             )}
           </div>
-        </div>
+        </FadeUp>
 
         {/* ── Продолжить обучение ─────────────────────────── */}
         {lastActiveSubject && (() => {
@@ -414,7 +415,8 @@ export default async function DashboardPage() {
             : 100;
 
           return (
-            <div data-tour="continue-learning" className="mt-8 mb-6 rounded-2xl relative overflow-hidden"
+            <FadeUp delay={0.08} className="mt-8 mb-6">
+            <div data-tour="continue-learning" className="rounded-2xl relative overflow-hidden"
               style={{
                 background: `linear-gradient(135deg, ${accent}0d 0%, ${accent}06 60%, rgba(255,255,255,0.03) 100%)`,
                 border: `1px solid ${accent}28`,
@@ -493,10 +495,12 @@ export default async function DashboardPage() {
                 </Link>
               </div>
             </div>
+            </FadeUp>
           );
         })()}
 
         {/* ── Subject library ───────────────────────────────── */}
+        <FadeUp delay={0.06}>
         <div data-tour="subjects">
           <SubjectLibrarySection
             userSubjects={userSubjects}
@@ -505,13 +509,17 @@ export default async function DashboardPage() {
             progressEntries={progressData ?? []}
           />
         </div>
+        </FadeUp>
 
         {/* ── Referral ─────────────────────────────────────── */}
-        <div className="mt-8 mb-2" data-tour="referral">
+        <FadeUp delay={0.1} className="mt-8 mb-2">
+        <div data-tour="referral">
           <ReferralWidget />
         </div>
+        </FadeUp>
 
         {/* ── Support ──────────────────────────────────────── */}
+        <FadeUp delay={0.15} fade>
         <div className="mt-6 mb-6 flex flex-col items-center gap-2 text-center">
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>{t("needHelp")}</p>
           <div className="flex gap-2 flex-wrap justify-center items-start">
@@ -519,6 +527,7 @@ export default async function DashboardPage() {
             <InstagramButton size="sm" label="@mentora.su" />
           </div>
         </div>
+        </FadeUp>
       </div>
     </main>
   );
