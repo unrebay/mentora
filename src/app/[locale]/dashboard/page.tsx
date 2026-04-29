@@ -395,34 +395,73 @@ export default async function DashboardPage() {
         </div>
 
         {/* ── Продолжить обучение ─────────────────────────── */}
-        {lastActiveSubject && (
-          <div data-tour="continue-learning" className="mt-8 mb-6 rounded-2xl overflow-hidden border"
-            style={{
-              background: `linear-gradient(135deg, ${subjectColor(lastActiveSubject.id)}22, ${subjectColor(lastActiveSubject.id)}08)`,
-              borderColor: `${subjectColor(lastActiveSubject.id)}30`,
-            }}
-          >
-            <div className="p-5 flex items-center gap-4">
-              <SubjectIcon id={lastActiveSubject.id} size={52} />
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold tracking-[0.15em] uppercase mb-1" style={{ color: subjectColor(lastActiveSubject.id) }}>
-                  {t("continueLearning")}
-                </p>
-                <p className="font-bold text-base truncate" style={{ color: "var(--text)" }}>{lastActiveSubject.title}</p>
-                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                  {locale === "en"
-                    ? `${lastActiveProgress?.xp_total ?? 0} XP`
-                    : `${lastActiveProgress?.xp_total ?? 0} ${pluralMenty(lastActiveProgress?.xp_total ?? 0)}`}
-                  {(lastActiveProgress?.streak_days ?? 0) > 0 && ` · 🔥 ${lastActiveProgress!.streak_days} ${t("xpInRow")}`}
-                </p>
+        {lastActiveSubject && (() => {
+          const accent = subjectColor(lastActiveSubject.id);
+          const xp = lastActiveProgress?.xp_total ?? 0;
+          const streak = lastActiveProgress?.streak_days ?? 0;
+          return (
+            <div data-tour="continue-learning" className="mt-8 mb-6 rounded-2xl relative overflow-hidden"
+              style={{
+                background: `linear-gradient(135deg, ${accent}0d 0%, ${accent}06 60%, rgba(255,255,255,0.03) 100%)`,
+                border: `1px solid ${accent}28`,
+                backdropFilter: "blur(24px) saturate(160%)",
+                WebkitBackdropFilter: "blur(24px) saturate(160%)",
+                boxShadow: `0 4px 28px ${accent}12, inset 0 1px 0 rgba(255,255,255,0.10)`,
+              }}
+            >
+              {/* Top shimmer line */}
+              <div style={{
+                position: "absolute", top: 0, left: 0, right: 0, height: 1,
+                background: `linear-gradient(90deg, transparent, ${accent}40, transparent)`,
+              }} />
+
+              <div className="p-5">
+                {/* Header row: icon + label */}
+                <div className="flex items-center gap-3 mb-3">
+                  <SubjectIcon id={lastActiveSubject.id} size={44} />
+                  <div>
+                    <p className="text-[10px] font-bold tracking-[0.15em] uppercase"
+                      style={{ color: accent }}>
+                      {t("continueLearning")}
+                    </p>
+                    <p className="font-bold text-lg leading-tight mt-0.5" style={{ color: "var(--text)" }}>
+                      {lastActiveSubject.title}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Meta row */}
+                <div className="flex items-center gap-2 mb-4 text-xs" style={{ color: "var(--text-muted)" }}>
+                  <span>
+                    {locale === "en"
+                      ? `${xp} XP`
+                      : `${xp} ${pluralMenty(xp)}`}
+                  </span>
+                  {streak > 0 && (
+                    <>
+                      <span style={{ opacity: 0.4 }}>·</span>
+                      <svg viewBox="0 0 24 24" width="12" height="12" fill="#f97316"><path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z"/></svg>
+                      <span>{streak} {t("xpInRow")}</span>
+                    </>
+                  )}
+                </div>
+
+                {/* CTA button — full width */}
+                <Link href={`/learn/${lastActiveSubject.id}`}
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-semibold text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  style={{
+                    background: `linear-gradient(135deg, ${accent}ee, ${accent}bb)`,
+                    boxShadow: `0 2px 14px ${accent}40`,
+                  }}>
+                  {t("continueBtn")}
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                </Link>
               </div>
-              <Link href={`/learn/${lastActiveSubject.id}`}
-                className="btn-glow shrink-0 px-4 py-2 rounded-xl text-sm font-semibold text-white">
-                {t("continueBtn")}
-              </Link>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* ── Subject library ───────────────────────────────── */}
         <div data-tour="subjects">
