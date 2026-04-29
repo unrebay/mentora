@@ -150,27 +150,30 @@ function SuggestCard({ s, i }: { s: Subject; i: number }) {
     >
       <Link href="/auth" className="block h-full">
         <motion.div
-          className="relative p-4 rounded-2xl flex flex-col items-center justify-center min-h-[140px] transition-all duration-200 group"
+          className="relative p-4 rounded-2xl flex flex-col items-center justify-center group"
           style={{
-            background: "rgba(255,255,255,0.04)",
-            border: "1.5px dashed rgba(255,255,255,0.18)",
-            backdropFilter: "blur(8px)",
+            background: "rgba(69,97,232,0.04)",
+            border: "2px dashed rgba(69,97,232,0.28)",
+            minHeight: 140,
           }}
           whileHover={{
-            background: "rgba(69,97,232,0.08)",
-            borderColor: "rgba(69,97,232,0.4)",
-            y: -4,
+            background: "rgba(69,97,232,0.09)",
+            borderColor: "rgba(69,97,232,0.55)",
+            y: -6,
+            scale: 1.03,
             transition: { type: "spring", stiffness: 300, damping: 22 },
           }}
         >
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-2 transition-all duration-200 group-hover:scale-110"
-            style={{ background: "rgba(69,97,232,0.12)" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(69,97,232,0.8)" strokeWidth="2" strokeLinecap="round">
+          <div
+            className="w-11 h-11 rounded-2xl flex items-center justify-center mb-3 transition-all duration-200 group-hover:scale-110"
+            style={{ background: "rgba(69,97,232,0.12)" }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(69,97,232,0.8)" strokeWidth="2.2" strokeLinecap="round">
               <path d="M12 5v14M5 12h14" />
             </svg>
           </div>
-          <div className="text-xs font-bold text-center" style={{ color: "var(--text-secondary)" }}>{s.title}</div>
-          <div className="text-[10px] text-center mt-0.5" style={{ color: "var(--text-muted)" }}>{s.desc}</div>
+          <div className="text-sm font-bold text-center" style={{ color: "var(--text)" }}>{s.title}</div>
+          <div className="text-xs text-center mt-1" style={{ color: "var(--text-muted)" }}>{s.desc}</div>
         </motion.div>
       </Link>
     </motion.div>
