@@ -11,6 +11,7 @@ import StatCard, { MentIcon, FlameIcon, MessageIcon, StarIcon } from "@/componen
 import SupportCodeCopy from "@/components/SupportCodeCopy";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
 import InstagramButton from "@/components/InstagramButton";
+import FreeWindowPill from "@/components/FreeWindowPill";
 
 /** Deterministic 10-char support code derived from UUID — no DB needed */
 function makeSupportCode(userId: string): string {
@@ -212,6 +213,10 @@ export default async function ProfilePage() {
   const windowExpired = !windowStart || (Date.now() - windowStart.getTime()) >= WINDOW_HOURS * 3600_000;
   const usedToday = windowExpired ? 0 : (profile?.messages_today ?? 0);
   const remainingToday = Math.max(0, FREE_LIMIT - usedToday);
+  // Pass reset time to client pill only when window is active and has used messages
+  const windowResetAt = (!windowExpired && windowStart && usedToday > 0)
+    ? new Date(windowStart.getTime() + WINDOW_HOURS * 3600_000).toISOString()
+    : null;
 
   const joinedDaysAgo = profile?.created_at
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 86400000)
@@ -277,13 +282,11 @@ export default async function ProfilePage() {
                   {isUltima ? "ULTRA" : "PRO"}
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full"
-                  style={{ background: "rgba(100,116,139,0.12)", color: "var(--text-muted)", border: "1px solid rgba(100,116,139,0.2)" }}>
-                  FREE
-                  <span className="font-bold" style={{ color: remainingToday <= 5 ? "#f59e0b" : "var(--text-secondary)" }}>
-                    · {remainingToday}/{FREE_LIMIT}
-                  </span>
-                </span>
+                <FreeWindowPill
+                  remaining={remainingToday}
+                  limit={FREE_LIMIT}
+                  windowResetAt={windowResetAt}
+                />
               )}
             </div>
             <p className="text-sm mb-3 truncate" style={{ color: "var(--text-muted)" }}>{user.email}</p>
