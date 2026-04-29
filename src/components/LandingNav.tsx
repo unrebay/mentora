@@ -18,10 +18,8 @@ export default function LandingNav() {
     function update() {
       const y = window.scrollY;
       setScrolled(y > 40);
-      // "subjects" section is the first light-background block
       const subjects = document.getElementById("subjects");
       if (!subjects) { setIsDark(true); return; }
-      // Switch to light when that section enters the nav area
       setIsDark(subjects.getBoundingClientRect().top > 72);
     }
     update();
@@ -36,42 +34,41 @@ export default function LandingNav() {
     return () => window.removeEventListener("scroll", close);
   }, [mobileOpen]);
 
-  // ── Pill visual states (mirrors DashboardNav dk / light) ──────────────────
-  // Transparent while at the very top of the dark hero; pills appear on scroll
+  // ── iOS 26 Liquid Glass pill visual states ────────────────────────────────
   const showPill = scrolled || !isDark;
 
   const navBg = isDark
-    ? (showPill ? "rgba(8,8,20,0.65)" : "transparent")
-    : "var(--bg-nav)";
+    ? (showPill ? "rgba(6,6,18,0.55)" : "transparent")
+    : "rgba(255,255,255,0.62)";
 
-  const navBlur = showPill ? "blur(28px) saturate(1.8)" : "none";
+  const navBlur = showPill ? "blur(40px) saturate(2.2) brightness(1.04)" : "none";
 
   const navBorder = showPill
-    ? (isDark ? "1px solid rgba(255,255,255,0.10)" : "1px solid var(--border-light)")
+    ? (isDark
+        ? "1px solid rgba(255,255,255,0.09)"
+        : "1px solid rgba(255,255,255,0.55)")
     : "1px solid transparent";
 
   const navShadow = showPill
     ? (isDark
-        ? "0 2px 0 rgba(255,255,255,0.04) inset, 0 8px 40px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset"
-        : "0 4px 24px rgba(0,0,0,0.09), 0 1px 0 rgba(255,255,255,0.8) inset")
+        ? "0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 48px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.08) inset"
+        : "0 0 0 1px rgba(255,255,255,0.9) inset, 0 8px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06)")
     : "none";
 
-  const linkColor = isDark ? "rgba(255,255,255,0.65)" : "var(--text-secondary)";
-  const loginColor = isDark ? "rgba(255,255,255,0.72)" : "var(--text-secondary)";
+  const linkColor = isDark ? "rgba(255,255,255,0.70)" : "rgba(30,30,50,0.75)";
+  const loginColor = isDark ? "rgba(255,255,255,0.75)" : "rgba(30,30,50,0.80)";
 
   // ── Mobile dropdown bg ────────────────────────────────────────────────────
-  const mobileBg = isDark ? "rgba(8,8,20,0.97)" : "var(--bg-nav)";
-  const mobileBorder = isDark ? "rgba(255,255,255,0.06)" : "var(--border-light)";
+  const mobileBg = isDark ? "rgba(6,6,18,0.97)" : "rgba(255,255,255,0.92)";
+  const mobileBorder = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)";
 
   return (
-    /* Outer sticky strip — background matches hero so the 10px gap is seamless */
+    /* Outer sticky strip — ALWAYS transparent so page content shows through padding */
     <nav
       className="sticky top-0 z-50"
       style={{
         padding: "10px 14px",
-        // Transparent over dark hero so content bleeds through the gaps;
-        // matches page bg when over the light section (same as DashboardNav).
-        background: isDark ? "transparent" : "var(--bg)",
+        background: "transparent",
         pointerEvents: "none",
       }}
     >
@@ -90,15 +87,15 @@ export default function LandingNav() {
           position: "relative",
         }}
       >
-        {/* thin top shimmer line — only when visible */}
+        {/* thin top shimmer line */}
         {showPill && (
           <div style={{
             position: "absolute",
             top: 0, left: 0, right: 0,
             height: 1,
             background: isDark
-              ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.09), transparent)"
-              : "linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent)",
+              ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)"
+              : "linear-gradient(90deg, transparent, rgba(255,255,255,0.85), transparent)",
             pointerEvents: "none",
           }} />
         )}
@@ -129,7 +126,7 @@ export default function LandingNav() {
             <LanguageSwitcher dark={isDark} />
             <ThemeToggle />
 
-            {/* Desktop: Войти — ghost pill */}
+            {/* Desktop: Войти — ghost */}
             <Link
               href="/auth"
               className="hidden md:inline-flex items-center px-4 py-2 text-sm font-medium rounded-full transition-all duration-200"
@@ -138,7 +135,7 @@ export default function LandingNav() {
               {t("login")}
             </Link>
 
-            {/* Desktop: CTA pill button */}
+            {/* Desktop: CTA pill */}
             <Link
               href="/auth"
               className="hidden md:inline-flex items-center px-5 py-2 text-sm font-semibold rounded-full text-white transition-all duration-200 hover:scale-[1.03] active:scale-95"
@@ -172,18 +169,12 @@ export default function LandingNav() {
               onClick={() => setMobileOpen((v) => !v)}
               aria-label={mobileOpen ? t("closeMenu") : t("openMenu")}
             >
-              <span
-                className="block w-4 h-[1.5px] bg-current transition-all duration-200 origin-center"
-                style={{ transform: mobileOpen ? "rotate(45deg) translate(0, 7px)" : "none" }}
-              />
-              <span
-                className="block w-4 h-[1.5px] bg-current transition-all duration-200"
-                style={{ opacity: mobileOpen ? 0 : 1 }}
-              />
-              <span
-                className="block w-4 h-[1.5px] bg-current transition-all duration-200 origin-center"
-                style={{ transform: mobileOpen ? "rotate(-45deg) translate(0, -7px)" : "none" }}
-              />
+              <span className="block w-4 h-[1.5px] bg-current transition-all duration-200 origin-center"
+                style={{ transform: mobileOpen ? "rotate(45deg) translate(0, 7px)" : "none" }} />
+              <span className="block w-4 h-[1.5px] bg-current transition-all duration-200"
+                style={{ opacity: mobileOpen ? 0 : 1 }} />
+              <span className="block w-4 h-[1.5px] bg-current transition-all duration-200 origin-center"
+                style={{ transform: mobileOpen ? "rotate(-45deg) translate(0, -7px)" : "none" }} />
             </button>
           </div>
         </div>
@@ -194,30 +185,15 @@ export default function LandingNav() {
             className="md:hidden border-t px-5 py-4 flex flex-col gap-1"
             style={{ background: mobileBg, borderColor: mobileBorder }}
           >
-            <a
-              href="#subjects"
-              className="text-sm font-medium py-2.5 border-b"
+            <a href="#subjects" className="text-sm font-medium py-2.5 border-b"
               style={{ color: linkColor, borderColor: mobileBorder }}
-              onClick={() => setMobileOpen(false)}
-            >
-              {t("subjects")}
-            </a>
-            <a
-              href="#how"
-              className="text-sm font-medium py-2.5 border-b"
+              onClick={() => setMobileOpen(false)}>{t("subjects")}</a>
+            <a href="#how" className="text-sm font-medium py-2.5 border-b"
               style={{ color: linkColor, borderColor: mobileBorder }}
-              onClick={() => setMobileOpen(false)}
-            >
-              {t("how")}
-            </a>
-            <Link
-              href="/pricing"
-              className="text-sm font-medium py-2.5 border-b"
+              onClick={() => setMobileOpen(false)}>{t("how")}</a>
+            <Link href="/pricing" className="text-sm font-medium py-2.5 border-b"
               style={{ color: linkColor, borderColor: mobileBorder }}
-              onClick={() => setMobileOpen(false)}
-            >
-              {t("pricing")}
-            </Link>
+              onClick={() => setMobileOpen(false)}>{t("pricing")}</Link>
             <div className="pt-3 flex items-center gap-3">
               <LanguageSwitcher dark={isDark} />
             </div>

@@ -10,6 +10,8 @@ import SubjectGrid from "@/components/SubjectGrid";
 import { LATEST } from "@/lib/changelog";
 import DemoScrollButton from "@/components/DemoScrollButton";
 import LandingNav from "@/components/LandingNav";
+import nextDynamic from "next/dynamic";
+const LandingStarsCanvas = nextDynamic(() => import("@/components/LandingStarsCanvas"), { ssr: false });
 
 export const dynamic = "force-dynamic";
 
@@ -141,16 +143,17 @@ export default async function HomePage() {
       {/* NAV — scroll-aware dark/light */}
       <LandingNav />
 
-      {/* HERO — pulled up behind the nav with negative margin so the dark bg
-           fills the nav area; padding-top pushes inner content back down */}
-      <section className="relative overflow-hidden" style={{ background: "#04060f", marginTop: "-76px", paddingTop: "76px" }}>
-        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+      {/* ── DARK UNIVERSE: nav gap + hero + stats + features in one seamless block ── */}
+      <div className="relative" style={{ background: "#060912", marginTop: "-76px" }}>
+        {/* Star field — spans the entire dark section, reacts to cursor */}
+        <LandingStarsCanvas className="absolute inset-0 w-full h-full z-0" />
+
+      {/* HERO — padding-top compensates for the negative margin */}
+      <section className="relative overflow-hidden" style={{ paddingTop: "76px" }}>
+        <div className="absolute inset-0 pointer-events-none z-[1]" aria-hidden>
           <NeuralNetworkCanvas className="absolute inset-0 w-full h-full" />
         </div>
         <SphereBlobScene spheres={SUBTLE_SPHERES} intensity={0.45} />
-
-        <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none" aria-hidden
-          style={{ background: "linear-gradient(to bottom, transparent, #111827)" }} />
 
         <div className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-12">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -262,8 +265,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* DARK BAND: STATS + FEATURES */}
-      <div style={{ background: "#080d1a" }}>
+      {/* STATS + FEATURES — same dark universe, no separate background */}
+      <div className="relative z-10">
 
         {/* STATS */}
         <section className="text-white pt-14 pb-10 px-6">
@@ -362,15 +365,18 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* SVG Wave transition to light section */}
-        <div aria-hidden style={{ display: "block", lineHeight: 0 }}>
-          <svg viewBox="0 0 1440 72" xmlns="http://www.w3.org/2000/svg"
-            preserveAspectRatio="none" style={{ display: "block", width: "100%", height: "72px" }}>
-            <path d="M0,36 C240,72 480,0 720,36 C960,72 1200,0 1440,36 L1440,72 L0,72 Z"
-              style={{ fill: "var(--bg)" }} />
-          </svg>
-        </div>
       </div>
+
+      {/* Gradient fade: dark universe → light page bg — no hard edge */}
+      <div aria-hidden style={{
+        height: 180,
+        background: "linear-gradient(to bottom, #060912 0%, var(--bg) 100%)",
+        marginTop: -1,
+        position: "relative",
+        zIndex: 1,
+      }} />
+
+      </div>{/* /DARK UNIVERSE */}
 
       {/* SUBJECTS */}
       {/* ── What's new ── */}
