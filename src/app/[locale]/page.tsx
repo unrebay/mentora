@@ -10,6 +10,7 @@ import SubjectGrid from "@/components/SubjectGrid";
 import DemoScrollButton from "@/components/DemoScrollButton";
 import LandingNav from "@/components/LandingNav";
 import BuyProButton from "@/components/BuyProButton";
+import FadeUp from "@/components/FadeUp";
 import nextDynamic from "next/dynamic";
 const LandingStarsCanvas = nextDynamic(() => import("@/components/LandingStarsCanvas"), { ssr: false });
 
@@ -148,10 +149,13 @@ export default async function HomePage() {
         <div className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-12">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5 text-xs font-bold tracking-widest uppercase"
-                style={{ background: "rgba(69,97,232,0.15)", color: "#6B8FFF", border: "1px solid rgba(69,97,232,0.25)" }}>
-                {t("landing.heroBadge")}
-              </div>
+              <FadeUp>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5 text-xs font-bold tracking-widest uppercase"
+                  style={{ background: "rgba(69,97,232,0.15)", color: "#6B8FFF", border: "1px solid rgba(69,97,232,0.25)" }}>
+                  {t("landing.heroBadge")}
+                </div>
+              </FadeUp>
+              <FadeUp delay={0.08}>
               <h1 className="text-[2.1rem] sm:text-[2.8rem] md:text-[3.2rem] lg:text-[4rem] font-black leading-[1.05] mb-6 tracking-tight text-white">
                 {locale === "en" ? (
                   <>
@@ -182,21 +186,27 @@ export default async function HomePage() {
                   </>
                 )}
               </h1>
-              <p className="text-lg text-gray-400 leading-relaxed mb-8 max-w-md">
-                {t("landing.heroSubtitle")}
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Link href="/auth"
-                  className="px-7 py-3.5 font-semibold rounded-full text-white transition-all hover:scale-[1.03] active:scale-95"
-                  style={{ background: "linear-gradient(135deg, #5575FF 0%, #4561E8 50%, #6B4FF0 100%)", boxShadow: "0 4px 20px rgba(69,97,232,0.45), 0 1px 0 rgba(255,255,255,0.2) inset" }}>
-                  {t("landing.heroCtaStart")}
-                </Link>
-                <DemoScrollButton />
-              </div>
+              </FadeUp>
+              <FadeUp delay={0.16}>
+                <p className="text-lg text-gray-400 leading-relaxed mb-8 max-w-md">
+                  {t("landing.heroSubtitle")}
+                </p>
+              </FadeUp>
+              <FadeUp delay={0.24}>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/auth"
+                    className="px-7 py-3.5 font-semibold rounded-full text-white transition-all hover:scale-[1.03] active:scale-95"
+                    style={{ background: "linear-gradient(135deg, #5575FF 0%, #4561E8 50%, #6B4FF0 100%)", boxShadow: "0 4px 20px rgba(69,97,232,0.45), 0 1px 0 rgba(255,255,255,0.2) inset" }}>
+                    {t("landing.heroCtaStart")}
+                  </Link>
+                  <DemoScrollButton />
+                </div>
+              </FadeUp>
             </div>
 
-            <div id="demo" className="flex flex-col gap-4">
+            <FadeUp delay={0.18} className="flex flex-col gap-4" id="demo">
               <DemoChat />
+              <FadeUp delay={0.28} fade>
               <p className="text-sm text-gray-500 text-center leading-relaxed">
                 {locale === "en" ? (
                   <>Ask the question you couldn&apos;t{" "}
@@ -208,18 +218,20 @@ export default async function HomePage() {
                   </>
                 )}
               </p>
-            </div>
+              </FadeUp>
+            </FadeUp>
           </div>
 
           {/* Floating questions — Russian only */}
           {locale === "ru" && (
             <div className="relative z-10 mt-20 max-w-4xl mx-auto px-4">
               <div className="mb-24 space-y-10">
-                <p className="text-xl sm:text-2xl font-semibold text-white w-fit">Подожди, а почему именно 1941-й?</p>
-                <p className="text-base sm:text-lg font-medium text-gray-400 w-fit ml-auto mr-[8%]">Это вообще базово знать или нет?</p>
-                <p className="text-2xl sm:text-3xl font-bold text-white w-fit sm:ml-[14%]">Объясни ещё раз, другими словами.</p>
-                <p className="text-base sm:text-xl font-medium text-gray-500 w-fit ml-[28%] sm:ml-[52%]">А зачем это вообще учить?</p>
+                <FadeUp delay={0}><p className="text-xl sm:text-2xl font-semibold text-white w-fit">Подожди, а почему именно 1941-й?</p></FadeUp>
+                <FadeUp delay={0.1} className="ml-auto mr-[8%] w-fit"><p className="text-base sm:text-lg font-medium text-gray-400">Это вообще базово знать или нет?</p></FadeUp>
+                <FadeUp delay={0.2} className="w-fit sm:ml-[14%]"><p className="text-2xl sm:text-3xl font-bold text-white">Объясни ещё раз, другими словами.</p></FadeUp>
+                <FadeUp delay={0.3} className="w-fit ml-[28%] sm:ml-[52%]"><p className="text-base sm:text-xl font-medium text-gray-500">А зачем это вообще учить?</p></FadeUp>
               </div>
+              <FadeUp delay={0.1}>
               <div className="text-center">
                 <p className="text-xl sm:text-2xl font-semibold text-white mb-1">{t("landing.teacherLine1")}</p>
                 <p className="text-xl sm:text-2xl font-semibold mb-12 text-white">
@@ -233,11 +245,13 @@ export default async function HomePage() {
                   {t("landing.heroCta2")}
                 </Link>
               </div>
+              </FadeUp>
             </div>
           )}
 
           {/* English CTA mid-hero */}
           {locale === "en" && (
+            <FadeUp delay={0.1}>
             <div className="relative z-10 mt-16 text-center">
               <p className="text-xl sm:text-2xl font-semibold text-white mb-1">{t("landing.teacherLine1")}</p>
               <p className="text-xl sm:text-2xl font-semibold mb-8 text-white">
@@ -251,6 +265,7 @@ export default async function HomePage() {
                 {t("landing.heroCtaStart")}
               </Link>
             </div>
+            </FadeUp>
           )}
         </div>
       </section>
@@ -261,8 +276,9 @@ export default async function HomePage() {
         {/* STATS */}
         <section className="text-white pt-14 pb-10 px-6">
           <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-            {STATS_DATA.map((s) => (
-              <div key={s.value} className="flex flex-col items-center text-center gap-3">
+            {STATS_DATA.map((s, i) => (
+              <FadeUp key={s.value} delay={i * 0.08}>
+              <div className="flex flex-col items-center text-center gap-3">
                 <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
                   style={{ background: `${s.color}25`, color: s.color }}>
                   <svg viewBox="0 0 24 24" className="w-6 h-6" dangerouslySetInnerHTML={{ __html: s.icon }} />
@@ -272,6 +288,7 @@ export default async function HomePage() {
                   <div className="text-sm text-gray-400 mt-0.5 leading-tight">{t(`stats.${s.key}`)}</div>
                 </div>
               </div>
+              </FadeUp>
             ))}
           </div>
         </section>
@@ -284,15 +301,17 @@ export default async function HomePage() {
         {/* FEATURES */}
         <section className="text-white px-6 pt-16 pb-10">
           <div className="max-w-6xl mx-auto">
-            <p className="text-xs font-bold tracking-[0.22em] uppercase mb-4 text-center" style={{ color: "rgba(255,255,255,0.35)" }}>
-              {t("landing.featuresLabel")}
-            </p>
-            <h2 className="text-4xl md:text-5xl font-black mb-3 leading-tight text-center text-white">
-              {t("landing.featuresTitle")}
-            </h2>
-            <p className="text-center text-base mb-12 max-w-xl mx-auto" style={{ color: "rgba(255,255,255,0.45)" }}>
-              {t("landing.featuresSubtitle")}
-            </p>
+            <FadeUp>
+              <p className="text-xs font-bold tracking-[0.22em] uppercase mb-4 text-center" style={{ color: "rgba(255,255,255,0.35)" }}>
+                {t("landing.featuresLabel")}
+              </p>
+              <h2 className="text-4xl md:text-5xl font-black mb-3 leading-tight text-center text-white">
+                {t("landing.featuresTitle")}
+              </h2>
+              <p className="text-center text-base mb-12 max-w-xl mx-auto" style={{ color: "rgba(255,255,255,0.45)" }}>
+                {t("landing.featuresSubtitle")}
+              </p>
+            </FadeUp>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {FEATURE_KEYS.map((key, i) => {
                 const color = FEATURE_COLORS[i];
@@ -305,7 +324,8 @@ export default async function HomePage() {
                   : undefined;
                 const isPrice = key === "price";
                 return (
-                  <div key={key}
+                  <FadeUp key={key} delay={i * 0.07}>
+                  <div
                     className="rounded-2xl p-6 flex flex-col gap-4 transition-all duration-200 hover:scale-[1.01]"
                     style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
                     <div className="flex items-start justify-between gap-2">
@@ -349,6 +369,7 @@ export default async function HomePage() {
                       </div>
                     )}
                   </div>
+                  </FadeUp>
                 );
               })}
             </div>
@@ -371,22 +392,25 @@ export default async function HomePage() {
       </div>
 
       <section id="subjects" className="max-w-6xl mx-auto px-6 py-16">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-px flex-1 bg-[var(--border)]" />
-          <span className="text-xs font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase">{t("landing.libraryLabel")}</span>
-          <div className="h-px flex-1 bg-[var(--border)]" />
-        </div>
-        <h2 className="text-4xl md:text-5xl font-black mb-3 leading-tight text-center">
-          {t("landing.subjectsHeading")}
-        </h2>
-        <p className="text-center text-[var(--text-muted)] text-base mb-10">
-          {t("landing.subjectsDesc")}
-        </p>
+        <FadeUp>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-px flex-1 bg-[var(--border)]" />
+            <span className="text-xs font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase">{t("landing.libraryLabel")}</span>
+            <div className="h-px flex-1 bg-[var(--border)]" />
+          </div>
+          <h2 className="text-4xl md:text-5xl font-black mb-3 leading-tight text-center">
+            {t("landing.subjectsHeading")}
+          </h2>
+          <p className="text-center text-[var(--text-muted)] text-base mb-10">
+            {t("landing.subjectsDesc")}
+          </p>
+        </FadeUp>
         <SubjectGrid subjects={subjects} />
       </section>
 
       {/* HOW TO LEARN */}
       <section className="max-w-6xl mx-auto px-6 py-16">
+        <FadeUp>
         <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-3xl p-5 sm:p-8 md:p-10">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
@@ -440,11 +464,13 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
+        </FadeUp>
       </section>
 
       {/* ── PRICING ─────────────────────────────────────────────────── */}
       <section id="pricing" className="max-w-6xl mx-auto px-6 py-16 scroll-mt-24">
         {/* Section header */}
+        <FadeUp>
         <div className="text-center mb-12">
           <p className="text-[11px] font-bold tracking-[0.15em] uppercase mb-3" style={{ color: "var(--brand)" }}>
             {t("nav.pricing")}
@@ -460,6 +486,7 @@ export default async function HomePage() {
           </h2>
           <p className="text-base" style={{ color: "var(--text-secondary)" }}>{t("pricing.hero.subtitle")}</p>
         </div>
+        </FadeUp>
 
         {/* Promo banner — Russian only */}
         {locale === "ru" && (
@@ -490,7 +517,8 @@ export default async function HomePage() {
           return (
             <div className="grid md:grid-cols-3 gap-6 md:gap-4 items-stretch">
               {/* FREE */}
-              <div className="rounded-2xl p-7 flex flex-col border"
+              <FadeUp delay={0}>
+              <div className="rounded-2xl p-7 flex flex-col border h-full"
                 style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
                 <div className="mb-6">
                   <p className="text-[11px] font-bold t-muted tracking-[0.15em] uppercase mb-4">{t("pricing.free.name")}</p>
@@ -509,8 +537,10 @@ export default async function HomePage() {
                   ))}
                 </ul>
               </div>
+              </FadeUp>
 
               {/* PRO */}
+              <FadeUp delay={0.12}>
               <div className="relative rounded-[17px] p-[1.5px] flex flex-col mt-3 md:mt-0"
                 style={{ background: "linear-gradient(145deg, #6B8FFF, #4561E8 45%, #9F7AFF)", boxShadow: "0 8px 40px rgba(69,97,232,0.25), 0 2px 8px rgba(69,97,232,0.15)" }}>
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
@@ -546,8 +576,10 @@ export default async function HomePage() {
                   </ul>
                 </div>
               </div>
+              </FadeUp>
 
               {/* ULTRA */}
+              <FadeUp delay={0.24}>
               <div className="relative flex flex-col mt-3 md:mt-0">
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap">
                   <span className="text-white text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase"
@@ -604,11 +636,13 @@ export default async function HomePage() {
                   </ul>
                 </div>
               </div>
+              </FadeUp>
             </div>
           );
         })()}
 
         {/* Ultima disclaimer */}
+        <FadeUp delay={0.1} fade>
         <p className="mt-5 text-center text-xs leading-relaxed max-w-xl mx-auto" style={{ color: "var(--text-muted)", opacity: 0.6 }}>
           <svg viewBox="0 0 12 12" width="9" height="9" style={{ display: "inline", verticalAlign: "middle", marginRight: 4, marginTop: -1 }}>
             <path d="M6 0.5L7.1 4.1L10.5 2.5L8.9 5.9L12.5 6L8.9 6.1L10.5 9.5L7.1 7.9L6 11.5L4.9 7.9L1.5 9.5L3.1 6.1L-0.5 6L3.1 5.9L1.5 2.5L4.9 4.1Z"
@@ -618,12 +652,14 @@ export default async function HomePage() {
             ? "Тариф Ultima сейчас включает все возможности Pro. Функции распознавания фото, презентаций и аудио находятся в активной разработке и будут добавлены в ближайшие месяцы."
             : "Ultima currently includes all Pro features. Photo recognition, presentation and audio generation are in active development and will be available soon."}
         </p>
+        </FadeUp>
       </section>
 
       {/* ЕГЭ/ОГЭ COMING SOON — Russian only */}
       {locale === "ru" && (
         <section className="px-6 py-16">
           <div className="max-w-6xl mx-auto">
+            <FadeUp>
             <div className="relative overflow-hidden rounded-3xl bg-gray-900 dark:bg-[#0a0a18] text-white p-8 md:p-12">
               <div className="absolute inset-0 pointer-events-none" aria-hidden>
                 <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 80% 50%, #4561E820 0%, transparent 60%)" }} />
@@ -662,6 +698,7 @@ export default async function HomePage() {
                 </div>
               </div>
             </div>
+            </FadeUp>
           </div>
         </section>
       )}
@@ -669,6 +706,7 @@ export default async function HomePage() {
       {/* HOW IT WORKS */}
       <section id="how" className="px-6 py-20" style={{ background: "var(--bg-secondary)" }}>
         <div className="max-w-6xl mx-auto">
+          <FadeUp>
           <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">{t("landing.howLabel")}</div>
           <h2 className="text-4xl font-bold mb-3 leading-tight">
             {t("landing.howHeading1")}<br />
@@ -681,9 +719,11 @@ export default async function HomePage() {
           <p className="text-[var(--text-secondary)] mb-12 max-w-lg">
             {t("landing.howIntroSub")}
           </p>
+          </FadeUp>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
             {STEP_NUMS.map((n, i) => (
-              <div key={n} className="bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border)] relative">
+              <FadeUp key={n} delay={i * 0.07}>
+              <div className="bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border)] relative h-full">
                 {i === STEP_BADGE_IDX && (
                   <span className="absolute top-3 right-3 text-[9px] font-bold bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 px-1.5 py-0.5 rounded">{t("landing.stepBadge")}</span>
                 )}
@@ -691,6 +731,7 @@ export default async function HomePage() {
                 <div className="font-semibold text-sm mb-1.5 text-[var(--text)]">{t(`steps.${n}.title`)}</div>
                 <div className="text-xs text-[var(--text-secondary)] leading-relaxed">{t(`steps.${n}.desc`)}</div>
               </div>
+              </FadeUp>
             ))}
           </div>
         </div>
@@ -698,15 +739,18 @@ export default async function HomePage() {
 
       {/* TESTIMONIALS */}
       <section className="max-w-6xl mx-auto px-6 py-20">
+        <FadeUp>
         <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">{t("landing.testimonialsLabel")}</div>
         <h2 className="text-4xl font-bold mb-3 leading-tight">{t("landing.testimonialsTitle")}</h2>
         <p className="text-[var(--text-secondary)] mb-10 text-lg">{t("landing.testimonialsSub")}</p>
+        </FadeUp>
         <div className="grid md:grid-cols-3 gap-6">
           {TESTIMONIALS.map((testimonial, i) => {
             const accentColors = ["#4561E8", "#FF7A00", "#10B981"];
             const accent = accentColors[i % accentColors.length];
             return (
-              <div key={testimonial.name} className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col gap-4 relative overflow-hidden">
+              <FadeUp key={testimonial.name} delay={i * 0.1}>
+              <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col gap-4 relative overflow-hidden h-full">
                 <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style={{ background: accent }} />
                 <div className="text-5xl leading-none font-black select-none -mt-1 -mb-2" style={{ color: accent, opacity: 0.2 }}>&quot;</div>
                 <div className="flex gap-0.5">
@@ -729,6 +773,7 @@ export default async function HomePage() {
                   </div>
                 </div>
               </div>
+              </FadeUp>
             );
           })}
         </div>
@@ -752,7 +797,10 @@ export default async function HomePage() {
             style={{ background: "radial-gradient(ellipse at 50% 120%, #4561E840 0%, transparent 70%)" }} />
         </div>
         <div className="relative z-10">
+          <FadeUp fade delay={0}>
           <p className="text-gray-500 text-xs font-semibold tracking-[0.2em] uppercase mb-8">{t("landing.ctaTagline")}</p>
+          </FadeUp>
+          <FadeUp delay={0.08}>
           <h2 className="text-3xl sm:text-5xl font-bold mb-5 leading-tight">
             {t("landing.ctaHero1")}<br />
             {locale === "en" ? (
@@ -761,6 +809,8 @@ export default async function HomePage() {
               <>как тебе{" "}<span className="text-[#4561E8] italic">удобно.</span></>
             )}
           </h2>
+          </FadeUp>
+          <FadeUp delay={0.16}>
           <p className="text-gray-400 text-lg mb-12 max-w-md mx-auto leading-relaxed">
             {t("landing.ctaLine1")}<br />
             {t("landing.ctaLine2")}
@@ -771,6 +821,7 @@ export default async function HomePage() {
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </Link>
           <p className="text-gray-600 text-xs mt-5">{t("landing.ctaNoCard")}</p>
+          </FadeUp>
         </div>
       </section>
 
