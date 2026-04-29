@@ -378,7 +378,7 @@ export default function AboutPage() {
                       <p className="text-sm leading-relaxed mb-2" style={{ color: "var(--text-secondary)" }}>{tip.body}</p>
                       <div className="inline-flex items-start gap-1.5 px-3 py-1.5 rounded-xl text-sm italic"
                         style={{ background: "var(--bg-secondary)", color: "var(--text-muted)", borderLeft: `2px solid ${accent}40` }}>
-                        <span className="shrink-0 font-semibold not-italic text-xs" style={{ color: accent }}>→</span>
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         {tip.example}
                       </div>
                     </div>

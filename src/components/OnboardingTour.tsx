@@ -528,7 +528,7 @@ export default function OnboardingTour() {
                     color: "white", cursor: "pointer", fontSize: 12.5, fontWeight: 700,
                     boxShadow: "0 4px 16px rgba(69,97,232,0.4)",
                   }}
-                >{isLast ? "Понятно!" : "Далее →"}</button>
+                >{isLast ? "Понятно!" : <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>Далее <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>}</button>
               </div>
             </div>
           </div>

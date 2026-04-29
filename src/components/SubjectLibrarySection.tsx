@@ -236,8 +236,9 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                       )}
                       <Link href={`/learn/${subject.id}`}
                         onClick={e => e.stopPropagation()}
-                        className="inline-flex text-xs font-semibold text-white/90 hover:text-white transition-colors">
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-white/90 hover:text-white transition-colors">
                         {xp > 0 ? t("continue") : t("start")}
+                        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                       </Link>
                     </div>
                   </div>
@@ -326,9 +327,10 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                     )}
                     <Link href={`/learn/${subject.id}`}
                       onClick={e => e.stopPropagation()}
-                      className="inline-flex text-xs font-semibold transition-colors hover:opacity-80"
+                      className="inline-flex items-center gap-1 text-xs font-semibold transition-colors hover:opacity-80"
                       style={{ color }}>
                       {xp > 0 ? t("continue") : t("start")}
+                      <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </Link>
                   </div>
                 </div>

@@ -398,8 +398,9 @@ export default async function HomePage() {
                   <>3 приёма, которые делают<br /><span className="text-brand-600 dark:text-brand-500 italic">учёбу эффективной</span></>
                 )}
               </h2>
-              <Link href="/guide" className="inline-flex items-center gap-2 text-brand-600 dark:text-brand-500 text-sm font-medium hover:underline">
+              <Link href="/guide" className="inline-flex items-center gap-1.5 text-brand-600 dark:text-brand-500 text-sm font-medium hover:underline">
                 {t("landing.howLearnGuide")}
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>
             </div>
             <div className="space-y-4">
@@ -756,6 +757,7 @@ export default async function HomePage() {
           <Link href="/auth"
             className="inline-flex items-center gap-2 px-8 py-4 bg-white text-gray-900 font-semibold rounded-full hover:bg-gray-100 transition-all hover:scale-[1.03] active:scale-95 text-sm">
             {t("landing.ctaButton")}
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </Link>
           <p className="text-gray-600 text-xs mt-5">{t("landing.ctaNoCard")}</p>
         </div>

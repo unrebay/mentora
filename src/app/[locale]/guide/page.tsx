@@ -66,8 +66,9 @@ export default async function GuidePage() {
           <Link href="/"><Logo size="sm" fontSize="1.44rem" /></Link>
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <Link href="/auth" className="btn-glow px-4 py-2 text-sm font-semibold rounded-xl text-white">
+            <Link href="/auth" className="btn-glow inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl text-white">
               {t("startFreeBtn")}
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </Link>
           </div>
         </div>
@@ -132,7 +133,7 @@ export default async function GuidePage() {
                     <p className="leading-relaxed mb-3 text-sm" style={{ color: "var(--text-secondary)" }}>{t(`${key}.body`)}</p>
                     <div className="inline-flex items-start gap-2 px-3 py-2 rounded-xl text-sm italic"
                       style={{ background: "var(--bg-secondary)", color: "var(--text-muted)", borderLeft: `2px solid ${meta.accent}40` }}>
-                      <span className="shrink-0 font-semibold not-italic text-xs" style={{ color: meta.accent }}>→</span>
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke={meta.accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                       {t(`${key}.example`)}
                     </div>
                   </div>
@@ -173,6 +174,7 @@ export default async function GuidePage() {
         <div className="text-center">
           <Link href="/auth" className="btn-glow inline-flex items-center gap-2 px-8 py-4 font-semibold rounded-xl text-white text-base">
             {t("ctaBtn")}
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </Link>
           <p className="text-xs mt-3" style={{ color: "var(--text-muted)" }}>{t("ctaNote")}</p>
         </div>
@@ -192,6 +194,7 @@ export default async function GuidePage() {
           </p>
           <Link href="/auth" className="btn-glow inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white">
             {t("footerCtaBtn")}
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </Link>
         </div>
       </section>

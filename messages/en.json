@@ -6,7 +6,7 @@
     "login": "Sign in",
     "tryFree": "Try for free",
     "tryFreeShort": "Sign in",
-    "dashboard": "Dashboard →",
+    "dashboard": "Dashboard",
     "langSwitch": "RU",
     "closeMenu": "Close menu",
     "openMenu": "Open menu"
@@ -33,7 +33,7 @@
     "newBadge": "New",
     "howLearnTitle": "How to learn",
     "howLearnSubtitle": "3 techniques that make learning effective",
-    "howLearnGuide": "Full guide →",
+    "howLearnGuide": "Full guide",
     "tip1Title": "Didn't get it? Ask for a different explanation",
     "tip1Desc": "'Explain it like I'm a beginner' — Mentora will rephrase the answer",
     "tip2Title": "Type 'quiz' — get 5 questions",
@@ -64,7 +64,7 @@
     "statsLabel": "By the numbers",
     "ctaTitle": "Ready to start?",
     "ctaSubtitle": "First 10 messages every 8 hours — free. No card required.",
-    "ctaButton": "Start for free →",
+    "ctaButton": "Start for free",
     "footerRights": "© 2024–2025 Mentora. All rights reserved.",
     "footerPrivacy": "Privacy",
     "footerTerms": "Terms",
@@ -287,7 +287,7 @@
     "footerCtaTitle2": "left off.",
     "footerCtaSub1": "No subscription, no card.",
     "footerCtaSub2": "20 messages per day — free forever.",
-    "footerCtaBtn": "Create free account →"
+    "footerCtaBtn": "Create free account"
   },
   "auth": {
     "signIn": "Sign in",
@@ -328,8 +328,8 @@
     "createFreeAccount": "Create a free account",
     "noCard": "No card · No commitment",
     "continueLearn": "Sign in to continue learning",
-    "createAccountBtn": "Create account →",
-    "signInBtn": "Sign in →",
+    "createAccountBtn": "Create account",
+    "signInBtn": "Sign in",
     "noAccount": "Don't have an account?",
     "signUpFreeLink": "Sign up for free",
     "hasAccount": "Already have an account?",
@@ -387,7 +387,7 @@
     "streakBannerDesc": "Learn {n} more days in a row and get 3 days Pro for free.",
     "trialUsedTitle": "Pro trial used",
     "trialUsedDesc": "Liked it?",
-    "trialUsedCta": "Subscribe →"
+    "trialUsedCta": "Subscribe"
   },
   "common": {
     "learnMore": "Learn more",
@@ -409,7 +409,7 @@
     "statBadges": "Achievements",
     "emptyTitle": "No data yet",
     "emptyDesc": "Start learning — your progress will appear here",
-    "emptyBtn": "Go to subjects →",
+    "emptyBtn": "Go to subjects",
     "weeklyActivity": "Activity this week",
     "qualityPerfect": "· perfect",
     "qualityGreat": "· great",
@@ -576,13 +576,13 @@
       "limitReachedTitle": "Daily limit reached",
       "limitReachedDesc": "You have used all {n} free messages for today.",
       "limitReset": "Limit resets at midnight UTC.",
-      "upgradeBtn": "Upgrade to Pro →",
+      "upgradeBtn": "Upgrade to Pro",
       "defaultHint": "Ask anything — I will help you understand",
       "defaultQ1": "Where to start studying?",
       "defaultQ2": "Explain the basic concepts",
       "defaultQ3": "Give me a study plan"
     },
-    "softBannerCta": "Sign up — 10 per 8 hrs free →",
+    "softBannerCta": "Sign up — 10 per 8 hrs free",
     "disclaimer": "10 messages / 8 hours · no card · free"
   },
   "subjectsSection": {
@@ -590,8 +590,8 @@
     "suggest": "Suggest a subject",
     "add": "Add subject",
     "soon": "SOON",
-    "start": "Start →",
-    "continue": "Continue →",
+    "start": "Start",
+    "continue": "Continue",
     "inARow": "in a row",
     "verifiedTitle": "✶ Verified",
     "verifiedDesc": "Full course with knowledge base and regular updates",
@@ -657,9 +657,9 @@
       "Roman Empire"
     ],
     "softBannerRemaining": "{n} messages left in demo",
-    "softBannerCta": "Sign up — 20 per day free →",
+    "softBannerCta": "Sign up — 20 per day free",
     "hardLimitTitle": "Demo limit reached 🚀",
-    "hardLimitCta": "Continue for free →",
+    "hardLimitCta": "Continue for free",
     "disclaimer": "20 messages per day · no card · free",
     "somethingWentWrong": "Something went wrong. Please try again.",
     "inputAriaClose": "Close"
@@ -680,10 +680,10 @@
     "ultraActive": "✓ Ultra is active",
     "proActive": "✓ Subscription active",
     "loading": "Redirecting to checkout...",
-    "getUltraAnnual": "Get Ultra annual →",
-    "getAnnual": "Get annual plan →",
-    "getUltra": "Get Ultra →",
-    "getPro": "Try Pro →",
+    "getUltraAnnual": "Get Ultra annual",
+    "getAnnual": "Get annual plan",
+    "getUltra": "Get Ultra",
+    "getPro": "Try Pro",
     "errorGeneric": "Something went wrong. Please try again.",
     "errorConnection": "Connection error. Please try again."
   },
@@ -692,7 +692,7 @@
     "proDays": "3 days of Pro",
     "free": "free — already activated",
     "desc": "Unlimited messages unlocked for 3 days. Study without limits — you earned it.",
-    "cta": "Continue learning →",
+    "cta": "Continue learning",
     "dismiss": "tap anywhere to close"
   },
   "whatsNew": {
@@ -727,7 +727,7 @@
     "soonTimer": "{days} d. {hours} h.",
     "soonTimerHoursOnly": "{hours} h.",
     "soonCta": "the activation button will appear right here.",
-    "soonBtn": "June 1 →",
+    "soonBtn": "June 1",
     "errorFallback": "Something went wrong"
   },
   "analytics": {
@@ -773,9 +773,9 @@
   "onboarding": {
     "step": "Step {step} of {total}",
     "saving": "Saving...",
-    "next": "Next →",
-    "start": "Start learning →",
-    "skip": "Skip →",
+    "next": "Next",
+    "start": "Start learning",
+    "skip": "Skip",
     "wait": "Please wait...",
     "errorSave": "Failed to save. Please try again.",
     "errorSkip": "Failed to skip. Please try again.",
@@ -870,15 +870,15 @@
     "badge": "How to learn",
     "heroTitle": "Guide to",
     "heroSubtitle": "7 techniques that will help you learn more effectively",
-    "startFreeBtn": "Start for free →",
+    "startFreeBtn": "Start for free",
     "limitTitle": "About the free tier limit",
     "limitDesc": "Free: 10 messages in an 8-hour window — no card required, forever.",
-    "limitLink": "Learn about Pro and Ultra →",
-    "ctaBtn": "Start learning for free →",
+    "limitLink": "Learn about Pro and Ultra",
+    "ctaBtn": "Start learning for free",
     "ctaNote": "No card. No commitments.",
     "footerCtaTitle": "Try it right now",
     "footerCtaDesc": "13 subjects. No VPN. No card.",
-    "footerCtaBtn": "Start for free →",
+    "footerCtaBtn": "Start for free",
     "footerPrivacy": "Privacy",
     "footerPricing": "Pricing",
     "tip1": {
@@ -1152,6 +1152,6 @@
     "contactBtn": "Write to the team",
     "ctaNote": "Questions, partnerships, feedback",
     "supportBtn": "Write to support",
-    "backBtn": "Back to learning →"
+    "backBtn": "Back to learning"
   }
 }

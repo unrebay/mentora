@@ -709,7 +709,10 @@ export default function KnowledgeGraph({ className = "", userProgress = [] }: Pr
               <a href={`/learn/${panelNode.id}`}
                 className="block w-full text-center py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-98"
                 style={{ background: `linear-gradient(135deg, ${pal.core}, ${pal.core}bb)` }}>
-                {panelNode.status === "active" || panelNode.status === "active_full" ? "Продолжить учёбу →" : "Начать изучение →"}
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  {panelNode.status === "active" || panelNode.status === "active_full" ? "Продолжить учёбу" : "Начать изучение"}
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </span>
               </a>
             </div>
           </div>

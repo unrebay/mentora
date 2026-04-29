@@ -59,7 +59,7 @@ export default function LaunchBanner() {
           className="text-xs font-semibold px-3 py-1.5 rounded-xl transition-all hover:opacity-80"
           style={{ background: "rgba(69,97,232,0.15)", color: "var(--brand)", border: "1px solid rgba(69,97,232,0.2)" }}
         >
-          Реф. ссылка →
+          Реф. ссылка <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline", verticalAlign: "middle" }}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
         <button
           onClick={dismiss}

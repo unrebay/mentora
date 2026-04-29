@@ -164,7 +164,7 @@ export default function NotFound() {
           className="text-sm text-white/40 hover:text-white/70 transition-colors"
           style={{ pointerEvents: "auto" }}
         >
-          Или вернись в библиотеку →
+          Или вернись в библиотеку <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline", verticalAlign: "middle" }}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </Link>
       </div>
     </div>

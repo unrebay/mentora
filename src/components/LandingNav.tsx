@@ -143,7 +143,7 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
                 boxShadow: "0 2px 12px rgba(69,97,232,0.45), 0 1px 0 rgba(255,255,255,0.2) inset",
               }}
             >
-              {isLoggedIn ? t("dashboard") : t("tryFree")}
+              {isLoggedIn ? <span className="inline-flex items-center gap-1.5">{t("dashboard")}<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span> : t("tryFree")}
             </Link>
 
             {/* Mobile: CTA pill (compact) */}
@@ -155,7 +155,7 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
                 boxShadow: "0 2px 10px rgba(69,97,232,0.4)",
               }}
             >
-              {isLoggedIn ? t("dashboard") : t("tryFreeShort")}
+              {isLoggedIn ? <span className="inline-flex items-center gap-1.5">{t("dashboard")}<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span> : t("tryFreeShort")}
             </Link>
 
             {/* Mobile: hamburger */}
