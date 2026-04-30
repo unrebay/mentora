@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import DashboardNav from "@/components/DashboardNav";
 import OnboardingTour from "@/components/OnboardingTour";
 import { TourButtonMobile } from "@/components/TourButton";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 // Pages with a forced dark background — nav should always be dark on these
 const DARK_PAGES: string[] = [];

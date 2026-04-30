@@ -26,14 +26,23 @@ export const metadata: Metadata = {
     "физика онлайн", "химия онлайн", "биология онлайн", "английский с AI",
     "образование для взрослых", "lifelong learning", "mentora", "mentora.su",
   ],
-  alternates: { canonical: "https://mentora.su" },
+  alternates: {
+    canonical: "https://mentora.su/ru",
+    languages: { "ru": "https://mentora.su/ru", "en": "https://mentora.su/en", "x-default": "https://mentora.su/ru" },
+  },
   openGraph: {
     type: "website",
-    url: "https://mentora.su",
+    url: "https://mentora.su/ru",
     title: "Mentora — новый вид образования. 17 наук с AI-ментором",
     description:
       "История, математика, физика, химия, биология, психология, философия и ещё 10 наук. Живой диалог вместо учебника — персонально, для любого возраста, бесплатно.",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Mentora AI-репетитор" }],
+    images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "Mentora AI-репетитор" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mentora — 17 наук с AI-ментором",
+    description: "Живой диалог вместо учебника. Персонально, для любого возраста, бесплатно.",
+    images: ["/opengraph-image.png"],
   },
 };
 
