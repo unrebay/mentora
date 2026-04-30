@@ -508,7 +508,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const subjColor = subjectColor(subject);
 
   return (
-    <div className="flex flex-col" style={{ height:"100dvh", background:"var(--chat-bg)" }}>
+    <div className="flex flex-col" style={{ height:"100dvh", background:"var(--chat-bg)", position:"relative" }}>
 
       {/* ── Header ── liquid glass ───────────────────────────────────────── */}
       <header
@@ -580,7 +580,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       </header>
 
       {/* ── Messages ─────────────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4" style={{ scrollbarWidth:"thin" }}>
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4" style={{ scrollbarWidth:"thin", paddingBottom:"80px" }}>
 
         {isEmpty && (
           <div className="relative text-center pt-10">
@@ -689,19 +689,24 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         <div ref={bottomRef} />
       </div>
 
-      {/* ── Input area ── transparent strip, glass only on elements ─────── */}
+      {/* ── Input area ── absolute overlay, glass levitates above chat ──── */}
       <div
-        className="shrink-0"
         style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
           background: "transparent",
+          pointerEvents: "none",
           paddingTop: "10px",
           paddingLeft: "12px",
           paddingRight: "12px",
           paddingBottom: "max(12px, env(safe-area-inset-bottom))",
+          zIndex: 10,
         }}
       >
         {limitReached ? (
-          <div className="rounded-2xl p-5 text-center space-y-3" style={{ background:"var(--chat-msg-bg)", border:"1px solid var(--chat-msg-border)" }}>
+          <div className="rounded-2xl p-5 text-center space-y-3" style={{ background:"var(--chat-msg-bg)", border:"1px solid var(--chat-msg-border)", pointerEvents:"all" }}>
             <div>
               <p className="text-sm font-semibold mb-0.5" style={{ color:"var(--text)" }}>{tChat("limit.title")}</p>
               <p className="text-xs" style={{ color:"var(--text-muted)" }}>{tChat("limit.resetsAt")}</p>
@@ -721,7 +726,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             </div>
           </div>
         ) : (
-          <>
+          <div style={{ pointerEvents:"all" }}>
             {/* Native hint */}
             {subject==="english" && showNativeHint && (
               <div className="mb-2 mx-auto max-w-xs rounded-2xl px-4 py-3 flex items-start gap-2" style={{
@@ -767,7 +772,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             )}
 
             {/* Telegram-style input row: 3 separate glass elements */}
-            <form onSubmit={sendMessage} className="flex gap-2 items-end">
+            <form onSubmit={sendMessage} className="flex gap-2 items-end" style={{ pointerEvents:"all" }}>
               {isUltima && <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />}
 
               {/* 1. Camera — standalone glass circle (Ultima only) */}
@@ -859,7 +864,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                 </svg>
               </button>
             </form>
-          </>
+          </div>
         )}
       </div>
 
