@@ -305,60 +305,70 @@ function AuthPageContent() {
       </div>
 
       {/* ══════════════════════════════════════════════
-          RIGHT PANEL — Form
+          RIGHT PANEL — Form (always dark glass)
       ══════════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-10"
-        style={{ background: "var(--bg)" }}>
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 relative"
+        style={{ background: "#07091a" }}>
 
-        {/* Mobile logo (hidden on lg+) */}
-        <div className="lg:hidden mb-8 w-full max-w-md">
-          <Logo size="md" href="/" />
+        {/* Subtle right-panel glow */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute" style={{
+            top: "-20%", right: "-10%", width: 400, height: 400, borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(69,97,232,0.12) 0%, transparent 65%)",
+            filter: "blur(40px)",
+          }} />
         </div>
 
-        <div className="w-full max-w-md animate-fade-in-up">
+        {/* Mobile logo (hidden on lg+) */}
+        <div className="lg:hidden mb-8 w-full max-w-md relative z-10">
+          <Logo size="md" href="/" textColor="white" />
+        </div>
+
+        <div className="w-full max-w-md animate-fade-in-up relative z-10">
 
           {/* ── Mode toggle pill ── */}
           <div className="relative flex p-1 rounded-2xl mb-6"
-            style={{ background: "var(--bg-secondary)" }}>
+            style={{ background: "rgba(255,255,255,0.06)" }}>
             {/* Sliding indicator */}
             <div
               className="absolute top-1 bottom-1 rounded-xl transition-all duration-200"
               style={{
                 width: "calc(50% - 4px)",
                 left: isSignup ? "calc(50%)" : "4px",
-                background: "var(--bg-card)",
-                boxShadow: "0 1px 5px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)",
+                background: "rgba(255,255,255,0.1)",
+                boxShadow: "0 1px 5px rgba(0,0,0,0.3)",
               }}
             />
             <button
               onClick={() => switchMode("signin")}
               className="relative flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors z-10"
-              style={{ color: !isSignup ? "var(--text)" : "var(--text-muted)" }}
+              style={{ color: !isSignup ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.35)" }}
             >
               {t("signIn")}
             </button>
             <button
               onClick={() => switchMode("signup")}
               className="relative flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors z-10"
-              style={{ color: isSignup ? "var(--text)" : "var(--text-muted)" }}
+              style={{ color: isSignup ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.35)" }}
             >
               {t("signUpTab")}
             </button>
           </div>
 
           {/* ── Auth card ── */}
-          <div className="rounded-3xl border p-7 space-y-4"
+          <div className="rounded-3xl p-7 space-y-4"
             style={{
-              background: "var(--bg-card)",
-              borderColor: "var(--border)",
-              boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06)",
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.09)",
+              backdropFilter: "blur(20px)",
+              boxShadow: "0 8px 40px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.2)",
             }}>
 
             <div className="mb-1">
-              <h1 className="text-xl font-bold" style={{ color: "var(--text)" }}>
+              <h1 className="text-xl font-bold text-white">
                 {isSignup ? t("createFreeAccount") : t("welcomeBack")}
               </h1>
-              <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
+              <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.45)" }}>
                 {isSignup ? t("noCard") : t("continueLearn")}
               </p>
             </div>
@@ -370,29 +380,29 @@ function AuthPageContent() {
               disabled={oauthLoading !== null}
               className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-60"
               style={{
-                background: "var(--bg-secondary)",
-                border: "1px solid var(--border)",
-                color: "var(--text-secondary)",
+                background: "rgba(255,255,255,0.07)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                color: "rgba(255,255,255,0.75)",
               }}
             >
               {oauthLoading === "google" ? (
                 <span className="w-4 h-4 border-2 rounded-full animate-spin"
-                  style={{ borderColor: "var(--border)", borderTopColor: "var(--text-secondary)" }} />
+                  style={{ borderColor: "rgba(255,255,255,0.2)", borderTopColor: "rgba(255,255,255,0.7)" }} />
               ) : <GoogleIcon />}
               {t("continueGoogle")}
             </button>
 
             {/* ── Divider ── */}
             <div className="relative flex items-center gap-3 py-1">
-              <div className="flex-1 border-t" style={{ borderColor: "var(--border-light)" }} />
-              <span className="text-xs" style={{ color: "var(--text-muted)" }}>{t("orEmail")}</span>
-              <div className="flex-1 border-t" style={{ borderColor: "var(--border-light)" }} />
+              <div className="flex-1 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }} />
+              <span className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>{t("orEmail")}</span>
+              <div className="flex-1 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }} />
             </div>
 
             {/* ── Email / Password form ── */}
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-muted)" }}>
+                <label className="block text-xs font-semibold mb-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>
                   Email
                 </label>
                 <input
@@ -401,13 +411,17 @@ function AuthPageContent() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoComplete="email"
-                  className="w-full px-4 py-3 rounded-xl border text-sm transition focus:outline-none focus:ring-2 focus:ring-[#4561E8]"
-                  style={{ background: "var(--bg-secondary)", borderColor: "var(--border)", color: "var(--text)" }}
+                  className="w-full px-4 py-3 rounded-xl text-sm transition focus:outline-none focus:ring-2 focus:ring-[#4561E8] placeholder:text-white/25"
+                  style={{
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    color: "rgba(255,255,255,0.9)",
+                  }}
                   placeholder="you@example.com"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-muted)" }}>
+                <label className="block text-xs font-semibold mb-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>
                   {t("password")}
                 </label>
                 <input
@@ -417,8 +431,12 @@ function AuthPageContent() {
                   required
                   minLength={6}
                   autoComplete={isSignup ? "new-password" : "current-password"}
-                  className="w-full px-4 py-3 rounded-xl border text-sm transition focus:outline-none focus:ring-2 focus:ring-[#4561E8]"
-                  style={{ background: "var(--bg-secondary)", borderColor: "var(--border)", color: "var(--text)" }}
+                  className="w-full px-4 py-3 rounded-xl text-sm transition focus:outline-none focus:ring-2 focus:ring-[#4561E8] placeholder:text-white/25"
+                  style={{
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    color: "rgba(255,255,255,0.9)",
+                  }}
                   placeholder={isSignup ? t("passwordPlaceholder") : t("passwordPlaceholderSignIn")}
                 />
               </div>
@@ -472,7 +490,7 @@ function AuthPageContent() {
             <div>
               {tgAvailable === false ? (
                 <div className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-xs"
-                  style={{ background: "var(--bg-secondary)", border: "1px solid var(--border-light)", color: "var(--text-muted)" }}>
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.35)" }}>
                   <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0 opacity-50" fill="currentColor">
                     <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/>
                   </svg>
@@ -500,18 +518,18 @@ function AuthPageContent() {
                     }
                 }}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-60"
-                  style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}
                 >
                   {tgLoading ? (
                     <>
                       <span className="w-4 h-4 border-2 rounded-full animate-spin"
-                        style={{ borderColor: "var(--border)", borderTopColor: "var(--text-secondary)" }} />
+                        style={{ borderColor: "rgba(255,255,255,0.15)", borderTopColor: "rgba(255,255,255,0.7)" }} />
                       {t("signingInTelegram")}
                     </>
                   ) : tgAvailable === null ? (
                     <>
                       <span className="w-4 h-4 border-2 rounded-full animate-spin"
-                        style={{ borderColor: "var(--border-light)", borderTopColor: "var(--text-muted)" }} />
+                        style={{ borderColor: "rgba(255,255,255,0.1)", borderTopColor: "rgba(255,255,255,0.4)" }} />
                       {t("checkingTelegram")}
                     </>
                   ) : (
@@ -529,18 +547,18 @@ function AuthPageContent() {
           </div>{/* /auth card */}
 
           {/* Switch mode link */}
-          <p className="text-center text-sm mt-5" style={{ color: "var(--text-muted)" }}>
+          <p className="text-center text-sm mt-5" style={{ color: "rgba(255,255,255,0.35)" }}>
             {isSignup ? (
               <>{t("hasAccount")}{" "}
                 <button onClick={() => switchMode("signin")}
-                  className="font-semibold hover:underline" style={{ color: "var(--brand)" }}>
+                  className="font-semibold hover:underline" style={{ color: "#6B8FFF" }}>
                   {t("signIn")}
                 </button>
               </>
             ) : (
               <>{t("noAccount")}{" "}
                 <button onClick={() => switchMode("signup")}
-                  className="font-semibold hover:underline" style={{ color: "var(--brand)" }}>
+                  className="font-semibold hover:underline" style={{ color: "#6B8FFF" }}>
                   {t("signUpFreeLink")}
                 </button>
               </>
