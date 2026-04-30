@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Logo from "@/components/Logo";
-import ThemeToggle from "@/components/ThemeToggle";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -57,15 +56,14 @@ export default async function GuidePage() {
   const t = await getTranslations("guide");
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
+    <div className="min-h-screen" style={{ background: "#04060f", color: "#fff" }}>
 
       {/* NAV */}
       <nav className="sticky top-0 z-50 border-b backdrop-blur-md"
-        style={{ background: "var(--bg-nav)", borderColor: "var(--border-light)" }}>
+        style={{ background: "rgba(4,6,15,0.85)", borderColor: "rgba(255,255,255,0.06)" }}>
         <div className="max-w-4xl mx-auto flex items-center justify-between px-6 py-4">
           <Link href="/"><Logo size="sm" fontSize="1.44rem" /></Link>
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <Link href="/auth" className="btn-glow inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl text-white">
               {t("startFreeBtn")}
               <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -81,7 +79,7 @@ export default async function GuidePage() {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6 text-xs font-bold tracking-widest uppercase"
             style={{
               background: "rgba(69,97,232,0.08)",
-              color: "var(--brand)",
+              color: "#6B8FFF",
               border: "1px solid rgba(69,97,232,0.18)",
             }}>
             <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor">
@@ -90,13 +88,13 @@ export default async function GuidePage() {
             </svg>
             {t("badge")}
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: "var(--text)" }}>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: "rgba(255,255,255,0.95)" }}>
             {t("heroTitle")}{" "}
             <span style={{ fontStyle: "italic", fontFamily: "var(--font-playfair), Georgia, serif" }}>
               M<span style={{ color: "#4561E8", fontStyle: "italic", marginRight: "0.02em" }}>e</span>ntora
             </span>
           </h1>
-          <p className="text-lg max-w-xl mx-auto leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-lg max-w-xl mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
             {t("heroSubtitle")}
           </p>
         </div>
@@ -108,7 +106,7 @@ export default async function GuidePage() {
             return (
               <div key={key}
                 className="relative rounded-2xl border overflow-hidden transition-all duration-200 group"
-                style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
+                style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}
               >
                 {/* Left accent bar */}
                 <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
@@ -128,11 +126,11 @@ export default async function GuidePage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
                       <span className="text-[10px] font-bold tracking-[0.15em]" style={{ color: meta.accent }}>{meta.n}</span>
-                      <h2 className="font-bold text-[17px] leading-snug" style={{ color: "var(--text)" }}>{t(`${key}.title`)}</h2>
+                      <h2 className="font-bold text-[17px] leading-snug" style={{ color: "rgba(255,255,255,0.92)" }}>{t(`${key}.title`)}</h2>
                     </div>
-                    <p className="leading-relaxed mb-3 text-sm" style={{ color: "var(--text-secondary)" }}>{t(`${key}.body`)}</p>
+                    <p className="leading-relaxed mb-3 text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>{t(`${key}.body`)}</p>
                     <div className="inline-flex items-start gap-2 px-3 py-2 rounded-xl text-sm italic"
-                      style={{ background: "var(--bg-secondary)", color: "var(--text-muted)", borderLeft: `2px solid ${meta.accent}40` }}>
+                      style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.38)", borderLeft: `2px solid ${meta.accent}40` }}>
                       <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke={meta.accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                       {t(`${key}.example`)}
                     </div>
@@ -160,7 +158,7 @@ export default async function GuidePage() {
             </div>
             <div>
               <div className="font-semibold text-sm mb-1" style={{ color: "#d97706" }}>{t("limitTitle")}</div>
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
                 {t("limitDesc")}{" "}
                 <Link href="/pricing" className="font-semibold hover:underline" style={{ color: "#f59e0b" }}>
                   {t("limitLink")}
@@ -176,7 +174,7 @@ export default async function GuidePage() {
             {t("ctaBtn")}
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </Link>
-          <p className="text-xs mt-3" style={{ color: "var(--text-muted)" }}>{t("ctaNote")}</p>
+          <p className="text-xs mt-3" style={{ color: "rgba(255,255,255,0.35)" }}>{t("ctaNote")}</p>
         </div>
       </main>
 
@@ -199,12 +197,12 @@ export default async function GuidePage() {
         </div>
       </section>
 
-      <footer className="py-8 border-t" style={{ background: "var(--bg)", borderColor: "var(--border)" }}>
-        <div className="max-w-4xl mx-auto px-6 flex items-center justify-between text-xs" style={{ color: "var(--text-muted)" }}>
+      <footer className="py-8 border-t" style={{ background: "#04060f", borderColor: "rgba(255,255,255,0.07)" }}>
+        <div className="max-w-4xl mx-auto px-6 flex items-center justify-between text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
           <span>© 2026 Mentora</span>
           <div className="flex gap-6">
-            <Link href="/privacy" className="hover:text-[var(--text)] transition-colors">{t("footerPrivacy")}</Link>
-            <Link href="/pricing" className="hover:text-[var(--text)] transition-colors">{t("footerPricing")}</Link>
+            <Link href="/privacy" className="hover:text-white transition-colors">{t("footerPrivacy")}</Link>
+            <Link href="/pricing" className="hover:text-white transition-colors">{t("footerPricing")}</Link>
           </div>
         </div>
       </footer>
