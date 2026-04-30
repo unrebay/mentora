@@ -327,8 +327,8 @@ function AuthGalaxy() {
         targetRotX  = 0.18 + ((e.clientY / window.innerHeight) - 0.5) * 2 * 0.18;
       };
       onRSFn = () => {
-        const nw = container.clientWidth || window.innerWidth;
-        const nh = container.clientHeight || window.innerHeight;
+        const nw = window.innerWidth;
+        const nh = window.innerHeight;
         camera.aspect = nw / nh; camera.updateProjectionMatrix(); renderer.setSize(nw, nh);
       };
       window.addEventListener("mousemove", onMMFn);

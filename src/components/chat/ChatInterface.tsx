@@ -197,7 +197,7 @@ function parseInline(text: string): React.ReactNode {
           return <em key={i} className="italic">{part.slice(1,-1)}</em>;
         if (part.startsWith("`") && part.endsWith("`") && part.length > 2)
           return <code key={i} className="rounded-md px-1.5 py-0.5 text-[13px] font-mono" style={{
-            background: "rgba(110,118,129,0.18)", color: "#e6edf3", border: "1px solid rgba(110,118,129,0.25)",
+            background: "rgba(69,97,232,0.12)", color: "#6B8FFF", border: "1px solid rgba(107,143,255,0.28)",
           }}>{part.slice(1,-1)}</code>;
         return <span key={i}>{part}</span>;
       })}
@@ -510,17 +510,32 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   return (
     <div className="flex flex-col" style={{ height:"100dvh", background:"var(--chat-bg)", position:"relative" }}>
 
-      {/* ── Header ── liquid glass ───────────────────────────────────────── */}
+      {/* ── Header ── absolute floating glass pill ──────────────────────── */}
       <header
-        className="px-4 py-3 flex items-center gap-3 shrink-0"
         style={{
-          background: "var(--chat-header)",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
-          borderBottom: "1px solid var(--chat-msg-border)",
-          boxShadow: "0 1px 0 var(--chat-msg-border)",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+          background: "transparent",
+          pointerEvents: "none",
+          padding: "10px 12px",
         }}
       >
+        <div
+          className="flex items-center gap-3"
+          style={{
+            background: "var(--bg-nav)",
+            backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+            WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+            border: "1px solid var(--border-light)",
+            borderRadius: 20,
+            boxShadow: "0 2px 12px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.06) inset",
+            padding: "10px 14px",
+            pointerEvents: "all",
+          }}
+        >
         <Link
           href="/dashboard"
           className="transition-opacity hover:opacity-70 flex items-center justify-center rounded-xl"
@@ -577,10 +592,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             <span className="hidden sm:inline">{exportingPdf ? tChat("exporting") : tChat("export")}</span>
           </button>
         )}
+        </div>
       </header>
 
       {/* ── Messages ─────────────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4" style={{ scrollbarWidth:"thin", paddingBottom:"80px" }}>
+      <div className="flex-1 overflow-y-auto px-4 space-y-4" style={{ scrollbarWidth:"thin", paddingTop:"80px", paddingBottom:"80px" }}>
 
         {isEmpty && (
           <div className="relative text-center pt-10">
