@@ -79,11 +79,12 @@ const GRAPH_EDGES: [string, string][] = [
 
 // ── Auth Galaxy Background (Three.js) ────────────────────────────────────────
 function AuthGalaxy() {
-  const mountRef = useRef<HTMLDivElement>(null);
+  // Inner ref — position:relative div inside fixed wrapper (same pattern as KnowledgeGraph3D)
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const mount = mountRef.current;
-    if (!mount) return;
+    const container = containerRef.current;
+    if (!container) return;
 
     let animId = 0;
     let disposed = false;
@@ -95,8 +96,8 @@ function AuthGalaxy() {
       const THREE = await import("three");
       if (disposed) return;
 
-      const w = mount.clientWidth  || window.innerWidth  || 1280;
-      const h = mount.clientHeight || window.innerHeight || 800;
+      const w = container.clientWidth  || window.innerWidth  || 1280;
+      const h = container.clientHeight || window.innerHeight || 800;
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -108,7 +109,7 @@ function AuthGalaxy() {
         width: "100%", height: "100%",
         display: "block",
       });
-      mount.appendChild(canvas);
+      container.appendChild(canvas);
 
       const scene  = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(58, w / h, 0.1, 1000);
@@ -332,8 +333,8 @@ function AuthGalaxy() {
         targetRotX  = 0.18 + ((e.clientY / window.innerHeight) - 0.5) * 2 * 0.18;
       };
       onRSFn = () => {
-        const nw = mount.clientWidth  || window.innerWidth;
-        const nh = mount.clientHeight || window.innerHeight;
+        const nw = container.clientWidth  || window.innerWidth;
+        const nh = container.clientHeight || window.innerHeight;
         camera.aspect = nw / nh; camera.updateProjectionMatrix(); renderer.setSize(nw, nh);
       };
       window.addEventListener("mousemove", onMMFn);
@@ -417,18 +418,11 @@ function AuthGalaxy() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Outer fixed wrapper fills viewport; inner relative div gives container.clientWidth correct value
   return (
-    <div
-      ref={mountRef}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 0,
-        pointerEvents: "none",
-        overflow: "hidden",
-        background: "#04060f",
-      }}
-    />
+    <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden", background: "#04060f" }}>
+      <div ref={containerRef} style={{ position: "relative", width: "100%", height: "100%" }} />
+    </div>
   );
 }
 
