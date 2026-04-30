@@ -769,32 +769,45 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
               </div>
             )}
 
-            {/* iOS 26 / Telegram-style input row */}
+            {/* Telegram-style input row: 3 separate glass elements */}
             <form onSubmit={sendMessage} className="flex gap-2 items-end">
               {isUltima && <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />}
 
-              {/* Pill container: camera + textarea together */}
-              <div className="flex-1 flex items-end rounded-[22px] overflow-hidden transition-all"
+              {/* 1. Camera — standalone glass circle (Ultima only) */}
+              {isUltima && (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  title={tChat("cameraTitle")}
+                  className="shrink-0 flex items-center justify-center transition-all hover:scale-[1.05] active:scale-95"
+                  style={{
+                    width: 44, height: 44, borderRadius: "50%",
+                    background: "var(--bg-nav)",
+                    backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                    WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                    border: "1px solid var(--border-light)",
+                    boxShadow: "0 2px 12px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.12) inset",
+                    color: "var(--text-muted)",
+                    alignSelf: "flex-end",
+                  }}
+                >
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                </button>
+              )}
+
+              {/* 2. Input field — separate glass pill */}
+              <div
+                className="flex-1 transition-all"
                 style={{
-                  border: "1px solid var(--chat-msg-border)",
-                  background: "var(--chat-msg-bg)",
-                  backdropFilter: "blur(16px)",
-                  WebkitBackdropFilter: "blur(16px)",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.08)",
+                  background: "var(--bg-nav)",
+                  backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                  WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                  border: "1px solid var(--border-light)",
+                  borderRadius: 22,
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.12) inset",
+                  overflow: "hidden",
                 }}
               >
-                {isUltima && (
-                  <button
-                    type="button" onClick={() => fileInputRef.current?.click()} title={tChat("cameraTitle")}
-                    className="shrink-0 flex items-center justify-center transition-all hover:opacity-70 self-end"
-                    style={{ width:40, height:44, color:"var(--text-muted)", flexShrink:0 }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                  </button>
-                )}
-                {!isUltima && (
-                  <div className="self-end flex items-center justify-center" style={{ width:14, height:44, flexShrink:0 }} />
-                )}
                 <textarea
                   ref={textareaRef} value={input} rows={1}
                   onChange={(e) => { setInput(e.target.value); adjustTextareaHeight(); }}
@@ -803,29 +816,43 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                   }}
                   placeholder={pendingImage ? tChat("placeholderWithImage") : tChat("placeholder")}
                   disabled={loading}
-                  className="flex-1 py-3 pr-3 disabled:opacity-50 focus:outline-none"
+                  className="w-full disabled:opacity-50 focus:outline-none"
                   style={{
-                    background:"transparent", color:"var(--text)", resize:"none",
-                    minHeight:"44px", maxHeight:"240px", overflowY:"hidden",
-                    lineHeight:"1.5", fontSize:"16px",
-                    WebkitOverflowScrolling:"touch",
+                    background: "transparent",
+                    color: "var(--text)",
+                    resize: "none",
+                    minHeight: "44px",
+                    maxHeight: "240px",
+                    overflowY: "hidden",
+                    lineHeight: "1.5",
+                    fontSize: "16px",
+                    padding: "12px 16px",
+                    WebkitOverflowScrolling: "touch",
+                    display: "block",
                   }}
                 />
               </div>
 
-              {/* Send button — circular floating */}
+              {/* 3. Send — standalone glass circle, lights up with subjColor when ready */}
               <button
-                type="submit" disabled={loading||(!input.trim()&&!pendingImage)}
-                className="shrink-0 flex items-center justify-center transition-all disabled:opacity-35 active:scale-95"
+                type="submit"
+                disabled={loading || (!input.trim() && !pendingImage)}
+                className="shrink-0 flex items-center justify-center transition-all disabled:opacity-35 active:scale-95 hover:scale-[1.05]"
                 style={{
-                  width:44, height:44, borderRadius:"50%",
-                  background: (input.trim()||pendingImage) && !loading
-                    ? `linear-gradient(135deg,${subjColor},${subjColor}cc)`
-                    : "var(--chat-msg-bg)",
-                  border: `1.5px solid ${(input.trim()||pendingImage) && !loading ? "transparent" : "var(--chat-msg-border)"}`,
-                  color: (input.trim()||pendingImage) && !loading ? "white" : "var(--text-muted)",
-                  boxShadow: (input.trim()||pendingImage) && !loading ? `0 3px 12px ${subjColor}45` : "none",
-                  transition: "background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease",
+                  width: 44, height: 44, borderRadius: "50%",
+                  background: (input.trim() || pendingImage) && !loading
+                    ? `linear-gradient(135deg, ${subjColor}, ${subjColor}cc)`
+                    : "var(--bg-nav)",
+                  backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                  WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                  border: (input.trim() || pendingImage) && !loading
+                    ? "1px solid transparent"
+                    : "1px solid var(--border-light)",
+                  boxShadow: (input.trim() || pendingImage) && !loading
+                    ? `0 3px 14px ${subjColor}50, 0 1px 0 rgba(255,255,255,0.2) inset`
+                    : "0 2px 12px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.12) inset",
+                  color: (input.trim() || pendingImage) && !loading ? "white" : "var(--text-muted)",
+                  transition: "background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, border 0.2s ease",
                   alignSelf: "flex-end",
                 }}
               >
