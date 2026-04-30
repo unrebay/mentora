@@ -56,13 +56,14 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
   const mobileBorder = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)";
 
   return (
-    /* Outer sticky strip — ALWAYS transparent so page content shows through padding */
+    /* Outer sticky strip — transparent when light, dark-hero color when dark (prevents body-bg bleed) */
     <nav
       className="sticky top-0 z-50"
       style={{
         padding: "10px 14px",
-        background: "transparent",
+        background: isDark ? "#060912" : "transparent",
         pointerEvents: "none",
+        transition: "background 0.3s",
       }}
     >
       {/* ── Nav content ─────────────────────────────────────────────── */}
