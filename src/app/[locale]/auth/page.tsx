@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
-import MeLogo from "@/components/MeLogo";
+import Logo from "@/components/Logo";
 import SubjectIcon from "@/components/SubjectIcon";
 import posthog from "posthog-js";
 
@@ -79,32 +79,31 @@ const GRAPH_EDGES: [string, string][] = [
 
 // ── Auth Galaxy Background (Three.js) ────────────────────────────────────────
 function AuthGalaxy() {
-  const mountRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
-    if (!mountRef.current) return;
-    const container = mountRef.current;
-
     let animId = 0;
     let disposed = false;
+    let canvas: HTMLCanvasElement | null = null;
     let onMMFn: ((e: MouseEvent) => void) | null = null;
     let onRSFn: (() => void) | null = null;
 
     async function init() {
       const THREE = await import("three");
-      if (disposed || !container) return;
+      if (disposed) return;
 
-      const w = window.innerWidth  || container.clientWidth  || 1280;
-      const h = window.innerHeight || container.clientHeight || 800;
+      const w = window.innerWidth  || 1280;
+      const h = window.innerHeight || 800;
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(w, h);
       renderer.setClearColor(0x04060f, 1);
-      Object.assign(renderer.domElement.style, {
-        position: "absolute", top: "0", left: "0", width: "100%", height: "100%", display: "block",
+      canvas = renderer.domElement;
+      Object.assign(canvas.style, {
+        position: "fixed", top: "0", left: "0",
+        width: "100vw", height: "100vh",
+        zIndex: "0", pointerEvents: "none", display: "block",
       });
-      container.appendChild(renderer.domElement);
+      document.body.appendChild(canvas);
 
       const scene  = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(58, w / h, 0.1, 1000);
@@ -408,11 +407,11 @@ function AuthGalaxy() {
       cancelAnimationFrame(animId);
       if (onMMFn) window.removeEventListener("mousemove", onMMFn);
       if (onRSFn) window.removeEventListener("resize",    onRSFn);
-      while (container.firstChild) container.removeChild(container.firstChild);
+      if (canvas && canvas.parentNode) canvas.parentNode.removeChild(canvas);
     };
   }, []);
 
-  return <div ref={mountRef} style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }} />;
+  return null;
 }
 
 // ── Page entry ───────────────────────────────────────────────────────────────
@@ -539,10 +538,9 @@ function AuthPageContent() {
           <AuthGalaxy />
         </div>
         <div className="relative z-10 w-full max-w-sm text-center animate-fade-in-up">
-          <a href="/" className="inline-flex items-baseline gap-0 select-none justify-center mb-10">
-            <MeLogo height={26} colorM="rgba(255,255,255,0.95)" />
-            <span style={{ fontFamily:"var(--font-playfair),Georgia,serif", fontSize:"1.625rem", fontWeight:700, letterSpacing:"-0.01em", lineHeight:1, color:"rgba(255,255,255,0.95)" }}>ntora</span>
-          </a>
+          <div className="flex justify-center mb-10">
+            <Logo size="md" textColor="rgba(255,255,255,0.95)" />
+          </div>
           <div className="glass rounded-3xl p-8 space-y-6">
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto"
               style={{ background: "rgba(69,97,232,0.18)", border: "1px solid rgba(107,143,255,0.25)" }}>
@@ -591,10 +589,9 @@ function AuthPageContent() {
         {/* ── LEFT: branding + headline ─────────────────────────────── */}
         <div className="hidden lg:flex flex-col justify-center px-14 xl:px-20 py-12" style={{ width: "54%" }}>
 
-          <a href="/" className="inline-flex items-baseline gap-0 select-none mb-12">
-            <MeLogo height={26} colorM="rgba(255,255,255,0.95)" />
-            <span style={{ fontFamily:"var(--font-playfair),Georgia,serif", fontSize:"1.625rem", fontWeight:700, letterSpacing:"-0.01em", lineHeight:1, color:"rgba(255,255,255,0.95)" }}>ntora</span>
-          </a>
+          <div className="mb-12">
+            <Logo size="md" textColor="rgba(255,255,255,0.95)" />
+          </div>
 
           <div className="max-w-lg">
             <p className="text-[10px] font-bold tracking-[0.25em] uppercase mb-5"
@@ -638,10 +635,7 @@ function AuthPageContent() {
 
           {/* Mobile-only logo */}
           <div className="lg:hidden mb-8">
-            <a href="/" className="inline-flex items-baseline gap-0 select-none">
-              <MeLogo height={18} colorM="rgba(255,255,255,0.95)" />
-              <span style={{ fontFamily:"var(--font-playfair),Georgia,serif", fontSize:"1.125rem", fontWeight:700, letterSpacing:"-0.01em", lineHeight:1, color:"rgba(255,255,255,0.95)" }}>ntora</span>
-            </a>
+            <Logo size="sm" textColor="rgba(255,255,255,0.95)" />
           </div>
 
           {/* Mobile-only headline */}

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { usePathname, Link } from "@/i18n/navigation";
+import Logo from "@/components/Logo";
 import MeLogo from "@/components/MeLogo";
 import ThemeToggle from "@/components/ThemeToggle";
 import { TourButtonDesktop } from "@/components/TourButton";
@@ -161,17 +162,7 @@ export default function DashboardNav({
 
         {/* Left: logo + desktop links */}
         <div className="flex items-center gap-1">
-          <div className="flex items-baseline gap-0 select-none shrink-0">
-            <MeLogo height={20} colorM={dk ? "rgba(255,255,255,0.95)" : undefined} />
-            <span style={{
-              fontFamily: "var(--font-playfair), Georgia, serif",
-              fontSize: "1.25rem",
-              fontWeight: 700,
-              letterSpacing: "-0.01em",
-              lineHeight: 1,
-              color: dk ? "rgba(255,255,255,0.95)" : "var(--text)",
-            }}>ntora</span>
-          </div>
+          <Logo size="sm" href="" textColor={dk ? "rgba(255,255,255,0.95)" : undefined} />
 
           <div className="hidden md:flex items-center gap-1 ml-7">
             {navLinks.map(({ href, label }) => (
