@@ -343,7 +343,9 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         const glow = new THREE.Mesh(new THREE.SphereGeometry(0.80, 8, 6), mkMat(cHex, isActive ? 0.14 : 0.08));
         glow.position.copy(pos); mainGrp.add(glow); sciGlows.push(glow);
         // Outer halo
-        mainGrp.add(Object.assign(new THREE.Mesh(new THREE.SphereGeometry(1.5,6,5), mkMat(cHex, isActive ? 0.05 : 0.022)), { position: pos.clone() }));
+        const halo = new THREE.Mesh(new THREE.SphereGeometry(1.5, 6, 5), mkMat(cHex, isActive ? 0.05 : 0.022));
+        halo.position.copy(pos);
+        mainGrp.add(halo);
       }
 
       // ── Edges & chain nodes ────────────────────────────────────────────────────
