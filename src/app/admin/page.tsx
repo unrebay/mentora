@@ -139,8 +139,9 @@ const IUsers   = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 const IRevenue = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>;
 const IKb      = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
 const ITeam    = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><circle cx="19" cy="4" r="2" fill="currentColor" stroke="none" opacity="0.6"/></svg>;
-const IRefresh = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>;
-const ISearch  = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
+const IRefresh  = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>;
+const ISearch   = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
+const IRoadmap  = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M3 17l6-12 4 8 3-5 5 9"/><circle cx="3" cy="17" r="1" fill="currentColor"/><circle cx="21" cy="17" r="1" fill="currentColor"/></svg>;
 
 // ── Team Tab ──────────────────────────────────────────────────────────────────
 interface Employee {
@@ -495,8 +496,209 @@ function TeamTab() {
   );
 }
 
+// ── Roadmap data ──────────────────────────────────────────────────────────────
+const ROADMAP_STORAGE_KEY = "mentora_admin_roadmap_v1";
+
+interface RTask  { id: string; label: string; tag?: string }
+interface RBlock { id: string; title: string; emoji: string; color: string; tasks: RTask[] }
+
+const ROADMAP_BLOCKS: RBlock[] = [
+  {
+    id: "design", title: "Дизайн-унификация", emoji: "🎨", color: "#4561E8",
+    tasks: [
+      { id: "d1",  label: "Landing (/) — единые иконки предметов, hero-секция", tag: "page" },
+      { id: "d2",  label: "Auth (/auth) — привести к фирменному стилю", tag: "page" },
+      { id: "d3",  label: "Dashboard (/dashboard) — SubjectIcon карточки единообразны", tag: "page" },
+      { id: "d4",  label: "Profile (/profile) — формы, аватар, тариф-плашка", tag: "page" },
+      { id: "d5",  label: "Progress (/dashboard/progress) — XP-графики, серия", tag: "page" },
+      { id: "d6",  label: "Analytics (/dashboard/analytics) — статистика предметов", tag: "page" },
+      { id: "d7",  label: "Chat (/learn/[subject]) — все UI-элементы согласованы", tag: "page" },
+      { id: "d8",  label: "Pricing (/pricing) — карточки тарифов, кнопки", tag: "page" },
+      { id: "d9",  label: "About (/dashboard/about) — секции, блок поддержки", tag: "page" },
+      { id: "d10", label: "Galaxy (/knowledge) — звёздная карта, цвета предметов", tag: "page" },
+    ],
+  },
+  {
+    id: "system", title: "Системная унификация", emoji: "🧩", color: "#a78bfa",
+    tasks: [
+      { id: "s1", label: "SubjectIcon — одни градиенты и иконки везде без исключений", tag: "comp" },
+      { id: "s2", label: "DashboardNav — единый компонент на всех авторизованных страницах", tag: "comp" },
+      { id: "s3", label: "Мобильная адаптация — все страницы при 375px без горизонтального скролла", tag: "mobile" },
+      { id: "s4", label: "Dark/Light mode — каждая страница корректна в обоих режимах", tag: "theme" },
+      { id: "s5", label: "Типографика и отступы — единый стандарт (font-size, line-height, gap)", tag: "design" },
+    ],
+  },
+  {
+    id: "optimize", title: "Глобальная оптимизация", emoji: "⚙️", color: "#22c55e",
+    tasks: [
+      { id: "o1", label: "Аудит роутов — правильная иерархия, убрать лишние редиректы", tag: "arch" },
+      { id: "o2", label: "Дублирующийся код — вынести в общие компоненты/утилиты", tag: "code" },
+      { id: "o3", label: "Lighthouse > 90 на Landing, Dashboard, Chat", tag: "perf" },
+      { id: "o4", label: "SEO: canonical, meta description, og:image на всех страницах", tag: "seo" },
+      { id: "o5", label: "API роуты — статусы, валидация, rate limiting проверить", tag: "api" },
+    ],
+  },
+  {
+    id: "qa", title: "QA-прогон до 1 июня", emoji: "✅", color: "#f59e0b",
+    tasks: [
+      { id: "q1", label: "Полный флоу: регистрация → чат → апгрейд → оплата → доступ", tag: "flow" },
+      { id: "q2", label: "Telegram-бот поддержки отвечает корректно на типовые вопросы", tag: "bot" },
+      { id: "q3", label: "Реферальная программа: приглашение → +3 дня Pro у обоих", tag: "refer" },
+      { id: "q4", label: "Все 17 предметов открываются и AI отвечает без ошибок", tag: "subjects" },
+      { id: "q5", label: "Лимиты сообщений (Free: 20) — сброс в 00:00 UTC работает", tag: "limits" },
+      { id: "q6", label: "PDF-конспект (Ultima) генерируется, скачивается, читается", tag: "pdf" },
+      { id: "q7", label: "Онбординг-тур запускается при первом входе, шаги корректны", tag: "onboard" },
+      { id: "q8", label: "Подарок 1 июня — кнопка активации видна и работает", tag: "gift" },
+    ],
+  },
+];
+
+// Total tasks for progress calculation
+const ROADMAP_TOTAL = ROADMAP_BLOCKS.reduce((s, b) => s + b.tasks.length, 0);
+
+function loadRoadmapChecked(): Set<string> {
+  try { return new Set(JSON.parse(localStorage.getItem(ROADMAP_STORAGE_KEY) ?? "[]") as string[]); }
+  catch { return new Set(); }
+}
+
+function saveRoadmapChecked(s: Set<string>) {
+  localStorage.setItem(ROADMAP_STORAGE_KEY, JSON.stringify([...s]));
+}
+
+// ── MilestoneTimeline (always visible at page top) ────────────────────────────
+function MilestoneTimeline({ checked }: { checked: Set<string> }) {
+  const { CARD, BOR, TEXT, MUTED, isDark } = useTok();
+  const done = checked.size;
+  const pct  = ROADMAP_TOTAL ? Math.round(done / ROADMAP_TOTAL * 100) : 0;
+
+  // Milestone positions: label, threshold pct, color
+  const MS = [
+    { label: "Сейчас",   pct:  0, color: MUTED },
+    { label: "Дизайн",   pct: 36, color: "#4561E8" },
+    { label: "Система",  pct: 55, color: "#a78bfa" },
+    { label: "Оптим.",   pct: 72, color: "#22c55e" },
+    { label: "QA",       pct: 90, color: "#f59e0b" },
+    { label: "🚀 1 июня",pct:100, color: "#ef4444" },
+  ];
+
+  return (
+    <div style={{ marginBottom: 28, padding: "14px 20px 18px", background: CARD, borderRadius: 14, border: `1px solid ${BOR}` }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <span style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+          До старта привлечения
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ fontSize: 12, color: MUTED }}>{done}/{ROADMAP_TOTAL} задач</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>{pct}%</span>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div style={{ position: "relative", height: 8, background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)", borderRadius: 99, marginBottom: 20 }}>
+        <div style={{ position: "absolute", inset: 0, height: "100%", width: pct + "%", borderRadius: 99, background: "linear-gradient(90deg, #4561E8, #a78bfa, #f59e0b)", transition: "width .7s cubic-bezier(.4,0,.2,1)", boxShadow: `0 0 10px rgba(69,97,232,0.5)` }} />
+        {/* Dots */}
+        {MS.map(m => (
+          <div key={m.label} title={m.label} style={{ position: "absolute", top: "50%", left: m.pct + "%", transform: "translate(-50%,-50%)", width: 10, height: 10, borderRadius: "50%", background: pct >= m.pct ? m.color : (isDark ? "#1a1d2e" : "#e2e8f0"), border: `2px solid ${m.color}`, boxShadow: pct >= m.pct ? `0 0 6px ${m.color}80` : "none", transition: "all .3s", zIndex: 2 }} />
+        ))}
+      </div>
+
+      {/* Labels row */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative" }}>
+        {MS.map((m, i) => (
+          <div key={m.label} style={{ textAlign: i === 0 ? "left" : i === MS.length - 1 ? "right" : "center", flex: i === 0 || i === MS.length - 1 ? "0 0 auto" : 1 }}>
+            <span style={{ fontSize: 10, fontWeight: pct >= m.pct ? 700 : 400, color: pct >= m.pct ? m.color : MUTED, whiteSpace: "nowrap", transition: "all .3s" }}>
+              {m.label}
+            </span>
+          </div>
+        ))}
+        {/* Unicorn SVG at far right */}
+        <div style={{ position: "absolute", right: -6, top: -34, fontSize: 20, lineHeight: 1 }}>🦄</div>
+      </div>
+    </div>
+  );
+}
+
+// ── RoadmapTab ─────────────────────────────────────────────────────────────────
+function RoadmapTab({ checked, onToggle, onClear }: { checked: Set<string>; onToggle(id: string): void; onClear(): void }) {
+  const { CARD, BOR, TEXT, MUTED } = useTok();
+  const done = checked.size;
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <p style={{ fontSize: 13, color: MUTED, margin: 0 }}>
+          Конкретные задачи до 1 июня — когда начнём привлекать пользователей
+        </p>
+        <button onClick={onClear} style={{ fontSize: 11, color: MUTED, background: "none", border: `1px solid ${BOR}`, borderRadius: 6, padding: "4px 10px", cursor: "pointer", opacity: 0.7 }}>
+          Сбросить всё
+        </button>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        {ROADMAP_BLOCKS.map(block => {
+          const bDone = block.tasks.filter(t => checked.has(t.id)).length;
+          const bPct  = Math.round(bDone / block.tasks.length * 100);
+          return (
+            <Card key={block.id} ch={
+              <>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 16 }}>{block.emoji}</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: TEXT }}>{block.title}</span>
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: block.color, background: block.color + "1a", padding: "2px 8px", borderRadius: 99, border: `1px solid ${block.color}30` }}>
+                    {bDone}/{block.tasks.length}
+                  </span>
+                </div>
+
+                {/* Block mini-progress */}
+                <div style={{ height: 3, background: BOR, borderRadius: 99, marginBottom: 14 }}>
+                  <div style={{ height: "100%", width: bPct + "%", background: block.color, borderRadius: 99, transition: "width .5s" }} />
+                </div>
+
+                {block.tasks.map((task, ti) => {
+                  const done = checked.has(task.id);
+                  return (
+                    <label key={task.id} htmlFor={`rtask_${task.id}`} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "7px 0", borderBottom: ti < block.tasks.length - 1 ? `1px solid ${BOR}` : "none", cursor: "pointer" }}>
+                      {/* Custom checkbox */}
+                      <div style={{ flexShrink: 0, width: 16, height: 16, borderRadius: 4, marginTop: 1, border: `2px solid ${done ? block.color : BOR}`, background: done ? block.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s" }}>
+                        {done && (
+                          <svg viewBox="0 0 10 8" width="9" height="9">
+                            <path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </div>
+                      <input id={`rtask_${task.id}`} type="checkbox" checked={done} onChange={() => onToggle(task.id)} style={{ display: "none" }} />
+                      <span style={{ fontSize: 13, color: done ? MUTED : TEXT, textDecoration: done ? "line-through" : "none", lineHeight: 1.5, flex: 1, transition: "all .2s" }}>
+                        {task.label}
+                      </span>
+                      {task.tag && (
+                        <span style={{ flexShrink: 0, fontSize: 10, fontWeight: 600, color: block.color, background: block.color + "15", padding: "1px 6px", borderRadius: 4, marginTop: 2 }}>
+                          {task.tag}
+                        </span>
+                      )}
+                    </label>
+                  );
+                })}
+              </>
+            } />
+          );
+        })}
+      </div>
+
+      {done === ROADMAP_TOTAL && done > 0 && (
+        <div style={{ marginTop: 24, padding: "16px 20px", borderRadius: 14, background: "linear-gradient(135deg, rgba(69,97,232,0.12), rgba(167,139,250,0.10))", border: "1px solid rgba(69,97,232,0.25)", textAlign: "center" }}>
+          <p style={{ fontSize: 20, margin: "0 0 6px" }}>🦄</p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: TEXT, margin: "0 0 4px" }}>Все задачи выполнены!</p>
+          <p style={{ fontSize: 12, color: MUTED, margin: 0 }}>1 июня — старт. Поехали 🚀</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
-type Tab = "overview" | "users" | "revenue" | "knowledge" | "team";
+type Tab = "overview" | "users" | "revenue" | "knowledge" | "team" | "roadmap";
 
 export default function AdminPanel() {
   const { theme } = useTheme();
@@ -507,6 +709,25 @@ export default function AdminPanel() {
   const [tab, setTab]         = useState<Tab>("overview");
   const [stats, setStats]     = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [rmChecked, setRmChecked] = useState<Set<string>>(new Set());
+
+  // Load roadmap state from localStorage
+  useEffect(() => { setRmChecked(loadRoadmapChecked()); }, []);
+
+  const toggleTask = useCallback((id: string) => {
+    setRmChecked(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      saveRoadmapChecked(next);
+      return next;
+    });
+  }, []);
+
+  const clearRoadmap = useCallback(() => {
+    const empty = new Set<string>();
+    saveRoadmapChecked(empty);
+    setRmChecked(empty);
+  }, []);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -529,6 +750,7 @@ export default function AdminPanel() {
     { id: "revenue",   icon: IRevenue, label: "Доходы" },
     { id: "knowledge", icon: IKb,      label: "База знаний" },
     { id: "team",      icon: ITeam,    label: "Команда" },
+    { id: "roadmap",   icon: IRoadmap, label: "Роадмап" },
   ];
 
   return (
@@ -580,6 +802,9 @@ export default function AdminPanel() {
               </button>
             )}
           </div>
+
+          {/* ── MILESTONE TIMELINE (always visible) ─────────────────────── */}
+          <MilestoneTimeline checked={rmChecked} />
 
           {loading && <p style={{ color: MUTED }}>Загрузка...</p>}
 
@@ -730,6 +955,7 @@ export default function AdminPanel() {
           {/* ── KNOWLEDGE ────────────────────────────────────────────────────── */}
           {tab === "knowledge" && <KnowledgeTab />}
           {tab === "team"      && <TeamTab />}
+          {tab === "roadmap"   && <RoadmapTab checked={rmChecked} onToggle={toggleTask} onClear={clearRoadmap} />}
         </main>
       </div> {/* end flex row */}
     </TokCtx.Provider>
