@@ -185,6 +185,11 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
   const [hov, setHov] = useState<number | null>(null);
   const [pop, setPop] = useState<PopupState | null>(null);
 
+  // Derive active set at component level (needed in JSX)
+  const activeIds = new Set<string>(
+    (userProgress ?? []).filter(p => (p.xp_total ?? 0) > 0).map(p => p.subject)
+  );
+
   // keep callbacks stable for Three.js loop
   useEffect(() => { setHovCb.current = setHov; setPopCb.current = setPop; });
 
@@ -613,7 +618,7 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
             backdropFilter: "blur(8px)",
             WebkitBackdropFilter: "blur(8px)",
             border: "1px solid rgba(255,255,255,0.12)",
-            color: activeSet.has(SUBS[hov].id) ? "#ffa040" : "rgba(200,220,255,0.92)",
+            color: activeIds.has(SUBS[hov].id) ? "#ffa040" : "rgba(200,220,255,0.92)",
             fontSize: 12,
             fontWeight: 600,
             fontFamily: "'Inter','Helvetica Neue',Arial,sans-serif",
