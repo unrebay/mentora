@@ -615,42 +615,41 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         )}
 
         {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role==="user" ? "justify-end" : "justify-start"} gap-2.5`}>
+          <div key={i} className={`flex ${msg.role==="user" ? "justify-end" : "justify-start"} gap-2`}>
 
             {/* Assistant avatar */}
             {msg.role === "assistant" && (
-              <div className="w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 mt-0.5" style={{
-                background: "var(--chat-msg-bg)", backdropFilter:"blur(12px)",
-                borderColor:"var(--chat-msg-border)",
-                boxShadow:"0 2px 8px rgba(0,0,0,0.12)",
+              <div className="w-7 h-7 rounded-2xl flex items-center justify-center shrink-0 mt-auto mb-0.5" style={{
+                background: `linear-gradient(135deg,${subjColor}22,${subjColor}11)`,
+                border: `1.5px solid ${subjColor}30`,
+                boxShadow: `0 2px 8px ${subjColor}18`,
               }}>
-                <MeLogo height={14} />
+                <MeLogo height={13} colorM="var(--text)" colorE={subjColor} />
               </div>
             )}
 
-            {/* Bubble */}
+            {/* Bubble — Telegram/iOS 26 style */}
             <div
-              className="max-w-[82%] rounded-2xl px-4 py-3.5"
+              className="max-w-[80%] px-4 py-3"
               style={
                 msg.role === "user"
                   ? {
                       background: "linear-gradient(135deg,#4561E8,#6B8FFF)",
                       color: "white", fontSize:"15px", lineHeight:"1.65",
-                      boxShadow: "0 3px 16px rgba(69,97,232,0.40)",
-                      borderBottomRightRadius: "6px",
+                      boxShadow: "0 2px 12px rgba(69,97,232,0.35), 0 1px 0 rgba(255,255,255,0.15) inset",
+                      borderRadius: "20px 20px 4px 20px",
                     }
                   : msg.isError
-                    ? { background:"rgba(239,68,68,0.07)", border:"1px solid rgba(239,68,68,0.22)", color:"#dc2626" }
+                    ? { background:"rgba(239,68,68,0.07)", border:"1px solid rgba(239,68,68,0.22)", color:"#dc2626", borderRadius:"20px 20px 20px 4px" }
                     : {
                         background: "var(--chat-msg-bg)",
                         backdropFilter: "blur(16px)",
                         WebkitBackdropFilter: "blur(16px)",
-                        borderLeft: `3px solid ${subjColor}`,
                         border: `1px solid var(--chat-msg-border)`,
-                        borderLeft: `3px solid ${subjColor}`,
+                        borderLeft: `2.5px solid ${subjColor}55`,
                         color: "var(--text)",
-                        boxShadow: "var(--chat-msg-shadow)",
-                        borderBottomLeftRadius: "6px",
+                        boxShadow: `var(--chat-msg-shadow), 0 0 0 1px ${subjColor}08`,
+                        borderRadius: "20px 20px 20px 4px",
                       }
               }
             >
@@ -674,11 +673,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
 
         {/* Typing indicator */}
         {loading && (
-          <div className="flex justify-start gap-2.5">
-            <div className="w-8 h-8 rounded-xl border flex items-center justify-center shrink-0" style={{ background:"var(--chat-msg-bg)", backdropFilter:"blur(12px)", borderColor:"var(--chat-msg-border)" }}>
-              <MeLogo height={14} />
+          <div className="flex justify-start gap-2">
+            <div className="w-7 h-7 rounded-2xl flex items-center justify-center shrink-0 mt-auto" style={{ background:`linear-gradient(135deg,${subjColor}22,${subjColor}11)`, border:`1.5px solid ${subjColor}30` }}>
+              <MeLogo height={13} colorM="var(--text)" colorE={subjColor} />
             </div>
-            <div className="rounded-2xl px-5 py-4" style={{ background:"var(--chat-msg-bg)", backdropFilter:"blur(16px)", border:"1px solid var(--chat-msg-border)", borderBottomLeftRadius:"6px" }}>
+            <div className="px-5 py-4" style={{ background:"var(--chat-msg-bg)", backdropFilter:"blur(16px)", border:`1px solid var(--chat-msg-border)`, borderLeft:`2.5px solid ${subjColor}55`, borderRadius:"20px 20px 20px 4px" }}>
               <div className="flex gap-1.5 items-end h-4">
                 {[0,1,2].map((i) => (
                   <div key={i} className="w-2 h-2 rounded-full" style={{ background:"#4561E8", opacity:0.7, animation:"mentoraDot 1.3s ease-in-out infinite", animationDelay:`${i*0.18}s` }} />
@@ -690,15 +689,18 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         <div ref={bottomRef} />
       </div>
 
-      {/* ── Input area ── liquid glass ─────────────────────────────────────── */}
+      {/* ── Input area ── iOS 26 / Telegram glass ────────────────────────── */}
       <div
-        className="px-4 pt-3 shrink-0"
+        className="shrink-0"
         style={{
           background: "var(--chat-input)",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
+          backdropFilter: "blur(40px) saturate(1.8)",
+          WebkitBackdropFilter: "blur(40px) saturate(1.8)",
           borderTop: "1px solid var(--chat-msg-border)",
-          paddingBottom: "max(14px, env(safe-area-inset-bottom))",
+          paddingTop: "10px",
+          paddingLeft: "12px",
+          paddingRight: "12px",
+          paddingBottom: "max(12px, env(safe-area-inset-bottom))",
         }}
       >
         {limitReached ? (
@@ -767,42 +769,69 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
               </div>
             )}
 
+            {/* iOS 26 / Telegram-style input row */}
             <form onSubmit={sendMessage} className="flex gap-2 items-end">
               {isUltima && <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />}
-              {isUltima && (
-                <button
-                  type="button" onClick={() => fileInputRef.current?.click()} title={tChat("cameraTitle")}
-                  className="shrink-0 flex items-center justify-center transition-all hover:opacity-80"
-                  style={{ width:42, height:42, borderRadius:"12px", border:"1px solid var(--chat-msg-border)", background:"var(--chat-msg-bg)", backdropFilter:"blur(8px)", color:"var(--text-muted)", alignSelf:"flex-end", marginBottom:"1px" }}
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                </button>
-              )}
-              <textarea
-                ref={textareaRef} value={input} rows={1}
-                onChange={(e) => { setInput(e.target.value); adjustTextareaHeight(); }}
-                onKeyDown={(e) => {
-                  if (e.key==="Enter"&&(e.ctrlKey||e.metaKey)) { e.preventDefault(); if(input.trim()||pendingImage) sendMessage(e as unknown as React.FormEvent); }
-                }}
-                placeholder={pendingImage ? tChat("placeholderWithImage") : tChat("placeholder")}
-                disabled={loading}
-                className="flex-1 px-4 py-3 disabled:opacity-50 focus:outline-none transition-all"
+
+              {/* Pill container: camera + textarea together */}
+              <div className="flex-1 flex items-end rounded-[22px] overflow-hidden transition-all"
                 style={{
-                  borderRadius:"14px", border:"1px solid var(--chat-msg-border)",
-                  background:"var(--chat-msg-bg)", backdropFilter:"blur(12px)",
-                  color:"var(--text)", resize:"none", minHeight:"44px", maxHeight:"240px",
-                  overflowY:"hidden", lineHeight:"1.5", fontSize:"16px",
-                  WebkitOverflowScrolling:"touch",
+                  border: "1px solid var(--chat-msg-border)",
+                  background: "var(--chat-msg-bg)",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.08)",
                 }}
-                onFocus={e => { e.currentTarget.style.borderColor=subjColor; e.currentTarget.style.boxShadow=`0 0 0 3px ${subjColor}20`; }}
-                onBlur={e => { e.currentTarget.style.borderColor="var(--chat-msg-border)"; e.currentTarget.style.boxShadow="none"; }}
-              />
+              >
+                {isUltima && (
+                  <button
+                    type="button" onClick={() => fileInputRef.current?.click()} title={tChat("cameraTitle")}
+                    className="shrink-0 flex items-center justify-center transition-all hover:opacity-70 self-end"
+                    style={{ width:40, height:44, color:"var(--text-muted)", flexShrink:0 }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  </button>
+                )}
+                {!isUltima && (
+                  <div className="self-end flex items-center justify-center" style={{ width:14, height:44, flexShrink:0 }} />
+                )}
+                <textarea
+                  ref={textareaRef} value={input} rows={1}
+                  onChange={(e) => { setInput(e.target.value); adjustTextareaHeight(); }}
+                  onKeyDown={(e) => {
+                    if (e.key==="Enter"&&(e.ctrlKey||e.metaKey)) { e.preventDefault(); if(input.trim()||pendingImage) sendMessage(e as unknown as React.FormEvent); }
+                  }}
+                  placeholder={pendingImage ? tChat("placeholderWithImage") : tChat("placeholder")}
+                  disabled={loading}
+                  className="flex-1 py-3 pr-3 disabled:opacity-50 focus:outline-none"
+                  style={{
+                    background:"transparent", color:"var(--text)", resize:"none",
+                    minHeight:"44px", maxHeight:"240px", overflowY:"hidden",
+                    lineHeight:"1.5", fontSize:"16px",
+                    WebkitOverflowScrolling:"touch",
+                  }}
+                />
+              </div>
+
+              {/* Send button — circular floating */}
               <button
                 type="submit" disabled={loading||(!input.trim()&&!pendingImage)}
-                className="shrink-0 btn-glow flex items-center justify-center disabled:opacity-40 transition-all"
-                style={{ width:44, height:44, borderRadius:"50%", fontSize:"18px" }}
+                className="shrink-0 flex items-center justify-center transition-all disabled:opacity-35 active:scale-95"
+                style={{
+                  width:44, height:44, borderRadius:"50%",
+                  background: (input.trim()||pendingImage) && !loading
+                    ? `linear-gradient(135deg,${subjColor},${subjColor}cc)`
+                    : "var(--chat-msg-bg)",
+                  border: `1.5px solid ${(input.trim()||pendingImage) && !loading ? "transparent" : "var(--chat-msg-border)"}`,
+                  color: (input.trim()||pendingImage) && !loading ? "white" : "var(--text-muted)",
+                  boxShadow: (input.trim()||pendingImage) && !loading ? `0 3px 12px ${subjColor}45` : "none",
+                  transition: "background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease",
+                  alignSelf: "flex-end",
+                }}
               >
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 19V5M5 12l7-7 7 7"/>
+                </svg>
               </button>
             </form>
           </>

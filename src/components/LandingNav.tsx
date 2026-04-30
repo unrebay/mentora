@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import Logo from "@/components/Logo";
+import MeLogo from "@/components/MeLogo";
 import ThemeToggle from "@/components/ThemeToggle";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
@@ -96,7 +96,10 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
         {/* Main row */}
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 pl-5 pr-6 py-3">
           {/* Logo */}
-          <Logo size="sm" fontSize="1.44rem" textColor={isDark ? "white" : undefined} />
+          <a href="/" className="inline-flex items-baseline gap-0 select-none shrink-0">
+            <MeLogo height={20} colorM={isDark ? "rgba(255,255,255,0.95)" : undefined} />
+            <span style={{ fontFamily:"var(--font-playfair),Georgia,serif", fontSize:"1.25rem", fontWeight:700, letterSpacing:"-0.01em", lineHeight:1, color:isDark ? "rgba(255,255,255,0.95)" : "var(--text)" }}>ntora</span>
+          </a>
 
           {/* Desktop nav links */}
           <div
