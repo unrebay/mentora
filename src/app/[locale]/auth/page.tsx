@@ -42,8 +42,6 @@ const SUBS = [
   { id: "philosophy",       label: "Философия",          hex: 0xddaa44 },
 ];
 
-// 75% complete: first 13 subjects are orange, last 4 are dim
-const COMPLETED_COUNT = 13;
 
 const GRAPH_EDGES: [string, string][] = [
   ["russian-history","world-history"],["russian-history","literature"],
@@ -77,332 +75,227 @@ const GRAPH_EDGES: [string, string][] = [
   ["philosophy","discovery"],["philosophy","world-history"],
 ];
 
+// ── Fake 70% complete profile (12 of 17 subjects have XP) ────────────────────
+const FAKE_ACTIVE = new Set([
+  "russian-history","world-history","mathematics","physics",
+  "chemistry","biology","russian-language","literature",
+  "english","social-studies","geography","computer-science",
+]);
+
 // ── Auth Galaxy Background (Three.js) ────────────────────────────────────────
 function AuthGalaxy() {
-  // Inner ref — position:relative div inside fixed wrapper (same pattern as KnowledgeGraph3D)
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    let animId = 0;
+    let animId   = 0;
     let disposed = false;
-    let canvas: HTMLCanvasElement | null = null;
-    let onMMFn: ((e: MouseEvent) => void) | null = null;
-    let onRSFn: (() => void) | null = null;
+    let onMMFn:  ((e: MouseEvent) => void) | null = null;
+    let onTMFn:  ((e: TouchEvent) => void) | null = null;
+    let onRSFn:  (() => void) | null = null;
 
     async function init() {
       const THREE = await import("three");
-      if (disposed) return;
+      if (disposed || !container) return;
 
-      const w = container.clientWidth  || window.innerWidth  || 1280;
-      const h = container.clientHeight || window.innerHeight || 800;
+      const w = container.clientWidth  || window.innerWidth;
+      const h = container.clientHeight || window.innerHeight;
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(w, h);
-      renderer.setClearColor(0x04060f, 1);
-      canvas = renderer.domElement;
-      Object.assign(canvas.style, {
-        position: "absolute", top: "0", left: "0",
-        width: "100%", height: "100%",
-        display: "block",
+      renderer.setClearColor(0x050a14, 1);
+      Object.assign(renderer.domElement.style, {
+        position: "absolute", top: "0", left: "0", width: "100%", height: "100%", display: "block",
       });
-      container.appendChild(canvas);
+      container.appendChild(renderer.domElement);
 
       const scene  = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(58, w / h, 0.1, 1000);
-      // Pulled back further + tilted up slightly to show full galaxy
-      camera.position.set(0, 2.5, 30);
+      scene.background = new THREE.Color(0x050a14);
+      const camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 1000);
+      camera.position.set(0, 3.0, 26);
       camera.lookAt(0, 0, 0);
 
       const ADD = THREE.AdditiveBlending;
       const mkMat = (color: number, op: number) =>
         new THREE.MeshBasicMaterial({ color, transparent: true, opacity: op, blending: ADD, depthWrite: false });
 
+      function fibSph(n: number, r: number): THREE.Vector3[] {
+        const pts: THREE.Vector3[] = [];
+        const phi = Math.PI * (3 - Math.sqrt(5));
+        for (let i = 0; i < n; i++) {
+          const y = 1 - (i / (n-1)) * 2;
+          const rad = Math.sqrt(Math.max(0, 1-y*y));
+          pts.push(new THREE.Vector3(Math.cos(phi*i)*rad*r, y*r, Math.sin(phi*i)*rad*r));
+        }
+        return pts;
+      }
+
       const mainGrp = new THREE.Group();
       const bgGrp   = new THREE.Group();
       scene.add(mainGrp);
       scene.add(bgGrp);
 
-      // ── Atmosphere spheres ────────────────────────────────────────────────
-      for (const [r, color, op] of [[90,0x1a3a7a,0.06],[60,0x0d2255,0.08],[45,0x18083a,0.04]] as [number,number,number][]) {
-        scene.add(new THREE.Mesh(new THREE.SphereGeometry(r, 20, 20), new THREE.MeshBasicMaterial({
-          color, transparent: true, opacity: op, blending: ADD, depthWrite: false, side: THREE.BackSide,
+      // ── Atmosphere ───────────────────────────────────────────────────────
+      for (const [r, color, op] of [[90,0x1a3a7a,0.07],[60,0x0d2255,0.10],[45,0x18083a,0.05]] as [number,number,number][]) {
+        scene.add(new THREE.Mesh(new THREE.SphereGeometry(r,20,20), new THREE.MeshBasicMaterial({
+          color, transparent:true, opacity:op, blending:ADD, depthWrite:false, side:THREE.BackSide,
         })));
       }
 
-      // ── Background stars ──────────────────────────────────────────────────
-      function mkStars(count: number, rMin: number, rMax: number, color: number, size: number, op: number) {
-        const geo = new THREE.BufferGeometry();
-        const pos = new Float32Array(count * 3);
-        function rng(seed: number) { const x = Math.sin(seed) * 73856; return x - Math.floor(x); }
-        for (let i = 0; i < count; i++) {
-          const r  = rMin + rng(i * 3.7 + 1) * (rMax - rMin);
-          const th = rng(i * 7.1 + 2) * Math.PI * 2;
-          const ph = Math.acos(2 * rng(i * 11.3 + 3) - 1);
-          pos[i*3]   = r * Math.sin(ph) * Math.cos(th);
-          pos[i*3+1] = r * Math.sin(ph) * Math.sin(th);
-          pos[i*3+2] = r * Math.cos(ph);
-        }
-        geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-        bgGrp.add(new THREE.Points(geo, new THREE.PointsMaterial({
-          color, size, transparent: true, opacity: op, blending: ADD, depthWrite: false, sizeAttenuation: false,
-        })));
-      }
-      mkStars(16000, 35, 300, 0xffffff, 1.5, 0.22);
-      mkStars(2500,  20,  80, 0xaabbff, 1.8, 0.14);
-      mkStars(400,   15,  40, 0xfff0cc, 2.4, 0.24);
-      mkStars(800,   25, 150, 0x88aaff, 1.2, 0.11);
-
-      // Milky Way band
-      {
-        const rngMW = (s: number) => { const x = Math.sin(s) * 73856; return x - Math.floor(x); };
-        const geo = new THREE.BufferGeometry();
-        const pos = new Float32Array(6000 * 3);
-        for (let i = 0; i < 6000; i++) {
-          const r = 80 + rngMW(i * 2.1) * 200;
-          const a = rngMW(i * 5.3) * Math.PI * 2;
-          const y = (rngMW(i * 8.7) - 0.5) * 26;
-          pos[i*3] = Math.cos(a)*r; pos[i*3+1] = y; pos[i*3+2] = Math.sin(a)*r;
-        }
-        geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-        bgGrp.add(new THREE.Points(geo, new THREE.PointsMaterial({
-          color: 0xaabbff, size: 1.1, transparent: true, opacity: 0.07, blending: ADD, depthWrite: false, sizeAttenuation: false,
-        })));
-      }
-
-      // ── Nebula blobs ───────────────────────────────────────────────────────
-      const nebulas = [
-        { cx:  20, cy:  8,  cz: -18, r: 12, col: 0x1a3a9a, count: 500, op: 0.20, sz: 2.4 },
-        { cx: -22, cy: -5,  cz:  12, r: 10, col: 0x5a0a8a, count: 400, op: 0.18, sz: 2.2 },
-        { cx:   4, cy:  20, cz: -22, r:  9, col: 0x0a3a4a, count: 350, op: 0.16, sz: 2.0 },
-        { cx: -10, cy: -20, cz: -12, r:  8, col: 0x442210, count: 280, op: 0.15, sz: 1.9 },
-        { cx:  26, cy: -8,  cz:  16, r: 10, col: 0x0a2255, count: 360, op: 0.18, sz: 2.3 },
-      ];
-      function rng(s: number) { const x = Math.sin(s) * 73856; return x - Math.floor(x); }
-      let seed = 0;
-      for (const nb of nebulas) {
+      // ── Nebulae ──────────────────────────────────────────────────────────
+      for (const nb of [
+        { cx:22,cy:10,cz:-18,r:14,col:0x1a3a9a,count:600,op:0.22,sz:2.5 },
+        { cx:-25,cy:-5,cz:14,r:12,col:0x5a0a8a,count:480,op:0.20,sz:2.3 },
+        { cx:4,cy:24,cz:-25,r:11,col:0x0a3a4a,count:420,op:0.18,sz:2.2 },
+        { cx:-12,cy:-22,cz:-14,r:9,col:0x442210,count:300,op:0.16,sz:2.0 },
+        { cx:28,cy:-10,cz:18,r:12,col:0x0a2255,count:400,op:0.19,sz:2.4 },
+      ]) {
         const geo = new THREE.BufferGeometry();
         const pos = new Float32Array(nb.count * 3);
         for (let i = 0; i < nb.count; i++) {
-          const u1 = Math.max(1e-10, rng(seed++)); const u2 = rng(seed++);
-          const g1 = Math.sqrt(-2*Math.log(u1)) * Math.cos(2*Math.PI*u2);
-          const u3 = Math.max(1e-10, rng(seed++)); const u4 = rng(seed++);
-          const g2 = Math.sqrt(-2*Math.log(u3)) * Math.cos(2*Math.PI*u4);
-          const u5 = Math.max(1e-10, rng(seed++)); const u6 = rng(seed++);
-          const g3 = Math.sqrt(-2*Math.log(u5)) * Math.cos(2*Math.PI*u6);
-          pos[i*3]   = nb.cx + g1 * nb.r * 0.38;
-          pos[i*3+1] = nb.cy + g2 * nb.r * 0.38;
-          pos[i*3+2] = nb.cz + g3 * nb.r * 0.38;
+          const u1=Math.max(1e-10,Math.random()),u2=Math.random();
+          const g1=Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);
+          const u3=Math.max(1e-10,Math.random()),u4=Math.random();
+          const g2=Math.sqrt(-2*Math.log(u3))*Math.cos(2*Math.PI*u4);
+          const u5=Math.max(1e-10,Math.random()),u6=Math.random();
+          const g3=Math.sqrt(-2*Math.log(u5))*Math.cos(2*Math.PI*u6);
+          pos[i*3]=nb.cx+g1*nb.r*0.38; pos[i*3+1]=nb.cy+g2*nb.r*0.38; pos[i*3+2]=nb.cz+g3*nb.r*0.38;
         }
-        geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-        bgGrp.add(new THREE.Points(geo, new THREE.PointsMaterial({
-          color: nb.col, size: nb.sz, transparent: true, opacity: nb.op,
-          blending: ADD, depthWrite: false, sizeAttenuation: false,
-        })));
+        geo.setAttribute("position",new THREE.BufferAttribute(pos,3));
+        bgGrp.add(new THREE.Points(geo,new THREE.PointsMaterial({ color:nb.col,size:nb.sz,transparent:true,opacity:nb.op,blending:ADD,depthWrite:false,sizeAttenuation:false })));
       }
 
-      // ── Science positions (Fibonacci sphere, r=11.5 = larger spread) ─────
-      function fibSph(n: number, r: number): { x: number; y: number; z: number }[] {
-        const pts: { x: number; y: number; z: number }[] = [];
-        const phi = Math.PI * (3 - Math.sqrt(5));
-        for (let i = 0; i < n; i++) {
-          const y   = 1 - (i / (n - 1)) * 2;
-          const rad = Math.sqrt(Math.max(0, 1 - y * y));
-          pts.push({ x: Math.cos(phi*i)*rad*r, y: y*r, z: Math.sin(phi*i)*rad*r });
+      // ── Background stars ──────────────────────────────────────────────────
+      function mkStars(count: number,rMin: number,rMax: number,color: number,size: number,op: number) {
+        const geo=new THREE.BufferGeometry(); const pos=new Float32Array(count*3);
+        for (let i=0;i<count;i++) {
+          const r=rMin+Math.random()*(rMax-rMin),th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);
+          pos[i*3]=r*Math.sin(ph)*Math.cos(th); pos[i*3+1]=r*Math.sin(ph)*Math.sin(th); pos[i*3+2]=r*Math.cos(ph);
         }
-        return pts;
+        geo.setAttribute("position",new THREE.BufferAttribute(pos,3));
+        bgGrp.add(new THREE.Points(geo,new THREE.PointsMaterial({ color,size,transparent:true,opacity:op,blending:ADD,depthWrite:false,sizeAttenuation:false })));
       }
-      const sciPos = fibSph(SUBS.length, 11.5);
+      mkStars(18000,35,350,0xffffff,1.6,0.20);
+      mkStars(3000,20,80,0xaabbff,1.9,0.13);
+      mkStars(500,15,40,0xfff0cc,2.6,0.22);
+      mkStars(900,25,150,0x88aaff,1.3,0.10);
+      mkStars(300,10,30,0xffffff,3.5,0.32);
+      // Milky Way band
+      { const geo=new THREE.BufferGeometry(); const pos=new Float32Array(8000*3);
+        for (let i=0;i<8000;i++) { const r=80+Math.random()*200,a=Math.random()*Math.PI*2,y=(Math.random()-0.5)*28; pos[i*3]=Math.cos(a)*r; pos[i*3+1]=y; pos[i*3+2]=Math.sin(a)*r; }
+        geo.setAttribute("position",new THREE.BufferAttribute(pos,3));
+        bgGrp.add(new THREE.Points(geo,new THREE.PointsMaterial({ color:0xaabbff,size:1.2,transparent:true,opacity:0.07,blending:ADD,depthWrite:false,sizeAttenuation:false }))); }
+
+      // ── Science positions — radius 20 (2× larger than default 10) ────────
+      const sciPos = fibSph(SUBS.length, 20.0);
 
       // ── Nodes ─────────────────────────────────────────────────────────────
-      const sciGlows: THREE.Mesh[]   = [];
+      const sciGlows:   THREE.Mesh[] = [];
       const sciGlowOps: number[]     = [];
 
       for (let i = 0; i < SUBS.length; i++) {
-        const s       = SUBS[i];
-        const p       = sciPos[i];
-        const done    = i < COMPLETED_COUNT;
-        // Completed → vivid orange-amber, not done → original dim color
-        const cHex    = done ? 0xffa040 : s.hex;
-        const cOp     = done ? 0.98 : 0.72;
-        const glowOp  = done ? 0.28 : 0.11;
+        const s = SUBS[i]; const pos = sciPos[i];
+        const isActive = FAKE_ACTIVE.has(s.id);
+        const cHex = isActive ? 0xffa040 : s.hex;
+        const cOp  = isActive ? 0.98 : 0.82;
+        const glowOp = isActive ? 0.22 : 0.13;
         sciGlowOps.push(glowOp);
 
-        const pos3 = new THREE.Vector3(p.x, p.y, p.z);
-
-        // Core
-        mainGrp.add(Object.assign(
-          new THREE.Mesh(new THREE.SphereGeometry(done ? 0.38 : 0.28, 12, 10), mkMat(cHex, cOp)),
-          { position: pos3.clone() }
-        ));
+        // Visual core
+        const core = new THREE.Mesh(new THREE.SphereGeometry(isActive?0.34:0.26,12,10),mkMat(cHex,cOp));
+        core.position.copy(pos); mainGrp.add(core);
         // Glow
-        const glow = new THREE.Mesh(new THREE.SphereGeometry(done ? 0.95 : 0.72, 8, 6), mkMat(cHex, glowOp));
-        glow.position.copy(pos3);
-        mainGrp.add(glow);
-        sciGlows.push(glow);
-        // Outer halo (stronger for completed)
-        mainGrp.add(Object.assign(
-          new THREE.Mesh(new THREE.SphereGeometry(done ? 2.2 : 1.5, 6, 5), mkMat(cHex, done ? 0.07 : 0.020)),
-          { position: pos3.clone() }
-        ));
+        const glow = new THREE.Mesh(new THREE.SphereGeometry(isActive?0.85:0.65,8,6),mkMat(cHex,glowOp));
+        glow.position.copy(pos); mainGrp.add(glow); sciGlows.push(glow);
+        // Outer halo
+        const halo = new THREE.Mesh(new THREE.SphereGeometry(isActive?1.7:1.3,6,5),mkMat(cHex,isActive?0.06:0.025));
+        halo.position.copy(pos); mainGrp.add(halo);
       }
 
       // ── Edges ─────────────────────────────────────────────────────────────
-      const sciIdx = new Map(SUBS.map((s, i) => [s.id, i]));
-      const interE: [THREE.Vector3, THREE.Vector3][] = [];
-      for (const [idA, idB] of GRAPH_EDGES) {
-        const ia = sciIdx.get(idA), ib = sciIdx.get(idB);
-        if (ia == null || ib == null) continue;
-        const pa = new THREE.Vector3(sciPos[ia].x, sciPos[ia].y, sciPos[ia].z);
-        const pb = new THREE.Vector3(sciPos[ib].x, sciPos[ib].y, sciPos[ib].z);
-        interE.push([pa, pb]);
-        // Orange edge if both completed, else blue
-        const bothDone = ia < COMPLETED_COUNT && ib < COMPLETED_COUNT;
-        mainGrp.add(new THREE.Line(
-          new THREE.BufferGeometry().setFromPoints([pa, pb]),
-          new THREE.LineBasicMaterial({
-            color: bothDone ? 0xff8040 : 0x4466cc,
-            transparent: true, opacity: bothDone ? 0.28 : 0.18,
-            blending: ADD, depthWrite: false,
-          })
-        ));
+      const sciIdx = new Map(SUBS.map((s,i)=>[s.id,i]));
+      const interE: [THREE.Vector3,THREE.Vector3][] = [];
+      for (const [idA,idB] of GRAPH_EDGES) {
+        const ia=sciIdx.get(idA),ib=sciIdx.get(idB);
+        if (ia==null||ib==null) continue;
+        interE.push([sciPos[ia],sciPos[ib]]);
+        const bothActive=FAKE_ACTIVE.has(idA)&&FAKE_ACTIVE.has(idB);
+        mainGrp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([sciPos[ia],sciPos[ib]]),
+          new THREE.LineBasicMaterial({ color:bothActive?0xff8040:0x4466cc,transparent:true,opacity:bothActive?0.28:0.18,blending:ADD,depthWrite:false })));
       }
 
-      // ── Chain nodes on edges ─────────────────────────────────────────────
-      const CN  = 18;
-      const TCN = Math.max(interE.length * CN, 1);
-      const cnM = new THREE.InstancedMesh(
-        new THREE.SphereGeometry(0.030, 5, 4),
-        mkMat(0x88aaff, 0.60),
-        TCN
-      );
+      // Chain nodes on edges
+      const CN=22,TCN=Math.max(interE.length*CN,1);
+      const cnM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.032,5,4),mkMat(0x88aaff,0.65),TCN);
       mainGrp.add(cnM);
-      {
-        const dum = new THREE.Object3D(); let idx = 0;
-        const rr = (s: number) => { const x = Math.sin(s*17.3+5) * 73856; return x - Math.floor(x); };
-        for (const [a, b] of interE) for (let k = 0; k < CN; k++) {
-          const t = (k+1)/(CN+1);
-          const amp = 0.45 + rr(idx)*0.25;
-          dum.position.set(
-            a.x+(b.x-a.x)*t + (rr(idx*2)-0.5)*amp,
-            a.y+(b.y-a.y)*t + (rr(idx*2+1)-0.5)*amp,
-            a.z+(b.z-a.z)*t + (rr(idx*2+2)-0.5)*amp,
-          );
-          dum.scale.setScalar(1); dum.updateMatrix(); cnM.setMatrixAt(idx++, dum.matrix);
+      { const dum=new THREE.Object3D(); let idx=0;
+        for (const [a,b] of interE) for (let k=0;k<CN;k++) {
+          const t=(k+1)/(CN+1),amp=0.55+Math.random()*0.25;
+          dum.position.set(a.x+(b.x-a.x)*t+(Math.random()-.5)*amp,a.y+(b.y-a.y)*t+(Math.random()-.5)*amp,a.z+(b.z-a.z)*t+(Math.random()-.5)*amp);
+          dum.scale.setScalar(1); dum.updateMatrix(); cnM.setMatrixAt(idx++,dum.matrix);
         }
-        cnM.instanceMatrix.needsUpdate = true;
-      }
+        cnM.instanceMatrix.needsUpdate=true; }
 
-      // ── Impulse pulses along edges ─────────────────────────────────────────
-      const IMP_N = Math.min(50, interE.length * 2);
-      interface ImpState { edgeIdx: number; t: number; speed: number; orange: boolean }
-      function rr2(s: number) { const x = Math.sin(s*31.7) * 73856; return x - Math.floor(x); }
-      const impStates: ImpState[] = Array.from({ length: IMP_N }, (_, i) => {
-        const ei = i % interE.length;
-        const [a, b] = interE[ei];
-        const ia = sciIdx.get(SUBS.find(s => {
-          const sp = sciPos[sciIdx.get(s.id)!];
-          return Math.abs(sp.x - a.x) < 0.01;
-        })?.id ?? "")!;
-        const ib = sciIdx.get(SUBS.find(s => {
-          const sp = sciPos[sciIdx.get(s.id)!];
-          return Math.abs(sp.x - b.x) < 0.01;
-        })?.id ?? "")!;
-        return {
-          edgeIdx: ei,
-          t: rr2(i * 7.3),
-          speed: 0.0025 + rr2(i * 13.1) * 0.003,
-          orange: (ia ?? 0) < COMPLETED_COUNT && (ib ?? 0) < COMPLETED_COUNT,
-        };
-      });
-      const impIM     = new THREE.InstancedMesh(new THREE.SphereGeometry(0.12, 5, 4), mkMat(0xffc070, 0.92), IMP_N);
-      const impIMblue = new THREE.InstancedMesh(new THREE.SphereGeometry(0.12, 5, 4), mkMat(0xaaccff, 0.88), IMP_N);
-      const impGlowIM = new THREE.InstancedMesh(new THREE.SphereGeometry(0.32, 5, 4), mkMat(0xff8844, 0.28), IMP_N);
-      mainGrp.add(impIM); mainGrp.add(impIMblue); mainGrp.add(impGlowIM);
-      const impD = new THREE.Object3D();
+      // Local clouds around each node
+      const CPER=80,TIN=SUBS.length*CPER;
+      const inM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.024,4,3),mkMat(0xffffff,0.22),TIN);
+      mainGrp.add(inM);
+      { const dum=new THREE.Object3D();
+        for (let si=0;si<SUBS.length;si++) { const sp=sciPos[si];
+          for (let j=0;j<CPER;j++) {
+            const r=0.5+Math.random()*2.0,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);
+            dum.position.set(sp.x+r*Math.sin(ph)*Math.cos(th),sp.y+r*Math.sin(ph)*Math.sin(th),sp.z+r*Math.cos(ph));
+            dum.scale.setScalar(1); dum.updateMatrix(); inM.setMatrixAt(si*CPER+j,dum.matrix);
+          }
+        }
+        inM.instanceMatrix.needsUpdate=true; }
+
+      // ── Impulse pulses ────────────────────────────────────────────────────
+      const IMP_N=Math.min(40,interE.length*2);
+      interface ImpState { edgeIdx:number; t:number; speed:number }
+      const impStates: ImpState[]=Array.from({length:IMP_N},(_,i)=>({ edgeIdx:i%interE.length,t:i/IMP_N,speed:0.0022+Math.random()*0.0038 }));
+      const impIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.11,5,4),mkMat(0xaaccff,0.90),IMP_N);
+      const impGlowIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.28,5,4),mkMat(0x4466cc,0.30),IMP_N);
+      mainGrp.add(impIM); mainGrp.add(impGlowIM);
+      const impD=new THREE.Object3D();
 
       // ── Mouse parallax ────────────────────────────────────────────────────
-      let targetRotX = 0.18, targetRotY = 0.0;
-      let currentRotX = 0.18, currentRotY = 0.0;
-
-      onMMFn = (e: MouseEvent) => {
-        targetRotY  = ((e.clientX / window.innerWidth)  - 0.5) * 2 * 0.30;
-        targetRotX  = 0.18 + ((e.clientY / window.innerHeight) - 0.5) * 2 * 0.18;
-      };
-      onRSFn = () => {
-        const nw = container.clientWidth  || window.innerWidth;
-        const nh = container.clientHeight || window.innerHeight;
-        camera.aspect = nw / nh; camera.updateProjectionMatrix(); renderer.setSize(nw, nh);
-      };
-      window.addEventListener("mousemove", onMMFn);
-      window.addEventListener("resize",    onRSFn);
+      let targetRotX=0.20,targetRotY=0.0,currentRotX=0.20,currentRotY=0.0;
+      onMMFn=(e:MouseEvent)=>{ targetRotY=((e.clientX/window.innerWidth)-.5)*2*0.55; targetRotX=0.20+((e.clientY/window.innerHeight)-.5)*2*0.30; };
+      onTMFn=(e:TouchEvent)=>{ if(!e.touches.length)return; targetRotY=((e.touches[0].clientX/window.innerWidth)-.5)*2*0.55; targetRotX=0.20+((e.touches[0].clientY/window.innerHeight)-.5)*2*0.30; };
+      onRSFn=()=>{ const nw=container.clientWidth||window.innerWidth,nh=container.clientHeight||window.innerHeight; camera.aspect=nw/nh; camera.updateProjectionMatrix(); renderer.setSize(nw,nh); };
+      window.addEventListener("mousemove",onMMFn);
+      window.addEventListener("touchmove",onTMFn,{passive:true});
+      window.addEventListener("resize",onRSFn);
 
       // ── Animation loop ────────────────────────────────────────────────────
-      const clock = new THREE.Clock();
-
+      const clock=new THREE.Clock();
       function animate() {
-        animId = requestAnimationFrame(animate);
-        const t = clock.getElapsedTime();
-
-        currentRotX += (targetRotX - currentRotX) * 0.03;
-        currentRotY += (targetRotY - currentRotY) * 0.03;
-        targetRotY  += 0.00045; // very slow auto-spin
-        mainGrp.rotation.x = currentRotX;
-        mainGrp.rotation.y = currentRotY;
-        bgGrp.rotation.x   = currentRotX * 0.08;
-        bgGrp.rotation.y   = currentRotY * 0.08;
-
-        // Pulse glows
-        for (let i = 0; i < sciGlows.length; i++) {
-          const done = i < COMPLETED_COUNT;
-          sciGlows[i].scale.setScalar(1 + (done ? 0.12 : 0.06) * Math.sin(t * 1.4 + i * 0.8));
-          (sciGlows[i].material as THREE.MeshBasicMaterial).opacity =
-            sciGlowOps[i] * (0.80 + 0.20 * Math.sin(t * 2.0 + i));
+        animId=requestAnimationFrame(animate);
+        const t=clock.getElapsedTime();
+        currentRotX+=(targetRotX-currentRotX)*0.04;
+        currentRotY+=(targetRotY-currentRotY)*0.04;
+        targetRotY+=0.00070;
+        mainGrp.rotation.x=currentRotX; mainGrp.rotation.y=currentRotY;
+        bgGrp.rotation.x=currentRotX*0.10; bgGrp.rotation.y=currentRotY*0.10;
+        for (let i=0;i<sciGlows.length;i++) {
+          sciGlows[i].scale.setScalar(1+0.09*Math.sin(t*1.5+i*0.72));
+          (sciGlows[i].material as THREE.MeshBasicMaterial).opacity=sciGlowOps[i]*(0.85+0.15*Math.sin(t*2.1+i));
         }
-
-        // Impulse pulses
-        for (let i = 0; i < IMP_N; i++) {
-          const s = impStates[i];
-          s.t += s.speed;
-          if (s.t > 1.08) {
-            s.t = -0.08;
-            s.edgeIdx = Math.floor(rr2(i * t * 0.01 + i) * interE.length) % interE.length;
-            s.speed = 0.0025 + rr2(i * t * 0.02) * 0.003;
-          }
-          const visible = s.t >= 0 && s.t <= 1;
-          if (visible) {
-            const [ea, eb] = interE[s.edgeIdx];
-            impD.position.lerpVectors(ea, eb, s.t);
-            const fade = Math.sin(Math.max(0, Math.min(1, s.t)) * Math.PI);
-            impD.scale.setScalar(Math.max(0.001, fade * 1.0));
-            impD.updateMatrix();
-          } else {
-            impD.position.set(0, 0, 0); impD.scale.setScalar(0.001); impD.updateMatrix();
-          }
-          if (s.orange) {
-            impIM.setMatrixAt(i, impD.matrix);
-            impGlowIM.setMatrixAt(i, impD.matrix);
-            const blank = new THREE.Object3D();
-            blank.position.set(0,0,0); blank.scale.setScalar(0.001); blank.updateMatrix();
-            impIMblue.setMatrixAt(i, blank.matrix);
-          } else {
-            impIMblue.setMatrixAt(i, impD.matrix);
-            const blank = new THREE.Object3D();
-            blank.position.set(0,0,0); blank.scale.setScalar(0.001); blank.updateMatrix();
-            impIM.setMatrixAt(i, blank.matrix);
-            impGlowIM.setMatrixAt(i, blank.matrix);
-          }
+        for (let i=0;i<IMP_N;i++) {
+          const s=impStates[i]; s.t+=s.speed;
+          if (s.t>1.08) { s.t=-0.08; s.edgeIdx=Math.floor(Math.random()*interE.length); s.speed=0.0022+Math.random()*0.0038; }
+          const vis=s.t>=0&&s.t<=1;
+          if (vis) { const[ea,eb]=interE[s.edgeIdx]; impD.position.lerpVectors(ea,eb,s.t); const fade=Math.sin(Math.max(0,Math.min(1,s.t))*Math.PI); impD.scale.setScalar(Math.max(0.001,fade*1.1)); impD.updateMatrix(); }
+          else { impD.position.set(0,0,0); impD.scale.setScalar(0.001); impD.updateMatrix(); }
+          impIM.setMatrixAt(i,impD.matrix); impGlowIM.setMatrixAt(i,impD.matrix);
         }
-        impIM.instanceMatrix.needsUpdate     = true;
-        impIMblue.instanceMatrix.needsUpdate = true;
-        impGlowIM.instanceMatrix.needsUpdate = true;
-
-        renderer.render(scene, camera);
+        impIM.instanceMatrix.needsUpdate=true; impGlowIM.instanceMatrix.needsUpdate=true;
+        renderer.render(scene,camera);
       }
-
       animate();
     }
 
@@ -412,16 +305,16 @@ function AuthGalaxy() {
       disposed = true;
       cancelAnimationFrame(animId);
       if (onMMFn) window.removeEventListener("mousemove", onMMFn);
+      if (onTMFn) window.removeEventListener("touchmove", onTMFn);
       if (onRSFn) window.removeEventListener("resize",    onRSFn);
-      if (canvas && canvas.parentNode) canvas.parentNode.removeChild(canvas);
+      while (container.firstChild) container.removeChild(container.firstChild);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Outer fixed wrapper fills viewport; inner relative div gives container.clientWidth correct value
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden", background: "#04060f" }}>
-      <div ref={containerRef} style={{ position: "relative", width: "100%", height: "100%" }} />
+    <div style={{ position:"fixed", inset:0, zIndex:0, overflow:"hidden", background:"#050a14" }}>
+      <div ref={containerRef} style={{ position:"relative", width:"100%", height:"100%" }} />
     </div>
   );
 }
