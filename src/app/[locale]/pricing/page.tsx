@@ -57,22 +57,47 @@ export default async function PricingPage() {
   const proFeatures: string[] = pricingMsg.pro.features;
   const ultraFeatures: string[] = pricingMsg.ultra.features;
 
-  const Check = ({ dark }: { dark?: boolean }) => (
+  const Check = () => (
     <svg className="w-4 h-4 shrink-0 mt-0.5" viewBox="0 0 16 16" fill="none">
-      <circle cx="8" cy="8" r="7" fill={dark ? "rgba(255,255,255,0.12)" : "rgba(69,97,232,0.12)"} />
-      <path d="M5 8l2 2 4-4" stroke={dark ? "rgba(255,255,255,0.7)" : "#4561E8"} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="8" cy="8" r="7" fill="rgba(107,143,255,0.15)" />
+      <path d="M5 8l2 2 4-4" stroke="#6B8FFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 
   return (
-    <div className="min-h-screen s-page t-primary">
+    <div className="min-h-screen" style={{ background: "#04060f", color: "#fff" }}>
+
+      {/* ── Ambient background blobs ── */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+        <div className="absolute" style={{
+          top: "-15%", left: "20%", width: 600, height: 600, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(69,97,232,0.18) 0%, transparent 65%)",
+          filter: "blur(40px)",
+        }} />
+        <div className="absolute" style={{
+          top: "40%", right: "-10%", width: 500, height: 500, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(159,122,255,0.12) 0%, transparent 65%)",
+          filter: "blur(50px)",
+        }} />
+        <div className="absolute" style={{
+          bottom: "10%", left: "-5%", width: 400, height: 400, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(255,122,0,0.07) 0%, transparent 65%)",
+          filter: "blur(40px)",
+        }} />
+      </div>
 
       {/* NAV */}
-      <LandingNav alwaysLight isLoggedIn={isLoggedIn} activePage="pricing" />
+      <div className="relative z-10">
+        <LandingNav isLoggedIn={isLoggedIn} activePage="pricing" />
+      </div>
 
       {/* HERO */}
-      <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-5 leading-[1.1]">
+      <section className="relative z-10 max-w-4xl mx-auto px-6 pt-24 pb-16 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6 text-xs font-bold tracking-widest uppercase"
+          style={{ background: "rgba(69,97,232,0.15)", border: "1px solid rgba(69,97,232,0.25)", color: "rgba(107,143,255,0.9)" }}>
+          {t("pricing.faqLabel")}
+        </div>
+        <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-5 leading-[1.1] text-white">
           {t("pricing.hero.title")}<br />
           <span style={{
             background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
@@ -84,18 +109,19 @@ export default async function PricingPage() {
             {t("pricing.hero.titleGradient")}
           </span>
         </h1>
-        <p className="text-lg t-muted max-w-lg mx-auto leading-relaxed">
+        <p className="text-lg max-w-lg mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
           {t("pricing.hero.subtitle")}
         </p>
       </section>
 
       {/* PROMO BANNER — Russian only */}
       {locale === "ru" && (
-        <section className="max-w-5xl mx-auto px-6 pb-6">
+        <section className="relative z-10 max-w-5xl mx-auto px-6 pb-6">
           <div className="relative overflow-hidden rounded-2xl px-5 py-4 flex flex-wrap items-center gap-3"
             style={{
-              background: "linear-gradient(135deg, rgba(69,97,232,0.12) 0%, rgba(159,122,255,0.10) 100%)",
-              border: "1px solid rgba(69,97,232,0.28)",
+              background: "linear-gradient(135deg, rgba(69,97,232,0.18) 0%, rgba(159,122,255,0.12) 100%)",
+              border: "1px solid rgba(107,143,255,0.2)",
+              backdropFilter: "blur(12px)",
             }}>
             <div className="absolute -top-6 left-8 w-32 h-16 rounded-full pointer-events-none"
               style={{ background: "rgba(69,97,232,0.18)", filter: "blur(24px)" }} />
@@ -106,15 +132,15 @@ export default async function PricingPage() {
               </svg>
             </div>
             <div className="relative z-10 flex-1 min-w-0">
-              <span className="font-bold text-sm" style={{ color: "var(--text)" }}>Только до 1 июня —</span>{" "}
-              <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                при покупке годового плана <strong style={{ color: "var(--brand)" }}>+3 месяца в подарок</strong>.
+              <span className="font-bold text-sm text-white">Только до 1 июня —</span>{" "}
+              <span className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+                при покупке годового плана <strong style={{ color: "#9BB4FF" }}>+3 месяца в подарок</strong>.
                 Платишь за 12 месяцев — пользуешься 15.
               </span>
             </div>
             <div className="relative z-10 flex-shrink-0">
               <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg"
-                style={{ background: "rgba(69,97,232,0.15)", border: "1px solid rgba(69,97,232,0.3)", color: "var(--brand)" }}>
+                style={{ background: "rgba(107,143,255,0.2)", border: "1px solid rgba(107,143,255,0.3)", color: "#9BB4FF" }}>
                 <svg viewBox="0 0 12 12" width="9" height="9" fill="currentColor">
                   <circle cx="6" cy="6" r="2.5" />
                   <circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5" />
@@ -127,29 +153,37 @@ export default async function PricingPage() {
       )}
 
       {/* PRICING CARDS */}
-      <section className="max-w-5xl mx-auto px-6 pb-8">
+      <section className="relative z-10 max-w-5xl mx-auto px-6 pb-8">
         <div className="grid md:grid-cols-3 gap-6 md:gap-4 items-stretch">
 
           {/* FREE */}
-          <div data-tilt data-tilt-strength="4" className="rounded-2xl p-7 flex flex-col border"
-            style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+          <div data-tilt data-tilt-strength="4" className="rounded-2xl p-7 flex flex-col"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              backdropFilter: "blur(16px)",
+            }}>
             <div className="mb-6">
-              <p className="text-[11px] font-bold t-muted tracking-[0.15em] uppercase mb-4">{t("pricing.free.name")}</p>
+              <p className="text-[11px] font-bold tracking-[0.15em] uppercase mb-4" style={{ color: "rgba(255,255,255,0.4)" }}>{t("pricing.free.name")}</p>
               <div className="flex items-end gap-1.5">
-                <span className="text-5xl font-bold tracking-tight t-primary">{t("pricing.free.price")}</span>
+                <span className="text-5xl font-bold tracking-tight text-white">{t("pricing.free.price")}</span>
               </div>
-              <p className="text-sm t-muted mt-2">{t("pricing.freeDesc")}</p>
+              <p className="text-sm mt-2" style={{ color: "rgba(255,255,255,0.4)" }}>{t("pricing.freeDesc")}</p>
             </div>
             <Link
               href="/auth"
-              className="block text-center py-3 px-5 font-semibold rounded-xl transition-all duration-200 mb-8 text-sm border"
-              style={{ color: "var(--text-secondary)", borderColor: "var(--border)", background: "var(--bg-secondary)" }}
+              className="block text-center py-3 px-5 font-semibold rounded-xl transition-all duration-200 mb-8 text-sm"
+              style={{
+                color: "rgba(255,255,255,0.6)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(255,255,255,0.05)",
+              }}
             >
               {t("pricing.free.cta")}
             </Link>
             <ul className="space-y-3 flex-1">
               {freeFeatures.map((f: string) => (
-                <li key={f} className="flex items-start gap-2.5 text-sm t-secondary">
+                <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
                   <Check />{f}
                 </li>
               ))}
@@ -160,7 +194,7 @@ export default async function PricingPage() {
           <div data-tilt data-tilt-strength="4" className="relative rounded-[17px] p-[1.5px] flex flex-col mt-3 md:mt-0"
             style={{
               background: "linear-gradient(145deg, #6B8FFF, #4561E8 45%, #9F7AFF)",
-              boxShadow: "0 8px 40px rgba(69,97,232,0.25), 0 2px 8px rgba(69,97,232,0.15)",
+              boxShadow: "0 8px 48px rgba(69,97,232,0.35), 0 2px 8px rgba(69,97,232,0.2)",
             }}>
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
               <span className="text-white text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase"
@@ -168,21 +202,22 @@ export default async function PricingPage() {
                 {t("pricing.pro.badge")}
               </span>
             </div>
-            <div className="rounded-2xl p-7 flex flex-col flex-1" style={{ background: "var(--bg-card)" }}>
+            <div className="rounded-2xl p-7 flex flex-col flex-1" style={{ background: "#080d1e" }}>
               <div className="mb-6">
-                <p className="text-[11px] font-bold tracking-[0.15em] uppercase mb-4" style={{ color: "var(--brand)" }}>
+                <p className="text-[11px] font-bold tracking-[0.15em] uppercase mb-4" style={{ color: "#6B8FFF" }}>
                   {t("pricing.pro.name")}
                 </p>
                 <div className="flex items-end gap-1.5">
-                  <span className="text-5xl font-bold tracking-tight t-primary">{t("pricing.pro.price")}</span>
-                  <span className="t-muted text-sm mb-2">{t("pricing.pro.period")}</span>
+                  <span className="text-5xl font-bold tracking-tight text-white">{t("pricing.pro.price")}</span>
+                  <span className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>{t("pricing.pro.period")}</span>
                 </div>
                 {locale === "ru" && (
-                  <div className="flex items-center gap-2 mt-3 rounded-xl px-3 py-2.5" style={{ background: "var(--bg-secondary)" }}>
-                    <span className="text-sm font-semibold t-secondary">2 990 ₽ / год</span>
-                    <span className="t-muted text-xs">·</span>
-                    <span className="text-xs t-muted">249 ₽/мес</span>
-                    <span className="ml-auto text-[11px] font-bold px-2 py-0.5 rounded-lg" style={{ color: "#15803d", background: "rgba(21,128,61,0.1)" }}>−37%</span>
+                  <div className="flex items-center gap-2 mt-3 rounded-xl px-3 py-2.5"
+                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    <span className="text-sm font-semibold text-white/80">2 990 ₽ / год</span>
+                    <span className="text-white/20 text-xs">·</span>
+                    <span className="text-xs text-white/40">249 ₽/мес</span>
+                    <span className="ml-auto text-[11px] font-bold text-emerald-400 bg-emerald-900/30 px-2 py-0.5 rounded-lg">−37%</span>
                   </div>
                 )}
               </div>
@@ -192,7 +227,7 @@ export default async function PricingPage() {
               </div>
               <ul className="space-y-3 flex-1">
                 {proFeatures.map((f: string) => (
-                  <li key={f} className="flex items-start gap-2.5 text-sm t-secondary">
+                  <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>
                     <Check />{f}
                   </li>
                 ))}
@@ -256,7 +291,7 @@ export default async function PricingPage() {
                   const isSoon = locale === "ru" ? (i === 2 || i === 3) : false;
                   return (
                     <li key={label} className="flex items-start gap-2.5 text-sm text-white/70">
-                      <Check dark />
+                      <Check />
                       <span className="flex items-center gap-2 flex-wrap">
                         {label}
                         {isSoon && (
@@ -294,14 +329,18 @@ export default async function PricingPage() {
 
         {/* STREAK PROMO — Russian only */}
         {locale === "ru" && (
-          <div className="mt-4 flex items-center gap-4 rounded-2xl px-6 py-4 border"
-            style={{ background: "linear-gradient(135deg, rgba(255,122,0,0.06) 0%, rgba(255,80,0,0.04) 100%)", borderColor: "rgba(255,122,0,0.2)" }}>
-            <div className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,122,0,0.12)" }}>
+          <div className="mt-4 flex items-center gap-4 rounded-2xl px-6 py-4"
+            style={{
+              background: "linear-gradient(135deg, rgba(255,122,0,0.1) 0%, rgba(255,80,0,0.06) 100%)",
+              border: "1px solid rgba(255,122,0,0.2)",
+              backdropFilter: "blur(12px)",
+            }}>
+            <div className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,122,0,0.15)" }}>
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="url(#flameGrad)" />
+                <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="url(#flameGrad2)" />
                 <path d="M12 14.5c0 1.105-.895 2-2 2s-2-.895-2-2c0-1.5 2-3 2-3s2 1.5 2 3z" fill="rgba(255,200,80,0.9)" />
                 <defs>
-                  <linearGradient id="flameGrad" x1="12" y1="2" x2="12" y2="17" gradientUnits="userSpaceOnUse">
+                  <linearGradient id="flameGrad2" x1="12" y1="2" x2="12" y2="17" gradientUnits="userSpaceOnUse">
                     <stop offset="0%" stopColor="#FF4500" />
                     <stop offset="100%" stopColor="#FF9800" />
                   </linearGradient>
@@ -309,8 +348,8 @@ export default async function PricingPage() {
               </svg>
             </div>
             <div>
-              <p className="font-semibold text-sm" style={{ color: "rgba(180,80,0,1)" }}>Стрик 7 дней → 3 дня Pro бесплатно</p>
-              <p className="text-xs mt-0.5" style={{ color: "rgba(200,100,20,0.8)" }}>
+              <p className="font-semibold text-sm" style={{ color: "rgba(255,160,60,1)" }}>Стрик 7 дней → 3 дня Pro бесплатно</p>
+              <p className="text-xs mt-0.5" style={{ color: "rgba(255,140,40,0.65)" }}>
                 Учись 7 дней подряд и получи 3 дня Pro без карты. Один раз на аккаунт.
               </p>
             </div>
@@ -319,22 +358,32 @@ export default async function PricingPage() {
 
         {/* SCHOOL CALLOUT — Russian only */}
         {locale === "ru" && (
-          <div className="mt-4 border rounded-2xl px-7 py-6" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+          <div className="mt-4 rounded-2xl px-7 py-6"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              backdropFilter: "blur(16px)",
+            }}>
             <div className="flex flex-col md:flex-row md:items-center gap-5">
               <div className="flex items-center gap-3 shrink-0">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "var(--text)" }}>
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ background: "rgba(107,143,255,0.15)", border: "1px solid rgba(107,143,255,0.2)" }}>
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#6B8FFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 14l9-5-9-5-9 5 9 5zm0 0v6m-4.243-3.172L12 20l4.243-2.828" />
                   </svg>
                 </div>
-                <p className="font-bold t-primary">Учебный тариф</p>
+                <p className="font-bold text-white">Учебный тариф</p>
               </div>
-              <p className="flex-1 text-sm t-muted leading-relaxed">
+              <p className="flex-1 text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
                 Особая версия Pro для школ и учебных заведений. Включает расширенную аналитику и мониторинг прогресса каждого ученика в реальном времени.
               </p>
               <a href="mailto:hello@mentora.su?subject=Учебный тариф"
-                className="shrink-0 px-5 py-2.5 text-sm font-semibold rounded-xl transition-colors whitespace-nowrap"
-                style={{ background: "var(--text)", color: "var(--bg)" }}>
+                className="shrink-0 px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 whitespace-nowrap"
+                style={{
+                  background: "rgba(107,143,255,0.15)",
+                  border: "1px solid rgba(107,143,255,0.25)",
+                  color: "#9BB4FF",
+                }}>
                 Подключить школу <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline", verticalAlign: "middle", marginLeft: 2 }}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </a>
             </div>
@@ -345,16 +394,16 @@ export default async function PricingPage() {
 
       {/* FAQ — Russian only */}
       {locale === "ru" && (
-        <section className="max-w-2xl mx-auto px-6 pt-16 pb-20">
+        <section className="relative z-10 max-w-2xl mx-auto px-6 pt-16 pb-20">
           <div className="text-center mb-10">
-            <p className="text-[11px] font-bold tracking-[0.15em] uppercase mb-3" style={{ color: "var(--brand)" }}>
+            <p className="text-[11px] font-bold tracking-[0.15em] uppercase mb-3" style={{ color: "rgba(107,143,255,0.7)" }}>
               {t("pricing.faqLabel")}
             </p>
-            <h2 className="text-3xl font-bold tracking-tight t-primary">{t("pricing.faqTitle")}</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-white">{t("pricing.faqTitle")}</h2>
           </div>
           <PricingFAQ />
           <div className="mt-12 flex flex-col items-center gap-3">
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t("pricing.supportQuestion")}</p>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>{t("pricing.supportQuestion")}</p>
             <div className="flex gap-2 flex-wrap justify-center items-start">
               <TelegramSupportButton label="Написать в поддержку" />
               <InstagramButton label="@mentora.su" />
@@ -364,7 +413,7 @@ export default async function PricingPage() {
       )}
 
       {/* FOOTER CTA */}
-      <section className="relative overflow-hidden py-24 px-6 text-center" style={{ background: "#04060f" }}>
+      <section className="relative z-10 overflow-hidden py-24 px-6 text-center" style={{ background: "rgba(0,0,0,0.3)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-64 rounded-full pointer-events-none"
           style={{ background: "radial-gradient(ellipse, rgba(69,97,232,0.2) 0%, transparent 70%)", top: "-40px" }} />
         <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full pointer-events-none"
@@ -398,8 +447,8 @@ export default async function PricingPage() {
         </div>
       </section>
 
-      <footer className="py-8 border-t" style={{ background: "var(--bg)", borderColor: "var(--border)" }}>
-        <div className="max-w-5xl mx-auto px-6 flex flex-col items-center gap-4 text-sm t-muted">
+      <footer className="relative z-10 py-8" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="max-w-5xl mx-auto px-6 flex flex-col items-center gap-4 text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
           <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
             <span>{t("landing.footerRights")}</span>
             <div className="flex gap-6">
