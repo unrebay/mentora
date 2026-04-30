@@ -94,6 +94,7 @@ const SN: Record<string, string> = {
   "physics":"Физика","chemistry":"Химия","biology":"Биология","russian-language":"Русский язык",
   "literature":"Литература","english":"Английский","social-studies":"Обществознание",
   "geography":"География","computer-science":"Информатика","astronomy":"Астрономия",
+  "discovery":"Кругозор","psychology":"Психология","economics":"Экономика","philosophy":"Философия",
 };
 const SUBS = Object.keys(SN);
 
