@@ -792,16 +792,13 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                 </button>
               )}
 
-              {/* 2. Input field — separate glass pill */}
+              {/* 2. Input field — transparent pill, just a border outline */}
               <div
                 className="flex-1 transition-all"
                 style={{
-                  background: "var(--bg-nav)",
-                  backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
-                  WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                  background: "transparent",
                   border: "1px solid var(--border-light)",
                   borderRadius: 22,
-                  boxShadow: "0 2px 12px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.12) inset",
                   overflow: "hidden",
                 }}
               >
