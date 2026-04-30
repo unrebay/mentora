@@ -77,19 +77,12 @@ const GRAPH_EDGES: [string, string][] = [
   ["discovery","astronomy"],["discovery","computer-science"],
   ["social-studies","geography"],["social-studies","english"],
   ["geography","astronomy"],["astronomy","physics"],["biology","chemistry"],
-  // Additional cross-discipline connections
-  ["english","computer-science"],
-  ["mathematics","social-studies"],
-  ["geography","physics"],
-  ["mathematics","biology"],
-  ["chemistry","computer-science"],
-  ["discovery","geography"],
-  ["physics","biology"],
-  ["literature","discovery"],
-  ["russian-language","discovery"],
-  ["astronomy","chemistry"],
-  ["english","social-studies"],
-  ["geography","russian-history"],
+  ["english","computer-science"],["mathematics","social-studies"],
+  ["geography","physics"],["mathematics","biology"],
+  ["chemistry","computer-science"],["discovery","geography"],
+  ["physics","biology"],["literature","discovery"],
+  ["russian-language","discovery"],["astronomy","chemistry"],
+  ["english","social-studies"],["geography","russian-history"],
 ];
 
 interface PopupState {
@@ -140,10 +133,8 @@ function PopupCard({ pop, onClose }: { pop: PopupState; onClose: () => void }) {
 
       {/* Body */}
       <div style={{ padding:"12px 16px 16px", display:"flex", flexDirection:"column", gap:12 }}>
-        {/* Description */}
         <p style={{ color:"rgba(255,255,255,0.55)", fontSize:12, lineHeight:1.6, margin:0 }}>{pop.description}</p>
 
-        {/* XP Progress */}
         <div>
           <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
             <span style={{ color:"rgba(255,255,255,0.35)", fontSize:11 }}>Прогресс</span>
@@ -156,30 +147,19 @@ function PopupCard({ pop, onClose }: { pop: PopupState; onClose: () => void }) {
           </div>
         </div>
 
-        {/* Topics */}
         <div>
           <p style={{ color:"rgba(255,255,255,0.35)", fontSize:11, margin:"0 0 8px 0" }}>Темы</p>
           <div style={{ display:"flex", flexWrap:"wrap", gap:5 }}>
             {pop.topics.map(t => (
-              <span
-                key={t}
-                style={{ padding:"3px 9px", borderRadius:20, fontSize:11, border:"1px solid rgba(255,255,255,0.12)", color:"rgba(255,255,255,0.65)" }}
-              >{t}</span>
+              <span key={t} style={{ padding:"3px 9px", borderRadius:20, fontSize:11, border:"1px solid rgba(255,255,255,0.12)", color:"rgba(255,255,255,0.65)" }}>{t}</span>
             ))}
           </div>
         </div>
 
-        {/* CTA */}
         {pop.xp > 0 ? (
-          <a
-            href={`/ru/learn/${pop.id}`}
-            style={{ display:"block", textAlign:"center", padding:"8px 0", borderRadius:10, background:color, color:"#000", fontSize:12, fontWeight:600, textDecoration:"none", opacity:0.92 }}
-          >Продолжить →</a>
+          <a href={`/ru/learn/${pop.id}`} style={{ display:"block", textAlign:"center", padding:"8px 0", borderRadius:10, background:color, color:"#000", fontSize:12, fontWeight:600, textDecoration:"none", opacity:0.92 }}>Продолжить →</a>
         ) : (
-          <a
-            href={`/ru/learn/${pop.id}`}
-            style={{ display:"block", textAlign:"center", padding:"8px 0", borderRadius:10, border:`1px solid ${color}55`, color:color, fontSize:12, fontWeight:600, textDecoration:"none" }}
-          >Начать изучение →</a>
+          <a href={`/ru/learn/${pop.id}`} style={{ display:"block", textAlign:"center", padding:"8px 0", borderRadius:10, border:`1px solid ${color}55`, color:color, fontSize:12, fontWeight:600, textDecoration:"none" }}>Начать изучение →</a>
         )}
       </div>
     </div>
@@ -189,23 +169,20 @@ function PopupCard({ pop, onClose }: { pop: PopupState; onClose: () => void }) {
 // ── Main component ─────────────────────────────────────────────────────────────
 export default function KnowledgeGraph3D({ className, userProgress }: Props) {
   const mountRef  = useRef<HTMLDivElement>(null);
-  const hovRef    = useRef<number | null>(null);       // raw hover index (in loop)
-  const sciScr    = useRef(SUBS.map(() => ({ x: 0, y: 0 }))); // projected screen coords
+  const hovRef    = useRef<number | null>(null);
+  const sciScr    = useRef(SUBS.map(() => ({ x: 0, y: 0 })));
   const setHovCb  = useRef<(i: number | null) => void>(() => {});
   const setPopCb  = useRef<(p: PopupState | null) => void>(() => {});
 
   const [hov, setHov] = useState<number | null>(null);
   const [pop, setPop] = useState<PopupState | null>(null);
 
-  // Derive active set at component level (needed in JSX)
   const activeIds = new Set<string>(
     (userProgress ?? []).filter(p => (p.xp_total ?? 0) > 0).map(p => p.subject)
   );
 
-  // keep callbacks stable for Three.js loop
   useEffect(() => { setHovCb.current = setHov; setPopCb.current = setPop; });
 
-  // Escape closes popup
   useEffect(() => {
     const fn = (e: KeyboardEvent) => { if (e.key === "Escape") setPop(null); };
     window.addEventListener("keydown", fn);
@@ -249,7 +226,7 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
       const scene  = new THREE.Scene();
       scene.background = new THREE.Color(0x050a14);
       const camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 1000);
-      camera.position.set(0, 3.5, 28);
+      camera.position.set(0, 3.0, 26); // slightly closer for larger apparent galaxy
       camera.lookAt(0, 0, 0);
 
       const ADD = THREE.AdditiveBlending;
@@ -279,25 +256,38 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         })));
       }
 
-      // ── Nebulae (coloured soft blobs in background) ────────────────────────────
-      // Large BackSide spheres placed at various positions in bgGrp
-      const nebulaData: [number, number, number, number, number, number][] = [
-        [55, 0x1a3a8a, 0.055,  50,  20, -30],
-        [42, 0x6a1a9a, 0.048, -55,  -8,  35],
-        [48, 0x0a4a3a, 0.052,  12,  42, -60],
-        [38, 0x5a200a, 0.040, -28, -35, -45],
-        [50, 0x0a2255, 0.060,  38, -18,  55],
-        [32, 0x1a0a44, 0.050, -18,  50,  30],
+      // ── Nebulae — soft gaussian particle clouds for cosmic atmosphere ──────────
+      const nebulaConfigs = [
+        { cx:  22, cy:  10, cz: -18, r: 14, col: 0x1a3a9a, count: 600, op: 0.22, sz: 2.5 },
+        { cx: -25, cy:  -5, cz:  14, r: 12, col: 0x5a0a8a, count: 480, op: 0.20, sz: 2.3 },
+        { cx:   4, cy:  24, cz: -25, r: 11, col: 0x0a3a4a, count: 420, op: 0.18, sz: 2.2 },
+        { cx: -12, cy: -22, cz: -14, r:  9, col: 0x442210, count: 300, op: 0.16, sz: 2.0 },
+        { cx:  28, cy: -10, cz:  18, r: 12, col: 0x0a2255, count: 400, op: 0.19, sz: 2.4 },
+        { cx: -18, cy:  16, cz:  22, r: 10, col: 0x1a0a44, count: 320, op: 0.17, sz: 2.1 },
       ];
-      for (const [r, col, op, nx, ny, nz] of nebulaData) {
-        const mesh = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), new THREE.MeshBasicMaterial({
-          color: col, transparent:true, opacity:op, blending:ADD, depthWrite:false, side:THREE.BackSide,
-        }));
-        mesh.position.set(nx, ny, nz);
-        bgGrp.add(mesh);
+      for (const nb of nebulaConfigs) {
+        const geo = new THREE.BufferGeometry();
+        const pos = new Float32Array(nb.count * 3);
+        for (let i = 0; i < nb.count; i++) {
+          // Box-Muller gaussian distribution for soft cloud look
+          const u1 = Math.max(1e-10, Math.random()), u2 = Math.random();
+          const g1 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+          const u3 = Math.max(1e-10, Math.random()), u4 = Math.random();
+          const g2 = Math.sqrt(-2 * Math.log(u3)) * Math.cos(2 * Math.PI * u4);
+          const u5 = Math.max(1e-10, Math.random()), u6 = Math.random();
+          const g3 = Math.sqrt(-2 * Math.log(u5)) * Math.cos(2 * Math.PI * u6);
+          pos[i*3]   = nb.cx + g1 * nb.r * 0.38;
+          pos[i*3+1] = nb.cy + g2 * nb.r * 0.38;
+          pos[i*3+2] = nb.cz + g3 * nb.r * 0.38;
+        }
+        geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+        bgGrp.add(new THREE.Points(geo, new THREE.PointsMaterial({
+          color: nb.col, size: nb.sz, transparent: true, opacity: nb.op,
+          blending: ADD, depthWrite: false, sizeAttenuation: false,
+        })));
       }
 
-      // ── Background stars (much dimmer) ────────────────────────────────────────
+      // ── Background stars (dimmed) ─────────────────────────────────────────────
       function mkStars(count: number, rMin: number, rMax: number, color: number, size: number, op: number) {
         const geo = new THREE.BufferGeometry();
         const pos = new Float32Array(count * 3);
@@ -311,13 +301,12 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
           color, size, transparent:true, opacity:op, blending:ADD, depthWrite:false, sizeAttenuation:false,
         })));
       }
-      // Stars dimmed ~50% vs first version
-      mkStars(18000, 35, 350, 0xffffff, 1.6, 0.25);
-      mkStars(3000,  20,  80, 0xaabbff, 1.9, 0.16);
-      mkStars(500,   15,  40, 0xfff0cc, 2.6, 0.28);
-      mkStars(900,   25, 150, 0x88aaff, 1.3, 0.12);
-      mkStars(300,   10,  30, 0xffffff, 3.5, 0.40);
-      // Milky Way
+      mkStars(18000, 35, 350, 0xffffff, 1.6, 0.20);
+      mkStars(3000,  20,  80, 0xaabbff, 1.9, 0.13);
+      mkStars(500,   15,  40, 0xfff0cc, 2.6, 0.22);
+      mkStars(900,   25, 150, 0x88aaff, 1.3, 0.10);
+      mkStars(300,   10,  30, 0xffffff, 3.5, 0.32);
+      // Milky Way band
       {
         const geo = new THREE.BufferGeometry();
         const pos = new Float32Array(8000*3);
@@ -326,53 +315,61 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
           pos[i*3]=Math.cos(a)*r; pos[i*3+1]=y; pos[i*3+2]=Math.sin(a)*r;
         }
         geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-        bgGrp.add(new THREE.Points(geo, new THREE.PointsMaterial({ color:0xaabbff, size:1.2, transparent:true, opacity:0.09, blending:ADD, depthWrite:false, sizeAttenuation:false })));
+        bgGrp.add(new THREE.Points(geo, new THREE.PointsMaterial({ color:0xaabbff, size:1.2, transparent:true, opacity:0.07, blending:ADD, depthWrite:false, sizeAttenuation:false })));
       }
 
-      // ── Science positions ──────────────────────────────────────────────────────
-      const sciPos = fibSph(SUBS.length, 8.0);
+      // ── Science positions (radius 10.0 = 25% larger sphere) ───────────────────
+      const sciPos = fibSph(SUBS.length, 10.0);
 
       // ── Science nodes ──────────────────────────────────────────────────────────
       const sciGlows:    THREE.Mesh[] = [];
-      const sciCores:    THREE.Mesh[] = []; // for raycasting (hit area)
+      const sciCores:    THREE.Mesh[] = [];
+      const sciGlowOps:  number[]     = []; // base opacity per node
 
       for (let i = 0; i < SUBS.length; i++) {
         const s = SUBS[i]; const pos = sciPos[i];
         const isActive = activeSet.has(s.id); const isFull = FULL_SUBJECTS.has(s.id);
         const cHex = isActive ? 0xffa040 : s.hex;
-        const cOp  = isActive ? 0.95 : isFull ? 0.85 : 0.65;
+        // ↑ higher contrast: inactive 0.65→0.82, active 0.95→0.98
+        const cOp  = isActive ? 0.98 : isFull ? 0.90 : 0.82;
+        const glowOp = isActive ? 0.22 : 0.13;
+        sciGlowOps.push(glowOp);
 
-        // Invisible hit sphere (r=1.0 for easy clicking)
-        // depthWrite:false is critical — without it the invisible sphere occludes the visual core
+        // Invisible hit sphere (depthWrite:false is critical)
         const hitSph = new THREE.Mesh(new THREE.SphereGeometry(1.0, 6, 5), new THREE.MeshBasicMaterial({ transparent:true, opacity:0, depthWrite:false }));
         hitSph.position.copy(pos);
         mainGrp.add(hitSph);
         sciCores.push(hitSph);
 
-        // Visual core
-        const core = new THREE.Mesh(new THREE.SphereGeometry(0.30, 12, 10), mkMat(cHex, cOp));
+        // Visual core (slightly larger: 0.30→0.34)
+        const core = new THREE.Mesh(new THREE.SphereGeometry(0.34, 12, 10), mkMat(cHex, cOp));
         core.position.copy(pos); mainGrp.add(core);
         // Glow
-        const glow = new THREE.Mesh(new THREE.SphereGeometry(0.80, 8, 6), mkMat(cHex, isActive ? 0.14 : 0.08));
+        const glow = new THREE.Mesh(new THREE.SphereGeometry(0.85, 8, 6), mkMat(cHex, glowOp));
         glow.position.copy(pos); mainGrp.add(glow); sciGlows.push(glow);
         // Outer halo
-        const halo = new THREE.Mesh(new THREE.SphereGeometry(1.5, 6, 5), mkMat(cHex, isActive ? 0.05 : 0.022));
+        const halo = new THREE.Mesh(new THREE.SphereGeometry(1.7, 6, 5), mkMat(cHex, isActive ? 0.06 : 0.025));
         halo.position.copy(pos);
         mainGrp.add(halo);
       }
 
-      // ── Edges & chain nodes ────────────────────────────────────────────────────
+      // ── Edges ─────────────────────────────────────────────────────────────────
       const sciIdx = new Map(SUBS.map((s,i) => [s.id,i]));
       const interE: [THREE.Vector3,THREE.Vector3][] = [];
       for (const [idA,idB] of GRAPH_EDGES) {
         const ia = sciIdx.get(idA), ib = sciIdx.get(idB);
         if (ia==null||ib==null) continue;
         interE.push([sciPos[ia],sciPos[ib]]);
-        mainGrp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([sciPos[ia],sciPos[ib]]),
-          new THREE.LineBasicMaterial({ color:0x3355aa, transparent:true, opacity:0.20, blending:ADD, depthWrite:false })));
+        // Higher contrast edges: opacity 0.20→0.30, brighter blue
+        mainGrp.add(new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints([sciPos[ia],sciPos[ib]]),
+          new THREE.LineBasicMaterial({ color:0x4466cc, transparent:true, opacity:0.30, blending:ADD, depthWrite:false })
+        ));
       }
+
+      // Chain nodes on edges
       const CN=22, TCN=Math.max(interE.length*CN,1);
-      const cnM = new THREE.InstancedMesh(new THREE.SphereGeometry(0.032,5,4), mkMat(0x88aaff,0.55), TCN);
+      const cnM = new THREE.InstancedMesh(new THREE.SphereGeometry(0.032,5,4), mkMat(0x88aaff,0.65), TCN);
       mainGrp.add(cnM);
       { const dum=new THREE.Object3D(); let idx=0;
         for (const [a,b] of interE) for (let k=0;k<CN;k++) {
@@ -383,10 +380,10 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         cnM.instanceMatrix.needsUpdate=true;
       }
 
-      // Chunks
+      // Chunks (local clouds around each science)
       const CPER=110, TIN=SUBS.length*CPER;
-      const inM  = new THREE.InstancedMesh(new THREE.SphereGeometry(0.024,4,3), mkMat(0xffffff,0.27), TIN);
-      const inM2 = new THREE.InstancedMesh(new THREE.SphereGeometry(0.062,4,3), mkMat(0xaabbff,0.05), TIN);
+      const inM  = new THREE.InstancedMesh(new THREE.SphereGeometry(0.024,4,3), mkMat(0xffffff,0.28), TIN);
+      const inM2 = new THREE.InstancedMesh(new THREE.SphereGeometry(0.062,4,3), mkMat(0xaabbff,0.06), TIN);
       mainGrp.add(inM); mainGrp.add(inM2);
       { const dum=new THREE.Object3D();
         for (let si=0;si<SUBS.length;si++) {
@@ -400,7 +397,8 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         }
         inM.instanceMatrix.needsUpdate=true; inM2.instanceMatrix.needsUpdate=true;
       }
-      // Spokes
+
+      // Spokes (short tendrils from each science)
       const SCN=6, SCEDGE=8, TSCN=SUBS.length*SCEDGE*SCN;
       const cnM2=new THREE.InstancedMesh(new THREE.SphereGeometry(0.020,5,4), mkMat(0x6688cc,0.38), TSCN);
       mainGrp.add(cnM2);
@@ -422,44 +420,62 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         cnM2.instanceMatrix.needsUpdate=true;
       }
 
+      // ── Impulse pulses along edges ─────────────────────────────────────────────
+      // Small bright spheres travel along edge lines, fade in/out with sin curve
+      const IMP_N = Math.min(40, interE.length * 2);
+      interface ImpState { edgeIdx: number; t: number; speed: number }
+      const impStates: ImpState[] = Array.from({ length: IMP_N }, (_, i) => ({
+        edgeIdx: i % interE.length,
+        t: i / IMP_N, // stagger so they don't all start at same edge point
+        speed: 0.0022 + Math.random() * 0.0038,
+      }));
+      const impGeo    = new THREE.SphereGeometry(0.11, 5, 4);
+      const impMat    = new THREE.MeshBasicMaterial({ color: 0xaaccff, transparent: true, opacity: 0.90, blending: ADD, depthWrite: false });
+      const impIM     = new THREE.InstancedMesh(impGeo, impMat, IMP_N);
+      const impGGeo   = new THREE.SphereGeometry(0.28, 5, 4);
+      const impGMat   = new THREE.MeshBasicMaterial({ color: 0x4466cc, transparent: true, opacity: 0.30, blending: ADD, depthWrite: false });
+      const impGlowIM = new THREE.InstancedMesh(impGGeo, impGMat, IMP_N);
+      mainGrp.add(impIM); mainGrp.add(impGlowIM);
+      const impD = new THREE.Object3D();
+
       // ── Comets ─────────────────────────────────────────────────────────────────
       const TRAIL = 18;
       interface Comet {
-        line: THREE.Line;
-        pos: THREE.Vector3;
-        vel: THREE.Vector3;
-        posArr: Float32Array;
-        colArr: Float32Array;
-        timer: number; // countdown to reset
+        line:     THREE.Line;
+        pos:      THREE.Vector3;
+        vel:      THREE.Vector3;
+        posArr:   Float32Array;
+        colArr:   Float32Array;
+        timer:    number;
+        maxTimer: number; // used for fade in/out calculation
       }
       const comets: Comet[] = [];
-      function spawnComet(c?: Partial<Comet>): Comet {
+
+      function spawnComet(): Comet {
         const posArr = new Float32Array(TRAIL * 3);
         const colArr = new Float32Array(TRAIL * 3);
         const geo = new THREE.BufferGeometry();
         geo.setAttribute("position", new THREE.BufferAttribute(posArr, 3));
         geo.setAttribute("color",    new THREE.BufferAttribute(colArr, 3));
-        const mat = new THREE.LineBasicMaterial({ vertexColors:true, transparent:true, opacity:0.85, blending:ADD, depthWrite:false });
+        const mat = new THREE.LineBasicMaterial({ vertexColors:true, transparent:true, opacity:0, blending:ADD, depthWrite:false });
         const line = new THREE.Line(geo, mat);
         scene.add(line);
-        // random start pos off-screen (far edge of scene)
         const side = Math.floor(Math.random()*4);
-        const px = side===0?-35:side===1?35:(Math.random()-0.5)*50;
-        const py = side===2?-25:side===3?25:(Math.random()-0.5)*40;
+        const px = side===0?-38:side===1?38:(Math.random()-0.5)*55;
+        const py = side===2?-28:side===3?28:(Math.random()-0.5)*44;
         const pz = -20+Math.random()*10;
         const spd = 0.04+Math.random()*0.06;
         const angle = Math.random()*Math.PI*2;
         const vel = new THREE.Vector3(Math.cos(angle)*spd, (Math.random()-0.5)*spd*0.5, Math.sin(angle)*spd*0.3);
         const pos = new THREE.Vector3(px, py, pz);
-        const timer = 80+Math.floor(Math.random()*120); // frames until reset
-        return { line, pos, vel, posArr, colArr, timer, ...c };
+        const timer = 80+Math.floor(Math.random()*120);
+        return { line, pos, vel, posArr, colArr, timer, maxTimer: timer };
       }
 
-      // Stagger comet start timers
       for (let ci = 0; ci < 3; ci++) {
         const comet = spawnComet();
-        // delay start
         comet.timer = ci * 90 + Math.floor(Math.random()*60);
+        comet.maxTimer = comet.timer;
         comets.push(comet);
       }
 
@@ -522,13 +538,13 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         for (let i=0;i<sciGlows.length;i++) {
           const g=sciGlows[i]; const ia=activeSet.has(SUBS[i].id);
           g.scale.setScalar(1+0.09*Math.sin(t*1.5+i*0.72));
-          (g.material as THREE.MeshBasicMaterial).opacity=(ia?0.14:0.08)*(0.88+0.12*Math.sin(t*2.1+i));
+          (g.material as THREE.MeshBasicMaterial).opacity=sciGlowOps[i]*(0.85+0.15*Math.sin(t*2.1+i));
         }
 
         // Update matrices before raycasting
         mainGrp.updateMatrixWorld(true);
 
-        // Project science positions to screen (for hover label + popup)
+        // Project science positions to screen
         const rect = renderer.domElement.getBoundingClientRect();
         for (let i=0;i<SUBS.length;i++) {
           tmpVec.copy(sciPos[i]).applyMatrix4(mainGrp.matrixWorld);
@@ -550,37 +566,63 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
           setHovCb.current(newHov);
           renderer.domElement.style.cursor = newHov!==null ? "pointer" : "default";
         }
-
-        // Highlight hovered core
         for (let i=0;i<sciGlows.length;i++) {
-          if (i===hovRef.current) {
-            sciGlows[i].scale.setScalar(1.35); // pop up on hover
-          }
+          if (i===hovRef.current) sciGlows[i].scale.setScalar(1.35);
         }
 
-        // Comets
+        // ── Impulse pulses ──────────────────────────────────────────────────────
+        for (let i = 0; i < IMP_N; i++) {
+          const s = impStates[i];
+          s.t += s.speed;
+          if (s.t > 1.08) {
+            s.t = -0.08;
+            s.edgeIdx = Math.floor(Math.random() * interE.length);
+            s.speed = 0.0022 + Math.random() * 0.0038;
+          }
+          const visible = s.t >= 0 && s.t <= 1;
+          if (visible) {
+            const [ea, eb] = interE[s.edgeIdx];
+            impD.position.lerpVectors(ea, eb, s.t);
+            // sin curve → fade in at start, fade out at end
+            const fade = Math.sin(Math.max(0, Math.min(1, s.t)) * Math.PI);
+            impD.scale.setScalar(Math.max(0.001, fade * 1.1));
+            impD.updateMatrix();
+          } else {
+            impD.position.set(0, 0, 0); impD.scale.setScalar(0.001); impD.updateMatrix();
+          }
+          impIM.setMatrixAt(i, impD.matrix);
+          impGlowIM.setMatrixAt(i, impD.matrix);
+        }
+        impIM.instanceMatrix.needsUpdate = true;
+        impGlowIM.instanceMatrix.needsUpdate = true;
+
+        // ── Comets with fade in/out ──────────────────────────────────────────────
         for (const c of comets) {
           c.timer--;
           if (c.timer <= 0) {
-            // Reuse same objects — reset position
-            c.pos.set(
-              (Math.random()-0.5)*70,
-              (Math.random()-0.5)*50,
-              -20+Math.random()*10,
-            );
+            c.pos.set((Math.random()-0.5)*70, (Math.random()-0.5)*50, -20+Math.random()*10);
             const spd=0.04+Math.random()*0.06;
             const angle=Math.random()*Math.PI*2;
             c.vel.set(Math.cos(angle)*spd, (Math.random()-.5)*spd*.5, Math.sin(angle)*spd*.3);
             c.timer = 100+Math.floor(Math.random()*150);
+            c.maxTimer = c.timer; // reset maxTimer for fresh fade cycle
           }
           c.pos.addScaledVector(c.vel, 1);
-          // Update trail
+
+          // Fade in (first 25 frames) + fade out (last 30 frames)
+          const elapsed  = c.maxTimer - c.timer;
+          const fadeIn   = Math.min(1, elapsed / 25);
+          const fadeOut  = Math.min(1, c.timer  / 30);
+          const opacity  = Math.min(fadeIn, fadeOut) * 0.85;
+          (c.line.material as THREE.LineBasicMaterial).opacity = opacity;
+
+          // Update trail geometry
           for (let k=0;k<TRAIL;k++) {
-            const trail = (TRAIL-1-k)/(TRAIL-1); // 0=head, 1=tail
+            const trail = (TRAIL-1-k)/(TRAIL-1);
             c.posArr[k*3]   = c.pos.x - c.vel.x*trail*TRAIL*2;
             c.posArr[k*3+1] = c.pos.y - c.vel.y*trail*TRAIL*2;
             c.posArr[k*3+2] = c.pos.z - c.vel.z*trail*TRAIL*2;
-            const bright = 1-trail; // head=1, tail=0
+            const bright = 1-trail;
             c.colArr[k*3]   = bright*1.0;
             c.colArr[k*3+1] = bright*0.92;
             c.colArr[k*3+2] = bright*1.0;
@@ -615,9 +657,7 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
       style={{ background:"#05080f", position:"relative", overflow:"hidden" }}
       onClick={() => { if (hovRef.current == null) setPop(null); }}
     >
-      {/* Three.js canvas appended here */}
-
-      {/* Hover label — shows only when hovering and no popup open */}
+      {/* Hover label */}
       {hov !== null && !pop && (
         <div
           style={{
@@ -645,15 +685,9 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         </div>
       )}
 
-      {/* Backdrop to close popup */}
       {pop && (
-        <div
-          style={{ position:"absolute", inset:0, zIndex:45 }}
-          onClick={() => setPop(null)}
-        />
+        <div style={{ position:"absolute", inset:0, zIndex:45 }} onClick={() => setPop(null)} />
       )}
-
-      {/* Popup card */}
       {pop && <PopupCard pop={pop} onClose={() => setPop(null)} />}
     </div>
   );

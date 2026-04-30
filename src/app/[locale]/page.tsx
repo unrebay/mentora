@@ -134,12 +134,12 @@ export default async function HomePage() {
       <LandingNav />
 
       {/* ── DARK UNIVERSE: nav gap + hero + stats + features in one seamless block ── */}
-      <div className="relative" style={{ background: "#060912", marginTop: "-76px" }}>
+      <div className="relative" style={{ background: "#060912", marginTop: "-100px" }}>
         {/* Star field — spans the entire dark section, reacts to cursor */}
         <LandingStarsCanvas className="absolute inset-0 w-full h-full z-0" />
 
-      {/* HERO — padding-top compensates for the negative margin */}
-      <section className="relative overflow-hidden" style={{ paddingTop: "76px" }}>
+      {/* HERO — padding-top compensates for the negative margin (100px covers nav on all devices) */}
+      <section className="relative overflow-hidden" style={{ paddingTop: "100px" }}>
         <div className="absolute inset-0 pointer-events-none z-[1]" aria-hidden>
           <NeuralNetworkCanvas className="absolute inset-0 w-full h-full" />
         </div>

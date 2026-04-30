@@ -56,14 +56,13 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
   const mobileBorder = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)";
 
   return (
-    /* Outer sticky strip — transparent when light, dark-hero color when dark (prevents body-bg bleed) */
+    /* Outer sticky strip — always transparent so glass pill shows hero behind it */
     <nav
       className="sticky top-0 z-50"
       style={{
         padding: "10px 14px",
-        background: isDark ? "#060912" : "transparent",
+        background: "transparent",
         pointerEvents: "none",
-        transition: "background 0.3s",
       }}
     >
       {/* ── Nav content ─────────────────────────────────────────────── */}
@@ -77,7 +76,7 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
             background: navBg,
             backdropFilter: navBlur,
             WebkitBackdropFilter: navBlur,
-            borderRadius: 28,
+            borderRadius: 20,
             border: navBorder,
             boxShadow: navShadow,
             overflow: "hidden",
@@ -95,7 +94,7 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
           }} />
 
         {/* Main row */}
-        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-3">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 pl-5 pr-6 py-3">
           {/* Logo */}
           <Logo size="sm" fontSize="1.44rem" textColor={isDark ? "white" : undefined} />
 
