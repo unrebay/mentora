@@ -506,92 +506,184 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
 
   const isEmpty = messages.length === 0;
   const subjColor = subjectColor(subject);
+  const [showHelp, setShowHelp] = useState(false);
 
   return (
     <div className="flex flex-col" style={{ height:"100dvh", background:"var(--chat-bg)", position:"relative" }}>
 
-      {/* ── Header ── absolute floating glass pill ──────────────────────── */}
+      {/* ── Header ── 3 separate floating glass elements ────────────────── */}
       <header
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 10,
-          background: "transparent",
-          pointerEvents: "none",
+          position: "absolute", top: 0, left: 0, right: 0, zIndex: 10,
+          background: "transparent", pointerEvents: "none",
           padding: "10px 12px",
+          display: "flex", alignItems: "center", gap: 10,
         }}
       >
-        <div
-          className="flex items-center gap-3"
+        {/* 1. Back — glass circle */}
+        <Link
+          href="/dashboard"
+          className="shrink-0 flex items-center justify-center transition-all hover:scale-[1.05] active:scale-95"
           style={{
+            pointerEvents: "all",
+            width: 44, height: 44, borderRadius: "50%",
             background: "var(--bg-nav)",
             backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
             WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
             border: "1px solid var(--border-light)",
-            borderRadius: 20,
             boxShadow: "0 2px 12px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.06) inset",
-            padding: "10px 14px",
-            pointerEvents: "all",
+            color: "var(--text-muted)",
           }}
         >
-        <Link
-          href="/dashboard"
-          className="transition-opacity hover:opacity-70 flex items-center justify-center rounded-xl"
-          style={{ color:"var(--text-muted)", width:32, height:32, background:"var(--chat-msg-bg)", border:"1px solid var(--chat-msg-border)", backdropFilter:"blur(8px)" }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
         </Link>
 
-        {/* Subject icon + title */}
-        <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{
-          background: `linear-gradient(135deg,${subjColor}22,${subjColor}11)`,
-          border: `1px solid ${subjColor}30`,
-        }}>
-          <SubjectIcon id={subject} size={22} />
+        {/* 2. Center — subject info glass pill */}
+        <div className="flex-1 flex justify-center" style={{ pointerEvents: "none", minWidth: 0 }}>
+          <div
+            className="flex items-center gap-2.5 shrink-0"
+            style={{
+              pointerEvents: "all",
+              background: "var(--bg-nav)",
+              backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+              WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+              border: "1px solid var(--border-light)",
+              borderRadius: 20,
+              boxShadow: "0 2px 12px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.06) inset",
+              padding: "8px 14px 8px 10px",
+              maxWidth: "calc(100vw - 160px)",
+            }}
+          >
+            {/* Subject icon */}
+            <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0" style={{
+              background: `linear-gradient(135deg,${subjColor}22,${subjColor}11)`,
+              border: `1px solid ${subjColor}30`,
+            }}>
+              <SubjectIcon id={subject} size={18} />
+            </div>
+            {/* Title + badge + subtitle */}
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <h1 className="font-semibold text-sm truncate" style={{ color: "var(--text)" }}>{subjectTitle}</h1>
+                {initialMessagesRemaining === null && (
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full tracking-wide shrink-0" style={{
+                    background: isUltima ? "linear-gradient(135deg,#7C3AED,#4561E8)" : "var(--brand)", color: "#fff",
+                  }}>
+                    {isUltima ? "ULTRA" : "PRO"}
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] leading-none mt-0.5" style={{ color: "var(--text-muted)" }}>{tChat("aiMentor")}</p>
+            </div>
+          </div>
         </div>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h1 className="font-semibold text-sm truncate" style={{ color:"var(--text)" }}>{subjectTitle}</h1>
-            {initialMessagesRemaining === null && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide shrink-0" style={{
-                background: isUltima ? "linear-gradient(135deg,#7C3AED,#4561E8)" : "var(--brand)", color:"#fff",
-              }}>
-                {isUltima ? "ULTRA" : "PRO"}
+        {/* 3. Right actions */}
+        <div className="shrink-0 flex items-center gap-2" style={{ pointerEvents: "all" }}>
+
+          {/* Counter badge */}
+          {showCounter && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full" style={{
+              background: "var(--bg-nav)",
+              backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+              WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+              border: "1px solid rgba(251,191,36,0.35)",
+              boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+            }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+              <span className="text-xs font-medium whitespace-nowrap" style={{ color: "#d97706" }}>
+                {messagesRemaining ?? 0}
               </span>
+            </div>
+          )}
+
+          {/* Export PDF — Ultra only */}
+          {isUltima && messages.filter(m => !m.isError).length >= 3 && (
+            <button
+              onClick={handleExportPdf} disabled={exportingPdf} title={tChat("exportTitle")}
+              className="flex items-center gap-1.5 transition-all disabled:opacity-50 hover:scale-[1.04] active:scale-95"
+              style={{
+                padding: "0 12px", height: 44, borderRadius: 22,
+                background: "var(--bg-nav)",
+                backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                border: "1px solid var(--border-light)",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.06) inset",
+                color: "var(--text-muted)",
+                fontSize: 12, fontWeight: 500,
+              }}
+            >
+              {exportingPdf
+                ? <span style={{ display: "inline-block", width: 12, height: 12, border: "1.5px solid var(--text-muted)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+                : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>}
+              <span>{exportingPdf ? tChat("exporting") : tChat("export")}</span>
+            </button>
+          )}
+
+          {/* Help — glass circle with ? */}
+          <div style={{ position: "relative" }}>
+            <button
+              type="button"
+              onClick={() => setShowHelp(v => !v)}
+              className="flex items-center justify-center transition-all hover:scale-[1.05] active:scale-95"
+              style={{
+                width: 44, height: 44, borderRadius: "50%",
+                background: showHelp ? `linear-gradient(135deg,${subjColor}22,${subjColor}11)` : "var(--bg-nav)",
+                backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                border: showHelp ? `1px solid ${subjColor}40` : "1px solid var(--border-light)",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.06) inset",
+                color: showHelp ? subjColor : "var(--text-muted)",
+                fontWeight: 600, fontSize: 15,
+              }}
+            >
+              ?
+            </button>
+
+            {/* Help popup */}
+            {showHelp && (
+              <div
+                className="absolute right-0"
+                style={{
+                  top: "calc(100% + 10px)",
+                  width: 268,
+                  background: "var(--bg-nav)",
+                  backdropFilter: "blur(20px) saturate(1.8) brightness(1.04)",
+                  WebkitBackdropFilter: "blur(20px) saturate(1.8) brightness(1.04)",
+                  border: "1px solid var(--border-light)",
+                  borderRadius: 20,
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.16), 0 1px 0 rgba(255,255,255,0.08) inset",
+                  padding: "16px 16px 12px",
+                  zIndex: 30,
+                }}
+              >
+                <p className="text-xs font-bold mb-2 tracking-wide uppercase" style={{ color: subjColor }}>{tChat("help.title")}</p>
+                <ul className="space-y-2 mb-3">
+                  {[tChat("help.tip1"), tChat("help.tip2"), tChat("help.tip3")].map((tip, i) => (
+                    <li key={i} className="flex gap-2 items-start">
+                      <span className="shrink-0 mt-[3px] w-1.5 h-1.5 rounded-full" style={{ background: subjColor, opacity: 0.85 }} />
+                      <span className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/dashboard/about#guide"
+                  onClick={() => setShowHelp(false)}
+                  className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-xs font-semibold transition-all hover:opacity-80"
+                  style={{
+                    background: `linear-gradient(135deg,${subjColor}22,${subjColor}11)`,
+                    border: `1px solid ${subjColor}30`,
+                    color: subjColor,
+                  }}
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                  {tChat("help.fullGuide")}
+                </Link>
+              </div>
             )}
           </div>
-          <p className="text-xs" style={{ color:"var(--text-muted)" }}>{tChat("aiMentor")}</p>
-        </div>
-
-        {showCounter && (
-          <div className="flex items-center gap-1.5 rounded-full px-3 py-1 shrink-0" style={{
-            background:"rgba(251,191,36,0.10)", border:"1px solid rgba(251,191,36,0.25)",
-          }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-            <span className="text-xs font-medium whitespace-nowrap" style={{ color:"#d97706" }}>
-              <span className="hidden sm:inline">{tChat("remainingFull",{n:messagesRemaining??0,limit:DAILY_LIMIT})}</span>
-              <span className="sm:hidden">{tChat("remainingShort",{n:messagesRemaining??0})}</span>
-            </span>
-          </div>
-        )}
-
-        {isUltima && messages.filter(m=>!m.isError).length >= 3 && (
-          <button
-            onClick={handleExportPdf} disabled={exportingPdf} title={tChat("exportTitle")}
-            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all disabled:opacity-50"
-            style={{ background:"var(--chat-msg-bg)", border:"1px solid var(--chat-msg-border)", color:"var(--text-muted)" }}
-          >
-            {exportingPdf
-              ? <span style={{ display:"inline-block", width:12, height:12, border:"1.5px solid var(--text-muted)", borderTopColor:"transparent", borderRadius:"50%", animation:"spin 0.7s linear infinite" }} />
-              : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>}
-            <span className="hidden sm:inline">{exportingPdf ? tChat("exporting") : tChat("export")}</span>
-          </button>
-        )}
         </div>
       </header>
 

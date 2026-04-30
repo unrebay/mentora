@@ -489,6 +489,13 @@
       "label": "New level",
       "close": "Close"
     },
+    "help": {
+      "title": "How to use",
+      "tip1": "Ask any question — the mentor explains it simply",
+      "tip2": "Request examples, tasks or quizzes — it adapts",
+      "tip3": "Ctrl+Enter to send, Enter for a new line",
+      "fullGuide": "Full guide"
+    },
     "subjects": {
       "russian-history": {
         "hint": "Ask about any period of Russian history — from ancient Rus to modern times",
