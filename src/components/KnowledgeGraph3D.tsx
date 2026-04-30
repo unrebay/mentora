@@ -76,8 +76,20 @@ const GRAPH_EDGES: [string, string][] = [
   ["literature","english"],["literature","social-studies"],
   ["discovery","astronomy"],["discovery","computer-science"],
   ["social-studies","geography"],["social-studies","english"],
-  ["geography","astronomy"],["computer-science","mathematics"],
-  ["astronomy","physics"],["biology","chemistry"],
+  ["geography","astronomy"],["astronomy","physics"],["biology","chemistry"],
+  // Additional cross-discipline connections
+  ["english","computer-science"],
+  ["mathematics","social-studies"],
+  ["geography","physics"],
+  ["mathematics","biology"],
+  ["chemistry","computer-science"],
+  ["discovery","geography"],
+  ["physics","biology"],
+  ["literature","discovery"],
+  ["russian-language","discovery"],
+  ["astronomy","chemistry"],
+  ["english","social-studies"],
+  ["geography","russian-history"],
 ];
 
 interface PopupState {
