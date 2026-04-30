@@ -189,33 +189,34 @@ function AuthGalaxy() {
         geo.setAttribute("position",new THREE.BufferAttribute(pos,3));
         bgGrp.add(new THREE.Points(geo,new THREE.PointsMaterial({ color:0xaabbff,size:1.2,transparent:true,opacity:0.07,blending:ADD,depthWrite:false,sizeAttenuation:false }))); }
 
-      // ── Science positions — radius 20 (2× larger than default 10) ────────
-      const sciPos = fibSph(SUBS.length, 20.0);
+      // ── Science positions — radius 10, 34 nodes (17 originals + 17 variants) ──
+      const NODE_COUNT = SUBS.length * 2; // 34
+      const sciPos = fibSph(NODE_COUNT, 10.0);
 
       // ── Nodes ─────────────────────────────────────────────────────────────
       const sciGlows:   THREE.Mesh[] = [];
       const sciGlowOps: number[]     = [];
 
-      for (let i = 0; i < SUBS.length; i++) {
-        const s = SUBS[i]; const pos = sciPos[i];
-        const isActive = FAKE_ACTIVE.has(s.id);
-        const cHex = isActive ? 0xffa040 : s.hex;
-        const cOp  = isActive ? 0.98 : 0.82;
-        const glowOp = isActive ? 0.22 : 0.13;
+      for (let i = 0; i < NODE_COUNT; i++) {
+        const s = SUBS[i % SUBS.length];
+        const isSecond = i >= SUBS.length; // second ring — slightly dimmer
+        const isActive = FAKE_ACTIVE.has(s.id) && !isSecond;
+        // second ring: dim version of the subject color (no orange)
+        const cHex = isActive ? 0xffa040 : isSecond ? Math.floor(s.hex * 0.55) : s.hex;
+        const cOp  = isActive ? 0.98 : isSecond ? 0.55 : 0.82;
+        const glowOp = isActive ? 0.22 : isSecond ? 0.07 : 0.13;
         sciGlowOps.push(glowOp);
+        const pos = sciPos[i];
 
-        // Visual core
-        const core = new THREE.Mesh(new THREE.SphereGeometry(isActive?0.34:0.26,12,10),mkMat(cHex,cOp));
+        const core = new THREE.Mesh(new THREE.SphereGeometry(isActive?0.34:isSecond?0.20:0.26,12,10),mkMat(cHex,cOp));
         core.position.copy(pos); mainGrp.add(core);
-        // Glow
-        const glow = new THREE.Mesh(new THREE.SphereGeometry(isActive?0.85:0.65,8,6),mkMat(cHex,glowOp));
+        const glow = new THREE.Mesh(new THREE.SphereGeometry(isActive?0.85:isSecond?0.50:0.65,8,6),mkMat(cHex,glowOp));
         glow.position.copy(pos); mainGrp.add(glow); sciGlows.push(glow);
-        // Outer halo
-        const halo = new THREE.Mesh(new THREE.SphereGeometry(isActive?1.7:1.3,6,5),mkMat(cHex,isActive?0.06:0.025));
+        const halo = new THREE.Mesh(new THREE.SphereGeometry(isActive?1.7:isSecond?1.0:1.3,6,5),mkMat(cHex,isActive?0.06:0.018));
         halo.position.copy(pos); mainGrp.add(halo);
       }
 
-      // ── Edges ─────────────────────────────────────────────────────────────
+      // ── Edges — connect first 17 ring by subject graph + some cross-links ──
       const sciIdx = new Map(SUBS.map((s,i)=>[s.id,i]));
       const interE: [THREE.Vector3,THREE.Vector3][] = [];
       for (const [idA,idB] of GRAPH_EDGES) {
@@ -225,6 +226,13 @@ function AuthGalaxy() {
         const bothActive=FAKE_ACTIVE.has(idA)&&FAKE_ACTIVE.has(idB);
         mainGrp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([sciPos[ia],sciPos[ib]]),
           new THREE.LineBasicMaterial({ color:bothActive?0xff8040:0x4466cc,transparent:true,opacity:bothActive?0.28:0.18,blending:ADD,depthWrite:false })));
+      }
+      // Cross-links: connect each second-ring node to its first-ring counterpart
+      for (let i = 0; i < SUBS.length; i++) {
+        const a = sciPos[i], b = sciPos[i + SUBS.length];
+        interE.push([a, b]);
+        mainGrp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),
+          new THREE.LineBasicMaterial({ color:0x334477,transparent:true,opacity:0.12,blending:ADD,depthWrite:false })));
       }
 
       // Chain nodes on edges
