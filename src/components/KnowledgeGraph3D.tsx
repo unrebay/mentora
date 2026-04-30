@@ -331,7 +331,8 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         const cOp  = isActive ? 0.95 : isFull ? 0.85 : 0.65;
 
         // Invisible hit sphere (r=1.0 for easy clicking)
-        const hitSph = new THREE.Mesh(new THREE.SphereGeometry(1.0, 6, 5), new THREE.MeshBasicMaterial({ transparent:true, opacity:0 }));
+        // depthWrite:false is critical — without it the invisible sphere occludes the visual core
+        const hitSph = new THREE.Mesh(new THREE.SphereGeometry(1.0, 6, 5), new THREE.MeshBasicMaterial({ transparent:true, opacity:0, depthWrite:false }));
         hitSph.position.copy(pos);
         mainGrp.add(hitSph);
         sciCores.push(hitSph);
