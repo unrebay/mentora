@@ -728,11 +728,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             {/* Assistant avatar */}
             {msg.role === "assistant" && (
               <div className="w-7 h-7 rounded-2xl flex items-center justify-center shrink-0 mt-auto mb-0.5" style={{
-                background: `linear-gradient(135deg,${subjColor}22,${subjColor}11)`,
-                border: `1.5px solid ${subjColor}30`,
-                boxShadow: `0 2px 8px ${subjColor}18`,
+                background: "#ffffff",
+                border: "1.5px solid rgba(0,0,0,0.08)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
               }}>
-                <MeLogo height={13} colorM="var(--text)" colorE={subjColor} />
+                <MeLogo height={13} colorM="#111111" colorE="#4561E8" />
               </div>
             )}
 
