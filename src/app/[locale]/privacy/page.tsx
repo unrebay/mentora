@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
-import ThemeToggle from "@/components/ThemeToggle";
 
 export const metadata = {
   title: "Политика конфиденциальности | Mentora",
@@ -11,22 +10,21 @@ function SectionHeading({ n, title }: { n: string; title: string }) {
   return (
     <div className="flex items-center gap-3 mb-3">
       <span className="text-[10px] font-bold tracking-[0.15em] shrink-0" style={{ color: "#4561E8" }}>{n}</span>
-      <h2 className="text-lg font-semibold leading-snug" style={{ color: "var(--text)" }}>{title}</h2>
+      <h2 className="text-lg font-semibold leading-snug" style={{ color: "rgba(255,255,255,0.92)" }}>{title}</h2>
     </div>
   );
 }
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
+    <div className="min-h-screen" style={{ background: "#04060f", color: "#fff" }}>
 
       {/* NAV */}
       <nav className="sticky top-0 z-50 border-b backdrop-blur-md"
-        style={{ background: "var(--bg-nav)", borderColor: "var(--border-light)" }}>
+        style={{ background: "rgba(4,6,15,0.85)", borderColor: "rgba(255,255,255,0.06)" }}>
         <div className="max-w-4xl mx-auto flex items-center justify-between px-6 py-4">
           <Link href="/"><Logo size="sm" fontSize="1.44rem" /></Link>
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <Link href="/auth" className="btn-glow px-4 py-2 text-sm font-semibold rounded-xl text-white">
               Попробовать бесплатно <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline", verticalAlign: "middle" }}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </Link>
@@ -41,7 +39,7 @@ export default function PrivacyPage() {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5 text-xs font-bold tracking-widest uppercase"
             style={{
               background: "rgba(69,97,232,0.08)",
-              color: "var(--brand)",
+              color: "#6B8FFF",
               border: "1px solid rgba(69,97,232,0.18)",
             }}>
             <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor">
@@ -50,7 +48,7 @@ export default function PrivacyPage() {
             </svg>
             Правовой документ
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: "var(--text)" }}>
+          <h1 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: "rgba(255,255,255,0.92)" }}>
             Политика{" "}
             <span style={{
               background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
@@ -61,14 +59,14 @@ export default function PrivacyPage() {
               конфиденциальности
             </span>
           </h1>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Последнее обновление: 28 марта 2026 г.</p>
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>Последнее обновление: 28 марта 2026 г.</p>
         </div>
 
         {/* Sections */}
-        <div className="space-y-10 leading-relaxed text-sm" style={{ color: "var(--text-secondary)" }}>
+        <div className="space-y-10 leading-relaxed text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
 
           <section className="rounded-2xl border p-6"
-            style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
+            style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}>
             <SectionHeading n="01" title="Общие положения" />
             <p>
               Настоящая Политика конфиденциальности (далее — «Политика») описывает, как ИП Андрей Унребай
@@ -83,7 +81,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="rounded-2xl border p-6"
-            style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
+            style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}>
             <SectionHeading n="02" title="Какие данные мы собираем" />
             <p className="mb-3">При использовании платформы мы можем собирать следующие данные:</p>
             <ul className="space-y-2.5">
@@ -95,14 +93,14 @@ export default function PrivacyPage() {
               ].map(item => (
                 <li key={item.label} className="flex gap-3">
                   <span className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: "#4561E8" }} />
-                  <span><strong style={{ color: "var(--text)", fontWeight: 600 }}>{item.label}:</strong> {item.text}</span>
+                  <span><strong style={{ color: "rgba(255,255,255,0.92)", fontWeight: 600 }}>{item.label}:</strong> {item.text}</span>
                 </li>
               ))}
             </ul>
           </section>
 
           <section className="rounded-2xl border p-6"
-            style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
+            style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}>
             <SectionHeading n="03" title="Как мы используем данные" />
             <ul className="space-y-2.5">
               {[
@@ -121,7 +119,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="rounded-2xl border p-6"
-            style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
+            style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}>
             <SectionHeading n="04" title="Передача данных третьим лицам" />
             <p className="mb-3">Мы не продаём ваши персональные данные. Мы можем передавать данные только:</p>
             <ul className="space-y-2.5">
@@ -133,7 +131,7 @@ export default function PrivacyPage() {
               ].map(item => (
                 <li key={item.name} className="flex gap-3">
                   <span className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: "#4561E8" }} />
-                  <span><strong style={{ color: "var(--text)", fontWeight: 600 }}>{item.name}</strong> — {item.desc}</span>
+                  <span><strong style={{ color: "rgba(255,255,255,0.92)", fontWeight: 600 }}>{item.name}</strong> — {item.desc}</span>
                 </li>
               ))}
               <li className="flex gap-3">
@@ -144,7 +142,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="rounded-2xl border p-6"
-            style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
+            style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}>
             <SectionHeading n="05" title="Хранение и защита данных" />
             <p>
               Ваши данные хранятся на защищённых серверах. Мы используем шифрование HTTPS,
@@ -154,7 +152,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="rounded-2xl border p-6"
-            style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
+            style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}>
             <SectionHeading n="06" title="Ваши права" />
             <p className="mb-3">В соответствии с Федеральным законом № 152-ФЗ «О персональных данных» вы вправе:</p>
             <ul className="space-y-2.5 mb-4">
@@ -178,7 +176,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="rounded-2xl border p-6"
-            style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
+            style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}>
             <SectionHeading n="07" title="Cookies" />
             <p>
               Мы используем cookies для обеспечения работы платформы (авторизация, сессии)
@@ -188,7 +186,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="rounded-2xl border p-6"
-            style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
+            style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}>
             <SectionHeading n="08" title="Дети" />
             <p>
               Платформа предназначена для пользователей от 14 лет. Мы не собираем намеренно
@@ -199,7 +197,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="rounded-2xl border p-6"
-            style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
+            style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}>
             <SectionHeading n="09" title="Изменения Политики" />
             <p>
               Мы можем обновлять настоящую Политику. О существенных изменениях уведомим
@@ -209,7 +207,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="rounded-2xl border p-6"
-            style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
+            style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}>
             <SectionHeading n="10" title="Контакты" />
             <p className="mb-3">По вопросам конфиденциальности обращайтесь:</p>
             <ul className="space-y-1.5">
@@ -222,11 +220,11 @@ export default function PrivacyPage() {
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t py-8 mt-8" style={{ borderColor: "var(--border)", background: "var(--bg)" }}>
-        <div className="max-w-4xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm" style={{ color: "var(--text-muted)" }}>
+      <footer className="border-t py-8 mt-8" style={{ borderColor: "rgba(255,255,255,0.08)", background: "#04060f" }}>
+        <div className="max-w-4xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
           <span>© 2026 Mentora</span>
           <div className="flex gap-6">
-            <Link href="/privacy" className="font-semibold" style={{ color: "var(--text)" }}>Конфиденциальность</Link>
+            <Link href="/privacy" className="font-semibold" style={{ color: "rgba(255,255,255,0.92)" }}>Конфиденциальность</Link>
             <Link href="/terms" className="hover:opacity-70 transition-opacity">Условия</Link>
             <Link href="/pricing" className="hover:opacity-70 transition-opacity">Тарифы</Link>
           </div>
