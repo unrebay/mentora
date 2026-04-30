@@ -59,6 +59,117 @@ interface Props { className?: string; userProgress?: UserProgress[] }
 
 const FULL_SUBJECTS = new Set(["russian-history"]);
 
+// ── Neural connections between subjects (knowledge graph edges) ──────────────
+const EDGES: [string, string][] = [
+  ["russian-history",  "world-history"],
+  ["russian-history",  "literature"],
+  ["russian-history",  "russian-language"],
+  ["russian-history",  "social-studies"],
+  ["russian-history",  "discovery"],
+  ["world-history",    "geography"],
+  ["world-history",    "english"],
+  ["world-history",    "social-studies"],
+  ["mathematics",      "physics"],
+  ["mathematics",      "computer-science"],
+  ["mathematics",      "astronomy"],
+  ["physics",          "chemistry"],
+  ["physics",          "computer-science"],
+  ["physics",          "astronomy"],
+  ["chemistry",        "biology"],
+  ["biology",          "geography"],
+  ["russian-language", "literature"],
+  ["russian-language", "english"],
+  ["discovery",        "astronomy"],
+  ["discovery",        "biology"],
+  ["social-studies",   "geography"],
+];
+
+function drawEdges(
+  ctx: CanvasRenderingContext2D,
+  nodes: GNode[],
+  t: number,
+  zoom: ZoomState,
+) {
+  const nodeMap = new Map(nodes.map(n => [n.id, n]));
+  const isAnyZoom = zoom.phase !== "idle";
+
+  for (const [idA, idB] of EDGES) {
+    const A = nodeMap.get(idA);
+    const B = nodeMap.get(idB);
+    if (!A || !B) continue;
+
+    const isZoomA = zoom.id === idA && isAnyZoom;
+    const isZoomB = zoom.id === idB && isAnyZoom;
+    const posA = driftedPos(A, t, isZoomA ? { cx: zoom.cx, cy: zoom.cy } : undefined);
+    const posB = driftedPos(B, t, isZoomB ? { cx: zoom.cx, cy: zoom.cy } : undefined);
+
+    const aActive = A.status === "active" || A.status === "active_full";
+    const bActive = B.status === "active" || B.status === "active_full";
+    const bothActive = aActive && bActive;
+    const oneActive  = aActive || bActive;
+
+    // Fade edges not connected to zoom target
+    let alpha = 1;
+    if (isAnyZoom && zoom.id !== idA && zoom.id !== idB) {
+      alpha = Math.max(0, 1 - zoom.progress * 0.9);
+    }
+    if (alpha < 0.01) continue;
+
+    // Build edge gradient
+    const grad = ctx.createLinearGradient(posA.cx, posA.cy, posB.cx, posB.cy);
+    if (bothActive) {
+      const pulse = 0.65 + 0.35 * Math.sin(t * 0.0006 + (idA.charCodeAt(0) % 7) * 0.9);
+      const op = 0.50 * pulse * alpha;
+      grad.addColorStop(0,    `rgba(255,160,64,${op})`);
+      grad.addColorStop(0.45, `rgba(255,110,30,${op * 0.75})`);
+      grad.addColorStop(1,    `rgba(255,160,64,${op})`);
+      ctx.lineWidth = 1.3;
+      ctx.shadowColor = "rgba(255,140,40,0.5)";
+      ctx.shadowBlur  = 4;
+    } else if (oneActive) {
+      const op = 0.18 * alpha;
+      if (aActive) {
+        grad.addColorStop(0, `rgba(255,160,64,${op * 1.6})`);
+        grad.addColorStop(1, `rgba(160,185,255,${op})`);
+      } else {
+        grad.addColorStop(0, `rgba(160,185,255,${op})`);
+        grad.addColorStop(1, `rgba(255,160,64,${op * 1.6})`);
+      }
+      ctx.lineWidth = 0.7;
+      ctx.shadowBlur = 0;
+    } else {
+      const op = 0.07 * alpha;
+      grad.addColorStop(0, `rgba(180,200,255,${op})`);
+      grad.addColorStop(1, `rgba(180,200,255,${op})`);
+      ctx.lineWidth = 0.4;
+      ctx.shadowBlur = 0;
+    }
+
+    ctx.strokeStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(posA.cx, posA.cy);
+    ctx.lineTo(posB.cx, posB.cy);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Synaptic pulse — two particles moving in opposite directions along active edges
+    if (bothActive) {
+      const edgeSeed = (idA + idB).split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+      const phaseOffset = (edgeSeed % 100) / 100;
+      for (let p = 0; p < 2; p++) {
+        const progress = ((t * 0.00012 + phaseOffset + p * 0.5) % 1);
+        const px = posA.cx + (posB.cx - posA.cx) * (p === 0 ? progress : 1 - progress);
+        const py = posA.cy + (posB.cy - posA.cy) * (p === 0 ? progress : 1 - progress);
+        const pGrad = ctx.createRadialGradient(px, py, 0, px, py, 5);
+        pGrad.addColorStop(0, `rgba(255,210,120,${0.9 * alpha})`);
+        pGrad.addColorStop(1, "rgba(255,140,40,0)");
+        ctx.fillStyle = pGrad;
+        ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+}
+
 function getStatus(id: string, progress: UserProgress[]): Status {
   const hasProgress = !!progress.find(x => x.subject === id && x.xp_total > 0);
   const isFull = FULL_SUBJECTS.has(id);
@@ -218,6 +329,9 @@ function render(
   }
 
   drawBg(ctx, W, H, t);
+
+  // ── Neural connections between subject nodes ───────────────────────────────
+  drawEdges(ctx, nodes, t, zoom);
 
   // ── Topic orbit dots ──────────────────────────────────────────────────────
   for (const n of nodes) {
