@@ -689,14 +689,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         <div ref={bottomRef} />
       </div>
 
-      {/* ── Input area ── iOS 26 / Telegram glass ────────────────────────── */}
+      {/* ── Input area ── transparent strip, glass only on elements ─────── */}
       <div
         className="shrink-0"
         style={{
-          background: "var(--chat-input)",
-          backdropFilter: "blur(40px) saturate(1.8)",
-          WebkitBackdropFilter: "blur(40px) saturate(1.8)",
-          borderTop: "1px solid var(--chat-msg-border)",
+          background: "transparent",
           paddingTop: "10px",
           paddingLeft: "12px",
           paddingRight: "12px",
