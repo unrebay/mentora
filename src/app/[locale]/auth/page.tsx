@@ -95,8 +95,8 @@ function AuthGalaxy() {
       const THREE = await import("three");
       if (disposed) return;
 
-      const w = window.innerWidth  || 1280;
-      const h = window.innerHeight || 800;
+      const w = mount.clientWidth  || window.innerWidth  || 1280;
+      const h = mount.clientHeight || window.innerHeight || 800;
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -104,6 +104,7 @@ function AuthGalaxy() {
       renderer.setClearColor(0x04060f, 1);
       canvas = renderer.domElement;
       Object.assign(canvas.style, {
+        position: "absolute", top: "0", left: "0",
         width: "100%", height: "100%",
         display: "block",
       });
@@ -331,8 +332,8 @@ function AuthGalaxy() {
         targetRotX  = 0.18 + ((e.clientY / window.innerHeight) - 0.5) * 2 * 0.18;
       };
       onRSFn = () => {
-        const nw = window.innerWidth;
-        const nh = window.innerHeight;
+        const nw = mount.clientWidth  || window.innerWidth;
+        const nh = mount.clientHeight || window.innerHeight;
         camera.aspect = nw / nh; camera.updateProjectionMatrix(); renderer.setSize(nw, nh);
       };
       window.addEventListener("mousemove", onMMFn);
