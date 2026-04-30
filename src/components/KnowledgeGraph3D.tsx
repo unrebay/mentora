@@ -23,6 +23,9 @@ const SUBS: SubData[] = [
   { id: "computer-science", label: "Информатика",        hex: 0xaa77ff },
   { id: "astronomy",        label: "Астрономия",         hex: 0xaaddff },
   { id: "discovery",        label: "Открытия",           hex: 0xffdd88 },
+  { id: "psychology",       label: "Психология",         hex: 0xcc66aa },
+  { id: "economics",        label: "Экономика",          hex: 0x44cc88 },
+  { id: "philosophy",       label: "Философия",          hex: 0xddaa44 },
 ];
 
 const TOPICS: Record<string, string[]> = {
@@ -40,6 +43,9 @@ const TOPICS: Record<string, string[]> = {
   "computer-science": ["Алгоритмы","Программирование","Сети","Базы данных","ИИ"],
   "astronomy":        ["Солнечная система","Звёзды","Галактики","Космонавтика","Чёрные дыры"],
   "discovery":        ["Научные открытия","Изобретения","Великие учёные","Прогресс","Технологии"],
+  "psychology":       ["Когнитивная психология","Эмоции","Личность","Социальная психология","Психотерапия"],
+  "economics":        ["Макроэкономика","Микроэкономика","Финансы","Рынки","Экономическая история"],
+  "philosophy":       ["Античность","Средневековье","Новое время","Этика","Эпистемология"],
 };
 
 const DESCRIPTIONS: Record<string, string> = {
@@ -57,6 +63,9 @@ const DESCRIPTIONS: Record<string, string> = {
   "computer-science": "Алгоритмы, программирование, сети и искусственный интеллект.",
   "astronomy":        "Планеты, звёзды, галактики и тайны вселенной — от Солнечной системы до Big Bang.",
   "discovery":        "Великие открытия и изобретения человечества, изменившие ход истории.",
+  "psychology":       "Поведение, эмоции и мышление человека — от когнитивных процессов до психотерапии.",
+  "economics":        "Рынки, деньги и решения — как устроена экономика на микро- и макроуровне.",
+  "philosophy":       "Вечные вопросы о бытии, познании и морали — от Сократа до современной этики.",
 };
 
 const GRAPH_EDGES: [string, string][] = [
@@ -83,6 +92,15 @@ const GRAPH_EDGES: [string, string][] = [
   ["physics","biology"],["literature","discovery"],
   ["russian-language","discovery"],["astronomy","chemistry"],
   ["english","social-studies"],["geography","russian-history"],
+  // Psychology connections
+  ["psychology","biology"],["psychology","social-studies"],
+  ["psychology","literature"],["psychology","philosophy"],
+  // Economics connections
+  ["economics","mathematics"],["economics","social-studies"],
+  ["economics","geography"],["economics","philosophy"],
+  // Philosophy connections
+  ["philosophy","literature"],["philosophy","mathematics"],
+  ["philosophy","discovery"],["philosophy","world-history"],
 ];
 
 interface PopupState {
