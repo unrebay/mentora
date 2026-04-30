@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const KnowledgeGraph = dynamic(() => import("@/components/KnowledgeGraph"), { ssr: false });
+const KnowledgeGraph = dynamic(() => import("@/components/KnowledgeGraph3D"), { ssr: false });
 const ParticleField = dynamic(() => import("@/components/ParticleField"), { ssr: false });
 const DeepSpaceBlobs = dynamic(() => import("@/components/DeepSpaceBlobs"), { ssr: false });
 
