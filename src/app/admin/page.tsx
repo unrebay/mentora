@@ -571,48 +571,93 @@ function MilestoneTimeline({ checked }: { checked: Set<string> }) {
   const done = checked.size;
   const pct  = ROADMAP_TOTAL ? Math.round(done / ROADMAP_TOTAL * 100) : 0;
 
-  // Milestone positions: label, threshold pct, color
   const MS = [
-    { label: "Сейчас",   pct:  0, color: MUTED },
-    { label: "Дизайн",   pct: 36, color: "#4561E8" },
-    { label: "Система",  pct: 55, color: "#a78bfa" },
-    { label: "Оптим.",   pct: 72, color: "#22c55e" },
-    { label: "QA",       pct: 90, color: "#f59e0b" },
-    { label: "🚀 1 июня",pct:100, color: "#ef4444" },
+    { label: "Сейчас",        pct:  0, color: "#94a3b8" },
+    { label: "Дизайн",        pct: 36, color: "#4561E8" },
+    { label: "Система",       pct: 55, color: "#a78bfa" },
+    { label: "Оптимизация",   pct: 72, color: "#22c55e" },
+    { label: "QA",            pct: 90, color: "#f59e0b" },
+    { label: "1 июня",        pct:100, color: "#ef4444" },
   ];
 
   return (
-    <div style={{ marginBottom: 28, padding: "14px 20px 18px", background: CARD, borderRadius: 14, border: `1px solid ${BOR}` }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+    <div style={{ marginBottom: 28, padding: "16px 24px 20px", background: CARD, borderRadius: 14, border: `1px solid ${BOR}` }}>
+      {/* Header row */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <span style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em" }}>
           До старта привлечения
         </span>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ fontSize: 12, color: MUTED }}>{done}/{ROADMAP_TOTAL} задач</span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>{pct}%</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 12, color: MUTED }}>{done} / {ROADMAP_TOTAL} задач</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: TEXT, minWidth: 36, textAlign: "right" }}>{pct}%</span>
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div style={{ position: "relative", height: 8, background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)", borderRadius: 99, marginBottom: 20 }}>
-        <div style={{ position: "absolute", inset: 0, height: "100%", width: pct + "%", borderRadius: 99, background: "linear-gradient(90deg, #4561E8, #a78bfa, #f59e0b)", transition: "width .7s cubic-bezier(.4,0,.2,1)", boxShadow: `0 0 10px rgba(69,97,232,0.5)` }} />
-        {/* Dots */}
-        {MS.map(m => (
-          <div key={m.label} title={m.label} style={{ position: "absolute", top: "50%", left: m.pct + "%", transform: "translate(-50%,-50%)", width: 10, height: 10, borderRadius: "50%", background: pct >= m.pct ? m.color : (isDark ? "#1a1d2e" : "#e2e8f0"), border: `2px solid ${m.color}`, boxShadow: pct >= m.pct ? `0 0 6px ${m.color}80` : "none", transition: "all .3s", zIndex: 2 }} />
-        ))}
-      </div>
+      {/* Track + dots + labels all in one relative container */}
+      <div style={{ position: "relative", paddingBottom: 22 }}>
+        {/* Track */}
+        <div style={{ height: 6, background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)", borderRadius: 99, position: "relative" }}>
+          {/* Fill */}
+          <div style={{
+            position: "absolute", left: 0, top: 0, bottom: 0,
+            width: pct + "%",
+            minWidth: pct > 0 ? 6 : 0,
+            borderRadius: 99,
+            background: "linear-gradient(90deg, #4561E8 0%, #a78bfa 55%, #f59e0b 100%)",
+            transition: "width .7s cubic-bezier(.4,0,.2,1)",
+            boxShadow: pct > 0 ? "0 0 10px rgba(69,97,232,0.45)" : "none",
+          }} />
 
-      {/* Labels row */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative" }}>
-        {MS.map((m, i) => (
-          <div key={m.label} style={{ textAlign: i === 0 ? "left" : i === MS.length - 1 ? "right" : "center", flex: i === 0 || i === MS.length - 1 ? "0 0 auto" : 1 }}>
-            <span style={{ fontSize: 10, fontWeight: pct >= m.pct ? 700 : 400, color: pct >= m.pct ? m.color : MUTED, whiteSpace: "nowrap", transition: "all .3s" }}>
-              {m.label}
-            </span>
-          </div>
-        ))}
-        {/* Unicorn SVG at far right */}
-        <div style={{ position: "absolute", right: -6, top: -34, fontSize: 20, lineHeight: 1 }}>🦄</div>
+          {/* Milestone dots — on the track */}
+          {MS.map(m => {
+            const reached = pct >= m.pct;
+            return (
+              <div key={m.pct} style={{
+                position: "absolute",
+                left: m.pct === 100 ? "calc(100% - 6px)" : m.pct === 0 ? "-1px" : `calc(${m.pct}% - 5px)`,
+                top: "50%",
+                transform: "translateY(-50%)",
+                width: 12, height: 12, borderRadius: "50%",
+                background: reached ? m.color : (isDark ? "#141625" : "#dde1ea"),
+                border: `2px solid ${m.color}`,
+                boxShadow: reached ? `0 0 7px ${m.color}90` : "none",
+                transition: "background .3s, box-shadow .3s",
+                zIndex: 2,
+              }} />
+            );
+          })}
+        </div>
+
+        {/* Labels — absolutely positioned under each dot */}
+        {MS.map((m, i) => {
+          const reached = pct >= m.pct;
+          const isFirst = i === 0;
+          const isLast  = i === MS.length - 1;
+          return (
+            <div key={`lbl_${m.pct}`} style={{
+              position: "absolute",
+              top: 14,
+              left: isLast ? "auto" : isFirst ? 0 : `${m.pct}%`,
+              right: isLast ? 0 : "auto",
+              transform: isFirst || isLast ? "none" : "translateX(-50%)",
+              textAlign: "center",
+            }}>
+              <span style={{
+                fontSize: 10, fontWeight: reached ? 700 : 400,
+                color: reached ? m.color : MUTED,
+                whiteSpace: "nowrap",
+                transition: "color .3s, font-weight .3s",
+              }}>
+                {m.label}
+              </span>
+            </div>
+          );
+        })}
+
+        {/* Unicorn — floats just past the last milestone */}
+        <div style={{ position: "absolute", top: -18, right: -10, fontSize: 18, lineHeight: 1, userSelect: "none" }}>
+          🦄
+        </div>
       </div>
     </div>
   );
