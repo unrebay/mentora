@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
-import Logo from "@/components/Logo";
+import MeLogo from "@/components/MeLogo";
 import SubjectIcon from "@/components/SubjectIcon";
 import posthog from "posthog-js";
 
@@ -94,8 +94,8 @@ function AuthGalaxy() {
       const THREE = await import("three");
       if (disposed || !container) return;
 
-      const w = container.clientWidth  || window.innerWidth;
-      const h = container.clientHeight || window.innerHeight;
+      const w = window.innerWidth  || container.clientWidth  || 1280;
+      const h = window.innerHeight || container.clientHeight || 800;
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -412,7 +412,7 @@ function AuthGalaxy() {
     };
   }, []);
 
-  return <div ref={mountRef} style={{ position: "absolute", inset: 0 }} />;
+  return <div ref={mountRef} style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }} />;
 }
 
 // ── Page entry ───────────────────────────────────────────────────────────────
@@ -539,7 +539,10 @@ function AuthPageContent() {
           <AuthGalaxy />
         </div>
         <div className="relative z-10 w-full max-w-sm text-center animate-fade-in-up">
-          <Logo size="md" href="/" className="justify-center mb-10" textColor="white" />
+          <a href="/" className="inline-flex items-baseline gap-0 select-none justify-center mb-10">
+            <MeLogo height={26} colorM="rgba(255,255,255,0.95)" />
+            <span style={{ fontFamily:"var(--font-playfair),Georgia,serif", fontSize:"1.625rem", fontWeight:700, letterSpacing:"-0.01em", lineHeight:1, color:"rgba(255,255,255,0.95)" }}>ntora</span>
+          </a>
           <div className="glass rounded-3xl p-8 space-y-6">
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto"
               style={{ background: "rgba(69,97,232,0.18)", border: "1px solid rgba(107,143,255,0.25)" }}>
@@ -566,12 +569,10 @@ function AuthPageContent() {
 
   // ── Main auth screen ──────────────────────────────────────────────────────
   return (
-    <main className="relative min-h-screen overflow-hidden" style={{ background: "#04060f" }}>
+    <main className="relative min-h-screen" style={{ background: "#04060f" }}>
 
       {/* ── Three.js Galaxy background ─────────────────────────────────── */}
-      <div className="fixed inset-0" style={{ zIndex: 0 }}>
-        <AuthGalaxy />
-      </div>
+      <AuthGalaxy />
 
       {/* ── Left-side gradient so text is readable ─────────────────────── */}
       <div className="fixed inset-0 pointer-events-none hidden lg:block" style={{
@@ -590,7 +591,10 @@ function AuthPageContent() {
         {/* ── LEFT: branding + headline ─────────────────────────────── */}
         <div className="hidden lg:flex flex-col justify-center px-14 xl:px-20 py-12" style={{ width: "54%" }}>
 
-          <Logo size="md" href="/" textColor="white" className="mb-12" />
+          <a href="/" className="inline-flex items-baseline gap-0 select-none mb-12">
+            <MeLogo height={26} colorM="rgba(255,255,255,0.95)" />
+            <span style={{ fontFamily:"var(--font-playfair),Georgia,serif", fontSize:"1.625rem", fontWeight:700, letterSpacing:"-0.01em", lineHeight:1, color:"rgba(255,255,255,0.95)" }}>ntora</span>
+          </a>
 
           <div className="max-w-lg">
             <p className="text-[10px] font-bold tracking-[0.25em] uppercase mb-5"
@@ -634,7 +638,10 @@ function AuthPageContent() {
 
           {/* Mobile-only logo */}
           <div className="lg:hidden mb-8">
-            <Logo size="sm" href="/" textColor="white" />
+            <a href="/" className="inline-flex items-baseline gap-0 select-none">
+              <MeLogo height={18} colorM="rgba(255,255,255,0.95)" />
+              <span style={{ fontFamily:"var(--font-playfair),Georgia,serif", fontSize:"1.125rem", fontWeight:700, letterSpacing:"-0.01em", lineHeight:1, color:"rgba(255,255,255,0.95)" }}>ntora</span>
+            </a>
           </div>
 
           {/* Mobile-only headline */}

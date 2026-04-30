@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import Logo from "@/components/Logo";
+import MeLogo from "@/components/MeLogo";
 
 export function SplashScreen() {
   const [visible, setVisible] = useState(true);
@@ -34,8 +34,16 @@ export function SplashScreen() {
         }
       `}</style>
       <div className="mentora-splash fixed inset-0 z-[9999] flex items-center justify-center" style={{ background: "var(--bg)" }}>
-        <div className="mentora-splash-logo">
-          <Logo size="lg" href={undefined} />
+        <div className="mentora-splash-logo flex items-baseline gap-0 select-none">
+          <MeLogo height={34} />
+          <span style={{
+            fontFamily: "var(--font-playfair), Georgia, serif",
+            fontSize: "2.125rem",
+            fontWeight: 700,
+            letterSpacing: "-0.01em",
+            lineHeight: 1,
+            color: "var(--text)",
+          }}>ntora</span>
         </div>
       </div>
     </>
