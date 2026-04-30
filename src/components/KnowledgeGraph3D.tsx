@@ -25,28 +25,44 @@ const SUBS: SubData[] = [
   { id: "discovery",        label: "Открытия",          hex: 0xffdd88 },
 ];
 
+// Denser graph — more cross-discipline edges
 const GRAPH_EDGES: [string, string][] = [
   ["russian-history",  "world-history"],
   ["russian-history",  "literature"],
   ["russian-history",  "russian-language"],
   ["russian-history",  "social-studies"],
   ["russian-history",  "discovery"],
+  ["russian-history",  "geography"],
   ["world-history",    "geography"],
   ["world-history",    "english"],
   ["world-history",    "social-studies"],
+  ["world-history",    "discovery"],
+  ["world-history",    "literature"],
   ["mathematics",      "physics"],
   ["mathematics",      "computer-science"],
   ["mathematics",      "astronomy"],
+  ["mathematics",      "chemistry"],
   ["physics",          "chemistry"],
   ["physics",          "computer-science"],
   ["physics",          "astronomy"],
+  ["physics",          "discovery"],
   ["chemistry",        "biology"],
+  ["chemistry",        "discovery"],
   ["biology",          "geography"],
+  ["biology",          "discovery"],
+  ["biology",          "chemistry"],
   ["russian-language", "literature"],
   ["russian-language", "english"],
+  ["russian-language", "social-studies"],
+  ["literature",       "english"],
+  ["literature",       "social-studies"],
   ["discovery",        "astronomy"],
-  ["discovery",        "biology"],
+  ["discovery",        "computer-science"],
   ["social-studies",   "geography"],
+  ["social-studies",   "english"],
+  ["geography",        "astronomy"],
+  ["computer-science", "mathematics"],
+  ["astronomy",        "physics"],
 ];
 
 export default function KnowledgeGraph3D({ className, userProgress }: Props) {
@@ -62,7 +78,6 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
     let onTouchMoveFn: ((e: TouchEvent) => void) | null = null;
     let onResizeFn: (() => void) | null = null;
 
-    // Build active set from user progress
     const activeSet = new Set<string>();
     if (userProgress) {
       for (const p of userProgress) {
@@ -75,7 +90,7 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
       if (disposed || !container) return;
 
       // ─── Renderer ──────────────────────────────────────────────────────────────
-      const w = container.clientWidth || window.innerWidth;
+      const w = container.clientWidth  || window.innerWidth;
       const h = container.clientHeight || window.innerHeight;
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -88,15 +103,25 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
       });
       container.appendChild(renderer.domElement);
 
+      // ─── Label canvas (2D overlay, pointer-events:none) ────────────────────────
+      const labelCanvas = document.createElement("canvas");
+      labelCanvas.width  = w;
+      labelCanvas.height = h;
+      Object.assign(labelCanvas.style, {
+        position: "absolute", top: "0", left: "0",
+        width: "100%", height: "100%", pointerEvents: "none",
+      });
+      container.appendChild(labelCanvas);
+      const lctx = labelCanvas.getContext("2d")!;
+
       // ─── Scene / Camera ────────────────────────────────────────────────────────
-      const scene = new THREE.Scene();
+      const scene  = new THREE.Scene();
       scene.background = new THREE.Color(0x060c18);
 
       const camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 1000);
-      camera.position.set(0, 3.5, 19);
+      camera.position.set(0, 3.5, 28);
       camera.lookAt(0, 0, 0);
 
-      // ─── Helpers ───────────────────────────────────────────────────────────────
       const ADD = THREE.AdditiveBlending;
 
       function makeMat(color: number, opacity: number) {
@@ -109,34 +134,26 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         const pts: THREE.Vector3[] = [];
         const phi = Math.PI * (3 - Math.sqrt(5));
         for (let i = 0; i < n; i++) {
-          const y = 1 - (i / (n - 1)) * 2;
+          const y   = 1 - (i / (n - 1)) * 2;
           const rad = Math.sqrt(Math.max(0, 1 - y * y));
-          const theta = phi * i;
+          const th  = phi * i;
           pts.push(new THREE.Vector3(
-            Math.cos(theta) * rad * r,
+            Math.cos(th) * rad * r,
             y * r,
-            Math.sin(theta) * rad * r,
+            Math.sin(th) * rad * r,
           ));
         }
         return pts;
       }
 
-      // ─── Groups ────────────────────────────────────────────────────────────────
-      // mainGrp: all science content – rotates with full mouse speed
-      // bgGrp:   background stars   – rotates at 0.10× (parallax)
+      // ─── Groups (separate rotation speeds for parallax) ────────────────────────
       const mainGrp = new THREE.Group();
       const bgGrp   = new THREE.Group();
       scene.add(mainGrp);
       scene.add(bgGrp);
 
       // ─── Atmosphere BackSide shells ────────────────────────────────────────────
-      // These sit directly in scene (so large they look static either way)
-      const atmData: [number, number, number][] = [
-        [90, 0x1a3a7a, 0.10],
-        [60, 0x0d2255, 0.14],
-        [45, 0x18083a, 0.08],
-      ];
-      for (const [r, color, op] of atmData) {
+      for (const [r, color, op] of [[90, 0x1a3a7a, 0.08], [60, 0x0d2255, 0.11], [45, 0x18083a, 0.06]] as [number, number, number][]) {
         scene.add(new THREE.Mesh(
           new THREE.SphereGeometry(r, 20, 20),
           new THREE.MeshBasicMaterial({
@@ -146,58 +163,54 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         ));
       }
 
-      // ─── Background star layers ────────────────────────────────────────────────
-      function mkStars(
-        count: number, rMin: number, rMax: number,
-        color: number, size: number, opacity: number,
-      ) {
+      // ─── Background stars (slightly dimmer than before) ────────────────────────
+      function mkStars(count: number, rMin: number, rMax: number, color: number, size: number, op: number) {
         const geo = new THREE.BufferGeometry();
         const pos = new Float32Array(count * 3);
         for (let i = 0; i < count; i++) {
-          const r     = rMin + Math.random() * (rMax - rMin);
-          const theta = Math.random() * Math.PI * 2;
-          const phi   = Math.acos(2 * Math.random() - 1);
-          pos[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
-          pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-          pos[i * 3 + 2] = r * Math.cos(phi);
+          const r   = rMin + Math.random() * (rMax - rMin);
+          const th  = Math.random() * Math.PI * 2;
+          const ph  = Math.acos(2 * Math.random() - 1);
+          pos[i*3]   = r * Math.sin(ph) * Math.cos(th);
+          pos[i*3+1] = r * Math.sin(ph) * Math.sin(th);
+          pos[i*3+2] = r * Math.cos(ph);
         }
         geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
         bgGrp.add(new THREE.Points(geo, new THREE.PointsMaterial({
-          color, size, transparent: true, opacity,
+          color, size, transparent: true, opacity: op,
           blending: ADD, depthWrite: false, sizeAttenuation: false,
         })));
       }
 
-      mkStars(22000, 35, 350, 0xffffff,  1.9, 0.55);
-      mkStars(4000,  20,  80, 0xaabbff,  2.2, 0.35);
-      mkStars(700,   15,  40, 0xfff0cc,  3.0, 0.50);
-      mkStars(1200,  25, 150, 0x88aaff,  1.5, 0.25);
-      mkStars(500,   10,  30, 0xffffff,  4.0, 0.70);
+      // Stars dimmed 30% vs original
+      mkStars(20000, 35, 350, 0xffffff, 1.7, 0.38);
+      mkStars(3500,  20,  80, 0xaabbff, 2.0, 0.24);
+      mkStars(600,   15,  40, 0xfff0cc, 2.8, 0.35);
+      mkStars(1000,  25, 150, 0x88aaff, 1.4, 0.17);
+      mkStars(400,   10,  30, 0xffffff, 3.8, 0.50);
 
-      // Milky Way band
+      // Milky Way
       {
-        const count = 10000;
         const geo = new THREE.BufferGeometry();
-        const pos = new Float32Array(count * 3);
-        for (let i = 0; i < count; i++) {
-          const r     = 80 + Math.random() * 200;
-          const angle = Math.random() * Math.PI * 2;
-          const y     = (Math.random() - 0.5) * 30;
-          pos[i * 3]     = Math.cos(angle) * r;
-          pos[i * 3 + 1] = y;
-          pos[i * 3 + 2] = Math.sin(angle) * r;
+        const pos = new Float32Array(10000 * 3);
+        for (let i = 0; i < 10000; i++) {
+          const r = 80 + Math.random() * 200;
+          const a = Math.random() * Math.PI * 2;
+          const y = (Math.random() - 0.5) * 30;
+          pos[i*3] = Math.cos(a)*r; pos[i*3+1] = y; pos[i*3+2] = Math.sin(a)*r;
         }
         geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
         bgGrp.add(new THREE.Points(geo, new THREE.PointsMaterial({
-          color: 0xaabbff, size: 1.4, transparent: true, opacity: 0.18,
+          color: 0xaabbff, size: 1.3, transparent: true, opacity: 0.12,
           blending: ADD, depthWrite: false, sizeAttenuation: false,
         })));
       }
 
-      // ─── Science positions (fibonacci sphere, compact) ─────────────────────────
-      const sciPos = fibSph(SUBS.length, 5.2);
+      // ─── Science positions ─────────────────────────────────────────────────────
+      // Larger radius = bigger galaxy, camera pulled back proportionally
+      const sciPos = fibSph(SUBS.length, 8.0);
 
-      // ─── Science nodes (core + glow + halo) ───────────────────────────────────
+      // ─── Science nodes ─────────────────────────────────────────────────────────
       const sciGlows: THREE.Mesh[] = [];
 
       for (let i = 0; i < SUBS.length; i++) {
@@ -205,57 +218,48 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         const pos      = sciPos[i];
         const isActive = activeSet.has(s.id);
         const isFull   = FULL_SUBJECTS.has(s.id);
-        const coreHex  = isActive ? 0xffa040 : s.hex;
-        const coreOp   = isActive ? 0.95 : isFull ? 0.85 : 0.60;
+        const cHex     = isActive ? 0xffa040 : s.hex;
+        const cOp      = isActive ? 0.95 : isFull ? 0.85 : 0.65;
 
         // Core
-        const core = new THREE.Mesh(
-          new THREE.SphereGeometry(0.22, 10, 8), makeMat(coreHex, coreOp),
-        );
+        const core = new THREE.Mesh(new THREE.SphereGeometry(0.30, 12, 10), makeMat(cHex, cOp));
         core.position.copy(pos);
         mainGrp.add(core);
 
-        // Glow halo (pulse-animated)
-        const glow = new THREE.Mesh(
-          new THREE.SphereGeometry(0.60, 8, 6), makeMat(coreHex, isActive ? 0.12 : 0.07),
-        );
+        // Glow (pulsed)
+        const glow = new THREE.Mesh(new THREE.SphereGeometry(0.80, 8, 6), makeMat(cHex, isActive ? 0.14 : 0.08));
         glow.position.copy(pos);
         mainGrp.add(glow);
         sciGlows.push(glow);
 
-        // Outer soft halo
-        const halo = new THREE.Mesh(
-          new THREE.SphereGeometry(1.05, 6, 5), makeMat(coreHex, isActive ? 0.045 : 0.022),
-        );
+        // Outer halo
+        const halo = new THREE.Mesh(new THREE.SphereGeometry(1.50, 6, 5), makeMat(cHex, isActive ? 0.05 : 0.025));
         halo.position.copy(pos);
         mainGrp.add(halo);
       }
 
       // ─── Inter-science edges ───────────────────────────────────────────────────
-      const sciIndex = new Map(SUBS.map((s, i) => [s.id, i]));
+      const sciIdx = new Map(SUBS.map((s, i) => [s.id, i]));
       const interE: [THREE.Vector3, THREE.Vector3][] = [];
 
       for (const [idA, idB] of GRAPH_EDGES) {
-        const ia = sciIndex.get(idA);
-        const ib = sciIndex.get(idB);
+        const ia = sciIdx.get(idA);
+        const ib = sciIdx.get(idB);
         if (ia == null || ib == null) continue;
         interE.push([sciPos[ia], sciPos[ib]]);
 
-        const geo = new THREE.BufferGeometry().setFromPoints([sciPos[ia], sciPos[ib]]);
-        mainGrp.add(new THREE.Line(geo, new THREE.LineBasicMaterial({
-          color: 0x3355aa, transparent: true, opacity: 0.22,
-          blending: ADD, depthWrite: false,
-        })));
+        mainGrp.add(new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints([sciPos[ia], sciPos[ib]]),
+          new THREE.LineBasicMaterial({ color: 0x3355aa, transparent: true, opacity: 0.20, blending: ADD, depthWrite: false }),
+        ));
       }
 
-      // ─── Chain nodes along inter-science edges (InstancedMesh) ────────────────
-      const CN  = 14; // nodes per edge
+      // ─── Chain nodes along inter-science edges ────────────────────────────────
+      // 22 nodes per edge with wider zigzag spread
+      const CN  = 22;
       const TCN = Math.max(interE.length * CN, 1);
-
       const cnM = new THREE.InstancedMesh(
-        new THREE.SphereGeometry(0.028, 5, 4),
-        makeMat(0x88aaff, 0.60),
-        TCN,
+        new THREE.SphereGeometry(0.032, 5, 4), makeMat(0x88aaff, 0.58), TCN,
       );
       mainGrp.add(cnM);
 
@@ -264,14 +268,12 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         let idx = 0;
         for (const [a, b] of interE) {
           for (let k = 0; k < CN; k++) {
-            const t  = (k + 1) / (CN + 1);
-            const ox = (Math.random() - 0.5) * 0.50;
-            const oy = (Math.random() - 0.5) * 0.50;
-            const oz = (Math.random() - 0.5) * 0.50;
+            const t   = (k + 1) / (CN + 1);
+            const amp = 0.55 + Math.random() * 0.25;
             dum.position.set(
-              a.x + (b.x - a.x) * t + ox,
-              a.y + (b.y - a.y) * t + oy,
-              a.z + (b.z - a.z) * t + oz,
+              a.x + (b.x - a.x) * t + (Math.random() - 0.5) * amp,
+              a.y + (b.y - a.y) * t + (Math.random() - 0.5) * amp,
+              a.z + (b.z - a.z) * t + (Math.random() - 0.5) * amp,
             );
             dum.scale.setScalar(1);
             dum.updateMatrix();
@@ -281,20 +283,13 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         cnM.instanceMatrix.needsUpdate = true;
       }
 
-      // ─── Inactive knowledge chunks around each science (InstancedMesh) ─────────
-      const CPER = 70; // chunks per science
+      // ─── Inactive knowledge chunks around each science ─────────────────────────
+      // 110 chunks/science, spread across r=0.5–2.2
+      const CPER = 110;
       const TIN  = SUBS.length * CPER;
 
-      const inM = new THREE.InstancedMesh(
-        new THREE.SphereGeometry(0.021, 4, 3),
-        makeMat(0xffffff, 0.27),
-        TIN,
-      );
-      const inM2 = new THREE.InstancedMesh(
-        new THREE.SphereGeometry(0.056, 4, 3),
-        makeMat(0xaabbff, 0.050),
-        TIN,
-      );
+      const inM  = new THREE.InstancedMesh(new THREE.SphereGeometry(0.024, 4, 3), makeMat(0xffffff, 0.28), TIN);
+      const inM2 = new THREE.InstancedMesh(new THREE.SphereGeometry(0.062, 4, 3), makeMat(0xaabbff, 0.05), TIN);
       mainGrp.add(inM);
       mainGrp.add(inM2);
 
@@ -303,79 +298,78 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         for (let si = 0; si < SUBS.length; si++) {
           const sp = sciPos[si];
           for (let j = 0; j < CPER; j++) {
-            const idx   = si * CPER + j;
-            const r     = 0.5 + Math.random() * 1.8;
-            const theta = Math.random() * Math.PI * 2;
-            const phi   = Math.acos(2 * Math.random() - 1);
+            const r   = 0.5 + Math.random() * 2.2;
+            const th  = Math.random() * Math.PI * 2;
+            const ph  = Math.acos(2 * Math.random() - 1);
             dum.position.set(
-              sp.x + r * Math.sin(phi) * Math.cos(theta),
-              sp.y + r * Math.sin(phi) * Math.sin(theta),
-              sp.z + r * Math.cos(phi),
+              sp.x + r * Math.sin(ph) * Math.cos(th),
+              sp.y + r * Math.sin(ph) * Math.sin(th),
+              sp.z + r * Math.cos(ph),
             );
             dum.scale.setScalar(1);
             dum.updateMatrix();
-            inM.setMatrixAt(idx, dum.matrix);
-            inM2.setMatrixAt(idx, dum.matrix);
+            inM.setMatrixAt(si * CPER + j, dum.matrix);
+            inM2.setMatrixAt(si * CPER + j, dum.matrix);
           }
         }
         inM.instanceMatrix.needsUpdate  = true;
         inM2.instanceMatrix.needsUpdate = true;
       }
 
-      // ─── Active knowledge nodes (for sciences with XP) ────────────────────────
+      // ─── Active nodes ──────────────────────────────────────────────────────────
       for (let si = 0; si < SUBS.length; si++) {
-        const s = SUBS[si];
-        if (!activeSet.has(s.id)) continue;
+        if (!activeSet.has(SUBS[si].id)) continue;
         const sp = sciPos[si];
-
-        for (let j = 0; j < 6; j++) {
-          const r     = 0.3 + Math.random() * 1.4;
-          const theta = Math.random() * Math.PI * 2;
-          const phi   = Math.acos(2 * Math.random() - 1);
-          const node  = new THREE.Mesh(
-            new THREE.SphereGeometry(0.048, 6, 5),
-            makeMat(0xffa040, 0.85),
+        for (let j = 0; j < 8; j++) {
+          const r  = 0.4 + Math.random() * 1.6;
+          const th = Math.random() * Math.PI * 2;
+          const ph = Math.acos(2 * Math.random() - 1);
+          const m  = new THREE.Mesh(new THREE.SphereGeometry(0.052, 6, 5), makeMat(0xffa040, 0.85));
+          m.position.set(
+            sp.x + r * Math.sin(ph) * Math.cos(th),
+            sp.y + r * Math.sin(ph) * Math.sin(th),
+            sp.z + r * Math.cos(ph),
           );
-          node.position.set(
-            sp.x + r * Math.sin(phi) * Math.cos(theta),
-            sp.y + r * Math.sin(phi) * Math.sin(theta),
-            sp.z + r * Math.cos(phi),
-          );
-          mainGrp.add(node);
+          mainGrp.add(m);
         }
       }
 
-      // ─── Sci-to-chunk chain nodes ──────────────────────────────────────────────
-      const SCN    = 5;  // nodes per sci→chunk edge
-      const SCEDGE = 3;  // such edges per science
+      // ─── Sci→subtopic chain nodes (radial spokes) ─────────────────────────────
+      // 8 spokes per science × 6 nodes each = rich web around every node
+      const SCN    = 6;
+      const SCEDGE = 8;
       const TSCN   = SUBS.length * SCEDGE * SCN;
 
-      if (TSCN > 0) {
-        const cnM2 = new THREE.InstancedMesh(
-          new THREE.SphereGeometry(0.018, 5, 4),
-          makeMat(0x6688cc, 0.42),
-          TSCN,
-        );
-        mainGrp.add(cnM2);
+      const cnM2 = new THREE.InstancedMesh(
+        new THREE.SphereGeometry(0.020, 5, 4), makeMat(0x6688cc, 0.40), TSCN,
+      );
+      mainGrp.add(cnM2);
 
+      {
         const dum = new THREE.Object3D();
-        let idx2  = 0;
+        let idx2 = 0;
         for (let si = 0; si < SUBS.length; si++) {
           const sp = sciPos[si];
           for (let e = 0; e < SCEDGE; e++) {
-            const r     = 1.5 + Math.random() * 1.0;
-            const theta = Math.random() * Math.PI * 2;
-            const phi   = Math.acos(2 * Math.random() - 1);
-            const tx    = sp.x + r * Math.sin(phi) * Math.cos(theta);
-            const ty    = sp.y + r * Math.sin(phi) * Math.sin(theta);
-            const tz    = sp.z + r * Math.cos(phi);
+            const r   = 1.6 + Math.random() * 1.4;
+            const th  = Math.random() * Math.PI * 2;
+            const ph  = Math.acos(2 * Math.random() - 1);
+            const tx  = sp.x + r * Math.sin(ph) * Math.cos(th);
+            const ty  = sp.y + r * Math.sin(ph) * Math.sin(th);
+            const tz  = sp.z + r * Math.cos(ph);
+
+            // Draw thin line for spoke
+            mainGrp.add(new THREE.Line(
+              new THREE.BufferGeometry().setFromPoints([sp, new THREE.Vector3(tx, ty, tz)]),
+              new THREE.LineBasicMaterial({ color: 0x334488, transparent: true, opacity: 0.12, blending: ADD, depthWrite: false }),
+            ));
 
             for (let k = 0; k < SCN; k++) {
               const t = (k + 1) / (SCN + 1);
               dum.position.set(
-                sp.x + (tx - sp.x) * t + (Math.random() - 0.5) * 0.20,
-                sp.y + (ty - sp.y) * t + (Math.random() - 0.5) * 0.20,
-                sp.z + (tz - sp.z) * t + (Math.random() - 0.5) * 0.20,
+                sp.x + (tx - sp.x) * t + (Math.random() - 0.5) * 0.22,
+                sp.y + (ty - sp.y) * t + (Math.random() - 0.5) * 0.22,
+                sp.z + (tz - sp.z) * t + (Math.random() - 0.5) * 0.22,
               );
               dum.scale.setScalar(1);
               dum.updateMatrix();
@@ -386,64 +380,100 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         cnM2.instanceMatrix.needsUpdate = true;
       }
 
-      // ─── Hero / bright foreground stars ───────────────────────────────────────
-      // A handful of larger bright stars scattered around the scene
+      // ─── Hero foreground stars ─────────────────────────────────────────────────
       {
-        const heroGeo = new THREE.BufferGeometry();
-        const count = 28;
-        const pos   = new Float32Array(count * 3);
-        for (let i = 0; i < count; i++) {
-          const r     = 8 + Math.random() * 18;
-          const theta = Math.random() * Math.PI * 2;
-          const phi   = Math.acos(2 * Math.random() - 1);
-          pos[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
-          pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-          pos[i * 3 + 2] = r * Math.cos(phi);
+        const geo = new THREE.BufferGeometry();
+        const pos = new Float32Array(30 * 3);
+        for (let i = 0; i < 30; i++) {
+          const r  = 10 + Math.random() * 22;
+          const th = Math.random() * Math.PI * 2;
+          const ph = Math.acos(2 * Math.random() - 1);
+          pos[i*3] = r*Math.sin(ph)*Math.cos(th);
+          pos[i*3+1] = r*Math.sin(ph)*Math.sin(th);
+          pos[i*3+2] = r*Math.cos(ph);
         }
-        heroGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-        mainGrp.add(new THREE.Points(heroGeo, new THREE.PointsMaterial({
-          color: 0xffffff, size: 4.5, transparent: true, opacity: 0.80,
-          blending: ADD, depthWrite: false, sizeAttenuation: false,
-        })));
-        mainGrp.add(new THREE.Points(heroGeo, new THREE.PointsMaterial({
-          color: 0xaaccff, size: 10, transparent: true, opacity: 0.22,
-          blending: ADD, depthWrite: false, sizeAttenuation: false,
-        })));
+        geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+        mainGrp.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 4.2, transparent: true, opacity: 0.75, blending: ADD, depthWrite: false, sizeAttenuation: false })));
+        mainGrp.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xaaccff, size: 9.0, transparent: true, opacity: 0.20, blending: ADD, depthWrite: false, sizeAttenuation: false })));
       }
 
-      // ─── Mouse / touch interaction ─────────────────────────────────────────────
+      // ─── Mouse / touch ─────────────────────────────────────────────────────────
       let targetRotX  = 0.20;
       let targetRotY  = 0.0;
       let currentRotX = 0.20;
       let currentRotY = 0.0;
 
       onMouseMoveFn = (e: MouseEvent) => {
-        const nx = (e.clientX / window.innerWidth  - 0.5) * 2;
-        const ny = (e.clientY / window.innerHeight - 0.5) * 2;
-        targetRotY = nx * 0.55;
-        targetRotX = 0.20 + ny * 0.30;
+        targetRotY = ((e.clientX / window.innerWidth)  - 0.5) * 2 * 0.55;
+        targetRotX = 0.20 + ((e.clientY / window.innerHeight) - 0.5) * 2 * 0.30;
       };
-
       onTouchMoveFn = (e: TouchEvent) => {
-        if (e.touches.length > 0) {
-          const nx = (e.touches[0].clientX / window.innerWidth  - 0.5) * 2;
-          const ny = (e.touches[0].clientY / window.innerHeight - 0.5) * 2;
-          targetRotY = nx * 0.55;
-          targetRotX = 0.20 + ny * 0.30;
-        }
+        if (!e.touches.length) return;
+        targetRotY = ((e.touches[0].clientX / window.innerWidth)  - 0.5) * 2 * 0.55;
+        targetRotX = 0.20 + ((e.touches[0].clientY / window.innerHeight) - 0.5) * 2 * 0.30;
       };
-
       onResizeFn = () => {
         const nw = container.clientWidth  || window.innerWidth;
         const nh = container.clientHeight || window.innerHeight;
         camera.aspect = nw / nh;
         camera.updateProjectionMatrix();
         renderer.setSize(nw, nh);
+        labelCanvas.width  = nw;
+        labelCanvas.height = nh;
       };
 
       window.addEventListener("mousemove", onMouseMoveFn);
       window.addEventListener("touchmove", onTouchMoveFn, { passive: true });
       window.addEventListener("resize",    onResizeFn);
+
+      // ─── Label drawing ─────────────────────────────────────────────────────────
+      function drawLabels() {
+        const cw = labelCanvas.width;
+        const ch = labelCanvas.height;
+        lctx.clearRect(0, 0, cw, ch);
+        lctx.font = "bold 12px 'Inter', 'Helvetica Neue', Arial, sans-serif";
+        lctx.textAlign = "center";
+
+        const tmp = new THREE.Vector3();
+
+        for (let i = 0; i < SUBS.length; i++) {
+          const s    = SUBS[i];
+          const wp   = sciPos[i].clone();
+          // Transform by mainGrp world matrix
+          wp.applyMatrix4(mainGrp.matrixWorld);
+          tmp.copy(wp);
+          tmp.project(camera);
+
+          // Skip if behind camera
+          if (tmp.z >= 1) continue;
+
+          const sx = (tmp.z > 0.999) ? -999 : (tmp.x * 0.5 + 0.5) * cw;
+          const sy = (-tmp.y * 0.5 + 0.5) * ch;
+
+          const isActive = activeSet.has(s.id);
+          const baseColor = isActive ? "255,160,64" : "200,220,255";
+
+          // Depth-based opacity fade (labels further away = slightly faded)
+          const depth  = Math.max(0, Math.min(1, 1 - (tmp.z * 0.5 + 0.5)));
+          const alpha  = Math.max(0.4, depth) * (isActive ? 0.98 : 0.88);
+
+          // Background pill
+          const metrics = lctx.measureText(s.label);
+          const pw = metrics.width + 10;
+          const ph = 16;
+          const px = sx - pw / 2;
+          const py = sy + 16;
+
+          lctx.fillStyle = `rgba(6,6,15,${(alpha * 0.65).toFixed(2)})`;
+          lctx.beginPath();
+          lctx.roundRect(px, py, pw, ph, 4);
+          lctx.fill();
+
+          // Text
+          lctx.fillStyle = `rgba(${baseColor},${alpha.toFixed(2)})`;
+          lctx.fillText(s.label, sx, py + 11.5);
+        }
+      }
 
       // ─── Animation loop ────────────────────────────────────────────────────────
       const clock = new THREE.Clock();
@@ -452,32 +482,29 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         animId = requestAnimationFrame(animate);
         const t = clock.getElapsedTime();
 
-        // Eased rotation
         currentRotX += (targetRotX - currentRotX) * 0.04;
         currentRotY += (targetRotY - currentRotY) * 0.04;
+        targetRotY  += 0.00070;
 
-        // Slow auto-rotation
-        targetRotY += 0.00075;
-
-        // Main content rotates fully
         mainGrp.rotation.x = currentRotX;
         mainGrp.rotation.y = currentRotY;
+        bgGrp.rotation.x   = currentRotX * 0.10;
+        bgGrp.rotation.y   = currentRotY * 0.10;
 
-        // Background parallax (10% speed = depth)
-        bgGrp.rotation.x = currentRotX * 0.10;
-        bgGrp.rotation.y = currentRotY * 0.10;
-
-        // Pulse science glows
+        // Pulse glows
         for (let i = 0; i < sciGlows.length; i++) {
-          const glow     = sciGlows[i];
-          const isActive = activeSet.has(SUBS[i].id);
-          const pulse    = 1 + 0.09 * Math.sin(t * 1.5 + i * 0.72);
-          glow.scale.setScalar(pulse);
-          const m = glow.material as THREE.MeshBasicMaterial;
-          m.opacity = (isActive ? 0.12 : 0.07) * (0.88 + 0.12 * Math.sin(t * 2.1 + i));
+          const g  = sciGlows[i];
+          const ia = activeSet.has(SUBS[i].id);
+          g.scale.setScalar(1 + 0.09 * Math.sin(t * 1.5 + i * 0.72));
+          (g.material as THREE.MeshBasicMaterial).opacity =
+            (ia ? 0.14 : 0.08) * (0.88 + 0.12 * Math.sin(t * 2.1 + i));
         }
 
         renderer.render(scene, camera);
+
+        // Draw 2D labels on top (matrices are current after render)
+        mainGrp.updateMatrixWorld(true);
+        drawLabels();
       }
 
       animate();
@@ -491,7 +518,6 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
       if (onMouseMoveFn) window.removeEventListener("mousemove",  onMouseMoveFn);
       if (onTouchMoveFn) window.removeEventListener("touchmove",  onTouchMoveFn);
       if (onResizeFn)    window.removeEventListener("resize",     onResizeFn);
-      // Remove Three.js canvas
       while (container.firstChild) container.removeChild(container.firstChild);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
