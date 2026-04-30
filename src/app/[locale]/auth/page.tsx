@@ -79,7 +79,12 @@ const GRAPH_EDGES: [string, string][] = [
 
 // ── Auth Galaxy Background (Three.js) ────────────────────────────────────────
 function AuthGalaxy() {
+  const mountRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
+    const mount = mountRef.current;
+    if (!mount) return;
+
     let animId = 0;
     let disposed = false;
     let canvas: HTMLCanvasElement | null = null;
@@ -99,11 +104,10 @@ function AuthGalaxy() {
       renderer.setClearColor(0x04060f, 1);
       canvas = renderer.domElement;
       Object.assign(canvas.style, {
-        position: "fixed", top: "0", left: "0",
-        width: "100vw", height: "100vh",
-        zIndex: "0", pointerEvents: "none", display: "block",
+        width: "100%", height: "100%",
+        display: "block",
       });
-      document.body.appendChild(canvas);
+      mount.appendChild(canvas);
 
       const scene  = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(58, w / h, 0.1, 1000);
@@ -409,9 +413,22 @@ function AuthGalaxy() {
       if (onRSFn) window.removeEventListener("resize",    onRSFn);
       if (canvas && canvas.parentNode) canvas.parentNode.removeChild(canvas);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return null;
+  return (
+    <div
+      ref={mountRef}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 0,
+        pointerEvents: "none",
+        overflow: "hidden",
+        background: "#04060f",
+      }}
+    />
+  );
 }
 
 // ── Page entry ───────────────────────────────────────────────────────────────
@@ -533,10 +550,9 @@ function AuthPageContent() {
   // ── Email confirmation screen ─────────────────────────────────────────────
   if (emailSent) {
     return (
-      <main className="min-h-screen relative flex items-center justify-center px-4 py-12" style={{ background: "#04060f" }}>
-        <div className="fixed inset-0 z-0" style={{ background: "#04060f" }}>
-          <AuthGalaxy />
-        </div>
+      <main className="min-h-screen relative flex items-center justify-center px-4 py-12" style={{ background: "transparent" }}>
+        <AuthGalaxy />
+        <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 1, background: "rgba(4,6,15,0.55)" }} />
         <div className="relative z-10 w-full max-w-sm text-center animate-fade-in-up">
           <div className="flex justify-center mb-10">
             <Logo size="md" textColor="rgba(255,255,255,0.95)" />
@@ -567,7 +583,7 @@ function AuthPageContent() {
 
   // ── Main auth screen ──────────────────────────────────────────────────────
   return (
-    <main className="relative min-h-screen" style={{ background: "#04060f" }}>
+    <main className="relative min-h-screen" style={{ background: "transparent" }}>
 
       {/* ── Three.js Galaxy background ─────────────────────────────────── */}
       <AuthGalaxy />
