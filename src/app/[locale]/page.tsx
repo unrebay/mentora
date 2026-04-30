@@ -17,9 +17,9 @@ const LandingStarsCanvas = nextDynamic(() => import("@/components/LandingStarsCa
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Mentora — новый вид образования | 14 наук с AI-ментором",
+  title: "Mentora — новый вид образования | 17 наук с AI-ментором",
   description:
-    "Персональный AI-ментор для всех возрастов. 14 наук: история, математика, физика, химия, биология, русский язык, литература, английский и др. Живой диалог вместо учебника. Начни бесплатно — без карты.",
+    "Персональный AI-ментор для всех возрастов. 17 наук: история, математика, физика, химия, биология, психология, философия и др. Живой диалог вместо учебника. Начни бесплатно — без карты.",
   keywords: [
     "AI ментор", "ИИ ментор", "персональный ментор", "AI репетитор", "ИИ образование",
     "учить историю с ИИ", "история России онлайн", "математика онлайн",
@@ -30,9 +30,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: "https://mentora.su",
-    title: "Mentora — новый вид образования. 14 наук с AI-ментором",
+    title: "Mentora — новый вид образования. 17 наук с AI-ментором",
     description:
-      "История, математика, физика, химия, биология и ещё 9 наук. Живой диалог вместо учебника — персонально, для любого возраста, бесплатно.",
+      "История, математика, физика, химия, биология, психология, философия и ещё 10 наук. Живой диалог вместо учебника — персонально, для любого возраста, бесплатно.",
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Mentora AI-репетитор" }],
   },
 };
@@ -52,6 +52,9 @@ const SUBJECT_EMOJIS: Record<string, string> = {
   "computer-science": "💻",
   "astronomy": "🔭",
   "discovery": "🌐",
+  "psychology": "🧠",
+  "economics": "📊",
+  "philosophy": "💭",
   "suggest": "+",
 };
 
@@ -60,19 +63,21 @@ const SUBJECT_LIVE: Record<string, boolean> = {
   "chemistry": true, "biology": true, "russian-language": true, "literature": true,
   "english": true, "social-studies": true, "geography": true, "computer-science": true,
   "astronomy": true, "discovery": true,
+  "psychology": true, "economics": true, "philosophy": true,
 };
 
 const SUBJECT_IDS = [
   "russian-history", "world-history", "mathematics", "physics", "chemistry", "biology",
   "russian-language", "literature", "english", "social-studies", "geography",
-  "computer-science", "astronomy", "discovery", "suggest",
+  "computer-science", "astronomy", "discovery",
+  "psychology", "economics", "philosophy", "suggest",
 ];
 
 const STEP_NUMS = ["01", "02", "03", "04", "05"];
 const STEP_BADGE_IDX = 2; // step 03 gets the badge
 
 const STATS_DATA = [
-  { value: "14", key: "subjects" as const, color: "#4561E8", icon: `<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
+  { value: "17", key: "subjects" as const, color: "#4561E8", icon: `<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
   { value: "90%", key: "accuracy" as const, color: "#10B981", icon: `<circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.2" fill="none"/><path d="M8 12l3 3 5-5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
   { value: "24/7", key: "availability" as const, color: "#FF7A00", icon: `<circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.2" fill="none"/><path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" fill="none"/>` },
   { value: "0 ₽", key: "free" as const, color: "#A78BFA", icon: `<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },

@@ -16,6 +16,9 @@ const META: Record<string, { from: string; to: string }> = {
   "computer-science": { from: "#64748B", to: "#334155" },
   "astronomy":        { from: "#7C3AED", to: "#4C1598" },
   "discovery":        { from: "#8BB8CC", to: "#4A7080" },
+  "psychology":       { from: "#CC66AA", to: "#993388" },
+  "economics":        { from: "#44CC88", to: "#228855" },
+  "philosophy":       { from: "#DDAA44", to: "#AA7700" },
   "spanish":          { from: "#EF4444", to: "#B91C1C" },
   "german":           { from: "#374151", to: "#1F2937" },
   "french":           { from: "#3B82F6", to: "#1D4ED8" },
@@ -202,6 +205,38 @@ function DiscoveryIcon() {
   );
 }
 
+function PsychologyIcon() {
+  // Brain outline
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+      <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-1.61-3.12 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 3.09-3.1Z" />
+      <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 1.61-3.12 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-3.09-3.1Z" />
+    </svg>
+  );
+}
+
+function EconomicsIcon() {
+  // Bar chart with upward arrow
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+      <path d="M3 3v18h18" />
+      <path d="M7 16l4-4 4 4 4-4" />
+    </svg>
+  );
+}
+
+function PhilosophyIcon() {
+  // Thought bubble / abstract mind
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="100%" height="100%">
+      <circle cx="12" cy="10" r="7" />
+      <path d="M9 10h.01M12 10h.01M15 10h.01" strokeWidth="2.5" />
+      <path d="M8 17.5c-2 1-3 2-2.5 3.5" />
+      <circle cx="5" cy="21" r="1" />
+    </svg>
+  );
+}
+
 // ── Icon map ────────────────────────────────────────────────────────────────
 const ICONS: Record<string, ReactNode> = {
   "russian-history":  <RussianHistoryIcon />,
@@ -218,6 +253,9 @@ const ICONS: Record<string, ReactNode> = {
   "computer-science": <ComputerScienceIcon />,
   "astronomy":        <AstronomyIcon />,
   "discovery":        <DiscoveryIcon />,
+  "psychology":       <PsychologyIcon />,
+  "economics":        <EconomicsIcon />,
+  "philosophy":       <PhilosophyIcon />,
   "spanish":          <SpanishIcon />,
   "german":           <GermanIcon />,
   "french":           <FrenchIcon />,

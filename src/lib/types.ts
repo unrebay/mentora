@@ -179,6 +179,33 @@ export const SUBJECTS: Subject[] = [
     beta: false,
     verified: true,
   },
+  {
+    id: "psychology",
+    title: "Психология",
+    description: "Разум, поведение, личность",
+    emoji: "🧠",
+    available: true,
+    beta: true,
+    verified: false,
+  },
+  {
+    id: "economics",
+    title: "Экономика",
+    description: "Рынки, финансы, поведение",
+    emoji: "📊",
+    available: true,
+    beta: true,
+    verified: false,
+  },
+  {
+    id: "philosophy",
+    title: "Философия",
+    description: "Смысл, этика, мышление",
+    emoji: "💭",
+    available: true,
+    beta: true,
+    verified: false,
+  },
 ];
 
 // ======= Badge system =======

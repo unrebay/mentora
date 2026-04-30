@@ -73,6 +73,9 @@ const SUBJECT_NAME: Record<string, string> = {
   "computer-science": "\u0438\u043d\u0444\u043e\u0440\u043c\u0430\u0442\u0438\u043a\u0435 \u0438 \u043f\u0440\u043e\u0433\u0440\u0430\u043c\u043c\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u044e",
   "astronomy": "\u0430\u0441\u0442\u0440\u043e\u043d\u043e\u043c\u0438\u0438",
   "discovery": "\u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043d\u0438\u044e \u043a\u0440\u0443\u0433\u043e\u0437\u043e\u0440\u0430",
+  "psychology": "\u043f\u0441\u0438\u0445\u043e\u043b\u043e\u0433\u0438\u0438",
+  "economics": "\u044d\u043a\u043e\u043d\u043e\u043c\u0438\u043a\u0435",
+  "philosophy": "\u0444\u0438\u043b\u043e\u0441\u043e\u0444\u0438\u0438",
 };
 
 // --- Personalization guides (module-level constants, not recreated per request) ---
@@ -124,7 +127,7 @@ export async function POST(req: NextRequest) {
     if (!message || typeof message !== "string" || message.length > 4000) {
       return NextResponse.json({ error: "Invalid message" }, { status: 400 });
     }
-    const VALID_SUBJECTS = ["russian-history","world-history","mathematics","physics","chemistry","biology","russian-language","literature","english","social-studies","geography","computer-science","astronomy","discovery"];
+    const VALID_SUBJECTS = ["russian-history","world-history","mathematics","physics","chemistry","biology","russian-language","literature","english","social-studies","geography","computer-science","astronomy","discovery","psychology","economics","philosophy"];
     if (!subject || !VALID_SUBJECTS.includes(subject)) {
       return NextResponse.json({ error: "Invalid subject" }, { status: 400 });
     }

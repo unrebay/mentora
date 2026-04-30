@@ -158,6 +158,18 @@
     "suggest": {
       "title": "Suggest a subject",
       "desc": "Vote for a science"
+    },
+    "psychology": {
+      "title": "Psychology",
+      "desc": "Mind, behavior, personality"
+    },
+    "economics": {
+      "title": "Economics",
+      "desc": "Markets, finance, behavior"
+    },
+    "philosophy": {
+      "title": "Philosophy",
+      "desc": "Meaning, ethics, thinking"
     }
   },
   "steps": {
