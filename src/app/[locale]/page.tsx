@@ -155,36 +155,33 @@ export default async function HomePage() {
                 </div>
               </FadeUp>
               <FadeUp delay={0.08}>
-              <h1 className="text-[2.1rem] sm:text-[2.8rem] md:text-[3.2rem] lg:text-[4rem] font-black leading-[1.05] mb-6 tracking-tight text-white">
+              <h1 className="text-[2.6rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[4.6rem] font-black leading-[1.02] mb-4 tracking-tight text-white">
                 {locale === "en" ? (
                   <>
-                    Forget <span className="line-through text-gray-600 font-bold">boring</span>{" "}
-                    textbooks.<br />
-                    Learn in{" "}
+                    A new kind<br />
+                    of{" "}
                     <span style={{
                       background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
-                      fontStyle: "italic",
-                    }}>dialogue.</span>
+                    }}>education.</span>
                   </>
                 ) : (
                   <>
-                    Забудь про{" "}
-                    <span className="line-through text-gray-600 font-bold">скучные</span>{" "}
-                    учебники.<br />
-                    Учись в{" "}
+                    Новый вид<br />
                     <span style={{
                       background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
-                      fontStyle: "italic",
-                    }}>диалоге.</span>
+                    }}>образования.</span>
                   </>
                 )}
               </h1>
+              <p className="text-base font-semibold tracking-wide mb-5" style={{ color: "#6B8FFF" }}>
+                {locale === "en" ? "For everyone. Everywhere. Right now." : "Доступный каждому. Везде. Прямо сейчас."}
+              </p>
               </FadeUp>
               <FadeUp delay={0.16}>
                 <p className="text-lg text-gray-400 leading-relaxed mb-8 max-w-md">
@@ -232,15 +229,23 @@ export default async function HomePage() {
               </div>
               <FadeUp delay={0.1}>
               <div className="text-center">
-                <p className="text-xl sm:text-2xl font-semibold text-white mb-1">{t("landing.teacherLine1")}</p>
-                <p className="text-xl sm:text-2xl font-semibold mb-12 text-white">
-                  <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontWeight: 700 }}>
-                    M<span style={{ color: "#4561E8", fontStyle: "italic", marginRight: "0.05em" }}>e</span>ntora
-                  </span>
-                  {" "}{locale === "ru" ? "— только тебе." : "— only for you."}
+                <p className="text-2xl sm:text-3xl font-black text-white mb-2">
+                  {locale === "ru" ? "От ребёнка в Индии" : "From a child in India"}
+                </p>
+                <p className="text-2xl sm:text-3xl font-black mb-3" style={{
+                  background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}>
+                  {locale === "ru" ? "до взрослого на арктической станции." : "to an adult at an Arctic station."}
+                </p>
+                <p className="text-base text-gray-500 mb-10">
+                  {locale === "ru" ? "Знания больше не привилегия." : "Knowledge is no longer a privilege."}
                 </p>
                 <Link href="/auth"
-                  className="inline-flex px-7 py-3.5 bg-[#4561E8] text-white font-medium rounded-full hover:bg-[#3651d8] transition-all hover:scale-[1.03] active:scale-95">
+                  className="inline-flex px-8 py-4 text-white font-semibold rounded-full hover:scale-[1.03] active:scale-95 transition-all"
+                  style={{ background: "linear-gradient(135deg, #5575FF 0%, #4561E8 50%, #6B4FF0 100%)", boxShadow: "0 4px 20px rgba(69,97,232,0.45)" }}>
                   {t("landing.heroCta2")}
                 </Link>
               </div>
@@ -821,8 +826,8 @@ export default async function HomePage() {
             <p className="text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-16"
               style={{ color: "var(--text-secondary)" }}>
               {locale === "ru"
-                ? "Хорошего репетитора всегда могли позволить себе не все. Ребёнок из Новосибирска заслуживает такого же наставника, как ребёнок в Москве с дорогим тьютором. Mentora строит мир, где это правда — живой диалог вместо учебника, глубокое понимание вместо зазубренных параграфов."
-                : "Quality mentorship has always been a luxury. A student in rural India deserves the same guide as one with an expensive private tutor in London. Mentora is building the world where that's true — real dialogue instead of textbooks, deep understanding instead of memorization."}
+                ? "Мы тренируем тело — почему не мозг? Знание — это не обязанность перед экзаменом. Это часть здоровой жизни. Mentora строит мир, где живой диалог с ментором доступен каждому — от ребёнка в Новосибирске до взрослого, который хочет понять мир глубже."
+                : "We train our bodies — why not our minds? Knowledge isn't a chore before an exam. It's part of a healthy life. Mentora is building a world where real mentorship is available to everyone — from a child anywhere to an adult who wants to understand the world more deeply."}
             </p>
           </FadeUp>
 
