@@ -698,7 +698,7 @@ export default async function HomePage() {
                     <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Реальные задания ЕГЭ/ОГЭ</span>
                     <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Трекер готовности к экзамену</span>
                     <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Прогноз результата</span>
-                    <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Все 14 наук</span>
+                    <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Все 17 наук</span>
                   </div>
                 </div>
                 <div className="flex flex-col gap-4">

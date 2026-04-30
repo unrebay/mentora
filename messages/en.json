@@ -15,13 +15,13 @@
     "badge": "Next-generation AI education",
     "hero": {
       "title": "Learn with a mentor\nwho's always there",
-      "subtitle": "AI tutor for 14 sciences: history, math, physics, chemistry and more. Explains, answers, remembers. Free.",
+      "subtitle": "AI tutor for 17 sciences: history, math, physics, chemistry and more. Explains, answers, remembers. Free.",
       "cta": "Start for free",
       "demo": "Watch demo"
     },
     "heroBadge": "A new kind of education",
     "heroTitle": "Forget boring textbooks. Learn in dialogue.",
-    "heroSubtitle": "14 sciences with an AI mentor. Real dialogue instead of cramming — explains your way. For any age.",
+    "heroSubtitle": "17 sciences with an AI mentor. Real dialogue instead of cramming — explains your way. For any age.",
     "heroCtaStart": "Start learning",
     "demoChatSub": "Ask the question you couldn't say out loud",
     "teacherLine1": "A teacher explains to everyone.",
@@ -29,7 +29,7 @@
     "heroCta2": "Get started",
     "libraryLabel": "Knowledge library",
     "subjectsHeading": "Choose a science",
-    "subjectsDesc": "14 sciences · from school to university",
+    "subjectsDesc": "17 sciences · from school to university",
     "newBadge": "New",
     "howLearnTitle": "How to learn",
     "howLearnSubtitle": "3 techniques that make learning effective",
@@ -54,7 +54,7 @@
     "ctaLine1": "At your own pace. Ask anything.",
     "ctaLine2": "Your questions are yours alone.",
     "ctaNoCard": "No card. No commitment.",
-    "subjectsTitle": "14 sciences available now",
+    "subjectsTitle": "17 sciences available now",
     "subjectsSubtitle": "From school curriculum to university-level courses",
     "howTitle": "How it works",
     "howSubtitle": "Four steps from your first question to real progress",
@@ -179,7 +179,7 @@
     },
     "02": {
       "title": "Choose your science",
-      "desc": "14 sciences from school to exam prep. Switch anytime — your progress is saved."
+      "desc": "17 sciences from school to exam prep. Switch anytime — your progress is saved."
     },
     "03": {
       "title": "Mentora remembers you",
@@ -354,7 +354,7 @@
     "leftHeading2": "you can't bring yourself",
     "leftHeading3": "to say out loud.",
     "leftSubtitle": "Mentora doesn't judge. It explains as many times as needed — in your own words.",
-    "leftStats1": "14 sciences",
+    "leftStats1": "17 sciences",
     "leftStats2": "No VPN",
     "leftStats3": "No card"
   },
@@ -889,7 +889,7 @@
     "ctaBtn": "Start learning for free",
     "ctaNote": "No card. No commitments.",
     "footerCtaTitle": "Try it right now",
-    "footerCtaDesc": "14 sciences. No VPN. No card.",
+    "footerCtaDesc": "17 sciences. No VPN. No card.",
     "footerCtaBtn": "Start for free",
     "footerPrivacy": "Privacy",
     "footerPricing": "Pricing",
@@ -950,7 +950,7 @@
     "problemBody": "The average lesson in Moscow costs 2,500 ₽. Eight lessons a month = 20,000 ₽. For most families, that's out of reach. But every child needs a good teacher — not just those whose parents can afford it.",
     "solutionTag": "Solution",
     "solutionTitle": "A personal mentor without limits",
-    "solutionBody": "Mentora remembers you. Knows your level, thinking style, and gaps. Explains three times in different words without getting annoyed. 14 subjects, 24/7, no VPN — for 499 ₽/month.",
+    "solutionBody": "Mentora remembers you. Knows your level, thinking style, and gaps. Explains three times in different words without getting annoyed. 17 subjects, 24/7, no VPN — for 499 ₽/month.",
     "howTag": "How it works",
     "howTitle": "Not keyword search — a real conversation",
     "howSubtitle": "You just write, like you would to a friend. Mentora understands the topic and responds to you specifically.",
@@ -1126,7 +1126,7 @@
       {
         "q": "Q1 2026",
         "label": "Platform launch",
-        "desc": "14 subjects, personal mentor, Pro and Ultima plans, referral system"
+        "desc": "17 subjects, personal mentor, Pro and Ultima plans, referral system"
       },
       {
         "q": "Q2 2026",

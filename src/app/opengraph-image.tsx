@@ -33,7 +33,7 @@ export default async function OgImage() {
         </div>
 
         <div style={{ fontSize: 52, fontWeight: 800, color: "#ffffff", lineHeight: 1.15, marginBottom: 20, display: "flex", flexWrap: "wrap" }}>
-          Новый вид образования — 14 наук
+          Новый вид образования — 17 наук
         </div>
 
         <div style={{ fontSize: 28, color: "#6b82c4", lineHeight: 1.4, marginBottom: 48, display: "flex" }}>
@@ -41,7 +41,7 @@ export default async function OgImage() {
         </div>
 
         <div style={{ display: "flex", gap: 48, marginTop: "auto" }}>
-          {[["14", "наук"], ["10", "сообщений / 8 часов"], ["24/7", "доступен"]].map(([val, label]) => (
+          {[["17", "наук"], ["20", "сообщений в день"], ["24/7", "доступен"]].map(([val, label]) => (
             <div key={val} style={{ display: "flex", flexDirection: "column" }}>
               <span style={{ fontSize: 40, fontWeight: 800, color: "#4561E8", lineHeight: 1 }}>{val}</span>
               <span style={{ fontSize: 18, color: "#6b82c4", marginTop: 4 }}>{label}</span>
