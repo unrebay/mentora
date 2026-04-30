@@ -156,13 +156,13 @@ function AuthGalaxy() {
 
       // Milky Way band
       {
-        function rng(s: number) { const x = Math.sin(s) * 73856; return x - Math.floor(x); }
+        const rngMW = (s: number) => { const x = Math.sin(s) * 73856; return x - Math.floor(x); };
         const geo = new THREE.BufferGeometry();
         const pos = new Float32Array(6000 * 3);
         for (let i = 0; i < 6000; i++) {
-          const r = 80 + rng(i * 2.1) * 200;
-          const a = rng(i * 5.3) * Math.PI * 2;
-          const y = (rng(i * 8.7) - 0.5) * 26;
+          const r = 80 + rngMW(i * 2.1) * 200;
+          const a = rngMW(i * 5.3) * Math.PI * 2;
+          const y = (rngMW(i * 8.7) - 0.5) * 26;
           pos[i*3] = Math.cos(a)*r; pos[i*3+1] = y; pos[i*3+2] = Math.sin(a)*r;
         }
         geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
@@ -280,7 +280,7 @@ function AuthGalaxy() {
       mainGrp.add(cnM);
       {
         const dum = new THREE.Object3D(); let idx = 0;
-        function rr(s: number) { const x = Math.sin(s*17.3+5) * 73856; return x - Math.floor(x); }
+        const rr = (s: number) => { const x = Math.sin(s*17.3+5) * 73856; return x - Math.floor(x); };
         for (const [a, b] of interE) for (let k = 0; k < CN; k++) {
           const t = (k+1)/(CN+1);
           const amp = 0.45 + rr(idx)*0.25;
