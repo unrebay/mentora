@@ -10,7 +10,7 @@ import MathField from "@/components/MathField";
 import SubjectIcon from "@/components/SubjectIcon";
 import posthog from "posthog-js";
 
-// ── Type augmentation for hCaptcha on window ──────────────────────────────
+// ── Type augmentation ────────────────────────────────────────────────────────
 declare global {
   interface Window {
     onMentoraCaptchaSuccess?: (token: string) => void;
@@ -21,6 +21,16 @@ declare global {
 }
 
 const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? "";
+
+// ── Deterministic star field ─────────────────────────────────────────────────
+function sr(s: number) { const x = Math.sin(s) * 73856; return x - Math.floor(x); }
+const STARS = Array.from({ length: 55 }, (_, i) => ({
+  top:     sr(i * 3.71 + 1) * 100,
+  left:    sr(i * 7.13 + 2) * 100,
+  size:    sr(i * 11.3 + 3) * 1.8 + 0.5,
+  opacity: sr(i * 5.9  + 4) * 0.35 + 0.1,
+  pulse:   sr(i * 13.7 + 5) > 0.7,          // ~30% stars twinkle
+}));
 
 export default function AuthPage() {
   return (
@@ -33,70 +43,50 @@ export default function AuthPage() {
 function AuthPageContent() {
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-
-  const [tgLoading, setTgLoading] = useState(false);
-  // null = loading widget, true = available, false = blocked/unavailable
+  const [tgLoading, setTgLoading]     = useState(false);
   const [tgAvailable, setTgAvailable] = useState<null | boolean>(null);
-
   const [mode, setMode]         = useState<"signin" | "signup">("signin");
   const [loading, setLoading]   = useState(false);
   const [oauthLoading, setOauthLoading] = useState<"google" | null>(null);
   const [error, setError]       = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [emailSent, setEmailSent] = useState<string | null>(null); // email address after signup
+  const [emailSent, setEmailSent] = useState<string | null>(null);
 
-  const router      = useRouter();
+  const router       = useRouter();
   const searchParams = useSearchParams();
-  const supabase    = createClient();
-  const captchaRef  = useRef<HTMLDivElement>(null);
+  const supabase     = createClient();
+  const captchaRef   = useRef<HTMLDivElement>(null);
   const t = useTranslations("auth");
 
-  // Show OAuth errors from callback redirect
   useEffect(() => {
     const oauthError = searchParams.get("error");
     if (oauthError) setError(t("errorOAuth"));
   }, [searchParams]);
 
-  // Register hCaptcha callbacks on window
   useEffect(() => {
     window.onMentoraCaptchaSuccess = (token: string) => setCaptchaToken(token);
     window.onMentoraCaptchaExpired = () => setCaptchaToken(null);
-    return () => {
-      delete window.onMentoraCaptchaSuccess;
-      delete window.onMentoraCaptchaExpired;
-    };
+    return () => { delete window.onMentoraCaptchaSuccess; delete window.onMentoraCaptchaExpired; };
   }, []);
 
-  // Load hCaptcha script once
   useEffect(() => {
     if (!HCAPTCHA_SITE_KEY) return;
     if (document.getElementById("hcaptcha-script")) return;
     const script = document.createElement("script");
-    script.id    = "hcaptcha-script";
-    script.src   = "https://js.hcaptcha.com/1/api.js";
-    script.async = true;
-    script.defer = true;
+    script.id = "hcaptcha-script"; script.src = "https://js.hcaptcha.com/1/api.js";
+    script.async = true; script.defer = true;
     document.head.appendChild(script);
   }, []);
 
-  // Reset captcha when switching modes
-  useEffect(() => {
-    setCaptchaToken(null);
-  }, [mode]);
+  useEffect(() => { setCaptchaToken(null); }, [mode]);
 
-  // Telegram Login Widget
   useEffect(() => {
     window.onTelegramAuth = async (user) => {
       setTgLoading(true);
       try {
-        const res = await fetch("/api/auth/telegram", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(user),
-        });
+        const res  = await fetch("/api/auth/telegram", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(user) });
         const json = await res.json();
         if (!res.ok) throw new Error(json.error);
-        // Redirect to Supabase magic link — it verifies and sends to /auth/callback
         window.location.href = json.action_link;
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : t("tryAgain");
@@ -104,115 +94,65 @@ function AuthPageContent() {
         setTgLoading(false);
       }
     };
-
     const container = document.getElementById("telegram-login-widget");
     if (container && !container.querySelector("script")) {
       const script = document.createElement("script");
       script.src = "https://telegram.org/js/telegram-widget.js?22";
       script.setAttribute("data-telegram-login", "mentora_su_bot");
-      script.setAttribute("data-size", "large");
-      script.setAttribute("data-radius", "10");
+      script.setAttribute("data-size", "large"); script.setAttribute("data-radius", "10");
       script.setAttribute("data-onauth", "onTelegramAuth(user)");
-      script.setAttribute("data-request-access", "write");
-      script.setAttribute("data-userpic", "false");
+      script.setAttribute("data-request-access", "write"); script.setAttribute("data-userpic", "false");
       script.async = true;
-      script.onload = () => setTgAvailable(true);
+      script.onload  = () => setTgAvailable(true);
       script.onerror = () => setTgAvailable(false);
       container.appendChild(script);
     }
-
     return () => { delete window.onTelegramAuth; };
   }, []);
 
-  // ── OAuth ─────────────────────────────────────────────────────────────
   async function handleOAuth(provider: "google") {
-    setOauthLoading(provider);
-    setError(null);
+    setOauthLoading(provider); setError(null);
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        queryParams: provider === "google"
-          ? { access_type: "offline", prompt: "consent" }
-          : undefined,
-      },
+      options: { redirectTo: `${window.location.origin}/auth/callback`, queryParams: provider === "google" ? { access_type: "offline", prompt: "consent" } : undefined },
     });
-    if (error) {
-      setError(t("errorConnect"));
-      setOauthLoading(null);
-    }
-    // On success browser will redirect — no need to reset state
+    if (error) { setError(t("errorConnect")); setOauthLoading(null); }
   }
 
-  // ── Email/Password ────────────────────────────────────────────────────
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
+    e.preventDefault(); setLoading(true); setError(null);
     if (mode === "signup") {
-      if (HCAPTCHA_SITE_KEY && !captchaToken) {
-        setError(t("errorRobot"));
-        setLoading(false);
-        return;
-      }
-      const { data: signUpData, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          captchaToken: captchaToken ?? undefined,
-        },
-      });
+      if (HCAPTCHA_SITE_KEY && !captchaToken) { setError(t("errorRobot")); setLoading(false); return; }
+      const { data: signUpData, error } = await supabase.auth.signUp({ email, password, options: { captchaToken: captchaToken ?? undefined } });
       if (error) {
-        if (error.message.includes("already registered")) {
-          setError(t("errorEmailExists"));
-        } else if (error.message.includes("captcha")) {
-          setError(t("errorCaptcha"));
-        } else {
-          setError(error.message);
-        }
+        if (error.message.includes("already registered")) setError(t("errorEmailExists"));
+        else if (error.message.includes("captcha"))       setError(t("errorCaptcha"));
+        else                                               setError(error.message);
       } else {
-        // Track referral if ref code in URL
         const refCode = searchParams.get("ref");
         if (refCode && signUpData.user?.id) {
-          fetch("/api/referral", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ code: refCode, newUserId: signUpData.user.id }),
-          }).catch(() => {}); // non-blocking
+          fetch("/api/referral", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: refCode, newUserId: signUpData.user.id }) }).catch(() => {});
         }
-        // If no session → email confirmation required
-        if (!signUpData.session) {
-          setEmailSent(email);
-        } else {
-          router.push("/onboarding");
-          router.refresh();
-        }
+        if (!signUpData.session) setEmailSent(email);
+        else { router.push("/onboarding"); router.refresh(); }
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        setError(t("errorCredentials"));
-      } else {
-        router.push("/dashboard");
-        router.refresh();
-      }
+      if (error) setError(t("errorCredentials"));
+      else { router.push("/dashboard"); router.refresh(); }
     }
     setLoading(false);
   }
 
-  function switchMode(next: "signin" | "signup") {
-    setMode(next);
-    setError(null);
-  }
-
+  function switchMode(next: "signin" | "signup") { setMode(next); setError(null); }
   const isSignup = mode === "signup";
 
-  // ── Email confirmation screen ──────────────────────────────────────────
+  // ── Email confirmation screen ─────────────────────────────────────────────
   if (emailSent) {
     return (
       <main className="min-h-screen relative flex items-center justify-center px-4 py-12" style={{ background: "#04060f" }}>
-        <MathField />
+        <GalaxyBg />
+        <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 1 }}><MathField /></div>
         <div className="relative z-10 w-full max-w-sm text-center animate-fade-in-up">
           <Logo size="md" href="/" className="justify-center mb-10" textColor="white" />
           <div className="glass rounded-3xl p-8 space-y-6">
@@ -226,16 +166,12 @@ function AuthPageContent() {
             <div>
               <h2 className="text-xl font-bold text-white mb-2">{t("checkEmail")}</h2>
               <p className="text-gray-400 text-sm leading-relaxed">
-                {t("checkEmailDesc")}{" "}
-                <span className="text-white font-semibold">{emailSent}</span>.<br/>
-                {t("checkEmailActivate")}
+                {t("checkEmailDesc")}{" "}<span className="text-white font-semibold">{emailSent}</span>.<br/>{t("checkEmailActivate")}
               </p>
             </div>
             <div className="rounded-xl p-3 text-xs text-gray-500" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
               {t("checkEmailNoReceive")}{" "}
-              <button className="text-[#6B8FFF] hover:underline font-medium" onClick={() => setEmailSent(null)}>
-                {t("tryAgain")}
-              </button>
+              <button className="text-[#6B8FFF] hover:underline font-medium" onClick={() => setEmailSent(null)}>{t("tryAgain")}</button>
             </div>
           </div>
         </div>
@@ -243,215 +179,156 @@ function AuthPageContent() {
     );
   }
 
+  // ── Main auth screen ──────────────────────────────────────────────────────
   return (
-    <main className="min-h-screen flex">
+    <main className="relative min-h-screen overflow-hidden" style={{ background: "#04060f" }}>
 
-      {/* ══════════════════════════════════════════════
-          LEFT PANEL — Branded dark side with 3D spheres
-          Hidden on mobile, 42% on lg+
-      ══════════════════════════════════════════════ */}
-      <div className="hidden lg:flex relative flex-col overflow-hidden"
-        style={{ width: "42%", background: "#04060f", minHeight: "100vh" }}>
+      {/* ── Galaxy background ─────────────────────────────────────── */}
+      <GalaxyBg />
 
-        {/* Floating math symbols */}
+      {/* ── Math formulas — full screen ────────────────────────────── */}
+      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 1 }}>
         <MathField />
-
-        {/* Content */}
-        <div className="relative z-10 flex flex-col h-full p-10 xl:p-14">
-
-          {/* Logo */}
-          <Logo size="sm" href="/" textColor="white" />
-
-          {/* Center quote */}
-          <div className="flex-1 flex flex-col justify-center pt-8">
-            <p className="text-[11px] font-bold tracking-[0.2em] uppercase mb-5"
-               style={{ color: "rgba(107,143,255,0.7)" }}>
-              {t("leftTagline")}
-            </p>
-            <h2 className="text-3xl xl:text-4xl font-black text-white leading-tight mb-5">
-              {t("leftHeading1")}<br />
-              {t("leftHeading2")}<br />
-              <span style={{
-                background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 45%, #9F7AFF 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}>
-                {t("leftHeading3")}
-              </span>
-            </h2>
-            <p className="text-sm leading-relaxed max-w-xs"
-               style={{ color: "rgba(255,255,255,0.55)" }}>
-              {t("leftSubtitle")}
-            </p>
-          </div>
-
-          {/* Bottom — subject icons + trust */}
-          <div>
-            <div className="flex items-center gap-2 mb-4 flex-wrap">
-              {["russian-history","mathematics","physics","chemistry","biology","english","astronomy"].map(id => (
-                <SubjectIcon key={id} id={id} size={30} style={{ opacity: 0.85 }} />
-              ))}
-            </div>
-            <div className="flex items-center gap-3 text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-              <span>{t("leftStats1")}</span>
-              <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
-              <span>{t("leftStats2")}</span>
-              <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
-              <span>{t("leftStats3")}</span>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* ══════════════════════════════════════════════
-          RIGHT PANEL — Form (always dark glass)
-      ══════════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 relative"
-        style={{ background: "#07091a" }}>
+      {/* ── Content ────────────────────────────────────────────────── */}
+      <div className="relative flex flex-col items-center justify-center min-h-screen px-5 py-10"
+        style={{ zIndex: 10 }}>
 
-        {/* Subtle right-panel glow */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute" style={{
-            top: "-20%", right: "-10%", width: 400, height: 400, borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(69,97,232,0.12) 0%, transparent 65%)",
-            filter: "blur(40px)",
-          }} />
+        {/* Logo */}
+        <div className="mb-6">
+          <Logo size="sm" href="/" textColor="white" />
         </div>
 
-        {/* Mobile logo (hidden on lg+) */}
-        <div className="lg:hidden mb-8 w-full max-w-md relative z-10">
-          <Logo size="md" href="/" textColor="white" />
+        {/* Headline — new positioning */}
+        <div className="text-center mb-8 max-w-xs sm:max-w-sm">
+          <p className="text-[10px] font-bold tracking-[0.22em] uppercase mb-3"
+             style={{ color: "rgba(107,143,255,0.7)" }}>
+            {t("leftTagline")}
+          </p>
+          <h1 className="font-black leading-tight text-white mb-3"
+              style={{ fontSize: "clamp(22px, 5vw, 32px)" }}>
+            {t("leftHeading1")}{" "}{t("leftHeading2")}{" "}
+            <span style={{
+              background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 45%, #9F7AFF 100%)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+            }}>
+              {t("leftHeading3")}
+            </span>
+          </h1>
+          <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+            {t("leftSubtitle")}
+          </p>
         </div>
 
-        <div className="w-full max-w-md animate-fade-in-up relative z-10">
-
-          {/* ── Mode toggle pill ── */}
-          <div className="relative flex p-1 rounded-2xl mb-6"
-            style={{ background: "rgba(255,255,255,0.06)" }}>
+        {/* ── Mode toggle — SEPARATE from card, like a navbar pill ── */}
+        <div className="w-full mb-3 animate-fade-in-up" style={{ maxWidth: 400 }}>
+          <div className="relative flex p-1 rounded-2xl"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
+            }}>
             {/* Sliding indicator */}
-            <div
-              className="absolute top-1 bottom-1 rounded-xl transition-all duration-200"
+            <div className="absolute top-1 bottom-1 rounded-xl transition-all duration-200"
               style={{
                 width: "calc(50% - 4px)",
                 left: isSignup ? "calc(50%)" : "4px",
-                background: "rgba(255,255,255,0.1)",
-                boxShadow: "0 1px 5px rgba(0,0,0,0.3)",
-              }}
-            />
+                background: "rgba(255,255,255,0.11)",
+                boxShadow: "0 1px 6px rgba(0,0,0,0.4)",
+              }} />
             <button
               onClick={() => switchMode("signin")}
-              className="relative flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors z-10"
-              style={{ color: !isSignup ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.35)" }}
+              className="relative flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors"
+              style={{ zIndex: 1, color: !isSignup ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.32)" }}
             >
               {t("signIn")}
             </button>
             <button
               onClick={() => switchMode("signup")}
-              className="relative flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors z-10"
-              style={{ color: isSignup ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.35)" }}
+              className="relative flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors"
+              style={{ zIndex: 1, color: isSignup ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.32)" }}
             >
               {t("signUpTab")}
             </button>
           </div>
+        </div>
 
-          {/* ── Auth card ── */}
+        {/* ── Glass card ─────────────────────────────────────────────── */}
+        <div className="w-full animate-fade-in-up" style={{ maxWidth: 400 }}>
           <div className="rounded-3xl p-7 space-y-4"
             style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.09)",
-              backdropFilter: "blur(20px)",
-              boxShadow: "0 8px 40px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.2)",
+              background: "rgba(255,255,255,0.07)",
+              border: "1px solid rgba(255,255,255,0.13)",
+              backdropFilter: "blur(28px)",
+              WebkitBackdropFilter: "blur(28px)",
+              boxShadow: "0 8px 60px rgba(0,0,0,0.55), 0 2px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)",
             }}>
 
+            {/* Card heading */}
             <div className="mb-1">
-              <h1 className="text-xl font-bold text-white">
+              <h2 className="text-xl font-bold text-white">
                 {isSignup ? t("createFreeAccount") : t("welcomeBack")}
-              </h1>
+              </h2>
               <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.45)" }}>
                 {isSignup ? t("noCard") : t("continueLearn")}
               </p>
             </div>
 
-            {/* ── Google OAuth ── */}
+            {/* Google OAuth */}
             <button
               type="button"
               onClick={() => handleOAuth("google")}
               disabled={oauthLoading !== null}
               className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-60"
-              style={{
-                background: "rgba(255,255,255,0.07)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                color: "rgba(255,255,255,0.75)",
-              }}
+              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.75)" }}
             >
-              {oauthLoading === "google" ? (
-                <span className="w-4 h-4 border-2 rounded-full animate-spin"
-                  style={{ borderColor: "rgba(255,255,255,0.2)", borderTopColor: "rgba(255,255,255,0.7)" }} />
-              ) : <GoogleIcon />}
+              {oauthLoading === "google"
+                ? <span className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(255,255,255,0.2)", borderTopColor: "rgba(255,255,255,0.7)" }} />
+                : <GoogleIcon />}
               {t("continueGoogle")}
             </button>
 
-            {/* ── Divider ── */}
+            {/* Divider */}
             <div className="relative flex items-center gap-3 py-1">
               <div className="flex-1 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }} />
               <span className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>{t("orEmail")}</span>
               <div className="flex-1 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }} />
             </div>
 
-            {/* ── Email / Password form ── */}
+            {/* Email / Password form */}
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>
-                  Email
-                </label>
+                <label className="block text-xs font-semibold mb-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>Email</label>
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
+                  type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  required autoComplete="email"
                   className="w-full px-4 py-3 rounded-xl text-sm transition focus:outline-none focus:ring-2 focus:ring-[#4561E8] placeholder:text-white/25"
-                  style={{
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    color: "rgba(255,255,255,0.9)",
-                  }}
+                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.9)" }}
                   placeholder="you@example.com"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>
-                  {t("password")}
-                </label>
+                <label className="block text-xs font-semibold mb-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>{t("password")}</label>
                 <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  autoComplete={isSignup ? "new-password" : "current-password"}
+                  type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                  required minLength={6} autoComplete={isSignup ? "new-password" : "current-password"}
                   className="w-full px-4 py-3 rounded-xl text-sm transition focus:outline-none focus:ring-2 focus:ring-[#4561E8] placeholder:text-white/25"
-                  style={{
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    color: "rgba(255,255,255,0.9)",
-                  }}
+                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.9)" }}
                   placeholder={isSignup ? t("passwordPlaceholder") : t("passwordPlaceholderSignIn")}
                 />
               </div>
 
-              {/* hCaptcha — only for signup */}
+              {/* hCaptcha */}
               {isSignup && HCAPTCHA_SITE_KEY && (
                 <div className="flex justify-center py-1">
-                  <div
-                    ref={captchaRef}
-                    className="h-captcha"
+                  <div ref={captchaRef} className="h-captcha"
                     data-sitekey={HCAPTCHA_SITE_KEY}
                     data-callback="onMentoraCaptchaSuccess"
                     data-expired-callback="onMentoraCaptchaExpired"
-                    data-theme="auto"
-                  />
+                    data-theme="auto" />
                 </div>
               )}
 
@@ -465,11 +342,8 @@ function AuthPageContent() {
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={loading || oauthLoading !== null}
-                className="btn-glow w-full py-3.5 rounded-2xl font-semibold text-sm disabled:opacity-50 disabled:transform-none"
-              >
+              <button type="submit" disabled={loading || oauthLoading !== null}
+                className="btn-glow w-full py-3.5 rounded-2xl font-semibold text-sm disabled:opacity-50 disabled:transform-none">
                 {loading
                   ? <span className="flex items-center justify-center gap-2">
                       <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -483,8 +357,8 @@ function AuthPageContent() {
               </button>
             </form>
 
-            {/* Hidden widget: loads Telegram.Login API */}
-            <div id="telegram-login-widget" style={{position:"absolute",opacity:0,width:1,height:1,overflow:"hidden",pointerEvents:"none"}} />
+            {/* Hidden Telegram widget loader */}
+            <div id="telegram-login-widget" style={{ position:"absolute", opacity:0, width:1, height:1, overflow:"hidden", pointerEvents:"none" }} />
 
             {/* Telegram button */}
             <div>
@@ -503,76 +377,115 @@ function AuthPageContent() {
                   onClick={() => {
                     const tg = window.Telegram;
                     if (tg?.Login?.auth) {
-                      tg.Login.auth(
-                        { bot_id: 8558784965, request_access: "write" },
-                        (user) => {
-                          if (user && window.onTelegramAuth) {
-                            window.onTelegramAuth(user);
-                          } else if (!user) {
-                            setError(t("errorTelegramFailed"));
-                          }
-                        }
-                      );
-                    } else {
-                      setError(t("errorTelegramUnavailable"));
-                    }
-                }}
+                      tg.Login.auth({ bot_id: 8558784965, request_access: "write" }, (user) => {
+                        if (user && window.onTelegramAuth) window.onTelegramAuth(user);
+                        else if (!user) setError(t("errorTelegramFailed"));
+                      });
+                    } else { setError(t("errorTelegramUnavailable")); }
+                  }}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-60"
                   style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}
                 >
                   {tgLoading ? (
-                    <>
-                      <span className="w-4 h-4 border-2 rounded-full animate-spin"
-                        style={{ borderColor: "rgba(255,255,255,0.15)", borderTopColor: "rgba(255,255,255,0.7)" }} />
-                      {t("signingInTelegram")}
-                    </>
+                    <><span className="w-4 h-4 border-2 rounded-full animate-spin"
+                        style={{ borderColor: "rgba(255,255,255,0.15)", borderTopColor: "rgba(255,255,255,0.7)" }} />{t("signingInTelegram")}</>
                   ) : tgAvailable === null ? (
-                    <>
-                      <span className="w-4 h-4 border-2 rounded-full animate-spin"
-                        style={{ borderColor: "rgba(255,255,255,0.1)", borderTopColor: "rgba(255,255,255,0.4)" }} />
-                      {t("checkingTelegram")}
-                    </>
+                    <><span className="w-4 h-4 border-2 rounded-full animate-spin"
+                        style={{ borderColor: "rgba(255,255,255,0.1)", borderTopColor: "rgba(255,255,255,0.4)" }} />{t("checkingTelegram")}</>
                   ) : (
-                    <>
-                      <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#2AABEE]">
+                    <><svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#2AABEE]">
                         <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/>
-                      </svg>
-                      {t("signInTelegram")}
-                    </>
+                      </svg>{t("signInTelegram")}</>
                   )}
                 </button>
               )}
             </div>
 
-          </div>{/* /auth card */}
+          </div>{/* /glass card */}
+        </div>
 
-          {/* Switch mode link */}
-          <p className="text-center text-sm mt-5" style={{ color: "rgba(255,255,255,0.35)" }}>
-            {isSignup ? (
-              <>{t("hasAccount")}{" "}
-                <button onClick={() => switchMode("signin")}
-                  className="font-semibold hover:underline" style={{ color: "#6B8FFF" }}>
-                  {t("signIn")}
-                </button>
-              </>
-            ) : (
-              <>{t("noAccount")}{" "}
-                <button onClick={() => switchMode("signup")}
-                  className="font-semibold hover:underline" style={{ color: "#6B8FFF" }}>
-                  {t("signUpFreeLink")}
-                </button>
-              </>
-            )}
-          </p>
+        {/* Switch mode link */}
+        <p className="text-center text-sm mt-5" style={{ color: "rgba(255,255,255,0.35)" }}>
+          {isSignup ? (
+            <>{t("hasAccount")}{" "}
+              <button onClick={() => switchMode("signin")} className="font-semibold hover:underline" style={{ color: "#6B8FFF" }}>{t("signIn")}</button>
+            </>
+          ) : (
+            <>{t("noAccount")}{" "}
+              <button onClick={() => switchMode("signup")} className="font-semibold hover:underline" style={{ color: "#6B8FFF" }}>{t("signUpFreeLink")}</button>
+            </>
+          )}
+        </p>
 
-        </div>{/* /max-w-md */}
-      </div>{/* /right panel */}
+        {/* Subject icons + stats */}
+        <div className="flex items-center gap-2 mt-8 flex-wrap justify-center">
+          {["russian-history","mathematics","physics","chemistry","biology","english","astronomy"].map(id => (
+            <SubjectIcon key={id} id={id} size={28} style={{ opacity: 0.55 }} />
+          ))}
+        </div>
+        <div className="flex items-center gap-3 mt-3 text-xs" style={{ color: "rgba(255,255,255,0.22)" }}>
+          <span>{t("leftStats1")}</span>
+          <span style={{ color: "rgba(255,255,255,0.1)" }}>·</span>
+          <span>{t("leftStats2")}</span>
+          <span style={{ color: "rgba(255,255,255,0.1)" }}>·</span>
+          <span>{t("leftStats3")}</span>
+        </div>
+
+      </div>{/* /content */}
     </main>
   );
 }
 
-// ── Icons ────────────────────────────────────────────────────────────────
+// ── Galaxy background component ──────────────────────────────────────────────
+function GalaxyBg() {
+  return (
+    <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+      {/* Nebula blobs */}
+      <div style={{ position:"absolute", top:"-18%", left:"-8%", width:"68%", height:"68%",
+        background:"radial-gradient(ellipse, rgba(69,97,232,0.25) 0%, transparent 65%)", filter:"blur(65px)" }} />
+      <div style={{ position:"absolute", top:"15%", right:"-12%", width:"60%", height:"58%",
+        background:"radial-gradient(ellipse, rgba(159,122,255,0.18) 0%, transparent 65%)", filter:"blur(60px)" }} />
+      <div style={{ position:"absolute", bottom:"-12%", left:"18%", width:"58%", height:"52%",
+        background:"radial-gradient(ellipse, rgba(255,90,0,0.1) 0%, transparent 65%)", filter:"blur(70px)" }} />
+      <div style={{ position:"absolute", top:"50%", left:"25%", width:"40%", height:"40%",
+        background:"radial-gradient(ellipse, rgba(0,180,200,0.07) 0%, transparent 65%)", filter:"blur(50px)" }} />
+      {/* Star field */}
+      {STARS.map((s, i) => (
+        <div key={i} style={{
+          position:"absolute", top:`${s.top}%`, left:`${s.left}%`,
+          width:`${s.size}px`, height:`${s.size}px`,
+          borderRadius:"50%", background:"white", opacity:s.opacity,
+          animation: s.pulse ? `pulse ${2 + (i % 3)}s ease-in-out infinite alternate` : undefined,
+        }} />
+      ))}
+      {/* Neural connection lines (SVG) */}
+      <svg className="absolute inset-0 w-full h-full" style={{ opacity: 0.06 }}>
+        <line x1="5%"  y1="20%" x2="25%" y2="45%" stroke="#6B8FFF" strokeWidth="0.5" />
+        <line x1="25%" y1="45%" x2="55%" y2="30%" stroke="#6B8FFF" strokeWidth="0.5" />
+        <line x1="55%" y1="30%" x2="80%" y2="55%" stroke="#9F7AFF" strokeWidth="0.5" />
+        <line x1="80%" y1="55%" x2="90%" y2="25%" stroke="#9F7AFF" strokeWidth="0.5" />
+        <line x1="15%" y1="70%" x2="40%" y2="60%" stroke="#4561E8" strokeWidth="0.5" />
+        <line x1="40%" y1="60%" x2="65%" y2="75%" stroke="#4561E8" strokeWidth="0.5" />
+        <line x1="65%" y1="75%" x2="85%" y2="80%" stroke="#6B8FFF" strokeWidth="0.5" />
+        <line x1="30%" y1="15%" x2="60%" y2="10%" stroke="#9F7AFF" strokeWidth="0.5" />
+        <line x1="60%" y1="10%" x2="75%" y2="35%" stroke="#6B8FFF" strokeWidth="0.5" />
+        {/* Node dots at intersections */}
+        {[
+          ["5%","20%"], ["25%","45%"], ["55%","30%"], ["80%","55%"], ["90%","25%"],
+          ["15%","70%"], ["40%","60%"], ["65%","75%"], ["85%","80%"],
+          ["30%","15%"], ["60%","10%"], ["75%","35%"],
+        ].map(([cx, cy], i) => (
+          <circle key={i} cx={cx} cy={cy} r="2.5" fill={i % 3 === 0 ? "#6B8FFF" : i % 3 === 1 ? "#9F7AFF" : "#4561E8"} opacity="0.5" />
+        ))}
+      </svg>
+      <style>{`
+        @keyframes pulse { from { opacity: 0.1; } to { opacity: 0.55; } }
+      `}</style>
+    </div>
+  );
+}
 
+// ── Icons ────────────────────────────────────────────────────────────────────
 function GoogleIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
