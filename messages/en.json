@@ -1,6 +1,6 @@
 {
   "nav": {
-    "subjects": "Subjects",
+    "subjects": "Sciences",
     "how": "How it works",
     "pricing": "Pricing",
     "login": "Sign in",
@@ -15,21 +15,21 @@
     "badge": "Next-generation AI education",
     "hero": {
       "title": "Learn with a mentor\nwho's always there",
-      "subtitle": "AI tutor for 13 subjects: history, math, physics, chemistry and more. Explains, answers, remembers. Free.",
+      "subtitle": "AI tutor for 14 sciences: history, math, physics, chemistry and more. Explains, answers, remembers. Free.",
       "cta": "Start for free",
       "demo": "Watch demo"
     },
     "heroBadge": "Mentora — just ask",
     "heroTitle": "Forget boring textbooks. Learn in dialogue.",
-    "heroSubtitle": "An AI mentor who knows your level, remembers you, and explains things your way. History, math, physics and 11 more subjects.",
+    "heroSubtitle": "An AI mentor who knows your level, remembers you, and explains things your way. History, math, physics and 12 more sciences.",
     "heroCtaStart": "Start learning",
     "demoChatSub": "Ask the question you couldn't say out loud",
     "teacherLine1": "A teacher explains to everyone.",
     "teacherLine2": "— only for you.",
     "heroCta2": "Get started",
     "libraryLabel": "Knowledge library",
-    "subjectsHeading": "Choose a subject",
-    "subjectsDesc": "13 subjects · from school to university",
+    "subjectsHeading": "Choose a science",
+    "subjectsDesc": "14 sciences · from school to university",
     "newBadge": "New",
     "howLearnTitle": "How to learn",
     "howLearnSubtitle": "3 techniques that make learning effective",
@@ -54,8 +54,8 @@
     "ctaLine1": "At your own pace. Ask anything.",
     "ctaLine2": "Your questions are yours alone.",
     "ctaNoCard": "No card. No commitment.",
-    "subjectsTitle": "13 subjects available now",
-    "subjectsSubtitle": "From school curriculum to exam preparation",
+    "subjectsTitle": "14 sciences available now",
+    "subjectsSubtitle": "From school curriculum to university-level courses",
     "howTitle": "How it works",
     "howSubtitle": "Four steps from your first question to real progress",
     "featuresLabel": "Why Mentora",
@@ -157,7 +157,7 @@
     },
     "suggest": {
       "title": "Suggest a subject",
-      "desc": "Vote for a topic"
+      "desc": "Vote for a science"
     }
   },
   "steps": {
@@ -166,8 +166,8 @@
       "desc": "No registration required. Ask your first question and get a detailed answer in a second."
     },
     "02": {
-      "title": "Choose your subject",
-      "desc": "13 topics from school curriculum to exam prep. Switch anytime — your progress is saved."
+      "title": "Choose your science",
+      "desc": "14 sciences from school to exam prep. Switch anytime — your progress is saved."
     },
     "03": {
       "title": "Mentora remembers you",
@@ -175,7 +175,7 @@
     },
     "04": {
       "title": "Progress becomes visible",
-      "desc": "XP, streaks, levels per subject. See how far you've come — that's what keeps you going."
+      "desc": "XP, streaks, levels per science. See how far you've come — that's what keeps you going."
     },
     "05": {
       "title": "Prepare for what matters",
@@ -183,7 +183,7 @@
     }
   },
   "stats": {
-    "subjects": "subjects available now",
+    "subjects": "sciences available",
     "accuracy": "AI answer accuracy",
     "availability": "available without VPN",
     "free": "to start learning"
@@ -237,7 +237,7 @@
       "desc": "Try without a card",
       "cta": "Start for free",
       "features": [
-        "All subjects",
+        "All sciences",
         "10 messages / 8 hours",
         "XP, levels and achievements",
         "Streak and progress",
@@ -252,7 +252,7 @@
       "desc": "For serious learning",
       "cta": "Upgrade to Pro",
       "features": [
-        "All subjects, no limits",
+        "All sciences, no limits",
         "Unlimited messages",
         "Full knowledge map",
         "Progress analytics",
@@ -342,14 +342,14 @@
     "leftHeading2": "you can't bring yourself",
     "leftHeading3": "to say out loud.",
     "leftSubtitle": "Mentora doesn't judge. It explains as many times as needed — in your own words.",
-    "leftStats1": "13 subjects",
+    "leftStats1": "14 sciences",
     "leftStats2": "No VPN",
     "leftStats3": "No card"
   },
   "dashboard": {
     "nav": {
       "home": "Home",
-      "subjects": "Subjects",
+      "subjects": "Sciences",
       "progress": "Progress",
       "analytics": "Analytics",
       "galaxy": "Galaxy",
@@ -358,7 +358,7 @@
       "about": "About"
     },
     "welcome": "Welcome",
-    "chooseSubject": "Choose a subject",
+    "chooseSubject": "Choose a science",
     "continueSubject": "Continue",
     "yourProgress": "Your progress",
     "streak": "day streak",
@@ -409,13 +409,13 @@
     "statBadges": "Achievements",
     "emptyTitle": "No data yet",
     "emptyDesc": "Start learning — your progress will appear here",
-    "emptyBtn": "Go to subjects",
+    "emptyBtn": "Go to sciences",
     "weeklyActivity": "Activity this week",
     "qualityPerfect": "· perfect",
     "qualityGreat": "· great",
     "questionsThisWeek": "{count} questions this week",
-    "mentBySubject": "XP by subject",
-    "bySubject": "By subject",
+    "mentBySubject": "XP by science",
+    "bySubject": "By science",
     "xpUnit": "XP",
     "questUnit": "q.",
     "dayUnit": "d.",
@@ -586,9 +586,9 @@
     "disclaimer": "10 messages / 8 hours · no card · free"
   },
   "subjectsSection": {
-    "title": "Subjects",
-    "suggest": "Suggest a subject",
-    "add": "Add subject",
+    "title": "Sciences",
+    "suggest": "Suggest a science",
+    "add": "Add a science",
     "soon": "SOON",
     "start": "Start",
     "continue": "Continue",
@@ -596,12 +596,12 @@
     "verifiedTitle": "✶ Verified",
     "verifiedDesc": "Full course with knowledge base and regular updates",
     "betaTitle": "✶ Beta",
-    "betaDesc": "Subject in development — content actively expanding",
-    "removeTitle": "Remove subject?",
-    "removeDesc": "The subject will be removed from your library. You can add it back later — all progress is saved.",
+    "betaDesc": "Science in development — content is actively expanding",
+    "removeTitle": "Remove science?",
+    "removeDesc": "The science will be removed from your library. You can add it back later — all progress will be saved.",
     "cancel": "Cancel",
     "remove": "Remove",
-    "removeAriaLabel": "Remove subject",
+    "removeAriaLabel": "Remove science",
     "levelBeginner": "Beginner",
     "levelExplorer": "Explorer",
     "levelAdept": "Adept",
@@ -610,20 +610,20 @@
     "xpUnit": "XP"
   },
   "addSubjectModal": {
-    "title": "Add subject",
+    "title": "Add a science",
     "subtitle": "Choose from the catalog",
-    "allAdded": "All available subjects are already added 🎉",
+    "allAdded": "All available sciences are already added 🎉",
     "adding": "Adding...",
     "add": "Add"
   },
   "suggestModal": {
-    "title": "Suggest a subject",
-    "subtitle": "Tell us what subject to add to Mentora",
-    "nameLabel": "Subject name",
+    "title": "Suggest a science",
+    "subtitle": "Tell us which science to add to Mentora",
+    "nameLabel": "Science name",
     "namePlaceholder": "E.g.: Social Studies, German...",
     "commentLabel": "Comment",
     "commentOptional": "(optional)",
-    "commentPlaceholder": "Why is this subject needed, for what grade or goal...",
+    "commentPlaceholder": "Why is this science needed, for what level or goal...",
     "cancel": "Cancel",
     "submit": "Suggest",
     "submitting": "Sending...",
@@ -636,8 +636,8 @@
     "a1": "Yes. The free plan requires no card — sign up and start right away. You can even try the demo chat on the homepage without an account.",
     "q2": "What does 'unlimited messages' mean?",
     "a2": "With Pro there's no limit on messages per day. Study as much as you want.",
-    "q3": "When will new subjects be added?",
-    "a3": "Math, biology and English will be first. Pro subscribers will get access immediately at release.",
+    "q3": "When will new sciences be added?",
+    "a3": "Psychology, Economics and Philosophy are next. Pro subscribers get access immediately upon release.",
     "q4": "How does Ultra work?",
     "a4": "Ultra adds three capabilities to Pro: photograph a task — Mentora will explain the solution (live now), create a presentation on any topic (coming soon), get an audio breakdown of a complex section (coming soon).",
     "q5": "How do I cancel my subscription?",
@@ -739,7 +739,7 @@
       "streak": "Streak",
       "streakValue": "{n} days",
       "messages": "Messages",
-      "subjects": "Subjects",
+      "subjects": "Sciences",
       "subjectsValue": "{active} of 14"
     },
     "level": {
@@ -752,7 +752,7 @@
       "tooltip": "{date}: {count} msg."
     },
     "subjects": {
-      "title": "By subject",
+      "title": "By science",
       "active": "{n} active"
     },
     "bestStreak": {
@@ -764,7 +764,7 @@
     },
     "empty": {
       "title": "Start learning — stats will appear",
-      "desc": "Ask your first question in any subject to start earning XP"
+      "desc": "Ask your first question in any science to start earning XP"
     }
   },
   "badges": {
@@ -837,7 +837,7 @@
     },
     "first_subject": {
       "title": "Where do we start?",
-      "subtitle": "Choose your first subject — we'll open a chat right away",
+      "subtitle": "Choose your first science — we'll open the chat right away",
       "russian-history": {
         "label": "Russian History",
         "desc": "From Ancient Rus to modern times"
@@ -877,7 +877,7 @@
     "ctaBtn": "Start learning for free",
     "ctaNote": "No card. No commitments.",
     "footerCtaTitle": "Try it right now",
-    "footerCtaDesc": "13 subjects. No VPN. No card.",
+    "footerCtaDesc": "14 sciences. No VPN. No card.",
     "footerCtaBtn": "Start for free",
     "footerPrivacy": "Privacy",
     "footerPricing": "Pricing",

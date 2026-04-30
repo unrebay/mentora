@@ -17,23 +17,22 @@ const LandingStarsCanvas = nextDynamic(() => import("@/components/LandingStarsCa
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Mentora — AI-репетитор | История, Математика, Физика и ещё 10 предметов",
+  title: "Mentora — новый вид образования | 14 наук с AI-ментором",
   description:
-    "Персональный AI-репетитор для школьников и студентов. 13 предметов: история, математика, физика, химия, биология, русский язык, литература, английский и др. Подготовка к ЕГЭ/ОГЭ в живом диалоге. Начни бесплатно — без карты.",
+    "Персональный AI-ментор для всех возрастов. 14 наук: история, математика, физика, химия, биология, русский язык, литература, английский и др. Живой диалог вместо учебника. Начни бесплатно — без карты.",
   keywords: [
-    "AI репетитор", "ИИ репетитор", "персональный ментор", "школьный репетитор онлайн",
-    "подготовка к ЕГЭ", "подготовка к ОГЭ", "ЕГЭ история", "ОГЭ математика",
-    "учить историю с ИИ", "история России ЕГЭ", "математика онлайн репетитор",
-    "физика онлайн", "химия репетитор", "биология онлайн", "английский с AI",
-    "обществознание ЕГЭ", "mentora", "mentora.su",
+    "AI ментор", "ИИ ментор", "персональный ментор", "AI репетитор", "ИИ образование",
+    "учить историю с ИИ", "история России онлайн", "математика онлайн",
+    "физика онлайн", "химия онлайн", "биология онлайн", "английский с AI",
+    "образование для взрослых", "lifelong learning", "mentora", "mentora.su",
   ],
   alternates: { canonical: "https://mentora.su" },
   openGraph: {
     type: "website",
     url: "https://mentora.su",
-    title: "Mentora — AI-репетитор по 13 школьным предметам",
+    title: "Mentora — новый вид образования. 14 наук с AI-ментором",
     description:
-      "История, математика, физика, химия, биология и ещё 8 предметов. Диалог с AI-ментором — живо, персонально, бесплатно.",
+      "История, математика, физика, химия, биология и ещё 9 наук. Живой диалог вместо учебника — персонально, для любого возраста, бесплатно.",
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Mentora AI-репетитор" }],
   },
 };
@@ -73,7 +72,7 @@ const STEP_NUMS = ["01", "02", "03", "04", "05"];
 const STEP_BADGE_IDX = 2; // step 03 gets the badge
 
 const STATS_DATA = [
-  { value: "13", key: "subjects" as const, color: "#4561E8", icon: `<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
+  { value: "14", key: "subjects" as const, color: "#4561E8", icon: `<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
   { value: "90%", key: "accuracy" as const, color: "#10B981", icon: `<circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.2" fill="none"/><path d="M8 12l3 3 5-5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
   { value: "24/7", key: "availability" as const, color: "#FF7A00", icon: `<circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.2" fill="none"/><path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" fill="none"/>` },
   { value: "0 ₽", key: "free" as const, color: "#A78BFA", icon: `<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>` },
@@ -680,7 +679,7 @@ export default async function HomePage() {
                     <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Реальные задания ЕГЭ/ОГЭ</span>
                     <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Трекер готовности к экзамену</span>
                     <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Прогноз результата</span>
-                    <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Все 13 предметов</span>
+                    <span className="flex items-center gap-2"><span className="text-brand-400">✓</span> Все 14 наук</span>
                   </div>
                 </div>
                 <div className="flex flex-col gap-4">
