@@ -132,33 +132,33 @@ function CodeBlock({ lang, code }: { lang: string; code: string }) {
   const highlighted = highlightCode(code, lang);
 
   return (
-    <div className="my-3 rounded-2xl overflow-hidden" style={{
+    <div className="my-3 rounded-xl overflow-hidden" style={{
       background: "#0d1117",
-      border: "1px solid rgba(255,255,255,0.09)",
-      boxShadow: "0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)",
+      border: "1px solid var(--chat-code-border)",
+      boxShadow: "var(--chat-code-shadow), inset 0 1px 0 rgba(255,255,255,0.04)",
     }}>
       {/* Header bar */}
       <div className="flex items-center justify-between px-4 py-2.5 select-none" style={{
-        background: "rgba(255,255,255,0.03)",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        background: "var(--chat-code-header-bg)",
+        borderBottom: "1px solid var(--chat-code-header-border)",
       }}>
         {/* Language badge */}
         <div className="flex items-center gap-2">
           <div className="flex gap-1.5">
             {["#ff5f57","#febc2e","#28c840"].map(c => (
-              <div key={c} style={{ width:10, height:10, borderRadius:"50%", background:c, opacity:0.7 }} />
+              <div key={c} style={{ width:10, height:10, borderRadius:"50%", background:c, opacity:0.75 }} />
             ))}
           </div>
-          <span className="text-xs font-mono ml-1" style={{ color:"#7d8590" }}>{displayLang}</span>
+          <span className="text-xs font-mono ml-1" style={{ color:"var(--chat-code-meta)" }}>{displayLang}</span>
         </div>
         {/* Copy button */}
         <button
           onClick={handleCopy}
           className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all select-none"
           style={{
-            background: copied ? "rgba(86,211,100,0.12)" : "rgba(255,255,255,0.06)",
-            color: copied ? "#56d364" : "#7d8590",
-            border: `1px solid ${copied ? "rgba(86,211,100,0.22)" : "rgba(255,255,255,0.08)"}`,
+            background: copied ? "rgba(86,211,100,0.12)" : "var(--chat-code-btn-bg)",
+            color: copied ? "#56d364" : "var(--chat-code-meta)",
+            border: `1px solid ${copied ? "rgba(86,211,100,0.22)" : "var(--chat-code-btn-border)"}`,
           }}
         >
           {copied ? (

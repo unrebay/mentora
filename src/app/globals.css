@@ -25,7 +25,13 @@
     --chat-msg-bg:      rgba(255,255,255,0.80);
     --chat-msg-border:  rgba(0,0,0,0.07);
     --chat-msg-shadow:  0 2px 16px rgba(0,0,0,0.07);
-    --chat-code-border: rgba(0,0,0,0.09);
+    --chat-code-border:        rgba(0,0,0,0.13);
+    --chat-code-shadow:        0 2px 10px rgba(0,0,0,0.12);
+    --chat-code-header-bg:     rgba(255,255,255,0.05);
+    --chat-code-header-border: rgba(255,255,255,0.08);
+    --chat-code-meta:          #7d8590;
+    --chat-code-btn-bg:        rgba(255,255,255,0.08);
+    --chat-code-btn-border:    rgba(255,255,255,0.11);
   }
 
   .dark {
@@ -50,7 +56,13 @@
     --chat-msg-bg:      rgba(22,22,44,0.78);
     --chat-msg-border:  rgba(255,255,255,0.08);
     --chat-msg-shadow:  0 2px 16px rgba(0,0,0,0.4);
-    --chat-code-border: rgba(255,255,255,0.07);
+    --chat-code-border:        rgba(255,255,255,0.09);
+    --chat-code-shadow:        0 4px 24px rgba(0,0,0,0.5);
+    --chat-code-header-bg:     rgba(255,255,255,0.03);
+    --chat-code-header-border: rgba(255,255,255,0.06);
+    --chat-code-meta:          #7d8590;
+    --chat-code-btn-bg:        rgba(255,255,255,0.06);
+    --chat-code-btn-border:    rgba(255,255,255,0.08);
   }
 
   body {
