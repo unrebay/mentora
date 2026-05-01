@@ -146,7 +146,7 @@ export default async function HomePage() {
       <LandingNav />
 
       {/* ── DARK UNIVERSE: nav gap + hero + stats + features in one seamless block ── */}
-      <div className="relative" style={{ background: "#060912", marginTop: "-100px" }}>
+      <div className="relative" style={{ background: "#050a14", marginTop: "-100px" }}>
         {/* Galaxy — spans the entire dark section, reacts to cursor */}
         <GalaxyCanvas className="absolute inset-0 w-full h-full z-0" />
 
@@ -393,7 +393,7 @@ export default async function HomePage() {
           style={{ display: "block", width: "100%", height: 90 }}>
           <path
             d="M0,0 C120,70 280,90 480,55 C640,25 800,75 960,50 C1120,25 1300,65 1440,40 L1440,0 Z"
-            fill="#060912"
+            fill="#050a14"
           />
         </svg>
       </div>
