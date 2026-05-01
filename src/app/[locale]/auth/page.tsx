@@ -212,27 +212,50 @@ function AuthGalaxy() {
       const NODE_COUNT = SUBS.length * 2; // 34
       const sciPos = fibSph(NODE_COUNT, 10.0);
 
-      // ── Nodes ─────────────────────────────────────────────────────────────
-      const sciGlows:   THREE.Mesh[] = [];
-      const sciGlowOps: number[]     = [];
+      // ── Soft glow texture — radial gradient canvas, cached per color ─────
+      const glowTexCache = new Map<number, THREE.Texture>();
+      function getGlowTex(hexColor: number): THREE.Texture {
+        if (glowTexCache.has(hexColor)) return glowTexCache.get(hexColor)!;
+        const rr=(hexColor>>16)&0xff, gg=(hexColor>>8)&0xff, bb=hexColor&0xff;
+        const sz=256; const gc=document.createElement("canvas"); gc.width=gc.height=sz;
+        const gctx=gc.getContext("2d")!;
+        const half=sz/2;
+        const grd=gctx.createRadialGradient(half,half,0,half,half,half);
+        grd.addColorStop(0.00,`rgba(${rr},${gg},${bb},1.00)`);
+        grd.addColorStop(0.10,`rgba(${rr},${gg},${bb},0.95)`);
+        grd.addColorStop(0.28,`rgba(${rr},${gg},${bb},0.60)`);
+        grd.addColorStop(0.52,`rgba(${rr},${gg},${bb},0.20)`);
+        grd.addColorStop(0.75,`rgba(${rr},${gg},${bb},0.05)`);
+        grd.addColorStop(1.00,`rgba(${rr},${gg},${bb},0.00)`);
+        gctx.fillStyle=grd; gctx.fillRect(0,0,sz,sz);
+        const tex=new THREE.CanvasTexture(gc); glowTexCache.set(hexColor,tex); return tex;
+      }
+
+      // ── Nodes — sprite billboards with soft gradient texture ──────────────
+      const sciGlows:   THREE.Sprite[] = [];
+      const sciGlowOps: number[]       = [];
+      const sciGlowSzs: number[]       = [];
 
       for (let i = 0; i < NODE_COUNT; i++) {
         const s = SUBS[i % SUBS.length];
-        const isSecond = i >= SUBS.length; // second ring — slightly dimmer
+        const isSecond = i >= SUBS.length;
         const isActive = FAKE_ACTIVE.has(s.id) && !isSecond;
-        // second ring: dim version of the subject color (no orange)
         const cHex = isActive ? 0xffa040 : isSecond ? Math.floor(s.hex * 0.55) : s.hex;
-        const cOp  = isActive ? 0.98 : isSecond ? 0.55 : 0.82;
-        const glowOp = isActive ? 0.22 : isSecond ? 0.07 : 0.13;
-        sciGlowOps.push(glowOp);
-        const pos = sciPos[i];
-
-        const core = new THREE.Mesh(new THREE.SphereGeometry(isActive?0.34:isSecond?0.20:0.26,12,10),mkMat(cHex,cOp));
-        core.position.copy(pos); mainGrp.add(core);
-        const glow = new THREE.Mesh(new THREE.SphereGeometry(isActive?0.85:isSecond?0.50:0.65,8,6),mkMat(cHex,glowOp));
-        glow.position.copy(pos); mainGrp.add(glow); sciGlows.push(glow);
-        const halo = new THREE.Mesh(new THREE.SphereGeometry(isActive?1.7:isSecond?1.0:1.3,6,5),mkMat(cHex,isActive?0.06:0.018));
-        halo.position.copy(pos); mainGrp.add(halo);
+        const npos = sciPos[i];
+        const tex = getGlowTex(cHex);
+        const mkSp = (sz: number, op: number) => {
+          const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, opacity:op, blending:ADD, depthWrite:false }));
+          sp.scale.set(sz,sz,1); sp.position.copy(npos); mainGrp.add(sp); return sp;
+        };
+        // Tight bright core
+        mkSp(isActive?1.4:isSecond?0.7:1.0, isActive?0.90:isSecond?0.45:0.75);
+        // Mid glow — animated
+        const gsz = isActive?4.0:isSecond?2.2:3.2;
+        const gop = isActive?0.45:isSecond?0.16:0.30;
+        const gsp = mkSp(gsz, gop);
+        sciGlows.push(gsp); sciGlowOps.push(gop); sciGlowSzs.push(gsz);
+        // Outer diffuse haze
+        mkSp(isActive?9.0:isSecond?5.0:7.0, isActive?0.10:isSecond?0.04:0.07);
       }
 
       // ── Edges — connect first 17 ring by subject graph + some cross-links ──
@@ -309,8 +332,10 @@ function AuthGalaxy() {
         mainGrp.rotation.x=currentRotX; mainGrp.rotation.y=currentRotY;
         bgGrp.rotation.x=currentRotX*0.10; bgGrp.rotation.y=currentRotY*0.10;
         for (let i=0;i<sciGlows.length;i++) {
-          sciGlows[i].scale.setScalar(1+0.09*Math.sin(t*1.5+i*0.72));
-          (sciGlows[i].material as THREE.MeshBasicMaterial).opacity=sciGlowOps[i]*(0.85+0.15*Math.sin(t*2.1+i));
+          const pulse=1+0.09*Math.sin(t*1.5+i*0.72);
+          const sz=sciGlowSzs[i]*pulse;
+          sciGlows[i].scale.set(sz,sz,1);
+          (sciGlows[i].material as THREE.SpriteMaterial).opacity=sciGlowOps[i]*(0.85+0.15*Math.sin(t*2.1+i));
         }
         for (let i=0;i<IMP_N;i++) {
           const s=impStates[i]; s.t+=s.speed;
