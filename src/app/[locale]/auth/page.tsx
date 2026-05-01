@@ -138,20 +138,42 @@ function AuthGalaxy() {
       scene.add(mainGrp);
       scene.add(bgGrp);
 
-      // ── Atmosphere ───────────────────────────────────────────────────────
-      for (const [r, color, op] of [[90,0x1a3a7a,0.07],[60,0x0d2255,0.10],[45,0x18083a,0.05]] as [number,number,number][]) {
+      // ── Atmosphere — large BackSide spheres create diffuse volumetric glow ──
+      for (const [r, color, op] of [
+        [140,0x0d1a4a,0.14],[100,0x1a3a8a,0.16],[70,0x0d2260,0.18],
+        [50,0x18083a,0.12],[32,0x240d50,0.10],
+      ] as [number,number,number][]) {
         scene.add(new THREE.Mesh(new THREE.SphereGeometry(r,20,20), new THREE.MeshBasicMaterial({
           color, transparent:true, opacity:op, blending:ADD, depthWrite:false, side:THREE.BackSide,
         })));
       }
 
-      // ── Nebulae ──────────────────────────────────────────────────────────
+      // ── Large nebula volume spheres — BackSide for cloud fill ────────────
+      for (const [cx,cy,cz,r,col,op] of [
+        [20, 8,-16, 32, 0x1a3aaa, 0.13],
+        [-22,-4, 12, 28, 0x5a1aaa, 0.11],
+        [3, 22,-22, 26, 0x0a4a6a, 0.10],
+        [-10,-20,-12, 24, 0x5a3818, 0.09],
+        [25,-8, 16, 28, 0x0a2a7a, 0.12],
+        [0,  0,-38, 22, 0x2a1070, 0.09],
+        [-28,14, -6, 20, 0x0a3a7a, 0.11],
+        [10,-14, 22, 18, 0x3a1a60, 0.09],
+      ] as [number,number,number,number,number,number][]) {
+        scene.add(new THREE.Mesh(new THREE.SphereGeometry(r,12,10), new THREE.MeshBasicMaterial({
+          color:col, transparent:true, opacity:op, blending:ADD, depthWrite:false, side:THREE.BackSide,
+        })));
+      }
+
+      // ── Dense particle nebulae — high count for smooth cloud appearance ───
       for (const nb of [
-        { cx:22,cy:10,cz:-18,r:14,col:0x1a3a9a,count:600,op:0.22,sz:2.5 },
-        { cx:-25,cy:-5,cz:14,r:12,col:0x5a0a8a,count:480,op:0.20,sz:2.3 },
-        { cx:4,cy:24,cz:-25,r:11,col:0x0a3a4a,count:420,op:0.18,sz:2.2 },
-        { cx:-12,cy:-22,cz:-14,r:9,col:0x442210,count:300,op:0.16,sz:2.0 },
-        { cx:28,cy:-10,cz:18,r:12,col:0x0a2255,count:400,op:0.19,sz:2.4 },
+        { cx:22,cy:10,cz:-18,r:16,col:0x3a5ae8,count:3500,op:0.28,sz:2.6 },
+        { cx:-25,cy:-5,cz:14,r:14,col:0x8a2ac8,count:3000,op:0.25,sz:2.4 },
+        { cx:4,cy:24,cz:-25,r:13,col:0x0a5a7a,count:2800,op:0.23,sz:2.3 },
+        { cx:-12,cy:-22,cz:-14,r:11,col:0x884422,count:2200,op:0.20,sz:2.1 },
+        { cx:28,cy:-10,cz:18,r:14,col:0x1a3a9a,count:3000,op:0.24,sz:2.5 },
+        { cx:-5,cy:5,cz:-30,r:18,col:0x2a1a7a,count:2000,op:0.16,sz:3.2 },
+        { cx:-20,cy:14,cz:-4,r:12,col:0x1a4a8a,count:2000,op:0.20,sz:2.3 },
+        { cx:8,cy:-16,cz:22,r:11,col:0x3a2060,count:1800,op:0.18,sz:2.2 },
       ]) {
         const geo = new THREE.BufferGeometry();
         const pos = new Float32Array(nb.count * 3);
@@ -567,18 +589,18 @@ function AuthPageContent() {
           <div className="w-full mb-3 animate-fade-in-up" style={{ maxWidth: 420 }}>
             <div className="relative flex p-1 rounded-2xl"
               style={{
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.10)",
-                backdropFilter: "blur(14px)",
-                WebkitBackdropFilter: "blur(14px)",
-                boxShadow: "0 4px 24px rgba(0,0,0,0.35)",
+                background: "rgba(8,14,36,0.88)",
+                border: "1px solid rgba(255,255,255,0.16)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.60)",
               }}>
               <div className="absolute top-1 bottom-1 rounded-xl transition-all duration-200"
                 style={{
                   width: "calc(50% - 4px)",
                   left: isSignup ? "calc(50%)" : "4px",
-                  background: "rgba(255,255,255,0.11)",
-                  boxShadow: "0 1px 6px rgba(0,0,0,0.4)",
+                  background: "rgba(255,255,255,0.14)",
+                  boxShadow: "0 1px 6px rgba(0,0,0,0.5)",
                 }} />
               <button
                 onClick={() => switchMode("signin")}
@@ -601,11 +623,11 @@ function AuthPageContent() {
           <div className="w-full animate-fade-in-up" style={{ maxWidth: 420 }}>
             <div className="rounded-3xl p-7 space-y-4"
               style={{
-                background: "rgba(255,255,255,0.07)",
-                border: "1px solid rgba(255,255,255,0.13)",
-                backdropFilter: "blur(32px)",
-                WebkitBackdropFilter: "blur(32px)",
-                boxShadow: "0 8px 60px rgba(0,0,0,0.55), 0 2px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.10)",
+                background: "rgba(6,10,30,0.88)",
+                border: "1px solid rgba(255,255,255,0.18)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                boxShadow: "0 8px 60px rgba(0,0,0,0.75), 0 2px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.12)",
               }}>
 
               <div className="mb-1">
