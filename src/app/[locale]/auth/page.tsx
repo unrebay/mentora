@@ -138,42 +138,39 @@ function AuthGalaxy() {
       scene.add(mainGrp);
       scene.add(bgGrp);
 
-      // ── Atmosphere — large BackSide spheres create diffuse volumetric glow ──
+      // ── Atmosphere — subtle BackSide spheres, low opacity (ADD blending accumulates!) ──
       for (const [r, color, op] of [
-        [140,0x0d1a4a,0.14],[100,0x1a3a8a,0.16],[70,0x0d2260,0.18],
-        [50,0x18083a,0.12],[32,0x240d50,0.10],
+        [100,0x0d1a3a,0.06],[65,0x1a0a2a,0.07],[42,0x180838,0.05],
       ] as [number,number,number][]) {
         scene.add(new THREE.Mesh(new THREE.SphereGeometry(r,20,20), new THREE.MeshBasicMaterial({
           color, transparent:true, opacity:op, blending:ADD, depthWrite:false, side:THREE.BackSide,
         })));
       }
 
-      // ── Large nebula volume spheres — BackSide for cloud fill ────────────
+      // ── Nebula volume spheres — varied colors, low opacity ───────────────
       for (const [cx,cy,cz,r,col,op] of [
-        [20, 8,-16, 32, 0x1a3aaa, 0.13],
-        [-22,-4, 12, 28, 0x5a1aaa, 0.11],
-        [3, 22,-22, 26, 0x0a4a6a, 0.10],
-        [-10,-20,-12, 24, 0x5a3818, 0.09],
-        [25,-8, 16, 28, 0x0a2a7a, 0.12],
-        [0,  0,-38, 22, 0x2a1070, 0.09],
-        [-28,14, -6, 20, 0x0a3a7a, 0.11],
-        [10,-14, 22, 18, 0x3a1a60, 0.09],
+        [20,  8,-16, 28, 0x2a1a6a, 0.06],   // deep violet
+        [-22,-4, 12, 24, 0x4a0a5a, 0.05],   // dark purple
+        [3,  22,-22, 22, 0x0a2a3a, 0.05],   // dark teal
+        [-10,-20,-12,20, 0x3a1a08, 0.05],   // warm amber
+        [25, -8, 16, 24, 0x0a1a4a, 0.05],   // deep navy
+        [-28,14,  -6,18, 0x1a0840, 0.04],   // violet
       ] as [number,number,number,number,number,number][]) {
         scene.add(new THREE.Mesh(new THREE.SphereGeometry(r,12,10), new THREE.MeshBasicMaterial({
           color:col, transparent:true, opacity:op, blending:ADD, depthWrite:false, side:THREE.BackSide,
         })));
       }
 
-      // ── Dense particle nebulae — high count for smooth cloud appearance ───
+      // ── Dense particle nebulae — mixed palette, subtle opacity ───────────
       for (const nb of [
-        { cx:22,cy:10,cz:-18,r:16,col:0x3a5ae8,count:3500,op:0.28,sz:2.6 },
-        { cx:-25,cy:-5,cz:14,r:14,col:0x8a2ac8,count:3000,op:0.25,sz:2.4 },
-        { cx:4,cy:24,cz:-25,r:13,col:0x0a5a7a,count:2800,op:0.23,sz:2.3 },
-        { cx:-12,cy:-22,cz:-14,r:11,col:0x884422,count:2200,op:0.20,sz:2.1 },
-        { cx:28,cy:-10,cz:18,r:14,col:0x1a3a9a,count:3000,op:0.24,sz:2.5 },
-        { cx:-5,cy:5,cz:-30,r:18,col:0x2a1a7a,count:2000,op:0.16,sz:3.2 },
-        { cx:-20,cy:14,cz:-4,r:12,col:0x1a4a8a,count:2000,op:0.20,sz:2.3 },
-        { cx:8,cy:-16,cz:22,r:11,col:0x3a2060,count:1800,op:0.18,sz:2.2 },
+        { cx:22,cy:10,cz:-18,r:16,col:0x2a3a88,count:3000,op:0.15,sz:2.5 },   // blue
+        { cx:-25,cy:-5,cz:14,r:14,col:0x5a1a7a,count:2800,op:0.14,sz:2.4 },   // purple
+        { cx:4,cy:24,cz:-25,r:13,col:0x0a3a4a,count:2500,op:0.13,sz:2.3 },    // teal
+        { cx:-12,cy:-22,cz:-14,r:11,col:0x5a2810,count:2000,op:0.12,sz:2.1 }, // warm
+        { cx:28,cy:-10,cz:18,r:14,col:0x1a2a60,count:2500,op:0.13,sz:2.4 },   // navy
+        { cx:-5,cy:5,cz:-30,r:18,col:0x180a40,count:1800,op:0.10,sz:3.0 },    // deep violet
+        { cx:-20,cy:14,cz:-4,r:12,col:0x0a3050,count:1800,op:0.12,sz:2.2 },   // slate
+        { cx:8,cy:-16,cz:22,r:11,col:0x2a1048,count:1600,op:0.11,sz:2.2 },    // purple
       ]) {
         const geo = new THREE.BufferGeometry();
         const pos = new Float32Array(nb.count * 3);
