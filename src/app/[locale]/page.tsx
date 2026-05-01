@@ -429,9 +429,24 @@ export default async function HomePage() {
                   <>3 приёма, которые делают<br /><span className="text-brand-600 dark:text-brand-500 italic">учёбу эффективной</span></>
                 )}
               </h2>
-              <Link href="/guide" className="inline-flex items-center gap-1.5 text-brand-600 dark:text-brand-500 text-sm font-medium hover:underline">
+              <Link
+                href="/guide"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 hover:scale-[1.04] active:scale-95"
+                style={{
+                  background: "rgba(69,97,232,0.13)",
+                  border: "1px solid rgba(69,97,232,0.38)",
+                  color: "#5575FF",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  boxShadow: [
+                    "0 2px 12px rgba(69,97,232,0.18)",
+                    "inset 0 1px 0 rgba(255,255,255,0.55)",
+                    "inset 0 -1px 0 rgba(69,97,232,0.12)",
+                  ].join(", "),
+                }}
+              >
                 {t("landing.howLearnGuide")}
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>
             </div>
             <div className="space-y-4">
