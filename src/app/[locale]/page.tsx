@@ -163,7 +163,7 @@ export default async function HomePage() {
                 </div>
               </FadeUp>
               <FadeUp delay={0.08}>
-              <h1 className="text-[3rem] sm:text-[3.75rem] md:text-[4.4rem] lg:text-[5.4rem] font-black leading-[1.02] mb-4 tracking-tight text-white">
+              <h1 className="text-[2.6rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[4.6rem] font-black leading-[1.02] mb-4 tracking-tight text-white">
                 {locale === "en" ? (
                   <>
                     A new kind<br />
@@ -187,19 +187,19 @@ export default async function HomePage() {
                   </>
                 )}
               </h1>
-              <p className="text-lg font-semibold tracking-wide mb-5" style={{ color: "#6B8FFF" }}>
+              <p className="text-base font-semibold tracking-wide mb-5" style={{ color: "#6B8FFF" }}>
                 {locale === "en" ? "For everyone. Everywhere. Right now." : "Доступный каждому. Везде. Прямо сейчас."}
               </p>
               </FadeUp>
               <FadeUp delay={0.16}>
-                <p className="text-xl text-gray-400 leading-relaxed mb-8 max-w-md">
+                <p className="text-lg text-gray-400 leading-relaxed mb-8 max-w-md">
                   {t("landing.heroSubtitle")}
                 </p>
               </FadeUp>
               <FadeUp delay={0.24}>
                 <div className="flex flex-wrap gap-3">
                   <Link href="/auth"
-                    className="px-8 py-4 text-lg font-semibold rounded-full text-white transition-all hover:scale-[1.03] active:scale-95"
+                    className="px-7 py-3.5 font-semibold rounded-full text-white transition-all hover:scale-[1.03] active:scale-95"
                     style={{ background: "linear-gradient(135deg, #5575FF 0%, #4561E8 50%, #6B4FF0 100%)", boxShadow: "0 4px 20px rgba(69,97,232,0.45), 0 1px 0 rgba(255,255,255,0.2) inset" }}>
                     {t("landing.heroCtaStart")}
                   </Link>
