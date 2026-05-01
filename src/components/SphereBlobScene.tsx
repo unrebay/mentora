@@ -116,18 +116,21 @@ export default function SphereBlobScene({
             bottom: s.bottom,
             left: s.left,
             right: s.right,
-            /* Lambertian shading: bright at 35% 35% (top-left light source) */
+            /* Soft glowing orb — light source at 38% 32%, feathered edges */
             background: `radial-gradient(
-              circle at 35% 35%,
+              circle at 38% 32%,
               ${s.highlight}  0%,
-              ${s.mid}       28%,
-              ${s.shadow}    58%,
-              ${s.deepShadow} 80%,
-              transparent   100%
+              ${s.mid}       22%,
+              ${s.shadow}    52%,
+              ${s.deepShadow} 72%,
+              transparent   90%
             )`,
-            /* Outer glow — creates the "floating in space" feel */
-            boxShadow: `0 0 ${Math.round(s.size * 0.35)}px ${s.glow},
-                        0 0 ${Math.round(s.size * 0.7)}px ${s.glow.replace("0.", "0.0")}`,
+            /* Multi-layer glow: tight core + wide diffuse halo */
+            boxShadow: `0 0 ${Math.round(s.size * 0.4)}px ${s.glow},
+                        0 0 ${Math.round(s.size * 0.9)}px ${s.glow},
+                        0 0 ${Math.round(s.size * 1.6)}px ${s.glow.replace(/[\d.]+\)$/, "0.15)")}`,
+            /* Soft blur makes edges glow naturally */
+            filter: `blur(${Math.round(s.size * 0.018)}px)`,
             /* Float animation */
             animation: `${s.float} ${s.duration} ease-in-out ${s.delay ?? "0s"} infinite`,
             opacity: (s.opacity ?? 1) * intensity,
@@ -137,13 +140,13 @@ export default function SphereBlobScene({
         />
       ))}
 
-      {/* Grain texture overlay for that premium film-grain feel */}
+      {/* Subtle grain — very low opacity so spheres stay clean */}
       <div
         style={{
           position: "absolute",
           inset: 0,
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E")`,
-          opacity: 0.04,
+          opacity: 0.02,
           mixBlendMode: "overlay",
         }}
       />
