@@ -117,7 +117,7 @@ export default function GalaxyCanvas({ className }: Props) {
 
       const mainGrp = new THREE.Group();
       const bgGrp   = new THREE.Group();
-      mainGrp.position.y = 7; // shift galaxy cluster up into hero / demo-chat area
+      mainGrp.position.y = 15; // shift galaxy cluster up into hero / demo-chat area
       scene.add(mainGrp);
       scene.add(bgGrp);
 

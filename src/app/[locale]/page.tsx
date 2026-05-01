@@ -156,12 +156,6 @@ export default async function HomePage() {
         <div className="relative z-10 max-w-6xl mx-auto px-6 pt-4 pb-12">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <FadeUp>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5 text-xs font-bold tracking-widest uppercase"
-                  style={{ background: "rgba(69,97,232,0.15)", color: "#6B8FFF", border: "1px solid rgba(69,97,232,0.25)" }}>
-                  {t("landing.heroBadge")}
-                </div>
-              </FadeUp>
               <FadeUp delay={0.08}>
               <h1 className="text-[2.6rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[4.6rem] font-black leading-[1.02] mb-4 tracking-tight text-white">
                 {locale === "en" ? (
