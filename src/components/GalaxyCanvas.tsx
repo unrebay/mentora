@@ -99,7 +99,7 @@ export default function GalaxyCanvas({ className }: Props) {
       const scene  = new THREE.Scene();
       scene.background = new THREE.Color(0x050a14);
       const camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 1000);
-      camera.position.set(0, 3.0, 50); // pulled back ~1.8x for subtle background effect
+      camera.position.set(0, 3.0, 43); // z=43: ~16% larger scale vs z=50
       camera.lookAt(0, 0, 0);
 
       const ADD = THREE.AdditiveBlending;
@@ -117,6 +117,7 @@ export default function GalaxyCanvas({ className }: Props) {
 
       const mainGrp = new THREE.Group();
       const bgGrp   = new THREE.Group();
+      mainGrp.position.y = 7; // shift galaxy cluster up into hero / demo-chat area
       scene.add(mainGrp);
       scene.add(bgGrp);
 
