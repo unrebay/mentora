@@ -99,7 +99,7 @@ export default function GalaxyCanvas({ className }: Props) {
       const scene  = new THREE.Scene();
       scene.background = new THREE.Color(0x050a14);
       const camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 1000);
-      camera.position.set(0, 3.0, 28); // slightly further back for landing (wider view)
+      camera.position.set(0, 3.0, 50); // pulled back ~1.8x for subtle background effect
       camera.lookAt(0, 0, 0);
 
       const ADD = THREE.AdditiveBlending;
