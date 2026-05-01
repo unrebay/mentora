@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
+import SubjectIcon, { subjectColor, SUBJECT_META_COLORS } from "@/components/SubjectIcon";
 
 type Subject = {
   id: string;
@@ -24,47 +24,73 @@ const cardVariants = {
   }),
 } as any;
 
-/* ── Single dark-glass card ──────────────────────────────── */
+/* ── Single 3D-glass gradient card ──────────────────────── */
 function GlassCard({ s, i }: { s: Subject; i: number }) {
   const color = subjectColor(s.id);
+  // Get secondary (darker) color for richer gradient
+  const toColor = SUBJECT_META_COLORS[s.id]?.to ?? (color + "99");
 
   const inner = (
     <motion.div
       className="relative rounded-2xl h-full flex flex-col cursor-pointer select-none overflow-hidden"
       style={{
-        background: "rgba(8,12,30,0.80)",
-        border: `1px solid ${color}28`,
-        boxShadow: `0 2px 12px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)`,
+        // Rich subject-color gradient base
+        background: `linear-gradient(145deg, ${color}EE 0%, ${toColor}CC 55%, ${color}99 100%)`,
+        border: `1px solid ${color}60`,
+        boxShadow: [
+          // Outer depth shadow
+          `0 4px 20px ${color}35`,
+          `0 2px 6px rgba(0,0,0,0.4)`,
+          // Top-left glass sheen (3D light reflection)
+          `inset 0 1px 0 rgba(255,255,255,0.45)`,
+          `inset 1px 0 0 rgba(255,255,255,0.18)`,
+          // Bottom-right depth edge
+          `inset 0 -1px 0 rgba(0,0,0,0.25)`,
+        ].join(", "),
         minHeight: 128,
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
       }}
       whileHover={{
-        y: -5,
-        scale: 1.02,
-        border: `1px solid ${color}55`,
-        boxShadow: `0 8px 28px rgba(0,0,0,0.5), 0 0 18px ${color}18, inset 0 1px 0 rgba(255,255,255,0.10)`,
-        transition: { type: "spring", stiffness: 300, damping: 22 },
+        y: -6,
+        scale: 1.03,
+        boxShadow: [
+          `0 10px 32px ${color}55`,
+          `0 4px 12px rgba(0,0,0,0.4)`,
+          `inset 0 1px 0 rgba(255,255,255,0.55)`,
+          `inset 1px 0 0 rgba(255,255,255,0.22)`,
+          `inset 0 -1px 0 rgba(0,0,0,0.20)`,
+        ].join(", "),
+        transition: { type: "spring", stiffness: 320, damping: 22 },
       }}
     >
-      {/* Subtle top glow line matching subject color */}
-      <div className="absolute top-0 left-4 right-4 h-px" style={{ background: `linear-gradient(90deg, transparent, ${color}50, transparent)` }} />
+      {/* Glass specular highlight — top diagonal sheen */}
+      <div className="absolute inset-0 rounded-2xl pointer-events-none" style={{
+        background: "linear-gradient(135deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.06) 40%, transparent 65%)",
+      }} />
+
+      {/* Bottom-right subtle darkening for 3D depth */}
+      <div className="absolute inset-0 rounded-2xl pointer-events-none" style={{
+        background: "linear-gradient(315deg, rgba(0,0,0,0.22) 0%, transparent 50%)",
+      }} />
 
       <div className="relative z-10 p-4 flex flex-col flex-1">
-        {/* Icon */}
+        {/* Icon — white/glass version on colored background */}
         <div className="mb-3 mt-0.5">
           <SubjectIcon id={s.id} size={36}
-            style={{ background: `${color}18`, border: `1px solid ${color}30` }} />
+            style={{
+              background: "rgba(255,255,255,0.20)",
+              border: "1px solid rgba(255,255,255,0.35)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.35)",
+            }} />
         </div>
 
         {/* Title + desc */}
-        <div className="font-semibold text-sm leading-snug" style={{ color: "rgba(255,255,255,0.88)" }}>{s.title}</div>
-        <div className="text-[11px] mt-0.5 leading-relaxed" style={{ color: "rgba(255,255,255,0.38)" }}>{s.desc}</div>
+        <div className="font-semibold text-sm leading-snug" style={{ color: "rgba(255,255,255,0.97)", textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>{s.title}</div>
+        <div className="text-[11px] mt-0.5 leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>{s.desc}</div>
 
-        {/* Arrow (always visible, subtle) */}
+        {/* Arrow */}
         <div className="mt-auto pt-2.5">
           <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
-            style={{ color: `${color}60` }}>
+            style={{ color: "rgba(255,255,255,0.65)" }}>
             <path d="M2 6h8M6 2l4 4-4 4" />
           </svg>
         </div>
