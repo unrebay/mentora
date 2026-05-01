@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useRef, useCallback } from "react";
 import Link from "next/link";
 import SubjectIcon, { subjectColor, SUBJECT_META_COLORS } from "@/components/SubjectIcon";
 
@@ -24,42 +25,58 @@ const cardVariants = {
   }),
 } as any;
 
+/* ── Tilt hook ───────────────────────────────────────────── */
+function useTilt(strength = 7) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const onMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (e.clientX - cx) / (rect.width / 2);
+    const dy = (e.clientY - cy) / (rect.height / 2);
+    el.style.transform = `perspective(700px) rotateX(${(-dy * strength).toFixed(2)}deg) rotateY(${(dx * strength).toFixed(2)}deg) scale(1.03)`;
+    el.style.transition = "transform 0.08s ease-out";
+  }, [strength]);
+
+  const onMouseLeave = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.transform = "perspective(700px) rotateX(0deg) rotateY(0deg) scale(1)";
+    el.style.transition = "transform 0.28s ease-out";
+  }, []);
+
+  return { ref, onMouseMove, onMouseLeave };
+}
+
 /* ── Single 3D-glass gradient card ──────────────────────── */
 function GlassCard({ s, i }: { s: Subject; i: number }) {
   const color = subjectColor(s.id);
   // Get secondary (darker) color for richer gradient
   const toColor = SUBJECT_META_COLORS[s.id]?.to ?? (color + "99");
+  const tilt = useTilt(7);
 
   const inner = (
-    <motion.div
+    <div
+      ref={tilt.ref}
+      onMouseMove={tilt.onMouseMove}
+      onMouseLeave={tilt.onMouseLeave}
       className="relative rounded-2xl h-full flex flex-col cursor-pointer select-none overflow-hidden"
       style={{
         // Rich subject-color gradient base
         background: `linear-gradient(145deg, ${color}EE 0%, ${toColor}CC 55%, ${color}99 100%)`,
         border: `1px solid ${color}60`,
         boxShadow: [
-          // Outer depth shadow
           `0 4px 20px ${color}35`,
           `0 2px 6px rgba(0,0,0,0.4)`,
-          // Top-left glass sheen (3D light reflection)
           `inset 0 1px 0 rgba(255,255,255,0.45)`,
           `inset 1px 0 0 rgba(255,255,255,0.18)`,
-          // Bottom-right depth edge
           `inset 0 -1px 0 rgba(0,0,0,0.25)`,
         ].join(", "),
         minHeight: 128,
-      }}
-      whileHover={{
-        y: -6,
-        scale: 1.03,
-        boxShadow: [
-          `0 10px 32px ${color}55`,
-          `0 4px 12px rgba(0,0,0,0.4)`,
-          `inset 0 1px 0 rgba(255,255,255,0.55)`,
-          `inset 1px 0 0 rgba(255,255,255,0.22)`,
-          `inset 0 -1px 0 rgba(0,0,0,0.20)`,
-        ].join(", "),
-        transition: { type: "spring", stiffness: 320, damping: 22 },
+        willChange: "transform",
       }}
     >
       {/* Glass specular highlight — top diagonal sheen */}
@@ -95,7 +112,7 @@ function GlassCard({ s, i }: { s: Subject; i: number }) {
           </svg>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 
   return (
