@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import DemoChat from "@/components/DemoChat";
 import { createClient } from "@/lib/supabase/server";
 import SubjectGrid from "@/components/SubjectGrid";
+import SubjectCarousel from "@/components/SubjectCarousel";
 import DemoScrollButton from "@/components/DemoScrollButton";
 import LandingNav from "@/components/LandingNav";
 import BuyProButton from "@/components/BuyProButton";
@@ -398,21 +399,23 @@ export default async function HomePage() {
 
       </div>{/* /DARK UNIVERSE */}
 
-      <section id="subjects" className="max-w-6xl mx-auto px-6 py-16">
+      <section id="subjects" className="py-16 overflow-hidden">
         <FadeUp>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px flex-1 bg-[var(--border)]" />
-            <span className="text-xs font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase">{t("landing.libraryLabel")}</span>
-            <div className="h-px flex-1 bg-[var(--border)]" />
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-px flex-1 bg-[var(--border)]" />
+              <span className="text-xs font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase">{t("landing.libraryLabel")}</span>
+              <div className="h-px flex-1 bg-[var(--border)]" />
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black mb-3 leading-tight text-center">
+              {t("landing.subjectsHeading")}
+            </h2>
+            <p className="text-center text-[var(--text-muted)] text-base mb-10">
+              {t("landing.subjectsDesc")}
+            </p>
           </div>
-          <h2 className="text-4xl md:text-5xl font-black mb-3 leading-tight text-center">
-            {t("landing.subjectsHeading")}
-          </h2>
-          <p className="text-center text-[var(--text-muted)] text-base mb-10">
-            {t("landing.subjectsDesc")}
-          </p>
         </FadeUp>
-        <SubjectGrid subjects={subjects} />
+        <SubjectCarousel subjects={subjects} />
       </section>
 
       {/* HOW TO LEARN */}
@@ -772,19 +775,11 @@ export default async function HomePage() {
 
         <div className="max-w-4xl mx-auto relative z-10 text-center">
 
-          {/* Eyebrow */}
-          <FadeUp fade>
-            <p className="text-[11px] font-bold tracking-[0.25em] uppercase mb-6"
-              style={{ color: "var(--text-muted)" }}>
-              {locale === "ru" ? "Наша миссия" : "Our mission"}
-            </p>
-          </FadeUp>
-
           {/* Big headline */}
           <FadeUp delay={0.07}>
             <h2 className="text-5xl md:text-7xl font-black leading-[1.05] mb-8 tracking-tight">
               <span style={{ color: "var(--text)" }}>
-                {locale === "ru" ? "Знания — " : "Knowledge is "}
+                {locale === "ru" ? "Знания — " : "Knowledge — "}
               </span>
               <br className="hidden sm:block" />
               <span style={{
@@ -793,7 +788,7 @@ export default async function HomePage() {
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
               }}>
-                {locale === "ru" ? "не привилегия." : "not a privilege."}
+                {locale === "ru" ? "каждому." : "for everyone."}
               </span>
             </h2>
           </FadeUp>
@@ -803,8 +798,8 @@ export default async function HomePage() {
             <p className="text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-16"
               style={{ color: "var(--text-secondary)" }}>
               {locale === "ru"
-                ? "Мы тренируем тело — почему не мозг? Знание — это не обязанность перед экзаменом. Это часть здоровой жизни. Mentora строит мир, где живой диалог с ментором доступен каждому — от ребёнка в Новосибирске до взрослого, который хочет понять мир глубже."
-                : "We train our bodies — why not our minds? Knowledge isn't a chore before an exam. It's part of a healthy life. Mentora is building a world where real mentorship is available to everyone — from a child anywhere to an adult who wants to understand the world more deeply."}
+                ? "Мы тренируем тело — почему не мозг? Знание — это не обязанность перед экзаменом. Это часть здоровой жизни. Mentora строит мир, где живой диалог с ментором доступен каждому — от школьника в Новосибирске до взрослого, который хочет понять мир глубже."
+                : "We train our bodies — why not our minds? Knowledge isn't a chore before an exam. It's part of a healthy life. Mentora is building a world where real mentorship is available to everyone — from a student anywhere to an adult who wants to understand the world more deeply."}
             </p>
           </FadeUp>
 
@@ -877,8 +872,8 @@ export default async function HomePage() {
                 <p className="text-xl md:text-2xl font-light italic leading-relaxed"
                   style={{ color: "var(--text)" }}>
                   {locale === "ru"
-                    ? "«Мы не продаём подписку. Мы возвращаем право на знание тем, у кого его раньше не было.»"
-                    : "\"We're not selling a subscription. We're giving back the right to knowledge to those who never had it.\""}
+                    ? "«Мы не продаём подписку. Мы даём каждому право учиться — снова, заново или впервые.»"
+                    : "\"We're not selling a subscription. We're giving everyone the right to learn — again, anew, or for the first time.\""}
                 </p>
                 <footer className="mt-4 text-sm font-semibold" style={{ color: "var(--text-muted)" }}>
                   — {locale === "ru" ? "Команда Mentora" : "Mentora team"}
