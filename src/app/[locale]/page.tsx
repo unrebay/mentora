@@ -385,18 +385,18 @@ export default async function HomePage() {
 
       </div>
 
-      </div>{/* /DARK UNIVERSE */}
-
-      {/* SVG wave: outside the dark div so transparency shows light page bg */}
-      <div aria-hidden style={{ marginTop: -2, position: "relative", zIndex: 1, lineHeight: 0 }}>
+      {/* Wave: white shape overlaid directly on galaxy, no dark strip */}
+      <div aria-hidden style={{ position: "relative", zIndex: 2, lineHeight: 0, marginBottom: -1 }}>
         <svg viewBox="0 0 1440 90" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
           style={{ display: "block", width: "100%", height: 90 }}>
           <path
-            d="M0,0 C120,70 280,90 480,55 C640,25 800,75 960,50 C1120,25 1300,65 1440,40 L1440,0 Z"
-            fill="#050a14"
+            d="M0,90 C120,20 280,0 480,35 C640,65 800,15 960,40 C1120,65 1300,25 1440,50 L1440,90 Z"
+            fill="var(--bg)"
           />
         </svg>
       </div>
+
+      </div>{/* /DARK UNIVERSE */}
 
       <section id="subjects" className="max-w-6xl mx-auto px-6 py-16">
         <FadeUp>
