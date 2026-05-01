@@ -145,14 +145,14 @@ export default function GalaxyCanvas({ className }: Props) {
 
       // ── Dense particle nebulae — gaussian clouds for cosmic atmosphere ────────
       for (const nb of [
-        { cx: 22,  cy: 10, cz:-18, r:16, col:0x2a3a88, count:3000, op:0.15, sz:2.5 },
-        { cx:-25, cy: -5, cz: 14, r:14, col:0x5a1a7a, count:2800, op:0.14, sz:2.4 },
-        { cx:  4, cy: 24, cz:-25, r:13, col:0x0a3a4a, count:2500, op:0.13, sz:2.3 },
-        { cx:-12, cy:-22, cz:-14, r:11, col:0x5a2810, count:2000, op:0.12, sz:2.1 },
-        { cx: 28, cy:-10, cz: 18, r:14, col:0x1a2a60, count:2500, op:0.13, sz:2.4 },
-        { cx: -5, cy:  5, cz:-30, r:18, col:0x180a40, count:1800, op:0.10, sz:3.0 },
-        { cx:-20, cy: 14, cz: -4, r:12, col:0x0a3050, count:1800, op:0.12, sz:2.2 },
-        { cx:  8, cy:-16, cz: 22, r:11, col:0x2a1048, count:1600, op:0.11, sz:2.2 },
+        { cx: 22,  cy: 10, cz:-18, r:16, col:0x2a3a88, count:3000, op:0.07, sz:2.5 },
+        { cx:-25, cy: -5, cz: 14, r:14, col:0x5a1a7a, count:2800, op:0.06, sz:2.4 },
+        { cx:  4, cy: 24, cz:-25, r:13, col:0x0a3a4a, count:2500, op:0.06, sz:2.3 },
+        { cx:-12, cy:-22, cz:-14, r:11, col:0x5a2810, count:2000, op:0.05, sz:2.1 },
+        { cx: 28, cy:-10, cz: 18, r:14, col:0x1a2a60, count:2500, op:0.06, sz:2.4 },
+        { cx: -5, cy:  5, cz:-30, r:18, col:0x180a40, count:1800, op:0.05, sz:3.0 },
+        { cx:-20, cy: 14, cz: -4, r:12, col:0x0a3050, count:1800, op:0.05, sz:2.2 },
+        { cx:  8, cy:-16, cz: 22, r:11, col:0x2a1048, count:1600, op:0.05, sz:2.2 },
       ]) {
         const geo = new THREE.BufferGeometry();
         const pos = new Float32Array(nb.count * 3);
@@ -185,16 +185,16 @@ export default function GalaxyCanvas({ className }: Props) {
           color, size, transparent: true, opacity: op, blending: ADD, depthWrite: false, sizeAttenuation: false,
         })));
       }
-      mkStars(18000, 35, 350, 0xffffff, 1.6, 0.20);
-      mkStars( 3000, 20,  80, 0xaabbff, 1.9, 0.13);
-      mkStars(  500, 15,  40, 0xfff0cc, 2.6, 0.22);
-      mkStars(  900, 25, 150, 0x88aaff, 1.3, 0.10);
-      mkStars(  300, 10,  30, 0xffffff, 3.5, 0.32);
+      mkStars(18000, 35, 350, 0xffffff, 1.6, 0.11);
+      mkStars( 3000, 20,  80, 0xaabbff, 1.9, 0.07);
+      mkStars(  500, 15,  40, 0xfff0cc, 2.6, 0.12);
+      mkStars(  900, 25, 150, 0x88aaff, 1.3, 0.06);
+      mkStars(  300, 10,  30, 0xffffff, 3.5, 0.18);
       // Milky Way band
       { const geo=new THREE.BufferGeometry(); const pos=new Float32Array(8000*3);
         for (let i=0;i<8000;i++) { const r=80+Math.random()*200,a=Math.random()*Math.PI*2,y=(Math.random()-0.5)*28; pos[i*3]=Math.cos(a)*r; pos[i*3+1]=y; pos[i*3+2]=Math.sin(a)*r; }
         geo.setAttribute("position",new THREE.BufferAttribute(pos,3));
-        bgGrp.add(new THREE.Points(geo,new THREE.PointsMaterial({ color:0xaabbff,size:1.2,transparent:true,opacity:0.07,blending:ADD,depthWrite:false,sizeAttenuation:false }))); }
+        bgGrp.add(new THREE.Points(geo,new THREE.PointsMaterial({ color:0xaabbff,size:1.2,transparent:true,opacity:0.04,blending:ADD,depthWrite:false,sizeAttenuation:false }))); }
 
       // ── Science positions — two rings of 17 nodes ─────────────────────────────
       const NODE_COUNT = SUBS.length * 2;
@@ -240,14 +240,14 @@ export default function GalaxyCanvas({ className }: Props) {
         };
 
         // Core
-        mkSp(isSecond ? 0.7 : 1.0, isSecond ? 0.45 : 0.75);
+        mkSp(isSecond ? 0.7 : 1.0, isSecond ? 0.28 : 0.50);
         // Mid glow (animated)
         const gsz = isSecond ? 2.2 : 3.2;
-        const gop = isSecond ? 0.16 : 0.30;
+        const gop = isSecond ? 0.09 : 0.16;
         const gsp = mkSp(gsz, gop);
         sciGlows.push(gsp); sciGlowOps.push(gop); sciGlowSzs.push(gsz);
         // Outer haze
-        mkSp(isSecond ? 5.0 : 7.0, isSecond ? 0.04 : 0.07);
+        mkSp(isSecond ? 5.0 : 7.0, isSecond ? 0.02 : 0.04);
       }
 
       // ── Graph edges ───────────────────────────────────────────────────────────
@@ -304,8 +304,8 @@ export default function GalaxyCanvas({ className }: Props) {
       const IMP_N=Math.min(40,interE.length*2);
       interface ImpState { edgeIdx:number; t:number; speed:number }
       const impStates: ImpState[]=Array.from({length:IMP_N},(_,i)=>({ edgeIdx:i%interE.length,t:i/IMP_N,speed:0.0022+Math.random()*0.0038 }));
-      const impIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.11,5,4),mkMat(0xaaccff,0.90),IMP_N);
-      const impGlowIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.28,5,4),mkMat(0x4466cc,0.30),IMP_N);
+      const impIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.11,5,4),mkMat(0xaaccff,0.55),IMP_N);
+      const impGlowIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.28,5,4),mkMat(0x4466cc,0.16),IMP_N);
       mainGrp.add(impIM); mainGrp.add(impGlowIM);
       const impD=new THREE.Object3D();
 

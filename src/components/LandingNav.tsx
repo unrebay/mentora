@@ -76,7 +76,7 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
             background: navBg,
             backdropFilter: navBlur,
             WebkitBackdropFilter: navBlur,
-            borderRadius: 20,
+            borderRadius: 9999,
             border: navBorder,
             boxShadow: navShadow,
             overflow: "hidden",
