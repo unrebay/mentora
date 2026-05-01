@@ -1,8 +1,7 @@
 "use client";
 
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
-import { useRef } from "react";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
 
 type Subject = {
@@ -16,100 +15,59 @@ type Subject = {
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 28, scale: 0.96 },
+  hidden: { opacity: 0, y: 24, scale: 0.97 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { delay: i * 0.055, duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+    transition: { delay: i * 0.045, duration: 0.35, ease: [0.22, 1, 0.36, 1] },
   }),
 } as any;
 
-/* ── Single liquid-glass card ────────────────────────────── */
+/* ── Single dark-glass card ──────────────────────────────── */
 function GlassCard({ s, i }: { s: Subject; i: number }) {
-  const cardRef = useRef<HTMLDivElement>(null);
   const color = subjectColor(s.id);
-
-  const mx = useMotionValue(50);
-  const my = useMotionValue(50);
-  const springX = useSpring(mx, { stiffness: 200, damping: 30 });
-  const springY = useSpring(my, { stiffness: 200, damping: 30 });
-
-  function handleMouseMove(e: React.MouseEvent) {
-    const rect = cardRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    mx.set(x);
-    my.set(y);
-  }
-  function handleMouseLeave() {
-    mx.set(50);
-    my.set(50);
-  }
 
   const inner = (
     <motion.div
-      ref={cardRef}
-      className="relative overflow-hidden rounded-2xl h-full flex flex-col cursor-pointer select-none"
+      className="relative rounded-2xl h-full flex flex-col cursor-pointer select-none overflow-hidden"
       style={{
-        background: `linear-gradient(145deg, ${color}ee 0%, ${color}99 55%, ${color}cc 100%)`,
-        boxShadow: `0 4px 24px ${color}35, inset 0 1px 0 rgba(255,255,255,0.18)`,
-        border: "1px solid rgba(255,255,255,0.14)",
-        minHeight: 140,
+        background: "rgba(8,12,30,0.80)",
+        border: `1px solid ${color}28`,
+        boxShadow: `0 2px 12px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)`,
+        minHeight: 128,
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
       }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
       whileHover={{
-        y: -6,
-        scale: 1.03,
-        boxShadow: `0 14px 40px ${color}55, inset 0 1px 0 rgba(255,255,255,0.25)`,
+        y: -5,
+        scale: 1.02,
+        border: `1px solid ${color}55`,
+        boxShadow: `0 8px 28px rgba(0,0,0,0.5), 0 0 18px ${color}18, inset 0 1px 0 rgba(255,255,255,0.10)`,
         transition: { type: "spring", stiffness: 300, damping: 22 },
       }}
     >
-      {/* Animated radial glow that follows cursor */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none rounded-2xl"
-        style={{
-          background: `radial-gradient(circle at ${springX}% ${springY}%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 40%, transparent 70%)`,
-        }}
-      />
-
-      {/* Glass shine — top-left sheen */}
-      <div className="absolute inset-0 pointer-events-none rounded-2xl"
-        style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.14) 0%, transparent 45%, rgba(0,0,0,0.08) 100%)" }} />
-
-      {/* Subtle grain texture */}
-      <div className="absolute inset-0 pointer-events-none rounded-2xl"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E")`,
-          opacity: 0.04, mixBlendMode: "overlay",
-        }}
-      />
+      {/* Subtle top glow line matching subject color */}
+      <div className="absolute top-0 left-4 right-4 h-px" style={{ background: `linear-gradient(90deg, transparent, ${color}50, transparent)` }} />
 
       <div className="relative z-10 p-4 flex flex-col flex-1">
         {/* Icon */}
-        <div className="mb-3 mt-1">
-          <SubjectIcon id={s.id} size={38} light
-            style={{ background: "rgba(255,255,255,0.22)", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }} />
+        <div className="mb-3 mt-0.5">
+          <SubjectIcon id={s.id} size={36}
+            style={{ background: `${color}18`, border: `1px solid ${color}30` }} />
         </div>
 
-        {/* Title */}
-        <div className="font-bold text-sm text-white leading-snug">{s.title}</div>
-        <div className="text-xs mt-0.5 leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>{s.desc}</div>
+        {/* Title + desc */}
+        <div className="font-semibold text-sm leading-snug" style={{ color: "rgba(255,255,255,0.88)" }}>{s.title}</div>
+        <div className="text-[11px] mt-0.5 leading-relaxed" style={{ color: "rgba(255,255,255,0.38)" }}>{s.desc}</div>
 
-        {/* Hover arrow */}
-        <motion.div
-          className="mt-auto pt-2 flex items-center gap-1 text-[11px] font-semibold"
-          style={{ color: "rgba(255,255,255,0.0)" }}
-          whileHover={{ color: "rgba(255,255,255,0.9)" }}
-        >
-          <span style={{ color: "rgba(255,255,255,0.6)" }}>
-            <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              <path d="M2 6h8M6 2l4 4-4 4" />
-            </svg>
-          </span>
-        </motion.div>
+        {/* Arrow (always visible, subtle) */}
+        <div className="mt-auto pt-2.5">
+          <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
+            style={{ color: `${color}60` }}>
+            <path d="M2 6h8M6 2l4 4-4 4" />
+          </svg>
+        </div>
       </div>
     </motion.div>
   );

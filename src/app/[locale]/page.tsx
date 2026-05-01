@@ -4,15 +4,13 @@ import { getTranslations, getLocale, getMessages } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import DemoChat from "@/components/DemoChat";
 import { createClient } from "@/lib/supabase/server";
-import NeuralNetworkCanvas from "@/components/NeuralNetworkCanvas";
-import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
 import SubjectGrid from "@/components/SubjectGrid";
 import DemoScrollButton from "@/components/DemoScrollButton";
 import LandingNav from "@/components/LandingNav";
 import BuyProButton from "@/components/BuyProButton";
 import FadeUp from "@/components/FadeUp";
 import nextDynamic from "next/dynamic";
-const LandingStarsCanvas = nextDynamic(() => import("@/components/LandingStarsCanvas"), { ssr: false });
+const GalaxyCanvas = nextDynamic(() => import("@/components/GalaxyCanvas"), { ssr: false });
 
 export const dynamic = "force-dynamic";
 
@@ -149,15 +147,11 @@ export default async function HomePage() {
 
       {/* ── DARK UNIVERSE: nav gap + hero + stats + features in one seamless block ── */}
       <div className="relative" style={{ background: "#060912", marginTop: "-100px" }}>
-        {/* Star field — spans the entire dark section, reacts to cursor */}
-        <LandingStarsCanvas className="absolute inset-0 w-full h-full z-0" />
+        {/* Galaxy — spans the entire dark section, reacts to cursor */}
+        <GalaxyCanvas className="absolute inset-0 w-full h-full z-0" />
 
       {/* HERO — padding-top compensates for the negative margin (100px covers nav on all devices) */}
       <section className="relative overflow-hidden" style={{ paddingTop: "100px" }}>
-        <div className="absolute inset-0 pointer-events-none z-[1]" aria-hidden>
-          <NeuralNetworkCanvas className="absolute inset-0 w-full h-full" />
-        </div>
-        <SphereBlobScene spheres={SUBTLE_SPHERES} intensity={0.45} />
 
         <div className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-12">
           <div className="grid md:grid-cols-2 gap-12 items-center">

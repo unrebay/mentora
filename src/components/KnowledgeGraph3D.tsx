@@ -339,36 +339,54 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
       // ── Science positions (radius 10.0 = 25% larger sphere) ───────────────────
       const sciPos = fibSph(SUBS.length, 10.0);
 
-      // ── Science nodes ──────────────────────────────────────────────────────────
-      const sciGlows:    THREE.Mesh[] = [];
-      const sciCores:    THREE.Mesh[] = [];
-      const sciGlowOps:  number[]     = []; // base opacity per node
+      // ── Soft glow texture factory (canvas radial gradient, cached) ───────────
+      const glowTexCache = new Map<number, THREE.Texture>();
+      function getGlowTex(hexColor: number): THREE.Texture {
+        if (glowTexCache.has(hexColor)) return glowTexCache.get(hexColor)!;
+        const rr=(hexColor>>16)&0xff, gg=(hexColor>>8)&0xff, bb=hexColor&0xff;
+        const sz=256; const gc=document.createElement("canvas"); gc.width=gc.height=sz;
+        const gctx=gc.getContext("2d")!;
+        const half=sz/2;
+        const grd=gctx.createRadialGradient(half,half,0,half,half,half);
+        grd.addColorStop(0.00,`rgba(${rr},${gg},${bb},1.00)`);
+        grd.addColorStop(0.10,`rgba(${rr},${gg},${bb},0.95)`);
+        grd.addColorStop(0.28,`rgba(${rr},${gg},${bb},0.60)`);
+        grd.addColorStop(0.52,`rgba(${rr},${gg},${bb},0.20)`);
+        grd.addColorStop(0.75,`rgba(${rr},${gg},${bb},0.05)`);
+        grd.addColorStop(1.00,`rgba(${rr},${gg},${bb},0.00)`);
+        gctx.fillStyle=grd; gctx.fillRect(0,0,sz,sz);
+        const tex=new THREE.CanvasTexture(gc); glowTexCache.set(hexColor,tex); return tex;
+      }
+
+      // ── Science nodes — sprite billboards + invisible hit sphere ──────────────
+      const sciGlows:   THREE.Sprite[] = [];
+      const sciCores:   THREE.Mesh[]   = [];
+      const sciGlowOps: number[]       = [];
+      const sciGlowSzs: number[]       = [];
 
       for (let i = 0; i < SUBS.length; i++) {
         const s = SUBS[i]; const pos = sciPos[i];
-        const isActive = activeSet.has(s.id); const isFull = FULL_SUBJECTS.has(s.id);
+        const isActive = activeSet.has(s.id);
         const cHex = isActive ? 0xffa040 : s.hex;
-        // ↑ higher contrast: inactive 0.65→0.82, active 0.95→0.98
-        const cOp  = isActive ? 0.98 : isFull ? 0.90 : 0.82;
-        const glowOp = isActive ? 0.22 : 0.13;
-        sciGlowOps.push(glowOp);
 
-        // Invisible hit sphere (depthWrite:false is critical)
+        // Invisible hit sphere for raycasting (keep this for click detection)
         const hitSph = new THREE.Mesh(new THREE.SphereGeometry(1.0, 6, 5), new THREE.MeshBasicMaterial({ transparent:true, opacity:0, depthWrite:false }));
-        hitSph.position.copy(pos);
-        mainGrp.add(hitSph);
-        sciCores.push(hitSph);
+        hitSph.position.copy(pos); mainGrp.add(hitSph); sciCores.push(hitSph);
 
-        // Visual core (slightly larger: 0.30→0.34)
-        const core = new THREE.Mesh(new THREE.SphereGeometry(0.34, 12, 10), mkMat(cHex, cOp));
-        core.position.copy(pos); mainGrp.add(core);
-        // Glow
-        const glow = new THREE.Mesh(new THREE.SphereGeometry(0.85, 8, 6), mkMat(cHex, glowOp));
-        glow.position.copy(pos); mainGrp.add(glow); sciGlows.push(glow);
-        // Outer halo
-        const halo = new THREE.Mesh(new THREE.SphereGeometry(1.7, 6, 5), mkMat(cHex, isActive ? 0.06 : 0.025));
-        halo.position.copy(pos);
-        mainGrp.add(halo);
+        const tex = getGlowTex(cHex);
+        const mkSp = (sz: number, op: number) => {
+          const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, opacity:op, blending:ADD, depthWrite:false }));
+          sp.scale.set(sz,sz,1); sp.position.copy(pos); mainGrp.add(sp); return sp;
+        };
+        // Tight bright core
+        mkSp(isActive ? 1.4 : 1.0, isActive ? 0.92 : 0.80);
+        // Mid glow (animated)
+        const gsz = isActive ? 4.0 : 3.2;
+        const gop = isActive ? 0.45 : 0.30;
+        const gsp = mkSp(gsz, gop);
+        sciGlows.push(gsp); sciGlowOps.push(gop); sciGlowSzs.push(gsz);
+        // Outer diffuse haze
+        mkSp(isActive ? 9.0 : 7.0, isActive ? 0.10 : 0.07);
       }
 
       // ── Edges ─────────────────────────────────────────────────────────────────
@@ -552,11 +570,12 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         mainGrp.rotation.x = currentRotX; mainGrp.rotation.y = currentRotY;
         bgGrp.rotation.x   = currentRotX*0.10; bgGrp.rotation.y = currentRotY*0.10;
 
-        // Pulse glows
+        // Pulse mid-glow sprites
         for (let i=0;i<sciGlows.length;i++) {
-          const g=sciGlows[i]; const ia=activeSet.has(SUBS[i].id);
-          g.scale.setScalar(1+0.09*Math.sin(t*1.5+i*0.72));
-          (g.material as THREE.MeshBasicMaterial).opacity=sciGlowOps[i]*(0.85+0.15*Math.sin(t*2.1+i));
+          const pulse=1+0.09*Math.sin(t*1.5+i*0.72);
+          const sz=sciGlowSzs[i]*pulse;
+          sciGlows[i].scale.set(sz,sz,1);
+          (sciGlows[i].material as THREE.SpriteMaterial).opacity=sciGlowOps[i]*(0.85+0.15*Math.sin(t*2.1+i));
         }
 
         // Update matrices before raycasting
@@ -585,7 +604,7 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
           renderer.domElement.style.cursor = newHov!==null ? "pointer" : "default";
         }
         for (let i=0;i<sciGlows.length;i++) {
-          if (i===hovRef.current) sciGlows[i].scale.setScalar(1.35);
+          if (i===hovRef.current) sciGlows[i].scale.set(sciGlowSzs[i]*1.35, sciGlowSzs[i]*1.35, 1);
         }
 
         // ── Impulse pulses ──────────────────────────────────────────────────────
