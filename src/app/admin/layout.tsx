@@ -5,7 +5,7 @@ import { getAuthUser, ADMIN_EMAIL } from "@/lib/admin";
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getAuthUser();
   if (!user || user.email !== ADMIN_EMAIL) {
-    redirect("/");
+    redirect("/auth");
   }
   return <>{children}</>;
 }

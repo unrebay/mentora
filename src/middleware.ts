@@ -8,6 +8,32 @@ const handleI18nRouting = createIntlMiddleware(routing);
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // /admin paths: do session refresh but skip i18n routing entirely.
+  // Admin is a static route (app/admin/) — no locale context needed.
+  const isAdminPath = pathname === "/admin" || pathname.startsWith("/admin/");
+  if (isAdminPath) {
+    // Create a mutable response so Supabase can write refreshed tokens to cookies
+    let response = NextResponse.next({ request: { headers: request.headers } });
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => request.cookies.getAll(),
+          setAll: (cs) => {
+            cs.forEach(({ name, value }) => request.cookies.set(name, value));
+            response = NextResponse.next({ request: { headers: request.headers } });
+            cs.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+          },
+        },
+      }
+    );
+    // getUser() will refresh the session if the access token has expired
+    await supabase.auth.getUser();
+    response.headers.set("x-pathname", pathname);
+    return response;
+  }
+
   // Detect internally-rewritten Russian locale paths.
   // next-intl rewrites "/" → "/ru", "/pricing" → "/ru/pricing", etc.
   // Next.js runs middleware AGAIN for these rewritten paths; we must pass through
@@ -92,6 +118,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Exclude: API, _next, static files, admin, auth/callback
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|admin|auth/callback|.*\\..*).*)"],
+  // Exclude: API, _next, static files, auth/callback
+  // Note: /admin is NOT excluded — middleware runs for it to refresh Supabase sessions,
+  // but the admin branch at the top of middleware() handles it and returns early (skipping i18n).
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|auth/callback|.*\\..*).*)"],
 };

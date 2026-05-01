@@ -362,14 +362,14 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
         <button
           onClick={() => setAddOpen(true)}
           className="relative rounded-2xl border-dashed border-2 flex flex-col items-center justify-center p-5 h-full min-h-[160px] gap-2.5 transition-all duration-200 group"
-          style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
+          style={{ background: "var(--bg-card)", borderColor: "var(--border)", boxShadow: "0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)" }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(69,97,232,0.5)";
-            (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 20px rgba(69,97,232,0.08)";
+            (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 20px rgba(69,97,232,0.12), 0 4px 16px rgba(0,0,0,0.06)";
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border)";
-            (e.currentTarget as HTMLButtonElement).style.boxShadow = "none";
+            (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)";
           }}
         >
           <div className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
