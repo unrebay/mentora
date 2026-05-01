@@ -146,7 +146,7 @@ export default async function HomePage() {
       <LandingNav />
 
       {/* ── DARK UNIVERSE: nav gap + hero + stats + features in one seamless block ── */}
-      <div className="relative" style={{ background: "#050a14", marginTop: "-100px" }}>
+      <div className="relative" style={{ background: "#050a14", marginTop: "-100px", paddingBottom: "200px" }}>
         {/* Galaxy — spans the entire dark section, reacts to cursor */}
         <GalaxyCanvas className="absolute inset-0 w-full h-full z-0" />
 
@@ -385,12 +385,12 @@ export default async function HomePage() {
 
       </div>
 
-      {/* Wave: white shape overlaid directly on galaxy, no dark strip */}
-      <div aria-hidden style={{ position: "relative", zIndex: 2, lineHeight: 0, marginBottom: -1 }}>
-        <svg viewBox="0 0 1440 90" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
-          style={{ display: "block", width: "100%", height: 90 }}>
+      {/* Wave: absolutely pinned to bottom, overlaps the gap, white fills below curve */}
+      <div aria-hidden style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 2, lineHeight: 0, pointerEvents: "none" }}>
+        <svg viewBox="0 0 1440 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
+          style={{ display: "block", width: "100%", height: 200 }}>
           <path
-            d="M0,90 C120,20 280,0 480,35 C640,65 800,15 960,40 C1120,65 1300,25 1440,50 L1440,90 Z"
+            d="M0,200 C120,130 280,110 480,150 C640,185 800,120 960,145 C1120,170 1300,120 1440,145 L1440,200 Z"
             fill="var(--bg)"
           />
         </svg>
