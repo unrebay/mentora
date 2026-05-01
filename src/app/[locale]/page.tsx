@@ -153,8 +153,9 @@ export default async function HomePage() {
       {/* HERO — padding-top compensates for the negative margin (100px covers nav on all devices) */}
       <section className="relative overflow-hidden" style={{ paddingTop: "100px" }}>
 
-        <div className="relative z-10 max-w-6xl mx-auto px-6 pt-4 pb-12">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+        {/* ── Hero grid — fills full viewport height ── */}
+        <div className="relative z-10 max-w-6xl mx-auto px-6 w-full" style={{ minHeight: "calc(100vh - 100px)", display: "flex", alignItems: "center" }}>
+          <div className="grid md:grid-cols-2 gap-12 items-center w-full py-10">
             <div>
               <FadeUp delay={0.08}>
               <h1 className="text-[2.6rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[4.6rem] font-black leading-[1.02] mb-4 tracking-tight text-white">
@@ -219,10 +220,11 @@ export default async function HomePage() {
               </FadeUp>
             </FadeUp>
           </div>
+        </div>{/* /hero grid */}
 
-          {/* Floating questions — Russian only */}
-          {locale === "ru" && (
-            <div className="relative z-10 mt-20 max-w-4xl mx-auto px-4">
+        {/* Floating questions — Russian only, below the fold */}
+        {locale === "ru" && (
+          <div className="relative z-10 mt-4 max-w-4xl mx-auto px-4">
               <div className="mb-24 space-y-10">
                 <FadeUp delay={0}><p className="text-xl sm:text-2xl font-semibold text-white w-fit">Подожди, а почему именно 1941-й?</p></FadeUp>
                 <FadeUp delay={0.1} className="ml-auto mr-[8%] w-fit"><p className="text-base sm:text-lg font-medium text-gray-400">Это вообще базово знать или нет?</p></FadeUp>
@@ -273,7 +275,6 @@ export default async function HomePage() {
             </div>
             </FadeUp>
           )}
-        </div>
       </section>
 
       {/* STATS + FEATURES — same dark universe, no separate background */}
