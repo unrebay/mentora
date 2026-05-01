@@ -30,10 +30,25 @@ export async function GET() {
     sb.from("chat_messages").select("*", { count: "exact", head: true }).eq("role", "assistant").gte("created_at", weekAgo),
     sb.from("subscriptions").select("*", { count: "exact", head: true }).eq("status", "active"),
     sb.from("knowledge_chunks").select("*", { count: "exact", head: true }),
-    sb.from("users").select("id, email, plan, created_at, last_active_at, messages_today").order("created_at", { ascending: false }).limit(10),
+    sb.from("users").select("id, email, plan, created_at, last_active_at").order("created_at", { ascending: false }).limit(10),
     sb.from("chat_messages").select("subject").eq("role", "user").gte("created_at", monthAgo),
     sb.from("users").select("*", { count: "exact", head: true }).not("trial_expires_at", "is", null).lt("trial_expires_at", now.toISOString()).eq("plan", "free"),
   ]);
+
+  // Compute actual today's message count per recent user from chat_messages
+  const recentUserIds = (recentUsersRes.data ?? []).map(u => u.id);
+  let todayMsgCounts: Record<string, number> = {};
+  if (recentUserIds.length > 0) {
+    const { data: todayMsgs } = await sb
+      .from("chat_messages")
+      .select("user_id")
+      .in("user_id", recentUserIds)
+      .eq("role", "user")
+      .gte("created_at", todayStart);
+    for (const m of todayMsgs ?? []) {
+      todayMsgCounts[m.user_id] = (todayMsgCounts[m.user_id] ?? 0) + 1;
+    }
+  }
 
   const subjectCounts: Record<string, number> = {};
   for (const msg of subjectMsgsRes.data ?? []) {
@@ -55,7 +70,10 @@ export async function GET() {
     chat: { totalMessages: totalMsgsRes.count ?? 0, messagesToday: msgsTodayRes.count ?? 0, userMessagesWeek: userMsgsWeek, aiResponsesWeek: aiMsgsWeek, aiResponseRate: userMsgsWeek > 0 ? Math.round((aiMsgsWeek / userMsgsWeek) * 100) : 0, topSubjects },
     billing: { activeSubscriptions: activeSubsRes.count ?? 0 },
     knowledge: { chunks: chunksRes.count ?? 0 },
-    recentUsers: recentUsersRes.data ?? [],
+    recentUsers: (recentUsersRes.data ?? []).map(u => ({
+      ...u,
+      messages_today: todayMsgCounts[u.id] ?? 0,
+    })),
     generatedAt: now.toISOString(),
   });
 }

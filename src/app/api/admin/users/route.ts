@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 
   let q = sb
     .from("users")
-    .select("id, email, plan, created_at, last_active_at, messages_today, trial_expires_at, referred_by", { count: "exact" })
+    .select("id, email, plan, created_at, last_active_at, trial_expires_at, referred_by", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
@@ -28,34 +28,31 @@ export async function GET(req: NextRequest) {
   const { data: userData, count, error } = await q;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Fetch total message count per user (user-role only = actual queries sent)
   const userIds = (userData ?? []).map(u => u.id);
-  let msgCounts: Record<string, number> = {};
-  if (userIds.length > 0) {
-    const { data: msgRows } = await sb
-      .from("chat_messages")
-      .select("user_id")
-      .in("user_id", userIds)
-      .eq("role", "user");
-    for (const m of msgRows ?? []) {
-      msgCounts[m.user_id] = (msgCounts[m.user_id] ?? 0) + 1;
-    }
-  }
 
-  // Fetch subject count per user (distinct subjects studied)
-  let subjectCounts: Record<string, number> = {};
+  // Today's midnight in UTC
+  const nowTs = new Date();
+  const todayStart = new Date(nowTs.getFullYear(), nowTs.getMonth(), nowTs.getDate()).toISOString();
+
+  // Parallel: total messages, today's messages, subject count
+  let msgCounts: Record<string, number>       = {};
+  let todayCounts: Record<string, number>     = {};
+  let subjectCounts: Record<string, number>   = {};
+
   if (userIds.length > 0) {
-    const { data: progRows } = await sb
-      .from("user_progress")
-      .select("user_id, subject")
-      .in("user_id", userIds);
-    for (const r of progRows ?? []) {
-      subjectCounts[r.user_id] = (subjectCounts[r.user_id] ?? 0) + 1;
-    }
+    const [allMsgs, todayMsgs, progRows] = await Promise.all([
+      sb.from("chat_messages").select("user_id").in("user_id", userIds).eq("role", "user"),
+      sb.from("chat_messages").select("user_id").in("user_id", userIds).eq("role", "user").gte("created_at", todayStart),
+      sb.from("user_progress").select("user_id, subject").in("user_id", userIds),
+    ]);
+    for (const m of allMsgs.data   ?? []) msgCounts[m.user_id]   = (msgCounts[m.user_id]   ?? 0) + 1;
+    for (const m of todayMsgs.data ?? []) todayCounts[m.user_id] = (todayCounts[m.user_id] ?? 0) + 1;
+    for (const r of progRows.data  ?? []) subjectCounts[r.user_id] = (subjectCounts[r.user_id] ?? 0) + 1;
   }
 
   const users = (userData ?? []).map(u => ({
     ...u,
+    messages_today:  todayCounts[u.id]   ?? 0,
     messages_total:  msgCounts[u.id]     ?? 0,
     subjects_count:  subjectCounts[u.id] ?? 0,
   }));

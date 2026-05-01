@@ -913,7 +913,7 @@ export default function AdminPanel() {
                     <TD>{u.email}</TD>
                     <TD><Badge plan={u.plan} /></TD>
                     <TD muted>{ago(u.created_at)} назад</TD>
-                    <TD muted>{ago(u.last_active_at)} назад</TD>
+                    <TD muted>{u.last_active_at ? ago(u.last_active_at) + " назад" : "—"}</TD>
                     <TD color={u.messages_today > 0 ? GREEN : MUTED}>{u.messages_today || "—"}</TD>
                   </tr>
                 ))}</tbody>
