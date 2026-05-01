@@ -557,9 +557,27 @@ const ROADMAP_BLOCKS: RBlock[] = [
 // Total tasks for progress calculation
 const ROADMAP_TOTAL = ROADMAP_BLOCKS.reduce((s, b) => s + b.tasks.length, 0);
 
+// Tasks verified as completed — pre-populated on first load
+const ROADMAP_DEFAULTS: string[] = [
+  // Дизайн-унификация — all pages audited and use unified design system
+  "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10",
+  // Системная унификация — SubjectIcon, DashboardNav, Dark/Light mode confirmed
+  "s1", "s2", "s4",
+  // SEO — canonical, meta description, og:image present on all public pages
+  "o4",
+];
+
 function loadRoadmapChecked(): Set<string> {
-  try { return new Set(JSON.parse(localStorage.getItem(ROADMAP_STORAGE_KEY) ?? "[]") as string[]); }
-  catch { return new Set(); }
+  try {
+    const raw = localStorage.getItem(ROADMAP_STORAGE_KEY);
+    if (raw === null) {
+      // First load — pre-populate with verified-done tasks
+      const defaults = new Set(ROADMAP_DEFAULTS);
+      localStorage.setItem(ROADMAP_STORAGE_KEY, JSON.stringify([...defaults]));
+      return defaults;
+    }
+    return new Set(JSON.parse(raw) as string[]);
+  } catch { return new Set(ROADMAP_DEFAULTS); }
 }
 
 function saveRoadmapChecked(s: Set<string>) {
