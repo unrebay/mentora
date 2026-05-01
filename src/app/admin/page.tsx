@@ -664,6 +664,139 @@ function MilestoneTimeline({ checked }: { checked: Set<string> }) {
   );
 }
 
+// ── Revenue Calculator ─────────────────────────────────────────────────────────
+function RevenueCalculator() {
+  const { CARD, BOR, TEXT, MUTED, isDark } = useTok();
+  const [total, setTotal]   = useState(200);
+  const [pctPro, setPctPro] = useState(75);   // % of paying who chose Pro (rest = Ultima)
+  const [pctAnn, setPctAnn] = useState(30);   // % annual subscriptions
+
+  const PRO_M = 399, PRO_Y = 2990, ULT_M = 799, ULT_Y = 5990;
+
+  const proCount = Math.round(total * pctPro / 100);
+  const ultCount = total - proCount;
+  const proMRR = Math.round(proCount * (PRO_M * (1 - pctAnn/100) + (PRO_Y/12) * (pctAnn/100)));
+  const ultMRR = Math.round(ultCount * (ULT_M * (1 - pctAnn/100) + (ULT_Y/12) * (pctAnn/100)));
+  const mrr    = proMRR + ultMRR;
+  const arr    = mrr * 12;
+  const tax    = Math.round(mrr * 0.06);  // 6% УСН
+  const net    = mrr - tax;
+
+  const milestones = [
+    { n: 50,   label: "Первые 50",  emoji: "🌱", color: "#22c55e" },
+    { n: 100,  label: "100 платящих",emoji: "🔥", color: "#f59e0b" },
+    { n: 250,  label: "PMF",        emoji: "⚡", color: "#60a5fa" },
+    { n: 500,  label: "Серьёзно",   emoji: "💎", color: "#a78bfa" },
+    { n: 1000, label: "1K",         emoji: "🚀", color: "#4561E8" },
+    { n: 2500, label: "2.5K",       emoji: "🏆", color: "#f97316" },
+    { n: 5000, label: "5K 🦄",      emoji: "🦄", color: "#ec4899" },
+  ];
+  const curMilestone = [...milestones].reverse().find(m => total >= m.n);
+
+  const sliderPct = Math.round(total / 5000 * 100);
+
+  const Row = ({ label, val, big, color }: { label: string; val: string; big?: boolean; color?: string }) => (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: `1px solid ${BOR}` }}>
+      <span style={{ fontSize: big ? 14 : 13, color: MUTED }}>{label}</span>
+      <span style={{ fontSize: big ? 18 : 14, fontWeight: big ? 700 : 600, color: color ?? TEXT }}>{val}</span>
+    </div>
+  );
+
+  return (
+    <Card ch={
+      <div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+          <span style={{ fontSize: 20 }}>💰</span>
+          <div>
+            <p style={{ fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>Калькулятор дохода</p>
+            <p style={{ fontSize: 12, color: MUTED, margin: 0 }}>Оценка при разном кол-ве платящих подписчиков</p>
+          </div>
+          {curMilestone && (
+            <div style={{ marginLeft: "auto", padding: "4px 12px", borderRadius: 99, background: curMilestone.color + "1a", border: `1px solid ${curMilestone.color}30`, fontSize: 12, fontWeight: 700, color: curMilestone.color }}>
+              {curMilestone.emoji} {curMilestone.label}
+            </div>
+          )}
+        </div>
+
+        {/* Main slider */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+            <span style={{ fontSize: 13, color: MUTED }}>Платящих подписчиков</span>
+            <span style={{ fontSize: 22, fontWeight: 800, color: TEXT }}>{total.toLocaleString("ru-RU")}</span>
+          </div>
+          <div style={{ position: "relative" }}>
+            <input
+              type="range" min={0} max={5000} step={10} value={total}
+              onChange={e => setTotal(Number(e.target.value))}
+              style={{ width: "100%", height: 6, appearance: "none", WebkitAppearance: "none", cursor: "pointer",
+                background: `linear-gradient(to right, #4561E8 ${sliderPct}%, ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"} ${sliderPct}%)`,
+                borderRadius: 99, outline: "none", border: "none" }}
+            />
+            {/* Milestone markers */}
+            <div style={{ position: "relative", marginTop: 6 }}>
+              {milestones.map(m => {
+                const pct = m.n / 5000 * 100;
+                const reached = total >= m.n;
+                return (
+                  <div key={m.n} style={{ position: "absolute", left: `${pct}%`, transform: "translateX(-50%)", textAlign: "center" }}>
+                    <div style={{ width: 4, height: 4, borderRadius: "50%", background: reached ? m.color : (isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)"), margin: "0 auto 2px" }} />
+                    <span style={{ fontSize: 9, color: reached ? m.color : MUTED, whiteSpace: "nowrap", fontWeight: reached ? 700 : 400 }}>{m.n >= 1000 ? m.n/1000 + "K" : m.n}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Secondary sliders */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+              <span style={{ fontSize: 12, color: MUTED }}>Pro / Ultima</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: TEXT }}>{pctPro}% / {100-pctPro}%</span>
+            </div>
+            <input type="range" min={0} max={100} step={5} value={pctPro} onChange={e => setPctPro(Number(e.target.value))}
+              style={{ width: "100%", height: 4, appearance: "none", WebkitAppearance: "none", cursor: "pointer",
+                background: `linear-gradient(to right, #60a5fa ${pctPro}%, ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"} ${pctPro}%)`,
+                borderRadius: 99, outline: "none", border: "none" }} />
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+              <span style={{ fontSize: 10, color: "#60a5fa" }}>Pro ({proCount})</span>
+              <span style={{ fontSize: 10, color: "#a78bfa" }}>Ultima ({ultCount})</span>
+            </div>
+          </div>
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+              <span style={{ fontSize: 12, color: MUTED }}>Годовых</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: TEXT }}>{pctAnn}%</span>
+            </div>
+            <input type="range" min={0} max={80} step={5} value={pctAnn} onChange={e => setPctAnn(Number(e.target.value))}
+              style={{ width: "100%", height: 4, appearance: "none", WebkitAppearance: "none", cursor: "pointer",
+                background: `linear-gradient(to right, #22c55e ${pctAnn/0.8}%, ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"} ${pctAnn/0.8}%)`,
+                borderRadius: 99, outline: "none", border: "none" }} />
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+              <span style={{ fontSize: 10, color: MUTED }}>Мес.</span>
+              <span style={{ fontSize: 10, color: "#22c55e" }}>Год (скидка)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Results */}
+        <div>
+          <Row label="Pro MRR"    val={`≈ ${proMRR.toLocaleString("ru-RU")} ₽`} color="#60a5fa" />
+          <Row label="Ultima MRR" val={`≈ ${ultMRR.toLocaleString("ru-RU")} ₽`} color="#a78bfa" />
+          <Row label="МRR итого"  val={`≈ ${mrr.toLocaleString("ru-RU")} ₽`} big color="#4561E8" />
+          <Row label="ARR (×12)"  val={`≈ ${arr.toLocaleString("ru-RU")} ₽`} color="#4561E8" />
+          <Row label="Налог 6% УСН" val={`−${tax.toLocaleString("ru-RU")} ₽`} color="#ef4444" />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 12, marginTop: 4 }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: MUTED }}>Чистыми / мес</span>
+            <span style={{ fontSize: 28, fontWeight: 900, color: "#22c55e" }}>{net.toLocaleString("ru-RU")} ₽</span>
+          </div>
+        </div>
+      </div>
+    } />
+  );
+}
+
 // ── RoadmapTab ─────────────────────────────────────────────────────────────────
 function RoadmapTab({ checked, onToggle, onClear }: { checked: Set<string>; onToggle(id: string): void; onClear(): void }) {
   const { CARD, BOR, TEXT, MUTED } = useTok();
@@ -739,6 +872,11 @@ function RoadmapTab({ checked, onToggle, onClear }: { checked: Set<string>; onTo
           <p style={{ fontSize: 12, color: MUTED, margin: 0 }}>1 июня — старт. Поехали 🚀</p>
         </div>
       )}
+
+      {/* Revenue Calculator */}
+      <div style={{ marginTop: 24 }}>
+        <RevenueCalculator />
+      </div>
     </div>
   );
 }
