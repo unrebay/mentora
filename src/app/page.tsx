@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import NeuralNetworkCanvas from "@/components/NeuralNetworkCanvas";
 import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
 import SubjectGrid from "@/components/SubjectGrid";
+import SubjectCarousel from "@/components/SubjectCarousel";
 import { LATEST } from "@/lib/changelog";
 import DemoScrollButton from "@/components/DemoScrollButton";
 import LandingNav from "@/components/LandingNav";
@@ -376,19 +377,21 @@ export default async function HomePage() {
         </a>
       </section>
 
-      <section id="subjects" className="max-w-6xl mx-auto px-6 py-16">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-px flex-1 bg-[var(--border)]" />
-          <span className="text-xs font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase">Библиотека знаний</span>
-          <div className="h-px flex-1 bg-[var(--border)]" />
+      <section id="subjects" className="py-16 overflow-hidden">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-px flex-1 bg-[var(--border)]" />
+            <span className="text-xs font-bold text-[var(--text-muted)] tracking-[0.2em] uppercase">Библиотека знаний</span>
+            <div className="h-px flex-1 bg-[var(--border)]" />
+          </div>
+          <h2 className="text-4xl md:text-5xl font-black mb-3 leading-tight text-center">
+            Выбери предмет
+          </h2>
+          <p className="text-center text-[var(--text-muted)] text-base mb-10">
+            17 предметов · от школьной программы до университета и жизни
+          </p>
         </div>
-        <h2 className="text-4xl md:text-5xl font-black mb-3 leading-tight text-center">
-          Выбери предмет
-        </h2>
-        <p className="text-center text-[var(--text-muted)] text-base mb-10">
-          13 предметов · от школьной программы до университета
-        </p>
-        <SubjectGrid subjects={SUBJECTS} />
+        <SubjectCarousel subjects={SUBJECTS} />
       </section>
 
       {/* HOW TO LEARN */}
