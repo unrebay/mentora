@@ -759,47 +759,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <FadeUp>
-        <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">{t("landing.testimonialsLabel")}</div>
-        <h2 className="text-4xl font-bold mb-3 leading-tight">{t("landing.testimonialsTitle")}</h2>
-        <p className="text-[var(--text-secondary)] mb-10 text-lg">{t("landing.testimonialsSub")}</p>
-        </FadeUp>
-        <div className="grid md:grid-cols-3 gap-6">
-          {TESTIMONIALS.map((testimonial, i) => {
-            const accentColors = ["#4561E8", "#FF7A00", "#10B981"];
-            const accent = accentColors[i % accentColors.length];
-            return (
-              <FadeUp key={testimonial.name} delay={i * 0.1} className="h-full">
-              <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col gap-4 relative overflow-hidden h-full">
-                <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style={{ background: accent }} />
-                <div className="text-5xl leading-none font-black select-none -mt-1 -mb-2" style={{ color: accent, opacity: 0.2 }}>&quot;</div>
-                <div className="flex gap-0.5">
-                  {Array.from({ length: testimonial.stars }).map((_, j) => (
-                    <span key={j} className="text-amber-400 text-sm">★</span>
-                  ))}
-                  {Array.from({ length: 5 - testimonial.stars }).map((_, j) => (
-                    <span key={`e-${j}`} className="text-gray-300 dark:text-gray-700 text-sm">★</span>
-                  ))}
-                </div>
-                <p className="text-[var(--text-secondary)] text-sm leading-relaxed flex-1">{testimonial.text}</p>
-                <div className="text-xs font-semibold px-2 py-1 rounded-md w-fit" style={{ background: `${accent}15`, color: accent }}>{testimonial.xp}</div>
-                <div className="flex items-center gap-3 pt-2 border-t border-[var(--border-light)]">
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${testimonial.avatarBg}`}>
-                    {testimonial.avatar}
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-[var(--text)]">{testimonial.name}</div>
-                    <div className="text-xs text-[var(--text-muted)]">{testimonial.role}</div>
-                  </div>
-                </div>
-              </div>
-              </FadeUp>
-            );
-          })}
-        </div>
-      </section>
 
       {/* ── MISSION / VISION ─────────────────────────────────────── */}
       <section className="relative px-6 py-28 overflow-hidden" style={{ background: "var(--bg)" }}>
