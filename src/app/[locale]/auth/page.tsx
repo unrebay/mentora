@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Logo from "@/components/Logo";
-import SubjectIcon from "@/components/SubjectIcon";
 import posthog from "posthog-js";
 
 // ── Type augmentation ────────────────────────────────────────────────────────
@@ -570,12 +569,6 @@ function AuthPageContent() {
               {t("leftSubtitle")}
             </p>
 
-            {/* Subject icons row */}
-            <div className="flex items-center gap-3 mb-4 flex-wrap">
-              {["russian-history","mathematics","physics","chemistry","biology","english","astronomy"].map(id => (
-                <SubjectIcon key={id} id={id} size={32} style={{ opacity: 0.60 }} />
-              ))}
-            </div>
             <div className="flex items-center gap-4 text-xs" style={{ color: "rgba(255,255,255,0.28)" }}>
               <span>{t("leftStats1")}</span>
               <span style={{ color: "rgba(255,255,255,0.12)" }}>·</span>
