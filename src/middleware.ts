@@ -29,7 +29,18 @@ export async function middleware(request: NextRequest) {
       }
     );
     // getUser() will refresh the session if the access token has expired
-    await supabase.auth.getUser();
+    const { data: { user: adminUser } } = await supabase.auth.getUser();
+
+    // Hard guard: only the admin email may reach /admin/*. Everyone else → /dashboard.
+    const ADMIN_EMAIL = "unrebay@gmail.com";
+    if (!adminUser || adminUser.email !== ADMIN_EMAIL) {
+      const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL ?? "").replace(/\/$/, "");
+      const forwardedHost = request.headers.get("x-forwarded-host");
+      const proto = request.headers.get("x-forwarded-proto") ?? "https";
+      const origin = baseUrl || (forwardedHost ? `${proto}://${forwardedHost}` : new URL(request.url).origin);
+      return NextResponse.redirect(new URL("/dashboard", origin));
+    }
+
     response.headers.set("x-pathname", pathname);
     return response;
   }
