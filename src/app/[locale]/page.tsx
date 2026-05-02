@@ -779,18 +779,51 @@ export default async function HomePage() {
           </p>
           </FadeUp>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
-            {STEP_NUMS.map((n, i) => (
-              <FadeUp key={n} delay={i * 0.07} className="h-full">
-              <div className="bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border)] relative h-full">
-                {i === STEP_BADGE_IDX && (
-                  <span className="absolute top-3 right-3 text-[9px] font-bold bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 px-1.5 py-0.5 rounded">{t("landing.stepBadge")}</span>
-                )}
-                <div className="text-xs font-bold text-[var(--text-muted)] mb-3">{n}</div>
-                <div className="font-semibold text-sm mb-1.5 text-[var(--text)]">{t(`steps.${n}.title`)}</div>
-                <div className="text-xs text-[var(--text-secondary)] leading-relaxed">{t(`steps.${n}.desc`)}</div>
-              </div>
-              </FadeUp>
-            ))}
+            {STEP_NUMS.map((n, i) => {
+              const stepColor = ["#4561E8", "#6B8FFF", "#9F7AFF", "#EC4899", "#FF7A00"][i] ?? "#4561E8";
+              return (
+                <FadeUp key={n} delay={i * 0.07} className="h-full">
+                <div className="group relative rounded-2xl p-6 border h-full transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+                  style={{
+                    background: "var(--bg-card)",
+                    borderColor: "var(--border)",
+                    borderLeft: `2.5px solid ${stepColor}`,
+                    boxShadow: `0 4px 20px rgba(0,0,0,0.04)`,
+                  }}>
+                  {/* Color spotlight — top-right, intensifies on hover */}
+                  <div aria-hidden className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none transition-opacity duration-500 opacity-40 group-hover:opacity-95"
+                    style={{ background: `radial-gradient(circle, ${stepColor}26 0%, transparent 65%)` }} />
+
+                  {/* Number + optional badge row */}
+                  <div className="relative z-10 mb-4 flex items-start justify-between gap-2">
+                    <div className="text-3xl font-black tracking-tight leading-none"
+                      style={{
+                        background: `linear-gradient(135deg, ${stepColor}, ${stepColor}AA)`,
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                      }}>
+                      {n}
+                    </div>
+                    {i === STEP_BADGE_IDX && (
+                      <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wider uppercase"
+                        style={{
+                          background: `linear-gradient(135deg, ${stepColor}26, ${stepColor}0D)`,
+                          color: stepColor,
+                          border: `1px solid ${stepColor}40`,
+                          boxShadow: `0 2px 8px ${stepColor}1A`,
+                        }}>
+                        {t("landing.stepBadge")}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="relative z-10 font-semibold text-base mb-2 text-[var(--text)]">{t(`steps.${n}.title`)}</div>
+                  <div className="relative z-10 text-[13px] text-[var(--text-secondary)] leading-relaxed">{t(`steps.${n}.desc`)}</div>
+                </div>
+                </FadeUp>
+              );
+            })}
           </div>
         </div>
       </section>
