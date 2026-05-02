@@ -701,20 +701,22 @@ function MilestoneTimeline({ checked }: { checked: Set<string> }) {
 const MAX_USERS = 1_000_000;
 function RevenueCalculator() {
   const { CARD, BOR, TEXT, MUTED, isDark } = useTok();
-  const [total, setTotal]   = useState(200);
-  const [pctPro, setPctPro] = useState(75);
-  const [pctAnn, setPctAnn] = useState(30);
+  const [total, setTotal]     = useState(200);
+  const [pctPro, setPctPro]   = useState(75);
+  const [pctAnn, setPctAnn]   = useState(30);
+  const [convRate, setConvRate] = useState(5); // % conversion: paying / total users
 
   const PRO_M = 399, PRO_Y = 2990, ULT_M = 799, ULT_Y = 5990;
 
-  const proCount = Math.round(total * pctPro / 100);
-  const ultCount = total - proCount;
-  const proMRR = Math.round(proCount * (PRO_M * (1 - pctAnn/100) + (PRO_Y/12) * (pctAnn/100)));
-  const ultMRR = Math.round(ultCount * (ULT_M * (1 - pctAnn/100) + (ULT_Y/12) * (pctAnn/100)));
-  const mrr    = proMRR + ultMRR;
-  const arr    = mrr * 12;
-  const tax    = Math.round(mrr * 0.06);
-  const net    = mrr - tax;
+  const proCount    = Math.round(total * pctPro / 100);
+  const ultCount    = total - proCount;
+  const proMRR      = Math.round(proCount * (PRO_M * (1 - pctAnn/100) + (PRO_Y/12) * (pctAnn/100)));
+  const ultMRR      = Math.round(ultCount * (ULT_M * (1 - pctAnn/100) + (ULT_Y/12) * (pctAnn/100)));
+  const mrr         = proMRR + ultMRR;
+  const arr         = mrr * 12;
+  const tax         = Math.round(mrr * 0.06);
+  const net         = mrr - tax;
+  const totalNeeded = convRate > 0 ? Math.round(total / (convRate / 100)) : 0;
 
   // Logarithmic scale: slider 0..1000 → actual 0..1_000_000
   const [sliderVal, setSliderVal] = useState(32); // log-approx for 200
@@ -795,7 +797,7 @@ function RevenueCalculator() {
         </div>
 
         {/* Secondary sliders */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
               <span style={{ fontSize: 12, color: MUTED }}>Pro / Ultima</span>
@@ -826,6 +828,22 @@ function RevenueCalculator() {
           </div>
         </div>
 
+        {/* Conversion rate slider */}
+        <div style={{ marginBottom: 24, padding: "14px 16px", borderRadius: 12, background: isDark ? "rgba(251,191,36,0.06)" : "rgba(251,191,36,0.08)", border: `1px solid rgba(251,191,36,0.18)` }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+            <span style={{ fontSize: 12, color: MUTED }}>% конверсии (платящих / всего)</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#fbbf24" }}>{convRate}%</span>
+          </div>
+          <input type="range" min={1} max={30} step={1} value={convRate} onChange={e => setConvRate(Number(e.target.value))}
+            style={{ width: "100%", height: 4, appearance: "none", WebkitAppearance: "none", cursor: "pointer",
+              background: `linear-gradient(to right, #fbbf24 ${convRate/30*100}%, ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"} ${convRate/30*100}%)`,
+              borderRadius: 99, outline: "none", border: "none" }} />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10 }}>
+            <span style={{ fontSize: 12, color: MUTED }}>Нужно всего пользователей:</span>
+            <span style={{ fontSize: 18, fontWeight: 800, color: "#fbbf24" }}>{totalNeeded.toLocaleString("ru-RU")}</span>
+          </div>
+        </div>
+
         {/* Results */}
         <div>
           <Row label="Pro MRR"    val={`≈ ${proMRR.toLocaleString("ru-RU")} ₽`} color="#60a5fa" />
@@ -841,6 +859,17 @@ function RevenueCalculator() {
       </div>
     } />
   );
+}
+
+// ── Conversion history ────────────────────────────────────────────────────────
+const CONV_HIST_KEY = "mentora_admin_conv_history_v1";
+interface ConvSnapshot { date: string; rate: number }
+function loadConvHistory(): ConvSnapshot[] {
+  try { return JSON.parse(localStorage.getItem(CONV_HIST_KEY) ?? "[]"); }
+  catch { return []; }
+}
+function saveConvHistory(arr: ConvSnapshot[]) {
+  localStorage.setItem(CONV_HIST_KEY, JSON.stringify(arr.slice(-90)));
 }
 
 // ── RoadmapTab ─────────────────────────────────────────────────────────────────
@@ -1084,6 +1113,17 @@ export default function AdminPanel() {
 
   useEffect(() => { reload(); }, [reload]);
 
+  // Record conversion rate snapshot to localStorage (one per day)
+  useEffect(() => {
+    if (!stats || stats.users.total === 0) return;
+    const rate = parseFloat(((stats.users.pro + stats.users.ultima) / stats.users.total * 100).toFixed(2));
+    const today = new Date().toISOString().split("T")[0];
+    const hist = loadConvHistory();
+    if (hist.length === 0 || hist[hist.length - 1].date !== today) {
+      saveConvHistory([...hist, { date: today, rate }]);
+    }
+  }, [stats]);
+
   // Revenue calc (70% monthly / 30% yearly assumed)
   const pro = stats?.users.pro ?? 0, ult = stats?.users.ultima ?? 0;
   const mrrPro  = Math.round(pro * (PRO_M * 0.7 + (PRO_Y / 12) * 0.3));
@@ -1204,6 +1244,75 @@ export default function AdminPanel() {
                 })}
               </>} />
             </div>
+
+            {/* Conversion rate history card */}
+            {(() => {
+              const convHist = loadConvHistory();
+              const currentRate = stats.users.total > 0
+                ? parseFloat(((stats.users.pro + stats.users.ultima) / stats.users.total * 100).toFixed(2))
+                : 0;
+              const W = 400, H = 56, PAD = 8;
+              const rates = convHist.map(s => s.rate);
+              const minR  = rates.length > 1 ? Math.min(...rates) : 0;
+              const maxR  = rates.length > 1 ? Math.max(...rates) : Math.max(currentRate, 1);
+              const range = maxR - minR || 1;
+              const toX = (i: number) => rates.length < 2 ? W/2 : PAD + (i / (rates.length - 1)) * (W - PAD*2);
+              const toY = (r: number) => H - PAD - ((r - minR) / range) * (H - PAD*2);
+              const pts  = rates.map((r, i) => `${toX(i)},${toY(r)}`).join(" ");
+              const area = rates.length > 1
+                ? `M${toX(0)},${H} ` + rates.map((r, i) => `L${toX(i)},${toY(r)}`).join(" ") + ` L${toX(rates.length-1)},${H} Z`
+                : "";
+              return (
+                <Card ch={<>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                    <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", margin: 0 }}>Конверсия в платящих</p>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ fontSize: 11, color: MUTED }}>{convHist.length} дней в истории</span>
+                      <div style={{ padding: "3px 10px", borderRadius: 99, background: currentRate >= 5 ? "#22c55e20" : currentRate >= 2 ? "#f59e0b20" : "#ef444420", border: `1px solid ${currentRate >= 5 ? "#22c55e40" : currentRate >= 2 ? "#f59e0b40" : "#ef444440"}` }}>
+                        <span style={{ fontSize: 16, fontWeight: 800, color: currentRate >= 5 ? GREEN : currentRate >= 2 ? AMBER : RED }}>{currentRate.toFixed(2)}%</span>
+                      </div>
+                    </div>
+                  </div>
+                  {convHist.length >= 2 ? (
+                    <div style={{ position: "relative" }}>
+                      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: 56 }}>
+                        <defs>
+                          <linearGradient id="convGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={BRAND} stopOpacity="0.25" />
+                            <stop offset="100%" stopColor={BRAND} stopOpacity="0.02" />
+                          </linearGradient>
+                        </defs>
+                        {area && <path d={area} fill="url(#convGrad)" />}
+                        {rates.length > 1 && <polyline points={pts} fill="none" stroke={BRAND} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />}
+                        {/* Latest dot */}
+                        {rates.length > 0 && <circle cx={toX(rates.length-1)} cy={toY(rates[rates.length-1])} r="4" fill={BRAND} />}
+                      </svg>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+                        <span style={{ fontSize: 10, color: MUTED }}>{convHist[0]?.date}</span>
+                        <span style={{ fontSize: 10, color: MUTED }}>сегодня</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 56, color: MUTED, fontSize: 12 }}>
+                      {convHist.length === 0 ? "Первый снимок записан — приходи завтра за графиком" : "Нужно минимум 2 дня данных для графика"}
+                    </div>
+                  )}
+                  <div style={{ display: "flex", gap: 16, marginTop: 12, paddingTop: 12, borderTop: `1px solid ${BOR}` }}>
+                    {[
+                      ["Платящих всего", stats.users.pro + stats.users.ultima],
+                      ["Pro", stats.users.pro],
+                      ["Ultima", stats.users.ultima],
+                      ["Всего юзеров", stats.users.total],
+                    ].map(([l, v]) => (
+                      <div key={l as string} style={{ flex: 1, textAlign: "center" }}>
+                        <p style={{ fontSize: 18, fontWeight: 700, color: TEXT, margin: 0 }}>{v}</p>
+                        <p style={{ fontSize: 10, color: MUTED, marginTop: 2 }}>{l}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>} style={{ marginBottom: 16 }} />
+              );
+            })()}
 
             <Card ch={<>
               <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Последние регистрации</p>
