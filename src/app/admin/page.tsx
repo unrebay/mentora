@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, createContext, useContext, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -1364,6 +1365,7 @@ export default function AdminPanel() {
   const isDark = theme === "dark";
   const tok = isDark ? darkTok : lightTok;
   const { BG, SIDE, CARD, BOR, TEXT, MUTED } = tok;
+  const router = useRouter();
 
   const [tab, setTab]         = useState<Tab>("overview");
   const [stats, setStats]     = useState<Stats | null>(null);
@@ -1390,9 +1392,12 @@ export default function AdminPanel() {
 
   const reload = useCallback(async () => {
     setLoading(true);
-    try { const r = await fetch("/api/admin/stats"); if (r.ok) setStats(await r.json()); }
-    finally { setLoading(false); }
-  }, []);
+    try {
+      const r = await fetch("/api/admin/stats");
+      if (r.status === 401 || r.status === 403) { router.replace("/dashboard"); return; }
+      if (r.ok) setStats(await r.json());
+    } finally { setLoading(false); }
+  }, [router]);
 
   useEffect(() => { reload(); }, [reload]);
 
