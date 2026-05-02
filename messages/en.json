@@ -880,6 +880,14 @@
       "russian-language": {
         "label": "Russian Language",
         "desc": "Spelling, punctuation, exam prep"
+      },
+      "biology": {
+        "label": "Biology",
+        "desc": "Cells, genes, evolution, ecology"
+      },
+      "discovery": {
+        "label": "Discovery",
+        "desc": "Any question — science & the world"
       }
     }
   },

@@ -48,7 +48,7 @@ const STEP_FIELDS = [
   { step: 1, field: "style",         values: ["storytelling", "facts", "practice"] },
   { step: 2, field: "level",         values: ["school", "student", "adult", "expert"] },
   { step: 3, field: "goal",          values: ["exam", "general", "professional", "curiosity"] },
-  { step: 4, field: "first_subject", values: ["russian-history", "world-history", "mathematics", "physics", "english", "russian-language"] },
+  { step: 4, field: "first_subject", values: ["russian-history", "world-history", "mathematics", "physics", "english", "russian-language", "biology", "discovery"] },
 ];
 
 export default function OnboardingPage() {
