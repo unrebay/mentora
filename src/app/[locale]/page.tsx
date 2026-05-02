@@ -551,7 +551,7 @@ export default async function HomePage() {
           return (
             <div className="grid md:grid-cols-3 gap-6 md:gap-4 items-stretch">
               {/* FREE */}
-              <FadeUp delay={0}>
+              <FadeUp delay={0} className="h-full">
               <div className="rounded-2xl p-7 flex flex-col border h-full"
                 style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
                 <div className="mb-6">
@@ -574,8 +574,8 @@ export default async function HomePage() {
               </FadeUp>
 
               {/* PRO */}
-              <FadeUp delay={0.12}>
-              <div className="relative rounded-[17px] p-[1.5px] flex flex-col mt-3 md:mt-0"
+              <FadeUp delay={0.12} className="h-full">
+              <div className="relative rounded-[17px] p-[1.5px] flex flex-col mt-3 md:mt-0 h-full"
                 style={{ background: "linear-gradient(145deg, #6B8FFF, #4561E8 45%, #9F7AFF)", boxShadow: "0 8px 40px rgba(69,97,232,0.25), 0 2px 8px rgba(69,97,232,0.15)" }}>
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
                   <span className="text-white text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase"
@@ -613,8 +613,8 @@ export default async function HomePage() {
               </FadeUp>
 
               {/* ULTRA */}
-              <FadeUp delay={0.24}>
-              <div className="relative flex flex-col mt-3 md:mt-0">
+              <FadeUp delay={0.24} className="h-full">
+              <div className="relative flex flex-col mt-3 md:mt-0 h-full">
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap">
                   <span className="text-white text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase"
                     style={{ background: "linear-gradient(135deg, #FF7A00, #7C3AED)", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 2px 16px rgba(255,122,0,0.4)" }}>
