@@ -762,7 +762,7 @@ export default async function HomePage() {
       )}
 
       {/* HOW IT WORKS */}
-      <section id="how" className="px-6 py-20" style={{ background: "var(--bg-secondary)" }}>
+      <section id="how" className="px-6 py-20" style={{ background: "var(--bg)" }}>
         <div className="max-w-6xl mx-auto">
           <FadeUp>
           <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">{t("landing.howLabel")}</div>
