@@ -683,7 +683,7 @@
   "demo": {
     "initialMessage": "Hi! I'm Mentora — your personal AI tutor for history. Ask me about any era, person, or event — I'll explain it in a way you won't forget.",
     "botTitle": "Mentora · personal AI mentor",
-    "onlineLabel": "● online now",
+    "onlineLabel": "online now",
     "historyBadge": "📜 History",
     "placeholder": "Ask Mentora about any era...",
     "userAvatar": "Me",
