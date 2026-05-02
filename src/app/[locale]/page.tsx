@@ -252,7 +252,11 @@ export default async function HomePage() {
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
                 }}>
-                  {locale === "ru" ? "до взрослого на арктической станции, изучающего новый язык." : "to an adult at an Arctic station learning a new language."}
+                  {locale === "ru" ? (
+                    <>до взрослого на арктической станции,<br />изучающего новый язык.</>
+                  ) : (
+                    <>to an adult at an Arctic station<br />learning a new language.</>
+                  )}
                 </p>
                 <p className="text-base text-gray-500 mb-10">
                   {locale === "ru" ? "Знания больше не привилегия." : "Knowledge is no longer a privilege."}
