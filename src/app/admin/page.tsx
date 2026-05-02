@@ -714,9 +714,48 @@ function RevenueCalculator() {
   const ultMRR      = Math.round(ultCount * (ULT_M * (1 - pctAnn/100) + (ULT_Y/12) * (pctAnn/100)));
   const mrr         = proMRR + ultMRR;
   const arr         = mrr * 12;
-  const tax         = Math.round(mrr * 0.06);
-  const net         = mrr - tax;
   const totalNeeded = convRate > 0 ? Math.round(total / (convRate / 100)) : 0;
+
+  // ── Налог по уровням ARR (законодательство РФ) ────────────────────────────
+  // УСН «Доходы» (ИП/ООО на упрощёнке):
+  //   ARR ≤ 150 млн → 6%  (базовая ставка)
+  //   ARR 150–265 млн → 8%  (повышенная; лимит с дефлятором ~265 млн в 2024)
+  //   ARR > 265 млн → утрата права на УСН → ОСНО
+  // ОСНО (Общая система):
+  //   Налог на прибыль 25% (с 2025 г.) от расчётной прибыли.
+  //   Для SaaS при марже ~60% (выручка − API/сервера/зарплаты):
+  //   Эффективная нагрузка ≈ 25% × 60% = 15% от выручки.
+  //   НДС (20%) на B2C цифровые услуги — включён в цену, поэтому
+  //   фактическая выручка после НДС = mrr × 100/120; для упрощения
+  //   показываем только НП и делаем пометку.
+  const USN_BASE_LIMIT  = 150_000_000;   // 150 млн ARR
+  const USN_UPPER_LIMIT = 265_000_000;   // ~265 млн с дефлятором 2024
+  const OSNO_MARGIN     = 0.60;          // предполагаемая маржинальность SaaS
+  const NP_RATE_2025    = 0.25;          // налог на прибыль с 2025 г.
+
+  let taxLabel: string;
+  let taxAmount: number;
+  let taxNote: string;
+  let taxColor: string;
+
+  if (arr <= USN_BASE_LIMIT) {
+    taxLabel  = "УСН Доходы 6%";
+    taxAmount = Math.round(mrr * 0.06);
+    taxNote   = `ARR ${(arr/1e6).toFixed(1)} млн ≤ 150 млн`;
+    taxColor  = "#f97316";
+  } else if (arr <= USN_UPPER_LIMIT) {
+    taxLabel  = "УСН Доходы 8%";
+    taxAmount = Math.round(mrr * 0.08);
+    taxNote   = "повышенная ставка, ARR 150–265 млн";
+    taxColor  = "#ef4444";
+  } else {
+    // ОСНО: НП 25% от расчётной прибыли при марже 60%
+    taxLabel  = "ОСНО НП 25% от прибыли";
+    taxAmount = Math.round(mrr * OSNO_MARGIN * NP_RATE_2025);
+    taxNote   = `оценка при марже ${OSNO_MARGIN * 100}% + НДС 20% в цене`;
+    taxColor  = "#ef4444";
+  }
+  const net = mrr - taxAmount;
 
   // Logarithmic scale: slider 0..1000 → actual 0..1_000_000
   const [sliderVal, setSliderVal] = useState(32); // log-approx for 200
@@ -850,10 +889,34 @@ function RevenueCalculator() {
           <Row label="Ultima MRR" val={`≈ ${ultMRR.toLocaleString("ru-RU")} ₽`} color="#a78bfa" />
           <Row label="МRR итого"  val={`≈ ${mrr.toLocaleString("ru-RU")} ₽`} big color="#4561E8" />
           <Row label="ARR (×12)"  val={`≈ ${arr.toLocaleString("ru-RU")} ₽`} color="#4561E8" />
-          <Row label="Налог 6% УСН" val={`−${tax.toLocaleString("ru-RU")} ₽`} color="#ef4444" />
+          {/* Tax row — dynamic regime */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: `1px solid ${BOR}` }}>
+            <div>
+              <span style={{ fontSize: 13, color: MUTED }}>{taxLabel}</span>
+              {taxNote && <p style={{ fontSize: 10, color: MUTED, margin: "2px 0 0", opacity: 0.65 }}>{taxNote}</p>}
+            </div>
+            <span style={{ fontSize: 14, fontWeight: 600, color: taxColor }}>−{taxAmount.toLocaleString("ru-RU")} ₽</span>
+          </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 12, marginTop: 4 }}>
             <span style={{ fontSize: 14, fontWeight: 600, color: MUTED }}>Чистыми / мес</span>
             <span style={{ fontSize: 28, fontWeight: 900, color: "#22c55e" }}>{net.toLocaleString("ru-RU")} ₽</span>
+          </div>
+        </div>
+
+        {/* Tax regime badge */}
+        <div style={{ marginTop: 14, padding: "8px 12px", borderRadius: 8, background: arr <= USN_BASE_LIMIT ? "rgba(249,115,22,0.07)" : arr <= USN_UPPER_LIMIT ? "rgba(239,68,68,0.07)" : "rgba(239,68,68,0.1)", border: `1px solid ${arr <= USN_BASE_LIMIT ? "rgba(249,115,22,0.2)" : "rgba(239,68,68,0.25)"}`, display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 13 }}>{arr <= USN_UPPER_LIMIT ? "📋" : "⚠️"}</span>
+          <div>
+            <span style={{ fontSize: 11, fontWeight: 600, color: arr <= USN_BASE_LIMIT ? "#f97316" : arr <= USN_UPPER_LIMIT ? "#ef4444" : "#ef4444" }}>
+              {arr <= USN_BASE_LIMIT ? "Режим: УСН" : arr <= USN_UPPER_LIMIT ? "Режим: УСН (переходный)" : "Режим: ОСНО — потеря УСН"}
+            </span>
+            <p style={{ fontSize: 10, color: MUTED, margin: "2px 0 0" }}>
+              {arr <= USN_BASE_LIMIT
+                ? "Базовая ставка 6% до ARR 150 млн ₽/год"
+                : arr <= USN_UPPER_LIMIT
+                ? "Повышенная ставка 8% при ARR 150–265 млн ₽/год"
+                : "ARR > 265 млн → обязателен переход на ОСНО. НП 25% с 2025 г., +НДС 20%."}
+            </p>
           </div>
         </div>
       </div>
