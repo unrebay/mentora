@@ -105,32 +105,53 @@ export default async function GuidePage() {
             const meta = TIP_META[idx];
             return (
               <div key={key}
-                className="relative rounded-2xl border overflow-hidden transition-all duration-200 group"
-                style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.08)", backdropFilter: "blur(12px)" }}
+                className="group relative rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
+                style={{
+                  background: "rgba(6,6,18,0.42)",
+                  backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                  WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                  border: "1px solid rgba(255,255,255,0.09)",
+                  borderLeft: `2.5px solid ${meta.accent}`,
+                  boxShadow: "0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 32px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset",
+                }}
               >
-                {/* Left accent bar */}
-                <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
-                  style={{ background: `linear-gradient(180deg, ${meta.accent}, ${meta.accent}55)` }} />
+                {/* Color spotlight — top-right, intensifies on hover */}
+                <div aria-hidden className="absolute -top-16 -right-16 w-56 h-56 rounded-full pointer-events-none transition-opacity duration-500 opacity-40 group-hover:opacity-95"
+                  style={{ background: `radial-gradient(circle, ${meta.accent}26 0%, transparent 65%)` }} />
 
-                {/* Hover glow */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                  style={{ background: `radial-gradient(ellipse at 0% 50%, ${meta.accent}08 0%, transparent 50%)` }} />
-
-                <div className="flex items-start gap-5 p-6 md:p-7 pl-7 md:pl-8 relative z-10">
-                  {/* Icon badge */}
-                  <div className="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center mt-0.5"
-                    style={{ background: `${meta.accent}15`, color: meta.accent }}>
+                <div className="flex items-start gap-5 p-6 md:p-7 relative z-10">
+                  {/* Icon badge with gradient + colored border */}
+                  <div className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center mt-0.5 transition-transform duration-300 group-hover:scale-105"
+                    style={{
+                      background: `linear-gradient(135deg, ${meta.accent}33, ${meta.accent}0F)`,
+                      border: `1px solid ${meta.accent}40`,
+                      color: meta.accent,
+                      boxShadow: `0 4px 14px ${meta.accent}22, 0 1px 0 rgba(255,255,255,0.08) inset`,
+                    }}>
                     {meta.icon}
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-[10px] font-bold tracking-[0.15em]" style={{ color: meta.accent }}>{meta.n}</span>
+                    <div className="flex items-baseline gap-3 mb-2">
+                      <span className="text-2xl font-black tracking-tight leading-none"
+                        style={{
+                          background: `linear-gradient(135deg, ${meta.accent}, ${meta.accent}AA)`,
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                          backgroundClip: "text",
+                        }}>
+                        {meta.n}
+                      </span>
                       <h2 className="font-bold text-[17px] leading-snug" style={{ color: "rgba(255,255,255,0.92)" }}>{t(`${key}.title`)}</h2>
                     </div>
-                    <p className="leading-relaxed mb-3 text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>{t(`${key}.body`)}</p>
+                    <p className="leading-relaxed mb-3 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>{t(`${key}.body`)}</p>
                     <div className="inline-flex items-start gap-2 px-3 py-2 rounded-xl text-sm italic"
-                      style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.38)", borderLeft: `2px solid ${meta.accent}40` }}>
+                      style={{
+                        background: `linear-gradient(135deg, ${meta.accent}1A, ${meta.accent}08)`,
+                        color: "rgba(255,255,255,0.55)",
+                        borderLeft: `2px solid ${meta.accent}66`,
+                        boxShadow: `0 2px 8px ${meta.accent}14`,
+                      }}>
                       <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke={meta.accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                       {t(`${key}.example`)}
                     </div>
@@ -142,10 +163,14 @@ export default async function GuidePage() {
         </div>
 
         {/* ── Limit note ───────────────────────────────────── */}
-        <div className="rounded-2xl p-6 mb-10 border"
+        <div className="relative rounded-2xl p-6 mb-10 overflow-hidden"
           style={{
-            background: "rgba(245,158,11,0.06)",
-            borderColor: "rgba(245,158,11,0.2)",
+            background: "rgba(245,158,11,0.10)",
+            backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+            WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+            border: "1px solid rgba(245,158,11,0.30)",
+            borderLeft: "2.5px solid #f59e0b",
+            boxShadow: "0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 32px rgba(0,0,0,0.30), 0 1px 0 rgba(255,255,255,0.06) inset",
           }}
         >
           <div className="flex items-start gap-3">
