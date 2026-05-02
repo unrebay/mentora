@@ -498,7 +498,7 @@ function TeamTab() {
 }
 
 // ── Roadmap data ──────────────────────────────────────────────────────────────
-const ROADMAP_STORAGE_KEY = "mentora_admin_roadmap_v1";
+const ROADMAP_STORAGE_KEY = "mentora_admin_roadmap_v3";
 
 interface RTask  { id: string; label: string; tag?: string }
 interface RBlock { id: string; title: string; emoji: string; color: string; tasks: RTask[] }
@@ -685,11 +685,12 @@ function MilestoneTimeline({ checked }: { checked: Set<string> }) {
 }
 
 // ── Revenue Calculator ─────────────────────────────────────────────────────────
+const MAX_USERS = 1_000_000;
 function RevenueCalculator() {
   const { CARD, BOR, TEXT, MUTED, isDark } = useTok();
   const [total, setTotal]   = useState(200);
-  const [pctPro, setPctPro] = useState(75);   // % of paying who chose Pro (rest = Ultima)
-  const [pctAnn, setPctAnn] = useState(30);   // % annual subscriptions
+  const [pctPro, setPctPro] = useState(75);
+  const [pctAnn, setPctAnn] = useState(30);
 
   const PRO_M = 399, PRO_Y = 2990, ULT_M = 799, ULT_Y = 5990;
 
@@ -699,21 +700,35 @@ function RevenueCalculator() {
   const ultMRR = Math.round(ultCount * (ULT_M * (1 - pctAnn/100) + (ULT_Y/12) * (pctAnn/100)));
   const mrr    = proMRR + ultMRR;
   const arr    = mrr * 12;
-  const tax    = Math.round(mrr * 0.06);  // 6% УСН
+  const tax    = Math.round(mrr * 0.06);
   const net    = mrr - tax;
 
+  // Logarithmic scale: slider 0..1000 → actual 0..1_000_000
+  const [sliderVal, setSliderVal] = useState(32); // log-approx for 200
+  const logToUsers = (v: number) => v === 0 ? 0 : Math.round(Math.pow(10, v / 1000 * 6));
+  const usersToLog = (u: number) => u === 0 ? 0 : Math.round(Math.log10(u) / 6 * 1000);
+
+  const handleSlider = (v: number) => {
+    setSliderVal(v);
+    setTotal(logToUsers(v));
+  };
+
   const milestones = [
-    { n: 50,   label: "Первые 50",  emoji: "🌱", color: "#22c55e" },
-    { n: 100,  label: "100 платящих",emoji: "🔥", color: "#f59e0b" },
-    { n: 250,  label: "PMF",        emoji: "⚡", color: "#60a5fa" },
-    { n: 500,  label: "Серьёзно",   emoji: "💎", color: "#a78bfa" },
-    { n: 1000, label: "1K",         emoji: "🚀", color: "#4561E8" },
-    { n: 2500, label: "2.5K",       emoji: "🏆", color: "#f97316" },
-    { n: 5000, label: "5K 🦄",      emoji: "🦄", color: "#ec4899" },
+    { n: 50,      label: "50",    color: "#22c55e" },
+    { n: 100,     label: "100",   color: "#f59e0b" },
+    { n: 500,     label: "500",   color: "#60a5fa" },
+    { n: 1000,    label: "1K",    color: "#4561E8" },
+    { n: 5000,    label: "5K",    color: "#a78bfa" },
+    { n: 10000,   label: "10K",   color: "#f97316" },
+    { n: 50000,   label: "50K",   color: "#ec4899" },
+    { n: 100000,  label: "100K",  color: "#14b8a6" },
+    { n: 500000,  label: "500K",  color: "#8b5cf6" },
+    { n: 1000000, label: "1M 🦄", color: "#fbbf24" },
   ];
   const curMilestone = [...milestones].reverse().find(m => total >= m.n);
+  const sliderPct = sliderVal / 10;
 
-  const sliderPct = Math.round(total / 5000 * 100);
+  const fmt = (n: number) => n >= 1_000_000 ? (n/1_000_000).toFixed(1) + "M" : n >= 1000 ? (n/1000).toFixed(0) + "K" : String(n);
 
   const Row = ({ label, val, big, color }: { label: string; val: string; big?: boolean; color?: string }) => (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: `1px solid ${BOR}` }}>
@@ -732,39 +747,37 @@ function RevenueCalculator() {
             <p style={{ fontSize: 12, color: MUTED, margin: 0 }}>Оценка при разном кол-ве платящих подписчиков</p>
           </div>
           {curMilestone && (
-            <div style={{ marginLeft: "auto", padding: "4px 12px", borderRadius: 99, background: curMilestone.color + "1a", border: `1px solid ${curMilestone.color}30`, fontSize: 12, fontWeight: 700, color: curMilestone.color }}>
-              {curMilestone.emoji} {curMilestone.label}
+            <div style={{ marginLeft: "auto", flexShrink: 0, padding: "4px 12px", borderRadius: 99, background: curMilestone.color + "1a", border: `1px solid ${curMilestone.color}30`, fontSize: 12, fontWeight: 700, color: curMilestone.color, whiteSpace: "nowrap" }}>
+              {curMilestone.label}
             </div>
           )}
         </div>
 
-        {/* Main slider */}
-        <div style={{ marginBottom: 24 }}>
+        {/* Main slider — logarithmic 0..1M */}
+        <div style={{ marginBottom: 36 }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
             <span style={{ fontSize: 13, color: MUTED }}>Платящих подписчиков</span>
             <span style={{ fontSize: 22, fontWeight: 800, color: TEXT }}>{total.toLocaleString("ru-RU")}</span>
           </div>
-          <div style={{ position: "relative" }}>
+          <div style={{ position: "relative", paddingBottom: 28 }}>
             <input
-              type="range" min={0} max={5000} step={10} value={total}
-              onChange={e => setTotal(Number(e.target.value))}
+              type="range" min={0} max={1000} step={1} value={sliderVal}
+              onChange={e => handleSlider(Number(e.target.value))}
               style={{ width: "100%", height: 6, appearance: "none", WebkitAppearance: "none", cursor: "pointer",
                 background: `linear-gradient(to right, #4561E8 ${sliderPct}%, ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"} ${sliderPct}%)`,
                 borderRadius: 99, outline: "none", border: "none" }}
             />
-            {/* Milestone markers */}
-            <div style={{ position: "relative", marginTop: 6 }}>
-              {milestones.map(m => {
-                const pct = m.n / 5000 * 100;
-                const reached = total >= m.n;
-                return (
-                  <div key={m.n} style={{ position: "absolute", left: `${pct}%`, transform: "translateX(-50%)", textAlign: "center" }}>
-                    <div style={{ width: 4, height: 4, borderRadius: "50%", background: reached ? m.color : (isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)"), margin: "0 auto 2px" }} />
-                    <span style={{ fontSize: 9, color: reached ? m.color : MUTED, whiteSpace: "nowrap", fontWeight: reached ? 700 : 400 }}>{m.n >= 1000 ? m.n/1000 + "K" : m.n}</span>
-                  </div>
-                );
-              })}
-            </div>
+            {/* Milestone markers — positioned absolute inside padded container */}
+            {milestones.map(m => {
+              const pct = usersToLog(m.n) / 10;
+              const reached = total >= m.n;
+              return (
+                <div key={m.n} style={{ position: "absolute", bottom: 0, left: `${pct}%`, transform: "translateX(-50%)", textAlign: "center", width: 28 }}>
+                  <div style={{ width: 4, height: 4, borderRadius: "50%", background: reached ? m.color : (isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)"), margin: "0 auto 3px" }} />
+                  <span style={{ fontSize: 9, color: reached ? m.color : MUTED, whiteSpace: "nowrap", fontWeight: reached ? 700 : 400 }}>{m.label}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -780,8 +793,8 @@ function RevenueCalculator() {
                 background: `linear-gradient(to right, #60a5fa ${pctPro}%, ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"} ${pctPro}%)`,
                 borderRadius: 99, outline: "none", border: "none" }} />
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-              <span style={{ fontSize: 10, color: "#60a5fa" }}>Pro ({proCount})</span>
-              <span style={{ fontSize: 10, color: "#a78bfa" }}>Ultima ({ultCount})</span>
+              <span style={{ fontSize: 10, color: "#60a5fa" }}>Pro ({fmt(proCount)})</span>
+              <span style={{ fontSize: 10, color: "#a78bfa" }}>Ultima ({fmt(ultCount)})</span>
             </div>
           </div>
           <div>
@@ -893,10 +906,6 @@ function RoadmapTab({ checked, onToggle, onClear }: { checked: Set<string>; onTo
         </div>
       )}
 
-      {/* Revenue Calculator */}
-      <div style={{ marginTop: 24 }}>
-        <RevenueCalculator />
-      </div>
     </div>
   );
 }
@@ -1153,6 +1162,11 @@ export default function AdminPanel() {
             <div style={{ marginTop: 16, padding: "14px 18px", borderRadius: 12, background: "rgba(239,68,68,0.05)", border: `1px solid rgba(239,68,68,0.15)` }}>
               <p style={{ fontSize: 12, color: RED, fontWeight: 600, margin: "0 0 4px" }}>⚠️ Оценка</p>
               <p style={{ fontSize: 13, color: MUTED, margin: 0, lineHeight: 1.6 }}>MRR рассчитан с допущением 70% месячных / 30% годовых подписок. Для точных данных смотри транзакции в YooKassa.</p>
+            </div>
+
+            {/* Revenue Calculator — перенесён из Роадмапа */}
+            <div style={{ marginTop: 16 }}>
+              <RevenueCalculator />
             </div>
           </>}
 
