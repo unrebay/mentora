@@ -244,7 +244,7 @@ export default async function HomePage() {
               <FadeUp delay={0.1}>
               <div className="text-center">
                 <p className="text-2xl sm:text-3xl font-black text-white mb-2">
-                  {locale === "ru" ? "От ребёнка в Индии" : "From a child in India"}
+                  {locale === "ru" ? "От ребёнка без доступа к образованию" : "From a child with no access to education"}
                 </p>
                 <p className="text-2xl sm:text-3xl font-black mb-3" style={{
                   background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
@@ -252,7 +252,7 @@ export default async function HomePage() {
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
                 }}>
-                  {locale === "ru" ? "до взрослого на арктической станции." : "to an adult at an Arctic station."}
+                  {locale === "ru" ? "до взрослого на арктической станции, изучающего новый язык." : "to an adult at an Arctic station learning a new language."}
                 </p>
                 <p className="text-base text-gray-500 mb-10">
                   {locale === "ru" ? "Знания больше не привилегия." : "Knowledge is no longer a privilege."}
@@ -807,8 +807,8 @@ export default async function HomePage() {
             <p className="text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-16"
               style={{ color: "var(--text-secondary)" }}>
               {locale === "ru"
-                ? "Мы тренируем тело — почему не мозг? Знание — это не обязанность перед экзаменом. Это часть здоровой жизни. Mentora строит мир, где живой диалог с ментором доступен каждому — от школьника в Новосибирске до взрослого, который хочет понять мир глубже."
-                : "We train our bodies — why not our minds? Knowledge isn't a chore before an exam. It's part of a healthy life. Mentora is building a world where real mentorship is available to everyone — from a student anywhere to an adult who wants to understand the world more deeply."}
+                ? "Мы тренируем тело — почему не мозг? Знание — не обязанность перед экзаменом, а часть здоровой жизни. Mentora делает живой диалог с ментором доступным каждому, кто хочет глубже понимать мир."
+                : "We train our bodies — why not our minds? Knowledge isn't a chore before an exam — it's part of a healthy life. Mentora makes real mentorship available to anyone who wants to understand the world more deeply."}
             </p>
           </FadeUp>
 
