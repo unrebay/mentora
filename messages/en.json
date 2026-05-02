@@ -581,6 +581,24 @@
         "q2": "The strangest things in nature",
         "q3": "Mysterious ancient civilizations"
       },
+      "psychology": {
+        "hint": "Ask about personality psychology, cognitive processes, or human behavior",
+        "q1": "What are cognitive biases?",
+        "q2": "How does memory work?",
+        "q3": "Explain Maslow's hierarchy"
+      },
+      "economics": {
+        "hint": "Ask about economics, finance, markets, or macroeconomics",
+        "q1": "What is GDP?",
+        "q2": "How does inflation work?",
+        "q3": "What is supply and demand?"
+      },
+      "philosophy": {
+        "hint": "Let's discuss philosophical concepts, ethics, logic, or history of thought",
+        "q1": "What is philosophy?",
+        "q2": "Explain Plato's ideas",
+        "q3": "What is ethics?"
+      },
       "default": {
         "hint": "Ask me anything — I'll help you figure it out",
         "q1": "Where should I start?",
