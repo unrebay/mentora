@@ -7,11 +7,15 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     const { hash, ...userData } = data;
 
-    // Verify Telegram HMAC-SHA256 hash
+    // ── Verify Telegram HMAC-SHA256 hash ─────────────────────────────────
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     if (!botToken) {
+      console.error("[telegram-auth] TELEGRAM_BOT_TOKEN env missing");
       return NextResponse.json({ error: "Bot token not configured" }, { status: 500 });
     }
+
+    const botIdPrefix = botToken.split(":")[0]; // public part — safe to log
+    const tokenLen = botToken.length;
 
     const secret = crypto.createHash("sha256").update(botToken).digest();
     const checkString = Object.keys(userData)
@@ -24,7 +28,21 @@ export async function POST(req: NextRequest) {
       .digest("hex");
 
     if (expectedHash !== hash) {
-      return NextResponse.json({ error: "Invalid hash" }, { status: 401 });
+      // Diagnostic logging — never reveal full token, only public bot id
+      console.error("[telegram-auth] hash mismatch", {
+        bot_id: botIdPrefix,
+        token_len: tokenLen,
+        check_string_keys: Object.keys(userData).sort().join(","),
+        received_hash_tail: typeof hash === "string" ? hash.slice(-8) : "(none)",
+        computed_hash_tail: expectedHash.slice(-8),
+        user_id: userData.id,
+        auth_date: userData.auth_date,
+      });
+      return NextResponse.json({
+        error: "Invalid hash",
+        // hint helps debugging in prod — mentora_su_bot id is 5xx-prefix; if logs show different prefix, env var has wrong bot
+        hint: `bot_id=${botIdPrefix}`,
+      }, { status: 401 });
     }
 
     // Auth data must be < 24 hours old
@@ -82,5 +100,38 @@ export async function POST(req: NextRequest) {
     const message = err instanceof Error ? err.message : "Internal server error";
     console.error("[telegram auth]", message);
     return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+// ── Diagnostic GET ─────────────────────────────────────────────────────────
+// Returns the public bot id prefix from TELEGRAM_BOT_TOKEN and asks Telegram
+// for the bot's actual username via getMe. Lets us verify that prod's token
+// matches the @mentora_su_bot widget on /auth.
+// Open: https://mentora.su/api/auth/telegram?diag=1
+export async function GET(req: NextRequest) {
+  if (req.nextUrl.searchParams.get("diag") !== "1") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) {
+    return NextResponse.json({ env: "TELEGRAM_BOT_TOKEN missing" }, { status: 500 });
+  }
+  const botIdPrefix = botToken.split(":")[0];
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
+    const j = await r.json();
+    return NextResponse.json({
+      bot_id_from_token: botIdPrefix,
+      token_length: botToken.length,
+      getMe_ok: j.ok,
+      bot_username: j.result?.username ?? null,
+      bot_first_name: j.result?.first_name ?? null,
+      expected_widget_bot: "mentora_su_bot",
+    });
+  } catch (e: unknown) {
+    return NextResponse.json({
+      bot_id_from_token: botIdPrefix,
+      getMe_error: e instanceof Error ? e.message : String(e),
+    }, { status: 500 });
   }
 }
