@@ -1,104 +1,130 @@
-name: Deploy to Russian VPS
+name: Build & deploy to Russian VPS
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
 
 jobs:
   deploy:
-    name: Deploy to mentora.su (Russia)
+    name: Build on runner, ship to mentora.su
     runs-on: ubuntu-latest
+
     env:
-      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       NEXT_PUBLIC_HCAPTCHA_SITE_KEY: ${{ secrets.NEXT_PUBLIC_HCAPTCHA_SITE_KEY }}
       NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
       NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
+      NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      ANTHROPIC_BASE_URL: ${{ secrets.ANTHROPIC_BASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       YOOKASSA_SECRET_KEY: ${{ secrets.YOOKASSA_SECRET_KEY }}
       YOOKASSA_SHOP_ID: ${{ secrets.YOOKASSA_SHOP_ID }}
-      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
-      NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
-      ANTHROPIC_BASE_URL: ${{ secrets.ANTHROPIC_BASE_URL }}
       VERCEL_BYPASS_SECRET: ${{ secrets.VERCEL_BYPASS_SECRET }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
     steps:
-      - name: Deploy via SSH
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (with npm cache)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies (npm ci)
+        run: npm ci
+
+      - name: Build (next build → standalone)
+        run: npm run build
+
+      - name: Assemble standalone bundle
+        run: |
+          cp -r public .next/standalone/public
+          mkdir -p .next/standalone/.next
+          cp -r .next/static .next/standalone/.next/static
+
+      - name: Archive bundle (tar.gz)
+        run: tar -czf bundle.tar.gz -C .next/standalone .
+
+      - name: Show bundle size
+        run: ls -lh bundle.tar.gz
+
+      - name: SCP bundle to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: bundle.tar.gz
+          target: /tmp/
+
+      - name: Deploy on VPS (extract + pm2 restart)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          envs: TELEGRAM_BOT_TOKEN,SUPABASE_SERVICE_ROLE_KEY,ANTHROPIC_API_KEY,OPENAI_API_KEY,NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,NEXT_PUBLIC_HCAPTCHA_SITE_KEY,NEXT_PUBLIC_POSTHOG_KEY,NEXT_PUBLIC_POSTHOG_HOST,YOOKASSA_SECRET_KEY,YOOKASSA_SHOP_ID,RESEND_API_KEY,CRON_SECRET,NEXT_PUBLIC_BASE_URL,ANTHROPIC_BASE_URL,VERCEL_BYPASS_SECRET
-          command_timeout: 15m
+          envs: TELEGRAM_BOT_TOKEN,SUPABASE_SERVICE_ROLE_KEY,ANTHROPIC_API_KEY,ANTHROPIC_BASE_URL,OPENAI_API_KEY,NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,NEXT_PUBLIC_HCAPTCHA_SITE_KEY,NEXT_PUBLIC_POSTHOG_KEY,NEXT_PUBLIC_POSTHOG_HOST,YOOKASSA_SECRET_KEY,YOOKASSA_SHOP_ID,RESEND_API_KEY,CRON_SECRET,NEXT_PUBLIC_BASE_URL,VERCEL_BYPASS_SECRET
+          command_timeout: 5m
           script: |
             set -e
-            cd /var/www/mentora
+            APP_DIR=/var/www/mentora
+            mkdir -p "$APP_DIR"
+            cd "$APP_DIR"
 
-            export TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN"
-            export SUPABASE_SERVICE_ROLE_KEY="$SUPABASE_SERVICE_ROLE_KEY"
-            export ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY"
-            export OPENAI_API_KEY="$OPENAI_API_KEY"
-            export NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL"
-            export NEXT_PUBLIC_SUPABASE_ANON_KEY="$NEXT_PUBLIC_SUPABASE_ANON_KEY"
-            export NEXT_PUBLIC_HCAPTCHA_SITE_KEY="$NEXT_PUBLIC_HCAPTCHA_SITE_KEY"
-            export NEXT_PUBLIC_POSTHOG_KEY="$NEXT_PUBLIC_POSTHOG_KEY"
-            export NEXT_PUBLIC_POSTHOG_HOST="$NEXT_PUBLIC_POSTHOG_HOST"
-            export YOOKASSA_SECRET_KEY="$YOOKASSA_SECRET_KEY"
-            export YOOKASSA_SHOP_ID="$YOOKASSA_SHOP_ID"
-            export RESEND_API_KEY="$RESEND_API_KEY"
-            export CRON_SECRET="$CRON_SECRET"
-            export NEXT_PUBLIC_BASE_URL="$NEXT_PUBLIC_BASE_URL"
-            export ANTHROPIC_BASE_URL="$ANTHROPIC_BASE_URL"
-            export VERCEL_BYPASS_SECRET="$VERCEL_BYPASS_SECRET"
+            echo "==> Stopping pm2 process (path may have changed)"
+            pm2 delete mentora 2>/dev/null || true
 
-            echo "==> git fetch"
-            git fetch origin main
+            echo "==> Wipe app dir"
+            find . -mindepth 1 -maxdepth 1 -exec rm -rf {} +
 
-            echo "==> clean untracked & reset to origin"
-            git clean -fd
-            git reset --hard origin/main
+            echo "==> Extract new standalone bundle"
+            tar -xzf /tmp/bundle.tar.gz
+            rm -f /tmp/bundle.tar.gz
 
-            echo "==> Write fresh .env.local (overwrite any stale VPS copy)"
-            printf "%s\n" \
-              "TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN" \
-              "SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY" \
-              "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY" \
-              "OPENAI_API_KEY=$OPENAI_API_KEY" \
-              "NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL" \
-              "NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY" \
-              "NEXT_PUBLIC_HCAPTCHA_SITE_KEY=$NEXT_PUBLIC_HCAPTCHA_SITE_KEY" \
-              "NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY" \
-              "NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST" \
-              "YOOKASSA_SECRET_KEY=$YOOKASSA_SECRET_KEY" \
-              "YOOKASSA_SHOP_ID=$YOOKASSA_SHOP_ID" \
-              "RESEND_API_KEY=$RESEND_API_KEY" \
-              "CRON_SECRET=$CRON_SECRET" \
-              "NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL" \
-              "ANTHROPIC_BASE_URL=$ANTHROPIC_BASE_URL" \
-              "VERCEL_BYPASS_SECRET=$VERCEL_BYPASS_SECRET" \
-              > .env.local
+            echo "==> Write fresh .env.local"
+            cat > .env.local <<EOF
+            TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN
+            SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
+            ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY
+            ANTHROPIC_BASE_URL=$ANTHROPIC_BASE_URL
+            OPENAI_API_KEY=$OPENAI_API_KEY
+            NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+            NEXT_PUBLIC_HCAPTCHA_SITE_KEY=$NEXT_PUBLIC_HCAPTCHA_SITE_KEY
+            NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
+            NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
+            YOOKASSA_SECRET_KEY=$YOOKASSA_SECRET_KEY
+            YOOKASSA_SHOP_ID=$YOOKASSA_SHOP_ID
+            RESEND_API_KEY=$RESEND_API_KEY
+            CRON_SECRET=$CRON_SECRET
+            NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
+            VERCEL_BYPASS_SECRET=$VERCEL_BYPASS_SECRET
+            EOF
 
-            echo "==> npm install"
-            npm install
-
-            echo "==> npm run build (auto-recover from missing @next/swc)"
-            npm run build || (npm install && npm run build)
-
-            echo "==> copy assets for standalone"
-            cp -r public .next/standalone/
-            cp -r .next/static .next/standalone/.next/
-
-            echo "==> pm2 restart (with updated env)"
-            pm2 restart mentora --update-env || pm2 start .next/standalone/server.js --name mentora
-
+            echo "==> pm2 start server.js"
+            pm2 start server.js --name mentora --update-env
             pm2 save
             pm2 status
 
+            echo "==> Health check"
             sleep 5
-            curl -sf http://localhost:3000 > /dev/null && echo "✅ App is up" || (echo "❌ App health check failed"; pm2 logs mentora --lines 50 --nostream; exit 1)
+            if curl -sf http://localhost:3000 > /dev/null; then
+              echo "✅ App is up"
+            else
+              echo "❌ App health check failed"
+              pm2 logs mentora --lines 80 --nostream
+              exit 1
+            fi
