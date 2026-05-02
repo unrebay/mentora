@@ -143,6 +143,7 @@ const ITeam    = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 const IRefresh  = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>;
 const ISearch   = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
 const IRoadmap  = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M3 17l6-12 4 8 3-5 5 9"/><circle cx="3" cy="17" r="1" fill="currentColor"/><circle cx="21" cy="17" r="1" fill="currentColor"/></svg>;
+const ILegal    = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
 
 // ── Team Tab ──────────────────────────────────────────────────────────────────
 interface Employee {
@@ -1137,7 +1138,185 @@ function RoadmapTab({ checked, onToggle, onClear }: { checked: Set<string>; onTo
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-type Tab = "overview" | "users" | "revenue" | "knowledge" | "team" | "roadmap";
+// ── LegalTab ──────────────────────────────────────────────────────────────────
+const LEGAL_CHECKLIST_KEY = "mentora_admin_legal_v1";
+type LegalItem = { id: string; done: boolean };
+function loadLegal(): Set<string> {
+  try { const arr: string[] = JSON.parse(localStorage.getItem(LEGAL_CHECKLIST_KEY) ?? "[]"); return new Set(arr); }
+  catch { return new Set(); }
+}
+function saveLegal(s: Set<string>) { localStorage.setItem(LEGAL_CHECKLIST_KEY, JSON.stringify([...s])); }
+
+function LegalTab({ annualRev }: { annualRev: number }) {
+  const { BOR, TEXT, MUTED, CARD, isDark } = useTok();
+  const [done, setDone] = useState<Set<string>>(() => loadLegal());
+
+  const toggle = (id: string) => setDone(prev => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    saveLegal(next);
+    return next;
+  });
+
+  const Check = ({ id, label, sub, warn }: { id: string; label: string; sub?: string; warn?: boolean }) => {
+    const checked = done.has(id);
+    return (
+      <div onClick={() => toggle(id)} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "10px 12px", borderRadius: 10, cursor: "pointer", background: checked ? (isDark ? "rgba(34,197,94,0.06)" : "rgba(34,197,94,0.07)") : "transparent", border: `1px solid ${checked ? "rgba(34,197,94,0.2)" : BOR}`, marginBottom: 6, transition: "all .15s", userSelect: "none" }}>
+        <div style={{ width: 18, height: 18, borderRadius: 5, border: `2px solid ${checked ? "#22c55e" : MUTED}`, background: checked ? "#22c55e" : "transparent", flexShrink: 0, marginTop: 1, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s" }}>
+          {checked && <svg viewBox="0 0 12 12" fill="none" width="10" height="10"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ fontSize: 13, color: checked ? MUTED : TEXT, textDecoration: checked ? "line-through" : "none", opacity: checked ? 0.6 : 1, fontWeight: warn && !checked ? 600 : 400 }}>{label}</span>
+          {sub && <p style={{ fontSize: 11, color: MUTED, margin: "2px 0 0", lineHeight: 1.5 }}>{sub}</p>}
+        </div>
+        {warn && !checked && <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 4, background: "rgba(239,68,68,0.12)", color: "#ef4444", fontWeight: 600, flexShrink: 0 }}>важно</span>}
+      </div>
+    );
+  };
+
+  // Dynamic regime and warnings based on ARR
+  const isUSN6  = annualRev <= 150_000_000;
+  const isUSN8  = annualRev > 150_000_000 && annualRev <= 265_000_000;
+  const isOSNO  = annualRev > 265_000_000;
+  const pctToUSN8  = isUSN6  ? Math.round(annualRev / 150_000_000 * 100) : 100;
+  const pctToOSNO  = !isOSNO ? Math.round(annualRev / 265_000_000 * 100) : 100;
+  const toUSN8Rem  = Math.max(0, 150_000_000 - annualRev);
+  const toOSNORem  = Math.max(0, 265_000_000 - annualRev);
+
+  const Sec = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div style={{ marginBottom: 28 }}>
+      <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>{title}</p>
+      {children}
+    </div>
+  );
+
+  const InfoBox = ({ icon, title, body, color = "#4561E8" }: { icon: string; title: string; body: string; color?: string }) => (
+    <div style={{ padding: "12px 16px", borderRadius: 12, background: color + "0d", border: `1px solid ${color}25`, marginBottom: 10, display: "flex", gap: 12 }}>
+      <span style={{ fontSize: 18, lineHeight: 1.4 }}>{icon}</span>
+      <div>
+        <p style={{ fontSize: 13, fontWeight: 600, color: TEXT, margin: "0 0 3px" }}>{title}</p>
+        <p style={{ fontSize: 12, color: MUTED, margin: 0, lineHeight: 1.6 }}>{body}</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      {/* ── Рекомендация формы ── */}
+      <Sec title="Рекомендуемая форма">
+        <InfoBox icon="✅" title="ИП + УСН Доходы 6% — правильный выбор сейчас"
+          body="Ты один, B2B клиентов пока нет, выручка растёт. ИП: регистрация 1 день через Госуслуги, бесплатно. Расчётный счёт в Тинькофф — открывается онлайн за день. YooKassa работает с ИП без проблем."
+          color="#22c55e" />
+        <InfoBox icon="⏳" title="ООО — когда это понадобится"
+          body="Первый B2B контракт (школа, компания), раунд инвестиций, добавление соучредителя/партнёра, или когда ARR > 30–50 млн ₽. До тех пор ООО — только лишняя бухгалтерия."
+          color="#f59e0b" />
+        <InfoBox icon="🎓" title="Образовательная лицензия"
+          body="Не нужна, пока Mentora — информационный сервис / AI-ассистент без итоговой аттестации. Если появятся сертификаты об образовании или официальные учебные программы — потребуется лицензия Рособрнадзора."
+          color="#4561E8" />
+      </Sec>
+
+      {/* ── Налоговые пороги ── */}
+      <Sec title="Мониторинг налоговых порогов">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 10 }}>
+          <div style={{ padding: "14px 16px", borderRadius: 12, background: isUSN8 || isOSNO ? "rgba(239,68,68,0.07)" : "rgba(34,197,94,0.06)", border: `1px solid ${isUSN8 || isOSNO ? "rgba(239,68,68,0.2)" : "rgba(34,197,94,0.18)"}` }}>
+            <p style={{ fontSize: 11, color: MUTED, margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>До УСН 8%</p>
+            <p style={{ fontSize: 22, fontWeight: 800, color: isUSN8 || isOSNO ? "#ef4444" : "#22c55e", margin: 0 }}>
+              {isUSN8 || isOSNO ? (isOSNO ? "—" : "< 150 млн") : `${(toUSN8Rem/1e6).toFixed(1)} млн ₽`}
+            </p>
+            <div style={{ height: 4, borderRadius: 99, background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)", marginTop: 8 }}>
+              <div style={{ height: "100%", width: pctToUSN8 + "%", borderRadius: 99, background: pctToUSN8 >= 80 ? "#ef4444" : pctToUSN8 >= 60 ? "#f59e0b" : "#22c55e" }} />
+            </div>
+            <p style={{ fontSize: 10, color: MUTED, marginTop: 4 }}>{isUSN8 ? "⚠️ Уже превышен" : isOSNO ? "—" : `${pctToUSN8}% от лимита 150 млн`}</p>
+          </div>
+          <div style={{ padding: "14px 16px", borderRadius: 12, background: isOSNO ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.06)", border: `1px solid ${isOSNO ? "rgba(239,68,68,0.25)" : "rgba(34,197,94,0.18)"}` }}>
+            <p style={{ fontSize: 11, color: MUTED, margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>До потери УСН (ОСНО)</p>
+            <p style={{ fontSize: 22, fontWeight: 800, color: isOSNO ? "#ef4444" : "#22c55e", margin: 0 }}>
+              {isOSNO ? "Перешёл!" : `${(toOSNORem/1e6).toFixed(1)} млн ₽`}
+            </p>
+            <div style={{ height: 4, borderRadius: 99, background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)", marginTop: 8 }}>
+              <div style={{ height: "100%", width: pctToOSNO + "%", borderRadius: 99, background: pctToOSNO >= 90 ? "#ef4444" : pctToOSNO >= 70 ? "#f59e0b" : "#22c55e" }} />
+            </div>
+            <p style={{ fontSize: 10, color: MUTED, marginTop: 4 }}>{isOSNO ? "🚨 ОСНО обязателен" : `${pctToOSNO}% от лимита ~265 млн`}</p>
+          </div>
+        </div>
+        {isOSNO && (
+          <InfoBox icon="🚨" title="Требуется переход на ОСНО" color="#ef4444"
+            body="ARR превысил лимит УСН (~265 млн ₽). Необходимо: 1) Уведомить ФНС о переходе (до 15 января следующего года). 2) Начать платить НДС 20% и налог на прибыль 25%. 3) Нанять бухгалтера или аутсорс. Рекомендую юриста для структурирования расходов." />
+        )}
+        {isUSN8 && !isOSNO && (
+          <InfoBox icon="⚠️" title="Повышенная ставка УСН 8%" color="#f59e0b"
+            body="ARR в переходном диапазоне 150–265 млн ₽. Ставка автоматически повышается до 8%. Начни готовить документы для перехода на ОСНО заблаговременно." />
+        )}
+      </Sec>
+
+      {/* ── Чеклист регистрации ── */}
+      <Sec title="Чеклист: регистрация и базовая защита">
+        <Check id="ip_reg"   label="Зарегистрировать ИП через Госуслуги" sub="Выбрать ОКВЭД 62.01 (основной), 63.11, 85.41 (дополнительные). Бесплатно, занимает 3 рабочих дня." warn />
+        <Check id="usn"      label="Уведомить ФНС о применении УСН при регистрации" sub="Форма 26.2-1, подаётся вместе с заявлением или в течение 30 дней. Без этого автоматически ОСНО!" warn />
+        <Check id="account"  label="Открыть расчётный счёт ИП" sub="Тинькофф Бизнес — онлайн, 0 ₽. Нужен для YooKassa и приёма платежей." />
+        <Check id="yookassa" label="Настроить YooKassa на расчётный счёт ИП" sub="Переключить выплаты на счёт ИП, загрузить документы. Без ИП платежи технически серые." warn />
+        <Check id="pp"       label="Оферта и политика конфиденциальности на сайте" sub="Юридически необходимо для B2C сервиса. 152-ФЗ (персональные данные) — обязательно." warn />
+        <Check id="pd_notify" label="Уведомить Роскомнадзор об обработке персональных данных" sub="Онлайн через портал РКН, бесплатно. Обязательно по 152-ФЗ если собираешь email/имена." warn />
+        <Check id="trademark" label="Зарегистрировать товарный знак «Mentora»" sub="ФИПС (Роспатент) — ~30 000 ₽ + 3–4 месяца. Защищает бренд от копирования." />
+        <Check id="ege_license" label="Изучить вопрос образовательной лицензии" sub="Пока не нужна (информационная услуга). Понадобится при запуске курсов с аттестацией или B2B со школами." />
+        <Check id="accountant" label="Подключить онлайн-бухгалтерию (Эльба / Контур)" sub="Эльба — от 2 500 ₽/мес, автоматически считает налоги, сдаёт отчёты. Окупается с первой оплаты." />
+        <Check id="kep"      label="Получить КЭП (квалифицированную электронную подпись)" sub="Нужна для подачи отчётов онлайн и подписания договоров. Удостоверяющие центры — от 1 500 ₽/год." />
+      </Sec>
+
+      {/* ── ОКВЭД ── */}
+      <Sec title="ОКВЭД для Mentora">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+          {[
+            { code: "62.01", label: "Разработка ПО", note: "Основной код", accent: true },
+            { code: "63.11", label: "Обработка данных", note: "AI/хостинг" },
+            { code: "85.41", label: "Дополнительное образование", note: "EdTech лицензии" },
+            { code: "85.11", label: "Дошкольное / школьное обр.", note: "При B2B со школами" },
+            { code: "62.09", label: "Деятельность в сфере ИТ", note: "Прочие ИТ услуги" },
+            { code: "74.90", label: "Прочая проф. деятельность", note: "Консалтинг" },
+          ].map(({ code, label, note, accent }) => (
+            <div key={code} style={{ padding: "10px 12px", borderRadius: 10, background: accent ? BRAND + "12" : (isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)"), border: `1px solid ${accent ? BRAND + "30" : BOR}` }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: accent ? "#a0b4ff" : TEXT, margin: "0 0 2px", fontFamily: "monospace" }}>{code}</p>
+              <p style={{ fontSize: 12, color: MUTED, margin: 0 }}>{label}</p>
+              <p style={{ fontSize: 10, color: MUTED, margin: "2px 0 0", opacity: 0.7 }}>{note}</p>
+            </div>
+          ))}
+        </div>
+      </Sec>
+
+      {/* ── Дорожная карта ── */}
+      <Sec title="Юридическая дорожная карта">
+        {[
+          { phase: "Сейчас",         color: "#22c55e", items: ["Зарегистрировать ИП", "УСН 6%", "Расчётный счёт", "Оферта + политика персданных", "Уведомление РКН"] },
+          { phase: "ARR > 5 млн ₽",  color: "#f59e0b", items: ["Онлайн-бухгалтерия (Эльба)", "Товарный знак Mentora", "КЭП", "Договор с Anthropic (API Terms)"] },
+          { phase: "Первый B2B",      color: "#4561E8", items: ["Преобразование в ООО или параллельное ООО", "Шаблон договора с организациями", "Образовательная лицензия (при необходимости)"] },
+          { phase: "Раунд инвестиций", color: "#a78bfa", items: ["Реструктуризация (ООО → АО или Кипр / ОАЭ холдинг)", "ESOP для команды", "Due diligence пакет", "Юрист по венчурным сделкам"] },
+        ].map(({ phase, color, items }) => (
+          <div key={phase} style={{ display: "flex", gap: 14, marginBottom: 16 }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: color, marginTop: 3 }} />
+              <div style={{ width: 1, flex: 1, background: BOR, marginTop: 4 }} />
+            </div>
+            <div style={{ flex: 1, paddingBottom: 4 }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color, margin: "0 0 6px" }}>{phase}</p>
+              {items.map(item => (
+                <p key={item} style={{ fontSize: 12, color: MUTED, margin: "2px 0", paddingLeft: 8, borderLeft: `2px solid ${color}30` }}>• {item}</p>
+              ))}
+            </div>
+          </div>
+        ))}
+      </Sec>
+
+      {/* ── Дисклеймер ── */}
+      <div style={{ padding: "10px 14px", borderRadius: 10, background: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)", border: `1px solid ${BOR}` }}>
+        <p style={{ fontSize: 11, color: MUTED, margin: 0, lineHeight: 1.6 }}>
+          ⚠️ <strong style={{ color: TEXT }}>Это информационная справка, не юридическая консультация.</strong> Для регистрации ИП/ООО, получения лицензий и структурирования сделок — обращайся к юристу. Пороги УСН актуальны на 2024 г. с учётом дефлятора.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+type Tab = "overview" | "users" | "revenue" | "knowledge" | "team" | "roadmap" | "legal";
 
 export default function AdminPanel() {
   const { theme } = useTheme();
@@ -1201,6 +1380,7 @@ export default function AdminPanel() {
     { id: "knowledge", icon: IKb,      label: "База знаний" },
     { id: "team",      icon: ITeam,    label: "Команда" },
     { id: "roadmap",   icon: IRoadmap, label: "Роадмап" },
+    { id: "legal",     icon: ILegal,   label: "Право" },
   ];
 
   return (
@@ -1480,6 +1660,7 @@ export default function AdminPanel() {
           {tab === "knowledge" && <KnowledgeTab />}
           {tab === "team"      && <TeamTab />}
           {tab === "roadmap"   && <RoadmapTab checked={rmChecked} onToggle={toggleTask} onClear={clearRoadmap} />}
+          {tab === "legal"     && <LegalTab annualRev={arr} />}
         </main>
       </div> {/* end flex row */}
     </TokCtx.Provider>
