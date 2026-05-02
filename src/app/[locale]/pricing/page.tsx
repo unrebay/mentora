@@ -327,6 +327,63 @@ export default async function PricingPage() {
 
         </div>
 
+
+        {/* COMPARISON TABLE — Russian only */}
+        {locale === "ru" && (
+          <div className="mt-8 overflow-x-auto">
+            <div className="rounded-2xl overflow-hidden" style={{
+              border: "1px solid rgba(255,255,255,0.08)",
+              background: "rgba(255,255,255,0.03)",
+              backdropFilter: "blur(16px)",
+              minWidth: 480,
+            }}>
+              {/* Table header */}
+              <div className="grid grid-cols-4 px-5 py-3 text-xs font-bold tracking-widest uppercase"
+                style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.35)" }}>
+                <div className="col-span-2">Возможности</div>
+                <div className="text-center">Pro</div>
+                <div className="text-center">Ultima</div>
+              </div>
+              {[
+                { label: "Все 17 наук", free: true,  pro: true,  ultra: true  },
+                { label: "Безлимитные сообщения", free: false, pro: true,  ultra: true  },
+                { label: "Галактика знаний", free: false, pro: true,  ultra: true  },
+                { label: "Аналитика прогресса", free: false, pro: true,  ultra: true  },
+                { label: "PDF-конспекты по темам", free: false, pro: true,  ultra: true  },
+                { label: "Распознавание фото", free: false, pro: false, ultra: true  },
+                { label: "Генерация презентаций", free: false, pro: false, ultra: true  },
+                { label: "Ранний доступ к фичам", free: false, pro: false, ultra: true  },
+              ].map((row, i) => (
+                <div key={row.label} className="grid grid-cols-4 px-5 py-3 text-sm items-center"
+                  style={{
+                    borderBottom: i < 7 ? "1px solid rgba(255,255,255,0.05)" : "none",
+                    background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
+                  }}>
+                  <div className="col-span-2" style={{ color: "rgba(255,255,255,0.6)" }}>{row.label}</div>
+                  <div className="text-center">
+                    {row.pro
+                      ? <svg className="w-4 h-4 inline" viewBox="0 0 16 16" fill="none">
+                          <circle cx="8" cy="8" r="7" fill="rgba(107,143,255,0.15)" />
+                          <path d="M5 8l2 2 4-4" stroke="#6B8FFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      : <span style={{ color: "rgba(255,255,255,0.15)" }}>—</span>
+                    }
+                  </div>
+                  <div className="text-center">
+                    {row.ultra
+                      ? <svg className="w-4 h-4 inline" viewBox="0 0 16 16" fill="none">
+                          <circle cx="8" cy="8" r="7" fill="rgba(255,122,0,0.12)" />
+                          <path d="M5 8l2 2 4-4" stroke="#FF9A3C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      : <span style={{ color: "rgba(255,255,255,0.15)" }}>—</span>
+                    }
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* STREAK PROMO — Russian only */}
         {locale === "ru" && (
           <div className="mt-4 flex items-center gap-4 rounded-2xl px-6 py-4"
