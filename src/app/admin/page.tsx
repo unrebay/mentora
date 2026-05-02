@@ -1200,78 +1200,118 @@ function LegalTab({ annualRev }: { annualRev: number }) {
     </div>
   );
 
+  // НПД (самозанятость) лимит — 2.4 млн ₽/год
+  const NPD_LIMIT   = 2_400_000;
+  const pctToNPD    = Math.min(Math.round(annualRev / NPD_LIMIT * 100), 100);
+  const toNPDRem    = Math.max(0, NPD_LIMIT - annualRev);
+  const isNPDOver   = annualRev >= NPD_LIMIT;
+
   return (
     <div>
-      {/* ── Рекомендация формы ── */}
-      <Sec title="Рекомендуемая форма">
-        <InfoBox icon="✅" title="ИП + УСН Доходы 6% — правильный выбор сейчас"
-          body="Ты один, B2B клиентов пока нет, выручка растёт. ИП: регистрация 1 день через Госуслуги, бесплатно. Расчётный счёт в Тинькофф — открывается онлайн за день. YooKassa работает с ИП без проблем."
-          color="#22c55e" />
-        <InfoBox icon="⏳" title="ООО — когда это понадобится"
-          body="Первый B2B контракт (школа, компания), раунд инвестиций, добавление соучредителя/партнёра, или когда ARR > 30–50 млн ₽. До тех пор ООО — только лишняя бухгалтерия."
-          color="#f59e0b" />
-        <InfoBox icon="🎓" title="Образовательная лицензия"
-          body="Не нужна, пока Mentora — информационный сервис / AI-ассистент без итоговой аттестации. Если появятся сертификаты об образовании или официальные учебные программы — потребуется лицензия Рособрнадзора."
-          color="#4561E8" />
-      </Sec>
-
-      {/* ── Налоговые пороги ── */}
-      <Sec title="Мониторинг налоговых порогов">
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 10 }}>
-          <div style={{ padding: "14px 16px", borderRadius: 12, background: isUSN8 || isOSNO ? "rgba(239,68,68,0.07)" : "rgba(34,197,94,0.06)", border: `1px solid ${isUSN8 || isOSNO ? "rgba(239,68,68,0.2)" : "rgba(34,197,94,0.18)"}` }}>
-            <p style={{ fontSize: 11, color: MUTED, margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>До УСН 8%</p>
-            <p style={{ fontSize: 22, fontWeight: 800, color: isUSN8 || isOSNO ? "#ef4444" : "#22c55e", margin: 0 }}>
-              {isUSN8 || isOSNO ? (isOSNO ? "—" : "< 150 млн") : `${(toUSN8Rem/1e6).toFixed(1)} млн ₽`}
-            </p>
-            <div style={{ height: 4, borderRadius: 99, background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)", marginTop: 8 }}>
-              <div style={{ height: "100%", width: pctToUSN8 + "%", borderRadius: 99, background: pctToUSN8 >= 80 ? "#ef4444" : pctToUSN8 >= 60 ? "#f59e0b" : "#22c55e" }} />
-            </div>
-            <p style={{ fontSize: 10, color: MUTED, marginTop: 4 }}>{isUSN8 ? "⚠️ Уже превышен" : isOSNO ? "—" : `${pctToUSN8}% от лимита 150 млн`}</p>
-          </div>
-          <div style={{ padding: "14px 16px", borderRadius: 12, background: isOSNO ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.06)", border: `1px solid ${isOSNO ? "rgba(239,68,68,0.25)" : "rgba(34,197,94,0.18)"}` }}>
-            <p style={{ fontSize: 11, color: MUTED, margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>До потери УСН (ОСНО)</p>
-            <p style={{ fontSize: 22, fontWeight: 800, color: isOSNO ? "#ef4444" : "#22c55e", margin: 0 }}>
-              {isOSNO ? "Перешёл!" : `${(toOSNORem/1e6).toFixed(1)} млн ₽`}
-            </p>
-            <div style={{ height: 4, borderRadius: 99, background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)", marginTop: 8 }}>
-              <div style={{ height: "100%", width: pctToOSNO + "%", borderRadius: 99, background: pctToOSNO >= 90 ? "#ef4444" : pctToOSNO >= 70 ? "#f59e0b" : "#22c55e" }} />
-            </div>
-            <p style={{ fontSize: 10, color: MUTED, marginTop: 4 }}>{isOSNO ? "🚨 ОСНО обязателен" : `${pctToOSNO}% от лимита ~265 млн`}</p>
+      {/* ── Текущий статус ── */}
+      <Sec title="Текущий статус">
+        <div style={{ padding: "14px 16px", borderRadius: 12, background: isDark ? "rgba(69,97,232,0.08)" : "rgba(69,97,232,0.07)", border: `1px solid rgba(69,97,232,0.25)`, marginBottom: 12, display: "flex", gap: 12, alignItems: "center" }}>
+          <span style={{ fontSize: 24 }}>🪪</span>
+          <div>
+            <p style={{ fontSize: 14, fontWeight: 700, color: TEXT, margin: "0 0 2px" }}>Самозанятый — НПД (налог на профессиональный доход)</p>
+            <p style={{ fontSize: 12, color: MUTED, margin: 0 }}>YooKassa подключена через самозанятость · Ставка 4% с доходов от физлиц, 6% от юрлиц · Лимит 2.4 млн ₽/год</p>
           </div>
         </div>
-        {isOSNO && (
-          <InfoBox icon="🚨" title="Требуется переход на ОСНО" color="#ef4444"
-            body="ARR превысил лимит УСН (~265 млн ₽). Необходимо: 1) Уведомить ФНС о переходе (до 15 января следующего года). 2) Начать платить НДС 20% и налог на прибыль 25%. 3) Нанять бухгалтера или аутсорс. Рекомендую юриста для структурирования расходов." />
-        )}
-        {isUSN8 && !isOSNO && (
-          <InfoBox icon="⚠️" title="Повышенная ставка УСН 8%" color="#f59e0b"
-            body="ARR в переходном диапазоне 150–265 млн ₽. Ставка автоматически повышается до 8%. Начни готовить документы для перехода на ОСНО заблаговременно." />
-        )}
+        <InfoBox icon="✅" title="Самозанятость — правильный старт, пока выручка мала"
+          body="НПД 4% — самая низкая ставка в РФ для B2C. Никакой отчётности, никакого бухгалтера: налог считается автоматически в приложении «Мой налог». YooKassa с самозанятостью работает легально. Это оптимально до лимита 2.4 млн ₽/год."
+          color="#22c55e" />
+        <InfoBox icon="⏭️" title="Следующий шаг: ИП + УСН Доходы 6%"
+          body="Переходить, когда ARR приближается к 2.4 млн ₽ (200K/мес выручки). ИП: регистрация бесплатная через Госуслуги за 3 рабочих дня. При регистрации сразу подать форму 26.2-1 на УСН 6% — без этого автоматически ОСНО!"
+          color="#f59e0b" />
+        <InfoBox icon="🏢" title="ООО — намного позже"
+          body="Первый B2B контракт (корпоративные клиенты, школы), раунд инвестиций, появление соучредителя. До тех пор ООО — только лишние расходы и бухгалтерия."
+          color="#4561E8" />
+        <InfoBox icon="🎓" title="Образовательная лицензия — пока не нужна"
+          body="Mentora — информационный сервис / AI-ассистент без итоговой аттестации. Лицензия Рособрнадзора потребуется только при выдаче официальных сертификатов об образовании или B2B с государственными школами как образовательная организация."
+          color="#64748b" />
       </Sec>
 
-      {/* ── Чеклист регистрации ── */}
-      <Sec title="Чеклист: регистрация и базовая защита">
-        <Check id="ip_reg"   label="Зарегистрировать ИП через Госуслуги" sub="Выбрать ОКВЭД 62.01 (основной), 63.11, 85.41 (дополнительные). Бесплатно, занимает 3 рабочих дня." warn />
-        <Check id="usn"      label="Уведомить ФНС о применении УСН при регистрации" sub="Форма 26.2-1, подаётся вместе с заявлением или в течение 30 дней. Без этого автоматически ОСНО!" warn />
-        <Check id="account"  label="Открыть расчётный счёт ИП" sub="Тинькофф Бизнес — онлайн, 0 ₽. Нужен для YooKassa и приёма платежей." />
-        <Check id="yookassa" label="Настроить YooKassa на расчётный счёт ИП" sub="Переключить выплаты на счёт ИП, загрузить документы. Без ИП платежи технически серые." warn />
-        <Check id="pp"       label="Оферта и политика конфиденциальности на сайте" sub="Юридически необходимо для B2C сервиса. 152-ФЗ (персональные данные) — обязательно." warn />
-        <Check id="pd_notify" label="Уведомить Роскомнадзор об обработке персональных данных" sub="Онлайн через портал РКН, бесплатно. Обязательно по 152-ФЗ если собираешь email/имена." warn />
-        <Check id="trademark" label="Зарегистрировать товарный знак «Mentora»" sub="ФИПС (Роспатент) — ~30 000 ₽ + 3–4 месяца. Защищает бренд от копирования." />
-        <Check id="ege_license" label="Изучить вопрос образовательной лицензии" sub="Пока не нужна (информационная услуга). Понадобится при запуске курсов с аттестацией или B2B со школами." />
-        <Check id="accountant" label="Подключить онлайн-бухгалтерию (Эльба / Контур)" sub="Эльба — от 2 500 ₽/мес, автоматически считает налоги, сдаёт отчёты. Окупается с первой оплаты." />
-        <Check id="kep"      label="Получить КЭП (квалифицированную электронную подпись)" sub="Нужна для подачи отчётов онлайн и подписания договоров. Удостоверяющие центры — от 1 500 ₽/год." />
+      {/* ── Лимит самозанятости ── */}
+      <Sec title="Мониторинг лимита самозанятости">
+        <div style={{ padding: "16px 18px", borderRadius: 12, background: isNPDOver ? "rgba(239,68,68,0.08)" : pctToNPD >= 70 ? "rgba(245,158,11,0.07)" : "rgba(34,197,94,0.06)", border: `1px solid ${isNPDOver ? "rgba(239,68,68,0.3)" : pctToNPD >= 70 ? "rgba(245,158,11,0.25)" : "rgba(34,197,94,0.2)"}`, marginBottom: 10 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <div>
+              <p style={{ fontSize: 11, color: MUTED, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.08em" }}>НПД лимит 2.4 млн ₽/год</p>
+              <p style={{ fontSize: 22, fontWeight: 800, color: isNPDOver ? "#ef4444" : pctToNPD >= 70 ? "#f59e0b" : "#22c55e", margin: 0 }}>
+                {isNPDOver ? "🚨 Лимит превышен!" : `осталось ${(toNPDRem/1e6).toFixed(2)} млн ₽`}
+              </p>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <p style={{ fontSize: 28, fontWeight: 900, color: isNPDOver ? "#ef4444" : pctToNPD >= 70 ? "#f59e0b" : "#22c55e", margin: 0 }}>{pctToNPD}%</p>
+              <p style={{ fontSize: 10, color: MUTED, margin: 0 }}>использовано</p>
+            </div>
+          </div>
+          <div style={{ height: 8, borderRadius: 99, background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)" }}>
+            <div style={{ height: "100%", width: pctToNPD + "%", borderRadius: 99, background: isNPDOver ? "#ef4444" : pctToNPD >= 70 ? "#f59e0b" : "#22c55e", transition: "width .4s" }} />
+          </div>
+          <p style={{ fontSize: 11, color: MUTED, marginTop: 8 }}>
+            {isNPDOver
+              ? "Превышен лимит НПД. Необходимо немедленно перейти на ИП + УСН, иначе ФНС переведёт на ОСНО автоматически."
+              : pctToNPD >= 70
+              ? `⚠️ Приближаешься к лимиту — рекомендуется заранее зарегистрировать ИП (занимает 3 дня).`
+              : `Текущий ARR: ${(annualRev/1e6).toFixed(2)} млн ₽ из 2.4 млн лимита НПД`}
+          </p>
+        </div>
+
+        {/* Пороги дальнейшего роста (актуальны после перехода на ИП) */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {[
+            { label: "НПД → ИП УСН 6%", limit: 2_400_000, desc: "Лимит самозанятости", color: "#f59e0b" },
+            { label: "УСН 6% → УСН 8%", limit: 150_000_000, desc: "Повышенная ставка", color: "#f97316" },
+            { label: "УСН 8% → ОСНО",   limit: 265_000_000, desc: "Потеря УСН",         color: "#ef4444" },
+          ].map(({ label, limit, desc, color }) => {
+            const pct = Math.min(Math.round(annualRev / limit * 100), 100);
+            const rem = Math.max(0, limit - annualRev);
+            return (
+              <div key={label} style={{ padding: "10px 12px", borderRadius: 10, background: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)", border: `1px solid ${BOR}` }}>
+                <p style={{ fontSize: 11, color, fontWeight: 600, margin: "0 0 2px" }}>{label}</p>
+                <p style={{ fontSize: 10, color: MUTED, margin: "0 0 8px" }}>{desc} · {(limit/1e6).toFixed(1)} млн ₽/год</p>
+                <div style={{ height: 3, borderRadius: 99, background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)", marginBottom: 4 }}>
+                  <div style={{ height: "100%", width: pct + "%", borderRadius: 99, background: color }} />
+                </div>
+                <p style={{ fontSize: 10, color: MUTED, margin: 0 }}>{pct >= 100 ? "✓ превышен" : `${pct}% · осталось ${rem >= 1e6 ? (rem/1e6).toFixed(0)+"M" : (rem/1000).toFixed(0)+"K"} ₽`}</p>
+              </div>
+            );
+          })}
+        </div>
+      </Sec>
+
+      {/* ── Чеклист ── */}
+      <Sec title="Чеклист: что нужно сделать">
+        <p style={{ fontSize: 12, color: MUTED, marginBottom: 10, marginTop: -4 }}>Кликни — отметь как выполненное</p>
+
+        <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>Сейчас (самозанятость)</p>
+        <Check id="yookassa_npd"  label="YooKassa подключена через самозанятость ✓" sub="Уже сделано — платежи принимаются легально." />
+        <Check id="pp"            label="Оферта и политика конфиденциальности на сайте" sub="Обязательно по 152-ФЗ для любого B2C сервиса, собирающего email и имена пользователей." warn />
+        <Check id="pd_notify"     label="Уведомить Роскомнадзор об обработке персданных" sub="Онлайн через портал РКН (pd.rkn.gov.ru), бесплатно. Штраф без уведомления — до 300K ₽." warn />
+
+        <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, margin: "16px 0 6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>При приближении к 2.4 млн ₽/год</p>
+        <Check id="ip_reg"        label="Зарегистрировать ИП через Госуслуги" sub="Бесплатно, 3 рабочих дня. ОКВЭД основной: 62.01, дополнительные: 63.11, 85.41." />
+        <Check id="usn"           label="Подать форму 26.2-1 (УСН 6%) при регистрации ИП" sub="Критично! Без этой формы ИП автоматически на ОСНО — это НДС 20% и налог на прибыль 25%." warn />
+        <Check id="account"       label="Открыть расчётный счёт ИП (Тинькофф Бизнес)" sub="Онлайн, 0 ₽/мес на старте. Нужен для переключения выплат YooKassa с личной карты." />
+        <Check id="yookassa_ip"   label="Переключить YooKassa на расчётный счёт ИП" sub="Загрузить документы ИП в личный кабинет YooKassa, указать новый расчётный счёт." />
+
+        <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, margin: "16px 0 6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>По мере роста</p>
+        <Check id="trademark"     label="Зарегистрировать товарный знак «Mentora»" sub="ФИПС (Роспатент) — ~30 000 ₽ госпошлина + 3–4 месяца. Защита бренда от копирования." />
+        <Check id="accountant"    label="Подключить онлайн-бухгалтерию (Эльба / Контур)" sub="При переходе на ИП. Эльба от 2 500 ₽/мес — автосчёт налогов, отчёты в ФНС." />
+        <Check id="kep"           label="Получить КЭП (электронную подпись)" sub="Нужна для отчётов в ФНС онлайн и подписания договоров с B2B клиентами. От 1 500 ₽/год." />
+        <Check id="ege_license"   label="Изучить вопрос образовательной лицензии" sub="Актуально при запуске курсов с сертификатами или B2B со школами." />
       </Sec>
 
       {/* ── ОКВЭД ── */}
-      <Sec title="ОКВЭД для Mentora">
+      <Sec title="ОКВЭД для Mentora (при регистрации ИП)">
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
           {[
-            { code: "62.01", label: "Разработка ПО", note: "Основной код", accent: true },
-            { code: "63.11", label: "Обработка данных", note: "AI/хостинг" },
-            { code: "85.41", label: "Дополнительное образование", note: "EdTech лицензии" },
-            { code: "85.11", label: "Дошкольное / школьное обр.", note: "При B2B со школами" },
-            { code: "62.09", label: "Деятельность в сфере ИТ", note: "Прочие ИТ услуги" },
+            { code: "62.01", label: "Разработка ПО", note: "Основной — обязательно", accent: true },
+            { code: "63.11", label: "Обработка данных", note: "AI-сервисы, хостинг" },
+            { code: "85.41", label: "Доп. образование детей и взрослых", note: "EdTech, репетиторство" },
+            { code: "62.09", label: "Деятельность в сфере ИТ", note: "Прочие ИТ-услуги" },
+            { code: "85.11", label: "Школьное образование", note: "При B2B со школами" },
             { code: "74.90", label: "Прочая проф. деятельность", note: "Консалтинг" },
           ].map(({ code, label, note, accent }) => (
             <div key={code} style={{ padding: "10px 12px", borderRadius: 10, background: accent ? BRAND + "12" : (isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)"), border: `1px solid ${accent ? BRAND + "30" : BOR}` }}>
@@ -1286,10 +1326,11 @@ function LegalTab({ annualRev }: { annualRev: number }) {
       {/* ── Дорожная карта ── */}
       <Sec title="Юридическая дорожная карта">
         {[
-          { phase: "Сейчас",         color: "#22c55e", items: ["Зарегистрировать ИП", "УСН 6%", "Расчётный счёт", "Оферта + политика персданных", "Уведомление РКН"] },
-          { phase: "ARR > 5 млн ₽",  color: "#f59e0b", items: ["Онлайн-бухгалтерия (Эльба)", "Товарный знак Mentora", "КЭП", "Договор с Anthropic (API Terms)"] },
-          { phase: "Первый B2B",      color: "#4561E8", items: ["Преобразование в ООО или параллельное ООО", "Шаблон договора с организациями", "Образовательная лицензия (при необходимости)"] },
-          { phase: "Раунд инвестиций", color: "#a78bfa", items: ["Реструктуризация (ООО → АО или Кипр / ОАЭ холдинг)", "ESOP для команды", "Due diligence пакет", "Юрист по венчурным сделкам"] },
+          { phase: "Сейчас · НПД 4%",    color: "#22c55e", items: ["Самозанятость оформлена ✓", "YooKassa подключена ✓", "Оферта + политика персданных на сайте", "Уведомление РКН (персданные)"] },
+          { phase: "≈ 150–200K ₽/мес",   color: "#f59e0b", items: ["Переход на ИП + УСН Доходы 6%", "Расчётный счёт (Тинькофф Бизнес)", "Переключить YooKassa", "Онлайн-бухгалтерия Эльба"] },
+          { phase: "ARR > 5–10 млн ₽",   color: "#4561E8", items: ["Товарный знак «Mentora» (Роспатент)", "КЭП для отчётности", "Договор с API-провайдерами (Anthropic ToS)"] },
+          { phase: "Первый B2B",          color: "#a78bfa", items: ["ООО (параллельно или вместо ИП)", "Шаблон договора для организаций", "Образовательная лицензия при необходимости"] },
+          { phase: "Раунд инвестиций",    color: "#fbbf24", items: ["Реструктуризация (ООО → АО или холдинг ОАЭ/Кипр)", "ESOP для команды", "Due diligence пакет", "Юрист по венчурным сделкам"] },
         ].map(({ phase, color, items }) => (
           <div key={phase} style={{ display: "flex", gap: 14, marginBottom: 16 }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
@@ -1309,7 +1350,7 @@ function LegalTab({ annualRev }: { annualRev: number }) {
       {/* ── Дисклеймер ── */}
       <div style={{ padding: "10px 14px", borderRadius: 10, background: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)", border: `1px solid ${BOR}` }}>
         <p style={{ fontSize: 11, color: MUTED, margin: 0, lineHeight: 1.6 }}>
-          ⚠️ <strong style={{ color: TEXT }}>Это информационная справка, не юридическая консультация.</strong> Для регистрации ИП/ООО, получения лицензий и структурирования сделок — обращайся к юристу. Пороги УСН актуальны на 2024 г. с учётом дефлятора.
+          ⚠️ <strong style={{ color: TEXT }}>Это информационная справка, не юридическая консультация.</strong> Для регистрации, получения лицензий и структурирования сделок обращайся к юристу. Лимиты и ставки актуальны на 2024–2025 гг.
         </p>
       </div>
     </div>
