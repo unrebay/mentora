@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useTheme } from "@/components/ThemeProvider";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 interface LandingNavProps {
@@ -17,12 +18,17 @@ interface LandingNavProps {
 
 export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: LandingNavProps = {}) {
   const t = useTranslations("nav");
-  /** true while viewport is over the dark hero section */
+  const { theme } = useTheme();
+  const isDarkTheme = theme === "dark";
+  /** true while viewport is over the dark hero section (or whole page in dark theme) */
   const [isDark, setIsDark] = useState(alwaysLight ? false : true);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     if (alwaysLight) { setIsDark(false); return; }
+    // In dark theme the page background is dark from top to bottom — keep nav in
+    // its dark/galaxy styling at all scroll positions.
+    if (isDarkTheme) { setIsDark(true); return; }
     function update() {
       const subjects = document.getElementById("subjects");
       if (!subjects) { setIsDark(true); return; }
@@ -31,7 +37,7 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
     update();
     window.addEventListener("scroll", update, { passive: true });
     return () => window.removeEventListener("scroll", update);
-  }, [alwaysLight]);
+  }, [alwaysLight, isDarkTheme]);
 
   useEffect(() => {
     if (!mobileOpen) return;
