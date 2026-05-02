@@ -154,6 +154,15 @@ export default async function HomePage() {
       {/* HERO — padding-top compensates for the negative margin (100px covers nav on all devices) */}
       <section className="relative overflow-hidden" style={{ paddingTop: "100px" }}>
 
+        {/* ── Subtle left-side darkening so hero text stays readable over the galaxy (max ~12% alpha) ── */}
+        <div className="absolute inset-0 pointer-events-none hidden md:block z-[1]" style={{
+          background: "linear-gradient(to right, rgba(5,10,20,0.12) 0%, rgba(5,10,20,0.09) 30%, rgba(5,10,20,0.04) 55%, rgba(5,10,20,0) 80%)",
+        }} />
+        {/* Mobile: uniform thin overlay (text takes full width on small screens) */}
+        <div className="absolute inset-0 pointer-events-none md:hidden z-[1]" style={{
+          background: "rgba(5,10,20,0.10)",
+        }} />
+
         {/* ── Hero grid — fills full viewport height ── */}
         <div className="relative z-10 max-w-6xl mx-auto px-6 w-full" style={{ minHeight: "calc(100vh - 100px)", display: "flex", alignItems: "center" }}>
           <div className="grid md:grid-cols-2 gap-12 items-center w-full py-10">
