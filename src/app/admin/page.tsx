@@ -499,6 +499,21 @@ function TeamTab() {
 
 // ── Roadmap data ──────────────────────────────────────────────────────────────
 const ROADMAP_STORAGE_KEY = "mentora_admin_roadmap_v3";
+const CUSTOM_TASKS_KEY    = "mentora_admin_custom_tasks_v1";
+const TASK_ORDER_KEY      = "mentora_admin_task_order_v1";
+
+function loadCustomTasks(): Record<string, Array<{id:string;label:string;tag?:string}>> {
+  try { return JSON.parse(localStorage.getItem(CUSTOM_TASKS_KEY) ?? "{}"); } catch { return {}; }
+}
+function saveCustomTasks(d: Record<string, Array<{id:string;label:string;tag?:string}>>) {
+  localStorage.setItem(CUSTOM_TASKS_KEY, JSON.stringify(d));
+}
+function loadTaskOrder(): Record<string, string[]> {
+  try { return JSON.parse(localStorage.getItem(TASK_ORDER_KEY) ?? "{}"); } catch { return {}; }
+}
+function saveTaskOrder(d: Record<string, string[]>) {
+  localStorage.setItem(TASK_ORDER_KEY, JSON.stringify(d));
+}
 
 interface RTask  { id: string; label: string; tag?: string }
 interface RBlock { id: string; title: string; emoji: string; color: string; tasks: RTask[] }
@@ -610,7 +625,8 @@ function MilestoneTimeline({ checked }: { checked: Set<string> }) {
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 12, color: MUTED }}>{done} / {ROADMAP_TOTAL} задач</span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: TEXT, minWidth: 36, textAlign: "right" }}>{pct}%</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: TEXT }}>{pct}%</span>
+          <span style={{ fontSize: 18, lineHeight: 1 }}>🦄</span>
         </div>
       </div>
 
@@ -675,10 +691,7 @@ function MilestoneTimeline({ checked }: { checked: Set<string> }) {
           );
         })}
 
-        {/* Unicorn — floats just past the last milestone */}
-        <div style={{ position: "absolute", top: -18, right: -10, fontSize: 18, lineHeight: 1, userSelect: "none" }}>
-          🦄
-        </div>
+
       </div>
     </div>
   );
@@ -832,8 +845,69 @@ function RevenueCalculator() {
 
 // ── RoadmapTab ─────────────────────────────────────────────────────────────────
 function RoadmapTab({ checked, onToggle, onClear }: { checked: Set<string>; onToggle(id: string): void; onClear(): void }) {
-  const { CARD, BOR, TEXT, MUTED } = useTok();
+  const { CARD, BOR, TEXT, MUTED, isDark } = useTok();
   const done = checked.size;
+
+  // Custom tasks per block: { [blockId]: [{id, label}] }
+  const [customTasks, setCustomTasks] = useState<Record<string, Array<{id:string;label:string}>>>(() => loadCustomTasks());
+  // Order of task IDs per block (for drag-and-drop)
+  const [taskOrder, setTaskOrder] = useState<Record<string, string[]>>(() => loadTaskOrder());
+  // Add-task input per block
+  const [addInput, setAddInput] = useState<Record<string, string>>({});
+  // Drag state
+  const dragRef = useRef<{blockId:string; fromIdx:number} | null>(null);
+  const [dragOver, setDragOver] = useState<{blockId:string; idx:number} | null>(null);
+
+  // Merge static + custom tasks, then apply saved order
+  const getBlockTasks = (block: typeof ROADMAP_BLOCKS[0]) => {
+    const allTasks = [...block.tasks, ...(customTasks[block.id] ?? [])];
+    const order = taskOrder[block.id];
+    if (!order) return allTasks;
+    const byId = Object.fromEntries(allTasks.map(t => [t.id, t]));
+    const ordered = order.map(id => byId[id]).filter(Boolean);
+    const unordered = allTasks.filter(t => !order.includes(t.id));
+    return [...ordered, ...unordered];
+  };
+
+  const addTask = (blockId: string) => {
+    const label = (addInput[blockId] ?? "").trim();
+    if (!label) return;
+    const id = `custom_${blockId}_${Date.now()}`;
+    const next = { ...customTasks, [blockId]: [...(customTasks[blockId] ?? []), { id, label }] };
+    setCustomTasks(next);
+    saveCustomTasks(next);
+    setAddInput(a => ({ ...a, [blockId]: "" }));
+  };
+
+  const removeCustomTask = (blockId: string, taskId: string) => {
+    const next = { ...customTasks, [blockId]: (customTasks[blockId] ?? []).filter(t => t.id !== taskId) };
+    setCustomTasks(next);
+    saveCustomTasks(next);
+  };
+
+  const handleDragStart = (blockId: string, idx: number) => {
+    dragRef.current = { blockId, fromIdx: idx };
+  };
+  const handleDragOver = (e: React.DragEvent, blockId: string, idx: number) => {
+    e.preventDefault();
+    setDragOver({ blockId, idx });
+  };
+  const handleDrop = (blockId: string) => {
+    if (!dragRef.current || dragRef.current.blockId !== blockId) return;
+    const { fromIdx } = dragRef.current;
+    const toIdx = dragOver?.idx ?? fromIdx;
+    if (fromIdx === toIdx) { dragRef.current = null; setDragOver(null); return; }
+    const block = ROADMAP_BLOCKS.find(b => b.id === blockId)!;
+    const tasks = getBlockTasks(block);
+    const ids = tasks.map(t => t.id);
+    const [moved] = ids.splice(fromIdx, 1);
+    ids.splice(toIdx, 0, moved);
+    const next = { ...taskOrder, [blockId]: ids };
+    setTaskOrder(next);
+    saveTaskOrder(next);
+    dragRef.current = null;
+    setDragOver(null);
+  };
 
   return (
     <div>
@@ -848,8 +922,9 @@ function RoadmapTab({ checked, onToggle, onClear }: { checked: Set<string>; onTo
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         {ROADMAP_BLOCKS.map(block => {
-          const bDone = block.tasks.filter(t => checked.has(t.id)).length;
-          const bPct  = Math.round(bDone / block.tasks.length * 100);
+          const tasks = getBlockTasks(block);
+          const bDone = tasks.filter(t => checked.has(t.id)).length;
+          const bPct  = Math.round(bDone / tasks.length * 100);
           return (
             <Card key={block.id} ch={
               <>
@@ -859,7 +934,7 @@ function RoadmapTab({ checked, onToggle, onClear }: { checked: Set<string>; onTo
                     <span style={{ fontSize: 14, fontWeight: 700, color: TEXT }}>{block.title}</span>
                   </div>
                   <span style={{ fontSize: 11, fontWeight: 700, color: block.color, background: block.color + "1a", padding: "2px 8px", borderRadius: 99, border: `1px solid ${block.color}30` }}>
-                    {bDone}/{block.tasks.length}
+                    {bDone}/{tasks.length}
                   </span>
                 </div>
 
@@ -868,30 +943,90 @@ function RoadmapTab({ checked, onToggle, onClear }: { checked: Set<string>; onTo
                   <div style={{ height: "100%", width: bPct + "%", background: block.color, borderRadius: 99, transition: "width .5s" }} />
                 </div>
 
-                {block.tasks.map((task, ti) => {
-                  const done = checked.has(task.id);
-                  return (
-                    <label key={task.id} htmlFor={`rtask_${task.id}`} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "7px 0", borderBottom: ti < block.tasks.length - 1 ? `1px solid ${BOR}` : "none", cursor: "pointer" }}>
-                      {/* Custom checkbox */}
-                      <div style={{ flexShrink: 0, width: 16, height: 16, borderRadius: 4, marginTop: 1, border: `2px solid ${done ? block.color : BOR}`, background: done ? block.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s" }}>
-                        {done && (
-                          <svg viewBox="0 0 10 8" width="9" height="9">
-                            <path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
+                {/* Task list with drag-and-drop */}
+                <div onDragOver={e => e.preventDefault()} onDrop={() => handleDrop(block.id)}>
+                  {tasks.map((task, ti) => {
+                    const isDone = checked.has(task.id);
+                    const isCustom = task.id.startsWith("custom_");
+                    const isDragging = dragOver?.blockId === block.id && dragOver.idx === ti;
+                    return (
+                      <div
+                        key={task.id}
+                        draggable
+                        onDragStart={() => handleDragStart(block.id, ti)}
+                        onDragOver={e => handleDragOver(e, block.id, ti)}
+                        onDrop={() => handleDrop(block.id)}
+                        style={{
+                          display: "flex", alignItems: "flex-start", gap: 8, padding: "7px 0",
+                          borderBottom: ti < tasks.length - 1 ? `1px solid ${BOR}` : "none",
+                          borderTop: isDragging ? `2px solid ${block.color}` : "2px solid transparent",
+                          cursor: "grab", transition: "border-color .15s",
+                          opacity: dragRef.current?.blockId === block.id && dragRef.current.fromIdx === ti ? 0.4 : 1,
+                        }}
+                      >
+                        {/* Drag handle */}
+                        <div style={{ flexShrink: 0, color: isDone ? "transparent" : (isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)"), marginTop: 2, fontSize: 11, lineHeight: 1, userSelect: "none" }}>⠿</div>
+
+                        {/* Checkbox */}
+                        <div
+                          onClick={() => onToggle(task.id)}
+                          style={{ flexShrink: 0, width: 16, height: 16, borderRadius: 4, marginTop: 1, border: `2px solid ${isDone ? block.color : BOR}`, background: isDone ? block.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s", cursor: "pointer" }}
+                        >
+                          {isDone && (
+                            <svg viewBox="0 0 10 8" width="9" height="9">
+                              <path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          )}
+                        </div>
+
+                        <span
+                          onClick={() => onToggle(task.id)}
+                          style={{ fontSize: 13, color: isDone ? MUTED : TEXT, textDecoration: isDone ? "line-through" : "none", lineHeight: 1.5, flex: 1, transition: "all .2s", cursor: "pointer" }}
+                        >
+                          {task.label}
+                        </span>
+
+                        {(task as {tag?:string}).tag && (
+                          <span style={{ flexShrink: 0, fontSize: 10, fontWeight: 600, color: block.color, background: block.color + "15", padding: "1px 6px", borderRadius: 4, marginTop: 2 }}>
+                            {(task as {tag?:string}).tag}
+                          </span>
+                        )}
+
+                        {/* Delete button for custom tasks */}
+                        {isCustom && (
+                          <button
+                            onClick={() => removeCustomTask(block.id, task.id)}
+                            style={{ flexShrink: 0, background: "none", border: "none", cursor: "pointer", color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)", fontSize: 14, lineHeight: 1, padding: "0 2px", marginTop: 1 }}
+                            title="Удалить"
+                          >×</button>
                         )}
                       </div>
-                      <input id={`rtask_${task.id}`} type="checkbox" checked={done} onChange={() => onToggle(task.id)} style={{ display: "none" }} />
-                      <span style={{ fontSize: 13, color: done ? MUTED : TEXT, textDecoration: done ? "line-through" : "none", lineHeight: 1.5, flex: 1, transition: "all .2s" }}>
-                        {task.label}
-                      </span>
-                      {task.tag && (
-                        <span style={{ flexShrink: 0, fontSize: 10, fontWeight: 600, color: block.color, background: block.color + "15", padding: "1px 6px", borderRadius: 4, marginTop: 2 }}>
-                          {task.tag}
-                        </span>
-                      )}
-                    </label>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+
+                {/* Add task input */}
+                <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
+                  <input
+                    value={addInput[block.id] ?? ""}
+                    onChange={e => setAddInput(a => ({ ...a, [block.id]: e.target.value }))}
+                    onKeyDown={e => { if (e.key === "Enter") addTask(block.id); }}
+                    placeholder="Добавить задачу..."
+                    style={{
+                      flex: 1, fontSize: 12, padding: "5px 10px", borderRadius: 8,
+                      border: `1px solid ${BOR}`, background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+                      color: TEXT, outline: "none",
+                    }}
+                  />
+                  <button
+                    onClick={() => addTask(block.id)}
+                    style={{
+                      flexShrink: 0, fontSize: 18, lineHeight: 1, padding: "4px 10px",
+                      borderRadius: 8, border: `1px solid ${block.color}40`,
+                      background: block.color + "15", color: block.color, cursor: "pointer",
+                    }}
+                  >+</button>
+                </div>
               </>
             } />
           );
@@ -905,7 +1040,6 @@ function RoadmapTab({ checked, onToggle, onClear }: { checked: Set<string>; onTo
           <p style={{ fontSize: 12, color: MUTED, margin: 0 }}>1 июня — старт. Поехали 🚀</p>
         </div>
       )}
-
     </div>
   );
 }
