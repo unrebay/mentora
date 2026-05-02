@@ -347,26 +347,46 @@ export default async function HomePage() {
                 return (
                   <FadeUp key={key} delay={i * 0.07} className="h-full">
                   <div
-                    className="rounded-2xl p-6 flex flex-col gap-4 transition-all duration-200 hover:scale-[1.01] h-full"
-                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                        style={{ background: `${color}22`, color }}>
+                    className="group relative rounded-2xl p-6 flex flex-col gap-4 transition-all duration-300 hover:-translate-y-1 h-full overflow-hidden"
+                    style={{
+                      background: "rgba(6,6,18,0.42)",
+                      backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                      WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                      border: "1px solid rgba(255,255,255,0.09)",
+                      borderLeft: `2.5px solid ${color}55`,
+                      boxShadow: `0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 32px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset`,
+                    }}>
+                    {/* Color spotlight — top-right corner, intensifies on hover */}
+                    <div aria-hidden className="absolute -top-16 -right-16 w-48 h-48 rounded-full pointer-events-none transition-opacity duration-500 opacity-50 group-hover:opacity-95"
+                      style={{ background: `radial-gradient(circle, ${color}33 0%, transparent 65%)` }} />
+                    <div className="relative z-10 flex items-start justify-between gap-2">
+                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105"
+                        style={{
+                          background: `linear-gradient(135deg, ${color}33, ${color}0F)`,
+                          border: `1px solid ${color}40`,
+                          color,
+                          boxShadow: `0 4px 14px ${color}22, 0 1px 0 rgba(255,255,255,0.08) inset`,
+                        }}>
                         <svg viewBox="0 0 24 24" className="w-5 h-5" dangerouslySetInnerHTML={{ __html: icon }} />
                       </div>
                       {tag && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 mt-1"
-                          style={{ background: `${color}22`, color, border: `1px solid ${color}40` }}>
+                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 mt-1"
+                          style={{
+                            background: `linear-gradient(135deg, ${color}26, ${color}0D)`,
+                            color,
+                            border: `1px solid ${color}40`,
+                            boxShadow: `0 2px 8px ${color}1A`,
+                          }}>
                           {tag}
                         </span>
                       )}
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-sm mb-1.5 text-white">{title}</h3>
-                      <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{desc}</p>
+                    <div className="relative z-10">
+                      <h3 className="font-semibold text-base mb-2 text-white">{title}</h3>
+                      <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>{desc}</p>
                     </div>
                     {isPrice && (
-                      <div className="mt-1 space-y-2">
+                      <div className="relative z-10 mt-1 space-y-2">
                         {[
                           { label: t("features.price.tutorLabel"), value: t("features.price.tutorValue"), sub: t("features.price.tutorSub"), highlight: false },
                           { label: t("features.price.proLabel"), value: t("features.price.proValue"), sub: t("features.price.proSub"), highlight: true },
