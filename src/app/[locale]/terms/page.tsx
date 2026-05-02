@@ -229,7 +229,7 @@ export default function TermsPage() {
               <p>Исполнитель: <span style={{ color: "rgba(255,255,255,0.92)" }}>Белашов Андрей Владимирович</span></p>
               <p>ИНН: <span style={{ color: "rgba(255,255,255,0.92)" }}>325005748248</span></p>
               <p>Статус: <span style={{ color: "rgba(255,255,255,0.92)" }}>Самозанятый (НПД)</span></p>
-              <p>Email: <a href="mailto:hi@mentora.su" style={{ color: "#4561E8" }} className="hover:underline">hi@mentora.su</a></p>
+              <p>Email: <a href="mailto:hello@mentora.su" style={{ color: "#4561E8" }} className="hover:underline">hello@mentora.su</a></p>
               <p>Сайт: <a href="https://mentora.su" style={{ color: "#4561E8" }} className="hover:underline">mentora.su</a></p>
             </div>
           </section>
