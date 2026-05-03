@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { BOT_PLATFORM_KNOWLEDGE } from "@/lib/bot-knowledge";
 
-const BOT_TOKEN     = process.env.TELEGRAM_SUPPORT_BOT_TOKEN ?? "";
+const BOT_TOKEN     = process.env.TELEGRAM_SUPPORT_BOT_TOKEN ?? process.env.TELEGRAM_BOT_TOKEN ?? "";
 const ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID ?? "";
 const anthropic     = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY ?? "" });
 
@@ -301,4 +301,40 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({ ok: true, service: "Mentora AI support bot" });
+}
+
+// ── Diagnostic GET ─────────────────────────────────────────────────────────
+// https://mentora.su/api/telegram/webhook?diag=1 — verify support bot token
+// + check whether the webhook URL is registered with Telegram.
+export async function GET(req: NextRequest) {
+  if (req.nextUrl.searchParams.get("diag") !== "1") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  if (!BOT_TOKEN) {
+    return NextResponse.json({
+      bot_token_env: "missing — neither TELEGRAM_SUPPORT_BOT_TOKEN nor TELEGRAM_BOT_TOKEN set",
+      admin_chat_id: ADMIN_CHAT_ID || "(missing)",
+    }, { status: 500 });
+  }
+  try {
+    const meRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getMe`);
+    const me = await meRes.json();
+    const wRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getWebhookInfo`);
+    const w = await wRes.json();
+    return NextResponse.json({
+      bot_id: BOT_TOKEN.split(":")[0],
+      getMe_ok: me.ok,
+      bot_username: me.result?.username ?? null,
+      webhook_url: w.result?.url ?? null,
+      pending_update_count: w.result?.pending_update_count ?? 0,
+      last_error_date: w.result?.last_error_date ?? null,
+      last_error_message: w.result?.last_error_message ?? null,
+      admin_chat_id_set: !!ADMIN_CHAT_ID,
+      anthropic_api_key_set: !!process.env.ANTHROPIC_API_KEY,
+    });
+  } catch (e: unknown) {
+    return NextResponse.json({
+      error: e instanceof Error ? e.message : String(e),
+    }, { status: 500 });
+  }
 }
