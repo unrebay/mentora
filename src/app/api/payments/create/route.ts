@@ -8,7 +8,7 @@ const YOOKASSA_SECRET_KEY = process.env.YOOKASSA_SECRET_KEY!;
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://mentora.su";
 
 const PLANS = {
-  monthly:        { amount: "399.00",  amountInt: 39900,  label: "Mentora Pro — подписка на 1 месяц",    tier: "pro"    },
+  monthly:        { amount: "499.00",  amountInt: 49900,  label: "Mentora Pro — подписка на 1 месяц",    tier: "pro"    },
   annual:         { amount: "2990.00", amountInt: 299000, label: "Mentora Pro — подписка на 1 год",        tier: "pro"    },
   ultima_monthly: { amount: "799.00",  amountInt: 79900,  label: "Mentora Ultima — подписка на 1 месяц", tier: "ultima" },
   ultima_annual:  { amount: "5990.00", amountInt: 599000, label: "Mentora Ultima — подписка на 1 год",    tier: "ultima" },

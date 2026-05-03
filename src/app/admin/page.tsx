@@ -7,7 +7,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import ThemeToggle from "@/components/ThemeToggle";
 
 // ── Pricing ───────────────────────────────────────────────────────────────────
-const PRO_M = 399, PRO_Y = 2990, ULT_M = 799, ULT_Y = 5990;
+const PRO_M = 499, PRO_Y = 2990, ULT_M = 799, ULT_Y = 5990;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Stats {
@@ -708,7 +708,7 @@ function RevenueCalculator() {
   const [pctAnn, setPctAnn]   = useState(30);
   const [convRate, setConvRate] = useState(5); // % conversion: paying / total users
 
-  const PRO_M = 399, PRO_Y = 2990, ULT_M = 799, ULT_Y = 5990;
+  const PRO_M = 499, PRO_Y = 2990, ULT_M = 799, ULT_Y = 5990;
 
   const proCount    = Math.round(total * pctPro / 100);
   const ultCount    = total - proCount;
@@ -1635,7 +1635,7 @@ export default function AdminPanel() {
               <Card ch={<>
                 <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 20 }}>Разбивка по тарифам</p>
                 {[
-                  { l: "Pro ежемес. (399₽)",    n: Math.round(pro * .7), mrr: Math.round(pro * .7 * PRO_M), c: "#60a5fa" },
+                  { l: "Pro ежемес. (499₽)",    n: Math.round(pro * .7), mrr: Math.round(pro * .7 * PRO_M), c: "#60a5fa" },
                   { l: "Pro годовой (249₽/мес)", n: Math.round(pro * .3), mrr: Math.round(pro * .3 * PRO_Y/12), c: "#60a5fa88" },
                   { l: "Ultima ежемес. (799₽)",  n: Math.round(ult * .7), mrr: Math.round(ult * .7 * ULT_M), c: "#a78bfa" },
                   { l: "Ultima годовой (499₽)",  n: Math.round(ult * .3), mrr: Math.round(ult * .3 * ULT_Y/12), c: "#a78bfa88" },
