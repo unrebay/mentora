@@ -258,26 +258,25 @@ export default function GalaxyCanvas({ className }: Props) {
           sp.scale.set(sz, sz, 1); sp.position.copy(npos); mainGrp.add(sp); return sp;
         };
 
-        // 3D ORB — much smaller (1.7× topic size). Topic = 0.0225, science = 0.038
-        const orbR = isSecond ? 0.030 : 0.038;
+        // 3D ORB — sciences clearly bigger than topics. Topic ~0.018, science 0.22/0.30
+        const orbR = isSecond ? 0.22 : 0.30;
         const orb = new THREE.Mesh(
-          new THREE.SphereGeometry(orbR, 14, 12),
+          new THREE.SphereGeometry(orbR, 18, 14),
           new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isSecond ? 0.92 : 1.0 })
         );
         orb.position.copy(npos); mainGrp.add(orb);
-        // Colored halo (additive) — orb's own-color glow
         const halo = new THREE.Mesh(
-          new THREE.SphereGeometry(orbR * 2.4, 12, 10),
-          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isSecond ? 0.22 : 0.34, blending: ADD, depthWrite: false })
+          new THREE.SphereGeometry(orbR * 1.85, 14, 12),
+          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isSecond ? 0.20 : 0.32, blending: ADD, depthWrite: false })
         );
         halo.position.copy(npos); mainGrp.add(halo);
-        // Mid glow (animated) — small proportional aura
-        const gsz = isSecond ? 0.40 : 0.55;
-        const gop = isSecond ? 0.20 : 0.32;
+        // Mid glow (animated) — proportional bloom for the new orb size
+        const gsz = isSecond ? 1.4 : 1.9;
+        const gop = isSecond ? 0.10 : 0.16;
         const gsp = mkSp(gsz, gop);
         sciGlows.push(gsp); sciGlowOps.push(gop); sciGlowSzs.push(gsz);
         // Outer haze — gentle bloom
-        mkSp(isSecond ? 0.85 : 1.20, isSecond ? 0.05 : 0.08);
+        mkSp(isSecond ? 3.0 : 4.0, isSecond ? 0.025 : 0.04);
       }
 
       // ── Graph edges ───────────────────────────────────────────────────────────
@@ -289,7 +288,7 @@ export default function GalaxyCanvas({ className }: Props) {
         interE.push([sciPos[ia], sciPos[ib]]);
         mainGrp.add(new THREE.Line(
           new THREE.BufferGeometry().setFromPoints([sciPos[ia], sciPos[ib]]),
-          new THREE.LineBasicMaterial({ color:0x6688f0, transparent:true, opacity:0.40, blending:ADD, depthWrite:false })
+          new THREE.LineBasicMaterial({ color:0x4466cc, transparent:true, opacity:0.22, blending:ADD, depthWrite:false })
         ));
       }
       // Cross-links: second ring → first ring
@@ -298,7 +297,7 @@ export default function GalaxyCanvas({ className }: Props) {
         interE.push([a, b]);
         mainGrp.add(new THREE.Line(
           new THREE.BufferGeometry().setFromPoints([a, b]),
-          new THREE.LineBasicMaterial({ color:0x556bbb, transparent:true, opacity:0.24, blending:ADD, depthWrite:false })
+          new THREE.LineBasicMaterial({ color:0x334477, transparent:true, opacity:0.14, blending:ADD, depthWrite:false })
         ));
       }
 
@@ -323,9 +322,9 @@ export default function GalaxyCanvas({ className }: Props) {
       // ── Local node clouds (3D topics — bluish-white tiny orbs with halo) ──────
       const CPER=80, TIN=SUBS.length*CPER;
       // Solid bluish-white orb body (denser geometry → reads as 3D ball)
-      const inM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.0225,10,8),mkMat(0xcfe3ff,0.29),TIN);
+      const inM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.018,8,6),mkMat(0xcfe3ff,0.24),TIN);
       // Soft halo around each topic-orb for subtle glow
-      const inMHalo=new THREE.InstancedMesh(new THREE.SphereGeometry(0.05,8,6),mkMat(0x88aaff,0.07),TIN);
+      const inMHalo=new THREE.InstancedMesh(new THREE.SphereGeometry(0.040,8,6),mkMat(0x88aaff,0.06),TIN);
       mainGrp.add(inM); mainGrp.add(inMHalo);
       { const dum=new THREE.Object3D();
         for (let si=0;si<SUBS.length;si++) { const sp=sciPos[si];
@@ -353,8 +352,8 @@ export default function GalaxyCanvas({ className }: Props) {
           phase: phaseInGroup * 0.6,         // phase for sin-pulsation
         };
       });
-      const impIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.20,12,10),mkMat(0xddeaff,0.95),IMP_N);
-      const impGlowIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.55,10,8),mkMat(0x5577ff,0.45),IMP_N);
+      const impIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.045,8,6),mkMat(0xaaccff,0.55),IMP_N);
+      const impGlowIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.13,8,6),mkMat(0x3355aa,0.18),IMP_N);
       mainGrp.add(impIM); mainGrp.add(impGlowIM);
       const impD=new THREE.Object3D();
 
@@ -443,7 +442,7 @@ export default function GalaxyCanvas({ className }: Props) {
             impD.position.lerpVectors(ea,eb,s.t);
             const fade=Math.sin(Math.max(0,Math.min(1,s.t))*Math.PI);
             // Wave pulsation along the current — gives the "flowing AC" feel
-            const wave = 0.6 + 0.6 * Math.sin(t * 4.0 + s.phase);
+            const wave = 0.65 + 0.35 * Math.sin(t * 3.0 + s.phase);
             impD.scale.setScalar(Math.max(0.001, fade * 1.1 * wave));
             impD.updateMatrix();
           } else { impD.position.set(0,0,0); impD.scale.setScalar(0.001); impD.updateMatrix(); }

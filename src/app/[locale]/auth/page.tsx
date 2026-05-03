@@ -246,26 +246,26 @@ function AuthGalaxy() {
           const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, opacity:op, blending:ADD, depthWrite:false }));
           sp.scale.set(sz,sz,1); sp.position.copy(npos); mainGrp.add(sp); return sp;
         };
-        // 3D ORB — much smaller (1.7× topic size)
-        const orbR = isActive ? 0.046 : isSecond ? 0.030 : 0.038;
+        // 3D ORB — sciences clearly bigger than topics
+        const orbR = isActive ? 0.36 : isSecond ? 0.22 : 0.30;
         const orbOp = isActive ? 1.0 : isSecond ? 0.92 : 0.98;
         const orb = new THREE.Mesh(
-          new THREE.SphereGeometry(orbR, 14, 12),
+          new THREE.SphereGeometry(orbR, 18, 14),
           new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: orbOp })
         );
         orb.position.copy(npos); mainGrp.add(orb);
         const halo = new THREE.Mesh(
-          new THREE.SphereGeometry(orbR * 2.4, 12, 10),
-          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 0.40 : isSecond ? 0.22 : 0.34, blending: ADD, depthWrite: false })
+          new THREE.SphereGeometry(orbR * 1.85, 14, 12),
+          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 0.40 : isSecond ? 0.20 : 0.32, blending: ADD, depthWrite: false })
         );
         halo.position.copy(npos); mainGrp.add(halo);
-        // Mid glow — small proportional aura
-        const gsz = isActive?0.70:isSecond?0.40:0.55;
-        const gop = isActive?0.45:isSecond?0.20:0.32;
+        // Mid glow — proportional bloom for the new orb size
+        const gsz = isActive?2.4:isSecond?1.4:1.9;
+        const gop = isActive?0.22:isSecond?0.10:0.16;
         const gsp = mkSp(gsz, gop);
         sciGlows.push(gsp); sciGlowOps.push(gop); sciGlowSzs.push(gsz);
         // Outer diffuse haze
-        mkSp(isActive?1.50:isSecond?0.85:1.20, isActive?0.10:isSecond?0.05:0.08);
+        mkSp(isActive?5.0:isSecond?3.0:4.0, isActive?0.05:isSecond?0.025:0.04);
       }
 
       // ── Comets — occasional fading streaks ──────────────────────────────
@@ -321,8 +321,8 @@ function AuthGalaxy() {
 
       // Local clouds around each node — 3D bluish-white topic orbs (with halo)
       const CPER=80,TIN=SUBS.length*CPER;
-      const inM     = new THREE.InstancedMesh(new THREE.SphereGeometry(0.0225,10,8), mkMat(0xcfe3ff,0.29), TIN);
-      const inMHalo = new THREE.InstancedMesh(new THREE.SphereGeometry(0.05,8,6),  mkMat(0x88aaff,0.07), TIN);
+      const inM     = new THREE.InstancedMesh(new THREE.SphereGeometry(0.018,8,6), mkMat(0xcfe3ff,0.24), TIN);
+      const inMHalo = new THREE.InstancedMesh(new THREE.SphereGeometry(0.040,8,6),  mkMat(0x88aaff,0.06), TIN);
       mainGrp.add(inM); mainGrp.add(inMHalo);
       { const dum=new THREE.Object3D();
         for (let si=0;si<SUBS.length;si++) { const sp=sciPos[si];
@@ -344,8 +344,8 @@ function AuthGalaxy() {
         const phaseInGroup = i % WAVE_PER_EDGE;
         return { edgeIdx, t: -phaseInGroup * 0.16, speed: 0.0028 + Math.random() * 0.0014, phase: phaseInGroup * 0.6 };
       });
-      const impIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.20,12,10),mkMat(0xddeaff,0.98),IMP_N);
-      const impGlowIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.55,10,8),mkMat(0x5577ff,0.55),IMP_N);
+      const impIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.045,8,6),mkMat(0xaaccff,0.55),IMP_N);
+      const impGlowIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.13,8,6),mkMat(0x3355aa,0.18),IMP_N);
       mainGrp.add(impIM); mainGrp.add(impGlowIM);
       const impD=new THREE.Object3D();
 
@@ -425,7 +425,7 @@ function AuthGalaxy() {
             const[ea,eb]=interE[s.edgeIdx];
             impD.position.lerpVectors(ea,eb,s.t);
             const fade=Math.sin(Math.max(0,Math.min(1,s.t))*Math.PI);
-            const wave = 0.6 + 0.6 * Math.sin(t * 4.0 + s.phase);
+            const wave = 0.65 + 0.35 * Math.sin(t * 3.0 + s.phase);
             impD.scale.setScalar(Math.max(0.001, fade * 1.1 * wave));
             impD.updateMatrix();
           } else { impD.position.set(0,0,0); impD.scale.setScalar(0.001); impD.updateMatrix(); }

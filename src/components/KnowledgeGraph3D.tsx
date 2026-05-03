@@ -378,25 +378,25 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
           const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, opacity:op, blending:ADD, depthWrite:false }));
           sp.scale.set(sz,sz,1); sp.position.copy(pos); mainGrp.add(sp); return sp;
         };
-        // 3D ORB — much smaller (1.7× topic size)
-        const orbR = isActive ? 0.046 : 0.038;
+        // 3D ORB — sciences clearly bigger than topics
+        const orbR = isActive ? 0.36 : 0.30;
         const orb = new THREE.Mesh(
-          new THREE.SphereGeometry(orbR, 14, 12),
+          new THREE.SphereGeometry(orbR, 18, 14),
           new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 1.0 : 0.98 })
         );
         orb.position.copy(pos); mainGrp.add(orb);
         const halo = new THREE.Mesh(
-          new THREE.SphereGeometry(orbR * 2.4, 12, 10),
+          new THREE.SphereGeometry(orbR * 1.85, 14, 12),
           new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 0.40 : 0.32, blending: ADD, depthWrite: false })
         );
         halo.position.copy(pos); mainGrp.add(halo);
-        // Mid glow (animated) — small proportional aura
-        const gsz = isActive ? 0.70 : 0.55;
-        const gop = isActive ? 0.45 : 0.32;
+        // Mid glow (animated) — proportional bloom for the new orb size
+        const gsz = isActive ? 2.4 : 1.9;
+        const gop = isActive ? 0.22 : 0.16;
         const gsp = mkSp(gsz, gop);
         sciGlows.push(gsp); sciGlowOps.push(gop); sciGlowSzs.push(gsz);
         // Outer diffuse haze
-        mkSp(isActive ? 1.50 : 1.20, isActive ? 0.10 : 0.08);
+        mkSp(isActive ? 5.0 : 4.0, isActive ? 0.05 : 0.04);
       }
 
       // ── Comets — occasional fading streaks ───────────────────────────────────
@@ -427,7 +427,7 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         // Higher contrast edges: opacity 0.20→0.30, brighter blue
         mainGrp.add(new THREE.Line(
           new THREE.BufferGeometry().setFromPoints([sciPos[ia],sciPos[ib]]),
-          new THREE.LineBasicMaterial({ color:0x6688f0, transparent:true, opacity:0.42, blending:ADD, depthWrite:false })
+          new THREE.LineBasicMaterial({ color:0x4466cc, transparent:true, opacity:0.22, blending:ADD, depthWrite:false })
         ));
       }
 
@@ -448,8 +448,8 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
 
       // Chunks (local clouds around each science) — 3D bluish-white topic orbs
       const CPER=110, TIN=SUBS.length*CPER;
-      const inM  = new THREE.InstancedMesh(new THREE.SphereGeometry(0.0225,10,8), mkMat(0xcfe3ff,0.28), TIN);
-      const inM2 = new THREE.InstancedMesh(new THREE.SphereGeometry(0.055,8,6),   mkMat(0x88aaff,0.07), TIN);
+      const inM  = new THREE.InstancedMesh(new THREE.SphereGeometry(0.018,8,6), mkMat(0xcfe3ff,0.24), TIN);
+      const inM2 = new THREE.InstancedMesh(new THREE.SphereGeometry(0.040,8,6),   mkMat(0x88aaff,0.06), TIN);
       mainGrp.add(inM); mainGrp.add(inM2);
       { const dum=new THREE.Object3D();
         for (let si=0;si<SUBS.length;si++) {
@@ -475,7 +475,7 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
             const r=1.6+Math.random()*1.4, th=Math.random()*Math.PI*2, ph=Math.acos(2*Math.random()-1);
             const tx=sp.x+r*Math.sin(ph)*Math.cos(th), ty=sp.y+r*Math.sin(ph)*Math.sin(th), tz=sp.z+r*Math.cos(ph);
             mainGrp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([sp,new THREE.Vector3(tx,ty,tz)]),
-              new THREE.LineBasicMaterial({ color:0x4466bb, transparent:true, opacity:0.16, blending:ADD, depthWrite:false })));
+              new THREE.LineBasicMaterial({ color:0x334477, transparent:true, opacity:0.10, blending:ADD, depthWrite:false })));
             for (let k=0;k<SCN;k++) {
               const t=(k+1)/(SCN+1);
               dum.position.set(sp.x+(tx-sp.x)*t+(Math.random()-.5)*.22, sp.y+(ty-sp.y)*t+(Math.random()-.5)*.22, sp.z+(tz-sp.z)*t+(Math.random()-.5)*.22);
@@ -501,11 +501,11 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
           phase: phaseInGroup * 0.6,
         };
       });
-      const impGeo    = new THREE.SphereGeometry(0.20, 12, 10);
-      const impMat    = new THREE.MeshBasicMaterial({ color: 0xddeaff, transparent: true, opacity: 0.98, blending: ADD, depthWrite: false });
+      const impGeo    = new THREE.SphereGeometry(0.045, 8, 6);
+      const impMat    = new THREE.MeshBasicMaterial({ color: 0xaaccff, transparent: true, opacity: 0.55, blending: ADD, depthWrite: false });
       const impIM     = new THREE.InstancedMesh(impGeo, impMat, IMP_N);
-      const impGGeo   = new THREE.SphereGeometry(0.55, 10, 8);
-      const impGMat   = new THREE.MeshBasicMaterial({ color: 0x5577ff, transparent: true, opacity: 0.55, blending: ADD, depthWrite: false });
+      const impGGeo   = new THREE.SphereGeometry(0.13, 8, 6);
+      const impGMat   = new THREE.MeshBasicMaterial({ color: 0x3355aa, transparent: true, opacity: 0.18, blending: ADD, depthWrite: false });
       const impGlowIM = new THREE.InstancedMesh(impGGeo, impGMat, IMP_N);
       mainGrp.add(impIM); mainGrp.add(impGlowIM);
       const impD = new THREE.Object3D();
@@ -697,7 +697,7 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
             const [ea, eb] = interE[s.edgeIdx];
             impD.position.lerpVectors(ea, eb, s.t);
             const fade = Math.sin(Math.max(0, Math.min(1, s.t)) * Math.PI);
-            const wave = 0.6 + 0.6 * Math.sin(t * 4.0 + s.phase);
+            const wave = 0.65 + 0.35 * Math.sin(t * 3.0 + s.phase);
             impD.scale.setScalar(Math.max(0.001, fade * 1.1 * wave));
             impD.updateMatrix();
           } else {
