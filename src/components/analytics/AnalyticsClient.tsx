@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
+import MeLogo from "@/components/MeLogo";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 export interface SubjectStat {
@@ -81,20 +82,31 @@ function Sparkline({ data, color, height = 28 }: { data: number[]; color: string
 }
 
 // ── KPI card with sparkline ──────────────────────────────────────────────────
-function StatCard({ label, value, color, icon, sparkData, deltaPct }: {
-  label: string; value: string | number; color: string; icon: string;
+function StatCard({ label, value, color, icon, iconNode, sparkData, deltaPct }: {
+  label: string; value: string | number; color: string; icon?: string; iconNode?: React.ReactNode;
   sparkData?: number[]; deltaPct?: number | null;
 }) {
   return (
-    <div className="rounded-2xl p-4 border flex flex-col gap-2 relative overflow-hidden"
+    <div className="rounded-2xl p-4 border flex flex-col gap-2 relative overflow-hidden group transition-all"
       style={{
-        background: "var(--bg-card)",
-        borderColor: "var(--border)",
-        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.04)`,
+        background: `linear-gradient(160deg, ${color}10, ${color}04 60%, transparent), var(--bg-card)`,
+        borderColor: `${color}28`,
+        backdropFilter: "blur(16px) saturate(1.4)",
+        WebkitBackdropFilter: "blur(16px) saturate(1.4)",
+        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px ${color}14, 0 4px 20px rgba(0,0,0,0.04)`,
       }}>
-      <div className="flex items-center justify-between">
-        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${color}18` }}>
-          <svg viewBox="0 0 24 24" width="16" height="16" fill={color}><path d={icon} /></svg>
+      {/* Spotlight in top-right */}
+      <div className="absolute pointer-events-none transition-opacity duration-500" aria-hidden
+        style={{ top: -30, right: -30, width: 120, height: 120, opacity: 0.5,
+          background: `radial-gradient(circle at center, ${color}38, transparent 65%)`, filter: "blur(8px)" }} />
+      <div className="flex items-center justify-between relative">
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+          style={{
+            background: `linear-gradient(135deg, ${color}30, ${color}10)`,
+            border: `1px solid ${color}30`,
+            boxShadow: `inset 0 1px 0 rgba(255,255,255,0.10), 0 4px 12px ${color}22`,
+          }}>
+          {iconNode ?? (icon && <svg viewBox="0 0 24 24" width="18" height="18" fill={color}><path d={icon} /></svg>)}
         </div>
         {deltaPct !== undefined && deltaPct !== null && (
           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
@@ -106,10 +118,10 @@ function StatCard({ label, value, color, icon, sparkData, deltaPct }: {
           </span>
         )}
       </div>
-      <div className="font-black text-2xl leading-tight" style={{ color: "var(--text)" }}>{value}</div>
-      <div className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>{label}</div>
+      <div className="font-black text-2xl leading-tight relative" style={{ color: "var(--text)" }}>{value}</div>
+      <div className="text-[11px] font-medium relative" style={{ color: "var(--text-muted)" }}>{label}</div>
       {sparkData && sparkData.length > 1 && (
-        <div className="mt-1 -mb-1">
+        <div className="mt-1 -mb-1 relative">
           <Sparkline data={sparkData} color={color} height={24} />
         </div>
       )}
@@ -129,12 +141,15 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
     : 100;
 
   return (
-    <div className="rounded-2xl p-5 border" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-      <div className="flex items-center justify-between mb-4">
+    <div className="rounded-2xl p-5 border relative overflow-hidden" style={{ background: "linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01) 60%, transparent), var(--bg-card)", borderColor: "rgba(255,255,255,0.10)", backdropFilter: "blur(16px) saturate(1.3)", WebkitBackdropFilter: "blur(16px) saturate(1.3)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 20px rgba(0,0,0,0.06)" }}>
+      <div className="flex items-center justify-between mb-4 relative">
         <span className="text-xs font-bold tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>
           {t("level.career")}
         </span>
-        <span className="text-xs font-bold" style={{ color: "var(--text-muted)" }}>{totalXP} XP</span>
+        <span className="text-sm font-bold flex items-center gap-1.5" style={{ color: "var(--text)" }}>
+          {totalXP.toLocaleString()}
+          <MeLogo height={14} colorM="#7C3AED" colorE="#7C3AED" />
+        </span>
       </div>
       <div className="relative" style={{ paddingTop: 6, paddingBottom: 26 }}>
         {/* Background line */}
@@ -154,12 +169,25 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
             const current = i === currentIdx;
             return (
               <div key={lvl.key} className="flex flex-col items-center" style={{ flexShrink: 0 }}>
-                <div className={`relative w-7 h-7 rounded-full border-2 flex items-center justify-center ${current ? "scale-125" : ""}`}
+                <div className={`relative rounded-full flex items-center justify-center transition-all duration-500 ${current ? "scale-125" : ""}`}
                   style={{
-                    background: current ? "linear-gradient(135deg, #4561E8, #7C3AED)" : passed ? "#4561E8" : "var(--bg)",
-                    borderColor: current ? "rgba(255,255,255,0.6)" : passed ? "#4561E8" : "var(--border)",
-                    boxShadow: current ? "0 0 16px rgba(124,58,237,0.7)" : passed ? "0 0 6px rgba(69,97,232,0.4)" : "none",
-                    transition: "transform 0.4s ease",
+                    width: current ? 36 : 28, height: current ? 36 : 28,
+                    background: current
+                      ? "radial-gradient(circle at 30% 30%, #8B6CF7, #4561E8 60%, #2D40A8)"
+                      : passed
+                      ? "linear-gradient(135deg, #4561E8, #2D40A8)"
+                      : "rgba(255,255,255,0.04)",
+                    border: current
+                      ? "1.5px solid rgba(255,255,255,0.5)"
+                      : passed
+                      ? "1px solid rgba(124,58,237,0.4)"
+                      : "1px solid rgba(255,255,255,0.10)",
+                    backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+                    boxShadow: current
+                      ? "0 0 24px rgba(124,58,237,0.85), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 4px rgba(0,0,0,0.3)"
+                      : passed
+                      ? "0 4px 12px rgba(69,97,232,0.4), inset 0 1px 0 rgba(255,255,255,0.25)"
+                      : "inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.10)",
                   }}>
                   {passed ? (
                     <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5L20 7" /></svg>
@@ -171,8 +199,9 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
                   <div className="text-[10px] font-bold" style={{ color: current ? "var(--text)" : "var(--text-muted)" }}>
                     {lvl.name}
                   </div>
-                  <div className="text-[9px]" style={{ color: "var(--text-muted)", opacity: 0.7 }}>
-                    {lvl.minXP} XP
+                  <div className="text-[9px] flex items-center justify-center gap-0.5" style={{ color: "var(--text-muted)", opacity: 0.85 }}>
+                    {lvl.minXP}
+                    <MeLogo height={8} colorM="currentColor" colorE="currentColor" />
                   </div>
                 </div>
               </div>
@@ -198,10 +227,16 @@ function GlobalRankCapsule({ rank, total }: { rank: number | null; total: number
   return (
     <div className="rounded-2xl p-4 border flex items-center gap-3 relative overflow-hidden"
       style={{
-        background: "linear-gradient(135deg, rgba(69,97,232,0.10), rgba(124,58,237,0.10))",
-        borderColor: "rgba(124,58,237,0.30)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 20px rgba(124,58,237,0.10)",
+        background: "linear-gradient(160deg, rgba(124,58,237,0.18) 0%, rgba(69,97,232,0.10) 50%, rgba(0,0,0,0.04) 100%)",
+        borderColor: "rgba(124,58,237,0.40)",
+        backdropFilter: "blur(20px) saturate(1.6)",
+        WebkitBackdropFilter: "blur(20px) saturate(1.6)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 0 0 1px rgba(124,58,237,0.18), 0 8px 32px rgba(124,58,237,0.20)",
       }}>
+      {/* Spotlight */}
+      <div className="absolute pointer-events-none" aria-hidden
+        style={{ top: -40, right: -40, width: 140, height: 140, opacity: 0.7,
+          background: "radial-gradient(circle, rgba(159,122,255,0.55), transparent 60%)", filter: "blur(6px)" }} />
       {isTop10 && (
         <div className="absolute -top-3 -right-3 px-2 py-0.5 rounded-bl-xl rounded-tr-xl text-[9px] font-bold text-white"
           style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}>
@@ -246,7 +281,7 @@ function ActivityAreaChart({ days }: { days: ActivityDay[] }) {
   const fillPath = `M ${PAD},${H - PAD} L ${points.split(" ").join(" L ")} L ${W - PAD},${H - PAD} Z`;
 
   return (
-    <div className="rounded-2xl p-5 border" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+    <div className="rounded-2xl p-5 border relative overflow-hidden" style={{ background: "linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01) 60%, transparent), var(--bg-card)", borderColor: "rgba(255,255,255,0.10)", backdropFilter: "blur(16px) saturate(1.3)", WebkitBackdropFilter: "blur(16px) saturate(1.3)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 20px rgba(0,0,0,0.06)" }}>
       <div className="flex items-center justify-between mb-1">
         <div>
           <div className="text-sm font-bold" style={{ color: "var(--text)" }}>{t("title")}</div>
@@ -329,7 +364,7 @@ function GalaxyOfKnowledge({ subjects }: { subjects: SubjectStat[] }) {
   const MAX_H = 140;
 
   return (
-    <div className="rounded-2xl border p-5" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+    <div className="rounded-2xl border p-5 relative overflow-hidden" style={{ background: "linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01) 60%, transparent), var(--bg-card)", borderColor: "rgba(255,255,255,0.10)", backdropFilter: "blur(16px) saturate(1.3)", WebkitBackdropFilter: "blur(16px) saturate(1.3)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 20px rgba(0,0,0,0.06)" }}>
       <div className="flex items-center justify-between mb-4">
         <div>
           <div className="text-sm font-bold" style={{ color: "var(--text)" }}>{t("title")}</div>
@@ -349,8 +384,10 @@ function GalaxyOfKnowledge({ subjects }: { subjects: SubjectStat[] }) {
               <span style={{
                 fontSize: 10, fontWeight: 700, color,
                 opacity: mounted ? 1 : 0, transition: "opacity 0.5s ease 0.4s",
-                minHeight: 14, display: "flex", alignItems: "flex-end",
-              }}>{s.xp}</span>
+                minHeight: 14, display: "flex", alignItems: "center", gap: 2,
+              }}>
+                {s.xp}<MeLogo height={8} colorM="currentColor" colorE="currentColor" />
+              </span>
               <div style={{
                 width: "100%", height: barH, position: "relative",
                 background: `linear-gradient(180deg, ${color}60 0%, ${color}28 80%, ${color}15 100%)`,
@@ -405,7 +442,7 @@ function BadgeGrid({ badges }: { badges: BadgeItem[] }) {
   const groups: BadgeItem["group"][] = ["volume", "consistency", "experience", "mastery"];
 
   return (
-    <div className="rounded-2xl border p-5" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+    <div className="rounded-2xl border p-5 relative overflow-hidden" style={{ background: "linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01) 60%, transparent), var(--bg-card)", borderColor: "rgba(255,255,255,0.10)", backdropFilter: "blur(16px) saturate(1.3)", WebkitBackdropFilter: "blur(16px) saturate(1.3)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 20px rgba(0,0,0,0.06)" }}>
       <div className="flex items-center justify-between mb-5">
         <div>
           <div className="text-sm font-bold" style={{ color: "var(--text)" }}>{t("title")}</div>
@@ -429,19 +466,32 @@ function BadgeGrid({ badges }: { badges: BadgeItem[] }) {
               <div className="grid grid-cols-5 gap-2">
                 {items.map(b => (
                   <div key={b.id} title={`${b.name} — ${b.desc}`}
-                    className="rounded-xl p-2.5 border flex flex-col items-center gap-1.5 transition-all"
+                    className="rounded-xl p-2.5 border flex flex-col items-center gap-1.5 transition-all relative overflow-hidden"
                     style={{
                       background: b.earned
-                        ? `linear-gradient(160deg, ${meta.color}22, ${meta.color}10)`
-                        : "var(--bg-secondary)",
-                      borderColor: b.earned ? `${meta.color}50` : "var(--border)",
-                      boxShadow: b.earned ? `0 4px 16px ${meta.color}25, inset 0 1px 0 rgba(255,255,255,0.06)` : "none",
-                      opacity: b.earned ? 1 : 0.5,
+                        ? `linear-gradient(160deg, ${meta.color}30, ${meta.color}10 60%, transparent)`
+                        : "rgba(255,255,255,0.02)",
+                      borderColor: b.earned ? `${meta.color}55` : "rgba(255,255,255,0.07)",
+                      backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+                      boxShadow: b.earned
+                        ? `0 6px 18px ${meta.color}35, inset 0 1px 0 rgba(255,255,255,0.10), inset 0 0 0 1px ${meta.color}28`
+                        : "inset 0 1px 0 rgba(255,255,255,0.04)",
+                      opacity: b.earned ? 1 : 0.55,
                     }}>
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center"
+                    {b.earned && (
+                      <div className="absolute pointer-events-none" aria-hidden
+                        style={{ top: -10, right: -10, width: 50, height: 50, opacity: 0.6,
+                          background: `radial-gradient(circle, ${meta.color}55, transparent 65%)`, filter: "blur(4px)" }} />
+                    )}
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center relative"
                       style={{
-                        background: b.earned ? meta.color : "var(--border)",
-                        boxShadow: b.earned ? `0 0 12px ${meta.color}90` : "none",
+                        background: b.earned
+                          ? `radial-gradient(circle at 30% 30%, ${meta.color}, ${meta.color}cc 70%)`
+                          : "rgba(255,255,255,0.06)",
+                        border: b.earned ? `1px solid rgba(255,255,255,0.30)` : "1px solid rgba(255,255,255,0.05)",
+                        boxShadow: b.earned
+                          ? `0 0 20px ${meta.color}aa, inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 3px rgba(0,0,0,0.35)`
+                          : "none",
                       }}>
                       <svg viewBox="0 0 24 24" width="18" height="18" fill="white"><path d={meta.icon} /></svg>
                     </div>
@@ -495,16 +545,19 @@ function RecentActivity({ msgs }: { msgs: RecentMsg[] }) {
   if (!msgs.length) return null;
 
   return (
-    <div className="rounded-2xl border p-5" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+    <div className="rounded-2xl border p-5 relative overflow-hidden" style={{ background: "linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01) 60%, transparent), var(--bg-card)", borderColor: "rgba(255,255,255,0.10)", backdropFilter: "blur(16px) saturate(1.3)", WebkitBackdropFilter: "blur(16px) saturate(1.3)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 20px rgba(0,0,0,0.06)" }}>
       <div className="text-sm font-bold mb-3" style={{ color: "var(--text)" }}>{t("title")}</div>
       <div className="space-y-2">
         {visible.map((m, i) => {
           const color = subjectColor(m.subject);
           return (
-            <div key={i} className="rounded-xl p-3 flex gap-3 items-start"
+            <div key={i} className="rounded-xl p-3 flex gap-3 items-start relative overflow-hidden"
               style={{
-                background: "var(--bg-secondary)",
+                background: `linear-gradient(135deg, ${color}10, transparent 80%), rgba(255,255,255,0.02)`,
                 borderLeft: `2px solid ${color}`,
+                border: "1px solid rgba(255,255,255,0.06)",
+                backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
               }}>
               <SubjectIcon id={m.subject} size={20} />
               <div className="flex-1 min-w-0">
@@ -571,7 +624,7 @@ export default function AnalyticsClient(p: Props) {
       {/* KPI grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard label={t("stats.totalXP")} value={p.totalXP.toLocaleString()} color="#4561E8"
-          icon="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+          iconNode={<MeLogo height={20} colorM="#4561E8" colorE="#4561E8" />}
           sparkData={trendCum} deltaPct={dlt} />
         <StatCard label={t("stats.streak")} value={t("stats.streakValue", { n: p.currentStreak })} color="#FF7A00"
           icon="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" />

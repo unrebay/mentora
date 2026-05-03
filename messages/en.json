@@ -732,7 +732,7 @@
   "analytics": {
     "title": "My analytics",
     "subtitle": "Personal stats · updated in real-time",
-    "globalRankOf": "of {n} students",
+    "globalRankOf": "of {n} users",
     "globalRankLabel": "Global rank",
     "stats": {
       "totalXP": "Total XP",
@@ -750,7 +750,7 @@
       "next": "Next",
       "toNextXP": "{n} XP to go",
       "max": "Max level",
-      "career": "Career path"
+      "career": "Level"
     },
     "activity": {
       "title": "Activity · 14 days",
@@ -760,8 +760,8 @@
       "avgPerDay": "{n}/day on average"
     },
     "subjects": {
-      "title": "Galaxy of Knowledge",
-      "subtitle": "XP by science",
+      "title": "XP by science",
+      "subtitle": "Progress in each science",
       "active": "{n} active",
       "weekly": "Weekly activity"
     },
