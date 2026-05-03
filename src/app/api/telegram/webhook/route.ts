@@ -321,6 +321,18 @@ export async function GET(req: NextRequest) {
     }, { status: 500 });
   }
 
+  // ?poll=1 → switch to long-polling: delete webhook + getUpdates
+  // Used as workaround when VPS firewall blocks Telegram inbound webhooks.
+  if (req.nextUrl.searchParams.get("poll") === "1") {
+    const delRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/deleteWebhook?drop_pending_updates=true`, { method: "POST" });
+    const delJson = await delRes.json();
+    const offset = req.nextUrl.searchParams.get("offset");
+    const url = `https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?timeout=5${offset ? `&offset=${offset}` : ""}`;
+    const upRes = await fetch(url);
+    const upJson = await upRes.json();
+    return NextResponse.json({ deleteWebhook: delJson, getUpdates: upJson });
+  }
+
   // ?setup=1 → register webhook URL with Telegram + drop pending updates
   if (req.nextUrl.searchParams.get("setup") === "1") {
     const webhookUrl = "https://mentora.su/api/telegram/webhook";
