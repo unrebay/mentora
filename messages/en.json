@@ -363,7 +363,6 @@
     "nav": {
       "home": "Home",
       "subjects": "Sciences",
-      "progress": "Progress",
       "analytics": "Analytics",
       "galaxy": "Galaxy",
       "galaxyFull": "Knowledge Galaxy",
@@ -413,44 +412,6 @@
     "free": "free",
     "perMonth": "/ mo",
     "unlimited": "unlimited"
-  },
-  "progress": {
-    "pageTitle": "My Progress — Mentora",
-    "statXP": "XP",
-    "statStreak": "Streak",
-    "statMessages": "Messages",
-    "statBadges": "Achievements",
-    "emptyTitle": "No data yet",
-    "emptyDesc": "Start learning — your progress will appear here",
-    "emptyBtn": "Go to sciences",
-    "weeklyActivity": "Activity this week",
-    "qualityPerfect": "· perfect",
-    "qualityGreat": "· great",
-    "questionsThisWeek": "{count} questions this week",
-    "mentBySubject": "XP by science",
-    "bySubject": "By science",
-    "xpUnit": "XP",
-    "questUnit": "q.",
-    "dayUnit": "d.",
-    "toLevelUnit": "to lvl",
-    "recentQuestions": "Recent questions",
-    "collapse": "Collapse",
-    "showMore": "Show {count} more",
-    "today": "today",
-    "yesterday": "yesterday",
-    "daysAgo": "{count}d ago",
-    "dayMon": "Mon",
-    "dayTue": "Tue",
-    "dayWed": "Wed",
-    "dayThu": "Thu",
-    "dayFri": "Fri",
-    "daySat": "Sat",
-    "daySun": "Sun",
-    "levelBeginner": "Beginner",
-    "levelExplorer": "Explorer",
-    "levelScholar": "Scholar",
-    "levelHistorian": "Historian",
-    "levelExpert": "Expert"
   },
   "chat": {
     "aiMentor": "AI mentor · Mentora",
@@ -769,40 +730,175 @@
     "errorFallback": "Something went wrong"
   },
   "analytics": {
-    "title": "My Analytics",
-    "subtitle": "Personal stats · updates in real time",
-    "globalRankOf": "of {n}",
+    "title": "My analytics",
+    "subtitle": "Personal stats · updated in real-time",
+    "globalRankOf": "of {n} students",
+    "globalRankLabel": "Global rank",
     "stats": {
       "totalXP": "Total XP",
       "streak": "Streak",
       "streakValue": "{n} days",
       "messages": "Messages",
       "subjects": "Sciences",
-      "subjectsValue": "{active} of 17"
+      "subjectsValue": "{active} of 17",
+      "badges": "Badges",
+      "badgesValue": "{earned} of {total}",
+      "weeklyDelta": "this week"
     },
     "level": {
+      "label": "Level",
       "next": "Next",
-      "toNextXP": "{n} XP away"
+      "toNextXP": "{n} XP to go",
+      "max": "Max level",
+      "career": "Career path"
     },
     "activity": {
-      "title": "Activity",
-      "subtitle": "last 8 days",
-      "tooltip": "{date}: {count} msg."
+      "title": "Activity · 14 days",
+      "subtitle": "messages per day",
+      "tooltip": "{date}: {count}",
+      "totalThisPeriod": "{n} messages over 14 days",
+      "avgPerDay": "{n}/day on average"
     },
     "subjects": {
-      "title": "By science",
-      "active": "{n} active"
+      "title": "Galaxy of Knowledge",
+      "subtitle": "XP by science",
+      "active": "{n} active",
+      "weekly": "Weekly activity"
     },
     "bestStreak": {
       "title": "Best streak: {n} days",
       "legendary": "Legendary achievement",
-      "impressive": "Impressive persistence",
+      "impressive": "Stunning consistency",
       "good": "Great habit",
-      "toWeek": "{n} more days to a week"
+      "toWeek": "To week: {n} more days"
+    },
+    "recent": {
+      "title": "Recent questions",
+      "showMore": "Show {count} more",
+      "collapse": "Collapse",
+      "today": "today",
+      "yesterday": "yesterday",
+      "daysAgo": "{count} days ago"
     },
     "empty": {
       "title": "Start learning — stats will appear",
-      "desc": "Ask your first question in any science to start earning XP"
+      "desc": "Ask your first question in any science to start gaining XP"
+    },
+    "levels": {
+      "beginner": {
+        "name": "Beginner",
+        "desc": "First steps"
+      },
+      "explorer": {
+        "name": "Explorer",
+        "desc": "100 XP — journey begins"
+      },
+      "scholar": {
+        "name": "Scholar",
+        "desc": "300 XP — growing"
+      },
+      "historian": {
+        "name": "Historian",
+        "desc": "600 XP — serious level"
+      },
+      "expert": {
+        "name": "Expert",
+        "desc": "1000 XP — peak"
+      }
+    },
+    "badges": {
+      "title": "Badges",
+      "subtitle": "Earned {earned} of {total}",
+      "locked": "{n} more",
+      "unlocked": "Earned",
+      "groups": {
+        "volume": "Volume",
+        "consistency": "Consistency",
+        "experience": "Experience",
+        "mastery": "Mastery"
+      },
+      "items": {
+        "first_step": {
+          "name": "First step",
+          "desc": "1 message"
+        },
+        "talker": {
+          "name": "Talker",
+          "desc": "50 messages"
+        },
+        "curious": {
+          "name": "Curious",
+          "desc": "200 messages"
+        },
+        "tireless": {
+          "name": "Tireless",
+          "desc": "500 messages"
+        },
+        "marathoner": {
+          "name": "Marathoner",
+          "desc": "1000 messages"
+        },
+        "warm_spark": {
+          "name": "Warm spark",
+          "desc": "3 days in a row"
+        },
+        "stable": {
+          "name": "Stable",
+          "desc": "7 days in a row"
+        },
+        "disciplined": {
+          "name": "Disciplined",
+          "desc": "14 days in a row"
+        },
+        "month_streak": {
+          "name": "Month strong",
+          "desc": "30 days"
+        },
+        "unshakeable": {
+          "name": "Unshakeable",
+          "desc": "100 days"
+        },
+        "novice": {
+          "name": "Novice",
+          "desc": "100 XP"
+        },
+        "explorer": {
+          "name": "Explorer",
+          "desc": "500 XP"
+        },
+        "erudite": {
+          "name": "Erudite",
+          "desc": "1000 XP"
+        },
+        "scholar": {
+          "name": "Scholar",
+          "desc": "3000 XP"
+        },
+        "sage": {
+          "name": "Sage",
+          "desc": "10000 XP"
+        },
+        "curious_mind": {
+          "name": "Curious mind",
+          "desc": "XP in 3 sciences"
+        },
+        "polymath": {
+          "name": "Polymath",
+          "desc": "XP in 5 sciences"
+        },
+        "encyclopedist": {
+          "name": "Encyclopedist",
+          "desc": "XP in 10 sciences"
+        },
+        "expert_subj": {
+          "name": "Subject expert",
+          "desc": "1000 XP in one science"
+        },
+        "guru": {
+          "name": "Guru",
+          "desc": "3000 XP in one science"
+        }
+      }
     }
   },
   "badges": {

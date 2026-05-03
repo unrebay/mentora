@@ -108,7 +108,6 @@ export default function DashboardNav({
 
   const navLinks = [
     { href: "/dashboard",           label: t("dashboard.nav.subjects") },
-    { href: "/dashboard/progress",  label: t("dashboard.nav.progress") },
     { href: "/dashboard/analytics", label: t("dashboard.nav.analytics") },
     { href: "/knowledge",           label: t("dashboard.nav.galaxy") },
     { href: "/profile",             label: t("dashboard.nav.profile") },

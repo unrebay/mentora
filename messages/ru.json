@@ -364,7 +364,6 @@
     "nav": {
       "home": "Главная",
       "subjects": "Науки",
-      "progress": "Прогресс",
       "analytics": "Аналитика",
       "galaxy": "Галактика",
       "galaxyFull": "Галактика знаний",
@@ -414,44 +413,6 @@
     "free": "бесплатно",
     "perMonth": "/ мес",
     "unlimited": "безлимит"
-  },
-  "progress": {
-    "pageTitle": "Мой прогресс — Mentora",
-    "statXP": "Мент",
-    "statStreak": "Стрик сейчас",
-    "statMessages": "Сообщений",
-    "statBadges": "Достижений",
-    "emptyTitle": "Пока нет данных",
-    "emptyDesc": "Начни учиться — здесь появится твой прогресс",
-    "emptyBtn": "К наукам",
-    "weeklyActivity": "Активность за неделю",
-    "qualityPerfect": "· идеально",
-    "qualityGreat": "· отлично",
-    "questionsThisWeek": "{count} вопросов за неделю",
-    "mentBySubject": "Мент по наукам",
-    "bySubject": "По наукам",
-    "xpUnit": "мент",
-    "questUnit": "вопр.",
-    "dayUnit": "дн.",
-    "toLevelUnit": "до ур.",
-    "recentQuestions": "Недавние вопросы",
-    "collapse": "Свернуть",
-    "showMore": "Показать ещё {count}",
-    "today": "сегодня",
-    "yesterday": "вчера",
-    "daysAgo": "{count} дн. назад",
-    "dayMon": "Пн",
-    "dayTue": "Вт",
-    "dayWed": "Ср",
-    "dayThu": "Чт",
-    "dayFri": "Пт",
-    "daySat": "Сб",
-    "daySun": "Вс",
-    "levelBeginner": "Новичок",
-    "levelExplorer": "Исследователь",
-    "levelScholar": "Знаток",
-    "levelHistorian": "Историк",
-    "levelExpert": "Эксперт"
   },
   "chat": {
     "aiMentor": "AI-ментор · Mentora",
@@ -772,27 +733,38 @@
   "analytics": {
     "title": "Моя аналитика",
     "subtitle": "Личная статистика · обновляется в реальном времени",
-    "globalRankOf": "из {n}",
+    "globalRankOf": "из {n} учеников",
+    "globalRankLabel": "Глобальный рейтинг",
     "stats": {
       "totalXP": "Суммарный XP",
       "streak": "Стрик",
       "streakValue": "{n} дн.",
       "messages": "Сообщений",
       "subjects": "Наук",
-      "subjectsValue": "{active} из 17"
+      "subjectsValue": "{active} из 17",
+      "badges": "Достижений",
+      "badgesValue": "{earned} из {total}",
+      "weeklyDelta": "за неделю"
     },
     "level": {
+      "label": "Уровень",
       "next": "Следующий",
-      "toNextXP": "через {n} XP"
+      "toNextXP": "ещё {n} XP",
+      "max": "Максимум",
+      "career": "Карьерный путь"
     },
     "activity": {
-      "title": "Активность",
-      "subtitle": "последние 8 дней",
-      "tooltip": "{date}: {count} сообщ."
+      "title": "Активность · 14 дней",
+      "subtitle": "сообщения в день",
+      "tooltip": "{date}: {count}",
+      "totalThisPeriod": "{n} сообщений за 14 дней",
+      "avgPerDay": "{n}/день в среднем"
     },
     "subjects": {
-      "title": "По наукам",
-      "active": "{n} активных"
+      "title": "Галактика знаний",
+      "subtitle": "XP по наукам",
+      "active": "{n} активных",
+      "weekly": "Активность за неделю"
     },
     "bestStreak": {
       "title": "Лучший стрик: {n} дней",
@@ -801,9 +773,133 @@
       "good": "Отличная привычка",
       "toWeek": "До недели: ещё {n} дн."
     },
+    "recent": {
+      "title": "Недавние вопросы",
+      "showMore": "Показать ещё {count}",
+      "collapse": "Свернуть",
+      "today": "сегодня",
+      "yesterday": "вчера",
+      "daysAgo": "{count} дн. назад"
+    },
     "empty": {
       "title": "Начни учиться — появится статистика",
       "desc": "Задай первый вопрос в любой науке, чтобы начать копить XP"
+    },
+    "levels": {
+      "beginner": {
+        "name": "Новичок",
+        "desc": "Первые шаги"
+      },
+      "explorer": {
+        "name": "Исследователь",
+        "desc": "100 XP — путь начался"
+      },
+      "scholar": {
+        "name": "Знаток",
+        "desc": "300 XP — растёшь"
+      },
+      "historian": {
+        "name": "Историк",
+        "desc": "600 XP — серьёзный уровень"
+      },
+      "expert": {
+        "name": "Эксперт",
+        "desc": "1000 XP — вершина"
+      }
+    },
+    "badges": {
+      "title": "Достижения",
+      "subtitle": "Заработано {earned} из {total}",
+      "locked": "Ещё {n}",
+      "unlocked": "Получено",
+      "groups": {
+        "volume": "Объём",
+        "consistency": "Постоянство",
+        "experience": "Опыт",
+        "mastery": "Знания"
+      },
+      "items": {
+        "first_step": {
+          "name": "Первый шаг",
+          "desc": "1 сообщение"
+        },
+        "talker": {
+          "name": "Разговорчивый",
+          "desc": "50 сообщений"
+        },
+        "curious": {
+          "name": "Любознательный",
+          "desc": "200 сообщений"
+        },
+        "tireless": {
+          "name": "Неутомимый",
+          "desc": "500 сообщений"
+        },
+        "marathoner": {
+          "name": "Марафонец",
+          "desc": "1000 сообщений"
+        },
+        "warm_spark": {
+          "name": "Тёплая искра",
+          "desc": "3 дня подряд"
+        },
+        "stable": {
+          "name": "Стабильный",
+          "desc": "7 дней подряд"
+        },
+        "disciplined": {
+          "name": "Дисциплинированный",
+          "desc": "14 дней подряд"
+        },
+        "month_streak": {
+          "name": "Месяц подряд",
+          "desc": "30 дней"
+        },
+        "unshakeable": {
+          "name": "Незыблемый",
+          "desc": "100 дней"
+        },
+        "novice": {
+          "name": "Новичок",
+          "desc": "100 XP"
+        },
+        "explorer": {
+          "name": "Исследователь",
+          "desc": "500 XP"
+        },
+        "erudite": {
+          "name": "Эрудит",
+          "desc": "1000 XP"
+        },
+        "scholar": {
+          "name": "Знаток",
+          "desc": "3000 XP"
+        },
+        "sage": {
+          "name": "Мудрец",
+          "desc": "10000 XP"
+        },
+        "curious_mind": {
+          "name": "Любопытный",
+          "desc": "XP в 3 науках"
+        },
+        "polymath": {
+          "name": "Полиглот знаний",
+          "desc": "XP в 5 науках"
+        },
+        "encyclopedist": {
+          "name": "Энциклопедист",
+          "desc": "XP в 10 науках"
+        },
+        "expert_subj": {
+          "name": "Эксперт науки",
+          "desc": "1000 XP в одной науке"
+        },
+        "guru": {
+          "name": "Гуру",
+          "desc": "3000 XP в одной науке"
+        }
+      }
     }
   },
   "badges": {
