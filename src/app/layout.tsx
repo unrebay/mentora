@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Golos_Text, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { PostHogProvider } from "@/components/PostHogProvider";
@@ -22,11 +22,11 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   metadataBase: new URL("https://mentora.su"),
   title: {
-    default: "Mentora — AI-репетитор | История, Математика, Физика и ещё 10 предметов",
+    default: "Mentora — AI-репетитор | 17 наук с AI-ментором",
     template: "%s | Mentora",
   },
   description:
-    "Mentora — персональный AI-репетитор для школьников и студентов. История, математика, физика, химия, биология, русский язык, литература, английский, обществознание, география, информатика, астрономия. Подготовка к ЕГЭ и ОГЭ. Бесплатно.",
+    "Mentora — персональный AI-ментор для всех возрастов. 17 наук: история, математика, физика, химия, биология, психология, философия, экономика и другие. Подготовка к ЕГЭ и ОГЭ. Бесплатно.",
   keywords: [
     "AI репетитор",
     "ИИ репетитор онлайн",
@@ -99,6 +99,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://mentora.su",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#4561E8",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
