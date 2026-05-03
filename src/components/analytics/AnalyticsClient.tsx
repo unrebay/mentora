@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
 import MeLogo from "@/components/MeLogo";
+import Leaderboard from "@/components/analytics/Leaderboard";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 export interface SubjectStat {
@@ -29,6 +30,7 @@ export interface CareerLevel {
   minXP: number; name: string; desc: string;
 }
 interface Props {
+  mySerialId?: number | null;
   totalXP: number;
   totalMessages: number;
   currentStreak: number;
@@ -219,7 +221,7 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
 }
 
 // ── Global rank capsule (ornate) ─────────────────────────────────────────────
-function GlobalRankCapsule({ rank, total }: { rank: number | null; total: number | null }) {
+function GlobalRankCapsule({ rank, total, mySerialId }: { rank: number | null; total: number | null; mySerialId?: number | null }) {
   const t = useTranslations("analytics");
   if (!rank || !total) return null;
   const pct = (rank / total) * 100;
@@ -257,6 +259,12 @@ function GlobalRankCapsule({ rank, total }: { rank: number | null; total: number
           style={{ background: "linear-gradient(135deg, #6B8FFF, #9F7AFF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
           #{rank}
         </div>
+        {mySerialId !== null && mySerialId !== undefined && (
+          <div className="text-[10px] font-bold tracking-wider mt-1 inline-block px-2 py-0.5 rounded-full"
+            style={{ background: "rgba(124,58,237,0.18)", color: "#9F7AFF", border: "1px solid rgba(159,122,255,0.30)" }}>
+            ID #{mySerialId}
+          </div>
+        )}
         <div className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
           {t("globalRankOf", { n: total.toLocaleString() })}
         </div>
@@ -618,7 +626,7 @@ export default function AnalyticsClient(p: Props) {
       {/* Hero: career ladder + global rank */}
       <div className="grid md:grid-cols-[2fr_1fr] gap-4">
         <CareerLadder levels={p.careerLevels} totalXP={p.totalXP} currentKey={p.currentLevelKey} />
-        <GlobalRankCapsule rank={p.globalRank} total={p.totalUsers} />
+        <GlobalRankCapsule rank={p.globalRank} total={p.totalUsers} mySerialId={p.mySerialId} />
       </div>
 
       {/* KPI grid */}
@@ -640,6 +648,9 @@ export default function AnalyticsClient(p: Props) {
 
       {/* Galaxy of Knowledge */}
       <GalaxyOfKnowledge subjects={p.subjectStats} />
+
+      {/* Leaderboard — top by ments */}
+      <Leaderboard mySerialId={p.mySerialId} />
 
       {/* Best streak callout */}
       <BestStreakCallout best={p.bestStreak} />

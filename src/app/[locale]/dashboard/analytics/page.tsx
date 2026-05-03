@@ -70,6 +70,15 @@ export default async function AnalyticsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth");
 
+  // Ensure the user has a serial_id (Telegram-style #N)
+  await supabase.rpc("ensure_user_profile", { p_user_id: user.id });
+  const { data: profileRow } = await supabase
+    .from("user_profiles")
+    .select("serial_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const mySerialId: number | null = profileRow?.serial_id ?? null;
+
   const [locale, t, tSubjects, tLevels, tBadges] = await Promise.all([
     getLocale(),
     getTranslations("analytics"),
@@ -215,6 +224,7 @@ export default async function AnalyticsPage() {
   return (
     <>
       <AnalyticsClient
+        mySerialId={mySerialId}
         totalXP={totalXP}
         totalMessages={totalMessages ?? 0}
         currentStreak={currentStreak}

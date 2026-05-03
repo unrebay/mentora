@@ -900,6 +900,21 @@
           "desc": "3000 XP в одной науке"
         }
       }
+    },
+    "leaderboard": {
+      "title": "Лидерборд",
+      "subtitle": "Топ учеников по ментам",
+      "you": "Вы",
+      "showAll": "Показать всех ({n})",
+      "messagesShort": "{n} сообщ.",
+      "streakOf": "{n} дн. подряд",
+      "tiers": {
+        "beginner": "Новичок",
+        "explorer": "Исследователь",
+        "scholar": "Знаток",
+        "historian": "Историк",
+        "expert": "Эксперт"
+      }
     }
   },
   "badges": {

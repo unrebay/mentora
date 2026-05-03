@@ -899,6 +899,21 @@
           "desc": "3000 XP in one science"
         }
       }
+    },
+    "leaderboard": {
+      "title": "Leaderboard",
+      "subtitle": "Top students by XP",
+      "you": "You",
+      "showAll": "Show all ({n})",
+      "messagesShort": "{n} msgs",
+      "streakOf": "{n} day streak",
+      "tiers": {
+        "beginner": "Beginner",
+        "explorer": "Explorer",
+        "scholar": "Scholar",
+        "historian": "Historian",
+        "expert": "Expert"
+      }
     }
   },
   "badges": {
