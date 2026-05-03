@@ -119,9 +119,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             if (t === 'dark') document.documentElement.classList.add('dark');
           } catch(e){}
         ` }} />
-        {/* KaTeX for math rendering in chat */}
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossOrigin="anonymous" />
-        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossOrigin="anonymous" />
         <meta name="yandex-verification" content="673fbfbebc45f7aa" />
         <meta name="theme-color" content="#4561E8" />
         <meta name="msapplication-TileColor" content="#4561E8" />

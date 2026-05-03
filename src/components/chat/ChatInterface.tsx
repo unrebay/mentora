@@ -344,6 +344,29 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const tChat = useTranslations("chat");
   const tUi = useTranslations("chat.ui");
 
+  // Lazy-load KaTeX (CSS + JS) only когда chat mounted — освобождает
+  // landing/pricing/guide от render-blocking 200KB CDN payload.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (!document.getElementById("mentora-katex-css")) {
+      const link = document.createElement("link");
+      link.id = "mentora-katex-css";
+      link.rel = "stylesheet";
+      link.href = "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css";
+      link.crossOrigin = "anonymous";
+      document.head.appendChild(link);
+    }
+    if (!document.getElementById("mentora-katex-js")) {
+      const script = document.createElement("script");
+      script.id = "mentora-katex-js";
+      script.src = "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js";
+      script.crossOrigin = "anonymous";
+      script.async = true;
+      document.head.appendChild(script);
+    }
+  }, []);
+
+
   const subjectKey = subject as string;
   const subjectHint = (() => { try { return tChat(`subjects.${subjectKey}.hint`); } catch { return tUi("defaultHint"); } })();
   const subjectQuickQ = (() => {
