@@ -1190,6 +1190,14 @@
         "note": "Even tutors get tired of explaining the same thing"
       },
       {
+        "criterion": "Reliability",
+        "search": "75%",
+        "ai": "80%",
+        "mentora": "85%",
+        "tutor": "92%",
+        "note": "How often answers match reality · fewer made-up facts"
+      },
+      {
         "criterion": "Real human empathy",
         "search": "✗",
         "ai": "✗",
