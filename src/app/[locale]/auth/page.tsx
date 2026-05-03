@@ -399,7 +399,11 @@ function AuthPageContent() {
 
   useEffect(() => {
     const oauthError = searchParams.get("error");
-    if (oauthError) setError(t("errorOAuth"));
+    if (oauthError) {
+      // Show specific error code in addition to localized message — helps debug
+      // edge cases like telegram_callback / oauth_callback / Supabase URL allowlist issues.
+      setError(`${t("errorOAuth")} [${oauthError}]`);
+    }
   }, [searchParams]);
 
   useEffect(() => {

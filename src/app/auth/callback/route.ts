@@ -46,8 +46,11 @@ export async function GET(request: NextRequest) {
       if (!verifyError) {
         return NextResponse.redirect(`${origin}${next}`);
       }
-    } catch {
-      // fall through to error redirect below
+      console.error("[auth-callback] verifyOtp failed", {
+        code: verifyError.code, name: verifyError.name, message: verifyError.message, status: verifyError.status,
+      });
+    } catch (e) {
+      console.error("[auth-callback] verifyOtp threw", e instanceof Error ? e.message : String(e));
     }
     return NextResponse.redirect(`${origin}/auth?error=telegram_callback`);
   }
@@ -58,6 +61,11 @@ export async function GET(request: NextRequest) {
   if (code) {
     try {
       const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+      if (exchangeError) {
+        console.error("[auth-callback] exchangeCodeForSession error", {
+          name: exchangeError.name, message: exchangeError.message, status: exchangeError.status,
+        });
+      }
       if (!exchangeError) {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
