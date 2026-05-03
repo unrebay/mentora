@@ -104,14 +104,40 @@ const SN: Record<string, string> = {
 const SUBS = Object.keys(SN);
 
 // ── Primitive components ──────────────────────────────────────────────────────
-function Card({ ch, style }: { ch: React.ReactNode; style?: React.CSSProperties }) {
+function Card({ ch, style, accent }: { ch: React.ReactNode; style?: React.CSSProperties; accent?: string }) {
   const { CARD, BOR, SHADOW, GLASS } = useTok();
-  return <div style={{ background: CARD, border: `1px solid ${BOR}`, borderRadius: 16, padding: "20px 24px", backdropFilter: GLASS, WebkitBackdropFilter: GLASS, boxShadow: SHADOW, ...style }}>{ch}</div>;
+  return (
+    <div className="group" style={{
+      position: "relative",
+      background: CARD,
+      border: `1px solid ${BOR}`,
+      borderLeft: accent ? `2.5px solid ${accent}` : `1px solid ${BOR}`,
+      borderRadius: 16,
+      padding: "20px 24px",
+      backdropFilter: GLASS,
+      WebkitBackdropFilter: GLASS,
+      boxShadow: SHADOW,
+      overflow: "hidden",
+      transition: "transform 0.25s ease, box-shadow 0.25s ease",
+      ...style,
+    }}>
+      {accent && (
+        <div aria-hidden style={{
+          position: "absolute", top: -50, right: -50, width: 140, height: 140, borderRadius: "50%",
+          background: `radial-gradient(circle, ${accent}26 0%, transparent 65%)`,
+          pointerEvents: "none",
+          opacity: 0.5,
+          transition: "opacity 0.4s ease",
+        }} className="group-hover:opacity-100" />
+      )}
+      <div style={{ position: "relative", zIndex: 1 }}>{ch}</div>
+    </div>
+  );
 }
 function Metric({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color?: string }) {
   const { TEXT, MUTED } = useTok();
   const c = color ?? TEXT;
-  return <Card ch={<>
+  return <Card accent={color} ch={<>
     <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED, marginBottom: 8 }}>{label}</p>
     <p style={{ fontSize: 28, fontWeight: 700, color: c, lineHeight: 1, marginBottom: sub ? 4 : 0 }}>{typeof value === "number" ? N(value) : value}</p>
     {sub && <p style={{ fontSize: 12, color: MUTED }}>{sub}</p>}
