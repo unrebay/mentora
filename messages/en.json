@@ -960,7 +960,8 @@
       "title": "Try Discovery mode",
       "body": "Not sure what to learn today? Just ask Mentora about anything — she'll share something amazing from any field.",
       "example": "«Surprise me with a fact about space»."
-    }
+    },
+    "ctaShortBtn": "Start learning"
   },
   "about": {
     "heroTag": "About us",
