@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
 import ThemeToggle from "@/components/ThemeToggle";
+import SystemStatusGrid from "@/components/admin/SystemStatusGrid";
+import FunnelWidget from "@/components/admin/FunnelWidget";
+import ActivityFeedTab from "@/components/admin/ActivityFeedTab";
+import AuditLogTab from "@/components/admin/AuditLogTab";
 
 // ── Pricing ───────────────────────────────────────────────────────────────────
 const PRO_M = 499, PRO_Y = 2990, ULT_M = 799, ULT_Y = 5990;
@@ -145,6 +149,8 @@ const IRefresh  = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const ISearch   = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
 const IRoadmap  = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M3 17l6-12 4 8 3-5 5 9"/><circle cx="3" cy="17" r="1" fill="currentColor"/><circle cx="21" cy="17" r="1" fill="currentColor"/></svg>;
 const ILegal    = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
+const IActivity = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>;
+const IAudit    = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="14" x2="15" y2="14"/><line x1="9" y1="18" x2="13" y2="18"/></svg>;
 
 // ── Team Tab ──────────────────────────────────────────────────────────────────
 interface Employee {
@@ -1361,7 +1367,7 @@ function LegalTab({ annualRev }: { annualRev: number }) {
   );
 }
 
-type Tab = "overview" | "users" | "revenue" | "knowledge" | "team" | "roadmap" | "legal";
+type Tab = "overview" | "users" | "activity" | "audit" | "revenue" | "knowledge" | "team" | "roadmap" | "legal";
 
 export default function AdminPanel() {
   const { theme } = useTheme();
@@ -1423,13 +1429,15 @@ export default function AdminPanel() {
   const arr     = mrr * 12;
 
   const TABS: { id: Tab; icon: React.ReactNode; label: string }[] = [
-    { id: "overview",  icon: IGrid,    label: "Обзор" },
-    { id: "users",     icon: IUsers,   label: "Пользователи" },
-    { id: "revenue",   icon: IRevenue, label: "Доходы" },
-    { id: "knowledge", icon: IKb,      label: "База знаний" },
-    { id: "team",      icon: ITeam,    label: "Команда" },
-    { id: "roadmap",   icon: IRoadmap, label: "Роадмап" },
-    { id: "legal",     icon: ILegal,   label: "Право" },
+    { id: "overview",  icon: IGrid,     label: "Обзор" },
+    { id: "users",     icon: IUsers,    label: "Пользователи" },
+    { id: "activity",  icon: IActivity, label: "Активность" },
+    { id: "audit",     icon: IAudit,    label: "Журнал" },
+    { id: "revenue",   icon: IRevenue,  label: "Доходы" },
+    { id: "knowledge", icon: IKb,       label: "База знаний" },
+    { id: "team",      icon: ITeam,     label: "Команда" },
+    { id: "roadmap",   icon: IRoadmap,  label: "Роадмап" },
+    { id: "legal",     icon: ILegal,    label: "Право" },
   ];
 
   return (
@@ -1488,6 +1496,12 @@ export default function AdminPanel() {
           {loading && <p style={{ color: MUTED }}>Загрузка...</p>}
 
           {/* ── OVERVIEW ─────────────────────────────────────────────────────── */}
+          {tab === "overview" && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+              <SystemStatusGrid isDark={isDark} TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} />
+              <FunnelWidget isDark={isDark} TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} />
+            </div>
+          )}
           {!loading && stats && tab === "overview" && <>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 16 }}>
               <Metric label="Пользователей"     value={stats.users.total}       sub={`+${stats.users.newToday} сегодня`} />
@@ -1706,6 +1720,8 @@ export default function AdminPanel() {
           </>}
 
           {/* ── KNOWLEDGE ────────────────────────────────────────────────────── */}
+          {tab === "activity"  && <ActivityFeedTab TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} />}
+          {tab === "audit"     && <AuditLogTab TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} />}
           {tab === "knowledge" && <KnowledgeTab />}
           {tab === "team"      && <TeamTab />}
           {tab === "roadmap"   && <RoadmapTab checked={rmChecked} onToggle={toggleTask} onClear={clearRoadmap} />}
@@ -1747,10 +1763,8 @@ function UsersTab() {
   });
 
   const exportCSV = () => {
-    const rows = [["Email","Тариф","Регистрация","Последний визит","Сообщ сегодня","Сообщ всего","Предметы","Реферал"]];
-    users.forEach(u => rows.push([u.email, u.plan, u.created_at, u.last_active_at ?? "", String(u.messages_today), String(u.messages_total ?? ""), String(u.subjects_count ?? ""), u.referred_by ? "да" : "нет"]));
-    const blob = new Blob([rows.map(r => r.join(",")).join("\n")], { type: "text/csv" });
-    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "mentora_users.csv"; a.click();
+    // Server-side download — grabs ALL users (up to 5000), not just current page
+    window.location.href = "/api/admin/users-export";
   };
 
   return (
