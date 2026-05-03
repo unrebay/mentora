@@ -311,6 +311,19 @@ export async function GET(req: NextRequest) {
       admin_chat_id: ADMIN_CHAT_ID || "(missing)",
     }, { status: 500 });
   }
+
+  // ?setup=1 → register webhook URL with Telegram + drop pending updates
+  if (req.nextUrl.searchParams.get("setup") === "1") {
+    const webhookUrl = "https://mentora.su/api/telegram/webhook";
+    const setRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: webhookUrl, drop_pending_updates: true }),
+    });
+    const setJson = await setRes.json();
+    return NextResponse.json({ setup: true, webhook_url: webhookUrl, telegram_response: setJson });
+  }
+
   try {
     const meRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getMe`);
     const me = await meRes.json();
