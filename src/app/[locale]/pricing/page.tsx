@@ -10,7 +10,7 @@ import { cookies } from "next/headers";
 export const metadata = {
   title: "Тарифы — Mentora AI-репетитор",
   description:
-    "Начни бесплатно — 20 сообщений в день без карты. Pro за 399 ₽/мес открывает все 17 наук без лимита. Ultra добавляет PDF-конспекты и приоритет.",
+    "Начни бесплатно — 10 сообщений за 8 часов без карты. Pro за 499 ₽/мес открывает все 17 наук без лимита. Ultima добавляет PDF-конспекты, приоритет и расширенную память.",
   keywords: ["тарифы AI репетитора", "стоимость репетитора онлайн", "Pro план Mentora", "Ultra", "AI обучение цена"],
   alternates: {
     canonical: "https://mentora.su/ru/pricing",
@@ -18,7 +18,7 @@ export const metadata = {
   },
   openGraph: {
     title: "Тарифы Mentora — от 0 ₽",
-    description: "Бесплатно, Pro 399 ₽/мес или Ultra 799 ₽/мес. Без договоров — отмени в любой момент.",
+    description: "Бесплатно, Pro 499 ₽/мес или Ultima 799 ₽/мес. Без договоров — отмени в любой момент.",
     url: "https://mentora.su/ru/pricing",
     images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
   },
