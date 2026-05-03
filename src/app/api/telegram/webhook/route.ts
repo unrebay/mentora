@@ -299,16 +299,11 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
-  return NextResponse.json({ ok: true, service: "Mentora AI support bot" });
-}
-
-// ── Diagnostic GET ─────────────────────────────────────────────────────────
-// https://mentora.su/api/telegram/webhook?diag=1 — verify support bot token
-// + check whether the webhook URL is registered with Telegram.
+// ── GET handler ────────────────────────────────────────────────────────────
+// Plain GET → status JSON. With ?diag=1 → verifies bot via getMe и getWebhookInfo.
 export async function GET(req: NextRequest) {
   if (req.nextUrl.searchParams.get("diag") !== "1") {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ ok: true, service: "Mentora AI support bot" });
   }
   if (!BOT_TOKEN) {
     return NextResponse.json({
