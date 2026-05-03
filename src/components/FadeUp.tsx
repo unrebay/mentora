@@ -1,5 +1,5 @@
 "use client";
-import { motion } from "framer-motion";
+import { LazyMotion, domAnimation, m } from "framer-motion";
 
 interface Props {
   children: React.ReactNode;
@@ -11,17 +11,25 @@ interface Props {
   fade?: boolean;
 }
 
+/**
+ * FadeUp — wrapper around framer-motion m.div + LazyMotion.
+ * LazyMotion + domAnimation cuts ~25KB off the framer-motion bundle vs
+ * importing the full `motion` API. This component renders on every page,
+ * so the saving is real even though framer-motion stays as a dep.
+ */
 export default function FadeUp({ children, delay = 0, duration = 0.45, className, id, fade }: Props) {
   return (
-    <motion.div
-      id={id}
-      className={className}
-      initial={{ opacity: 0, y: fade ? 0 : 22 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration, delay, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.div>
+    <LazyMotion features={domAnimation} strict>
+      <m.div
+        id={id}
+        className={className}
+        initial={{ opacity: 0, y: fade ? 0 : 22 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-40px" }}
+        transition={{ duration, delay, ease: [0.22, 1, 0.36, 1] }}
+      >
+        {children}
+      </m.div>
+    </LazyMotion>
   );
 }
