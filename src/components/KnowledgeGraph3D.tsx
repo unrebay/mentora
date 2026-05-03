@@ -378,25 +378,25 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
           const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, opacity:op, blending:ADD, depthWrite:false }));
           sp.scale.set(sz,sz,1); sp.position.copy(pos); mainGrp.add(sp); return sp;
         };
-        // 3D ORB — core sphere mesh keeps subject color
-        const orbR = isActive ? 0.65 : 0.58;
+        // 3D ORB — much smaller (1.7× topic size)
+        const orbR = isActive ? 0.046 : 0.038;
         const orb = new THREE.Mesh(
-          new THREE.SphereGeometry(orbR, 18, 14),
-          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 0.98 : 0.96 })
+          new THREE.SphereGeometry(orbR, 14, 12),
+          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 1.0 : 0.98 })
         );
         orb.position.copy(pos); mainGrp.add(orb);
         const halo = new THREE.Mesh(
-          new THREE.SphereGeometry(orbR * 1.95, 14, 12),
-          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 0.34 : 0.26, blending: ADD, depthWrite: false })
+          new THREE.SphereGeometry(orbR * 2.4, 12, 10),
+          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 0.40 : 0.32, blending: ADD, depthWrite: false })
         );
         halo.position.copy(pos); mainGrp.add(halo);
-        // Mid glow (animated)
-        const gsz = isActive ? 4.0 : 3.2;
-        const gop = isActive ? 0.45 : 0.30;
+        // Mid glow (animated) — small proportional aura
+        const gsz = isActive ? 0.70 : 0.55;
+        const gop = isActive ? 0.45 : 0.32;
         const gsp = mkSp(gsz, gop);
         sciGlows.push(gsp); sciGlowOps.push(gop); sciGlowSzs.push(gsz);
         // Outer diffuse haze
-        mkSp(isActive ? 9.0 : 7.0, isActive ? 0.10 : 0.07);
+        mkSp(isActive ? 1.50 : 1.20, isActive ? 0.10 : 0.08);
       }
 
       // ── Comets — occasional fading streaks ───────────────────────────────────
@@ -488,13 +488,19 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
 
       // ── Impulse pulses along edges ─────────────────────────────────────────────
       // Small bright spheres travel along edge lines, fade in/out with sin curve
-      const IMP_N = Math.min(40, interE.length * 2);
-      interface ImpState { edgeIdx: number; t: number; speed: number }
-      const impStates: ImpState[] = Array.from({ length: IMP_N }, (_, i) => ({
-        edgeIdx: i % interE.length,
-        t: i / IMP_N, // stagger so they don't all start at same edge point
-        speed: 0.0022 + Math.random() * 0.0038,
-      }));
+      const WAVE_PER_EDGE = 4;
+      const IMP_N = Math.min(120, interE.length * WAVE_PER_EDGE);
+      interface ImpState { edgeIdx: number; t: number; speed: number; phase: number }
+      const impStates: ImpState[] = Array.from({ length: IMP_N }, (_, i) => {
+        const edgeIdx = Math.floor(i / WAVE_PER_EDGE) % interE.length;
+        const phaseInGroup = i % WAVE_PER_EDGE;
+        return {
+          edgeIdx,
+          t: -phaseInGroup * 0.16,
+          speed: 0.0028 + Math.random() * 0.0014,
+          phase: phaseInGroup * 0.6,
+        };
+      });
       const impGeo    = new THREE.SphereGeometry(0.20, 12, 10);
       const impMat    = new THREE.MeshBasicMaterial({ color: 0xddeaff, transparent: true, opacity: 0.98, blending: ADD, depthWrite: false });
       const impIM     = new THREE.InstancedMesh(impGeo, impMat, IMP_N);
@@ -677,17 +683,22 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
           const s = impStates[i];
           s.t += s.speed;
           if (s.t > 1.08) {
-            s.t = -0.08;
-            s.edgeIdx = Math.floor(Math.random() * interE.length);
-            s.speed = 0.0022 + Math.random() * 0.0038;
+            const groupStart = Math.floor(i / 4) * 4;
+            const newEdge = Math.floor(Math.random() * interE.length);
+            for (let g = 0; g < 4 && groupStart + g < IMP_N; g++) {
+              impStates[groupStart + g].edgeIdx = newEdge;
+              impStates[groupStart + g].t = -g * 0.16;
+              impStates[groupStart + g].speed = 0.0028 + Math.random() * 0.0014;
+            }
+            continue;
           }
           const visible = s.t >= 0 && s.t <= 1;
           if (visible) {
             const [ea, eb] = interE[s.edgeIdx];
             impD.position.lerpVectors(ea, eb, s.t);
-            // sin curve → fade in at start, fade out at end
             const fade = Math.sin(Math.max(0, Math.min(1, s.t)) * Math.PI);
-            impD.scale.setScalar(Math.max(0.001, fade * 1.1));
+            const wave = 0.6 + 0.6 * Math.sin(t * 4.0 + s.phase);
+            impD.scale.setScalar(Math.max(0.001, fade * 1.1 * wave));
             impD.updateMatrix();
           } else {
             impD.position.set(0, 0, 0); impD.scale.setScalar(0.001); impD.updateMatrix();

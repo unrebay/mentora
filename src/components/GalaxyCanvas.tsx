@@ -258,26 +258,26 @@ export default function GalaxyCanvas({ className }: Props) {
           sp.scale.set(sz, sz, 1); sp.position.copy(npos); mainGrp.add(sp); return sp;
         };
 
-        // 3D ORB — core sphere mesh keeps subject color (replaces flat sprite-core)
-        const orbR = isSecond ? 0.42 : 0.58;
+        // 3D ORB — much smaller (1.7× topic size). Topic = 0.0225, science = 0.038
+        const orbR = isSecond ? 0.030 : 0.038;
         const orb = new THREE.Mesh(
-          new THREE.SphereGeometry(orbR, 18, 14),
-          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isSecond ? 0.88 : 0.96 })
+          new THREE.SphereGeometry(orbR, 14, 12),
+          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isSecond ? 0.92 : 1.0 })
         );
         orb.position.copy(npos); mainGrp.add(orb);
-        // Colored halo (additive) — gives the orb a 3D glow in its own colour
+        // Colored halo (additive) — orb's own-color glow
         const halo = new THREE.Mesh(
-          new THREE.SphereGeometry(orbR * 1.95, 14, 12),
-          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isSecond ? 0.16 : 0.26, blending: ADD, depthWrite: false })
+          new THREE.SphereGeometry(orbR * 2.4, 12, 10),
+          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isSecond ? 0.22 : 0.34, blending: ADD, depthWrite: false })
         );
         halo.position.copy(npos); mainGrp.add(halo);
-        // Mid glow (animated)
-        const gsz = isSecond ? 2.2 : 3.2;
-        const gop = isSecond ? 0.09 : 0.16;
+        // Mid glow (animated) — small proportional aura
+        const gsz = isSecond ? 0.40 : 0.55;
+        const gop = isSecond ? 0.20 : 0.32;
         const gsp = mkSp(gsz, gop);
         sciGlows.push(gsp); sciGlowOps.push(gop); sciGlowSzs.push(gsz);
-        // Outer haze
-        mkSp(isSecond ? 5.0 : 7.0, isSecond ? 0.02 : 0.04);
+        // Outer haze — gentle bloom
+        mkSp(isSecond ? 0.85 : 1.20, isSecond ? 0.05 : 0.08);
       }
 
       // ── Graph edges ───────────────────────────────────────────────────────────
@@ -339,9 +339,20 @@ export default function GalaxyCanvas({ className }: Props) {
         inM.instanceMatrix.needsUpdate=true; inMHalo.instanceMatrix.needsUpdate=true; }
 
       // ── Impulse pulses along edges ────────────────────────────────────────────
-      const IMP_N=Math.min(40,interE.length*2);
-      interface ImpState { edgeIdx:number; t:number; speed:number }
-      const impStates: ImpState[]=Array.from({length:IMP_N},(_,i)=>({ edgeIdx:i%interE.length,t:i/IMP_N,speed:0.0022+Math.random()*0.0038 }));
+      // Wave-current: 4 impulses per edge with staggered phase → looks like flowing plasma current
+      const WAVE_PER_EDGE = 4;
+      const IMP_N = Math.min(120, interE.length * WAVE_PER_EDGE);
+      interface ImpState { edgeIdx:number; t:number; speed:number; phase:number }
+      const impStates: ImpState[] = Array.from({length: IMP_N}, (_, i) => {
+        const edgeIdx = Math.floor(i / WAVE_PER_EDGE) % interE.length;
+        const phaseInGroup = i % WAVE_PER_EDGE;
+        return {
+          edgeIdx,
+          t: -phaseInGroup * 0.16,           // stagger: each group member trails the previous
+          speed: 0.0028 + Math.random() * 0.0014,  // unified base speed for whole group
+          phase: phaseInGroup * 0.6,         // phase for sin-pulsation
+        };
+      });
       const impIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.20,12,10),mkMat(0xddeaff,0.95),IMP_N);
       const impGlowIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.55,10,8),mkMat(0x5577ff,0.45),IMP_N);
       mainGrp.add(impIM); mainGrp.add(impGlowIM);
@@ -416,10 +427,26 @@ export default function GalaxyCanvas({ className }: Props) {
         // Impulse pulses
         for (let i=0;i<IMP_N;i++) {
           const s=impStates[i]; s.t+=s.speed;
-          if (s.t>1.08) { s.t=-0.08; s.edgeIdx=Math.floor(Math.random()*interE.length); s.speed=0.0022+Math.random()*0.0038; }
+          if (s.t>1.08) {
+            const groupStart = Math.floor(i / 4) * 4;
+            const newEdge = Math.floor(Math.random() * interE.length);
+            for (let g = 0; g < 4 && groupStart + g < IMP_N; g++) {
+              impStates[groupStart + g].edgeIdx = newEdge;
+              impStates[groupStart + g].t = -g * 0.16;
+              impStates[groupStart + g].speed = 0.0028 + Math.random() * 0.0014;
+            }
+            continue;
+          }
           const vis=s.t>=0&&s.t<=1;
-          if (vis) { const[ea,eb]=interE[s.edgeIdx]; impD.position.lerpVectors(ea,eb,s.t); const fade=Math.sin(Math.max(0,Math.min(1,s.t))*Math.PI); impD.scale.setScalar(Math.max(0.001,fade*1.1)); impD.updateMatrix(); }
-          else { impD.position.set(0,0,0); impD.scale.setScalar(0.001); impD.updateMatrix(); }
+          if (vis) {
+            const[ea,eb]=interE[s.edgeIdx];
+            impD.position.lerpVectors(ea,eb,s.t);
+            const fade=Math.sin(Math.max(0,Math.min(1,s.t))*Math.PI);
+            // Wave pulsation along the current — gives the "flowing AC" feel
+            const wave = 0.6 + 0.6 * Math.sin(t * 4.0 + s.phase);
+            impD.scale.setScalar(Math.max(0.001, fade * 1.1 * wave));
+            impD.updateMatrix();
+          } else { impD.position.set(0,0,0); impD.scale.setScalar(0.001); impD.updateMatrix(); }
           impIM.setMatrixAt(i,impD.matrix); impGlowIM.setMatrixAt(i,impD.matrix);
         }
         impIM.instanceMatrix.needsUpdate=true; impGlowIM.instanceMatrix.needsUpdate=true;
