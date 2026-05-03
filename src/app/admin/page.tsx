@@ -7,7 +7,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import ThemeToggle from "@/components/ThemeToggle";
 import SystemStatusGrid from "@/components/admin/SystemStatusGrid";
 import FunnelWidget from "@/components/admin/FunnelWidget";
-import ActivityFeedTab from "@/components/admin/ActivityFeedTab";
+import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import AuditLogTab from "@/components/admin/AuditLogTab";
 
 // ── Pricing ───────────────────────────────────────────────────────────────────
@@ -1746,7 +1746,7 @@ export default function AdminPanel() {
           </>}
 
           {/* ── KNOWLEDGE ────────────────────────────────────────────────────── */}
-          {tab === "activity"  && <ActivityFeedTab TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} />}
+          {tab === "activity"  && <AnalyticsDashboard TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} isDark={isDark} />}
           {tab === "audit"     && <AuditLogTab TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} />}
           {tab === "knowledge" && <KnowledgeTab />}
           {tab === "team"      && <TeamTab />}
