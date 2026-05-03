@@ -123,6 +123,36 @@ nav, .card, section, main, aside, header, footer {
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 
+  /* ── Theme-aware glass stack (used in nav, DemoChat, feature cards) ── */
+  /* Drop-in replacement для inline stack:
+       background: var(--bg-nav)
+       backdrop-filter: blur(16px) saturate(1.6) brightness(1.02)
+       border: 1px solid var(--border-light)
+       + theme-aware shadow. */
+  .glass-card {
+    background: var(--bg-nav);
+    backdrop-filter: blur(16px) saturate(1.6) brightness(1.02);
+    -webkit-backdrop-filter: blur(16px) saturate(1.6) brightness(1.02);
+    border: 1px solid var(--border-light);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 32px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset;
+  }
+  .glass-pill {
+    background: var(--bg-nav);
+    backdrop-filter: blur(16px) saturate(1.6) brightness(1.02);
+    -webkit-backdrop-filter: blur(16px) saturate(1.6) brightness(1.02);
+    border: 1px solid var(--border-light);
+    border-radius: 9999px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  .glass-circle {
+    background: var(--bg-nav);
+    backdrop-filter: blur(16px) saturate(1.6) brightness(1.02);
+    -webkit-backdrop-filter: blur(16px) saturate(1.6) brightness(1.02);
+    border: 1px solid var(--border-light);
+    border-radius: 50%;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.12) inset;
+  }
+
   /* ── Gradient text utility ─────────────────────────────────────── */
   .text-gradient-blue {
     background: linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%);
