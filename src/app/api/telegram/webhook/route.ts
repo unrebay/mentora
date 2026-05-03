@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { BOT_PLATFORM_KNOWLEDGE } from "@/lib/bot-knowledge";
 
-const BOT_TOKEN     = process.env.TELEGRAM_SUPPORT_BOT_TOKEN ?? process.env.TELEGRAM_BOT_TOKEN ?? "";
-const ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID ?? "";
+const BOT_TOKEN     = process.env.TELEGRAM_SUPPORT_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN || "";
+const ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID || "";
 const anthropic     = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY ?? "" });
 
 // ── In-memory conversation store (per Telegram user_id → last N messages)
