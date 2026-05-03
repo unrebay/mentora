@@ -378,10 +378,10 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
           const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, opacity:op, blending:ADD, depthWrite:false }));
           sp.scale.set(sz,sz,1); sp.position.copy(pos); mainGrp.add(sp); return sp;
         };
-        // 3D ORB — sciences clearly bigger than topics
-        const orbR = isActive ? 0.36 : 0.30;
+        // 3D ORB — sciences ~50% smaller
+        const orbR = isActive ? 0.18 : 0.15;
         const orb = new THREE.Mesh(
-          new THREE.SphereGeometry(orbR, 18, 14),
+          new THREE.SphereGeometry(orbR, 16, 14),
           new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 1.0 : 0.98 })
         );
         orb.position.copy(pos); mainGrp.add(orb);
@@ -390,13 +390,13 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
           new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 0.40 : 0.32, blending: ADD, depthWrite: false })
         );
         halo.position.copy(pos); mainGrp.add(halo);
-        // Mid glow (animated) — proportional bloom for the new orb size
-        const gsz = isActive ? 2.4 : 1.9;
+        // Mid glow (animated) — proportional bloom for halved orb size
+        const gsz = isActive ? 1.2 : 0.95;
         const gop = isActive ? 0.22 : 0.16;
         const gsp = mkSp(gsz, gop);
         sciGlows.push(gsp); sciGlowOps.push(gop); sciGlowSzs.push(gsz);
         // Outer diffuse haze
-        mkSp(isActive ? 5.0 : 4.0, isActive ? 0.05 : 0.04);
+        mkSp(isActive ? 2.5 : 2.0, isActive ? 0.05 : 0.04);
       }
 
       // ── Comets — occasional fading streaks ───────────────────────────────────
@@ -448,8 +448,8 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
 
       // Chunks (local clouds around each science) — 3D bluish-white topic orbs
       const CPER=110, TIN=SUBS.length*CPER;
-      const inM  = new THREE.InstancedMesh(new THREE.SphereGeometry(0.018,8,6), mkMat(0xcfe3ff,0.24), TIN);
-      const inM2 = new THREE.InstancedMesh(new THREE.SphereGeometry(0.040,8,6),   mkMat(0x88aaff,0.06), TIN);
+      const inM  = new THREE.InstancedMesh(new THREE.SphereGeometry(0.018,8,6), mkMat(0xeaf2ff,0.32), TIN);
+      const inM2 = new THREE.InstancedMesh(new THREE.SphereGeometry(0.040,8,6),   mkMat(0xb8c8ff,0.08), TIN);
       mainGrp.add(inM); mainGrp.add(inM2);
       { const dum=new THREE.Object3D();
         for (let si=0;si<SUBS.length;si++) {

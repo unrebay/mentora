@@ -246,11 +246,11 @@ function AuthGalaxy() {
           const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, opacity:op, blending:ADD, depthWrite:false }));
           sp.scale.set(sz,sz,1); sp.position.copy(npos); mainGrp.add(sp); return sp;
         };
-        // 3D ORB — sciences clearly bigger than topics
-        const orbR = isActive ? 0.36 : isSecond ? 0.22 : 0.30;
+        // 3D ORB — sciences ~50% smaller
+        const orbR = isActive ? 0.18 : isSecond ? 0.11 : 0.15;
         const orbOp = isActive ? 1.0 : isSecond ? 0.92 : 0.98;
         const orb = new THREE.Mesh(
-          new THREE.SphereGeometry(orbR, 18, 14),
+          new THREE.SphereGeometry(orbR, 16, 14),
           new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: orbOp })
         );
         orb.position.copy(npos); mainGrp.add(orb);
@@ -259,13 +259,13 @@ function AuthGalaxy() {
           new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 0.40 : isSecond ? 0.20 : 0.32, blending: ADD, depthWrite: false })
         );
         halo.position.copy(npos); mainGrp.add(halo);
-        // Mid glow — proportional bloom for the new orb size
-        const gsz = isActive?2.4:isSecond?1.4:1.9;
+        // Mid glow — proportional bloom for halved orb size
+        const gsz = isActive?1.2:isSecond?0.7:0.95;
         const gop = isActive?0.22:isSecond?0.10:0.16;
         const gsp = mkSp(gsz, gop);
         sciGlows.push(gsp); sciGlowOps.push(gop); sciGlowSzs.push(gsz);
         // Outer diffuse haze
-        mkSp(isActive?5.0:isSecond?3.0:4.0, isActive?0.05:isSecond?0.025:0.04);
+        mkSp(isActive?2.5:isSecond?1.5:2.0, isActive?0.05:isSecond?0.025:0.04);
       }
 
       // ── Comets — occasional fading streaks ──────────────────────────────
@@ -321,8 +321,8 @@ function AuthGalaxy() {
 
       // Local clouds around each node — 3D bluish-white topic orbs (with halo)
       const CPER=80,TIN=SUBS.length*CPER;
-      const inM     = new THREE.InstancedMesh(new THREE.SphereGeometry(0.018,8,6), mkMat(0xcfe3ff,0.24), TIN);
-      const inMHalo = new THREE.InstancedMesh(new THREE.SphereGeometry(0.040,8,6),  mkMat(0x88aaff,0.06), TIN);
+      const inM     = new THREE.InstancedMesh(new THREE.SphereGeometry(0.018,8,6), mkMat(0xeaf2ff,0.32), TIN);
+      const inMHalo = new THREE.InstancedMesh(new THREE.SphereGeometry(0.040,8,6),  mkMat(0xb8c8ff,0.08), TIN);
       mainGrp.add(inM); mainGrp.add(inMHalo);
       { const dum=new THREE.Object3D();
         for (let si=0;si<SUBS.length;si++) { const sp=sciPos[si];

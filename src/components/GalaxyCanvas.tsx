@@ -258,10 +258,10 @@ export default function GalaxyCanvas({ className }: Props) {
           sp.scale.set(sz, sz, 1); sp.position.copy(npos); mainGrp.add(sp); return sp;
         };
 
-        // 3D ORB — sciences clearly bigger than topics. Topic ~0.018, science 0.22/0.30
-        const orbR = isSecond ? 0.22 : 0.30;
+        // 3D ORB — sciences ~50% smaller. Topic ~0.018, science 0.11/0.15
+        const orbR = isSecond ? 0.11 : 0.15;
         const orb = new THREE.Mesh(
-          new THREE.SphereGeometry(orbR, 18, 14),
+          new THREE.SphereGeometry(orbR, 16, 14),
           new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isSecond ? 0.92 : 1.0 })
         );
         orb.position.copy(npos); mainGrp.add(orb);
@@ -270,13 +270,13 @@ export default function GalaxyCanvas({ className }: Props) {
           new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isSecond ? 0.20 : 0.32, blending: ADD, depthWrite: false })
         );
         halo.position.copy(npos); mainGrp.add(halo);
-        // Mid glow (animated) — proportional bloom for the new orb size
-        const gsz = isSecond ? 1.4 : 1.9;
+        // Mid glow (animated) — proportional bloom for halved orb size
+        const gsz = isSecond ? 0.7 : 0.95;
         const gop = isSecond ? 0.10 : 0.16;
         const gsp = mkSp(gsz, gop);
         sciGlows.push(gsp); sciGlowOps.push(gop); sciGlowSzs.push(gsz);
         // Outer haze — gentle bloom
-        mkSp(isSecond ? 3.0 : 4.0, isSecond ? 0.025 : 0.04);
+        mkSp(isSecond ? 1.5 : 2.0, isSecond ? 0.025 : 0.04);
       }
 
       // ── Graph edges ───────────────────────────────────────────────────────────
@@ -322,9 +322,9 @@ export default function GalaxyCanvas({ className }: Props) {
       // ── Local node clouds (3D topics — bluish-white tiny orbs with halo) ──────
       const CPER=80, TIN=SUBS.length*CPER;
       // Solid bluish-white orb body (denser geometry → reads as 3D ball)
-      const inM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.018,8,6),mkMat(0xcfe3ff,0.24),TIN);
+      const inM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.018,8,6),mkMat(0xeaf2ff,0.32),TIN);
       // Soft halo around each topic-orb for subtle glow
-      const inMHalo=new THREE.InstancedMesh(new THREE.SphereGeometry(0.040,8,6),mkMat(0x88aaff,0.06),TIN);
+      const inMHalo=new THREE.InstancedMesh(new THREE.SphereGeometry(0.040,8,6),mkMat(0xb8c8ff,0.08),TIN);
       mainGrp.add(inM); mainGrp.add(inMHalo);
       { const dum=new THREE.Object3D();
         for (let si=0;si<SUBS.length;si++) { const sp=sciPos[si];
