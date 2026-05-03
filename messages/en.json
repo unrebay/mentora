@@ -55,7 +55,7 @@
     "ctaLine2": "Your questions are yours alone.",
     "ctaNoCard": "No card. No commitment.",
     "subjectsTitle": "17 sciences available now",
-    "subjectsSubtitle": "From school curriculum to university-level courses",
+    "subjectsSubtitle": "From school curriculum to the frontiers of modern science",
     "howTitle": "How it works",
     "howSubtitle": "Four steps from your first question to real progress",
     "featuresLabel": "Why Mentora",
@@ -180,7 +180,7 @@
     },
     "02": {
       "title": "Choose your science",
-      "desc": "17 sciences from school to exam prep. Switch anytime — your progress is saved."
+      "desc": "17 sciences — from literature and history to math, physics and philosophy. Switch anytime — progress in each one is tracked separately."
     },
     "03": {
       "title": "Mentora remembers you",
@@ -191,8 +191,8 @@
       "desc": "XP, streaks, levels per science. See how far you've come — that's what keeps you going."
     },
     "05": {
-      "title": "Prepare for what matters",
-      "desc": "Exam mode with real tasks and readiness tracker. Launching summer 2026."
+      "title": "Go deeper",
+      "desc": "The Galaxy of Knowledge shows how sciences connect; PDF notes and real sources let you dig further. Real learning — no ceiling."
     }
   },
   "stats": {
