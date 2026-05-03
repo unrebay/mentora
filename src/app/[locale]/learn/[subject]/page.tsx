@@ -168,6 +168,7 @@ export default async function LearnSubjectPage({ params, searchParams }: Props) 
       initialResetAt={initialResetAt}
       initialTopic={initialTopic}
       isUltima={isUltima}
+      isPro={isPaidOrTrial}
     />
   );
 }

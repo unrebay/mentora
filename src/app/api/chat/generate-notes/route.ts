@@ -25,15 +25,20 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    // Ultra-only feature
+    // Pro+ feature (includes Ultima and active trial)
     const { data: profile } = await supabase
       .from("users")
-      .select("plan")
+      .select("plan, trial_expires_at")
       .eq("id", user.id)
       .single();
 
-    if (profile?.plan !== "ultima") {
-      return NextResponse.json({ error: "Ultra plan required" }, { status: 403 });
+    const isTrialActive = profile?.trial_expires_at
+      ? new Date(profile.trial_expires_at) > new Date()
+      : false;
+    const hasPro = profile?.plan === "pro" || profile?.plan === "ultima" || isTrialActive;
+
+    if (!hasPro) {
+      return NextResponse.json({ error: "Pro plan required" }, { status: 403 });
     }
 
     // Build conversation text for Claude

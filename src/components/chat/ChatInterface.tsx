@@ -12,7 +12,7 @@ import TelegramSupportButton from "@/components/TelegramSupportButton";
 const DAILY_LIMIT = 10;
 
 interface Message { role: MessageRole; content: string; isError?: boolean; imageUrl?: string }
-interface Props { subject: string; subjectTitle: string; initialHistory: { role: string; content: string }[]; initialMessagesRemaining: number | null; initialResetAt?: string | null; initialTopic?: string; isUltima?: boolean }
+interface Props { subject: string; subjectTitle: string; initialHistory: { role: string; content: string }[]; initialMessagesRemaining: number | null; initialResetAt?: string | null; initialTopic?: string; isUltima?: boolean; isPro?: boolean }
 
 // ─── Countdown helpers ────────────────────────────────────────────────────
 function msUntilNextMidnightUTC(): number {
@@ -339,7 +339,7 @@ function MarkdownMessage({ content }: { content: string }) {
 }
 
 // ─── Main Component ────────────────────────────────────────────────────────
-export default function ChatInterface({ subject, subjectTitle, initialHistory, initialMessagesRemaining, initialResetAt, initialTopic, isUltima = false }: Props) {
+export default function ChatInterface({ subject, subjectTitle, initialHistory, initialMessagesRemaining, initialResetAt, initialTopic, isUltima = false, isPro = false }: Props) {
   const locale = useLocale();
   const tChat = useTranslations("chat");
   const tUi = useTranslations("chat.ui");
@@ -599,8 +599,8 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             </div>
           )}
 
-          {/* Export PDF — Ultra only */}
-          {isUltima && messages.filter(m => !m.isError).length >= 3 && (
+          {/* Export PDF — Pro+ feature (Pro, Ultima, active trial) */}
+          {isPro && messages.filter(m => !m.isError).length >= 3 && (
             <button
               onClick={handleExportPdf} disabled={exportingPdf} title={tChat("exportTitle")}
               className="flex items-center gap-1.5 transition-all disabled:opacity-50 hover:scale-[1.04] active:scale-95"
