@@ -56,6 +56,7 @@ jobs:
           cp -r public .next/standalone/public
           mkdir -p .next/standalone/.next
           cp -r .next/static .next/standalone/.next/static
+          cp -r scripts .next/standalone/scripts
 
       - name: Archive bundle (tar.gz)
         run: tar -czf bundle.tar.gz -C .next/standalone .
@@ -120,6 +121,11 @@ jobs:
 
             echo "==> pm2 start server.js"
             pm2 start server.js --name mentora --update-env
+
+            echo "==> pm2 (re)start telegram-poller (long-polling, выходит наружу из VPS)"
+            pm2 delete telegram-poller 2>/dev/null || true
+            pm2 start scripts/telegram-poller.mjs --name telegram-poller --update-env --interpreter node
+
             pm2 save
             pm2 status
 
