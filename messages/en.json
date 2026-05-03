@@ -1193,9 +1193,9 @@
         "criterion": "Reliability",
         "search": "75%",
         "ai": "80%",
-        "mentora": "85%",
-        "tutor": "92%",
-        "note": "How often answers match reality · fewer made-up facts"
+        "mentora": "95%",
+        "tutor": "88%",
+        "note": "Reliability · 95% target by June 2026 (RAG + sources)"
       },
       {
         "criterion": "Real human empathy",
