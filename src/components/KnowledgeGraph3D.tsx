@@ -378,14 +378,8 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
           const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, opacity:op, blending:ADD, depthWrite:false }));
           sp.scale.set(sz,sz,1); sp.position.copy(pos); mainGrp.add(sp); return sp;
         };
-        // 3D ORB — real sphere mesh
-        const orbR = isActive ? 0.62 : 0.50;
-        const orbMat = new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 0.98 : 0.94 });
-        const orb = new THREE.Mesh(new THREE.SphereGeometry(orbR, 24, 18), orbMat);
-        orb.position.copy(pos);
-        mainGrp.add(orb);
-        // Inner bloom halo (small sprite hugging the orb)
-        mkSp(isActive ? 1.5 : 1.1, isActive ? 0.85 : 0.72);
+        // Tight bright core
+        mkSp(isActive ? 1.4 : 1.0, isActive ? 0.92 : 0.80);
         // Mid glow (animated)
         const gsz = isActive ? 4.0 : 3.2;
         const gop = isActive ? 0.45 : 0.30;
@@ -409,23 +403,25 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         ));
       }
 
-      // Chain nodes on edges
+      // Chain nodes on edges — plasma beads (denser geom + halo, animated pulse)
       const CN=22, TCN=Math.max(interE.length*CN,1);
-      const cnM = new THREE.InstancedMesh(new THREE.SphereGeometry(0.032,5,4), mkMat(0x88aaff,0.65), TCN);
-      mainGrp.add(cnM);
+      const cnM     = new THREE.InstancedMesh(new THREE.SphereGeometry(0.055,10,8), mkMat(0xb8d4ff,0.85), TCN);
+      const cnMHalo = new THREE.InstancedMesh(new THREE.SphereGeometry(0.16,8,6),  mkMat(0x4470ff,0.22), TCN);
+      mainGrp.add(cnM); mainGrp.add(cnMHalo);
       { const dum=new THREE.Object3D(); let idx=0;
         for (const [a,b] of interE) for (let k=0;k<CN;k++) {
           const t=(k+1)/(CN+1), amp=0.55+Math.random()*0.25;
           dum.position.set(a.x+(b.x-a.x)*t+(Math.random()-.5)*amp, a.y+(b.y-a.y)*t+(Math.random()-.5)*amp, a.z+(b.z-a.z)*t+(Math.random()-.5)*amp);
-          dum.scale.setScalar(1); dum.updateMatrix(); cnM.setMatrixAt(idx++, dum.matrix);
+          dum.scale.setScalar(1); dum.updateMatrix();
+          cnM.setMatrixAt(idx,dum.matrix); cnMHalo.setMatrixAt(idx,dum.matrix); idx++;
         }
-        cnM.instanceMatrix.needsUpdate=true;
+        cnM.instanceMatrix.needsUpdate=true; cnMHalo.instanceMatrix.needsUpdate=true;
       }
 
-      // Chunks (local clouds around each science)
+      // Chunks (local clouds around each science) — 3D bluish-white topic orbs
       const CPER=110, TIN=SUBS.length*CPER;
-      const inM  = new THREE.InstancedMesh(new THREE.SphereGeometry(0.024,4,3), mkMat(0xffffff,0.28), TIN);
-      const inM2 = new THREE.InstancedMesh(new THREE.SphereGeometry(0.062,4,3), mkMat(0xaabbff,0.06), TIN);
+      const inM  = new THREE.InstancedMesh(new THREE.SphereGeometry(0.045,10,8), mkMat(0xcfe3ff,0.40), TIN);
+      const inM2 = new THREE.InstancedMesh(new THREE.SphereGeometry(0.11,8,6),   mkMat(0x88aaff,0.10), TIN);
       mainGrp.add(inM); mainGrp.add(inM2);
       { const dum=new THREE.Object3D();
         for (let si=0;si<SUBS.length;si++) {
@@ -442,7 +438,7 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
 
       // Spokes (short tendrils from each science)
       const SCN=6, SCEDGE=8, TSCN=SUBS.length*SCEDGE*SCN;
-      const cnM2=new THREE.InstancedMesh(new THREE.SphereGeometry(0.020,5,4), mkMat(0x6688cc,0.38), TSCN);
+      const cnM2=new THREE.InstancedMesh(new THREE.SphereGeometry(0.034,8,6), mkMat(0x88aadd,0.55), TSCN);
       mainGrp.add(cnM2);
       { const dum=new THREE.Object3D(); let idx2=0;
         for (let si=0;si<SUBS.length;si++) {

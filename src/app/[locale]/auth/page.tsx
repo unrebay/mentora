@@ -246,14 +246,8 @@ function AuthGalaxy() {
           const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, opacity:op, blending:ADD, depthWrite:false }));
           sp.scale.set(sz,sz,1); sp.position.copy(npos); mainGrp.add(sp); return sp;
         };
-        // 3D ORB — real sphere mesh
-        const orbR = isActive ? 0.62 : isSecond ? 0.34 : 0.52;
-        const orbMat = new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 0.98 : isSecond ? 0.82 : 0.94 });
-        const orb = new THREE.Mesh(new THREE.SphereGeometry(orbR, 24, 18), orbMat);
-        orb.position.copy(npos);
-        mainGrp.add(orb);
-        // Inner bloom halo (sprite hugging the orb)
-        mkSp(isActive?1.5:isSecond?0.8:1.15, isActive?0.85:isSecond?0.40:0.70);
+        // Tight bright core
+        mkSp(isActive?1.4:isSecond?0.7:1.0, isActive?0.90:isSecond?0.45:0.75);
         // Mid glow — animated
         const gsz = isActive?4.0:isSecond?2.2:3.2;
         const gop = isActive?0.45:isSecond?0.16:0.30;
@@ -282,31 +276,35 @@ function AuthGalaxy() {
           new THREE.LineBasicMaterial({ color:0x334477,transparent:true,opacity:0.12,blending:ADD,depthWrite:false })));
       }
 
-      // Chain nodes on edges
+      // Chain nodes on edges — plasma beads (3D + halo)
       const CN=22,TCN=Math.max(interE.length*CN,1);
-      const cnM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.032,5,4),mkMat(0x88aaff,0.65),TCN);
-      mainGrp.add(cnM);
+      const cnM     = new THREE.InstancedMesh(new THREE.SphereGeometry(0.055,10,8), mkMat(0xb8d4ff,0.85), TCN);
+      const cnMHalo = new THREE.InstancedMesh(new THREE.SphereGeometry(0.16,8,6),  mkMat(0x4470ff,0.22), TCN);
+      mainGrp.add(cnM); mainGrp.add(cnMHalo);
       { const dum=new THREE.Object3D(); let idx=0;
         for (const [a,b] of interE) for (let k=0;k<CN;k++) {
           const t=(k+1)/(CN+1),amp=0.55+Math.random()*0.25;
           dum.position.set(a.x+(b.x-a.x)*t+(Math.random()-.5)*amp,a.y+(b.y-a.y)*t+(Math.random()-.5)*amp,a.z+(b.z-a.z)*t+(Math.random()-.5)*amp);
-          dum.scale.setScalar(1); dum.updateMatrix(); cnM.setMatrixAt(idx++,dum.matrix);
+          dum.scale.setScalar(1); dum.updateMatrix();
+          cnM.setMatrixAt(idx,dum.matrix); cnMHalo.setMatrixAt(idx,dum.matrix); idx++;
         }
-        cnM.instanceMatrix.needsUpdate=true; }
+        cnM.instanceMatrix.needsUpdate=true; cnMHalo.instanceMatrix.needsUpdate=true; }
 
-      // Local clouds around each node
+      // Local clouds around each node — 3D bluish-white topic orbs (with halo)
       const CPER=80,TIN=SUBS.length*CPER;
-      const inM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.024,4,3),mkMat(0xffffff,0.22),TIN);
-      mainGrp.add(inM);
+      const inM     = new THREE.InstancedMesh(new THREE.SphereGeometry(0.045,10,8), mkMat(0xcfe3ff,0.42), TIN);
+      const inMHalo = new THREE.InstancedMesh(new THREE.SphereGeometry(0.10,8,6),  mkMat(0x88aaff,0.10), TIN);
+      mainGrp.add(inM); mainGrp.add(inMHalo);
       { const dum=new THREE.Object3D();
         for (let si=0;si<SUBS.length;si++) { const sp=sciPos[si];
           for (let j=0;j<CPER;j++) {
             const r=0.5+Math.random()*2.0,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);
             dum.position.set(sp.x+r*Math.sin(ph)*Math.cos(th),sp.y+r*Math.sin(ph)*Math.sin(th),sp.z+r*Math.cos(ph));
-            dum.scale.setScalar(1); dum.updateMatrix(); inM.setMatrixAt(si*CPER+j,dum.matrix);
+            dum.scale.setScalar(1); dum.updateMatrix();
+            const idx=si*CPER+j; inM.setMatrixAt(idx,dum.matrix); inMHalo.setMatrixAt(idx,dum.matrix);
           }
         }
-        inM.instanceMatrix.needsUpdate=true; }
+        inM.instanceMatrix.needsUpdate=true; inMHalo.instanceMatrix.needsUpdate=true; }
 
       // ── Impulse pulses ────────────────────────────────────────────────────
       const IMP_N=Math.min(40,interE.length*2);

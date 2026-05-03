@@ -240,14 +240,8 @@ export default function GalaxyCanvas({ className }: Props) {
           sp.scale.set(sz, sz, 1); sp.position.copy(npos); mainGrp.add(sp); return sp;
         };
 
-        // Core 3D ORB — real sphere mesh that catches light through emissive color
-        const orbR = isSecond ? 0.34 : 0.52;
-        const orbMat = new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isSecond ? 0.85 : 0.95 });
-        const orb = new THREE.Mesh(new THREE.SphereGeometry(orbR, 24, 18), orbMat);
-        orb.position.copy(npos);
-        mainGrp.add(orb);
-        // Bright inner halo (sprite, very small) to give bloom edge to the orb
-        mkSp(isSecond ? 0.8 : 1.15, isSecond ? 0.32 : 0.55);
+        // Core
+        mkSp(isSecond ? 0.7 : 1.0, isSecond ? 0.28 : 0.50);
         // Mid glow (animated)
         const gsz = isSecond ? 2.2 : 3.2;
         const gop = isSecond ? 0.09 : 0.16;
@@ -266,7 +260,7 @@ export default function GalaxyCanvas({ className }: Props) {
         interE.push([sciPos[ia], sciPos[ib]]);
         mainGrp.add(new THREE.Line(
           new THREE.BufferGeometry().setFromPoints([sciPos[ia], sciPos[ib]]),
-          new THREE.LineBasicMaterial({ color:0x4466cc, transparent:true, opacity:0.18, blending:ADD, depthWrite:false })
+          new THREE.LineBasicMaterial({ color:0x5577e0, transparent:true, opacity:0.24, blending:ADD, depthWrite:false })
         ));
       }
       // Cross-links: second ring → first ring
@@ -275,37 +269,45 @@ export default function GalaxyCanvas({ className }: Props) {
         interE.push([a, b]);
         mainGrp.add(new THREE.Line(
           new THREE.BufferGeometry().setFromPoints([a, b]),
-          new THREE.LineBasicMaterial({ color:0x334477, transparent:true, opacity:0.12, blending:ADD, depthWrite:false })
+          new THREE.LineBasicMaterial({ color:0x445599, transparent:true, opacity:0.16, blending:ADD, depthWrite:false })
         ));
       }
 
-      // ── Chain nodes on edges ──────────────────────────────────────────────────
+      // ── Chain nodes on edges — plasma beads (3D + halo, animated pulse) ───────
       const CN=22, TCN=Math.max(interE.length*CN,1);
       const mkMat = (color: number, op: number) =>
         new THREE.MeshBasicMaterial({ color, transparent:true, opacity:op, blending:ADD, depthWrite:false });
-      const cnM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.032,5,4),mkMat(0x88aaff,0.65),TCN);
-      mainGrp.add(cnM);
+      // Bright plasma core: denser geom, brighter
+      const cnM     = new THREE.InstancedMesh(new THREE.SphereGeometry(0.055,10,8), mkMat(0xb8d4ff,0.85), TCN);
+      // Plasma halo around each bead — gives the "energy stream" feeling
+      const cnMHalo = new THREE.InstancedMesh(new THREE.SphereGeometry(0.16,8,6),  mkMat(0x4470ff,0.22), TCN);
+      mainGrp.add(cnM); mainGrp.add(cnMHalo);
       { const dum=new THREE.Object3D(); let idx=0;
         for (const [a,b] of interE) for (let k=0;k<CN;k++) {
           const t=(k+1)/(CN+1),amp=0.55+Math.random()*0.25;
           dum.position.set(a.x+(b.x-a.x)*t+(Math.random()-.5)*amp,a.y+(b.y-a.y)*t+(Math.random()-.5)*amp,a.z+(b.z-a.z)*t+(Math.random()-.5)*amp);
-          dum.scale.setScalar(1); dum.updateMatrix(); cnM.setMatrixAt(idx++,dum.matrix);
+          dum.scale.setScalar(1); dum.updateMatrix();
+          cnM.setMatrixAt(idx,dum.matrix); cnMHalo.setMatrixAt(idx,dum.matrix); idx++;
         }
-        cnM.instanceMatrix.needsUpdate=true; }
+        cnM.instanceMatrix.needsUpdate=true; cnMHalo.instanceMatrix.needsUpdate=true; }
 
-      // ── Local node clouds ─────────────────────────────────────────────────────
+      // ── Local node clouds (3D topics — bluish-white tiny orbs with halo) ──────
       const CPER=80, TIN=SUBS.length*CPER;
-      const inM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.024,4,3),mkMat(0xffffff,0.22),TIN);
-      mainGrp.add(inM);
+      // Solid bluish-white orb body (denser geometry → reads as 3D ball)
+      const inM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.045,10,8),mkMat(0xcfe3ff,0.42),TIN);
+      // Soft halo around each topic-orb for subtle glow
+      const inMHalo=new THREE.InstancedMesh(new THREE.SphereGeometry(0.10,8,6),mkMat(0x88aaff,0.10),TIN);
+      mainGrp.add(inM); mainGrp.add(inMHalo);
       { const dum=new THREE.Object3D();
         for (let si=0;si<SUBS.length;si++) { const sp=sciPos[si];
           for (let j=0;j<CPER;j++) {
             const r=0.5+Math.random()*2.0,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);
             dum.position.set(sp.x+r*Math.sin(ph)*Math.cos(th),sp.y+r*Math.sin(ph)*Math.sin(th),sp.z+r*Math.cos(ph));
-            dum.scale.setScalar(1); dum.updateMatrix(); inM.setMatrixAt(si*CPER+j,dum.matrix);
+            dum.scale.setScalar(1); dum.updateMatrix();
+            const idx=si*CPER+j; inM.setMatrixAt(idx,dum.matrix); inMHalo.setMatrixAt(idx,dum.matrix);
           }
         }
-        inM.instanceMatrix.needsUpdate=true; }
+        inM.instanceMatrix.needsUpdate=true; inMHalo.instanceMatrix.needsUpdate=true; }
 
       // ── Impulse pulses along edges ────────────────────────────────────────────
       const IMP_N=Math.min(40,interE.length*2);
