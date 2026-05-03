@@ -430,7 +430,9 @@ function AuthPageContent() {
         const res  = await fetch("/api/auth/telegram", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(user) });
         const json = await res.json();
         if (!res.ok) throw new Error(json.error);
-        window.location.href = json.action_link;
+        // New flow: server-side verifyOtp set the session cookies. Just navigate
+        // to the destination decided by the API (dashboard / onboarding).
+        window.location.href = json.next ?? "/dashboard";
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : t("tryAgain");
         setError(t("errorTelegramLogin") + msg);
