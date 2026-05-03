@@ -15,12 +15,16 @@ interface Row {
 }
 interface Props { mySerialId?: number | null }
 
-const TIER_COLORS = ["#94a3b8", "#4561E8", "#7C3AED", "#FF7A00", "#f59e0b"]; // beginner..expert
+const TIER_COLORS = ["#94a3b8", "#4561E8", "#7C3AED", "#FF7A00", "#f59e0b", "#c084fc", "#06B6D4", "#FF8B3D"]; // beginner..academic
+const TIER_KEYS = ["beginner", "explorer", "scholar", "historian", "expert", "master", "doctor", "academic"] as const;
 function tierIdxByXP(xp: number) {
-  if (xp >= 1000) return 4;
-  if (xp >= 600)  return 3;
-  if (xp >= 300)  return 2;
-  if (xp >= 100)  return 1;
+  if (xp >= 10000) return 7;
+  if (xp >= 5000)  return 6;
+  if (xp >= 2500)  return 5;
+  if (xp >= 1000)  return 4;
+  if (xp >= 600)   return 3;
+  if (xp >= 300)   return 2;
+  if (xp >= 100)   return 1;
   return 0;
 }
 const MEDAL_GRADIENTS: Record<number, string> = {
@@ -37,12 +41,11 @@ const MEDAL_GLOW: Record<number, string> = {
 export default function Leaderboard({ mySerialId }: Props) {
   const t = useTranslations("analytics.leaderboard");
   const [rows, setRows] = useState<Row[] | null>(null);
-  const [showAll, setShowAll] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/leaderboard?limit=50")
+    fetch("/api/leaderboard?limit=300")
       .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
       .then(d => { if (!cancelled) setRows(d.top); })
       .catch(e => { if (!cancelled) setError(String(e.message ?? e)); });
@@ -50,9 +53,12 @@ export default function Leaderboard({ mySerialId }: Props) {
   }, []);
 
   if (error) return null;
-  const visible = !rows ? [] : (showAll ? rows : rows.slice(0, 10));
   const myIdx = rows && mySerialId ? rows.findIndex(r => r.serial_id === mySerialId && !r.is_bot) : -1;
-  const myShown = mySerialId && rows && !visible.some(r => r.serial_id === mySerialId && !r.is_bot) && myIdx >= 0;
+  // Top 10 always visible
+  const top10 = !rows ? [] : rows.slice(0, 10);
+  // Neighbours: ±2 around the user IF the user is below top-10
+  const showNeighbours = !!(rows && mySerialId && myIdx >= 10);
+  const neighbours = showNeighbours && rows ? rows.slice(Math.max(10, myIdx - 2), myIdx + 3) : [];
 
   return (
     <div className="rounded-2xl border p-5 relative overflow-hidden"
@@ -90,7 +96,7 @@ export default function Leaderboard({ mySerialId }: Props) {
             ))}
           </div>
         )}
-        {visible.map((r, idx) => {
+        {top10.map((r, idx) => {
           const isMine = mySerialId === r.serial_id && !r.is_bot;
           const tier = tierIdxByXP(r.xp);
           const tierColor = TIER_COLORS[tier];
@@ -145,7 +151,7 @@ export default function Leaderboard({ mySerialId }: Props) {
                 <div className="flex items-center gap-3 mt-0.5">
                   <span className="text-[10px] font-bold flex items-center gap-1" style={{ color: tierColor }}>
                     <span className="w-1.5 h-1.5 rounded-full" style={{ background: tierColor, boxShadow: `0 0 6px ${tierColor}` }} />
-                    {t(`tiers.${["beginner","explorer","scholar","historian","expert"][tier]}` as never)}
+                    {t(`tiers.${TIER_KEYS[tier]}` as never)}
                   </span>
                   <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
                     {t("streakOf", { n: r.streak })}
@@ -167,58 +173,81 @@ export default function Leaderboard({ mySerialId }: Props) {
           );
         })}
 
-        {/* "You're here" when not in visible top */}
-        {myShown && rows && (
+        {/* Neighbours block (only if user below top-10) */}
+        {showNeighbours && rows && (
           <>
-            <div className="text-center text-xs py-1.5" style={{ color: "var(--text-muted)" }}>· · ·</div>
-            {(() => {
-              const r = rows[myIdx];
+            <div className="text-center py-2" style={{ color: "var(--text-muted)" }}>
+              <span className="text-[10px] tracking-[0.2em]">· · ·</span>
+            </div>
+            {neighbours.map((r, ni) => {
+              // Index in the full leaderboard for #place
+              const fullIdx = rows.indexOf(r);
+              const isMine = mySerialId === r.serial_id && !r.is_bot;
               const tier = tierIdxByXP(r.xp);
               const tierColor = TIER_COLORS[tier];
+              const subjColor = r.primary_subject ? subjectColor(r.primary_subject) : tierColor;
               return (
-                <div className="rounded-xl p-3 flex items-center gap-3 relative"
+                <div key={`nb-${r.serial_id}-${ni}`}
+                  className="rounded-xl p-3 flex items-center gap-3 relative overflow-hidden transition-all"
                   style={{
-                    background: "linear-gradient(135deg, rgba(124,58,237,0.18), rgba(69,97,232,0.10))",
-                    border: "1.5px solid rgba(124,58,237,0.55)",
+                    background: isMine
+                      ? "linear-gradient(135deg, rgba(124,58,237,0.20), rgba(69,97,232,0.12) 60%, rgba(0,0,0,0.04))"
+                      : `linear-gradient(135deg, ${subjColor}10, transparent 80%), rgba(255,255,255,0.03)`,
+                    borderLeft: `3px solid ${tierColor}`,
+                    border: isMine ? "1.5px solid rgba(124,58,237,0.60)" : "1px solid rgba(255,255,255,0.06)",
                     backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
-                    boxShadow: "0 0 28px rgba(124,58,237,0.55), inset 0 1px 0 rgba(255,255,255,0.10)",
+                    boxShadow: isMine
+                      ? "0 0 32px rgba(124,58,237,0.60), inset 0 1px 0 rgba(255,255,255,0.10)"
+                      : "inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 8px rgba(0,0,0,0.10)",
+                    transform: isMine ? "scale(1.02)" : "scale(1)",
+                    marginBottom: 8,
                   }}>
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 font-black text-base"
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 relative font-black"
                     style={{
                       background: `linear-gradient(135deg, ${tierColor}30, ${tierColor}10)`,
-                      border: `1px solid ${tierColor}40`, color: tierColor,
+                      border: `1px solid ${tierColor}40`,
+                      color: tierColor, fontSize: 14,
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10)",
                     }}>
-                    {myIdx + 1}
+                    {fullIdx + 1}
                   </div>
-                  <div className="flex-1">
-                    <div className="font-black text-base" style={{ color: "var(--text)" }}>
-                      #{r.serial_id}
-                      <span className="ml-2 text-[9px] font-bold tracking-widest uppercase px-1.5 py-0.5 rounded"
-                        style={{ background: "rgba(124,58,237,0.25)", color: "#9F7AFF", border: "1px solid rgba(159,122,255,0.40)" }}>
-                        {t("you")}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-black text-base" style={{ color: "var(--text)", letterSpacing: "-0.01em" }}>
+                        #{r.serial_id}
+                      </span>
+                      {isMine && (
+                        <span className="text-[9px] font-bold tracking-widest uppercase px-1.5 py-0.5 rounded"
+                          style={{ background: "rgba(124,58,237,0.25)", color: "#9F7AFF", border: "1px solid rgba(159,122,255,0.40)" }}>
+                          {t("you")}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 mt-0.5">
+                      <span className="text-[10px] font-bold flex items-center gap-1" style={{ color: tierColor }}>
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: tierColor, boxShadow: `0 0 6px ${tierColor}` }} />
+                        {t(`tiers.${TIER_KEYS[tier]}` as never)}
+                      </span>
+                      <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                        {t("streakOf", { n: r.streak })}
                       </span>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right flex-shrink-0">
                     <div className="font-black text-lg flex items-center gap-1 justify-end" style={{ color: "var(--text)" }}>
                       {r.xp.toLocaleString()}
                       <MeLogo height={14} colorM={tierColor} colorE={tierColor} />
                     </div>
+                    <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                      {t("messagesShort", { n: r.messages.toLocaleString() })}
+                    </div>
                   </div>
                 </div>
               );
-            })()}
+            })}
           </>
         )}
       </div>
-
-      {rows && rows.length > 10 && !showAll && (
-        <button onClick={() => setShowAll(true)}
-          className="w-full mt-3 py-2 rounded-xl text-xs font-semibold transition-colors relative"
-          style={{ background: "rgba(124,58,237,0.10)", color: "#9F7AFF", border: "1px solid rgba(124,58,237,0.30)" }}>
-          {t("showAll", { n: rows.length })}
-        </button>
-      )}
     </div>
   );
 }

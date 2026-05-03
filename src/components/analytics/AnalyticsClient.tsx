@@ -26,7 +26,7 @@ export interface BadgeItem {
   earned: boolean; progress: number; name: string; desc: string; threshold: number; current: number;
 }
 export interface CareerLevel {
-  key: "beginner" | "explorer" | "scholar" | "historian" | "expert";
+  key: "beginner" | "explorer" | "scholar" | "historian" | "expert" | "master" | "doctor" | "academic";
   minXP: number; name: string; desc: string;
 }
 interface Props {
@@ -153,15 +153,15 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
           <MeLogo height={14} colorM="#7C3AED" colorE="#7C3AED" />
         </span>
       </div>
-      <div className="relative" style={{ paddingTop: 6, paddingBottom: 26 }}>
+      <div className="relative" style={{ paddingTop: 4, paddingBottom: 30 }}>
         {/* Background line */}
-        <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[2px] rounded-full"
+        <div className="absolute left-2 right-2 top-1/2 -translate-y-1/2 h-[2px] rounded-full"
           style={{ background: "var(--border)" }} />
         {/* Progress fill */}
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-[2px] rounded-full transition-all duration-700"
+        <div className="absolute left-2 top-1/2 -translate-y-1/2 h-[2px] rounded-full transition-all duration-700"
           style={{
-            width: `${(currentIdx + segProgress / 100) / (levels.length - 1) * 100}%`,
-            background: "linear-gradient(90deg, #4561E8, #7C3AED)",
+            width: `calc(${(currentIdx + segProgress / 100) / (levels.length - 1) * 100}% - 16px)`,
+            background: "linear-gradient(90deg, #4561E8, #7C3AED, #FF7A00)",
             boxShadow: "0 0 8px rgba(124,58,237,0.6)",
           }} />
         {/* Nodes */}
@@ -169,41 +169,49 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
           {levels.map((lvl, i) => {
             const passed = i < currentIdx;
             const current = i === currentIdx;
+            const isPeak = i === levels.length - 1;
             return (
-              <div key={lvl.key} className="flex flex-col items-center" style={{ flexShrink: 0 }}>
-                <div className={`relative rounded-full flex items-center justify-center transition-all duration-500 ${current ? "scale-125" : ""}`}
+              <div key={lvl.key} className="flex flex-col items-center" style={{ flexShrink: 0, position: "relative" }}>
+                <div className={`relative rounded-full flex items-center justify-center transition-all duration-500 ${current ? "scale-110" : ""}`}
                   style={{
-                    width: current ? 36 : 28, height: current ? 36 : 28,
+                    width: current ? 26 : 18, height: current ? 26 : 18,
                     background: current
                       ? "radial-gradient(circle at 30% 30%, #8B6CF7, #4561E8 60%, #2D40A8)"
                       : passed
                       ? "linear-gradient(135deg, #4561E8, #2D40A8)"
+                      : isPeak
+                      ? "radial-gradient(circle at 30% 30%, rgba(255,215,80,0.30), rgba(245,158,11,0.06) 70%)"
                       : "rgba(255,255,255,0.04)",
                     border: current
                       ? "1.5px solid rgba(255,255,255,0.5)"
                       : passed
                       ? "1px solid rgba(124,58,237,0.4)"
+                      : isPeak
+                      ? "1px solid rgba(245,158,11,0.35)"
                       : "1px solid rgba(255,255,255,0.10)",
                     backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
                     boxShadow: current
-                      ? "0 0 24px rgba(124,58,237,0.85), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 4px rgba(0,0,0,0.3)"
+                      ? "0 0 18px rgba(124,58,237,0.85), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 4px rgba(0,0,0,0.3)"
                       : passed
-                      ? "0 4px 12px rgba(69,97,232,0.4), inset 0 1px 0 rgba(255,255,255,0.25)"
+                      ? "0 3px 9px rgba(69,97,232,0.4), inset 0 1px 0 rgba(255,255,255,0.25)"
                       : "inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.10)",
                   }}>
                   {passed ? (
-                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5L20 7" /></svg>
+                    <svg viewBox="0 0 24 24" width="9" height="9" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5L20 7" /></svg>
                   ) : current ? (
-                    <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                   ) : null}
                 </div>
-                <div className="absolute top-full mt-1.5 text-center" style={{ width: 70, marginLeft: -21 }}>
-                  <div className="text-[10px] font-bold" style={{ color: current ? "var(--text)" : "var(--text-muted)" }}>
+                <div className="absolute top-full mt-2 text-center" style={{ width: 64, marginLeft: -23 }}>
+                  <div className="text-[9px] font-bold leading-tight" style={{
+                    color: current ? "var(--text)" : passed ? "var(--text-muted)" : "var(--text-muted)",
+                    opacity: current ? 1 : passed ? 0.85 : 0.55,
+                  }}>
                     {lvl.name}
                   </div>
-                  <div className="text-[9px] flex items-center justify-center gap-0.5" style={{ color: "var(--text-muted)", opacity: 0.85 }}>
-                    {lvl.minXP}
-                    <MeLogo height={8} colorM="currentColor" colorE="currentColor" />
+                  <div className="text-[8px] flex items-center justify-center gap-0.5 mt-0.5" style={{ color: "var(--text-muted)", opacity: 0.7 }}>
+                    {lvl.minXP >= 1000 ? `${lvl.minXP / 1000}k` : lvl.minXP}
+                    <MeLogo height={7} colorM="currentColor" colorE="currentColor" />
                   </div>
                 </div>
               </div>

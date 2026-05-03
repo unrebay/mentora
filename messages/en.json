@@ -804,6 +804,18 @@
       "expert": {
         "name": "Expert",
         "desc": "1000 XP — peak"
+      },
+      "master": {
+        "name": "Master",
+        "desc": "2500 ments — deep dive"
+      },
+      "doctor": {
+        "name": "Doctor",
+        "desc": "5000 ments — research grade"
+      },
+      "academic": {
+        "name": "Academician",
+        "desc": "10000 ments — peak of knowledge"
       }
     },
     "badges": {
@@ -904,7 +916,6 @@
       "title": "Leaderboard",
       "subtitle": "Top students by XP",
       "you": "You",
-      "showAll": "Show all ({n})",
       "messagesShort": "{n} msgs",
       "streakOf": "{n} day streak",
       "tiers": {
@@ -912,7 +923,10 @@
         "explorer": "Explorer",
         "scholar": "Scholar",
         "historian": "Historian",
-        "expert": "Expert"
+        "expert": "Expert",
+        "master": "Master",
+        "doctor": "Doctor",
+        "academic": "Academician"
       }
     }
   },

@@ -11,11 +11,14 @@ export const dynamic = "force-dynamic";
 
 // ── Career level thresholds ──────────────────────────────────────────────────
 const LEVELS = [
-  { key: "beginner",  minXP: 0    },
-  { key: "explorer",  minXP: 100  },
-  { key: "scholar",   minXP: 300  },
-  { key: "historian", minXP: 600  },
-  { key: "expert",    minXP: 1000 },
+  { key: "beginner",  minXP: 0     },
+  { key: "explorer",  minXP: 100   },
+  { key: "scholar",   minXP: 300   },
+  { key: "historian", minXP: 600   },
+  { key: "expert",    minXP: 1000  },
+  { key: "master",    minXP: 2500  },
+  { key: "doctor",    minXP: 5000  },
+  { key: "academic",  minXP: 10000 },
 ] as const;
 
 function getLevelKey(xp: number) {
