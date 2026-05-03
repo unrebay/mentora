@@ -292,12 +292,6 @@ async function handleUpdate(update: Record<string, unknown>) {
 export async function POST(req: NextRequest) {
   try {
     const update = await req.json();
-    stats.received += 1;
-    stats.lastReceivedAt = Math.floor(Date.now() / 1000);
-    if (update.message) {
-      stats.lastFromId = update.message.from?.id ?? 0;
-      stats.lastText = (update.message.text ?? "").slice(0, 80);
-    }
     // On VPS (pm2 / long-running process) we can just fire-and-forget without waitUntil.
     // We return 200 to Telegram immediately; handleUpdate runs in the background.
     handleUpdate(update).catch((e) => console.error("handleUpdate error:", e));
@@ -305,70 +299,5 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     console.error("Telegram webhook parse error:", e);
     return NextResponse.json({ ok: false }, { status: 200 });
-  }
-}
-
-// ── GET handler ────────────────────────────────────────────────────────────
-// Plain GET → status JSON. With ?diag=1 → verifies bot via getMe и getWebhookInfo.
-export async function GET(req: NextRequest) {
-  if (req.nextUrl.searchParams.get("diag") !== "1") {
-    return NextResponse.json({ ok: true, service: "Mentora AI support bot" });
-  }
-  if (!BOT_TOKEN) {
-    return NextResponse.json({
-      bot_token_env: "missing — neither TELEGRAM_SUPPORT_BOT_TOKEN nor TELEGRAM_BOT_TOKEN set",
-      admin_chat_id: ADMIN_CHAT_ID || "(missing)",
-    }, { status: 500 });
-  }
-
-  // ?poll=1 → switch to long-polling: delete webhook + getUpdates
-  // Used as workaround when VPS firewall blocks Telegram inbound webhooks.
-  if (req.nextUrl.searchParams.get("poll") === "1") {
-    const delRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/deleteWebhook?drop_pending_updates=true`, { method: "POST" });
-    const delJson = await delRes.json();
-    const offset = req.nextUrl.searchParams.get("offset");
-    const url = `https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?timeout=5${offset ? `&offset=${offset}` : ""}`;
-    const upRes = await fetch(url);
-    const upJson = await upRes.json();
-    return NextResponse.json({ deleteWebhook: delJson, getUpdates: upJson });
-  }
-
-  // ?setup=1 → register webhook URL with Telegram + drop pending updates
-  if (req.nextUrl.searchParams.get("setup") === "1") {
-    const webhookUrl = "https://mentora.su/api/telegram/webhook";
-    const setRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: webhookUrl, drop_pending_updates: true }),
-    });
-    const setJson = await setRes.json();
-    return NextResponse.json({ setup: true, webhook_url: webhookUrl, telegram_response: setJson });
-  }
-
-  try {
-    const meRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getMe`);
-    const me = await meRes.json();
-    const wRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getWebhookInfo`);
-    const w = await wRes.json();
-    return NextResponse.json({
-      bot_id: BOT_TOKEN.split(":")[0],
-      getMe_ok: me.ok,
-      bot_username: me.result?.username ?? null,
-      webhook_url: w.result?.url ?? null,
-      pending_update_count: w.result?.pending_update_count ?? 0,
-      last_error_date: w.result?.last_error_date ?? null,
-      last_error_message: w.result?.last_error_message ?? null,
-      admin_chat_id_set: !!ADMIN_CHAT_ID,
-      anthropic_api_key_set: !!process.env.ANTHROPIC_API_KEY,
-      // Local stats: how many real updates Telegram managed to deliver to us
-      received_total: stats.received,
-      last_received_at: stats.lastReceivedAt,
-      last_from_id: stats.lastFromId,
-      last_text: stats.lastText,
-    });
-  } catch (e: unknown) {
-    return NextResponse.json({
-      error: e instanceof Error ? e.message : String(e),
-    }, { status: 500 });
   }
 }

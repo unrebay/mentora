@@ -137,33 +137,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-
-// ── Diagnostic GET ─────────────────────────────────────────────────────────
-// https://mentora.su/api/auth/telegram?diag=1 — verifies the bot token via getMe.
-export async function GET(req: NextRequest) {
-  if (req.nextUrl.searchParams.get("diag") !== "1") {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  if (!botToken) {
-    return NextResponse.json({ env: "TELEGRAM_BOT_TOKEN missing" }, { status: 500 });
-  }
-  const botIdPrefix = botToken.split(":")[0];
-  try {
-    const r = await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
-    const j = await r.json();
-    return NextResponse.json({
-      bot_id_from_token: botIdPrefix,
-      token_length: botToken.length,
-      getMe_ok: j.ok,
-      bot_username: j.result?.username ?? null,
-      bot_first_name: j.result?.first_name ?? null,
-      expected_widget_bot: "mentora_su_bot",
-    });
-  } catch (e: unknown) {
-    return NextResponse.json({
-      bot_id_from_token: botIdPrefix,
-      getMe_error: e instanceof Error ? e.message : String(e),
-    }, { status: 500 });
-  }
-}
