@@ -40,21 +40,18 @@ export async function GET() {
     checks.push({ service: "Supabase", ok: !r.error, latencyMs: r.ms, detail: r.error });
   }
 
-  // 2) Anthropic — checks ENV present and pings models endpoint with HEAD-like call
+  // 2) Anthropic — env-presence check (proxy is POST-only, real call would cost tokens)
   {
     const key = process.env.ANTHROPIC_API_KEY;
+    const proxy = process.env.ANTHROPIC_BASE_URL;
+    const bypass = process.env.VERCEL_BYPASS_SECRET;
     if (!key) {
       checks.push({ service: "Anthropic AI", ok: false, latencyMs: 0, detail: "API key missing" });
+    } else if (proxy && !bypass) {
+      checks.push({ service: "Anthropic AI", ok: false, latencyMs: 0, detail: "VERCEL_BYPASS_SECRET missing" });
     } else {
-      const baseURL = process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com";
-      const r = await timed(async () => {
-        const res = await fetch(`${baseURL.replace(/\/$/, "")}/v1/models`, {
-          headers: { "x-api-key": key, "anthropic-version": "2023-06-01" },
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return true;
-      });
-      checks.push({ service: "Anthropic AI", ok: !r.error, latencyMs: r.ms, detail: r.error });
+      const detail = proxy ? `via Vercel proxy` : "direct";
+      checks.push({ service: "Anthropic AI", ok: true, latencyMs: 0, detail });
     }
   }
 
