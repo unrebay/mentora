@@ -1006,8 +1006,6 @@ export default async function HomePage() {
               <Link href="/terms" className="transition-colors hover:text-white/70">{t("landing.footerTerms")}</Link>
             </div>
           </div>
-          {locale === "ru" && (
-          )}
         </div>
       </footer>
     </div>

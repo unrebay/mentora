@@ -511,8 +511,6 @@ export default async function PricingPage() {
               <Link href="/terms" className="hover:t-secondary transition-colors">{t("landing.footerTerms")}</Link>
             </div>
           </div>
-          {locale === "ru" && (
-          )}
         </div>
       </footer>
     </div>
