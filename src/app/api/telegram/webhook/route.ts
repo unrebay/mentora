@@ -4,6 +4,9 @@ import { BOT_PLATFORM_KNOWLEDGE } from "@/lib/bot-knowledge";
 
 const BOT_TOKEN     = process.env.TELEGRAM_SUPPORT_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN || "";
 const ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID || "";
+
+// Diagnostic counters — survive across requests in this Node process.
+const stats = { received: 0, lastReceivedAt: 0 as number, lastFromId: 0, lastText: "" };
 const anthropic     = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY ?? "" });
 
 // ── In-memory conversation store (per Telegram user_id → last N messages)
@@ -289,6 +292,12 @@ async function handleUpdate(update: Record<string, unknown>) {
 export async function POST(req: NextRequest) {
   try {
     const update = await req.json();
+    stats.received += 1;
+    stats.lastReceivedAt = Math.floor(Date.now() / 1000);
+    if (update.message) {
+      stats.lastFromId = update.message.from?.id ?? 0;
+      stats.lastText = (update.message.text ?? "").slice(0, 80);
+    }
     // On VPS (pm2 / long-running process) we can just fire-and-forget without waitUntil.
     // We return 200 to Telegram immediately; handleUpdate runs in the background.
     handleUpdate(update).catch((e) => console.error("handleUpdate error:", e));
@@ -339,6 +348,11 @@ export async function GET(req: NextRequest) {
       last_error_message: w.result?.last_error_message ?? null,
       admin_chat_id_set: !!ADMIN_CHAT_ID,
       anthropic_api_key_set: !!process.env.ANTHROPIC_API_KEY,
+      // Local stats: how many real updates Telegram managed to deliver to us
+      received_total: stats.received,
+      last_received_at: stats.lastReceivedAt,
+      last_from_id: stats.lastFromId,
+      last_text: stats.lastText,
     });
   } catch (e: unknown) {
     return NextResponse.json({
