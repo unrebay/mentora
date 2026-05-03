@@ -59,3 +59,28 @@ export async function getEmbedding(content: string): Promise<number[]> {
   const data = await resp.json();
   return data.embedding as number[];
 }
+
+/**
+ * Logs an admin action to the admin_audit_log table.
+ * Fire-and-forget — never fails the calling endpoint if logging itself errors.
+ *
+ * Example:
+ *   await logAudit("knowledge.create", `chunk:${id}`, { subject: row.subject, length: row.content.length });
+ */
+export async function logAudit(
+  action: string,
+  target?: string,
+  metadata?: Record<string, unknown>,
+): Promise<void> {
+  try {
+    const sb = createAdminSupabase();
+    await sb.from("admin_audit_log").insert({
+      admin_email: ADMIN_EMAIL,
+      action,
+      target,
+      metadata,
+    });
+  } catch (e) {
+    console.error("[logAudit] failed:", e instanceof Error ? e.message : String(e));
+  }
+}

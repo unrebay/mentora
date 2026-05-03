@@ -55,6 +55,9 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    await logAudit("knowledge.create", `chunk:${data.id}`, {
+      subject, topic: topic ?? null, length: content.length,
+    });
     return NextResponse.json({ data }, { status: 201 });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -76,5 +79,6 @@ export async function DELETE(req: NextRequest) {
   const { error } = await admin.from("knowledge_chunks").delete().in("id", ids);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  await logAudit("knowledge.delete", `chunks:${ids.length}`, { count: ids.length, ids });
   return NextResponse.json({ deleted: ids.length });
 }

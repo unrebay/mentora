@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin, createAdminSupabase } from "@/lib/admin";
+import { requireAdmin, createAdminSupabase, logAudit } from "@/lib/admin";
 
 export const maxDuration = 300; // 5 minutes
 
@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    await logAudit("knowledge.bulk_import", `chunks:${inserted}`, { inserted, errors, total: chunks.length });
     return NextResponse.json({ inserted, errors, total: chunks.length });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });

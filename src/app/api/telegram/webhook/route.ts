@@ -255,6 +255,17 @@ async function handleUpdate(update: Record<string, unknown>) {
     if (targetId && reply) {
       await sendMessage(targetId, `💬 <b>Ответ от команды Mentora:</b>\n\n${reply}`);
       await sendMessage(ADMIN_CHAT_ID, "✅ Ответ отправлен");
+      // Log to audit trail
+      try {
+        const { createAdminSupabase } = await import("@/lib/admin");
+        const sb = createAdminSupabase();
+        await sb.from("admin_audit_log").insert({
+          admin_email: "unrebay@gmail.com",
+          action: "telegram.reply",
+          target: `tg:${targetId}`,
+          metadata: { length: reply.length, preview: reply.slice(0, 80) },
+        });
+      } catch { /* fire-and-forget */ }
     }
     return;
   }

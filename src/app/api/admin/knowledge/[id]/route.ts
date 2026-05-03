@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin, createAdminSupabase, getEmbedding } from "@/lib/admin";
+import { requireAdmin, createAdminSupabase, getEmbedding, logAudit } from "@/lib/admin";
 
 const CHUNK_SELECT = "id, subject, topic, content, source, language, created_at";
 
@@ -26,6 +26,7 @@ export async function PUT(
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  await logAudit("knowledge.update", `chunk:${params.id}`, { subject, topic: topic ?? null });
   return NextResponse.json({ data });
 }
 
@@ -44,5 +45,6 @@ export async function DELETE(
     .eq("id", params.id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  await logAudit("knowledge.delete", `chunk:${params.id}`);
   return NextResponse.json({ deleted: 1 });
 }

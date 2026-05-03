@@ -1413,8 +1413,18 @@ export default function AdminPanel() {
   const toggleTask = useCallback((id: string) => {
     setRmChecked(prev => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      const wasChecked = next.has(id);
+      if (wasChecked) next.delete(id); else next.add(id);
       saveRoadmapChecked(next);
+      // Fire-and-forget audit log entry — never block UI on failure
+      fetch("/api/admin/audit-log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: wasChecked ? "roadmap.uncheck" : "roadmap.check",
+          target: `task:${id}`,
+        }),
+      }).catch(() => {});
       return next;
     });
   }, []);
@@ -1423,6 +1433,11 @@ export default function AdminPanel() {
     const empty = new Set<string>();
     saveRoadmapChecked(empty);
     setRmChecked(empty);
+    fetch("/api/admin/audit-log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "roadmap.clear_all" }),
+    }).catch(() => {});
   }, []);
 
   const reload = useCallback(async () => {
