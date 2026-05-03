@@ -378,8 +378,18 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
           const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, opacity:op, blending:ADD, depthWrite:false }));
           sp.scale.set(sz,sz,1); sp.position.copy(pos); mainGrp.add(sp); return sp;
         };
-        // Tight bright core
-        mkSp(isActive ? 1.4 : 1.0, isActive ? 0.92 : 0.80);
+        // 3D ORB — core sphere mesh keeps subject color
+        const orbR = isActive ? 0.65 : 0.58;
+        const orb = new THREE.Mesh(
+          new THREE.SphereGeometry(orbR, 18, 14),
+          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 0.98 : 0.96 })
+        );
+        orb.position.copy(pos); mainGrp.add(orb);
+        const halo = new THREE.Mesh(
+          new THREE.SphereGeometry(orbR * 1.95, 14, 12),
+          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 0.34 : 0.26, blending: ADD, depthWrite: false })
+        );
+        halo.position.copy(pos); mainGrp.add(halo);
         // Mid glow (animated)
         const gsz = isActive ? 4.0 : 3.2;
         const gop = isActive ? 0.45 : 0.30;
@@ -387,6 +397,24 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         sciGlows.push(gsp); sciGlowOps.push(gop); sciGlowSzs.push(gsz);
         // Outer diffuse haze
         mkSp(isActive ? 9.0 : 7.0, isActive ? 0.10 : 0.07);
+      }
+
+      // ── Comets — occasional fading streaks ───────────────────────────────────
+      type KGComet = { head: THREE.Mesh; halo: THREE.Mesh; pos: THREE.Vector3; dir: THREE.Vector3; speed: number; t: number; duration: number; active: boolean; startDelay: number };
+      const KG_COMET_N = 4;
+      const kgComets: KGComet[] = [];
+      for (let ci = 0; ci < KG_COMET_N; ci++) {
+        const head = new THREE.Mesh(
+          new THREE.SphereGeometry(0.65, 10, 8),
+          new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, blending: ADD, depthWrite: false })
+        );
+        const halo = new THREE.Mesh(
+          new THREE.SphereGeometry(2.2, 10, 8),
+          new THREE.MeshBasicMaterial({ color: 0x88aaff, transparent: true, opacity: 0, blending: ADD, depthWrite: false })
+        );
+        bgGrp.add(head); bgGrp.add(halo);
+        kgComets.push({ head, halo, pos: new THREE.Vector3(), dir: new THREE.Vector3(),
+                        speed: 0, t: 0, duration: 5, active: false, startDelay: ci * 9 + Math.random() * 6 });
       }
 
       // ── Edges ─────────────────────────────────────────────────────────────────
@@ -399,7 +427,7 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         // Higher contrast edges: opacity 0.20→0.30, brighter blue
         mainGrp.add(new THREE.Line(
           new THREE.BufferGeometry().setFromPoints([sciPos[ia],sciPos[ib]]),
-          new THREE.LineBasicMaterial({ color:0x4466cc, transparent:true, opacity:0.30, blending:ADD, depthWrite:false })
+          new THREE.LineBasicMaterial({ color:0x6688f0, transparent:true, opacity:0.42, blending:ADD, depthWrite:false })
         ));
       }
 
@@ -420,8 +448,8 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
 
       // Chunks (local clouds around each science) — 3D bluish-white topic orbs
       const CPER=110, TIN=SUBS.length*CPER;
-      const inM  = new THREE.InstancedMesh(new THREE.SphereGeometry(0.045,10,8), mkMat(0xcfe3ff,0.40), TIN);
-      const inM2 = new THREE.InstancedMesh(new THREE.SphereGeometry(0.11,8,6),   mkMat(0x88aaff,0.10), TIN);
+      const inM  = new THREE.InstancedMesh(new THREE.SphereGeometry(0.0225,10,8), mkMat(0xcfe3ff,0.28), TIN);
+      const inM2 = new THREE.InstancedMesh(new THREE.SphereGeometry(0.055,8,6),   mkMat(0x88aaff,0.07), TIN);
       mainGrp.add(inM); mainGrp.add(inM2);
       { const dum=new THREE.Object3D();
         for (let si=0;si<SUBS.length;si++) {
@@ -447,7 +475,7 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
             const r=1.6+Math.random()*1.4, th=Math.random()*Math.PI*2, ph=Math.acos(2*Math.random()-1);
             const tx=sp.x+r*Math.sin(ph)*Math.cos(th), ty=sp.y+r*Math.sin(ph)*Math.sin(th), tz=sp.z+r*Math.cos(ph);
             mainGrp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([sp,new THREE.Vector3(tx,ty,tz)]),
-              new THREE.LineBasicMaterial({ color:0x334488, transparent:true, opacity:0.10, blending:ADD, depthWrite:false })));
+              new THREE.LineBasicMaterial({ color:0x4466bb, transparent:true, opacity:0.16, blending:ADD, depthWrite:false })));
             for (let k=0;k<SCN;k++) {
               const t=(k+1)/(SCN+1);
               dum.position.set(sp.x+(tx-sp.x)*t+(Math.random()-.5)*.22, sp.y+(ty-sp.y)*t+(Math.random()-.5)*.22, sp.z+(tz-sp.z)*t+(Math.random()-.5)*.22);
@@ -467,11 +495,11 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         t: i / IMP_N, // stagger so they don't all start at same edge point
         speed: 0.0022 + Math.random() * 0.0038,
       }));
-      const impGeo    = new THREE.SphereGeometry(0.11, 5, 4);
-      const impMat    = new THREE.MeshBasicMaterial({ color: 0xaaccff, transparent: true, opacity: 0.90, blending: ADD, depthWrite: false });
+      const impGeo    = new THREE.SphereGeometry(0.20, 12, 10);
+      const impMat    = new THREE.MeshBasicMaterial({ color: 0xddeaff, transparent: true, opacity: 0.98, blending: ADD, depthWrite: false });
       const impIM     = new THREE.InstancedMesh(impGeo, impMat, IMP_N);
-      const impGGeo   = new THREE.SphereGeometry(0.28, 5, 4);
-      const impGMat   = new THREE.MeshBasicMaterial({ color: 0x4466cc, transparent: true, opacity: 0.30, blending: ADD, depthWrite: false });
+      const impGGeo   = new THREE.SphereGeometry(0.55, 10, 8);
+      const impGMat   = new THREE.MeshBasicMaterial({ color: 0x5577ff, transparent: true, opacity: 0.55, blending: ADD, depthWrite: false });
       const impGlowIM = new THREE.InstancedMesh(impGGeo, impGMat, IMP_N);
       mainGrp.add(impIM); mainGrp.add(impGlowIM);
       const impD = new THREE.Object3D();
@@ -561,10 +589,45 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
       // ── Animation loop ─────────────────────────────────────────────────────────
       const clock = new THREE.Clock();
       const tmpVec = new THREE.Vector3();
+      let kgLastT = 0;
 
       function animate() {
         animId = requestAnimationFrame(animate);
         const t = clock.getElapsedTime();
+        const dt = Math.min(0.05, t - kgLastT); kgLastT = t;
+        // Comet system
+        for (const c of kgComets) {
+          if (!c.active) {
+            c.startDelay -= dt;
+            if (c.startDelay <= 0) {
+              const r = 200 + Math.random() * 80;
+              const th1 = Math.random() * Math.PI * 2;
+              const ph1 = Math.acos(2 * Math.random() - 1);
+              c.pos.set(r * Math.sin(ph1) * Math.cos(th1), r * Math.sin(ph1) * Math.sin(th1), r * Math.cos(ph1));
+              const tg = new THREE.Vector3().crossVectors(c.pos, new THREE.Vector3(0, 1, 0)).normalize();
+              c.dir.copy(tg).multiplyScalar(Math.random() < 0.5 ? -1 : 1);
+              c.speed = 0.4 + Math.random() * 0.6;
+              c.t = 0; c.duration = 4 + Math.random() * 3; c.active = true;
+            }
+            (c.head.material as THREE.MeshBasicMaterial).opacity = 0;
+            (c.halo.material as THREE.MeshBasicMaterial).opacity = 0;
+          } else {
+            c.t += dt / c.duration;
+            if (c.t >= 1) {
+              c.active = false; c.startDelay = 8 + Math.random() * 14;
+              (c.head.material as THREE.MeshBasicMaterial).opacity = 0;
+              (c.halo.material as THREE.MeshBasicMaterial).opacity = 0;
+            } else {
+              c.pos.addScaledVector(c.dir, c.speed);
+              const fade = Math.sin(c.t * Math.PI);
+              c.head.position.copy(c.pos);
+              c.halo.position.copy(c.pos);
+              (c.head.material as THREE.MeshBasicMaterial).opacity = 0.95 * fade;
+              (c.halo.material as THREE.MeshBasicMaterial).opacity = 0.40 * fade;
+            }
+          }
+        }
+
 
         currentRotX += (targetRotX-currentRotX)*0.025;
         currentRotY += (targetRotY-currentRotY)*0.025;

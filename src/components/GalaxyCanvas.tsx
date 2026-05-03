@@ -197,6 +197,24 @@ export default function GalaxyCanvas({ className }: Props) {
         geo.setAttribute("position",new THREE.BufferAttribute(pos,3));
         bgGrp.add(new THREE.Points(geo,new THREE.PointsMaterial({ color:0xaabbff,size:1.2,transparent:true,opacity:0.04,blending:ADD,depthWrite:false,sizeAttenuation:false }))); }
 
+
+      // ── Comets — occasional fading streaks across deep sky (own meshes for indep. fade) ──
+      type Comet = { head: THREE.Mesh; halo: THREE.Mesh; pos: THREE.Vector3; dir: THREE.Vector3; speed: number; t: number; duration: number; active: boolean; startDelay: number };
+      const COMET_N = 4;
+      const comets: Comet[] = [];
+      for (let i = 0; i < COMET_N; i++) {
+        const head = new THREE.Mesh(
+          new THREE.SphereGeometry(0.65, 10, 8),
+          new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, blending: ADD, depthWrite: false })
+        );
+        const halo = new THREE.Mesh(
+          new THREE.SphereGeometry(2.2, 10, 8),
+          new THREE.MeshBasicMaterial({ color: 0x88aaff, transparent: true, opacity: 0, blending: ADD, depthWrite: false })
+        );
+        bgGrp.add(head); bgGrp.add(halo);
+        comets.push({ head, halo, pos: new THREE.Vector3(), dir: new THREE.Vector3(),
+                      speed: 0, t: 0, duration: 5, active: false, startDelay: i * 9 + Math.random() * 6 });
+      }
       // ── Science positions — two rings of 17 nodes ─────────────────────────────
       const NODE_COUNT = SUBS.length * 2;
       const sciPos = fibSph(NODE_COUNT, 10.0);
@@ -240,8 +258,19 @@ export default function GalaxyCanvas({ className }: Props) {
           sp.scale.set(sz, sz, 1); sp.position.copy(npos); mainGrp.add(sp); return sp;
         };
 
-        // Core
-        mkSp(isSecond ? 0.7 : 1.0, isSecond ? 0.28 : 0.50);
+        // 3D ORB — core sphere mesh keeps subject color (replaces flat sprite-core)
+        const orbR = isSecond ? 0.42 : 0.58;
+        const orb = new THREE.Mesh(
+          new THREE.SphereGeometry(orbR, 18, 14),
+          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isSecond ? 0.88 : 0.96 })
+        );
+        orb.position.copy(npos); mainGrp.add(orb);
+        // Colored halo (additive) — gives the orb a 3D glow in its own colour
+        const halo = new THREE.Mesh(
+          new THREE.SphereGeometry(orbR * 1.95, 14, 12),
+          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isSecond ? 0.16 : 0.26, blending: ADD, depthWrite: false })
+        );
+        halo.position.copy(npos); mainGrp.add(halo);
         // Mid glow (animated)
         const gsz = isSecond ? 2.2 : 3.2;
         const gop = isSecond ? 0.09 : 0.16;
@@ -260,7 +289,7 @@ export default function GalaxyCanvas({ className }: Props) {
         interE.push([sciPos[ia], sciPos[ib]]);
         mainGrp.add(new THREE.Line(
           new THREE.BufferGeometry().setFromPoints([sciPos[ia], sciPos[ib]]),
-          new THREE.LineBasicMaterial({ color:0x5577e0, transparent:true, opacity:0.24, blending:ADD, depthWrite:false })
+          new THREE.LineBasicMaterial({ color:0x6688f0, transparent:true, opacity:0.40, blending:ADD, depthWrite:false })
         ));
       }
       // Cross-links: second ring → first ring
@@ -269,7 +298,7 @@ export default function GalaxyCanvas({ className }: Props) {
         interE.push([a, b]);
         mainGrp.add(new THREE.Line(
           new THREE.BufferGeometry().setFromPoints([a, b]),
-          new THREE.LineBasicMaterial({ color:0x445599, transparent:true, opacity:0.16, blending:ADD, depthWrite:false })
+          new THREE.LineBasicMaterial({ color:0x556bbb, transparent:true, opacity:0.24, blending:ADD, depthWrite:false })
         ));
       }
 
@@ -294,9 +323,9 @@ export default function GalaxyCanvas({ className }: Props) {
       // ── Local node clouds (3D topics — bluish-white tiny orbs with halo) ──────
       const CPER=80, TIN=SUBS.length*CPER;
       // Solid bluish-white orb body (denser geometry → reads as 3D ball)
-      const inM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.045,10,8),mkMat(0xcfe3ff,0.42),TIN);
+      const inM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.0225,10,8),mkMat(0xcfe3ff,0.29),TIN);
       // Soft halo around each topic-orb for subtle glow
-      const inMHalo=new THREE.InstancedMesh(new THREE.SphereGeometry(0.10,8,6),mkMat(0x88aaff,0.10),TIN);
+      const inMHalo=new THREE.InstancedMesh(new THREE.SphereGeometry(0.05,8,6),mkMat(0x88aaff,0.07),TIN);
       mainGrp.add(inM); mainGrp.add(inMHalo);
       { const dum=new THREE.Object3D();
         for (let si=0;si<SUBS.length;si++) { const sp=sciPos[si];
@@ -313,8 +342,8 @@ export default function GalaxyCanvas({ className }: Props) {
       const IMP_N=Math.min(40,interE.length*2);
       interface ImpState { edgeIdx:number; t:number; speed:number }
       const impStates: ImpState[]=Array.from({length:IMP_N},(_,i)=>({ edgeIdx:i%interE.length,t:i/IMP_N,speed:0.0022+Math.random()*0.0038 }));
-      const impIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.11,5,4),mkMat(0xaaccff,0.55),IMP_N);
-      const impGlowIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.28,5,4),mkMat(0x4466cc,0.16),IMP_N);
+      const impIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.20,12,10),mkMat(0xddeaff,0.95),IMP_N);
+      const impGlowIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.55,10,8),mkMat(0x5577ff,0.45),IMP_N);
       mainGrp.add(impIM); mainGrp.add(impGlowIM);
       const impD=new THREE.Object3D();
 
@@ -329,9 +358,47 @@ export default function GalaxyCanvas({ className }: Props) {
 
       // ── Animation loop ────────────────────────────────────────────────────────
       const clock=new THREE.Clock();
+      let lastT = 0;
       function animate() {
         animId=requestAnimationFrame(animate);
         const t=clock.getElapsedTime();
+        const dt = Math.min(0.05, t - lastT); lastT = t;
+        // Comet system
+        for (const c of comets) {
+          if (!c.active) {
+            c.startDelay -= dt;
+            if (c.startDelay <= 0) {
+              const r = 200 + Math.random() * 80;
+              const th1 = Math.random() * Math.PI * 2;
+              const ph1 = Math.acos(2 * Math.random() - 1);
+              c.pos.set(r * Math.sin(ph1) * Math.cos(th1), r * Math.sin(ph1) * Math.sin(th1), r * Math.cos(ph1));
+              const tg = new THREE.Vector3().crossVectors(c.pos, new THREE.Vector3(0, 1, 0)).normalize();
+              c.dir.copy(tg).multiplyScalar(Math.random() < 0.5 ? -1 : 1);
+              c.speed = 0.4 + Math.random() * 0.6;
+              c.t = 0;
+              c.duration = 4 + Math.random() * 3;
+              c.active = true;
+            }
+            (c.head.material as THREE.MeshBasicMaterial).opacity = 0;
+            (c.halo.material as THREE.MeshBasicMaterial).opacity = 0;
+          } else {
+            c.t += dt / c.duration;
+            if (c.t >= 1) {
+              c.active = false;
+              c.startDelay = 8 + Math.random() * 14;
+              (c.head.material as THREE.MeshBasicMaterial).opacity = 0;
+              (c.halo.material as THREE.MeshBasicMaterial).opacity = 0;
+            } else {
+              c.pos.addScaledVector(c.dir, c.speed);
+              const fade = Math.sin(c.t * Math.PI);
+              c.head.position.copy(c.pos);
+              c.halo.position.copy(c.pos);
+              (c.head.material as THREE.MeshBasicMaterial).opacity = 0.95 * fade;
+              (c.halo.material as THREE.MeshBasicMaterial).opacity = 0.40 * fade;
+            }
+          }
+        }
+
         currentRotX+=(targetRotX-currentRotX)*0.025;
         currentRotY+=(targetRotY-currentRotY)*0.025;
         targetRotY+=0.00040;

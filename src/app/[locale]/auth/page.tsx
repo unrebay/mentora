@@ -246,8 +246,19 @@ function AuthGalaxy() {
           const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, opacity:op, blending:ADD, depthWrite:false }));
           sp.scale.set(sz,sz,1); sp.position.copy(npos); mainGrp.add(sp); return sp;
         };
-        // Tight bright core
-        mkSp(isActive?1.4:isSecond?0.7:1.0, isActive?0.90:isSecond?0.45:0.75);
+        // 3D ORB — core sphere mesh keeps subject color
+        const orbR = isActive ? 0.65 : isSecond ? 0.42 : 0.58;
+        const orbOp = isActive ? 0.98 : isSecond ? 0.86 : 0.96;
+        const orb = new THREE.Mesh(
+          new THREE.SphereGeometry(orbR, 18, 14),
+          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: orbOp })
+        );
+        orb.position.copy(npos); mainGrp.add(orb);
+        const halo = new THREE.Mesh(
+          new THREE.SphereGeometry(orbR * 1.95, 14, 12),
+          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 0.34 : isSecond ? 0.16 : 0.26, blending: ADD, depthWrite: false })
+        );
+        halo.position.copy(npos); mainGrp.add(halo);
         // Mid glow — animated
         const gsz = isActive?4.0:isSecond?2.2:3.2;
         const gop = isActive?0.45:isSecond?0.16:0.30;
@@ -255,6 +266,24 @@ function AuthGalaxy() {
         sciGlows.push(gsp); sciGlowOps.push(gop); sciGlowSzs.push(gsz);
         // Outer diffuse haze
         mkSp(isActive?9.0:isSecond?5.0:7.0, isActive?0.10:isSecond?0.04:0.07);
+      }
+
+      // ── Comets — occasional fading streaks ──────────────────────────────
+      type AuComet = { head: THREE.Mesh; halo: THREE.Mesh; pos: THREE.Vector3; dir: THREE.Vector3; speed: number; t: number; duration: number; active: boolean; startDelay: number };
+      const AU_COMET_N = 4;
+      const auComets: AuComet[] = [];
+      for (let ci = 0; ci < AU_COMET_N; ci++) {
+        const head = new THREE.Mesh(
+          new THREE.SphereGeometry(0.65, 10, 8),
+          new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, blending: ADD, depthWrite: false })
+        );
+        const halo = new THREE.Mesh(
+          new THREE.SphereGeometry(2.2, 10, 8),
+          new THREE.MeshBasicMaterial({ color: 0x88aaff, transparent: true, opacity: 0, blending: ADD, depthWrite: false })
+        );
+        bgGrp.add(head); bgGrp.add(halo);
+        auComets.push({ head, halo, pos: new THREE.Vector3(), dir: new THREE.Vector3(),
+                        speed: 0, t: 0, duration: 5, active: false, startDelay: ci * 9 + Math.random() * 6 });
       }
 
       // ── Edges — connect first 17 ring by subject graph + some cross-links ──
@@ -292,8 +321,8 @@ function AuthGalaxy() {
 
       // Local clouds around each node — 3D bluish-white topic orbs (with halo)
       const CPER=80,TIN=SUBS.length*CPER;
-      const inM     = new THREE.InstancedMesh(new THREE.SphereGeometry(0.045,10,8), mkMat(0xcfe3ff,0.42), TIN);
-      const inMHalo = new THREE.InstancedMesh(new THREE.SphereGeometry(0.10,8,6),  mkMat(0x88aaff,0.10), TIN);
+      const inM     = new THREE.InstancedMesh(new THREE.SphereGeometry(0.0225,10,8), mkMat(0xcfe3ff,0.29), TIN);
+      const inMHalo = new THREE.InstancedMesh(new THREE.SphereGeometry(0.05,8,6),  mkMat(0x88aaff,0.07), TIN);
       mainGrp.add(inM); mainGrp.add(inMHalo);
       { const dum=new THREE.Object3D();
         for (let si=0;si<SUBS.length;si++) { const sp=sciPos[si];
@@ -310,8 +339,8 @@ function AuthGalaxy() {
       const IMP_N=Math.min(40,interE.length*2);
       interface ImpState { edgeIdx:number; t:number; speed:number }
       const impStates: ImpState[]=Array.from({length:IMP_N},(_,i)=>({ edgeIdx:i%interE.length,t:i/IMP_N,speed:0.0022+Math.random()*0.0038 }));
-      const impIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.11,5,4),mkMat(0xaaccff,0.90),IMP_N);
-      const impGlowIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.28,5,4),mkMat(0x4466cc,0.30),IMP_N);
+      const impIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.20,12,10),mkMat(0xddeaff,0.98),IMP_N);
+      const impGlowIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.55,10,8),mkMat(0x5577ff,0.55),IMP_N);
       mainGrp.add(impIM); mainGrp.add(impGlowIM);
       const impD=new THREE.Object3D();
 
@@ -326,9 +355,43 @@ function AuthGalaxy() {
 
       // ── Animation loop ────────────────────────────────────────────────────
       const clock=new THREE.Clock();
+      let auLastT = 0;
       function animate() {
         animId=requestAnimationFrame(animate);
         const t=clock.getElapsedTime();
+        const dt = Math.min(0.05, t - auLastT); auLastT = t;
+        for (const c of auComets) {
+          if (!c.active) {
+            c.startDelay -= dt;
+            if (c.startDelay <= 0) {
+              const r = 200 + Math.random() * 80;
+              const th1 = Math.random() * Math.PI * 2;
+              const ph1 = Math.acos(2 * Math.random() - 1);
+              c.pos.set(r * Math.sin(ph1) * Math.cos(th1), r * Math.sin(ph1) * Math.sin(th1), r * Math.cos(ph1));
+              const tg = new THREE.Vector3().crossVectors(c.pos, new THREE.Vector3(0, 1, 0)).normalize();
+              c.dir.copy(tg).multiplyScalar(Math.random() < 0.5 ? -1 : 1);
+              c.speed = 0.4 + Math.random() * 0.6;
+              c.t = 0; c.duration = 4 + Math.random() * 3; c.active = true;
+            }
+            (c.head.material as THREE.MeshBasicMaterial).opacity = 0;
+            (c.halo.material as THREE.MeshBasicMaterial).opacity = 0;
+          } else {
+            c.t += dt / c.duration;
+            if (c.t >= 1) {
+              c.active = false; c.startDelay = 8 + Math.random() * 14;
+              (c.head.material as THREE.MeshBasicMaterial).opacity = 0;
+              (c.halo.material as THREE.MeshBasicMaterial).opacity = 0;
+            } else {
+              c.pos.addScaledVector(c.dir, c.speed);
+              const fade = Math.sin(c.t * Math.PI);
+              c.head.position.copy(c.pos);
+              c.halo.position.copy(c.pos);
+              (c.head.material as THREE.MeshBasicMaterial).opacity = 0.95 * fade;
+              (c.halo.material as THREE.MeshBasicMaterial).opacity = 0.40 * fade;
+            }
+          }
+        }
+
         currentRotX+=(targetRotX-currentRotX)*0.025;
         currentRotY+=(targetRotY-currentRotY)*0.025;
         targetRotY+=0.00040;
