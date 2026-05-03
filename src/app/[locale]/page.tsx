@@ -938,8 +938,8 @@ export default async function HomePage() {
                 <p className="text-xl md:text-2xl font-light italic leading-relaxed"
                   style={{ color: "var(--text)" }}>
                   {locale === "ru"
-                    ? "«Мы не продаём подписку. Мы даём каждому право учиться — снова, заново или впервые.»"
-                    : "\"We're not selling a subscription. We're giving everyone the right to learn — again, anew, or for the first time.\""}
+                    ? "«Мы даём каждому возможность учиться — снова, заново или впервые.»"
+                    : "\"We give everyone a chance to learn — again, anew, or for the first time.\""}
                 </p>
                 <footer className="mt-4 text-sm font-semibold" style={{ color: "var(--text-muted)" }}>
                   — {locale === "ru" ? "Команда Mentora" : "Mentora team"}
