@@ -998,7 +998,7 @@ export default async function HomePage() {
       </section>
 
       <footer className="py-8" style={{ background: "#111827", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="max-w-6xl mx-auto px-6 flex flex-col items-center gap-4 text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+        <div className="max-w-6xl mx-auto px-6 flex flex-col items-center gap-3 text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
           <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
             <span>{t("landing.footerRights")}</span>
             <div className="flex gap-6">
@@ -1006,6 +1006,15 @@ export default async function HomePage() {
               <Link href="/terms" className="transition-colors hover:text-white/70">{t("landing.footerTerms")}</Link>
             </div>
           </div>
+          <a
+            href="https://pd.rkn.gov.ru/operators-registry/operators-list/?id=100271782"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] tracking-wide opacity-60 hover:opacity-90 transition-opacity"
+            style={{ color: "rgba(255,255,255,0.45)" }}
+          >
+            {t("landing.footerRkn")}
+          </a>
         </div>
       </footer>
     </div>

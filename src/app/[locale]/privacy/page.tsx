@@ -59,7 +59,7 @@ export default function PrivacyPage() {
               конфиденциальности
             </span>
           </h1>
-          <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>Последнее обновление: 28 марта 2026 г.</p>
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>Последнее обновление: 3 мая 2026 г.</p>
         </div>
 
         {/* Sections */}
@@ -69,10 +69,24 @@ export default function PrivacyPage() {
             style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}>
             <SectionHeading n="01" title="Общие положения" />
             <p>
-              Настоящая Политика конфиденциальности (далее — «Политика») описывает, как ИП Андрей Унребай
-              (далее — «Mentora», «мы», «нас») собирает, использует и защищает персональные данные
-              пользователей образовательной платформы Mentora, доступной по адресу{" "}
+              Настоящая Политика конфиденциальности (далее — «Политика») описывает, как самозанятый
+              Белашов Андрей Владимирович (ИНН 325005748248, далее — «Mentora», «мы», «нас») собирает,
+              использует и защищает персональные данные пользователей образовательной платформы Mentora,
+              доступной по адресу{" "}
               <a href="https://mentora.su" style={{ color: "#4561E8" }} className="hover:underline">mentora.su</a>.
+            </p>
+            <p className="mt-3">
+              Mentora зарегистрирована в реестре операторов, осуществляющих обработку персональных данных,
+              ведущемся Роскомнадзором, под номером{" "}
+              <a
+                href="https://pd.rkn.gov.ru/operators-registry/operators-list/?id=100271782"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "#4561E8" }}
+                className="hover:underline font-medium"
+              >№100271782</a>{" "}
+              (ключ&nbsp;12770851). Обработка персональных данных осуществляется в соответствии с Федеральным
+              законом № 152-ФЗ «О персональных данных».
             </p>
             <p className="mt-3">
               Используя платформу, вы соглашаетесь с условиями настоящей Политики. Если вы не согласны
@@ -208,12 +222,26 @@ export default function PrivacyPage() {
 
           <section className="rounded-2xl border p-6"
             style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}>
-            <SectionHeading n="10" title="Контакты" />
+            <SectionHeading n="10" title="Контакты и реквизиты оператора" />
             <p className="mb-3">По вопросам конфиденциальности обращайтесь:</p>
             <ul className="space-y-1.5">
               <li>Email: <a href="mailto:hello@mentora.su" style={{ color: "#4561E8" }} className="hover:underline font-medium">hello@mentora.su</a></li>
               <li>Сайт: <a href="https://mentora.su" style={{ color: "#4561E8" }} className="hover:underline">mentora.su</a></li>
             </ul>
+            <div className="mt-5 pt-5 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+              <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>Реквизиты оператора</p>
+              <ul className="space-y-1.5 text-sm">
+                <li>Самозанятый: Белашов Андрей Владимирович</li>
+                <li>ИНН: 325005748248</li>
+                <li>Реестр Роскомнадзора: <a
+                  href="https://pd.rkn.gov.ru/operators-registry/operators-list/?id=100271782"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "#4561E8" }}
+                  className="hover:underline font-medium"
+                >№100271782</a></li>
+              </ul>
+            </div>
           </section>
 
         </div>
