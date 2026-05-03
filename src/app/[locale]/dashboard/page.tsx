@@ -15,7 +15,6 @@ import LaunchBanner from "@/components/LaunchBanner";
 import ReferralWidget from "@/components/ReferralWidget";
 import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
-import InstagramButton from "@/components/InstagramButton";
 import FadeUp from "@/components/FadeUp";
 import dynamic from "next/dynamic";
 const StreakRewardCelebration = dynamic(() => import("@/components/StreakRewardCelebration"), { ssr: false });
@@ -547,7 +546,6 @@ export default async function DashboardPage() {
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>{t("needHelp")}</p>
           <div className="flex gap-2 flex-wrap justify-center items-start">
             <TelegramSupportButton size="sm" label={t("support")} />
-            <InstagramButton size="sm" label="@mentora.su" />
           </div>
         </div>
         </FadeUp>

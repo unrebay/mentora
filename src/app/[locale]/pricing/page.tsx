@@ -4,7 +4,6 @@ import LandingNav from "@/components/LandingNav";
 import BuyProButton from "@/components/BuyProButton";
 import PricingFAQ from "@/components/PricingFAQ";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
-import InstagramButton from "@/components/InstagramButton";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
@@ -463,7 +462,6 @@ export default async function PricingPage() {
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>{t("pricing.supportQuestion")}</p>
             <div className="flex gap-2 flex-wrap justify-center items-start">
               <TelegramSupportButton label="Написать в поддержку" />
-              <InstagramButton label="@mentora.su" />
             </div>
           </div>
         </section>
@@ -514,9 +512,6 @@ export default async function PricingPage() {
             </div>
           </div>
           {locale === "ru" && (
-            <p className="text-center" style={{ fontSize: "10px", opacity: 0.4, maxWidth: 480, lineHeight: 1.4 }}>
-              Instagram — продукт компании Meta Platforms Inc. Деятельность организации Meta Platforms признана экстремистской и запрещена на территории Российской Федерации.
-            </p>
           )}
         </div>
       </footer>

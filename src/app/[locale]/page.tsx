@@ -1007,9 +1007,6 @@ export default async function HomePage() {
             </div>
           </div>
           {locale === "ru" && (
-            <p className="text-center" style={{ fontSize: "10px", opacity: 0.3, maxWidth: 480, lineHeight: 1.4 }}>
-              Instagram — продукт компании Meta Platforms Inc. Деятельность организации Meta Platforms признана экстремистской и запрещена на территории Российской Федерации.
-            </p>
           )}
         </div>
       </footer>

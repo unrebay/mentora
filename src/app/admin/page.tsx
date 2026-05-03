@@ -158,7 +158,7 @@ interface Employee {
 }
 
 const EMPLOYEES: Employee[] = [
-  { id: "marketing", name: "Ника",  role: "Маркетолог",    desc: "Instagram, контент, тренды, рилсы", color: "#e8458a", available: true,  avatar: "Н" },
+  { id: "marketing", name: "Ника",  role: "Маркетолог",    desc: "Telegram, контент, тренды, рилсы", color: "#e8458a", available: true,  avatar: "Н" },
   { id: "analytics", name: "Миша",  role: "Аналитик",      desc: "PostHog, воронки, когорты, метрики", color: "#4561E8", available: true,  avatar: "М" },
   { id: "growth",    name: "Саша",  role: "Growth Hacker",  desc: "Конверсии, виральность, эксперименты", color: "#10b981", available: true, avatar: "С" },
 ];
@@ -500,7 +500,7 @@ function TeamTab() {
 }
 
 // ── Roadmap data ──────────────────────────────────────────────────────────────
-const ROADMAP_STORAGE_KEY = "mentora_admin_roadmap_v3";
+const ROADMAP_STORAGE_KEY = "mentora_admin_roadmap_v4";
 const CUSTOM_TASKS_KEY    = "mentora_admin_custom_tasks_v1";
 const TASK_ORDER_KEY      = "mentora_admin_task_order_v1";
 
@@ -576,14 +576,17 @@ const ROADMAP_TOTAL = ROADMAP_BLOCKS.reduce((s, b) => s + b.tasks.length, 0);
 
 // Tasks verified as completed — pre-populated on first load
 const ROADMAP_DEFAULTS: string[] = [
-  // Дизайн-унификация — all pages audited and use unified design system
+  // Дизайн-унификация — все страницы audited
   "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10",
-  // Системная унификация — SubjectIcon, DashboardNav, Dark/Light mode, mobile подтверждены
-  "s1", "s2", "s3", "s4",
-  // Оптимизация — API безопасность (4 уязвимости закрыты), SEO
-  "o4", "o5",
-  // QA — 17 предметов работают, лимиты сообщений сброс ✓
-  "q4", "q5",
+  // Системная унификация — SubjectIcon, DashboardNav, Dark/Light, mobile, типографика ty-* utilities (s5)
+  "s1", "s2", "s3", "s4", "s5",
+  // Оптимизация — аудит роутов (o1), shared utilities .glass-* + AccentCard (o2),
+  // Lighthouse 95/94/100/92 (o3), SEO meta + sitemap.ts (o4), API security (o5)
+  "o1", "o2", "o3", "o4", "o5",
+  // QA — все 8 пройдены: полный флоу (q1), Telegram-бот long-polling (q2),
+  // ReferralProcessor для всех signup (q3), 17 предметов (q4), лимиты сообщений (q5),
+  // PDF-конспекты Pro+ (q6), онбординг-тур (q7), подарок 1 июня (q8)
+  "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8",
 ];
 
 function loadRoadmapChecked(): Set<string> {
