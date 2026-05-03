@@ -404,6 +404,13 @@ function AuthPageContent() {
       // edge cases like telegram_callback / oauth_callback / Supabase URL allowlist issues.
       setError(`${t("errorOAuth")} [${oauthError}]`);
     }
+    // Save referral code from ?ref=XYZ — ReferralProcessor (in dashboard layout)
+    // will pick it up and POST /api/referral once the user is authenticated.
+    // This covers ALL signup paths (email, Google, Telegram), not just email.
+    const refCode = searchParams.get("ref");
+    if (refCode) {
+      try { localStorage.setItem("mentora_ref_pending", refCode); } catch {}
+    }
   }, [searchParams]);
 
   useEffect(() => {

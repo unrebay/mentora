@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import DashboardNav from "@/components/DashboardNav";
 import OnboardingTour from "@/components/OnboardingTour";
 import { TourButtonMobile } from "@/components/TourButton";
+import ReferralProcessor from "@/components/ReferralProcessor";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -63,6 +64,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       </div>
       <OnboardingTour />
       <TourButtonMobile />
+      <ReferralProcessor />
     </>
   );
 }
