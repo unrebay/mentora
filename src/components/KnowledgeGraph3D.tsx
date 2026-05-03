@@ -234,7 +234,7 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(w, h);
-      renderer.setClearColor(0x06060f, 1);
+      renderer.setClearColor(0x020308, 1);
       Object.assign(renderer.domElement.style, {
         position:"absolute", top:"0", left:"0", width:"100%", height:"100%", display:"block",
       });
@@ -242,7 +242,7 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
 
       // ── Scene / Camera ─────────────────────────────────────────────────────────
       const scene  = new THREE.Scene();
-      scene.background = new THREE.Color(0x050a14);
+      scene.background = new THREE.Color(0x020308);
       const camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 1000);
       camera.position.set(0, 3.0, 26); // slightly closer for larger apparent galaxy
       camera.lookAt(0, 0, 0);
@@ -378,8 +378,14 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
           const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, opacity:op, blending:ADD, depthWrite:false }));
           sp.scale.set(sz,sz,1); sp.position.copy(pos); mainGrp.add(sp); return sp;
         };
-        // Tight bright core
-        mkSp(isActive ? 1.4 : 1.0, isActive ? 0.92 : 0.80);
+        // 3D ORB — real sphere mesh
+        const orbR = isActive ? 0.62 : 0.50;
+        const orbMat = new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 0.98 : 0.94 });
+        const orb = new THREE.Mesh(new THREE.SphereGeometry(orbR, 24, 18), orbMat);
+        orb.position.copy(pos);
+        mainGrp.add(orb);
+        // Inner bloom halo (small sprite hugging the orb)
+        mkSp(isActive ? 1.5 : 1.1, isActive ? 0.85 : 0.72);
         // Mid glow (animated)
         const gsz = isActive ? 4.0 : 3.2;
         const gop = isActive ? 0.45 : 0.30;
@@ -564,9 +570,9 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
         animId = requestAnimationFrame(animate);
         const t = clock.getElapsedTime();
 
-        currentRotX += (targetRotX-currentRotX)*0.04;
-        currentRotY += (targetRotY-currentRotY)*0.04;
-        targetRotY  += 0.00070;
+        currentRotX += (targetRotX-currentRotX)*0.025;
+        currentRotY += (targetRotY-currentRotY)*0.025;
+        targetRotY  += 0.00040;
         mainGrp.rotation.x = currentRotX; mainGrp.rotation.y = currentRotY;
         bgGrp.rotation.x   = currentRotX*0.10; bgGrp.rotation.y = currentRotY*0.10;
 

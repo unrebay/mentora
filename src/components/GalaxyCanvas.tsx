@@ -90,14 +90,14 @@ export default function GalaxyCanvas({ className }: Props) {
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(w, h);
-      renderer.setClearColor(0x050a14, 1);
+      renderer.setClearColor(0x020308, 1);
       Object.assign(renderer.domElement.style, {
         position: "absolute", top: "0", left: "0", width: "100%", height: "100%", display: "block",
       });
       container.appendChild(renderer.domElement);
 
       const scene  = new THREE.Scene();
-      scene.background = new THREE.Color(0x050a14);
+      scene.background = new THREE.Color(0x020308);
       const camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 1000);
       camera.position.set(0, 3.0, 43); // z=43: ~16% larger scale vs z=50
       camera.lookAt(0, 0, 0);
@@ -123,7 +123,7 @@ export default function GalaxyCanvas({ className }: Props) {
 
       // ── Atmosphere — BackSide spheres (ADD blending accumulates, keep opacity very low) ──
       for (const [r, color, op] of [
-        [100, 0x0d1a3a, 0.06], [65, 0x1a0a2a, 0.07], [42, 0x180838, 0.05],
+        [100, 0x080814, 0.04], [65, 0x14081f, 0.05], [42, 0x10062a, 0.04],
       ] as [number, number, number][]) {
         scene.add(new THREE.Mesh(new THREE.SphereGeometry(r, 20, 20), new THREE.MeshBasicMaterial({
           color, transparent: true, opacity: op, blending: ADD, depthWrite: false, side: THREE.BackSide,
@@ -240,8 +240,14 @@ export default function GalaxyCanvas({ className }: Props) {
           sp.scale.set(sz, sz, 1); sp.position.copy(npos); mainGrp.add(sp); return sp;
         };
 
-        // Core
-        mkSp(isSecond ? 0.7 : 1.0, isSecond ? 0.28 : 0.50);
+        // Core 3D ORB — real sphere mesh that catches light through emissive color
+        const orbR = isSecond ? 0.34 : 0.52;
+        const orbMat = new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isSecond ? 0.85 : 0.95 });
+        const orb = new THREE.Mesh(new THREE.SphereGeometry(orbR, 24, 18), orbMat);
+        orb.position.copy(npos);
+        mainGrp.add(orb);
+        // Bright inner halo (sprite, very small) to give bloom edge to the orb
+        mkSp(isSecond ? 0.8 : 1.15, isSecond ? 0.32 : 0.55);
         // Mid glow (animated)
         const gsz = isSecond ? 2.2 : 3.2;
         const gop = isSecond ? 0.09 : 0.16;
@@ -324,9 +330,9 @@ export default function GalaxyCanvas({ className }: Props) {
       function animate() {
         animId=requestAnimationFrame(animate);
         const t=clock.getElapsedTime();
-        currentRotX+=(targetRotX-currentRotX)*0.04;
-        currentRotY+=(targetRotY-currentRotY)*0.04;
-        targetRotY+=0.00070;
+        currentRotX+=(targetRotX-currentRotX)*0.025;
+        currentRotY+=(targetRotY-currentRotY)*0.025;
+        targetRotY+=0.00040;
         mainGrp.rotation.x=currentRotX; mainGrp.rotation.y=currentRotY;
         bgGrp.rotation.x=currentRotX*0.10; bgGrp.rotation.y=currentRotY*0.10;
 

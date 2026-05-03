@@ -105,14 +105,14 @@ function AuthGalaxy() {
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(w, h);
-      renderer.setClearColor(0x050a14, 1);
+      renderer.setClearColor(0x020308, 1);
       Object.assign(renderer.domElement.style, {
         position: "absolute", top: "0", left: "0", width: "100%", height: "100%", display: "block",
       });
       container.appendChild(renderer.domElement);
 
       const scene  = new THREE.Scene();
-      scene.background = new THREE.Color(0x050a14);
+      scene.background = new THREE.Color(0x020308);
       const camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 1000);
       camera.position.set(0, 3.0, 26);
       camera.lookAt(0, 0, 0);
@@ -246,8 +246,14 @@ function AuthGalaxy() {
           const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, opacity:op, blending:ADD, depthWrite:false }));
           sp.scale.set(sz,sz,1); sp.position.copy(npos); mainGrp.add(sp); return sp;
         };
-        // Tight bright core
-        mkSp(isActive?1.4:isSecond?0.7:1.0, isActive?0.90:isSecond?0.45:0.75);
+        // 3D ORB — real sphere mesh
+        const orbR = isActive ? 0.62 : isSecond ? 0.34 : 0.52;
+        const orbMat = new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isActive ? 0.98 : isSecond ? 0.82 : 0.94 });
+        const orb = new THREE.Mesh(new THREE.SphereGeometry(orbR, 24, 18), orbMat);
+        orb.position.copy(npos);
+        mainGrp.add(orb);
+        // Inner bloom halo (sprite hugging the orb)
+        mkSp(isActive?1.5:isSecond?0.8:1.15, isActive?0.85:isSecond?0.40:0.70);
         // Mid glow — animated
         const gsz = isActive?4.0:isSecond?2.2:3.2;
         const gop = isActive?0.45:isSecond?0.16:0.30;
@@ -325,9 +331,9 @@ function AuthGalaxy() {
       function animate() {
         animId=requestAnimationFrame(animate);
         const t=clock.getElapsedTime();
-        currentRotX+=(targetRotX-currentRotX)*0.04;
-        currentRotY+=(targetRotY-currentRotY)*0.04;
-        targetRotY+=0.00070;
+        currentRotX+=(targetRotX-currentRotX)*0.025;
+        currentRotY+=(targetRotY-currentRotY)*0.025;
+        targetRotY+=0.00040;
         mainGrp.rotation.x=currentRotX; mainGrp.rotation.y=currentRotY;
         bgGrp.rotation.x=currentRotX*0.10; bgGrp.rotation.y=currentRotY*0.10;
         for (let i=0;i<sciGlows.length;i++) {
