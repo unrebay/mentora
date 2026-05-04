@@ -69,13 +69,24 @@ export default function AboutPage() {
 
   function Card({ children, accent = false }: { children: React.ReactNode; accent?: boolean }) {
     return (
-      <div style={{
-        background: accent ? "rgba(69,97,232,0.07)" : "var(--bg-secondary)",
-        border: `1px solid ${accent ? "rgba(69,97,232,0.2)" : "var(--border-light)"}`,
+      <div className="relative overflow-hidden transition-transform hover:-translate-y-0.5" style={{
+        background: accent
+          ? "linear-gradient(160deg, rgba(124,58,237,0.10), rgba(69,97,232,0.04) 60%, transparent), var(--bg-card)"
+          : "linear-gradient(160deg, rgba(255,122,0,0.06), rgba(255,255,255,0.01) 60%, transparent), var(--bg-card)",
+        border: `1px solid ${accent ? "rgba(124,58,237,0.25)" : "rgba(255,122,0,0.20)"}`,
         borderRadius: 20,
         padding: "28px",
+        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 24px rgba(0,0,0,${accent ? "0.08" : "0.05"})`,
       }}>
-        {children}
+        {/* Spotlight */}
+        <div className="absolute pointer-events-none" aria-hidden style={{
+          top: -40, right: -40, width: 160, height: 160, opacity: 0.6,
+          background: accent
+            ? "radial-gradient(circle, rgba(124,58,237,0.30), transparent 65%)"
+            : "radial-gradient(circle, rgba(255,122,0,0.25), transparent 65%)",
+          filter: "blur(8px)",
+        }} />
+        <div className="relative">{children}</div>
       </div>
     );
   }
@@ -121,16 +132,29 @@ export default function AboutPage() {
       <div className="relative" style={{ zIndex: 1 }}>
 
         {/* ── HERO ─────────────────────────────────────────────── */}
-        <section className="max-w-4xl mx-auto px-5 sm:px-8 pt-14 pb-16">
+        <section className="max-w-4xl mx-auto px-5 sm:px-8 pt-14 pb-16 relative">
+          {/* Decorative orbital ring */}
+          <div className="absolute pointer-events-none hidden md:block" aria-hidden style={{
+            top: 30, right: 0, width: 200, height: 200,
+            borderRadius: "50%",
+            background: "conic-gradient(from 90deg, transparent 0deg, rgba(124,58,237,0.18) 90deg, transparent 180deg, rgba(69,97,232,0.14) 270deg, transparent 360deg)",
+            filter: "blur(20px)",
+            opacity: 0.85,
+          }} />
           <Tag color="#4561E8">{t("heroTag")}</Tag>
           <h1 style={{
             fontSize: "clamp(30px, 5vw, 52px)",
             fontWeight: 900, lineHeight: 1.1,
-            letterSpacing: "-1.5px", color: "var(--text)",
+            letterSpacing: "-1.5px",
             margin: "20px 0 12px",
+            background: "linear-gradient(135deg, var(--text) 30%, #4561E8 70%, #7C3AED 100%)",
+            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
           }}>
             {t("heroTitle1")}<br />
-            <span style={{ color: "#4561E8" }} className="dark:text-[#6b87ff]">{t("heroTitle2")}</span>
+            <span style={{
+              background: "linear-gradient(135deg, #4561E8, #7C3AED, #FF7A00)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+            }}>{t("heroTitle2")}</span>
           </h1>
           <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "var(--text-muted)", marginBottom: 18 }}>
             {t("heroTagline")}
@@ -138,6 +162,26 @@ export default function AboutPage() {
           <p style={{ fontSize: 17, lineHeight: 1.75, color: "var(--text-secondary)", maxWidth: 580 }}>
             {t("heroBody")}
           </p>
+          {/* Stats chip row */}
+          <div className="flex flex-wrap gap-2 mt-6">
+            {[
+              { v: "17", label: "наук", color: "#4561E8" },
+              { v: "95%", label: "точность", color: "#10B981" },
+              { v: "₽0", label: "стартовый", color: "#FF7A00" },
+              { v: "8", label: "уровней", color: "#9F7AFF" },
+            ].map(s => (
+              <div key={s.label} style={{
+                display: "inline-flex", alignItems: "baseline", gap: 6,
+                padding: "8px 14px", borderRadius: 12,
+                background: `linear-gradient(135deg, ${s.color}18, ${s.color}06)`,
+                border: `1px solid ${s.color}30`,
+                boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06)`,
+              }}>
+                <span style={{ fontWeight: 800, fontSize: 16, color: s.color }}>{s.v}</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>{s.label}</span>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* ── JUNE 1 COUNTDOWN ─────────────────────────────────── */}
@@ -232,18 +276,35 @@ export default function AboutPage() {
           </p>
 
           <div className="space-y-3">
-            {howSteps.map((item, idx) => (
-              <div key={item.n}
-                className="flex gap-5 p-5 rounded-2xl"
-                style={{ background: "var(--bg-secondary)", border: "1px solid var(--border-light)" }}
-              >
-                <div style={{ color: HOW_COLORS[idx], fontSize: 12, fontWeight: 900, minWidth: 28, paddingTop: 2, flexShrink: 0 }}>{item.n}</div>
-                <div>
-                  <div style={{ fontWeight: 700, color: "var(--text)", fontSize: 14, marginBottom: 5 }}>{item.title}</div>
-                  <p style={{ fontSize: 13, lineHeight: 1.65, color: "var(--text-secondary)" }}>{item.desc}</p>
+            {howSteps.map((item, idx) => {
+              const c = HOW_COLORS[idx];
+              return (
+                <div key={item.n}
+                  className="flex gap-5 p-5 rounded-2xl relative overflow-hidden transition-transform hover:translate-x-1"
+                  style={{
+                    background: `linear-gradient(135deg, ${c}10, ${c}03 60%, transparent), var(--bg-card)`,
+                    border: `1px solid ${c}28`,
+                    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06)`,
+                  }}
+                >
+                  {/* Left accent bar */}
+                  <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
+                    style={{ background: `linear-gradient(180deg, ${c}, ${c}40)` }} />
+                  <div style={{
+                    width: 38, height: 38, borderRadius: 12, flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: `linear-gradient(135deg, ${c}30, ${c}10)`,
+                    border: `1px solid ${c}40`,
+                    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.10), 0 4px 12px ${c}25`,
+                    color: "#fff", fontSize: 13, fontWeight: 900,
+                  }}>{item.n}</div>
+                  <div className="flex-1">
+                    <div style={{ fontWeight: 700, color: "var(--text)", fontSize: 14, marginBottom: 5 }}>{item.title}</div>
+                    <p style={{ fontSize: 13, lineHeight: 1.65, color: "var(--text-secondary)" }}>{item.desc}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
@@ -325,19 +386,31 @@ export default function AboutPage() {
               const meta = VALUE_META[idx];
               return (
                 <div key={v.title}
-                  className="flex gap-4 p-5 rounded-2xl"
-                  style={{ background: "var(--bg-secondary)", border: "1px solid var(--border-light)" }}
+                  className="flex gap-4 p-5 rounded-2xl relative overflow-hidden transition-transform hover:-translate-y-0.5"
+                  style={{
+                    background: `linear-gradient(160deg, ${meta.color}10, ${meta.color}04 60%, transparent), var(--bg-card)`,
+                    border: `1px solid ${meta.color}30`,
+                    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 16px ${meta.color}10`,
+                  }}
                 >
-                  <div style={{
-                    width: 40, height: 40, borderRadius: 12, flexShrink: 0,
-                    background: `${meta.color}16`, border: `1px solid ${meta.color}30`,
+                  {/* Spotlight */}
+                  <div className="absolute pointer-events-none" aria-hidden style={{
+                    top: -25, right: -25, width: 90, height: 90, opacity: 0.55,
+                    background: `radial-gradient(circle, ${meta.color}40, transparent 65%)`,
+                    filter: "blur(6px)",
+                  }} />
+                  <div className="relative" style={{
+                    width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                    background: `linear-gradient(135deg, ${meta.color}38, ${meta.color}12)`,
+                    border: `1px solid ${meta.color}48`,
+                    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.15), 0 6px 14px ${meta.color}30`,
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke={meta.color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke={meta.color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                       <path d={meta.icon} />
                     </svg>
                   </div>
-                  <div>
+                  <div className="relative flex-1">
                     <div style={{ fontWeight: 700, color: "var(--text)", fontSize: 14, marginBottom: 5 }}>{v.title}</div>
                     <p style={{ fontSize: 13, lineHeight: 1.65, color: "var(--text-secondary)" }}>{v.desc}</p>
                   </div>
@@ -435,15 +508,22 @@ export default function AboutPage() {
 
         {/* ── ULTIMA NOTE ──────────────────────────────────────── */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
-          <div style={{
-            background: "rgba(245,158,11,0.07)",
-            border: "1px solid rgba(245,158,11,0.2)",
+          <div className="relative overflow-hidden" style={{
+            background: "linear-gradient(135deg, rgba(245,158,11,0.14), rgba(252,211,77,0.06) 50%, transparent), var(--bg-card)",
+            border: "1px solid rgba(245,158,11,0.32)",
             borderRadius: 16,
-            padding: "16px 20px",
+            padding: "18px 22px",
             display: "flex",
             gap: 14,
             alignItems: "flex-start",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 6px 18px rgba(245,158,11,0.10)",
           }}>
+            {/* gold spotlight */}
+            <div className="absolute pointer-events-none" aria-hidden style={{
+              top: -25, right: -25, width: 120, height: 120, opacity: 0.55,
+              background: "radial-gradient(circle, rgba(252,211,77,0.55), transparent 65%)",
+              filter: "blur(10px)",
+            }} />
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
               <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01" />
             </svg>
