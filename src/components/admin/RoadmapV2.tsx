@@ -417,6 +417,7 @@ function TaskCard({ task, onUpdate, onDelete }: {
   const [editingNotes, setEditingNotes] = useState(false);
   const [draftTitle, setDraftTitle] = useState(task.title);
   const [draftNotes, setDraftNotes] = useState(task.notes ?? "");
+  const [draftDue, setDraftDue] = useState(task.due ?? "");
   const [menuOpen, setMenuOpen] = useState(false);
   const [newSub, setNewSub] = useState("");
   const cat = CAT_META[task.category];
@@ -638,6 +639,41 @@ function TaskCard({ task, onUpdate, onDelete }: {
                   </button>
                 ))}
                 <div style={{ height: 1, background: BOR, margin: "4px 0" }} />
+                <div style={{ fontSize: 9, fontWeight: 700, padding: "4px 8px", color: MUTED, letterSpacing: "0.06em", textTransform: "uppercase" }}>Дедлайн</div>
+                <div style={{ padding: "4px 8px 6px" }}>
+                  <input type="date" value={draftDue} onChange={e => setDraftDue(e.target.value)}
+                    style={{
+                      width: "100%", padding: "5px 8px", fontSize: 12, borderRadius: 6,
+                      background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                      color: TEXT, border: `1px solid ${BOR}`, outline: "none", marginBottom: 4,
+                    }} />
+                  <div style={{ display: "flex", gap: 4 }}>
+                    <button onClick={() => {
+                      onUpdate({ ...task, due: draftDue || undefined });
+                      setMenuOpen(false);
+                    }}
+                      style={{
+                        flex: 1, padding: "4px 8px", borderRadius: 6, fontSize: 11, fontWeight: 600,
+                        background: "rgba(69,97,232,0.18)", color: "#6B8FFF",
+                        border: "1px solid rgba(69,97,232,0.30)", cursor: "pointer",
+                      }}>
+                      Сохранить
+                    </button>
+                    {task.due && (
+                      <button onClick={() => {
+                        setDraftDue("");
+                        onUpdate({ ...task, due: undefined });
+                        setMenuOpen(false);
+                      }}
+                        title="Убрать дедлайн"
+                        style={{
+                          padding: "4px 8px", borderRadius: 6, fontSize: 11, fontWeight: 600,
+                          background: "transparent", color: MUTED, border: `1px solid ${BOR}`, cursor: "pointer",
+                        }}>×</button>
+                    )}
+                  </div>
+                </div>
+                <div style={{ height: 1, background: BOR, margin: "4px 0" }} />
                 <button onClick={() => { if (confirm("Удалить задачу?")) onDelete(task.id); setMenuOpen(false); }}
                   style={{
                     width: "100%", textAlign: "left", padding: "6px 8px",
@@ -711,11 +747,12 @@ function SubtaskItem({ sub, onToggle, onDelete, onEdit }: {
 }
 
 // ── BucketColumn ─────────────────────────────────────────────────────────────
-function BucketColumn({ bucket, tasks, onAdd, onUpdate, onDelete }: {
+function BucketColumn({ bucket, tasks, onAdd, onUpdate, onDelete, currentCategory }: {
   bucket: Bucket; tasks: RoadmapTaskV2[];
-  onAdd(bucket: Bucket): void;
+  onAdd(bucket: Bucket, category?: Category): void;
   onUpdate(t: RoadmapTaskV2): void;
   onDelete(id: string): void;
+  currentCategory?: Category | null;
 }) {
   const { CARD, BOR, TEXT, MUTED, isDark } = useTok();
   const meta = BUCKET_META[bucket];
@@ -739,7 +776,7 @@ function BucketColumn({ bucket, tasks, onAdd, onUpdate, onDelete }: {
       <div>
         {inThis.map(t => <TaskCard key={t.id} task={t} onUpdate={onUpdate} onDelete={onDelete} />)}
       </div>
-      <button onClick={() => onAdd(bucket)}
+      <button onClick={() => onAdd(bucket, currentCategory ?? undefined)}
         style={{
           width: "100%", padding: "8px", marginTop: 4,
           fontSize: 12, fontWeight: 600, color: meta.color,
@@ -753,15 +790,16 @@ function BucketColumn({ bucket, tasks, onAdd, onUpdate, onDelete }: {
 }
 
 // ── Add modal (simple form) ──────────────────────────────────────────────────
-function AddTaskModal({ initialBucket, onSubmit, onClose }: {
+function AddTaskModal({ initialBucket, initialCategory, onSubmit, onClose }: {
   initialBucket: Bucket;
+  initialCategory?: Category;
   onSubmit(t: RoadmapTaskV2): void;
   onClose(): void;
 }) {
   const { CARD, BOR, TEXT, MUTED, isDark } = useTok();
   const [title, setTitle] = useState("");
   const [bucket, setBucket] = useState<Bucket>(initialBucket);
-  const [category, setCategory] = useState<Category>("tech");
+  const [category, setCategory] = useState<Category>(initialCategory ?? "tech");
   const [isMilestone, setIsMilestone] = useState(false);
   const [due, setDue] = useState("");
   const [notes, setNotes] = useState("");
@@ -852,10 +890,205 @@ function AddTaskModal({ initialBucket, onSubmit, onClose }: {
   );
 }
 
+
+
+// ── SearchToolbar — glass search input + plus button + view toggle + backup ──
+function SearchToolbar({
+  searchQuery, setSearchQuery, viewMode, setViewMode, onQuickAdd, tasks, onImport, onRestore,
+}: {
+  searchQuery: string; setSearchQuery: (q: string) => void;
+  viewMode: "kanban" | "calendar"; setViewMode: (m: "kanban" | "calendar") => void;
+  onQuickAdd: () => void;
+  tasks: RoadmapTaskV2[];
+  onImport: (t: RoadmapTaskV2[]) => void;
+  onRestore: (t: RoadmapTaskV2[]) => void;
+}) {
+  const { isDark, MUTED, TEXT, BOR } = useTok();
+  return (
+    <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 14, flexWrap: "wrap" }}>
+      {/* Glass search input — matches chat input style */}
+      <div style={{
+        position: "relative", flex: 1, minWidth: 240,
+        display: "flex", alignItems: "center",
+        background: isDark
+          ? "linear-gradient(135deg, rgba(22,22,44,0.55), rgba(10,10,24,0.65))"
+          : "linear-gradient(135deg, rgba(255,255,255,0.78), rgba(245,247,255,0.62))",
+        border: isDark ? "1px solid rgba(124,58,237,0.20)" : "1px solid rgba(69,97,232,0.14)",
+        borderRadius: 99,
+        backdropFilter: "blur(20px) saturate(1.6)",
+        WebkitBackdropFilter: "blur(20px) saturate(1.6)",
+        boxShadow: isDark
+          ? "0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05)"
+          : "0 4px 20px rgba(69,97,232,0.10), inset 0 1px 0 rgba(255,255,255,0.6)",
+        height: 40,
+        paddingLeft: 14, paddingRight: 12,
+      }}>
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginRight: 9 }}>
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          placeholder="Поиск по задачам и заметкам…"
+          style={{
+            flex: 1, background: "transparent", border: "none", outline: "none",
+            fontSize: 13, color: TEXT, fontFamily: "inherit",
+          }} />
+        {searchQuery && (
+          <button onClick={() => setSearchQuery("")} style={{
+            background: "transparent", border: "none", cursor: "pointer",
+            color: MUTED, padding: 2, fontSize: 14, lineHeight: 1,
+          }} title="Очистить">×</button>
+        )}
+      </div>
+
+      {/* Round glass plus button — quick-add */}
+      <button onClick={onQuickAdd}
+        title="Добавить задачу в Сейчас"
+        style={{
+          width: 40, height: 40, borderRadius: "50%",
+          flexShrink: 0,
+          background: isDark
+            ? "linear-gradient(135deg, rgba(124,58,237,0.30), rgba(69,97,232,0.20))"
+            : "linear-gradient(135deg, rgba(69,97,232,0.12), rgba(124,58,237,0.08))",
+          border: isDark ? "1px solid rgba(124,58,237,0.40)" : "1px solid rgba(69,97,232,0.25)",
+          backdropFilter: "blur(20px) saturate(1.6)",
+          WebkitBackdropFilter: "blur(20px) saturate(1.6)",
+          boxShadow: isDark
+            ? "0 4px 14px rgba(124,58,237,0.30), inset 0 1px 0 rgba(255,255,255,0.10)"
+            : "0 4px 14px rgba(69,97,232,0.20), inset 0 1px 0 rgba(255,255,255,0.4)",
+          cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          color: isDark ? "#bcc8ff" : "#4561E8",
+          transition: "transform .15s, box-shadow .15s",
+        }}
+        onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.05)"; }}
+        onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; }}>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+
+      {/* View mode toggle: Kanban / Calendar */}
+      <div style={{
+        display: "inline-flex", alignItems: "center",
+        background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+        borderRadius: 99, padding: 3,
+        border: `1px solid ${BOR}`,
+      }}>
+        <button onClick={() => setViewMode("kanban")}
+          title="Канбан-доска"
+          style={{
+            padding: "6px 12px", borderRadius: 99, fontSize: 12, fontWeight: 600,
+            background: viewMode === "kanban" ? (isDark ? "rgba(124,58,237,0.25)" : "rgba(69,97,232,0.15)") : "transparent",
+            color: viewMode === "kanban" ? (isDark ? "#bcc8ff" : "#4561E8") : MUTED,
+            border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5,
+          }}>
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <rect x="3" y="3" width="7" height="18"/><rect x="14" y="3" width="7" height="13"/>
+          </svg>
+          Доска
+        </button>
+        <button onClick={() => setViewMode("calendar")}
+          title="Календарь по дедлайнам"
+          style={{
+            padding: "6px 12px", borderRadius: 99, fontSize: 12, fontWeight: 600,
+            background: viewMode === "calendar" ? (isDark ? "rgba(124,58,237,0.25)" : "rgba(69,97,232,0.15)") : "transparent",
+            color: viewMode === "calendar" ? (isDark ? "#bcc8ff" : "#4561E8") : MUTED,
+            border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5,
+          }}>
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+          </svg>
+          Календарь
+        </button>
+      </div>
+
+      {/* Backup tools (compact in the toolbar) */}
+      <BackupTools tasks={tasks} onImport={onImport} onRestore={onRestore} />
+    </div>
+  );
+}
+
+// ── CalendarView — tasks grouped by deadline week ────────────────────────────
+function CalendarView({ tasks, onUpdate, onDelete }: {
+  tasks: RoadmapTaskV2[];
+  onUpdate(t: RoadmapTaskV2): void;
+  onDelete(id: string): void;
+}) {
+  const { CARD, BOR, TEXT, MUTED } = useTok();
+
+  // Group tasks by due date (overdue, this week, next week, by month, no date)
+  const today = new Date(); today.setHours(0,0,0,0);
+  const thisWeekEnd = new Date(today); thisWeekEnd.setDate(today.getDate() + (6 - today.getDay()));
+  const nextWeekEnd = new Date(thisWeekEnd); nextWeekEnd.setDate(thisWeekEnd.getDate() + 7);
+
+  type Group = { key: string; label: string; color: string; tasks: RoadmapTaskV2[] };
+  const groups: Group[] = [
+    { key: "overdue",   label: "🔴 Просрочено",     color: "#ef4444", tasks: [] },
+    { key: "today",     label: "🟠 Сегодня",        color: "#FF7A00", tasks: [] },
+    { key: "thisweek",  label: "🟡 На этой неделе", color: "#f59e0b", tasks: [] },
+    { key: "nextweek",  label: "🟢 На след. неделе", color: "#22c55e", tasks: [] },
+    { key: "later",     label: "🔵 Позже",          color: "#4561E8", tasks: [] },
+    { key: "nodate",    label: "⚪ Без дедлайна",   color: "#94a3b8", tasks: [] },
+  ];
+
+  const byDate = [...tasks].sort((a, b) => (a.due ?? "9999").localeCompare(b.due ?? "9999"));
+  for (const t of byDate) {
+    if (!t.due) { groups[5].tasks.push(t); continue; }
+    const d = new Date(t.due + "T00:00:00");
+    if (d < today) groups[0].tasks.push(t);
+    else if (d.getTime() === today.getTime()) groups[1].tasks.push(t);
+    else if (d <= thisWeekEnd) groups[2].tasks.push(t);
+    else if (d <= nextWeekEnd) groups[3].tasks.push(t);
+    else groups[4].tasks.push(t);
+  }
+
+  const days = Math.floor((today.getTime() - new Date(2026, 0, 1).getTime()) / 86400000);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {groups.filter(g => g.tasks.length > 0).map(g => (
+        <div key={g.key} style={{
+          background: CARD, border: `1px solid ${BOR}`, borderRadius: 14,
+          borderLeft: `4px solid ${g.color}`,
+          padding: 14,
+        }}>
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 10,
+          }}>
+            <span>{g.label}</span>
+            <span style={{ fontSize: 11, color: MUTED, fontWeight: 500 }}>{g.tasks.length} задач</span>
+          </div>
+          <div>
+            {g.tasks.map(t => <TaskCard key={t.id} task={t} onUpdate={onUpdate} onDelete={onDelete} />)}
+          </div>
+        </div>
+      ))}
+      {groups.every(g => g.tasks.length === 0) && (
+        <div style={{ padding: 30, textAlign: "center", fontSize: 13, color: MUTED, background: CARD, border: `1px solid ${BOR}`, borderRadius: 14 }}>
+          Нет задач по фильтру.
+        </div>
+      )}
+      <div style={{ fontSize: 10, color: MUTED, opacity: 0.5, textAlign: "center", marginTop: 8 }}>
+        Сегодня день #{days} с начала года · Запуск 1 июня
+      </div>
+    </div>
+  );
+}
+
 // ── Main exported tab ────────────────────────────────────────────────────────
 export default function RoadmapV2Tab() {
   const [tasks, setTasks] = useState<RoadmapTaskV2[]>([]);
-  const [addingFor, setAddingFor] = useState<Bucket | null>(null);
+  const [addingFor, setAddingFor] = useState<{ bucket: Bucket; category?: Category } | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"kanban" | "calendar">("kanban");
   const [filterCat, setFilterCat] = useState<Category | null>(null);
 
   useEffect(() => {
@@ -970,36 +1203,60 @@ export default function RoadmapV2Tab() {
     persist([...tasks, t], `add:${t.title.slice(0, 30)}`);
   };
 
-  const filtered = useMemo(() => filterCat ? tasks.filter(t => t.category === filterCat) : tasks, [tasks, filterCat]);
+  const filtered = useMemo(() => {
+    let result = tasks;
+    if (filterCat) result = result.filter(t => t.category === filterCat);
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      result = result.filter(t =>
+        t.title.toLowerCase().includes(q) ||
+        (t.notes ?? "").toLowerCase().includes(q) ||
+        (t.subtasks ?? []).some(s => s.text.toLowerCase().includes(q))
+      );
+    }
+    return result;
+  }, [tasks, filterCat, searchQuery]);
 
   return (
     <div>
       <LaunchTracker tasks={tasks} />
 
-      {/* Top toolbar — backup / restore + filter */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12, alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          <CategoryChip active={filterCat === null} label="Все" color="#94a3b8" onClick={() => setFilterCat(null)} count={tasks.length} />
-          {(Object.keys(CAT_META) as Category[]).map(c => (
-            <CategoryChip key={c}
-              active={filterCat === c} label={CAT_META[c].label} color={CAT_META[c].color}
-              count={tasks.filter(t => t.category === c).length}
-              onClick={() => setFilterCat(filterCat === c ? null : c)} />
-          ))}
-        </div>
-        <BackupTools tasks={tasks} onImport={(t) => persist(t, "import")} onRestore={(t) => persist(t, "restore-history")} />
-      </div>
+      {/* Search + quick add + view mode + backup */}
+      <SearchToolbar
+        searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+        viewMode={viewMode} setViewMode={setViewMode}
+        onQuickAdd={() => setAddingFor({ bucket: "now", category: filterCat ?? undefined })}
+        tasks={tasks}
+        onImport={(t) => persist(t, "import")}
+        onRestore={(t) => persist(t, "restore-history")}
+      />
 
-      {/* 4-bucket grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {(Object.keys(BUCKET_META) as Bucket[]).map(b => (
-          <BucketColumn key={b} bucket={b} tasks={filtered}
-            onAdd={() => setAddingFor(b)} onUpdate={update} onDelete={remove} />
+      {/* Category filter chips */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12, alignItems: "center" }}>
+        <CategoryChip active={filterCat === null} label="Все" color="#94a3b8" onClick={() => setFilterCat(null)} count={tasks.length} />
+        {(Object.keys(CAT_META) as Category[]).map(c => (
+          <CategoryChip key={c}
+            active={filterCat === c} label={CAT_META[c].label} color={CAT_META[c].color}
+            count={tasks.filter(t => t.category === c).length}
+            onClick={() => setFilterCat(filterCat === c ? null : c)} />
         ))}
       </div>
 
+      {/* View — Kanban (4-bucket grid) or Calendar (by deadline) */}
+      {viewMode === "kanban" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {(Object.keys(BUCKET_META) as Bucket[]).map(b => (
+            <BucketColumn key={b} bucket={b} tasks={filtered}
+              currentCategory={filterCat}
+              onAdd={(bucket, category) => setAddingFor({ bucket, category })} onUpdate={update} onDelete={remove} />
+          ))}
+        </div>
+      ) : (
+        <CalendarView tasks={filtered} onUpdate={update} onDelete={remove} />
+      )}
+
       {addingFor && (
-        <AddTaskModal initialBucket={addingFor} onSubmit={add} onClose={() => setAddingFor(null)} />
+        <AddTaskModal initialBucket={addingFor.bucket} initialCategory={addingFor.category} onSubmit={add} onClose={() => setAddingFor(null)} />
       )}
     </div>
   );
