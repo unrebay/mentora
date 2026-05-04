@@ -97,7 +97,7 @@ const FEATURE_ICONS = [
   `<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>`,
   `<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>`,
   `<circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>`,
-  `<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>`,
+  `<circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="2" fill="none"/><circle cx="15" cy="15" r="6" stroke="currentColor" strokeWidth="2" fill="none"/>`,
 ];
 
 const FEATURE_COLORS = ["#4561E8", "#10B981", "#FF7A00", "#A78BFA", "#06B6D4", "#F59E0B"];
@@ -936,8 +936,6 @@ export default async function HomePage() {
           {/* Closing manifesto quote */}
           <FadeUp delay={0.5} fade>
             <div className="relative max-w-2xl mx-auto">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-px"
-                style={{ background: "linear-gradient(90deg, transparent, rgba(69,97,232,0.4), transparent)" }} />
               <blockquote className="pt-8">
                 <p className="text-xl md:text-2xl font-light italic leading-relaxed"
                   style={{ color: "var(--text)" }}>
@@ -996,13 +994,16 @@ export default async function HomePage() {
             {t("landing.ctaButton")}
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </Link>
-          <p className="text-gray-600 text-xs mt-5">{t("landing.ctaNoCard")}</p>
+
           </FadeUp>
         </div>
       </section>
 
-      <footer className="py-8" style={{ background: "#111827", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="max-w-6xl mx-auto px-6 flex flex-col items-center gap-3 text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+      <footer className="py-8 relative overflow-hidden" style={{ background: "#111827", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+        {/* Continuation of the CTA glow — soft brand-tinted radial above the footer */}
+        <div className="absolute inset-0 opacity-30 pointer-events-none" aria-hidden
+          style={{ background: "radial-gradient(ellipse at 50% -30%, rgba(69,97,232,0.35) 0%, transparent 65%)" }} />
+        <div className="relative max-w-6xl mx-auto px-6 flex flex-col items-center gap-3 text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
           <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
             <span>{t("landing.footerRights")}</span>
             <div className="flex gap-6">
