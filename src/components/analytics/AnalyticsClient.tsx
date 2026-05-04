@@ -152,7 +152,7 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
         </span>
         <span className="text-sm font-bold flex items-center gap-1.5" style={{ color: "var(--text)" }}>
           {totalXP.toLocaleString()}
-          <MeLogo height={14} colorM="#7C3AED" colorE="#7C3AED" />
+          <MeLogo height={14} />
         </span>
       </div>
       <div className="relative" style={{ paddingTop: 4, paddingBottom: 30 }}>
@@ -213,7 +213,7 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
                   </div>
                   <div className="text-[8px] flex items-center justify-center gap-0.5 mt-0.5" style={{ color: "var(--text-muted)", opacity: 0.7 }}>
                     {lvl.minXP >= 1000 ? `${lvl.minXP / 1000}k` : lvl.minXP}
-                    <MeLogo height={7} colorM="currentColor" colorE="currentColor" />
+                    <MeLogo height={7} />
                   </div>
                 </div>
               </div>
@@ -239,7 +239,7 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
               }}>
                 {(next.minXP - totalXP).toLocaleString()}
               </span>
-              <MeLogo height={11} colorM="#9F7AFF" colorE="#9F7AFF" />
+              <MeLogo height={11} />
               <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>→ {next.name}</span>
             </div>
             {/* Mini progress bar */}
@@ -448,15 +448,15 @@ function GalaxyOfKnowledge({ subjects }: { subjects: SubjectStat[] }) {
                 opacity: mounted ? 1 : 0, transition: "opacity 0.5s ease 0.4s",
                 minHeight: 14, display: "flex", alignItems: "center", gap: 2,
               }}>
-                {s.xp}<MeLogo height={8} colorM="currentColor" colorE="currentColor" />
+                {s.xp}<MeLogo height={8} />
               </span>
               <div style={{
                 width: "100%", height: barH, position: "relative",
                 background: `linear-gradient(180deg, ${color}60 0%, ${color}28 80%, ${color}15 100%)`,
-                border: `1px solid ${color}50`, borderBottom: `3px solid ${color}75`,
+                border: `1px solid ${color}50`,
                 backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
                 boxShadow: `0 6px 20px ${color}30, inset 0 1px 0 rgba(255,255,255,0.25), 4px 6px 0 rgba(0,0,0,0.07)`,
-                borderRadius: "7px 7px 3px 3px",
+                borderRadius: "10px 10px 6px 6px",
                 transition: "height 1s cubic-bezier(0.34,1.15,0.64,1)",
                 overflow: "hidden",
               }}>
@@ -604,8 +604,8 @@ function BestStreakCallout({ best }: { best: number }) {
           border: "1px solid rgba(255,160,0,0.45)",
           boxShadow: "0 0 24px rgba(255,122,0,0.45), inset 0 1px 0 rgba(255,255,255,0.30)",
         }}>
-        <svg viewBox="0 0 24 24" width="28" height="28" fill="#FF7A00" style={{ filter: "drop-shadow(0 0 6px rgba(255,160,0,0.7))" }}>
-          <path d="M13 2C13 2 8.5 7 8.5 11.5c0 1.5.5 2.8 1.3 3.8C9.3 14.5 9 13.5 9 12.5c0-2 1.5-4 3-5 0 1.5.5 3 1.5 4 .5-1 .5-2 .5-3 1 1.5 1.5 3 1.5 4.5 0 2.5-2 4.5-4.5 4.5S6.5 15.5 6.5 13C6.5 7.5 13 2 13 2z" />
+        <svg viewBox="0 0 24 24" width="34" height="34" fill="#FF7A00" style={{ filter: "drop-shadow(0 0 8px rgba(255,160,0,0.8))", transform: "translateY(0.5px)" }}>
+          <path d="M12 2C12 2 6 8 6 13.5c0 3.31 2.69 6 6 6s6-2.69 6-6c0-1.5-.5-2.8-1.3-3.8C16.7 9 16 9 15.5 9.5c0 0 0.2 1.5-1.5 2 0.5-2-1-3.5-2-4.5 0.3 1.5-0.5 2.5-1.5 3-1-1-1-2-1-3 0.5-1.5 1.5-3 2.5-5z" />
         </svg>
       </div>
       <div className="relative">
@@ -708,7 +708,7 @@ export default function AnalyticsClient(p: Props) {
                 boxShadow: "0 4px 12px rgba(124,58,237,0.15), inset 0 1px 0 rgba(255,255,255,0.08)",
               }}>
               <span style={{ fontSize: 13 }}>{p.totalXP.toLocaleString()}</span>
-              <MeLogo height={11} colorM="#9F7AFF" colorE="#9F7AFF" />
+              <MeLogo height={11} />
             </span>
           )}
         </div>
@@ -720,8 +720,8 @@ export default function AnalyticsClient(p: Props) {
         }} />
       </div>
 
-      {/* Hero: career ladder + global rank */}
-      <div className="grid md:grid-cols-[2fr_1fr] gap-4">
+      {/* Hero: career ladder full-width + global rank below */}
+      <div className="space-y-4">
         <CareerLadder levels={p.careerLevels} totalXP={p.totalXP} currentKey={p.currentLevelKey} />
         <GlobalRankCapsule rank={p.globalRank} total={p.totalUsers} mySerialId={p.mySerialId} />
       </div>
@@ -729,15 +729,19 @@ export default function AnalyticsClient(p: Props) {
       {/* KPI grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard label={t("stats.totalXP")} value={p.totalXP.toLocaleString()} color="#4561E8"
-          iconNode={<MeLogo height={20} colorM="#4561E8" colorE="#4561E8" />}
+          iconNode={<MeLogo height={20} />}
           sparkData={trendCum} deltaPct={dlt} />
         <StatCard label={t("stats.streak")} value={t("stats.streakValue", { n: p.currentStreak })} color="#FF7A00"
-          icon="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" />
+          iconNode={
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="#FF7A00" style={{ display: "block", margin: "auto", transform: "translateY(0.5px)" }}>
+              <path d="M12 2C12 2 6 8 6 13.5c0 3.31 2.69 6 6 6s6-2.69 6-6c0-1.5-.5-2.8-1.3-3.8C16.7 9 16 9 15.5 9.5c0 0 0.2 1.5-1.5 2 0.5-2-1-3.5-2-4.5 0.3 1.5-0.5 2.5-1.5 3-1-1-1-2-1-3 0.5-1.5 1.5-3 2.5-5z" />
+            </svg>
+          } />
         <StatCard label={t("stats.messages")} value={p.totalMessages.toLocaleString()} color="#10B981"
           icon="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
           sparkData={p.activity14d.map(d => d.count)} deltaPct={dlt} />
         <StatCard label={t("stats.badges")} value={t("stats.badgesValue", { earned: earnedBadges, total: p.badges.length })} color="#9F7AFF"
-          icon="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          icon="M6 4h12v3a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V4zM4 4h2v3a2 2 0 0 1-2 2 2 2 0 0 1 0-4V4zM18 4h2v1a2 2 0 0 1 0 4 2 2 0 0 1-2-2V4zM10 13h4l-.5 3h2l1 4h-9l1-4h2l-.5-3z" />
       </div>
 
       {/* Activity area chart */}

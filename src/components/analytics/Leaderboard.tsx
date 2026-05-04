@@ -170,7 +170,7 @@ export default function Leaderboard({ mySerialId }: Props) {
               <div className="text-right flex-shrink-0">
                 <div className="font-black text-lg flex items-center gap-1 justify-end" style={{ color: "var(--text)" }}>
                   {r.xp.toLocaleString()}
-                  <MeLogo height={14} colorM={tierColor} colorE={tierColor} />
+                  <MeLogo height={14} />
                 </div>
                 <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>
                   {t("messagesShort", { n: r.messages.toLocaleString() })}
@@ -241,7 +241,7 @@ export default function Leaderboard({ mySerialId }: Props) {
                   <div className="text-right flex-shrink-0">
                     <div className="font-black text-lg flex items-center gap-1 justify-end" style={{ color: "var(--text)" }}>
                       {r.xp.toLocaleString()}
-                      <MeLogo height={14} colorM={tierColor} colorE={tierColor} />
+                      <MeLogo height={14} />
                     </div>
                     <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>
                       {t("messagesShort", { n: r.messages.toLocaleString() })}
