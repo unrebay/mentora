@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
 import LevelAvatar, { LEVEL_TIER_NAMES, unlockedLevel } from "@/components/LevelAvatar";
 
 interface Props {
@@ -21,10 +20,21 @@ export default function UserDropdown({
   totalXP, currentStreak, isPro, isUltima,
   selectedAvatarLevel, serialId, email, displayName, logoutAction,
 }: Props) {
-  const t = useTranslations();
   const [open, setOpen] = useState(false);
+  const [rank, setRank] = useState<{ rank: number; total: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const lvl = selectedAvatarLevel ?? unlockedLevel(totalXP);
+
+  // Lazy-fetch rank on first open
+  useEffect(() => {
+    if (!open || rank) return;
+    let cancelled = false;
+    fetch("/api/leaderboard?limit=10")
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (!cancelled && d?.myRank && d?.myTotal) setRank({ rank: d.myRank, total: d.myTotal }); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [open, rank]);
 
   // Close on outside click + ESC
   useEffect(() => {
@@ -104,33 +114,68 @@ export default function UserDropdown({
                 }}>{planLabel}</span>
               </div>
               <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>
-                {LEVEL_TIER_NAMES[lvl]}{serialId ? ` · #${serialId}` : ""}
+                {LEVEL_TIER_NAMES[lvl]}{serialId ? ` · ID #${serialId}` : ""}
               </div>
             </div>
           </div>
 
-          {/* Stats strip */}
+          {/* Stats strip — ments + global rank */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, padding: "0 14px 12px" }}>
             <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "6px 10px" }}>
               <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.05em", textTransform: "uppercase", fontWeight: 700 }}>Менты</div>
               <div style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>{totalXP.toLocaleString("ru-RU")}</div>
             </div>
             <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "6px 10px" }}>
-              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.05em", textTransform: "uppercase", fontWeight: 700 }}>Стрик</div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>{currentStreak} дн.</div>
+              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.05em", textTransform: "uppercase", fontWeight: 700 }}>Место</div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>
+                {rank ? `#${rank.rank}` : "—"}
+                {rank && <span style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 500 }}> из {rank.total.toLocaleString("ru-RU")}</span>}
+              </div>
             </div>
           </div>
 
           {/* Divider */}
           <div style={{ height: 1, background: "rgba(255,255,255,0.06)" }} />
 
-          {/* Menu items */}
+          {/* Profile link */}
           <div style={{ padding: "6px 0" }}>
             <Item href="/profile" icon={<IconUser />} label="Профиль" onClick={() => setOpen(false)} />
-            <Item href="/dashboard" icon={<IconHome />} label="Главная" onClick={() => setOpen(false)} />
-            <Item href="/dashboard/analytics" icon={<IconChart />} label="Аналитика" onClick={() => setOpen(false)} />
-            {!isPro && <Item href="/pricing" icon={<IconCrown />} label="Тарифы" highlight onClick={() => setOpen(false)} />}
-            <Item href="/dashboard/about" icon={<IconInfo />} label="О проекте" onClick={() => setOpen(false)} />
+          </div>
+
+          {/* Divider */}
+          <div style={{ height: 1, background: "rgba(255,255,255,0.06)" }} />
+
+          {/* Contact us — TG + Email side by side */}
+          <div style={{ padding: "10px 14px 12px" }}>
+            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.05em", textTransform: "uppercase", fontWeight: 700, marginBottom: 8 }}>
+              Написать нам
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <a href="https://t.me/mentora_su_bot" target="_blank" rel="noopener noreferrer"
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  padding: "8px 10px", fontSize: 12, fontWeight: 600,
+                  background: "rgba(35,156,234,0.10)", color: "#5BB5F0", border: "1px solid rgba(35,156,234,0.30)",
+                  borderRadius: 8, textDecoration: "none", transition: "background .12s",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = "rgba(35,156,234,0.18)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "rgba(35,156,234,0.10)")}>
+                <IconTelegram />
+                <span style={{ color: "#5BB5F0" }}>Telegram</span>
+              </a>
+              <a href="mailto:hello@mentora.su"
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  padding: "8px 10px", fontSize: 12, fontWeight: 600,
+                  background: "rgba(124,58,237,0.10)", color: "#9F7AFF", border: "1px solid rgba(124,58,237,0.30)",
+                  borderRadius: 8, textDecoration: "none", transition: "background .12s",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = "rgba(124,58,237,0.18)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "rgba(124,58,237,0.10)")}>
+                <IconMail />
+                <span>Почта</span>
+              </a>
+            </div>
           </div>
 
           {/* Divider */}
@@ -179,8 +224,6 @@ function Item({ href, icon, label, highlight, onClick }: {
 // ── Icons ────────────────────────────────────────────────────────────────────
 const sw = { fill: "none", stroke: "currentColor", strokeWidth: "1.7", strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
 function IconUser()    { return <svg viewBox="0 0 24 24" width="14" height="14" {...sw}><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>; }
-function IconHome()    { return <svg viewBox="0 0 24 24" width="14" height="14" {...sw}><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>; }
-function IconChart()   { return <svg viewBox="0 0 24 24" width="14" height="14" {...sw}><path d="M3 21h18M7 17V8M12 17V4M17 17v-6"/></svg>; }
-function IconCrown()   { return <svg viewBox="0 0 24 24" width="14" height="14" {...sw}><path d="M3 7l4 6 5-9 5 9 4-6v12H3z"/></svg>; }
-function IconInfo()    { return <svg viewBox="0 0 24 24" width="14" height="14" {...sw}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h0"/></svg>; }
 function IconLogout()  { return <svg viewBox="0 0 24 24" width="14" height="14" {...sw}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>; }
+function IconTelegram(){ return <svg viewBox="0 0 24 24" width="14" height="14" fill="#5BB5F0"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>; }
+function IconMail()    { return <svg viewBox="0 0 24 24" width="14" height="14" {...sw}><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>; }
