@@ -10,7 +10,7 @@ import { cookies } from "next/headers";
 export const metadata = {
   title: "Тарифы — Mentora AI-репетитор",
   description:
-    "Начни бесплатно — 10 сообщений за 8 часов без карты. Pro за 499 ₽/мес открывает все 17 наук без лимита. Ultima добавляет PDF-конспекты, приоритет и расширенную память.",
+    "Начни бесплатно — 10 сообщений за 8 часов без карты. Pro за 499 ₽/мес открывает все 17 наук без лимита. Ultra добавляет PDF-конспекты, приоритет и расширенную память.",
   keywords: ["тарифы AI репетитора", "стоимость репетитора онлайн", "Pro план Mentora", "Ultra", "AI обучение цена"],
   alternates: {
     canonical: "https://mentora.su/ru/pricing",
@@ -18,7 +18,7 @@ export const metadata = {
   },
   openGraph: {
     title: "Тарифы Mentora — от 0 ₽",
-    description: "Бесплатно, Pro 499 ₽/мес или Ultima 799 ₽/мес. Без договоров — отмени в любой момент.",
+    description: "Бесплатно, Pro 499 ₽/мес или Ultra 799 ₽/мес. Без договоров — отмени в любой момент.",
     url: "https://mentora.su/ru/pricing",
     images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
   },
@@ -311,7 +311,7 @@ export default async function PricingPage() {
                   );
                 })}
               </ul>
-              {/* Ultima dev disclaimer */}
+              {/* Ultra dev disclaimer */}
               {locale === "ru" && (
                 <p className="mt-5 text-[10px] text-white/30 leading-relaxed relative z-10">
                   <svg viewBox="0 0 12 12" width="8" height="8" style={{ display: "inline", verticalAlign: "middle", marginRight: 3 }}>
@@ -341,7 +341,7 @@ export default async function PricingPage() {
                 style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.35)" }}>
                 <div className="col-span-2">Возможности</div>
                 <div className="text-center">Pro</div>
-                <div className="text-center">Ultima</div>
+                <div className="text-center">Ultra</div>
               </div>
               {[
                 { label: "Все 17 наук", free: true,  pro: true,  ultra: true  },

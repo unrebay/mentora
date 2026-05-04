@@ -273,12 +273,12 @@
       ]
     },
     "ultra": {
-      "name": "Ultima",
+      "name": "Ultra",
       "price": "799 ₽",
       "period": "/ month",
       "badge": "Maximum",
       "desc": "For perfectionists",
-      "cta": "Upgrade to Ultima",
+      "cta": "Upgrade to Ultra",
       "features": [
         "Everything in Pro",
         "Photo and task recognition",
@@ -289,7 +289,7 @@
     },
     "currentPlan": "Current plan",
     "activePro": "Pro active",
-    "activeUltima": "Ultima active",
+    "activeUltima": "Ultra active",
     "soon": "soon",
     "freeDesc": "Forever · no card",
     "faqLabel": "Support",
@@ -715,7 +715,7 @@
   "giftBanner": {
     "reserved": "Gift reserved",
     "proActivated": "Pro activated",
-    "ultimaDesc": "You're already on Ultima — the top plan. Your gift is recorded in your account.",
+    "ultimaDesc": "You're already on Ultra — the top plan. Your gift is recorded in your account.",
     "proDesc": "Pro active until {date}. Thanks for being with us from the start!",
     "title": "Gift from Mentora — Pro until {date}",
     "desc": "You signed up before the official launch. Activate Pro for free right now.",
@@ -1294,7 +1294,7 @@
       {
         "q": "Q1 2026",
         "label": "Platform launch",
-        "desc": "17 subjects, personal mentor, Pro and Ultima plans, referral system"
+        "desc": "17 subjects, personal mentor, Pro and Ultra plans, referral system"
       },
       {
         "q": "Q2 2026",
@@ -1317,8 +1317,8 @@
         "desc": "English version, Kazakhstan, other languages and education systems"
       }
     ],
-    "ultimaTag": "About Ultima plan",
-    "ultimaBody": "We are actively developing new features. Some capabilities described in the Ultima plan are still in testing and will be rolled out gradually by June 1, 2026. All Ultima subscribers will get access to them automatically as they become available.",
+    "ultimaTag": "About Ultra plan",
+    "ultimaBody": "We are actively developing new features. Some capabilities described in the Ultra plan are still in testing and will be rolled out gradually by June 1, 2026. All Ultra subscribers will get access to them automatically as they become available.",
     "supportTag": "Support the platform",
     "supportTitle": "Mentora grows without VC or ads",
     "supportSubtitle": "The project is sustained by user subscriptions and partner support",

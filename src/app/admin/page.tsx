@@ -89,7 +89,7 @@ function ago(iso: string | null) {
   return Math.floor(s / 86400) + " дн";
 }
 function planMeta(p: string) {
-  if (p === "ultima") return { l: "Ultima", c: "#a78bfa" };
+  if (p === "ultima") return { l: "Ultra", c: "#a78bfa" };
   if (p === "pro")    return { l: "Pro",    c: "#60a5fa" };
   return { l: "Free", c: "#94a3b8" };
 }
@@ -674,7 +674,7 @@ function RevenueCalculator() {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-              <span style={{ fontSize: 12, color: MUTED }}>Pro / Ultima</span>
+              <span style={{ fontSize: 12, color: MUTED }}>Pro / Ultra</span>
               <span style={{ fontSize: 12, fontWeight: 600, color: TEXT }}>{pctPro}% / {100-pctPro}%</span>
             </div>
             <input type="range" min={0} max={100} step={5} value={pctPro} onChange={e => setPctPro(Number(e.target.value))}
@@ -683,7 +683,7 @@ function RevenueCalculator() {
                 borderRadius: 99, outline: "none", border: "none" }} />
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
               <span style={{ fontSize: 10, color: "#60a5fa" }}>Pro ({fmt(proCount)})</span>
-              <span style={{ fontSize: 10, color: "#a78bfa" }}>Ultima ({fmt(ultCount)})</span>
+              <span style={{ fontSize: 10, color: "#a78bfa" }}>Ultra ({fmt(ultCount)})</span>
             </div>
           </div>
           <div>
@@ -721,7 +721,7 @@ function RevenueCalculator() {
         {/* Results */}
         <div>
           <Row label="Pro MRR"    val={`≈ ${proMRR.toLocaleString("ru-RU")} ₽`} color="#60a5fa" />
-          <Row label="Ultima MRR" val={`≈ ${ultMRR.toLocaleString("ru-RU")} ₽`} color="#a78bfa" />
+          <Row label="Ultra MRR" val={`≈ ${ultMRR.toLocaleString("ru-RU")} ₽`} color="#a78bfa" />
           <Row label="МRR итого"  val={`≈ ${mrr.toLocaleString("ru-RU")} ₽`} big color="#4561E8" />
           <Row label="ARR (×12)"  val={`≈ ${arr.toLocaleString("ru-RU")} ₽`} color="#4561E8" />
           {/* Tax row — dynamic regime */}
@@ -1110,12 +1110,12 @@ export default function AdminPanel() {
               <Metric label="Пользователей"     value={stats.users.total}       sub={`+${stats.users.newToday} сегодня`} />
               <Metric label="Активны сегодня"   value={stats.users.activeToday} sub={`неделя: ${N(stats.users.activeWeek)}`} color={GREEN} />
               <Metric label="Сообщений сегодня" value={stats.chat.messagesToday} sub={`всего: ${N(stats.chat.totalMessages)}`} />
-              <Metric label="MRR (оценка)"      value={R(mrr)} sub={`Pro×${pro} + Ultima×${ult}`} color="#a78bfa" />
+              <Metric label="MRR (оценка)"      value={R(mrr)} sub={`Pro×${pro} + Ultra×${ult}`} color="#a78bfa" />
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginBottom: 16 }}>
               <Metric label="Pro"    value={stats.users.pro}    sub={`≈${R(mrrPro)}/мес`} color="#60a5fa" />
-              <Metric label="Ultima" value={stats.users.ultima} sub={`≈${R(mrrUlt)}/мес`} color="#a78bfa" />
+              <Metric label="Ultra" value={stats.users.ultima} sub={`≈${R(mrrUlt)}/мес`} color="#a78bfa" />
               <Metric label="Free"   value={stats.users.free}   sub={`Пробный истёк: ${stats.users.trialExpired}`} />
             </div>
 
@@ -1210,7 +1210,7 @@ export default function AdminPanel() {
                     {[
                       ["Платящих всего", stats.users.pro + stats.users.ultima],
                       ["Pro", stats.users.pro],
-                      ["Ultima", stats.users.ultima],
+                      ["Ultra", stats.users.ultima],
                       ["Всего юзеров", stats.users.total],
                     ].map(([l, v]) => (
                       <div key={l as string} style={{ flex: 1, textAlign: "center" }}>
@@ -1257,8 +1257,8 @@ export default function AdminPanel() {
                 {[
                   { l: "Pro ежемес. (499₽)",    n: Math.round(pro * .7), mrr: Math.round(pro * .7 * PRO_M), c: "#60a5fa" },
                   { l: "Pro годовой (249₽/мес)", n: Math.round(pro * .3), mrr: Math.round(pro * .3 * PRO_Y/12), c: "#60a5fa88" },
-                  { l: "Ultima ежемес. (799₽)",  n: Math.round(ult * .7), mrr: Math.round(ult * .7 * ULT_M), c: "#a78bfa" },
-                  { l: "Ultima годовой (499₽)",  n: Math.round(ult * .3), mrr: Math.round(ult * .3 * ULT_Y/12), c: "#a78bfa88" },
+                  { l: "Ultra ежемес. (799₽)",  n: Math.round(ult * .7), mrr: Math.round(ult * .7 * ULT_M), c: "#a78bfa" },
+                  { l: "Ultra годовой (499₽)",  n: Math.round(ult * .3), mrr: Math.round(ult * .3 * ULT_Y/12), c: "#a78bfa88" },
                 ].map(r => (
                   <div key={r.l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${BOR}` }}>
                     <div><p style={{ fontSize: 13, color: r.c, fontWeight: 500, margin: 0 }}>{r.l}</p><p style={{ fontSize: 11, color: MUTED, margin: "2px 0 0" }}>~{N(r.n)} пользователей</p></div>
@@ -1300,7 +1300,7 @@ export default function AdminPanel() {
                 {[
                   ["Всего платящих",  stats.users.total ? ((pro+ult)/stats.users.total*100).toFixed(1)+"%" : "—"],
                   ["Free → Pro",      stats.users.total ? (pro/stats.users.total*100).toFixed(1)+"%" : "—"],
-                  ["Free → Ultima",   stats.users.total ? (ult/stats.users.total*100).toFixed(1)+"%" : "—"],
+                  ["Free → Ultra",   stats.users.total ? (ult/stats.users.total*100).toFixed(1)+"%" : "—"],
                   ["Активных/неделю", stats.users.total ? (stats.users.activeWeek/stats.users.total*100).toFixed(0)+"%" : "—"],
                 ].map(([l, v]) => (
                   <div key={l} style={{ textAlign: "center" }}>
@@ -1382,7 +1382,7 @@ function UsersTab() {
           <option value="">Все тарифы</option>
           <option value="free">Free</option>
           <option value="pro">Pro</option>
-          <option value="ultima">Ultima</option>
+          <option value="ultima">Ultra</option>
         </select>
         <select value={sortBy} onChange={e => setSortBy(e.target.value as typeof sortBy)} style={{ ...inp, width: "auto" }}>
           <option value="created_at">По дате регистрации</option>

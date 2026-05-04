@@ -54,7 +54,7 @@ export async function GET() {
     { key: "onboarded", label: "Онбординг пройден", count: onboardedCount ?? 0 },
     { key: "first_msg", label: "Первое сообщение", count: usersWithMessages.size },
     { key: "engaged",   label: "3+ сообщений",     count: usersWith3PlusMessages },
-    { key: "upgraded",  label: "Pro / Ultima / Trial", count: upgraded },
+    { key: "upgraded",  label: "Pro / Ultra / Trial", count: upgraded },
   ];
 
   // Calculate % of preceding stage and % of total

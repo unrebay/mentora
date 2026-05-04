@@ -99,7 +99,7 @@ export default function GalaxyCanvas({ className }: Props) {
       const scene  = new THREE.Scene();
       scene.background = new THREE.Color(0x020308);
       const camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 1000);
-      camera.position.set(0, 3.0, 43); // z=43: ~16% larger scale vs z=50
+      camera.position.set(0, 3.0, 60); // z=60: distant view like /knowledge page
       camera.lookAt(0, 0, 0);
 
       const ADD = THREE.AdditiveBlending;
@@ -267,16 +267,16 @@ export default function GalaxyCanvas({ className }: Props) {
         orb.position.copy(npos); mainGrp.add(orb);
         const halo = new THREE.Mesh(
           new THREE.SphereGeometry(orbR * 1.85, 14, 12),
-          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isSecond ? 0.20 : 0.32, blending: ADD, depthWrite: false })
+          new THREE.MeshBasicMaterial({ color: cHex, transparent: true, opacity: isSecond ? 0.16 : 0.26, blending: ADD, depthWrite: false })
         );
         halo.position.copy(npos); mainGrp.add(halo);
         // Mid glow (animated) — proportional bloom for halved orb size
         const gsz = isSecond ? 0.7 : 0.95;
-        const gop = isSecond ? 0.10 : 0.16;
+        const gop = isSecond ? 0.08 : 0.13;
         const gsp = mkSp(gsz, gop);
         sciGlows.push(gsp); sciGlowOps.push(gop); sciGlowSzs.push(gsz);
         // Outer haze — gentle bloom
-        mkSp(isSecond ? 1.5 : 2.0, isSecond ? 0.025 : 0.04);
+        mkSp(isSecond ? 1.5 : 2.0, isSecond ? 0.018 : 0.03);
       }
 
       // ── Graph edges ───────────────────────────────────────────────────────────
@@ -322,9 +322,9 @@ export default function GalaxyCanvas({ className }: Props) {
       // ── Local node clouds (3D topics — bluish-white tiny orbs with halo) ──────
       const CPER=80, TIN=SUBS.length*CPER;
       // Solid bluish-white orb body (denser geometry → reads as 3D ball)
-      const inM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.018,8,6),mkMat(0xeaf2ff,0.32),TIN);
+      const inM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.018,8,6),mkMat(0xeaf2ff,0.26),TIN);
       // Soft halo around each topic-orb for subtle glow
-      const inMHalo=new THREE.InstancedMesh(new THREE.SphereGeometry(0.040,8,6),mkMat(0xb8c8ff,0.08),TIN);
+      const inMHalo=new THREE.InstancedMesh(new THREE.SphereGeometry(0.040,8,6),mkMat(0xb8c8ff,0.06),TIN);
       mainGrp.add(inM); mainGrp.add(inMHalo);
       { const dum=new THREE.Object3D();
         for (let si=0;si<SUBS.length;si++) { const sp=sciPos[si];
@@ -352,8 +352,8 @@ export default function GalaxyCanvas({ className }: Props) {
           phase: phaseInGroup * 0.6,         // phase for sin-pulsation
         };
       });
-      const impIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.045,8,6),mkMat(0xaaccff,0.55),IMP_N);
-      const impGlowIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.13,8,6),mkMat(0x3355aa,0.18),IMP_N);
+      const impIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.045,8,6),mkMat(0xaaccff,0.40),IMP_N);
+      const impGlowIM=new THREE.InstancedMesh(new THREE.SphereGeometry(0.13,8,6),mkMat(0x3355aa,0.13),IMP_N);
       mainGrp.add(impIM); mainGrp.add(impGlowIM);
       const impD=new THREE.Object3D();
 

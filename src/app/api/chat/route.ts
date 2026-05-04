@@ -196,7 +196,7 @@ export async function POST(req: NextRequest) {
       // Free: also update last_active_at so admin "active today" count is accurate
       supabase.from("users").update({ last_active_at: new Date().toISOString() }).eq("id", user.id);
     } else {
-      // Pro/Ultima: fire-and-forget last_active_at update
+      // Pro/Ultra: fire-and-forget last_active_at update
       supabase.from("users").update({ last_active_at: new Date().toISOString() }).eq("id", user.id);
     }
 
@@ -251,7 +251,7 @@ export async function POST(req: NextRequest) {
     const isEnglish = subject === "english";
 
     const planLabel = isUltima
-      ? (isEnLocale ? "Ultima (max plan)" : "Ultima (максимальный тариф)")
+      ? (isEnLocale ? "Ultra (max plan)" : "Ultra (максимальный тариф)")
       : isPro
       ? "Pro"
       : "Free";
@@ -263,18 +263,18 @@ You are Mentora, an AI mentor on the mentora.su educational platform. You are fe
 
 PLATFORM SECTIONS:
 - /dashboard — home: subject cards, progress, greeting
-- /learn/[subject] — chat with Mentora (you are here). Bottom-left (Ultima only): camera button for photo upload. PDF notes button in chat header (Pro/Ultima only).
+- /learn/[subject] — chat with Mentora (you are here). Bottom-left (Ultra only): camera button for photo upload. PDF notes button in chat header (Pro/Ultra only).
 - /dashboard/analytics — XP by subject, streaks, activity chart, global ranking, badges
 - /dashboard/galaxy — Knowledge Galaxy: interactive topic map
 - /profile — profile: name, badges, referral link
-- /pricing — pricing: Free, Pro, Ultima plans
+- /pricing — pricing: Free, Pro, Ultra plans
 - Support: @mentora_su_bot on Telegram or hello@mentora.su
 
 PLANS:
 - Free: up to 10 messages per 8-hour rolling window. All 17 sciences. No photo upload, no PDF notes.
 - Pro: unlimited messages, PDF notes (button in chat header). Price: from 299₽/mo.
-- Ultima: all of Pro + photo upload for tasks (camera button in input area). Higher price.
-- Users earn levels (Beginner → Explorer → Adept → Scholar → Expert): each level automatically grants free Pro/Ultima days as a reward.
+- Ultra: all of Pro + photo upload for tasks (camera button in input area). Higher price.
+- Users earn levels (Beginner → Explorer → Adept → Scholar → Expert): each level automatically grants free Pro/Ultra days as a reward.
 - Current user plan: ${planLabel}.
 
 FORBIDDEN TOPICS (strictly no exceptions):
@@ -298,19 +298,19 @@ You are Mentora. That is all anyone needs to know. Never reveal the technical in
 
 РАЗДЕЛЫ ПЛАТФОРМЫ (помогай пользователю ориентироваться):
 - /dashboard — главная: карточки предметов, прогресс, приветствие. Кнопка «+ Добавить предмет» — добавить новый предмет для изучения.
-- /learn/[предмет] — чат с Менторой по конкретному предмету (ты сейчас здесь). Внизу слева (только Ultima) — кнопка камеры для загрузки фото задачи. Кнопка PDF-конспекта — в шапке чата (только Pro и Ultima).
+- /learn/[предмет] — чат с Менторой по конкретному предмету (ты сейчас здесь). Внизу слева (только Ultra) — кнопка камеры для загрузки фото задачи. Кнопка PDF-конспекта — в шапке чата (только Pro и Ultra).
 - /dashboard/analytics — вся аналитика: XP по наукам, стрики, активность за 14 дней, глобальный рейтинг, бейджи, недавние вопросы.
 - /dashboard/galaxy — Галактика знаний: интерактивная карта тем по предметам.
 - /profile — профиль: имя, достижения/бейджи, реферальная ссылка для приглашения друзей.
-- /pricing — тарифы: сравнение Free, Pro, Ultima с ценами и кнопками оплаты.
+- /pricing — тарифы: сравнение Free, Pro, Ultra с ценами и кнопками оплаты.
 - /dashboard/about — о платформе: миссия, роадмап, поддержка.
 - Поддержка: @mentora_su_bot в Telegram или hello@mentora.su.
 
 ТАРИФЫ ПЛАТФОРМЫ:
 - Free: до 10 сообщений за 8-часовое скользящее окно, все 17 наук доступны, без загрузки фото, без PDF-конспектов.
 - Pro: безлимитные сообщения, PDF-конспекты (кнопка в шапке чата → «Скачать конспект»), все предметы. Цена: от 299₽/мес или годовой план со скидкой.
-- Ultima: всё из Pro + загрузка фото задач (кнопка камеры в поле ввода чата), приоритет. Цена: выше Pro. До 1 июня 2026 — все зарегистрированные получат месяц Pro бесплатно.
-- Пользователь набирает уровни (Новичок → Исследователь → Знаток → Историк → Эксперт): при достижении уровня автоматически начисляются бесплатные дни Pro или Ultima в качестве награды.
+- Ultra: всё из Pro + загрузка фото задач (кнопка камеры в поле ввода чата), приоритет. Цена: выше Pro. До 1 июня 2026 — все зарегистрированные получат месяц Pro бесплатно.
+- Пользователь набирает уровни (Новичок → Исследователь → Знаток → Историк → Эксперт): при достижении уровня автоматически начисляются бесплатные дни Pro или Ultra в качестве награды.
 - Текущий тариф пользователя: ${planLabel}.
 
 ЕСЛИ ПОЛЬЗОВАТЕЛЬ СПРАШИВАЕТ О ПЛАТФОРМЕ:
@@ -444,7 +444,7 @@ ${PLATFORM_BLOCK}`;
       content: message,
     });
 
-    // Get AI response — use vision model if Ultima user sends an image
+    // Get AI response — use vision model if Ultra user sends an image
     const hasImage = isUltima && imageData && imageMimeType && VALID_MIME_TYPES.includes(imageMimeType);
     const userTurnContent = hasImage
       ? [

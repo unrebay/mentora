@@ -622,7 +622,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             </div>
           )}
 
-          {/* Export PDF — Pro+ feature (Pro, Ultima, active trial) */}
+          {/* Export PDF — Pro+ feature (Pro, Ultra, active trial) */}
           {isPro && messages.filter(m => !m.isError).length >= 3 && (
             <button
               onClick={handleExportPdf} disabled={exportingPdf} title={tChat("exportTitle")}
@@ -906,7 +906,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             <form onSubmit={sendMessage} className="flex gap-2 items-end" style={{ pointerEvents:"all" }}>
               {isUltima && <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />}
 
-              {/* 1. Camera — standalone glass circle (Ultima only) */}
+              {/* 1. Camera — standalone glass circle (Ultra only) */}
               {isUltima && (
                 <button
                   type="button"

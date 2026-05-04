@@ -23,7 +23,7 @@ export function getEffectivePlan(user: PlanFields): PlanTier {
     ? new Date(user.trial_expires_at) > now
     : false;
 
-  // Level reward (temporary Pro or Ultima)
+  // Level reward (temporary Pro or Ultra)
   const rewardActive = user.reward_expires_at
     ? new Date(user.reward_expires_at) > now
     : false;

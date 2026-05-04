@@ -42,7 +42,7 @@ export async function POST() {
       return NextResponse.json({ error: "Not eligible" }, { status: 403 });
     }
 
-    // Ultima users: mark claimed but don't downgrade their plan
+    // Ultra users: mark claimed but don't downgrade their plan
     const updates: Record<string, unknown> = { gift_pro_claimed: true };
     if (profile.plan !== "ultima") {
       updates.plan = "pro";
