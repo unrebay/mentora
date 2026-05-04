@@ -39,13 +39,15 @@ interface DashboardNavProps {
   serialId?: number | null;
   displayName?: string | null;
   email?: string | null;
+  initialRank?: number | null;
+  initialTotal?: number | null;
   logoutAction: () => Promise<void>;
   /** "dark" — forces dark/galaxy styling regardless of user's theme */
   variant?: "default" | "dark";
 }
 
 export default function DashboardNav({
-  isPro, isUltima, totalXP, currentStreak, bestStreak, selectedAvatarLevel, serialId, displayName, email, logoutAction, variant = "default"
+  isPro, isUltima, totalXP, currentStreak, bestStreak, selectedAvatarLevel, serialId, displayName, email, initialRank, initialTotal, logoutAction, variant = "default"
 }: DashboardNavProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -199,7 +201,8 @@ export default function DashboardNav({
               serialId={serialId}
               displayName={displayName}
               email={email}
-              logoutAction={logoutAction}
+              initialRank={initialRank}
+              initialTotal={initialTotal}
             />
           </div>
           {totalXP > 0 && (

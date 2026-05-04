@@ -65,11 +65,20 @@
     --chat-code-btn-border:    rgba(255,255,255,0.08);
   }
 
+  html {
+    overflow-x: hidden;
+    /* iOS safe areas */
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     background-color: var(--bg);
     color: var(--text);
     @apply antialiased;
     transition: background-color 0.2s ease, color 0.2s ease;
+    /* Prevent horizontal stripe on mobile from any wide child */
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 
   /* Scrollbar */

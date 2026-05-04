@@ -194,12 +194,14 @@ export default async function ProfilePage() {
   if (!user) redirect("/auth");
 
   const [{ data: profile }, { data: progressData }, { count: msgCount },
-    { data: profileRow }
+    { data: profileRow },
+    { data: rankRow }
   ] = await Promise.all([
     supabase.from("users").select("plan, trial_expires_at, created_at, display_name, name_changes_count, full_name, age, phone, gift_pro_claimed, messages_today, messages_window_start").eq("id", user.id).single(),
     supabase.from("user_progress").select("xp_total, streak_days, best_streak").eq("user_id", user.id),
-    supabase.from("user_profiles").select("selected_avatar").eq("user_id", user.id).maybeSingle(),
+    supabase.from("user_profiles").select("selected_avatar, serial_id").eq("user_id", user.id).maybeSingle(),
     supabase.from("chat_messages").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("role", "user"),
+    supabase.rpc("get_user_global_rank", { p_user_id: user.id }).maybeSingle(),
   ]);
 
   const totalXP = progressData?.reduce((s, p) => s + (p.xp_total ?? 0), 0) ?? 0;
@@ -247,7 +249,20 @@ export default async function ProfilePage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
 
-      <DashboardNav isPro={isPro} isUltima={isUltima} totalXP={totalXP} currentStreak={currentStreak} bestStreak={bestStreak} logoutAction={handleLogout} />
+      <DashboardNav
+        isPro={isPro}
+        isUltima={isUltima}
+        totalXP={totalXP}
+        currentStreak={currentStreak}
+        bestStreak={bestStreak}
+        selectedAvatarLevel={(profileRow as { selected_avatar?: number | null } | null)?.selected_avatar ?? null}
+        serialId={(profileRow as { serial_id?: number | null } | null)?.serial_id ?? null}
+        displayName={profile?.full_name ?? profile?.display_name ?? null}
+        email={user.email ?? null}
+        initialRank={(rankRow as { rank?: number | string | null } | null)?.rank ? Number((rankRow as { rank: number | string }).rank) : null}
+        initialTotal={(rankRow as { total?: number | string | null } | null)?.total ? Number((rankRow as { total: number | string }).total) : null}
+        logoutAction={handleLogout}
+      />
 
       {/* Ambient BG */}
       <div className="fixed inset-0 -z-10 pointer-events-none"
