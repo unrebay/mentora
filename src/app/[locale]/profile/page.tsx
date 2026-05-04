@@ -8,6 +8,7 @@ import GiftProBanner from "@/components/GiftProBanner";
 import MeLogo from "@/components/MeLogo";
 import DashboardNav from "@/components/DashboardNav";
 import StatCard, { MentIcon, FlameIcon, MessageIcon, StarIcon } from "@/components/StatCard";
+import AvatarGrid from "@/components/AvatarGrid";
 import SupportCodeCopy from "@/components/SupportCodeCopy";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
 import FreeWindowPill from "@/components/FreeWindowPill";
@@ -191,9 +192,12 @@ export default async function ProfilePage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth");
 
-  const [{ data: profile }, { data: progressData }, { count: msgCount }] = await Promise.all([
+  const [{ data: profile }, { data: progressData }, { count: msgCount },
+    { data: profileRow }
+  ] = await Promise.all([
     supabase.from("users").select("plan, trial_expires_at, created_at, display_name, name_changes_count, full_name, age, phone, gift_pro_claimed, messages_today, messages_window_start").eq("id", user.id).single(),
     supabase.from("user_progress").select("xp_total, streak_days, best_streak").eq("user_id", user.id),
+    supabase.from("user_profiles").select("selected_avatar").eq("user_id", user.id).maybeSingle(),
     supabase.from("chat_messages").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("role", "user"),
   ]);
 
@@ -306,6 +310,9 @@ export default async function ProfilePage() {
           <StatCard label="Сообщений"     value={totalMessages} icon={<MessageIcon />} accent="#10B981" />
           <StatCard label="Достижений"    value={earned.length} icon={<StarIcon />}    accent="#f59e0b" />
         </div>
+
+        {/* ── Avatar grid ──────────────────────────────────── */}
+        <AvatarGrid totalXP={totalXP} initialSelected={(profileRow as { selected_avatar?: number | null } | null)?.selected_avatar ?? null} />
 
         {/* ── XP Progress bar ──────────────────────────────── */}
         <div className="rounded-2xl p-6 border"
