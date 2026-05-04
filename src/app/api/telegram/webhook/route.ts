@@ -21,14 +21,47 @@ async function sendMessage(
   text: string,
   extra: Record<string, unknown> = {},
 ) {
-  if (!BOT_TOKEN) return;
-  // Telegram HTML: strip unsupported tags
-  const safe = text.replace(/<(?!\/?(b|i|u|s|code|pre|a\s))[^>]+>/gi, "");
-  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text: safe, parse_mode: "HTML", ...extra }),
-  });
+  if (!BOT_TOKEN) {
+    console.error("[telegram] sendMessage skipped — BOT_TOKEN missing");
+    return;
+  }
+  if (!text || !text.trim()) {
+    console.warn("[telegram] sendMessage skipped — empty text for chat", chatId);
+    return;
+  }
+  // Telegram HTML mode rejects unescaped < > & inside text body.
+  // Strategy: escape stray < not part of allowed tags
+  let safe = text.replace(/<(?!\/?(b|i|u|s|code|pre|a(\s|>))[^>]*>)/gi, "&lt;");
+  if (safe.length > 4000) safe = safe.slice(0, 4000) + "…";
+
+  const sendBody = (body: Record<string, unknown>) =>
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+  try {
+    const r = await sendBody({ chat_id: chatId, text: safe, parse_mode: "HTML", ...extra });
+    const data = await r.json();
+    if (!data.ok) {
+      console.error("[telegram] HTML send failed for chat", chatId, "—", data.description, "— retry plain");
+      const plain = text.replace(/<[^>]+>/g, "").trim();
+      if (plain) {
+        const r2 = await sendBody({ chat_id: chatId, text: plain.slice(0, 4000), ...extra });
+        const data2 = await r2.json();
+        if (!data2.ok) {
+          console.error("[telegram] plain-text retry also failed:", data2.description);
+        } else {
+          console.log("[telegram] plain-text fallback OK to", chatId);
+        }
+      }
+    } else {
+      console.log("[telegram] sent OK to", chatId, `(${safe.length} chars)`);
+    }
+  } catch (err) {
+    console.error("[telegram] sendMessage network error to", chatId, ":", err);
+  }
 }
 
 async function sendTyping(chatId: string | number) {
