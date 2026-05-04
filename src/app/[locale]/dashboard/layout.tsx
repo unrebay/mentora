@@ -19,9 +19,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth");
 
-  const [{ data: profile }, { data: progressData }] = await Promise.all([
+  const [{ data: profile }, { data: progressData },
+    { data: profileRow }
+  ] = await Promise.all([
     supabase.from("users").select("plan, trial_expires_at").eq("id", user.id).single(),
     supabase.from("user_progress").select("xp_total, streak_days, best_streak").eq("user_id", user.id),
+    supabase.from("user_profiles").select("selected_avatar").eq("user_id", user.id).maybeSingle(),
   ]);
 
   const isTrialActive = profile?.trial_expires_at ? new Date(profile.trial_expires_at) > new Date() : false;
@@ -51,6 +54,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         totalXP={totalXP}
         currentStreak={currentStreak}
         bestStreak={bestStreak}
+        selectedAvatarLevel={(profileRow as { selected_avatar?: number | null } | null)?.selected_avatar ?? null}
         logoutAction={handleLogout}
         variant={navVariant}
       />

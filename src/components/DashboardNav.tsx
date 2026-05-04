@@ -1,4 +1,5 @@
 "use client";
+import LevelAvatar, { unlockedLevel } from "@/components/LevelAvatar";
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { usePathname, Link } from "@/i18n/navigation";
@@ -33,13 +34,14 @@ interface DashboardNavProps {
   totalXP: number;
   currentStreak: number;
   bestStreak: number;
+  selectedAvatarLevel?: number | null;
   logoutAction: () => Promise<void>;
   /** "dark" — forces dark/galaxy styling regardless of user's theme */
   variant?: "default" | "dark";
 }
 
 export default function DashboardNav({
-  isPro, isUltima, totalXP, currentStreak, bestStreak, logoutAction, variant = "default"
+  isPro, isUltima, totalXP, currentStreak, bestStreak, selectedAvatarLevel, logoutAction, variant = "default"
 }: DashboardNavProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -183,6 +185,17 @@ export default function DashboardNav({
           <ThemeToggle forceDark={dk} />
           <LanguageSwitcher dark={dk} />
 
+          {/* Avatar — clickable, goes to /profile */}
+          <Link href="/profile" aria-label="Профиль" className="hidden md:flex items-center" style={{ marginRight: 6 }}>
+            <span style={{
+              width: 32, height: 32, borderRadius: "50%",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              border: "1px solid var(--border)", overflow: "hidden",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+            }}>
+              <LevelAvatar level={selectedAvatarLevel ?? unlockedLevel(totalXP)} size={32} />
+            </span>
+          </Link>
           {totalXP > 0 && (
             <div className="hidden sm:flex items-center gap-1.5" data-tour="nav-stats">
               {/* XP pill */}
