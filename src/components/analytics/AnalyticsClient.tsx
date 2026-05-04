@@ -202,7 +202,7 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                   ) : null}
                 </div>
-                <div className="absolute top-full mt-2 text-center" style={{ width: 64, marginLeft: -23 }}>
+                <div className="absolute top-full mt-2 text-center" style={{ width: 56, marginLeft: -19 }}>
                   <div className="text-[9px] font-bold leading-tight" style={{
                     color: current ? "var(--text)" : passed ? "var(--text-muted)" : "var(--text-muted)",
                     opacity: current ? 1 : passed ? 0.85 : 0.55,
@@ -479,7 +479,7 @@ function BadgeGrid({ badges }: { badges: BadgeItem[] }) {
                   {t(`groups.${grp}` as never)}
                 </span>
               </div>
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                 {items.map(b => (
                   <div key={b.id} title={`${b.name} — ${b.desc}`}
                     className="rounded-xl p-2.5 border flex flex-col items-center gap-1.5 transition-all relative overflow-hidden"

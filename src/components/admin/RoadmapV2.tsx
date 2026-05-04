@@ -533,7 +533,7 @@ export default function RoadmapV2Tab() {
       </div>
 
       {/* 4-bucket grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {(Object.keys(BUCKET_META) as Bucket[]).map(b => (
           <BucketColumn key={b} bucket={b} tasks={filtered}
             onAdd={() => setAddingFor(b)} onUpdate={update} onDelete={remove} />
