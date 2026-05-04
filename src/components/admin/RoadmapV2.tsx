@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 export type Bucket = "now" | "soon" | "ideas" | "notes";
@@ -895,20 +895,51 @@ export default function RoadmapV2Tab() {
     return () => { cancelled = true; };
   }, []);
 
-  // Debounced auto-save to server on every state change
-  useEffect(() => {
-    if (tasks.length === 0) return;
-    const timer = setTimeout(() => {
+  // Auto-save with 30s debounce + immediate flush on tab close / visibility change
+  // (so heavy typing doesn't trigger constant network calls, but no data is lost)
+  const tasksRef = useRef(tasks);
+  useEffect(() => { tasksRef.current = tasks; }, [tasks]);
+
+  const flushSave = useCallback((reason: string) => {
+    const current = tasksRef.current;
+    if (!current || current.length === 0) return;
+    try {
+      const blob = new Blob([JSON.stringify({ state: current, action: reason })], { type: "application/json" });
+      // Use sendBeacon for unload events (more reliable than fetch+keepalive)
+      if (reason === "beforeunload" && navigator.sendBeacon) {
+        navigator.sendBeacon("/api/admin/roadmap-state", blob);
+        return;
+      }
       fetch("/api/admin/roadmap-state", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ state: tasks, action: "auto-save" }),
+        body: JSON.stringify({ state: current, action: reason }),
         keepalive: true,
-      }).catch(err => console.warn("[Roadmap] auto-save failed:", err));
-    }, 1500);  // debounce 1.5s after last change
+      }).catch(err => console.warn("[Roadmap] save failed:", err));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (tasks.length === 0) return;
+    // 30s debounce — tab idle for half a minute → save
+    const timer = setTimeout(() => flushSave("auto-save"), 30000);
     return () => clearTimeout(timer);
-  }, [tasks]);
+  }, [tasks, flushSave]);
+
+  // Immediate flush on tab close / visibility change / page unload
+  useEffect(() => {
+    const onBeforeUnload = () => flushSave("beforeunload");
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") flushSave("visibility-hidden");
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [flushSave]);
 
   const persist = (next: RoadmapTaskV2[], action: string = "save") => {
     setTasks(next);
