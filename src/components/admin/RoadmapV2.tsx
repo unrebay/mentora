@@ -19,7 +19,7 @@ export interface RoadmapTaskV2 {
   createdAt: string;     // ISO
 }
 
-const STORAGE_KEY = "mentora_admin_roadmap_v5";
+const STORAGE_KEY = "mentora_admin_roadmap_v6";
 const LAUNCH_DATE = "2026-06-01";
 
 // ── Category & state metadata ────────────────────────────────────────────────
@@ -78,6 +78,25 @@ const SEED: RoadmapTaskV2[] = [
     createdAt: new Date().toISOString() },
 
   // ═══ Сейчас (этот спринт, не milestone) ═══
+  { id: "now_desktop_pass",  title: "Десктоп-проход: дизайн всех публичных страниц",
+    bucket: "now", category: "design",     state: "in_progress",
+    notes: "Сегодня закончим. Затем мобильная версия",
+    createdAt: new Date().toISOString() },
+  { id: "now_mobile_pass",   title: "Мобильный проход всех страниц (375/414/768px)",
+    bucket: "soon", category: "design",    state: "planned",
+    notes: "После десктопа. Особое внимание /dashboard, /pricing, /chat",
+    createdAt: new Date().toISOString() },
+  { id: "now_nonce_csp",     title: "Nonce-CSP для script-src → A+ rating",
+    bucket: "now", category: "tech",       state: "planned",
+    notes: "Next.js 14 поддерживает из коробки. ~полдня. Style-src оставим с unsafe-inline",
+    createdAt: new Date().toISOString() },
+  { id: "now_avatars_done",  title: "Космические аватарки за менты + UserDropdown",
+    bucket: "now", category: "product",    state: "done",
+    notes: "8 уровней (Луна → Кубок), миграция БД, /profile сетка, dropdown в навбаре",
+    createdAt: new Date().toISOString() },
+  { id: "now_galaxy_polish", title: "Лендинг hero: галактика по центру + auth-like тинт",
+    bucket: "now", category: "design",     state: "done",
+    createdAt: new Date().toISOString() },
   { id: "now_sources_list", title: "Собрать список 5+ источников на каждую из 17 наук",
     bucket: "now", category: "content",   state: "planned",
     notes: "Литература → lib.ru/Imwerden; Биология → элементы.ру; Психология → PsyJournals; Философия → Stanford Encyclopedia; История → arzamas.academy",
