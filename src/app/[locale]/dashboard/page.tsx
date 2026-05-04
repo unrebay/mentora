@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { SUBJECTS } from "@/lib/types";
 import Link from "next/link";
 import { PostHogIdentify } from "@/components/PostHogIdentify";
+import PaymentSuccessTracker from "@/components/PaymentSuccessTracker";
+import { Suspense } from "react";
 import { ProActivationBanner, ProExpiryBanner } from "@/components/ProBanners";
 import SubjectLibrarySection from "@/components/SubjectLibrarySection";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
@@ -200,6 +202,7 @@ export default async function DashboardPage() {
 
       <StreakRewardCelebration />
       <PostHogIdentify userId={user.id} email={user.email ?? ""} />
+      <Suspense fallback={null}><PaymentSuccessTracker /></Suspense>
       <div className="max-w-5xl mx-auto px-6 py-10">
 
         {/* ── Pro activation banner (payment=success in URL) ────────── */}
