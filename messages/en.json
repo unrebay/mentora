@@ -750,7 +750,8 @@
       "next": "Next",
       "toNextXP": "{n} XP to go",
       "max": "Max level",
-      "career": "Level"
+      "career": "Level",
+      "toNextLabel": "Next level"
     },
     "activity": {
       "title": "Activity · 14 days",

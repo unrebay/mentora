@@ -89,14 +89,16 @@ function StatCard({ label, value, color, icon, iconNode, sparkData, deltaPct }: 
   sparkData?: number[]; deltaPct?: number | null;
 }) {
   return (
-    <div className="rounded-2xl p-4 border flex flex-col gap-2 relative overflow-hidden group transition-all"
+    <div className="rounded-2xl p-4 border flex flex-col gap-2 relative overflow-hidden group transition-all hover:-translate-y-0.5"
       style={{
-        background: `linear-gradient(160deg, ${color}10, ${color}04 60%, transparent), var(--bg-card)`,
-        borderColor: `${color}28`,
+        background: `linear-gradient(160deg, ${color}14, ${color}05 60%, transparent), var(--bg-card)`,
+        borderColor: `${color}30`,
         backdropFilter: "blur(16px) saturate(1.4)",
         WebkitBackdropFilter: "blur(16px) saturate(1.4)",
-        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px ${color}14, 0 4px 20px rgba(0,0,0,0.04)`,
+        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), inset 0 0 0 1px ${color}18, 0 8px 28px rgba(0,0,0,0.05)`,
       }}>
+      {/* Color stripe accent on top */}
+      <div className="absolute inset-x-0 top-0 h-[3px]" style={{ background: `linear-gradient(90deg, transparent, ${color}, transparent)`, opacity: 0.7 }} />
       {/* Spotlight in top-right */}
       <div className="absolute pointer-events-none transition-opacity duration-500" aria-hidden
         style={{ top: -30, right: -30, width: 120, height: 120, opacity: 0.5,
@@ -220,8 +222,40 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
         </div>
       </div>
       {next && (
-        <div className="mt-2 text-center text-xs" style={{ color: "var(--text-muted)" }}>
-          {t("level.toNextXP", { n: next.minXP - totalXP })} → {next.name}
+        <div className="mt-3 rounded-xl p-3 flex items-center gap-3 relative overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg, rgba(124,58,237,0.10), rgba(69,97,232,0.04) 60%, transparent)",
+            border: "1px solid rgba(124,58,237,0.20)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+          }}>
+          <div className="flex-1 min-w-0">
+            <div className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
+              {t("level.toNextLabel")}
+            </div>
+            <div className="flex items-baseline gap-1.5 mt-1">
+              <span className="font-black text-xl" style={{
+                background: "linear-gradient(135deg, #6B8FFF, #9F7AFF)",
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+              }}>
+                {(next.minXP - totalXP).toLocaleString()}
+              </span>
+              <MeLogo height={11} colorM="#9F7AFF" colorE="#9F7AFF" />
+              <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>→ {next.name}</span>
+            </div>
+            {/* Mini progress bar */}
+            <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+              <div className="h-full rounded-full transition-all duration-700" style={{
+                width: `${segProgress}%`,
+                background: "linear-gradient(90deg, #4561E8, #7C3AED, #9F7AFF)",
+                boxShadow: "0 0 8px rgba(124,58,237,0.6)",
+              }} />
+            </div>
+          </div>
+          <div className="text-right flex-shrink-0">
+            <div className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
+              {Math.round(segProgress)}%
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -329,6 +363,18 @@ function ActivityAreaChart({ days }: { days: ActivityDay[] }) {
           <path d={fillPath} fill="url(#actfill)" />
           {/* Line */}
           <polyline points={points} fill="none" stroke="url(#actstroke)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          {/* Peak marker */}
+          {(() => {
+            const peakIdx = days.reduce((mi, d, i, a) => d.count > a[mi].count ? i : mi, 0);
+            if (days[peakIdx].count === 0) return null;
+            const cx = PAD + peakIdx * stepX, cy = yFor(days[peakIdx].count);
+            return (
+              <g>
+                <circle cx={cx} cy={cy} r="6" fill="rgba(255,122,0,0.18)" />
+                <circle cx={cx} cy={cy} r="3.5" fill="#FF7A00" stroke="#fff" strokeWidth="1.5" />
+              </g>
+            );
+          })()}
           {/* Points */}
           {days.map((d, i) => (
             <g key={d.date}>
@@ -536,17 +582,38 @@ function BestStreakCallout({ best }: { best: number }) {
   if (best < 3) return null;
   const label = best >= 30 ? t("legendary") : best >= 14 ? t("impressive") : best >= 7 ? t("good") : t("toWeek", { n: 7 - best });
   return (
-    <div className="rounded-2xl p-4 border flex items-center gap-4"
-      style={{ background: "rgba(255,122,0,0.06)", borderColor: "rgba(255,122,0,0.2)" }}>
-      <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: "rgba(255,122,0,0.12)", border: "1px solid rgba(255,122,0,0.25)" }}>
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="#FF7A00">
+    <div className="rounded-2xl p-5 border flex items-center gap-4 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, rgba(255,122,0,0.14), rgba(255,160,0,0.06) 50%, rgba(0,0,0,0.02) 100%)",
+        borderColor: "rgba(255,122,0,0.32)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 24px rgba(255,122,0,0.10)",
+      }}>
+      {/* Ember radial spotlights */}
+      <div className="absolute pointer-events-none" aria-hidden style={{
+        top: -40, left: -30, width: 180, height: 180, opacity: 0.45,
+        background: "radial-gradient(circle, rgba(255,160,40,0.55), transparent 60%)", filter: "blur(12px)",
+      }} />
+      <div className="absolute pointer-events-none" aria-hidden style={{
+        bottom: -50, right: -20, width: 200, height: 200, opacity: 0.35,
+        background: "radial-gradient(circle, rgba(255,90,0,0.6), transparent 65%)", filter: "blur(14px)",
+      }} />
+      {/* Big animated flame icon */}
+      <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 relative"
+        style={{
+          background: "radial-gradient(circle at 30% 30%, rgba(255,200,80,0.55), rgba(255,90,0,0.30) 70%)",
+          border: "1px solid rgba(255,160,0,0.45)",
+          boxShadow: "0 0 24px rgba(255,122,0,0.45), inset 0 1px 0 rgba(255,255,255,0.30)",
+        }}>
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="#FF7A00" style={{ filter: "drop-shadow(0 0 6px rgba(255,160,0,0.7))" }}>
           <path d="M13 2C13 2 8.5 7 8.5 11.5c0 1.5.5 2.8 1.3 3.8C9.3 14.5 9 13.5 9 12.5c0-2 1.5-4 3-5 0 1.5.5 3 1.5 4 .5-1 .5-2 .5-3 1 1.5 1.5 3 1.5 4.5 0 2.5-2 4.5-4.5 4.5S6.5 15.5 6.5 13C6.5 7.5 13 2 13 2z" />
         </svg>
       </div>
-      <div>
-        <div className="text-sm font-bold" style={{ color: "#FF7A00" }}>{t("title", { n: best })}</div>
-        <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{label}</div>
+      <div className="relative">
+        <div className="font-black text-xl leading-tight" style={{
+          background: "linear-gradient(135deg, #FFB347, #FF7A00, #E63900)",
+          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+        }}>{t("title", { n: best })}</div>
+        <div className="text-xs mt-1 font-medium" style={{ color: "var(--text-muted)" }}>{label}</div>
       </div>
     </div>
   );
@@ -626,9 +693,31 @@ export default function AnalyticsClient(p: Props) {
   return (
     <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-20 space-y-5">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold" style={{ color: "var(--text)" }}>{t("title")}</h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>{t("subtitle")}</p>
+      <div className="relative">
+        <div className="flex items-center gap-3 flex-wrap">
+          <h1 className="text-2xl sm:text-[28px] font-black tracking-tight" style={{
+            background: "linear-gradient(135deg, var(--text), var(--text-secondary))",
+            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+          }}>{t("title")}</h1>
+          {p.totalXP > 0 && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold"
+              style={{
+                background: "linear-gradient(135deg, rgba(124,58,237,0.18), rgba(69,97,232,0.10))",
+                border: "1px solid rgba(124,58,237,0.30)",
+                color: "#9F7AFF",
+                boxShadow: "0 4px 12px rgba(124,58,237,0.15), inset 0 1px 0 rgba(255,255,255,0.08)",
+              }}>
+              <span style={{ fontSize: 13 }}>{p.totalXP.toLocaleString()}</span>
+              <MeLogo height={11} colorM="#9F7AFF" colorE="#9F7AFF" />
+            </span>
+          )}
+        </div>
+        <p className="text-sm mt-1.5" style={{ color: "var(--text-muted)" }}>{t("subtitle")}</p>
+        {/* Decorative bottom accent */}
+        <div className="mt-3 h-[2px] w-24 rounded-full" style={{
+          background: "linear-gradient(90deg, #4561E8, #7C3AED, transparent)",
+          boxShadow: "0 0 8px rgba(124,58,237,0.5)",
+        }} />
       </div>
 
       {/* Hero: career ladder + global rank */}
