@@ -145,6 +145,44 @@ async function handleUpdate(update: Record<string, unknown>) {
     ? `@${(message.from as Record<string, unknown>).username}`
     : "без username";
 
+  // ── Native admin reply: admin uses Telegram's "Reply" feature on a notification ──
+  // The notification message we send to admin contains "TG: <code>123</code>"
+  // When admin swipes/replies to that notification, message.reply_to_message
+  // is the original notification. Parse user TG id from there and forward.
+  if (
+    ADMIN_CHAT_ID &&
+    String(chatId) === String(ADMIN_CHAT_ID) &&
+    text &&
+    !text.startsWith("/")
+  ) {
+    const replyTo = message.reply_to_message as Record<string, unknown> | undefined;
+    if (replyTo && typeof replyTo.text === "string") {
+      // Match patterns: "TG: <code>123456</code>" or "TG: 123456"
+      const m = replyTo.text.match(/TG:\s*(?:<code>)?(\d+)/i);
+      if (m && m[1]) {
+        const targetId = m[1];
+        try {
+          await sendMessage(targetId, `💬 <b>Ответ от команды Mentora:</b>\n\n${text}`);
+          await sendMessage(ADMIN_CHAT_ID, `✅ Ответ отправлен пользователю <code>${targetId}</code>`, { reply_to_message_id: message.message_id });
+          // Audit
+          try {
+            const { createAdminSupabase } = await import("@/lib/admin");
+            const sb = createAdminSupabase();
+            await sb.from("admin_audit_log").insert({
+              admin_email: "unrebay@gmail.com",
+              action: "telegram.reply",
+              target: `tg:${targetId}`,
+              metadata: { length: text.length, preview: text.slice(0, 80), via: "reply_to_message" },
+            });
+          } catch {}
+        } catch (err) {
+          await sendMessage(ADMIN_CHAT_ID, `❌ Не удалось отправить: ${String(err)}`);
+        }
+        return;
+      }
+    }
+  }
+
   // ── Successful payment ────────────────────────────────────────────────
   const payment = message.successful_payment as Record<string, unknown> | undefined;
   if (payment) {

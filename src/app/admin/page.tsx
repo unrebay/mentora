@@ -1149,7 +1149,7 @@ export default function AdminPanel() {
 
           {/* Brand block — Logo + 'Центр Управления' editorial label */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-<Logo size="sm" href="" />
+<Logo size="sm" href="/dashboard" />
           </div>
 
           {/* Tabs (desktop) — horizontal scroll if overflow */}
@@ -1167,19 +1167,7 @@ export default function AdminPanel() {
           {/* Right actions */}
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, marginLeft: isMobile ? "auto" : 0 }}>
             <ThemeToggle />
-            <Link href="/dashboard" title="На сайт"
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 6,
-                padding: "8px 12px", borderRadius: 10,
-                color: MUTED, fontSize: 12, fontWeight: 600, textDecoration: "none",
-                background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
-                border: `1px solid ${BOR}`,
-                whiteSpace: "nowrap",
-              }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="13" height="13"><polyline points="15 18 9 12 15 6"/></svg>
-              {!isMobile && <span>На сайт</span>}
-            </Link>
-            {/* Mobile burger to open tabs menu */}
+{/* Mobile burger to open tabs menu */}
             {isMobile && (
               <button onClick={() => setMobileNavOpen(true)}
                 aria-label="Открыть меню"
