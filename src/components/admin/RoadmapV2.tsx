@@ -858,7 +858,57 @@ export default function RoadmapV2Tab() {
   const [addingFor, setAddingFor] = useState<Bucket | null>(null);
   const [filterCat, setFilterCat] = useState<Category | null>(null);
 
-  useEffect(() => { setTasks(loadTasks()); }, []);
+  useEffect(() => {
+    // Hybrid load:
+    // 1) Try server first (Supabase admin_roadmap_state) — authoritative across browsers/devices
+    // 2) Fall back to local merge if server is empty or offline
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetch("/api/admin/roadmap-state", { credentials: "same-origin" });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const d = await r.json();
+        if (cancelled) return;
+        if (d.ok && Array.isArray(d.state) && d.state.length > 0) {
+          // Server wins. Mirror to localStorage as offline backup.
+          setTasks(d.state);
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d.state)); } catch {}
+          console.log(`[Roadmap] Loaded ${d.state.length} tasks from server (saved ${d.updatedAt})`);
+          return;
+        }
+      } catch (err) {
+        console.warn("[Roadmap] Server load failed, falling back to local:", err);
+      }
+      // Local fallback
+      const local = loadTasks();
+      setTasks(local);
+      // Push local state to server so first-deploy on a new browser captures it
+      if (local.length > 0) {
+        fetch("/api/admin/roadmap-state", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ state: local, action: "initial-sync" }),
+        }).catch(() => {});
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Debounced auto-save to server on every state change
+  useEffect(() => {
+    if (tasks.length === 0) return;
+    const timer = setTimeout(() => {
+      fetch("/api/admin/roadmap-state", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ state: tasks, action: "auto-save" }),
+        keepalive: true,
+      }).catch(err => console.warn("[Roadmap] auto-save failed:", err));
+    }, 1500);  // debounce 1.5s after last change
+    return () => clearTimeout(timer);
+  }, [tasks]);
 
   const persist = (next: RoadmapTaskV2[], action: string = "save") => {
     setTasks(next);
