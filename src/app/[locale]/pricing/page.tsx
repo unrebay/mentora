@@ -175,7 +175,7 @@ export default async function PricingPage() {
             <div className="mb-6">
               <p className="text-[11px] font-bold tracking-[0.15em] uppercase mb-4" style={{ color: "rgba(255,255,255,0.4)" }}>{t("pricing.free.name")}</p>
               <div className="flex items-end gap-1.5">
-                <span className="text-5xl font-bold tracking-tight text-white">{t("pricing.free.price")}</span>
+                <span className="text-4xl sm:text-5xl font-bold tracking-tight text-white">{t("pricing.free.price")}</span>
               </div>
               <p className="text-sm mt-2" style={{ color: "rgba(255,255,255,0.4)" }}>{t("pricing.freeDesc")}</p>
             </div>
@@ -217,7 +217,7 @@ export default async function PricingPage() {
                   {t("pricing.pro.name")}
                 </p>
                 <div className="flex items-end gap-1.5">
-                  <span className="text-5xl font-bold tracking-tight text-white">{t("pricing.pro.price")}</span>
+                  <span className="text-4xl sm:text-5xl font-bold tracking-tight text-white">{t("pricing.pro.price")}</span>
                   <span className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>{t("pricing.pro.period")}</span>
                 </div>
                 {locale === "ru" && (
@@ -278,7 +278,7 @@ export default async function PricingPage() {
                   {t("pricing.ultra.name")}
                 </p>
                 <div className="flex items-end gap-1.5">
-                  <span className="text-5xl font-bold tracking-tight text-white">{t("pricing.ultra.price")}</span>
+                  <span className="text-4xl sm:text-5xl font-bold tracking-tight text-white">{t("pricing.ultra.price")}</span>
                   <span className="text-gray-400 text-sm mb-2">{t("pricing.ultra.period")}</span>
                 </div>
                 {locale === "ru" && (
@@ -339,7 +339,10 @@ export default async function PricingPage() {
 
         {/* COMPARISON TABLE — Russian only */}
         {locale === "ru" && (
-          <div className="mt-8 overflow-x-auto">
+          <div className="mt-8 overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0" style={{
+            scrollbarWidth: "thin",
+            WebkitOverflowScrolling: "touch",
+          }}>
             <div className="rounded-2xl overflow-hidden" style={{
               border: "1px solid rgba(255,255,255,0.08)",
               background: "rgba(255,255,255,0.03)",

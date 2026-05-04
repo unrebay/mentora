@@ -585,7 +585,7 @@ export default async function HomePage() {
                 <div className="mb-6">
                   <p className="text-[11px] font-bold t-muted tracking-[0.15em] uppercase mb-4">{t("pricing.free.name")}</p>
                   <div className="flex items-end gap-1.5">
-                    <span className="text-5xl font-bold tracking-tight t-primary">{t("pricing.free.price")}</span>
+                    <span className="text-4xl sm:text-5xl font-bold tracking-tight t-primary">{t("pricing.free.price")}</span>
                   </div>
                   <p className="text-sm t-muted mt-2">{t("pricing.freeDesc")}</p>
                 </div>
@@ -615,7 +615,7 @@ export default async function HomePage() {
                   <div className="mb-6">
                     <p className="text-[11px] font-bold tracking-[0.15em] uppercase mb-4" style={{ color: "var(--brand)" }}>{t("pricing.pro.name")}</p>
                     <div className="flex items-end gap-1.5">
-                      <span className="text-5xl font-bold tracking-tight t-primary">{t("pricing.pro.price")}</span>
+                      <span className="text-4xl sm:text-5xl font-bold tracking-tight t-primary">{t("pricing.pro.price")}</span>
                       <span className="t-muted text-sm mb-2">{t("pricing.pro.period")}</span>
                     </div>
                     {locale === "ru" && (
@@ -660,7 +660,7 @@ export default async function HomePage() {
                       {t("pricing.ultra.name")}
                     </p>
                     <div className="flex items-end gap-1.5">
-                      <span className="text-5xl font-bold tracking-tight text-white">{t("pricing.ultra.price")}</span>
+                      <span className="text-4xl sm:text-5xl font-bold tracking-tight text-white">{t("pricing.ultra.price")}</span>
                       <span className="text-gray-400 text-sm mb-2">{t("pricing.ultra.period")}</span>
                     </div>
                     {locale === "ru" && (
