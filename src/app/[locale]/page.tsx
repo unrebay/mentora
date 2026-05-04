@@ -151,22 +151,21 @@ export default async function HomePage() {
         {/* Galaxy — spans the entire dark section, reacts to cursor */}
         <GalaxyCanvas className="absolute inset-0 w-full h-full z-0" />
 
-      {/* HERO — padding-top compensates for the negative margin (100px covers nav on all devices) */}
-      <section className="relative overflow-hidden" style={{ paddingTop: "100px" }}>
-
-        {/* ── Tint layer between galaxy and content — like /auth overlay ── */}
-        {/* Desktop: stronger left side (around hero text), softer right (chat box still glows) */}
+        {/* ── Tint layer covers the WHOLE dark-block (hero + stats + features) ── */}
         <div className="absolute inset-0 pointer-events-none hidden md:block z-[1]" style={{
-          background: "linear-gradient(to right, rgba(4,6,15,0.55) 0%, rgba(4,6,15,0.42) 40%, rgba(4,6,15,0.20) 70%, rgba(4,6,15,0.10) 100%)",
+          background: "linear-gradient(to right, rgba(4,6,15,0.55) 0%, rgba(4,6,15,0.42) 40%, rgba(4,6,15,0.22) 70%, rgba(4,6,15,0.12) 100%)",
         }} />
-        {/* Vertical fade — top + bottom slightly darker so hero text feels grounded */}
         <div className="absolute inset-0 pointer-events-none hidden md:block z-[1]" style={{
-          background: "radial-gradient(ellipse 90% 70% at 50% 50%, transparent 30%, rgba(4,6,15,0.30) 75%, rgba(4,6,15,0.55) 100%)",
+          background: "radial-gradient(ellipse 90% 70% at 50% 25%, transparent 35%, rgba(4,6,15,0.32) 80%, rgba(4,6,15,0.50) 100%)",
         }} />
-        {/* Mobile: uniform tint (heavy because text is over busy area) */}
         <div className="absolute inset-0 pointer-events-none md:hidden z-[1]" style={{
           background: "rgba(4,6,15,0.55)",
         }} />
+
+      {/* HERO — padding-top compensates for the negative margin (100px covers nav on all devices) */}
+      <section className="relative overflow-hidden" style={{ paddingTop: "100px" }}>
+
+
 
         {/* ── Hero grid — fills full viewport height ── */}
         <div className="relative z-10 max-w-6xl mx-auto px-6 w-full" style={{ minHeight: "calc(100vh - 100px)", display: "flex", alignItems: "center" }}>

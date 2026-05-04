@@ -9,7 +9,7 @@ import MeLogo from "@/components/MeLogo";
 import DashboardNav from "@/components/DashboardNav";
 import StatCard, { MentIcon, FlameIcon, MessageIcon, StarIcon } from "@/components/StatCard";
 import AvatarGrid from "@/components/AvatarGrid";
-import LevelAvatar from "@/components/LevelAvatar";
+import LevelAvatar, { unlockedLevel as unlockedLevelFn } from "@/components/LevelAvatar";
 import SupportCodeCopy from "@/components/SupportCodeCopy";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
 import FreeWindowPill from "@/components/FreeWindowPill";
@@ -231,7 +231,6 @@ export default async function ProfilePage() {
   const lvl = getLevel(totalXP);
   const changesLeft = Math.max(0, 2 - (profile?.name_changes_count ?? 0));
   const name = profile?.full_name ?? profile?.display_name ?? user.email?.split("@")[0] ?? "Пользователь";
-  const initial = name[0].toUpperCase();
 
   const earned = BADGES.filter(b => b.check(stats));
   const locked = BADGES.filter(b => !b.check(stats));
@@ -263,13 +262,16 @@ export default async function ProfilePage() {
         <div className="rounded-2xl p-6 border flex flex-col sm:flex-row items-start sm:items-center gap-5"
           style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
         >
-          {/* Avatar */}
+          {/* Avatar — current LevelAvatar (planet/trophy) */}
           <div className="relative shrink-0">
-            <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold text-white"
-              style={{ background: isUltima ? "linear-gradient(135deg, #4561E8, #7C3AED)" : isPro ? "linear-gradient(135deg, #4561E8, #6B8FFF)" : `linear-gradient(135deg, ${lvl.grad[0]}, ${lvl.grad[1]})`, boxShadow: isUltima ? "0 4px 20px rgba(69,97,232,0.4)" : isPro ? "0 4px 20px rgba(69,97,232,0.35)" : `0 4px 20px ${lvl.color}40` }}>
-              {initial}
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center"
+              style={{
+                background: "var(--bg-secondary)",
+                border: "1px solid var(--border)",
+                boxShadow: `0 4px 18px ${lvl.color}30, inset 0 1px 0 rgba(255,255,255,0.04)`,
+              }}>
+              <LevelAvatar level={(profileRow as { selected_avatar?: number | null } | null)?.selected_avatar ?? unlockedLevelFn(totalXP)} size={72} />
             </div>
-
           </div>
 
           {/* Info */}

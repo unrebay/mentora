@@ -814,7 +814,7 @@
         "desc": "5000 ments — research grade"
       },
       "academic": {
-        "name": "Academician",
+        "name": "Scientist",
         "desc": "10000 ments — peak of knowledge"
       }
     },
@@ -926,7 +926,7 @@
         "expert": "Expert",
         "master": "Master",
         "doctor": "Doctor",
-        "academic": "Academician"
+        "academic": "Scientist"
       }
     }
   },
@@ -1322,7 +1322,7 @@
     "supportTag": "Support the platform",
     "supportTitle": "Mentora grows without VC or ads",
     "supportSubtitle": "The project is sustained by user subscriptions and partner support",
-    "donateTitle": "Donate",
+    "donateTitle": "Support with money",
     "donateBody": "From Russia — Boosty or Telegram Stars, from other countries — Ko-fi (card/PayPal).",
     "boostyBtn": "Boosty — from Russia",
     "kofiBtn": "Ko-fi — from other countries",

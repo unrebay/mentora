@@ -16,7 +16,7 @@ export const LEVEL_NAMES = [
 
 export const LEVEL_TIER_NAMES = [
   "Новичок", "Исследователь", "Знаток", "Историк",
-  "Эксперт", "Магистр", "Доктор", "Академик",
+  "Эксперт", "Магистр", "Доктор", "Учёный",
 ] as const;
 
 export const LEVEL_THRESHOLDS = [0, 100, 300, 600, 1000, 2500, 5000, 10000] as const;

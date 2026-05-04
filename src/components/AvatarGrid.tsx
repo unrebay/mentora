@@ -29,6 +29,8 @@ export default function AvatarGrid({ totalXP, initialSelected }: Props) {
         throw new Error(j?.error || `HTTP ${res.status}`);
       }
       setSelected(level);
+      // Reload so navbar avatar updates from server-side props
+      window.location.reload();
     } catch (e) {
       setError(String((e as Error).message ?? e));
     } finally {
@@ -63,7 +65,7 @@ export default function AvatarGrid({ totalXP, initialSelected }: Props) {
               onClick={() => unlocked && choose(level)}
               disabled={!unlocked || isPending}
               title={unlocked ? `${LEVEL_TIER_NAMES[level]} · ${LEVEL_THRESHOLDS[level]} мент` : `Ещё ${remaining.toLocaleString("ru-RU")} мент(ов)`}
-              className="relative rounded-xl p-3 pt-3.5 transition-all overflow-hidden flex flex-col items-center"
+              className="relative rounded-xl p-2 pt-3 transition-all overflow-hidden flex flex-col items-center"
               style={{
                 background: isSelected
                   ? "linear-gradient(160deg, rgba(124,58,237,0.20), rgba(69,97,232,0.10) 60%, rgba(0,0,0,0.04))"
@@ -97,7 +99,7 @@ export default function AvatarGrid({ totalXP, initialSelected }: Props) {
                 )}
               </div>
               {/* Tier label */}
-              <div className="text-[11px] mt-2 font-bold leading-tight text-center" style={{ color: unlocked ? "var(--text)" : "var(--text-muted)" }}>
+              <div className="text-[11px] mt-2 font-bold leading-tight text-center" style={{ color: unlocked ? "var(--text)" : "var(--text-muted)", overflowWrap: "anywhere", lineHeight: 1.15, maxWidth: "100%" }}>
                 {LEVEL_TIER_NAMES[level]}
               </div>
               {/* Planet name + ment count */}

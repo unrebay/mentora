@@ -117,7 +117,7 @@ export default function GalaxyCanvas({ className }: Props) {
 
       const mainGrp = new THREE.Group();
       const bgGrp   = new THREE.Group();
-      mainGrp.position.y = 4; // galaxy centered around hero (chat box level)
+      mainGrp.position.y = 14; // galaxy upper part frames the hero text behind
       scene.add(mainGrp);
       scene.add(bgGrp);
 
