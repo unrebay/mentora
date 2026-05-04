@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
 import ThemeToggle from "@/components/ThemeToggle";
+import Logo from "@/components/Logo";
+import MeLogo from "@/components/MeLogo";
 import SystemStatusGrid from "@/components/admin/SystemStatusGrid";
 import FunnelWidget from "@/components/admin/FunnelWidget";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
@@ -1127,59 +1129,65 @@ export default function AdminPanel() {
               : "0 12px 40px rgba(69,97,232,0.18), inset 0 1px 0 rgba(255,255,255,0.40), 0 0 0 1px rgba(69,97,232,0.04)",
           }}>
 
-          {/* Header: logo + collapse-toggle */}
+          {/* Header — full Mentora logo (expanded) or Me-mark (collapsed) */}
           <div style={{
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: (sidebarOpen || isMobile) ? "4px 8px 18px" : "4px 0 18px",
-            gap: 8,
+            display: "flex", flexDirection: "column", alignItems: "center",
+            padding: (sidebarOpen || isMobile) ? "8px 8px 16px" : "8px 0 14px",
+            gap: 10,
+            position: "relative",
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: 9, flexShrink: 0,
-                background: "linear-gradient(135deg, #4561E8, #7C3AED)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 4px 14px rgba(69,97,232,0.40), inset 0 1px 0 rgba(255,255,255,0.20)",
-              }}>
-                <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-              </div>
-              {(sidebarOpen || isMobile) && (
-                <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: 14, fontWeight: 800, color: TEXT, margin: 0 }}>Mentora</p>
-                  <p style={{ fontSize: 10, color: MUTED, margin: 0, opacity: 0.7 }}>Admin · только ты</p>
-                </div>
-              )}
-            </div>
-            {/* Collapse toggle (desktop only) */}
-            {!isMobile && (
-              <button onClick={() => setSidebarOpen(o => !o)}
-                title={sidebarOpen ? "Свернуть меню" : "Развернуть меню"}
-                style={{
-                  width: 28, height: 28, borderRadius: 7,
-                  background: "transparent",
-                  border: `1px solid ${BOR}`,
-                  cursor: "pointer", color: MUTED,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  transition: "all .15s",
-                }}
-                onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)")}
-                onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  {sidebarOpen
-                    ? <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>
-                    : <><line x1="9" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="9" y1="18" x2="21" y2="18"/></>}
-                </svg>
-              </button>
-            )}
-            {/* Close button (mobile only) */}
-            {isMobile && (
-              <button onClick={() => setMobileNavOpen(false)}
-                style={{
-                  width: 28, height: 28, borderRadius: 7, background: "transparent",
-                  border: `1px solid ${BOR}`, cursor: "pointer", color: MUTED,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
+            {(sidebarOpen || isMobile) ? (
+              <>
+                {/* Full wordmark + Admin chip */}
+                <Logo size="sm" href="" />
+                <span style={{
+                  fontSize: 9, fontWeight: 700,
+                  letterSpacing: "0.16em", textTransform: "uppercase",
+                  padding: "3px 9px", borderRadius: 99,
+                  background: "linear-gradient(135deg, rgba(124,58,237,0.18), rgba(69,97,232,0.10))",
+                  border: "1px solid rgba(124,58,237,0.28)",
+                  color: isDark ? "#bcc8ff" : "#4561E8",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+                }}>Admin · только ты</span>
+                {/* Top-right: collapse toggle (desktop) / close (mobile) */}
+                <button
+                  onClick={() => isMobile ? setMobileNavOpen(false) : setSidebarOpen(o => !o)}
+                  title={isMobile ? "Закрыть" : "Свернуть меню"}
+                  style={{
+                    position: "absolute", top: 6, right: 6,
+                    width: 26, height: 26, borderRadius: 7,
+                    background: "transparent", border: `1px solid ${BOR}`,
+                    cursor: "pointer", color: MUTED,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    transition: "all .15s",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                  {isMobile
+                    ? <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    : <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>}
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Collapsed — just the Me mark, click to expand */}
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  title="Развернуть меню"
+                  style={{
+                    width: 44, height: 44, borderRadius: 12,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: "linear-gradient(135deg, rgba(124,58,237,0.18), rgba(69,97,232,0.10))",
+                    border: "1px solid rgba(124,58,237,0.28)",
+                    boxShadow: "0 4px 12px rgba(69,97,232,0.18), inset 0 1px 0 rgba(255,255,255,0.10)",
+                    cursor: "pointer",
+                    transition: "transform .15s, box-shadow .15s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.05)"; e.currentTarget.style.boxShadow = "0 6px 18px rgba(69,97,232,0.30), inset 0 1px 0 rgba(255,255,255,0.14)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 4px 12px rgba(69,97,232,0.18), inset 0 1px 0 rgba(255,255,255,0.10)"; }}>
+                  <MeLogo height={22} colorM={isDark ? "#ffffff" : "#111111"} colorE="#7C3AED" />
+                </button>
+              </>
             )}
           </div>
 
