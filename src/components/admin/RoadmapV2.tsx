@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 export type Bucket = "now" | "soon" | "ideas" | "notes";
@@ -35,6 +35,16 @@ const LEGACY_KEYS = [
   "mentora_admin_roadmap_v5",
   "mentora_admin_roadmap_v4",
 ];
+
+// ⚠️ STABLE — DO NOT BUMP. History stores full timestamped snapshots; capped at last 100.
+const HISTORY_KEY = "mentora_admin_roadmap_history";
+const HISTORY_MAX = 100;
+
+interface HistoryEntry {
+  ts: number;            // unix ms
+  action: string;        // human label e.g. "edit:title", "add", "delete", "move:bucket"
+  tasksSnapshot: RoadmapTaskV2[];
+}
 const LAUNCH_DATE = "2026-06-01";
 
 // ── Category & state metadata ────────────────────────────────────────────────
@@ -205,6 +215,41 @@ function mergeNewSeedTasks(existing: RoadmapTaskV2[]): RoadmapTaskV2[] {
 
 function saveTasks(t: RoadmapTaskV2[]) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(t)); } catch {}
+}
+
+/** Append a timestamped snapshot to history. Bounded to HISTORY_MAX entries.
+ *  Best-effort: never throws. */
+function pushHistorySnapshot(action: string, tasks: RoadmapTaskV2[]) {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    let log: HistoryEntry[] = [];
+    if (raw) {
+      try { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) log = parsed; } catch {}
+    }
+    log.push({ ts: Date.now(), action, tasksSnapshot: tasks });
+    if (log.length > HISTORY_MAX) log = log.slice(log.length - HISTORY_MAX);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(log));
+    // Best-effort server-side mirror — fire and forget
+    try {
+      fetch("/api/admin/roadmap-log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, taskCount: tasks.length, ts: Date.now() }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch {}
+  } catch {}
+}
+
+function loadHistory(): HistoryEntry[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch { return []; }
 }
 
 // ── Theme tokens (mirrored from admin/page.tsx, simplified) ──────────────────
@@ -771,11 +816,30 @@ export default function RoadmapV2Tab() {
 
   useEffect(() => { setTasks(loadTasks()); }, []);
 
-  const persist = (next: RoadmapTaskV2[]) => { setTasks(next); saveTasks(next); };
+  const persist = (next: RoadmapTaskV2[], action: string = "save") => {
+    setTasks(next);
+    saveTasks(next);
+    pushHistorySnapshot(action, next);
+  };
 
-  const update = (t: RoadmapTaskV2) => persist(tasks.map(x => x.id === t.id ? t : x));
-  const remove = (id: string) => persist(tasks.filter(x => x.id !== id));
-  const add    = (t: RoadmapTaskV2) => persist([...tasks, t]);
+  const update = (t: RoadmapTaskV2) => {
+    const prev = tasks.find(x => x.id === t.id);
+    let action = "edit";
+    if (prev) {
+      if (prev.bucket !== t.bucket) action = `move:${prev.bucket}→${t.bucket}`;
+      else if (prev.state !== t.state) action = `state:${prev.state}→${t.state}`;
+      else if (prev.category !== t.category) action = `category:${prev.category}→${t.category}`;
+      else if (prev.title !== t.title) action = "edit:title";
+      else if ((prev.notes ?? "") !== (t.notes ?? "")) action = "edit:notes";
+      else if (JSON.stringify(prev.subtasks ?? []) !== JSON.stringify(t.subtasks ?? [])) action = "edit:subtasks";
+    }
+    persist(tasks.map(x => x.id === t.id ? t : x), action);
+  };
+  const remove = (id: string) => {
+    const t = tasks.find(x => x.id === id);
+    persist(tasks.filter(x => x.id !== id), `delete:${t?.title?.slice(0, 30) ?? id}`);
+  };
+  const add    = (t: RoadmapTaskV2) => persist([...tasks, t], `add:${t.title.slice(0, 30)}`);
 
   const filtered = useMemo(() => filterCat ? tasks.filter(t => t.category === filterCat) : tasks, [tasks, filterCat]);
 
@@ -783,15 +847,18 @@ export default function RoadmapV2Tab() {
     <div>
       <LaunchTracker tasks={tasks} />
 
-      {/* Category filter row */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 18 }}>
-        <CategoryChip active={filterCat === null} label="Все" color="#94a3b8" onClick={() => setFilterCat(null)} count={tasks.length} />
-        {(Object.keys(CAT_META) as Category[]).map(c => (
-          <CategoryChip key={c}
-            active={filterCat === c} label={CAT_META[c].label} color={CAT_META[c].color}
-            count={tasks.filter(t => t.category === c).length}
-            onClick={() => setFilterCat(filterCat === c ? null : c)} />
-        ))}
+      {/* Top toolbar — backup / restore + filter */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12, alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <CategoryChip active={filterCat === null} label="Все" color="#94a3b8" onClick={() => setFilterCat(null)} count={tasks.length} />
+          {(Object.keys(CAT_META) as Category[]).map(c => (
+            <CategoryChip key={c}
+              active={filterCat === c} label={CAT_META[c].label} color={CAT_META[c].color}
+              count={tasks.filter(t => t.category === c).length}
+              onClick={() => setFilterCat(filterCat === c ? null : c)} />
+          ))}
+        </div>
+        <BackupTools tasks={tasks} onImport={(t) => persist(t, "import")} onRestore={(t) => persist(t, "restore-history")} />
       </div>
 
       {/* 4-bucket grid */}
@@ -827,5 +894,185 @@ function CategoryChip({ active, label, color, count, onClick }: {
       <span>{label}</span>
       <span style={{ opacity: 0.6, fontSize: 11 }}>{count}</span>
     </button>
+  );
+}
+
+// ── BackupTools — Export/Import JSON + History snapshots ────────────────────
+function BackupTools({ tasks, onImport, onRestore }: { tasks: RoadmapTaskV2[]; onImport: (t: RoadmapTaskV2[]) => void; onRestore: (t: RoadmapTaskV2[]) => void }) {
+  const { isDark, MUTED, TEXT, BOR, CARD } = useTok();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  useEffect(() => {
+    if (historyOpen) setHistory(loadHistory().slice().reverse()); // newest first
+  }, [historyOpen]);
+
+  function exportJson() {
+    const blob = new Blob([JSON.stringify(tasks, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const today = new Date().toISOString().split("T")[0];
+    a.href = url;
+    a.download = `mentora-roadmap-${today}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const text = String(ev.target?.result ?? "");
+        const parsed = JSON.parse(text) as RoadmapTaskV2[];
+        if (!Array.isArray(parsed)) throw new Error("not an array");
+        // Merge by id — incoming wins for matched ids
+        const map = new Map<string, RoadmapTaskV2>();
+        for (const t of tasks) map.set(t.id, t);
+        for (const t of parsed) if (t && t.id) map.set(t.id, t);
+        const merged = Array.from(map.values());
+        if (confirm(`Импорт: ${parsed.length} задач из файла. Текущих: ${tasks.length}. После мержа: ${merged.length}. Продолжить?`)) {
+          onImport(merged);
+        }
+      } catch (err) {
+        alert("Ошибка импорта: " + String(err));
+      }
+    };
+    reader.readAsText(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  const btnStyle: React.CSSProperties = {
+    display: "inline-flex", alignItems: "center", gap: 6,
+    padding: "5px 12px", borderRadius: 99, fontSize: 12, fontWeight: 600,
+    background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+    color: MUTED,
+    border: "1px solid transparent",
+    cursor: "pointer", transition: "all .15s",
+  };
+
+  return (
+    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+      <button onClick={exportJson}
+        title="Скачать JSON-бэкап всех задач"
+        style={btnStyle}
+        onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)")}
+        onMouseLeave={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)")}>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+        Backup
+      </button>
+      <button onClick={() => fileInputRef.current?.click()}
+        title="Восстановить из JSON-файла (мерж с текущими)"
+        style={btnStyle}
+        onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)")}
+        onMouseLeave={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)")}>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+        </svg>
+        Restore
+      </button>
+      <button onClick={() => setHistoryOpen(true)}
+        title="История изменений — снапшоты после каждого изменения"
+        style={btnStyle}
+        onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)")}
+        onMouseLeave={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)")}>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 3"/>
+        </svg>
+        История
+      </button>
+      <input ref={fileInputRef} type="file" accept="application/json,.json" onChange={onPickFile} style={{ display: "none" }} />
+
+      {/* History modal */}
+      {historyOpen && (
+        <div onClick={() => setHistoryOpen(false)} style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)",
+          backdropFilter: "blur(4px)", zIndex: 100,
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            width: "100%", maxWidth: 520, maxHeight: "80vh",
+            background: CARD, border: `1px solid ${BOR}`, borderRadius: 16,
+            display: "flex", flexDirection: "column", overflow: "hidden",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.50)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 18px", borderBottom: `1px solid ${BOR}` }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: TEXT }}>История изменений</div>
+                <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>{history.length} {history.length === 1 ? "снапшот" : history.length < 5 ? "снапшота" : "снапшотов"} · хранится последние 100</div>
+              </div>
+              <button onClick={() => setHistoryOpen(false)} style={{
+                width: 28, height: 28, borderRadius: 7,
+                background: "transparent", border: `1px solid ${BOR}`,
+                cursor: "pointer", color: MUTED,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div style={{ flex: 1, overflowY: "auto", padding: "8px 4px" }}>
+              {history.length === 0 ? (
+                <div style={{ padding: 30, textAlign: "center", fontSize: 12, color: MUTED }}>
+                  Пока пусто. Каждое изменение в роадмапе автоматически записывается сюда.
+                </div>
+              ) : history.map((h, i) => {
+                const d = new Date(h.ts);
+                const date = d.toLocaleDateString("ru-RU", { day: "2-digit", month: "short", year: "numeric" });
+                const time = d.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+                return (
+                  <div key={h.ts + ":" + i} style={{
+                    display: "flex", alignItems: "center", gap: 10,
+                    padding: "10px 14px", borderRadius: 10, margin: "2px 8px",
+                    background: "transparent", transition: "background .12s",
+                  }}
+                    onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                    <div style={{
+                      width: 6, height: 6, borderRadius: "50%",
+                      background: h.action.startsWith("delete") ? "#ef4444" :
+                                  h.action.startsWith("add") ? "#22c55e" :
+                                  h.action.startsWith("move") ? "#a78bfa" :
+                                  h.action.startsWith("state") ? "#FF7A00" :
+                                  h.action.startsWith("import") ? "#0EA5E9" :
+                                  h.action.startsWith("restore") ? "#0EA5E9" :
+                                  "#6B8FFF",
+                      flexShrink: 0,
+                    }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: TEXT, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {h.action}
+                      </div>
+                      <div style={{ fontSize: 10, color: MUTED, marginTop: 1 }}>
+                        {date} · {time} · {h.tasksSnapshot.length} задач
+                      </div>
+                    </div>
+                    <button onClick={() => {
+                      if (confirm(`Восстановить состояние от ${date} ${time}? Текущие данные будут заменены (но автоматически сохранятся в этой же истории).`)) {
+                        onRestore(h.tasksSnapshot);
+                        setHistoryOpen(false);
+                      }
+                    }}
+                      style={{
+                        flexShrink: 0, padding: "4px 10px", borderRadius: 6,
+                        fontSize: 11, fontWeight: 600,
+                        background: "rgba(69,97,232,0.15)", color: "#6B8FFF",
+                        border: "1px solid rgba(69,97,232,0.30)",
+                        cursor: "pointer",
+                      }}>
+                      Восстановить
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
