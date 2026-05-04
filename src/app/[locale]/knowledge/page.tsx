@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/server";
 import DashboardNav from "@/components/DashboardNav";
+import BodyScrollLock from "@/components/BodyScrollLock";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
@@ -42,7 +43,8 @@ export default async function KnowledgePage() {
   }
 
   return (
-    <div className="flex flex-col bg-[#06060f] text-white" style={{ height: "100dvh" }}>
+    <div className="flex flex-col bg-[#06060f] text-white" style={{ height: "100dvh", overflow: "hidden" }}>
+      <BodyScrollLock />
       {/* Nav */}
       <DashboardNav isPro={isPro} isUltima={isUltima} totalXP={totalXP} currentStreak={currentStreak} bestStreak={bestStreak} logoutAction={handleLogout} variant="dark" />
 

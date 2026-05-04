@@ -1100,27 +1100,31 @@ export default function AdminPanel() {
           }} />
         )}
 
-        {/* Sidebar — glass, collapsible (desktop) / slide-in (mobile) */}
+        {/* Sidebar — floating glass pill (matches main navbar pill) */}
         <aside
           style={{
             width: isMobile ? 240 : (sidebarOpen ? 220 : 64),
             flexShrink: 0,
             background: isDark
-              ? "linear-gradient(180deg, rgba(22,22,44,0.78), rgba(10,10,24,0.82) 60%, rgba(6,6,15,0.85))"
+              ? "linear-gradient(180deg, rgba(22,22,44,0.72), rgba(10,10,24,0.78) 60%, rgba(6,6,15,0.82))"
               : "linear-gradient(180deg, rgba(255,255,255,0.78), rgba(245,247,255,0.74))",
-            borderRight: isDark ? "1px solid rgba(124,58,237,0.18)" : "1px solid rgba(69,97,232,0.10)",
-            padding: (sidebarOpen || isMobile) ? "20px 14px" : "20px 8px",
+            border: isDark ? "1px solid rgba(124,58,237,0.20)" : "1px solid rgba(69,97,232,0.12)",
+            borderRadius: 24,
+            padding: (sidebarOpen || isMobile) ? "16px 12px" : "16px 8px",
             display: "flex", flexDirection: "column", gap: 4,
             position: isMobile ? "fixed" : "sticky",
-            top: 0, left: 0,
-            height: "100vh", zIndex: 20,
-            transform: isMobile ? (mobileNavOpen ? "translateX(0)" : "translateX(-100%)") : "none",
+            top: isMobile ? 12 : 12,
+            left: isMobile ? 12 : "auto",
+            margin: isMobile ? 0 : "12px 0 12px 12px",
+            height: "calc(100vh - 24px)",
+            zIndex: 20,
+            transform: isMobile ? (mobileNavOpen ? "translateX(0)" : "translateX(calc(-100% - 16px))") : "none",
             transition: "transform .25s cubic-bezier(.34,1.56,.64,1), width .2s ease",
-            backdropFilter: "blur(22px) saturate(1.5)",
-            WebkitBackdropFilter: "blur(22px) saturate(1.5)",
+            backdropFilter: "blur(22px) saturate(1.6)",
+            WebkitBackdropFilter: "blur(22px) saturate(1.6)",
             boxShadow: isDark
-              ? "2px 0 32px rgba(0,0,0,0.40), inset -1px 0 0 rgba(255,255,255,0.04)"
-              : "2px 0 32px rgba(69,97,232,0.10), inset -1px 0 0 rgba(69,97,232,0.06)",
+              ? "0 12px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 0 1px rgba(124,58,237,0.06)"
+              : "0 12px 40px rgba(69,97,232,0.18), inset 0 1px 0 rgba(255,255,255,0.40), 0 0 0 1px rgba(69,97,232,0.04)",
           }}>
 
           {/* Header: logo + collapse-toggle */}
