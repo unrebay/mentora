@@ -153,13 +153,13 @@ export default async function HomePage() {
 
         {/* ── Tint layer covers the WHOLE dark-block (hero + stats + features) ── */}
         <div className="absolute inset-0 pointer-events-none hidden md:block z-[1]" style={{
-          background: "linear-gradient(to right, rgba(4,6,15,0.55) 0%, rgba(4,6,15,0.42) 40%, rgba(4,6,15,0.22) 70%, rgba(4,6,15,0.12) 100%)",
+          background: "linear-gradient(to right, rgba(4,6,15,0.78) 0%, rgba(4,6,15,0.65) 35%, rgba(4,6,15,0.40) 65%, rgba(4,6,15,0.22) 100%)",
         }} />
         <div className="absolute inset-0 pointer-events-none hidden md:block z-[1]" style={{
-          background: "radial-gradient(ellipse 90% 70% at 50% 25%, transparent 35%, rgba(4,6,15,0.32) 80%, rgba(4,6,15,0.50) 100%)",
+          background: "radial-gradient(ellipse 90% 70% at 50% 25%, transparent 30%, rgba(4,6,15,0.45) 75%, rgba(4,6,15,0.65) 100%)",
         }} />
         <div className="absolute inset-0 pointer-events-none md:hidden z-[1]" style={{
-          background: "rgba(4,6,15,0.55)",
+          background: "rgba(4,6,15,0.70)",
         }} />
 
       {/* HERO — padding-top compensates for the negative margin (100px covers nav on all devices) */}

@@ -117,7 +117,7 @@ export default function GalaxyCanvas({ className }: Props) {
 
       const mainGrp = new THREE.Group();
       const bgGrp   = new THREE.Group();
-      mainGrp.position.y = 14; // galaxy upper part frames the hero text behind
+      mainGrp.position.y = 19; // galaxy clusters above the fold, dim leftover behind text
       scene.add(mainGrp);
       scene.add(bgGrp);
 
