@@ -96,7 +96,17 @@ export default async function PricingPage() {
           style={{ background: "rgba(69,97,232,0.15)", border: "1px solid rgba(69,97,232,0.25)", color: "rgba(107,143,255,0.9)" }}>
           {t("pricing.faqLabel")}
         </div>
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-5 leading-[1.1] text-white">
+        {/* Decorative orbital ring */}
+        <div className="absolute pointer-events-none hidden md:block" aria-hidden style={{
+          top: 60, right: "10%", width: 220, height: 220,
+          borderRadius: "50%",
+          background: "conic-gradient(from 90deg, transparent 0deg, rgba(124,58,237,0.18) 90deg, transparent 180deg, rgba(69,97,232,0.14) 270deg, transparent 360deg)",
+          filter: "blur(24px)", opacity: 0.7, zIndex: 1,
+        }} />
+        <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-5 leading-[1.1] relative z-10" style={{
+          background: "linear-gradient(135deg, #ffffff 30%, #B4C7FF 70%, #C9B5FF 100%)",
+          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+        }}>
           {t("pricing.hero.title")}<br />
           <span style={{
             background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
