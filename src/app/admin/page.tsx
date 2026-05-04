@@ -1118,7 +1118,7 @@ export default function AdminPanel() {
             top: isMobile ? 12 : 12,
             left: isMobile ? 12 : "auto",
             margin: isMobile ? 0 : "12px 0 12px 12px",
-            height: "calc(100vh - 24px)",
+            height: "auto", maxHeight: "calc(100vh - 24px)", overflowY: "auto",
             zIndex: 20,
             transform: isMobile ? (mobileNavOpen ? "translateX(0)" : "translateX(calc(-100% - 16px))") : "none",
             transition: "transform .25s cubic-bezier(.34,1.56,.64,1), width .2s ease",
@@ -1140,15 +1140,27 @@ export default function AdminPanel() {
               <>
                 {/* Full wordmark + Admin chip */}
                 <Logo size="sm" href="" />
-                <span style={{
-                  fontSize: 9, fontWeight: 700,
-                  letterSpacing: "0.16em", textTransform: "uppercase",
-                  padding: "3px 9px", borderRadius: 99,
-                  background: "linear-gradient(135deg, rgba(124,58,237,0.18), rgba(69,97,232,0.10))",
-                  border: "1px solid rgba(124,58,237,0.28)",
-                  color: isDark ? "#bcc8ff" : "#4561E8",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
-                }}>Admin · только ты</span>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginTop: 2 }}>
+                  {/* gradient hairline accent */}
+                  <span aria-hidden style={{
+                    width: 18, height: 1.5, borderRadius: 1,
+                    background: "linear-gradient(90deg, transparent, " + (isDark ? "#9F7AFF" : "#4561E8") + ")",
+                    flexShrink: 0,
+                  }} />
+                  <span style={{
+                    fontSize: 10, fontWeight: 700,
+                    letterSpacing: "0.22em", textTransform: "uppercase",
+                    background: isDark
+                      ? "linear-gradient(135deg, #bcc8ff, #9F7AFF)"
+                      : "linear-gradient(135deg, #4561E8, #7C3AED)",
+                    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                  }}>Центр Управления</span>
+                  <span aria-hidden style={{
+                    width: 18, height: 1.5, borderRadius: 1,
+                    background: "linear-gradient(90deg, " + (isDark ? "#9F7AFF" : "#4561E8") + ", transparent)",
+                    flexShrink: 0,
+                  }} />
+                </div>
                 {/* Top-right: collapse toggle (desktop) / close (mobile) */}
                 <button
                   onClick={() => isMobile ? setMobileNavOpen(false) : setSidebarOpen(o => !o)}
@@ -1198,17 +1210,25 @@ export default function AdminPanel() {
             onClick={() => { setTab(t.id); if (isMobile) setMobileNavOpen(false); }}
           />)}
 
-          <div style={{ flex: 1 }} />
-
-          {/* Theme toggle */}
+          {/* Theme toggle — vertical orientation (rotated 90° so thumb travels up/down) */}
           <div style={{
-            display: "flex", alignItems: "center",
-            justifyContent: (sidebarOpen || isMobile) ? "space-between" : "center",
-            padding: (sidebarOpen || isMobile) ? "10px 14px" : "10px 0",
+            display: "flex", flexDirection: "column",
+            alignItems: "center",
+            padding: "12px 0 8px",
             borderTop: `1px solid ${BOR}`, marginTop: 8,
+            gap: 8,
           }}>
-            {(sidebarOpen || isMobile) && <span style={{ fontSize: 12, color: MUTED }}>Тема</span>}
-            <ThemeToggle />
+            {(sidebarOpen || isMobile) && (
+              <span style={{ fontSize: 9, fontWeight: 700, color: MUTED, letterSpacing: "0.18em", textTransform: "uppercase", opacity: 0.7 }}>Тема</span>
+            )}
+            <div style={{
+              transform: "rotate(-90deg)",
+              transformOrigin: "center",
+              width: 26, height: 64,        // reserve vertical space (track was 64×26)
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <ThemeToggle />
+            </div>
           </div>
 
           <Link href="/dashboard" title="На сайт"
