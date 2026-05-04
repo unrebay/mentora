@@ -1290,32 +1290,39 @@
     ],
     "roadmapTag": "Roadmap",
     "roadmapTitle": "Where we're heading",
+    "roadmapSubtitle": "5 key milestones — from closed beta to global expansion",
     "roadmapDone": "done",
+    "roadmapNext": "next step",
     "timeline": [
       {
         "q": "Q1 2026",
-        "label": "Platform launch",
-        "desc": "17 subjects, personal mentor, Pro and Ultra plans, referral system"
+        "label": "Closed beta",
+        "desc": "Pilot testing with early users — RAG, accuracy benchmarks, safety.",
+        "status": "done"
       },
       {
-        "q": "Q2 2026",
-        "label": "Curricula and learning tracks",
-        "desc": "Structured courses by topic, 'Teach me from scratch' mode, topic coverage tracker"
+        "q": "June 1, 2026",
+        "label": "Mentora public launch",
+        "desc": "17 sciences, personal AI mentor, Pro and Ultra plans, referral program.",
+        "status": "next"
       },
       {
         "q": "Q3 2026",
         "label": "Mobile app",
-        "desc": "iOS and Android — learn on the go, push notifications, offline notes"
+        "desc": "iOS and Android — learn on the go, push, offline notes.",
+        "status": "future"
       },
       {
         "q": "Q4 2026",
-        "label": "B2B: schools and organizations",
-        "desc": "After 1000+ active users: teacher dashboard, group licenses"
+        "label": "A new chapter",
+        "desc": "Building something no other educational AI has done. Details later.",
+        "status": "future"
       },
       {
         "q": "2027",
-        "label": "International expansion",
-        "desc": "English version, Kazakhstan, other languages and education systems"
+        "label": "Expanding horizons",
+        "desc": "Something bigger than just a study platform.",
+        "status": "future"
       }
     ],
     "ultimaTag": "About Ultra plan",

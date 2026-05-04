@@ -13,8 +13,6 @@ const VALUE_META: { icon: string; color: string; custom?: "handsFlower" }[] = [
 
 const TIP_ACCENTS = ["#4561E8", "#7C3AED", "#0EA5E9", "#10B981", "#F59E0B", "#FF7A00", "#9F7AFF"];
 const HOW_COLORS = ["#4561E8", "#A78BFA", "#10B981", "#F59E0B"];
-const TIMELINE_DONE = [true, false, false, false, false];
-
 export default function AboutPage() {
   const t = useTranslations("about");
 
@@ -51,7 +49,7 @@ export default function AboutPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tipsData = t.raw("tips") as { n: string; title: string; body: string; example: string }[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const timelineData = t.raw("timeline") as { q: string; label: string; desc: string }[];
+  const timelineData = t.raw("timeline") as { q: string; label: string; desc: string; status?: "done" | "next" | "future" }[];
 
   /* ── Helpers ──────────────────────────────────────────────────── */
   function Tag({ children, color = "#4561E8" }: { children: React.ReactNode; color?: string }) {
@@ -520,48 +518,141 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ── ROADMAP ──────────────────────────────────────────── */}
-        <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
+        {/* ── ROADMAP — investor-grade timeline ──────────────── */}
+        <section className="max-w-5xl mx-auto px-5 sm:px-8 pb-14">
           <Tag color="#6366F1">{t("roadmapTag")}</Tag>
-          <h2 style={{ fontSize: 26, fontWeight: 900, color: "var(--text)", margin: "16px 0 28px", letterSpacing: "-0.5px" }}>{t("roadmapTitle")}</h2>
+          <h2 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", margin: "16px 0 6px", letterSpacing: "-0.5px" }}>{t("roadmapTitle")}</h2>
+          <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 28, lineHeight: 1.6 }}>
+            {t("roadmapSubtitle")}
+          </p>
 
-          <div className="relative pl-6" style={{ borderLeft: "1px solid var(--border)" }}>
-            {timelineData.map((item, idx) => {
-              const done = TIMELINE_DONE[idx] ?? false;
-              return (
-                <div key={item.q} className="relative mb-6 last:mb-0">
-                  <div className="absolute -left-8 top-1 w-3 h-3 rounded-full" style={{
-                    background: done ? "#4561E8" : "var(--border)",
-                    border: done ? "none" : "1px solid var(--border)",
-                    boxShadow: done ? "0 0 10px rgba(69,97,232,0.5)" : "none",
-                  }} />
-                  <div className="flex items-start gap-3 flex-wrap">
-                    <span className="text-xs font-bold px-2 py-0.5 rounded-full text-center" style={{
-                      background: done ? "rgba(69,97,232,0.12)" : "var(--bg-secondary)",
-                      color: done ? "#4561E8" : "var(--text-muted)",
-                      flexShrink: 0,
-                      minWidth: 64,
+          <div className="relative">
+            {/* Vertical track gradient line */}
+            <div className="absolute left-[18px] sm:left-[22px] top-2 bottom-2 w-px pointer-events-none" aria-hidden
+              style={{ background: "linear-gradient(180deg, transparent, rgba(99,102,241,0.30) 8%, rgba(99,102,241,0.30) 92%, transparent)" }} />
+
+            <div className="space-y-4">
+              {timelineData.map((item) => {
+                const status = item.status ?? "future";
+                const isDone = status === "done";
+                const isNext = status === "next";
+                // Color theming
+                const accent = isNext ? "#6366F1" : isDone ? "#10B981" : "#9F7AFF";
+                const cardBg = isNext
+                  ? "linear-gradient(135deg, rgba(99,102,241,0.16) 0%, rgba(124,58,237,0.10) 50%, rgba(69,97,232,0.06) 100%), var(--bg-card)"
+                  : isDone
+                  ? "linear-gradient(135deg, rgba(16,185,129,0.10) 0%, rgba(16,185,129,0.04) 60%, transparent), var(--bg-card)"
+                  : "var(--bg-card)";
+                const borderColor = isNext ? "rgba(99,102,241,0.45)" : isDone ? "rgba(16,185,129,0.32)" : "var(--border)";
+                const dotShadow = isNext
+                  ? `0 0 0 4px rgba(99,102,241,0.18), 0 0 22px ${accent}90`
+                  : isDone ? `0 0 14px rgba(16,185,129,0.55)` : "none";
+                return (
+                  <div key={item.q} className="relative pl-12 sm:pl-14">
+                    {/* Node dot */}
+                    <div className="absolute left-3 sm:left-4 top-5 w-4 h-4 rounded-full" style={{
+                      background: isDone || isNext ? accent : "var(--bg-card)",
+                      border: isDone || isNext ? "none" : `1.5px solid var(--border)`,
+                      boxShadow: dotShadow,
+                      zIndex: 2,
                     }}>
-                      {item.q}
-                    </span>
-                    <div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text)", marginBottom: 3 }}>
-                        {item.label}
-                        {done && (
-                          <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 400, color: "#4561E8" }}>
-                            <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ display: "inline", marginBottom: 1 }}>
-                              <path d="M2 6l3 3 5-5" />
-                            </svg>{" "}{t("roadmapDone")}
-                          </span>
-                        )}
+                      {isDone && (
+                        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="white" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", inset: 2 }}>
+                          <path d="M3 8l3 3 7-7" />
+                        </svg>
+                      )}
+                    </div>
+                    {/* Pulse ring on next */}
+                    {isNext && (
+                      <span className="absolute left-3 sm:left-4 top-5 w-4 h-4 rounded-full pointer-events-none" aria-hidden
+                        style={{
+                          animation: "mentoraPulse 2s ease-out infinite",
+                          background: "transparent",
+                          boxShadow: `0 0 0 0 ${accent}80`,
+                        }}
+                      />
+                    )}
+
+                    {/* Card */}
+                    <div className="relative rounded-2xl p-5 overflow-hidden transition-transform hover:-translate-y-0.5"
+                      style={{
+                        background: cardBg,
+                        border: `1px solid ${borderColor}`,
+                        backdropFilter: isNext ? "blur(16px) saturate(1.4)" : "blur(10px) saturate(1.2)",
+                        WebkitBackdropFilter: isNext ? "blur(16px) saturate(1.4)" : "blur(10px) saturate(1.2)",
+                        boxShadow: isNext
+                          ? `0 14px 44px ${accent}30, inset 0 1px 0 rgba(255,255,255,0.10)`
+                          : "0 4px 16px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.06)",
+                      }}>
+                      {/* Spotlight on next */}
+                      {isNext && (
+                        <div className="absolute pointer-events-none" aria-hidden style={{
+                          top: -50, right: -50, width: 220, height: 220, opacity: 0.55,
+                          background: `radial-gradient(circle, ${accent}55, transparent 65%)`,
+                          filter: "blur(20px)",
+                        }} />
+                      )}
+
+                      <div className="flex items-start justify-between gap-3 flex-wrap relative">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                            <span className="text-[11px] font-bold px-2.5 py-1 rounded-md tracking-wide" style={{
+                              background: isNext ? `linear-gradient(135deg, ${accent}, #7C3AED)` : isDone ? `${accent}1c` : "var(--bg-secondary)",
+                              color: isNext ? "white" : isDone ? accent : "var(--text-muted)",
+                              boxShadow: isNext ? `0 4px 12px ${accent}40` : "none",
+                              border: isDone && !isNext ? `1px solid ${accent}30` : "none",
+                              letterSpacing: "0.02em",
+                            }}>
+                              {item.q}
+                            </span>
+                            {isDone && (
+                              <span className="text-[10px] font-bold tracking-wider uppercase" style={{ color: accent }}>
+                                ✓ {t("roadmapDone")}
+                              </span>
+                            )}
+                            {isNext && (
+                              <span className="text-[10px] font-black tracking-[0.18em] uppercase" style={{
+                                color: "white",
+                                background: `linear-gradient(135deg, ${accent}, #7C3AED)`,
+                                padding: "3px 8px", borderRadius: 8,
+                                boxShadow: `0 0 16px ${accent}80`,
+                              }}>
+                                {t("roadmapNext")}
+                              </span>
+                            )}
+                          </div>
+                          <div style={{
+                            fontSize: isNext ? 18 : 15,
+                            fontWeight: isNext ? 900 : 700,
+                            color: "var(--text)",
+                            marginBottom: 4,
+                            letterSpacing: "-0.01em",
+                          }}>
+                            {item.label}
+                          </div>
+                          <p style={{
+                            fontSize: 13,
+                            color: "var(--text-secondary)",
+                            lineHeight: 1.55,
+                            opacity: status === "future" ? 0.78 : 1,
+                          }}>
+                            {item.desc}
+                          </p>
+                        </div>
                       </div>
-                      <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5 }}>{item.desc}</p>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
+          <style jsx>{`
+            @keyframes mentoraPulse {
+              0%   { box-shadow: 0 0 0 0 rgba(99,102,241,0.55); }
+              70%  { box-shadow: 0 0 0 14px rgba(99,102,241,0); }
+              100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
+            }
+          `}</style>
         </section>
 
         {/* ── ULTIMA NOTE ──────────────────────────────────────── */}
