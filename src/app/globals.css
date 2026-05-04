@@ -108,6 +108,20 @@
     }
   }
 
+  /* NUCLEAR FIX: fixed-position background plate behind everything.
+     Eliminates any white stripe coming from html/body overflow, scrollbar gutter,
+     iPad sidebar peek, rubber-band overscroll, or any other UA quirk.
+     z-index: -1 keeps it behind content, pointer-events: none keeps it inert. */
+  html::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--bg);
+    z-index: -1;
+    pointer-events: none;
+  }
+  body { position: relative; z-index: 0; }
+
   /* All direct page wrappers should never exceed viewport */
   body > div, body > main, body > nav {
     max-width: 100%;

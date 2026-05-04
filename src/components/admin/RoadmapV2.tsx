@@ -26,7 +26,15 @@ export interface RoadmapTaskV2 {
   createdAt: string;     // ISO
 }
 
+// ⚠️ STABLE — DO NOT BUMP. Bumping wipes user data.
+// To add new seed tasks for existing installs, push them via mergeNewSeedTasks() instead.
 const STORAGE_KEY = "mentora_admin_roadmap_v8";
+const LEGACY_KEYS = [
+  "mentora_admin_roadmap_v7",
+  "mentora_admin_roadmap_v6",
+  "mentora_admin_roadmap_v5",
+  "mentora_admin_roadmap_v4",
+];
 const LAUNCH_DATE = "2026-06-01";
 
 // ── Category & state metadata ────────────────────────────────────────────────
@@ -159,15 +167,42 @@ const SEED: RoadmapTaskV2[] = [
 function loadTasks(): RoadmapTaskV2[] {
   if (typeof window === "undefined") return SEED;
   try {
+    // Try current key first
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw === null) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED));
-      return SEED;
+    if (raw !== null) {
+      const parsed = JSON.parse(raw) as RoadmapTaskV2[];
+      if (Array.isArray(parsed)) return mergeNewSeedTasks(parsed);
     }
-    const parsed = JSON.parse(raw) as RoadmapTaskV2[];
-    return Array.isArray(parsed) ? parsed : SEED;
+    // Migrate from legacy keys — preserve user data when key was bumped
+    for (const lk of LEGACY_KEYS) {
+      const lraw = localStorage.getItem(lk);
+      if (lraw !== null) {
+        try {
+          const lparsed = JSON.parse(lraw) as RoadmapTaskV2[];
+          if (Array.isArray(lparsed) && lparsed.length > 0) {
+            const merged = mergeNewSeedTasks(lparsed);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+            // Clean up legacy entries to free localStorage space
+            try { localStorage.removeItem(lk); } catch {}
+            return merged;
+          }
+        } catch {}
+      }
+    }
+    // First install: seed
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED));
+    return SEED;
   } catch { return SEED; }
 }
+
+/** Merge new SEED tasks (by id) into existing user tasks without overwriting user changes.
+ *  Adds tasks from SEED that the user doesn't have yet; keeps user's edits intact. */
+function mergeNewSeedTasks(existing: RoadmapTaskV2[]): RoadmapTaskV2[] {
+  const existingIds = new Set(existing.map(t => t.id));
+  const additions = SEED.filter(s => !existingIds.has(s.id));
+  return additions.length === 0 ? existing : [...existing, ...additions];
+}
+
 function saveTasks(t: RoadmapTaskV2[]) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(t)); } catch {}
 }
