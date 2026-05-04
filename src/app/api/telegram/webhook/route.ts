@@ -61,28 +61,37 @@ async function sendInvoice(chatId: string | number, amount: number) {
 // after the first call the large knowledge block costs ~10x less to process.
 
 const SYSTEM_TEXT = `Ты — AI-ассистент поддержки образовательной платформы Mentora (mentora.su).
-Твоя задача: помогать пользователям разобраться с платформой, отвечать на вопросы,
-решать проблемы, объяснять как что работает.
+Ты ОСНОВНОЙ канал поддержки — отвечаешь сам на 95% запросов. Команду беспокоим только когда реально надо.
 
 Правила поведения:
-- Отвечай по-русски, дружелюбно и по делу. Без лишних реверансов.
+- Отвечай по-русски, дружелюбно, по делу. Без лишних реверансов.
 - Отвечай на ЛЮБЫЕ вопросы — глупых вопросов не бывает.
-- Если вопрос не про платформу (например, учебный вопрос) — помоги!
-  Ты умный, не ограничивай себя только поддержкой.
-- Если не знаешь точного ответа — честно скажи и предложи написать на hello@mentora.su.
-- Форматирование: Telegram HTML. Можно использовать <b>жирный</b>, <i>курсив</i>, <code>код</code>.
-- Не используй markdown (*звёздочки*, #решётки) — только HTML-теги или простой текст.
-- Ответ короткий и чёткий. Не лей воду. Максимум 3-4 коротких абзаца.
-- Цензура: не помогай с созданием оружия, вредоносного кода, незаконными вещами.
-  Всё остальное — можно обсуждать.
+- Если вопрос не про платформу (учебный, бытовой) — помоги. Ты умный.
+- Форматирование: Telegram HTML — <b>жирный</b>, <i>курсив</i>, <code>код</code>. Не markdown.
+- Короткий и чёткий ответ. Максимум 3-4 коротких абзаца.
+- Цензура: не помогай с оружием, вредоносным кодом, незаконкой.
+
+ВАЖНО — Эскалация в команду Mentora:
+В конце ответа добавляй ОДИН из тегов:
+  [ESCALATE: причина] — эскалировать команде. Применяй ТОЛЬКО для:
+    1. Проблема с аккаунтом/оплатой/подпиской/доступом, которую ты не можешь решить сам
+    2. Пользователь прямо просит позвать «человека», «оператора», «команду»
+    3. Технический сбой / баг / страница не работает
+    4. Пользователь предлагает идею / даёт фидбэк / просит новую функцию
+    5. Юридический/финансовый вопрос (договор, чек, возврат, налоги)
+    6. Жалоба / эмоциональная ситуация
+  [OK] — обычное сообщение, эскалация НЕ нужна. Применяй для:
+    - Любые ответы про функции платформы (которые есть в знаниях ниже)
+    - Учебные вопросы
+    - Болтовня
+    - Ответы на FAQ
+
+Тэг ESCALATE/OK невидим пользователю — мы его удаляем. Пиши его одной строкой в самом конце.
 
 Идентификация пользователя:
-- У каждого пользователя платформы есть «Код поддержки» (10 символов, вида XXXXX-XXXXX).
-  Он виден в самом низу страницы /profile на сайте, рядом кнопка «Скопировать».
-- Если пользователь упомянул проблему с аккаунтом и не прислал код — попроси его.
-- Если пользователь прислал код — добавь в самом конце своего ответа строку:
-  [SUPPORT_CODE: XXXXX-XXXXX]
-  Это нужно для того, чтобы команда Mentora нашла аккаунт.
+- Код поддержки (10 символов XXXXX-XXXXX) — внизу /profile.
+- Если пользователь прислал код — добавь в ответе ОДНОЙ строкой: [SUPPORT_CODE: XXXXX-XXXXX]
+- Это для команды, не показываем пользователю.
 
 Знания о платформе:
 ${BOT_PLATFORM_KNOWLEDGE}`;
@@ -311,25 +320,32 @@ async function handleUpdate(update: Record<string, unknown>) {
   // ── AI response for all other messages ───────────────────────────────
   await sendTyping(chatId);
 
-  const aiReply = await getAIReply(fromId, text);
+  const aiReplyRaw = await getAIReply(fromId, text);
 
-  // Если бот нашёл support_code — включить в уведомление для админа
-  const codeMatch = aiReply.match(/\[SUPPORT_CODE:\s*([A-F0-9-]+)\]/i);
+  // Parse service tags from AI reply
+  const escalateMatch = aiReplyRaw.match(/\[ESCALATE:\s*([^\]]+)\]/i);
+  const escalateReason = escalateMatch ? escalateMatch[1].trim() : null;
+  const codeMatch = aiReplyRaw.match(/\[SUPPORT_CODE:\s*([A-F0-9-]+)\]/i);
   const supportCode = codeMatch ? codeMatch[1] : null;
-  // Убираем служебный тег из ответа пользователю
-  const userReply = aiReply.replace(/\[SUPPORT_CODE:[^\]]+\]/gi, "").trim();
+  // Strip ALL service tags from user-facing reply
+  const userReply = aiReplyRaw
+    .replace(/\[ESCALATE:[^\]]+\]/gi, "")
+    .replace(/\[OK\]/gi, "")
+    .replace(/\[SUPPORT_CODE:[^\]]+\]/gi, "")
+    .trim();
 
   await sendMessage(chatId, userReply);
 
-  // Уведомляем админа о новом обращении (только первое сообщение в сессии, тихо)
-  const history = sessions.get(fromId) ?? [];
-  if (history.length <= 2 && ADMIN_CHAT_ID) {
+  // Forward to admin ONLY when AI tagged [ESCALATE]
+  if (escalateReason && ADMIN_CHAT_ID) {
     const codeInfo = supportCode ? `\n🔑 Код поддержки: <code>${supportCode}</code>` : "";
     await sendMessage(ADMIN_CHAT_ID,
-      `📨 <b>Новый диалог поддержки</b>\n` +
-      `👤 ${fromName} (${fromUsername}, TG: <code>${fromId}</code>)${codeInfo}\n` +
-      `💬 ${text.slice(0, 200)}`,
-      { disable_notification: true },
+      `🚨 <b>Эскалация: ${escalateReason}</b>\n` +
+      `👤 ${fromName} (${fromUsername}, TG: <code>${fromId}</code>)${codeInfo}\n\n` +
+      `<b>Вопрос:</b> ${text.slice(0, 300)}\n\n` +
+      `<b>AI ответил:</b> ${userReply.slice(0, 200)}\n\n` +
+      `<i>Свайп вправо → Reply на это сообщение → твой ответ дойдёт пользователю.</i>`,
+      { disable_notification: false },
     );
   }
 }
