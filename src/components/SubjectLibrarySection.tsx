@@ -361,22 +361,45 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
         >
         <button
           onClick={() => setAddOpen(true)}
-          className="relative rounded-2xl border-dashed border-2 flex flex-col items-center justify-center p-5 h-full min-h-[160px] gap-2.5 transition-all duration-200 group"
-          style={{ background: "var(--bg-card)", borderColor: "var(--border)", boxShadow: "0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)" }}
+          className="relative w-full rounded-2xl border-dashed border-2 flex flex-col items-center justify-center p-5 gap-3 transition-all duration-200 group overflow-hidden"
+          style={{
+            aspectRatio: "1 / 1",
+            minHeight: 200,
+            background: "linear-gradient(135deg, rgba(69,97,232,0.04) 0%, rgba(124,58,237,0.03) 100%), var(--bg-card)",
+            borderColor: "var(--border)",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)",
+          }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(69,97,232,0.5)";
-            (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 20px rgba(69,97,232,0.12), 0 4px 16px rgba(0,0,0,0.06)";
+            (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(69,97,232,0.55)";
+            (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0 28px rgba(69,97,232,0.18), 0 4px 16px rgba(0,0,0,0.06)";
+            (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-2px)";
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border)";
             (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)";
+            (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
           }}
         >
-          <div className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
-            style={{ background: "var(--bg-secondary)" }}>
-            <span className="text-xl font-light" style={{ color: "var(--text-muted)" }}>+</span>
+          <div className="absolute pointer-events-none opacity-50 group-hover:opacity-90 transition-opacity duration-300"
+            aria-hidden
+            style={{
+              top: "30%", left: "50%", transform: "translate(-50%, -50%)",
+              width: 140, height: 140, borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(69,97,232,0.16) 0%, transparent 70%)",
+              filter: "blur(18px)",
+            }}
+          />
+          <div className="relative w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200 group-hover:scale-110"
+            style={{
+              background: "linear-gradient(135deg, rgba(69,97,232,0.18), rgba(124,58,237,0.12))",
+              border: "1.5px solid rgba(69,97,232,0.25)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.20), 0 4px 16px rgba(69,97,232,0.18)",
+            }}>
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
           </div>
-          <span className="text-xs font-semibold text-center" style={{ color: "var(--text-muted)" }}>
+          <span className="relative text-sm font-bold" style={{ color: "var(--text-secondary)" }}>
             {t("add")}
           </span>
         </button>

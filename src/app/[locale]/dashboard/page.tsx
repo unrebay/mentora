@@ -389,7 +389,7 @@ export default async function DashboardPage() {
             {currentStreak > 0 && (
               <div className="flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm border"
                 style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-                <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none">
+                <svg className="shrink-0" width="23" height="23" viewBox="0 0 24 24" fill="none" style={{ marginTop: 1 }}>
                   <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00" />
                 </svg>
                 <span style={{ color: "var(--text-secondary)" }}>
@@ -453,18 +453,34 @@ export default async function DashboardPage() {
 
               <div className="p-5">
                 {/* Header row: icon + label + title */}
-                <div className="flex items-center gap-3 mb-3">
-                  <SubjectIcon id={lastActiveSubject.id} size={44} />
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="relative flex-shrink-0" style={{ marginTop: 2 }}>
+                    <div className="absolute pointer-events-none" aria-hidden
+                      style={{
+                        top: -6, left: -6, width: 60, height: 60, borderRadius: "50%",
+                        background: `radial-gradient(circle, ${accent}26 0%, transparent 70%)`,
+                        filter: "blur(10px)",
+                      }}
+                    />
+                    <SubjectIcon id={lastActiveSubject.id} size={48} />
+                  </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-bold tracking-[0.15em] uppercase"
+                    <p className="text-[10px] font-bold tracking-[0.18em] uppercase flex items-center gap-1.5"
                       style={{ color: accent }}>
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: accent, boxShadow: `0 0 8px ${accent}` }} />
                       {t("continueLearning")}
                     </p>
-                    <p className="font-bold text-lg leading-tight mt-0.5" style={{ color: "var(--text)" }}>
+                    <p className="font-black text-xl leading-tight mt-1" style={{ color: "var(--text)", letterSpacing: "-0.01em" }}>
                       {lastActiveSubject.title}
                     </p>
                     {lastTopicHint && (
-                      <p className="text-xs mt-0.5 truncate" style={{ color: "var(--text-muted)", opacity: 0.7 }}>
+                      <p className="text-sm mt-1.5 leading-snug" style={{
+                        color: "var(--text-secondary)",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}>
                         {lastTopicHint}
                       </p>
                     )}
@@ -479,7 +495,7 @@ export default async function DashboardPage() {
                   {streak > 0 && (
                     <>
                       <span style={{ opacity: 0.4 }}>·</span>
-                      <svg viewBox="0 0 24 24" width="11" height="11" fill="#f97316">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="#f97316" style={{ marginTop: 2 }}>
                         <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z"/>
                       </svg>
                       <span>{streak} {t("xpInRow")}</span>
