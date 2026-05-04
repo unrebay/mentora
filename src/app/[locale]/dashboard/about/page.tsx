@@ -55,15 +55,34 @@ export default function AboutPage() {
 
   /* ── Helpers ──────────────────────────────────────────────────── */
   function Tag({ children, color = "#4561E8" }: { children: React.ReactNode; color?: string }) {
+    // Editorial-style section marker:
+    // ●━━━ TITLE ─── (glowing dot + gradient connector + bracketed text)
     return (
-      <span style={{
-        display: "inline-block", fontSize: 11, fontWeight: 700,
-        letterSpacing: "0.08em", textTransform: "uppercase" as const,
-        padding: "3px 10px", borderRadius: 99,
-        background: `${color}18`, color, border: `1px solid ${color}38`,
-      }}>
-        {children}
-      </span>
+      <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+        {/* Glowing 3D dot */}
+        <span aria-hidden style={{
+          width: 8, height: 8, borderRadius: "50%",
+          background: `radial-gradient(circle at 30% 30%, ${color}, ${color}99 65%, ${color}55)`,
+          boxShadow: `0 0 12px ${color}88, 0 0 4px ${color}, inset 0 1px 1px rgba(255,255,255,0.4)`,
+          flexShrink: 0,
+        }} />
+        {/* Gradient connector line */}
+        <span aria-hidden style={{
+          width: 32, height: 1.5, borderRadius: 1,
+          background: `linear-gradient(90deg, ${color}, ${color}33 70%, transparent)`,
+          flexShrink: 0,
+        }} />
+        {/* Label with monospaced § prefix */}
+        <span style={{
+          fontSize: 11, fontWeight: 800,
+          letterSpacing: "0.18em", textTransform: "uppercase" as const,
+          color,
+          fontVariant: "small-caps",
+        }}>
+          <span style={{ opacity: 0.55, marginRight: 6, fontFamily: "ui-monospace, SF Mono, Menlo, monospace", fontWeight: 700 }}>§</span>
+          {children}
+        </span>
+      </div>
     );
   }
 
