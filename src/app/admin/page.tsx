@@ -148,13 +148,34 @@ function Badge({ plan }: { plan: string }) {
   const { l, c } = planMeta(plan);
   return <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 100, fontSize: 11, fontWeight: 600, background: c + "20", border: `1px solid ${c}40`, color: c }}>{l}</span>;
 }
-function NavBtn({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick(): void }) {
-  const { MUTED, isDark, SHADOW } = useTok();
-  const activeBg = isDark ? BRAND+"22" : "rgba(69,97,232,0.1)";
-  const activeColor = isDark ? "#a0b4ff" : BRAND;
-  const activeShadow = isDark ? "none" : "0 1px 8px rgba(69,97,232,0.12)";
-  return <button onClick={onClick} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 10, border: active && !isDark ? `1px solid rgba(69,97,232,0.18)` : "1px solid transparent", cursor: "pointer", background: active ? activeBg : "transparent", color: active ? activeColor : MUTED, fontSize: 14, fontWeight: active ? 600 : 400, transition: "all .15s", outline: "none", boxShadow: active ? activeShadow : "none" }}>
-    <span style={{ opacity: active ? 1 : 0.6 }}>{icon}</span>{label}
+function NavBtn({ icon, label, active, onClick, collapsed = false }: { icon: React.ReactNode; label: string; active: boolean; onClick(): void; collapsed?: boolean }) {
+  const { MUTED, isDark } = useTok();
+  const activeBg = isDark ? "rgba(124,58,237,0.18)" : "rgba(69,97,232,0.1)";
+  const activeColor = isDark ? "#bcc8ff" : BRAND;
+  const activeShadow = isDark
+    ? "0 0 14px rgba(124,58,237,0.25), inset 0 1px 0 rgba(255,255,255,0.06)"
+    : "0 1px 8px rgba(69,97,232,0.12)";
+  return <button
+    onClick={onClick}
+    title={collapsed ? label : undefined}
+    style={{
+      width: "100%",
+      display: "flex", alignItems: "center", gap: 10,
+      padding: collapsed ? "10px 0" : "10px 14px",
+      justifyContent: collapsed ? "center" : "flex-start",
+      borderRadius: 10,
+      border: active ? (isDark ? "1px solid rgba(124,58,237,0.32)" : "1px solid rgba(69,97,232,0.18)") : "1px solid transparent",
+      cursor: "pointer",
+      background: active ? activeBg : "transparent",
+      color: active ? activeColor : MUTED,
+      fontSize: 14, fontWeight: active ? 600 : 400,
+      transition: "all .15s",
+      outline: "none",
+      boxShadow: active ? activeShadow : "none",
+      whiteSpace: "nowrap", overflow: "hidden",
+    }}>
+    <span style={{ opacity: active ? 1 : 0.6, flexShrink: 0 }}>{icon}</span>
+    {!collapsed && <span>{label}</span>}
   </button>;
 }
 function TH({ label }: { label: string }) {
@@ -1002,6 +1023,24 @@ export default function AdminPanel() {
   const [tab, setTab]         = useState<Tab>("overview");
   const [stats, setStats]     = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen]     = useState(true);   // desktop: open=full width, closed=icons only
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);  // mobile: overlay slide-in
+  const [isMobile, setIsMobile]           = useState(false);
+
+  // Detect mobile breakpoint + restore sidebar persistence
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    try {
+      const saved = localStorage.getItem("mentora_admin_sidebar_open");
+      if (saved !== null) setSidebarOpen(saved === "1");
+    } catch {}
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem("mentora_admin_sidebar_open", sidebarOpen ? "1" : "0"); } catch {}
+  }, [sidebarOpen]);
   const reload = useCallback(async () => {
     setLoading(true);
     try {
@@ -1053,38 +1092,158 @@ export default function AdminPanel() {
           <div style={{ position: "fixed", width: 350, height: 350, borderRadius: "50%", background: "radial-gradient(circle, rgba(56,189,213,0.08) 0%, transparent 70%)", bottom: 50, left: 300, pointerEvents: "none", zIndex: 0 }} />
         </>}
 
-        {/* Sidebar */}
-        <aside style={{ width: 220, flexShrink: 0, background: SIDE, borderRight: `1px solid ${BOR}`, padding: "24px 14px", display: "flex", flexDirection: "column", gap: 4, position: "sticky", top: 0, height: "100vh", zIndex: 10, backdropFilter: isDark ? "none" : "blur(20px) saturate(1.8)", WebkitBackdropFilter: isDark ? "none" : "blur(20px) saturate(1.8)", boxShadow: isDark ? "none" : "2px 0 24px rgba(69,97,232,0.1), 1px 0 0 rgba(69,97,232,0.08)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 14px 24px" }}>
-            <div style={{ width: 30, height: 30, borderRadius: 8, background: BRAND, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        {/* Mobile overlay backdrop when nav is open */}
+        {isMobile && mobileNavOpen && (
+          <div onClick={() => setMobileNavOpen(false)} style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
+            backdropFilter: "blur(2px)", zIndex: 19, animation: "adminFadeIn .2s ease-out",
+          }} />
+        )}
+
+        {/* Sidebar — glass, collapsible (desktop) / slide-in (mobile) */}
+        <aside
+          style={{
+            width: isMobile ? 240 : (sidebarOpen ? 220 : 64),
+            flexShrink: 0,
+            background: isDark
+              ? "linear-gradient(180deg, rgba(22,22,44,0.78), rgba(10,10,24,0.82) 60%, rgba(6,6,15,0.85))"
+              : "linear-gradient(180deg, rgba(255,255,255,0.78), rgba(245,247,255,0.74))",
+            borderRight: isDark ? "1px solid rgba(124,58,237,0.18)" : "1px solid rgba(69,97,232,0.10)",
+            padding: (sidebarOpen || isMobile) ? "20px 14px" : "20px 8px",
+            display: "flex", flexDirection: "column", gap: 4,
+            position: isMobile ? "fixed" : "sticky",
+            top: 0, left: 0,
+            height: "100vh", zIndex: 20,
+            transform: isMobile ? (mobileNavOpen ? "translateX(0)" : "translateX(-100%)") : "none",
+            transition: "transform .25s cubic-bezier(.34,1.56,.64,1), width .2s ease",
+            backdropFilter: "blur(22px) saturate(1.5)",
+            WebkitBackdropFilter: "blur(22px) saturate(1.5)",
+            boxShadow: isDark
+              ? "2px 0 32px rgba(0,0,0,0.40), inset -1px 0 0 rgba(255,255,255,0.04)"
+              : "2px 0 32px rgba(69,97,232,0.10), inset -1px 0 0 rgba(69,97,232,0.06)",
+          }}>
+
+          {/* Header: logo + collapse-toggle */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: (sidebarOpen || isMobile) ? "4px 8px 18px" : "4px 0 18px",
+            gap: 8,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: 9, flexShrink: 0,
+                background: "linear-gradient(135deg, #4561E8, #7C3AED)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "0 4px 14px rgba(69,97,232,0.40), inset 0 1px 0 rgba(255,255,255,0.20)",
+              }}>
+                <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              </div>
+              {(sidebarOpen || isMobile) && (
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: 14, fontWeight: 800, color: TEXT, margin: 0 }}>Mentora</p>
+                  <p style={{ fontSize: 10, color: MUTED, margin: 0, opacity: 0.7 }}>Admin · только ты</p>
+                </div>
+              )}
             </div>
-            <div><p style={{ fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>Mentora</p><p style={{ fontSize: 10, color: MUTED, margin: 0 }}>Admin · только ты</p></div>
+            {/* Collapse toggle (desktop only) */}
+            {!isMobile && (
+              <button onClick={() => setSidebarOpen(o => !o)}
+                title={sidebarOpen ? "Свернуть меню" : "Развернуть меню"}
+                style={{
+                  width: 28, height: 28, borderRadius: 7,
+                  background: "transparent",
+                  border: `1px solid ${BOR}`,
+                  cursor: "pointer", color: MUTED,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "all .15s",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  {sidebarOpen
+                    ? <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>
+                    : <><line x1="9" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="9" y1="18" x2="21" y2="18"/></>}
+                </svg>
+              </button>
+            )}
+            {/* Close button (mobile only) */}
+            {isMobile && (
+              <button onClick={() => setMobileNavOpen(false)}
+                style={{
+                  width: 28, height: 28, borderRadius: 7, background: "transparent",
+                  border: `1px solid ${BOR}`, cursor: "pointer", color: MUTED,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            )}
           </div>
 
-          {TABS.map(t => <NavBtn key={t.id} icon={t.icon} label={t.label} active={tab === t.id} onClick={() => setTab(t.id)} />)}
+          {TABS.map(t => <NavBtn
+            key={t.id} icon={t.icon} label={t.label}
+            active={tab === t.id}
+            collapsed={!sidebarOpen && !isMobile}
+            onClick={() => { setTab(t.id); if (isMobile) setMobileNavOpen(false); }}
+          />)}
 
           <div style={{ flex: 1 }} />
 
           {/* Theme toggle */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderTop: `1px solid ${BOR}`, marginTop: 8 }}>
-            <span style={{ fontSize: 12, color: MUTED }}>{isDark ? "Тёмная" : "Светлая"}</span>
+          <div style={{
+            display: "flex", alignItems: "center",
+            justifyContent: (sidebarOpen || isMobile) ? "space-between" : "center",
+            padding: (sidebarOpen || isMobile) ? "10px 14px" : "10px 0",
+            borderTop: `1px solid ${BOR}`, marginTop: 8,
+          }}>
+            {(sidebarOpen || isMobile) && <span style={{ fontSize: 12, color: MUTED }}>Тема</span>}
             <ThemeToggle />
           </div>
 
-          <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", color: MUTED, fontSize: 13, textDecoration: "none", borderRadius: 10 }}>
+          <Link href="/dashboard" title="На сайт"
+            style={{
+              display: "flex", alignItems: "center",
+              gap: 8, justifyContent: (sidebarOpen || isMobile) ? "flex-start" : "center",
+              padding: (sidebarOpen || isMobile) ? "10px 14px" : "10px 0",
+              color: MUTED, fontSize: 13, textDecoration: "none", borderRadius: 10,
+            }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
-            На сайт
+            {(sidebarOpen || isMobile) && <span>На сайт</span>}
           </Link>
-          {stats && <p style={{ fontSize: 10, color: MUTED, padding: "2px 14px", opacity: 0.4 }}>{new Date(stats.generatedAt).toLocaleTimeString("ru-RU")}</p>}
+          {stats && (sidebarOpen || isMobile) && <p style={{ fontSize: 10, color: MUTED, padding: "2px 14px", opacity: 0.4 }}>{new Date(stats.generatedAt).toLocaleTimeString("ru-RU")}</p>}
+
+          <style>{`
+            @keyframes adminFadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+          `}</style>
         </aside>
 
         {/* Content */}
-        <main style={{ flex: 1, padding: "32px 36px", overflowY: "auto", minWidth: 0, position: "relative", zIndex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
-            <div>
-              <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{TABS.find(t => t.id === tab)?.label}</h1>
-              <p style={{ fontSize: 13, color: MUTED, marginTop: 4, marginBottom: 0 }}>mentora.su / admin</p>
+        <main style={{ flex: 1, padding: isMobile ? "20px 18px" : "32px 36px", overflowY: "auto", minWidth: 0, position: "relative", zIndex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, gap: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+              {/* Mobile burger to open sidebar */}
+              {isMobile && (
+                <button onClick={() => setMobileNavOpen(true)}
+                  aria-label="Открыть меню"
+                  style={{
+                    width: 38, height: 38, borderRadius: 10,
+                    background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+                    border: `1px solid ${BOR}`,
+                    cursor: "pointer", color: TEXT, flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+                  </svg>
+                </button>
+              )}
+              <div style={{ minWidth: 0 }}>
+                <h1 style={{ fontSize: isMobile ? 18 : 22, fontWeight: 700, margin: 0 }}>{TABS.find(t => t.id === tab)?.label}</h1>
+                <p style={{ fontSize: 13, color: MUTED, marginTop: 4, marginBottom: 0 }}>mentora.su / admin</p>
+              </div>
+              </div>
             </div>
             {tab !== "team" && (
               <button onClick={reload} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, border: `1px solid ${BOR}`, background: CARD, color: MUTED, fontSize: 13, cursor: "pointer" }}>
