@@ -154,13 +154,18 @@ export default async function HomePage() {
       {/* HERO — padding-top compensates for the negative margin (100px covers nav on all devices) */}
       <section className="relative overflow-hidden" style={{ paddingTop: "100px" }}>
 
-        {/* ── Subtle left-side darkening so hero text stays readable over the galaxy (max ~12% alpha) ── */}
+        {/* ── Tint layer between galaxy and content — like /auth overlay ── */}
+        {/* Desktop: stronger left side (around hero text), softer right (chat box still glows) */}
         <div className="absolute inset-0 pointer-events-none hidden md:block z-[1]" style={{
-          background: "linear-gradient(to right, rgba(5,10,20,0.12) 0%, rgba(5,10,20,0.09) 30%, rgba(5,10,20,0.04) 55%, rgba(5,10,20,0) 80%)",
+          background: "linear-gradient(to right, rgba(4,6,15,0.55) 0%, rgba(4,6,15,0.42) 40%, rgba(4,6,15,0.20) 70%, rgba(4,6,15,0.10) 100%)",
         }} />
-        {/* Mobile: uniform thin overlay (text takes full width on small screens) */}
+        {/* Vertical fade — top + bottom slightly darker so hero text feels grounded */}
+        <div className="absolute inset-0 pointer-events-none hidden md:block z-[1]" style={{
+          background: "radial-gradient(ellipse 90% 70% at 50% 50%, transparent 30%, rgba(4,6,15,0.30) 75%, rgba(4,6,15,0.55) 100%)",
+        }} />
+        {/* Mobile: uniform tint (heavy because text is over busy area) */}
         <div className="absolute inset-0 pointer-events-none md:hidden z-[1]" style={{
-          background: "rgba(5,10,20,0.10)",
+          background: "rgba(4,6,15,0.55)",
         }} />
 
         {/* ── Hero grid — fills full viewport height ── */}
