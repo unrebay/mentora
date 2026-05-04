@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 
 /* ── Static non-localizable data ──────────────────────────────── */
-const VALUE_META = [
+const VALUE_META: { icon: string; color: string; custom?: "handsFlower" }[] = [
   { icon: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z", color: "#4561E8" },
-  { icon: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0-4 4v2M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75", color: "#10B981" },
+  { icon: "", color: "#10B981", custom: "handsFlower" },
   { icon: "M13 2L3 14h9l-1 8 10-12h-9l1-8z", color: "#F59E0B" },
   { icon: "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11", color: "#A78BFA" },
 ];
@@ -345,16 +345,31 @@ export default function AboutPage() {
                       padding: "10px 14px",
                       fontSize: 12, fontWeight: 700, textAlign: "left" as const,
                       color: i === 3 ? "#4561E8" : "var(--text-muted)",
-                      background: i === 3 ? "rgba(69,97,232,0.09)" : "var(--bg-secondary)",
-                      borderBottom: i === 3 ? "1px solid rgba(69,97,232,0.22)" : "1px solid var(--border)",
+                      background: i === 3
+                        ? "linear-gradient(180deg, rgba(69,97,232,0.18) 0%, rgba(124,58,237,0.10) 50%, rgba(69,97,232,0.06) 100%), rgba(255,255,255,0.04)"
+                        : "var(--bg-secondary)",
+                      borderBottom: i === 3 ? "1px solid rgba(69,97,232,0.30)" : "1px solid var(--border)",
                       borderTop: "1px solid var(--border-light)",
-                      borderLeft: i === 3 ? "1px solid rgba(69,97,232,0.22)" : i === 0 ? "1px solid var(--border-light)" : "none",
-                      borderRight: i === 3 ? "1px solid rgba(69,97,232,0.22)" : i === 4 ? "1px solid var(--border-light)" : "none",
+                      borderLeft: i === 3 ? "1px solid rgba(69,97,232,0.28)" : i === 0 ? "1px solid var(--border-light)" : "none",
+                      borderRight: i === 3 ? "1px solid rgba(69,97,232,0.28)" : i === 4 ? "1px solid var(--border-light)" : "none",
                       borderRadius: i === 0 ? "12px 0 0 0" : i === 4 ? "0 12px 0 0" : 0,
                       whiteSpace: "nowrap" as const,
                       letterSpacing: "0.03em",
+                      backdropFilter: i === 3 ? "blur(10px) saturate(1.4)" : undefined,
+                      WebkitBackdropFilter: i === 3 ? "blur(10px) saturate(1.4)" : undefined,
+                      boxShadow: i === 3 ? "inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -1px 0 rgba(124,58,237,0.20)" : undefined,
                     }}>
-                      {h}
+                      {i === 3 ? (
+                        <span style={{
+                          fontFamily: "var(--font-playfair), Georgia, serif",
+                          fontWeight: 800,
+                          fontSize: 14,
+                          letterSpacing: "-0.01em",
+                          color: "var(--text)",
+                        }}>
+                          M<span style={{ fontStyle: "italic", color: "#4561E8" }}>e</span>ntora
+                        </span>
+                      ) : h}
                     </th>
                   ))}
                 </tr>
@@ -370,11 +385,15 @@ export default function AboutPage() {
                       : i === 3 ? "#4561E8"
                       : "var(--text-secondary)",
                     fontWeight: val === "✓" || val === "✗" ? 700 : 500,
-                    background: i === 3 ? "rgba(69,97,232,0.06)" : ri % 2 === 0 ? "var(--bg-secondary)" : "transparent",
+                    background: i === 3
+                      ? "linear-gradient(180deg, rgba(69,97,232,0.12) 0%, rgba(124,58,237,0.06) 50%, rgba(69,97,232,0.10) 100%), rgba(255,255,255,0.02)"
+                      : ri % 2 === 0 ? "var(--bg-secondary)" : "transparent",
                     borderBottom: "1px solid var(--border-light)",
-                    borderLeft: i === 3 ? "1px solid rgba(69,97,232,0.18)" : i === 0 ? "1px solid var(--border-light)" : "none",
-                    borderRight: i === 3 ? "1px solid rgba(69,97,232,0.18)" : i === 4 ? "1px solid var(--border-light)" : "none",
+                    borderLeft: i === 3 ? "1px solid rgba(69,97,232,0.22)" : i === 0 ? "1px solid var(--border-light)" : "none",
+                    borderRight: i === 3 ? "1px solid rgba(69,97,232,0.22)" : i === 4 ? "1px solid var(--border-light)" : "none",
                     borderRadius: isLast && i === 0 ? "0 0 0 12px" : isLast && i === 4 ? "0 0 12px 0" : 0,
+                    backdropFilter: i === 3 ? "blur(8px) saturate(1.3)" : undefined,
+                    WebkitBackdropFilter: i === 3 ? "blur(8px) saturate(1.3)" : undefined,
                     lineHeight: 1.4,
                   });
                   return (
@@ -424,9 +443,30 @@ export default function AboutPage() {
                     boxShadow: `inset 0 1px 0 rgba(255,255,255,0.15), 0 6px 14px ${meta.color}30`,
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke={meta.color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <path d={meta.icon} />
-                    </svg>
+                    {meta.custom === "handsFlower" ? (
+                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke={meta.color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        {/* Two cupped hands forming a bowl */}
+                        <path d="M3 14c0-1.5 1-2.5 2-2.5s2 1 2 2.5v3c0 1.5-1 2.5-2 2.5h0a2 2 0 0 1-2-2v-3.5z" />
+                        <path d="M21 14c0-1.5-1-2.5-2-2.5s-2 1-2 2.5v3c0 1.5 1 2.5 2 2.5h0a2 2 0 0 0 2-2v-3.5z" />
+                        <path d="M7 17h10" />
+                        {/* Flower stem */}
+                        <path d="M12 11.5V8" />
+                        {/* Two leaves */}
+                        <path d="M12 9.5c-1-.5-2-.2-2.5.7" />
+                        <path d="M12 9.5c1-.5 2-.2 2.5.7" />
+                        {/* Flower petals (5) */}
+                        <circle cx="12" cy="6" r="1.4" fill={meta.color} stroke="none" />
+                        <circle cx="9.7" cy="5" r="1.1" fill={meta.color} stroke="none" />
+                        <circle cx="14.3" cy="5" r="1.1" fill={meta.color} stroke="none" />
+                        <circle cx="10.4" cy="3.2" r="1.1" fill={meta.color} stroke="none" />
+                        <circle cx="13.6" cy="3.2" r="1.1" fill={meta.color} stroke="none" />
+                        <circle cx="12" cy="4.6" r="0.7" fill="#FBBF24" stroke="none" />
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke={meta.color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d={meta.icon} />
+                      </svg>
+                    )}
                   </div>
                   <div className="relative flex-1">
                     <div style={{ fontWeight: 700, color: "var(--text)", fontSize: 14, marginBottom: 5 }}>{v.title}</div>
@@ -703,6 +743,33 @@ export default function AboutPage() {
         </section>
 
       </div>
+
+      {/* Floating "Пригласить" CTA */}
+      <a
+        href="https://t.me/share/url?url=https://mentora.su&text=Mentora — твой персональный AI-ментор по 17 наукам"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-40 group"
+        aria-label="Пригласить друга"
+        style={{ pointerEvents: "auto" }}
+      >
+        <div
+          className="flex items-center gap-2.5 rounded-full px-5 py-3.5 text-sm font-bold text-white transition-all duration-200 group-hover:scale-[1.04] group-active:scale-[0.98]"
+          style={{
+            background: "linear-gradient(135deg, #4561E8 0%, #6366F1 50%, #7C3AED 100%)",
+            boxShadow: "0 12px 36px rgba(69,97,232,0.45), 0 0 0 1px rgba(255,255,255,0.10) inset, 0 1px 0 rgba(255,255,255,0.20) inset",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+          }}
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="8.5" cy="7" r="4" />
+            <path d="M20 8v6M23 11h-6" />
+          </svg>
+          Пригласить
+        </div>
+      </a>
     </div>
   );
 }
