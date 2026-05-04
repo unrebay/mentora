@@ -790,7 +790,7 @@
         "desc": "First steps"
       },
       "explorer": {
-        "name": "Explorer",
+        "name": "Enthusiast",
         "desc": "100 XP — journey begins"
       },
       "scholar": {
@@ -920,7 +920,7 @@
       "streakOf": "{n} day streak",
       "tiers": {
         "beginner": "Beginner",
-        "explorer": "Explorer",
+        "explorer": "Enthusiast",
         "scholar": "Scholar",
         "historian": "Historian",
         "expert": "Expert",

@@ -259,8 +259,8 @@ export default async function ProfilePage() {
       <main className="max-w-3xl mx-auto px-6 py-10 space-y-6">
 
         {/* ── Profile card ─────────────────────────────────── */}
-        <div className="rounded-2xl p-6 border flex flex-col sm:flex-row items-start sm:items-center gap-5"
-          style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
+        <div className="rounded-2xl p-6 border flex flex-col sm:flex-row items-start sm:items-center gap-5 animate-fade-in-up"
+          style={{ background: "var(--bg-card)", borderColor: "var(--border)", animationDelay: "0ms" }}
         >
           {/* Avatar — current LevelAvatar (planet/trophy) */}
           <div className="relative shrink-0">
@@ -307,7 +307,7 @@ export default async function ProfilePage() {
         </div>
 
         {/* ── Stats grid ───────────────────────────────────── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-fade-in-up" style={{ animationDelay: "60ms", opacity: 0 }}>
           <StatCard label="Мент"          value={totalXP}       icon={<MentIcon />}    accent="var(--brand)" isBrand />
           <StatCard label="Рекорд стрика" value={bestStreak}    icon={<FlameIcon />}   accent="#FF7A00" />
           <StatCard label="Сообщений"     value={totalMessages} icon={<MessageIcon />} accent="#10B981" />
@@ -315,11 +315,13 @@ export default async function ProfilePage() {
         </div>
 
         {/* ── Avatar grid ──────────────────────────────────── */}
-        <AvatarGrid totalXP={totalXP} initialSelected={(profileRow as { selected_avatar?: number | null } | null)?.selected_avatar ?? null} />
+        <div className="animate-fade-in-up" style={{ animationDelay: "120ms", opacity: 0 }}>
+          <AvatarGrid totalXP={totalXP} initialSelected={(profileRow as { selected_avatar?: number | null } | null)?.selected_avatar ?? null} />
+        </div>
 
         {/* ── XP Progress bar ──────────────────────────────── */}
-        <div className="rounded-2xl p-6 border"
-          style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
+        <div className="rounded-2xl p-6 border animate-fade-in-up"
+          style={{ background: "var(--bg-card)", borderColor: "var(--border)", animationDelay: "180ms", opacity: 0 }}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <span className="font-semibold" style={{ color: "var(--text)" }}>{lvl.name}</span>
@@ -376,7 +378,7 @@ export default async function ProfilePage() {
 
         {/* ── Earned badges ────────────────────────────────── */}
         {earned.length > 0 && (
-          <div>
+          <div className="animate-fade-in-up" style={{ animationDelay: "240ms", opacity: 0 }}>
             <h2 className="text-xs font-bold tracking-[0.18em] uppercase mb-4 flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -409,7 +411,7 @@ export default async function ProfilePage() {
 
         {/* ── Locked badges ────────────────────────────────── */}
         {locked.length > 0 && (
-          <div>
+          <div className="animate-fade-in-up" style={{ animationDelay: "300ms", opacity: 0 }}>
             <h2 className="text-xs font-bold tracking-[0.18em] uppercase mb-4" style={{ color: "var(--text-muted)" }}>
               Ещё не разблокировано · {locked.length}
             </h2>

@@ -116,7 +116,6 @@ export default function DashboardNav({
     { href: "/dashboard",           label: t("dashboard.nav.subjects") },
     { href: "/dashboard/analytics", label: t("dashboard.nav.analytics") },
     { href: "/knowledge",           label: t("dashboard.nav.galaxy") },
-    { href: "/profile",             label: t("dashboard.nav.profile") },
     { href: "/dashboard/about",     label: t("dashboard.nav.about") },
   ];
 
@@ -149,7 +148,7 @@ export default function DashboardNav({
           borderRadius: 28,
           border: navBorder,
           boxShadow: navShadow,
-          overflow: "hidden",
+          overflow: "visible", // visible so UserDropdown can extend beyond pill
           position: "relative",
         }}
       >
