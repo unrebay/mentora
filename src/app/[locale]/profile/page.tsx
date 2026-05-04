@@ -9,6 +9,7 @@ import MeLogo from "@/components/MeLogo";
 import DashboardNav from "@/components/DashboardNav";
 import StatCard, { MentIcon, FlameIcon, MessageIcon, StarIcon } from "@/components/StatCard";
 import AvatarGrid from "@/components/AvatarGrid";
+import LevelAvatar from "@/components/LevelAvatar";
 import SupportCodeCopy from "@/components/SupportCodeCopy";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
 import FreeWindowPill from "@/components/FreeWindowPill";
@@ -333,17 +334,41 @@ export default async function ProfilePage() {
               </span>
             )}
           </div>
-          <div className="h-3 rounded-full overflow-hidden" style={{ background: "var(--bg-secondary)" }}>
-            <div className="h-full rounded-full transition-all duration-700"
-              style={{
-                width: `${lvl.progress}%`,
-                background: `linear-gradient(90deg, ${lvl.grad[0]}, ${lvl.grad[1]})`,
-                boxShadow: `0 0 8px ${lvl.color}60`,
-              }}
-            />
+          {/* Bar with avatar at start (current) and at end (next, dimmed) */}
+          <div className="flex items-center gap-2.5">
+            <span className="flex-shrink-0" title={lvl.name} style={{
+              width: 36, height: 36, borderRadius: "50%",
+              border: "1px solid var(--border)", overflow: "hidden",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              background: "var(--bg-secondary)",
+            }}>
+              <LevelAvatar level={lvl.idx} size={36} />
+            </span>
+            <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: "var(--bg-secondary)" }}>
+              <div className="h-full rounded-full transition-all duration-700"
+                style={{
+                  width: `${lvl.progress}%`,
+                  background: `linear-gradient(90deg, ${lvl.grad[0]}, ${lvl.grad[1]})`,
+                  boxShadow: `0 0 8px ${lvl.color}60`,
+                }}
+              />
+            </div>
+            {lvl.next && (
+              <span className="flex-shrink-0" title={`${lvl.next.name} — ${lvl.next.minXP} мент`} style={{
+                width: 36, height: 36, borderRadius: "50%",
+                border: "1px dashed var(--border)", overflow: "hidden",
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                background: "var(--bg-secondary)", opacity: 0.55, filter: "grayscale(0.45)",
+              }}>
+                <LevelAvatar level={Math.min(7, lvl.idx + 1)} size={36} />
+              </span>
+            )}
           </div>
           <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
             {totalXP.toLocaleString("ru-RU")} / {(lvl.next?.minXP ?? totalXP).toLocaleString("ru-RU")} {pluralMenty(lvl.next?.minXP ?? totalXP)}
+            {lvl.next && lvl.idx + 1 < 8 && (
+              <> · откроется аватарка <span style={{ color: "var(--text)", fontWeight: 600 }}>{["Луна","Меркурий","Плутон","Земля","Марс","Юпитер","Сатурн","Кубок"][Math.min(7, lvl.idx + 1)]}</span></>
+            )}
           </p>
         </div>
 
