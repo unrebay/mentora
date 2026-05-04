@@ -22,9 +22,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const [{ data: profile }, { data: progressData },
     { data: profileRow }
   ] = await Promise.all([
-    supabase.from("users").select("plan, trial_expires_at").eq("id", user.id).single(),
+    supabase.from("users").select("plan, trial_expires_at, display_name, full_name").eq("id", user.id).single(),
     supabase.from("user_progress").select("xp_total, streak_days, best_streak").eq("user_id", user.id),
-    supabase.from("user_profiles").select("selected_avatar").eq("user_id", user.id).maybeSingle(),
+    supabase.from("user_profiles").select("selected_avatar, serial_id").eq("user_id", user.id).maybeSingle(),
   ]);
 
   const isTrialActive = profile?.trial_expires_at ? new Date(profile.trial_expires_at) > new Date() : false;
@@ -55,6 +55,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
         currentStreak={currentStreak}
         bestStreak={bestStreak}
         selectedAvatarLevel={(profileRow as { selected_avatar?: number | null } | null)?.selected_avatar ?? null}
+        serialId={(profileRow as { serial_id?: number | null } | null)?.serial_id ?? null}
+        displayName={(profile as { full_name?: string | null; display_name?: string | null } | null)?.full_name ?? (profile as { display_name?: string | null } | null)?.display_name ?? null}
+        email={user.email ?? null}
         logoutAction={handleLogout}
         variant={navVariant}
       />
