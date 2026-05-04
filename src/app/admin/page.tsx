@@ -1103,7 +1103,6 @@ export default function AdminPanel() {
     { id: "overview",  icon: IGrid,     label: "Обзор" },
     { id: "users",     icon: IUsers,    label: "Пользователи" },
     { id: "activity",  icon: IActivity, label: "Активность" },
-    { id: "audit",     icon: IAudit,    label: "Журнал" },
     { id: "revenue",   icon: IRevenue,  label: "Доходы" },
     { id: "knowledge", icon: IKb,       label: "База знаний" },
     { id: "team",      icon: ITeam,     label: "Команда" },
@@ -1150,24 +1149,7 @@ export default function AdminPanel() {
 
           {/* Brand block — Logo + 'Центр Управления' editorial label */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-            <Logo size="sm" href="" />
-            {!isMobile && (
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 7, paddingLeft: 12, marginLeft: 4, borderLeft: `1px solid ${BOR}` }}>
-                <span aria-hidden style={{
-                  width: 14, height: 1.5, borderRadius: 1,
-                  background: "linear-gradient(90deg, transparent, " + (isDark ? "#9F7AFF" : "#4561E8") + ")",
-                }} />
-                <span style={{
-                  fontSize: 9, fontWeight: 700,
-                  letterSpacing: "0.20em", textTransform: "uppercase",
-                  background: isDark
-                    ? "linear-gradient(135deg, #bcc8ff, #9F7AFF)"
-                    : "linear-gradient(135deg, #4561E8, #7C3AED)",
-                  WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-                  whiteSpace: "nowrap",
-                }}>Центр Управления</span>
-              </div>
-            )}
+<Logo size="sm" href="" />
           </div>
 
           {/* Tabs (desktop) — horizontal scroll if overflow */}
@@ -1252,7 +1234,19 @@ export default function AdminPanel() {
         <main style={{ padding: isMobile ? "20px 14px" : "28px 32px", minWidth: 0, position: "relative", zIndex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28, gap: 12 }}>
             <div style={{ minWidth: 0 }}>
-              <h1 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 800, margin: 0 }}>{TABS.find(t => t.id === tab)?.label}</h1>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 7, marginBottom: 4 }}>
+                <span aria-hidden style={{
+                  width: 14, height: 1.5, borderRadius: 1,
+                  background: "linear-gradient(90deg, transparent, " + (isDark ? "#9F7AFF" : "#4561E8") + ")",
+                }} />
+                <span style={{
+                  fontSize: 9, fontWeight: 700,
+                  letterSpacing: "0.20em", textTransform: "uppercase",
+                  background: isDark ? "linear-gradient(135deg, #bcc8ff, #9F7AFF)" : "linear-gradient(135deg, #4561E8, #7C3AED)",
+                  WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                }}>Центр Управления</span>
+              </div>
+              <h1 style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, margin: 0, letterSpacing: "-0.5px" }}>{TABS.find(t => t.id === tab)?.label}</h1>
               <p style={{ fontSize: 12, color: MUTED, marginTop: 4, marginBottom: 0 }}>mentora.su / admin</p>
             </div>
             {tab !== "team" && (

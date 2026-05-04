@@ -39,6 +39,7 @@ const LEGACY_KEYS = [
 // ⚠️ STABLE — DO NOT BUMP. History stores full timestamped snapshots; capped at last 100.
 const HISTORY_KEY = "mentora_admin_roadmap_history";
 const HISTORY_MAX = 100;
+const DELETED_KEY = "mentora_admin_roadmap_deleted_ids";  // ids user explicitly deleted — never re-add via seed merge
 
 interface HistoryEntry {
   ts: number;            // unix ms
@@ -174,47 +175,90 @@ const SEED: RoadmapTaskV2[] = [
 ];
 
 // ── Storage ──────────────────────────────────────────────────────────────────
+/** Load tasks. Always merges from current + legacy keys + adds new SEED tasks.
+ *  Honours deleted-ids set so user deletions stick across reloads.
+ *  Tasks present in current STORAGE_KEY are kept regardless of deletion-set
+ *  (user authoritative). Legacy/seed sources are filtered. */
 function loadTasks(): RoadmapTaskV2[] {
   if (typeof window === "undefined") return SEED;
   try {
-    // Try current key first
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw !== null) {
-      const parsed = JSON.parse(raw) as RoadmapTaskV2[];
-      if (Array.isArray(parsed)) return mergeNewSeedTasks(parsed);
-    }
-    // Migrate from legacy keys — preserve user data when key was bumped
-    for (const lk of LEGACY_KEYS) {
-      const lraw = localStorage.getItem(lk);
-      if (lraw !== null) {
-        try {
-          const lparsed = JSON.parse(lraw) as RoadmapTaskV2[];
-          if (Array.isArray(lparsed) && lparsed.length > 0) {
-            const merged = mergeNewSeedTasks(lparsed);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-            // Clean up legacy entries to free localStorage space
-            try { localStorage.removeItem(lk); } catch {}
-            return merged;
-          }
-        } catch {}
-      }
-    }
-    // First install: seed
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED));
-    return SEED;
-  } catch { return SEED; }
-}
+    const merged: RoadmapTaskV2[] = [];
+    const seenIds = new Set<string>();
+    const deletedIds = loadDeletedIds();
 
-/** Merge new SEED tasks (by id) into existing user tasks without overwriting user changes.
- *  Adds tasks from SEED that the user doesn't have yet; keeps user's edits intact. */
-function mergeNewSeedTasks(existing: RoadmapTaskV2[]): RoadmapTaskV2[] {
-  const existingIds = new Set(existing.map(t => t.id));
-  const additions = SEED.filter(s => !existingIds.has(s.id));
-  return additions.length === 0 ? existing : [...existing, ...additions];
+    // Pull tasks from a key. allowDeleted=true → include tasks even if id in deleted-set.
+    const pullFrom = (key: string, allowDeleted: boolean): number => {
+      const raw = localStorage.getItem(key);
+      if (raw === null) return 0;
+      try {
+        const arr = JSON.parse(raw) as RoadmapTaskV2[];
+        if (!Array.isArray(arr)) return 0;
+        let added = 0;
+        for (const t of arr) {
+          if (!t || typeof t.id !== "string") continue;
+          if (seenIds.has(t.id)) continue;
+          if (!allowDeleted && deletedIds.has(t.id)) continue;
+          merged.push(t);
+          seenIds.add(t.id);
+          added++;
+        }
+        return added;
+      } catch { return 0; }
+    };
+
+    // 1. Current key — authoritative user state, deletions already reflected here
+    pullFrom(STORAGE_KEY, /* allowDeleted */ true);
+    // 2. Legacy keys — recover orphan tasks, but skip ids user explicitly deleted
+    for (const lk of LEGACY_KEYS) {
+      pullFrom(lk, /* allowDeleted */ false);
+    }
+    // 3. First install: nothing anywhere → seed (filtered)
+    if (merged.length === 0) {
+      const seeded = SEED.filter(s => !deletedIds.has(s.id));
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded)); } catch {}
+      return seeded;
+    }
+    // 4. Add new SEED tasks user doesn't have yet, except deleted ones
+    for (const s of SEED) {
+      if (seenIds.has(s.id)) continue;
+      if (deletedIds.has(s.id)) continue;
+      merged.push(s);
+      seenIds.add(s.id);
+    }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(merged)); } catch {}
+    return merged;
+  } catch { return SEED; }
 }
 
 function saveTasks(t: RoadmapTaskV2[]) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(t)); } catch {}
+}
+
+// ── Deleted-ids tracking — ensures deleted SEED/legacy tasks don't reappear ──
+function loadDeletedIds(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = localStorage.getItem(DELETED_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? new Set(arr) : new Set();
+  } catch { return new Set(); }
+}
+function addDeletedIds(ids: string[]) {
+  if (typeof window === "undefined" || ids.length === 0) return;
+  try {
+    const cur = loadDeletedIds();
+    for (const id of ids) cur.add(id);
+    localStorage.setItem(DELETED_KEY, JSON.stringify(Array.from(cur)));
+  } catch {}
+}
+function removeDeletedIds(ids: string[]) {
+  if (typeof window === "undefined" || ids.length === 0) return;
+  try {
+    const cur = loadDeletedIds();
+    for (const id of ids) cur.delete(id);
+    localStorage.setItem(DELETED_KEY, JSON.stringify(Array.from(cur)));
+  } catch {}
 }
 
 /** Append a timestamped snapshot to history. Bounded to HISTORY_MAX entries.
@@ -837,9 +881,13 @@ export default function RoadmapV2Tab() {
   };
   const remove = (id: string) => {
     const t = tasks.find(x => x.id === id);
+    addDeletedIds([id]);  // ⚠ remember deletion so seed/legacy merge doesn't bring it back
     persist(tasks.filter(x => x.id !== id), `delete:${t?.title?.slice(0, 30) ?? id}`);
   };
-  const add    = (t: RoadmapTaskV2) => persist([...tasks, t], `add:${t.title.slice(0, 30)}`);
+  const add    = (t: RoadmapTaskV2) => {
+    removeDeletedIds([t.id]);  // un-delete if user re-creates with same id
+    persist([...tasks, t], `add:${t.title.slice(0, 30)}`);
+  };
 
   const filtered = useMemo(() => filterCat ? tasks.filter(t => t.category === filterCat) : tasks, [tasks, filterCat]);
 
