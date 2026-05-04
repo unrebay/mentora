@@ -104,7 +104,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#4561E8",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)",  color: "#0a0a18" },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -120,7 +123,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           } catch(e){}
         ` }} />
         <meta name="yandex-verification" content="673fbfbebc45f7aa" />
-        <meta name="theme-color" content="#4561E8" />
+        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#0a0a18" media="(prefers-color-scheme: dark)" />
         <meta name="msapplication-TileColor" content="#4561E8" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
         {/* PWA */}

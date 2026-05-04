@@ -66,7 +66,7 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
     <nav
       className="sticky top-0 z-50"
       style={{
-        padding: "10px 14px",
+        padding: "10px clamp(6px, 2vw, 14px)",
         background: "transparent",
         pointerEvents: "none",
       }}
