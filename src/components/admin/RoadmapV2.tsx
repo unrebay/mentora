@@ -7,10 +7,17 @@ export type Bucket = "now" | "soon" | "ideas" | "notes";
 export type Category = "tech" | "marketing" | "design" | "content" | "product" | "ops";
 export type TaskState = "planned" | "in_progress" | "done" | "blocked";
 
+export interface SubTask {
+  id: string;
+  text: string;
+  done: boolean;
+}
+
 export interface RoadmapTaskV2 {
   id: string;
   title: string;
   notes?: string;
+  subtasks?: SubTask[];
   bucket: Bucket;
   category: Category;
   state: TaskState;
@@ -19,7 +26,7 @@ export interface RoadmapTaskV2 {
   createdAt: string;     // ISO
 }
 
-const STORAGE_KEY = "mentora_admin_roadmap_v7";
+const STORAGE_KEY = "mentora_admin_roadmap_v8";
 const LAUNCH_DATE = "2026-06-01";
 
 // ── Category & state metadata ────────────────────────────────────────────────
@@ -282,10 +289,38 @@ function TaskCard({ task, onUpdate, onDelete }: {
   onDelete(id: string): void;
 }) {
   const { CARD, BOR, TEXT, MUTED, isDark } = useTok();
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(task.title);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [draftTitle, setDraftTitle] = useState(task.title);
+  const [draftNotes, setDraftNotes] = useState(task.notes ?? "");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [newSub, setNewSub] = useState("");
   const cat = CAT_META[task.category];
   const st  = STATE_META[task.state];
+
+  const subtasks = task.subtasks ?? [];
+
+  function moveTo(b: Bucket) { onUpdate({ ...task, bucket: b }); setMenuOpen(false); }
+  function changeCategory(c: Category) { onUpdate({ ...task, category: c }); setMenuOpen(false); }
+  function addSubtask() {
+    const t = newSub.trim();
+    if (!t) return;
+    const next: SubTask[] = [...subtasks, { id: `s_${Date.now()}_${Math.random().toString(36).slice(2,6)}`, text: t, done: false }];
+    onUpdate({ ...task, subtasks: next });
+    setNewSub("");
+  }
+  function toggleSub(id: string) {
+    const next = subtasks.map(s => s.id === id ? { ...s, done: !s.done } : s);
+    onUpdate({ ...task, subtasks: next });
+  }
+  function delSub(id: string) {
+    onUpdate({ ...task, subtasks: subtasks.filter(s => s.id !== id) });
+  }
+  function editSub(id: string, text: string) {
+    onUpdate({ ...task, subtasks: subtasks.map(s => s.id === id ? { ...s, text } : s) });
+  }
+
+  const subDone = subtasks.filter(s => s.done).length;
 
   return (
     <div style={{
@@ -316,13 +351,13 @@ function TaskCard({ task, onUpdate, onDelete }: {
 
         {/* Title (inline edit) */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          {editing ? (
-            <input value={draft} autoFocus
-              onChange={e => setDraft(e.target.value)}
-              onBlur={() => { onUpdate({ ...task, title: draft.trim() || task.title }); setEditing(false); }}
+          {editingTitle ? (
+            <input value={draftTitle} autoFocus
+              onChange={e => setDraftTitle(e.target.value)}
+              onBlur={() => { onUpdate({ ...task, title: draftTitle.trim() || task.title }); setEditingTitle(false); }}
               onKeyDown={e => {
-                if (e.key === "Enter") { onUpdate({ ...task, title: draft.trim() || task.title }); setEditing(false); }
-                if (e.key === "Escape") { setDraft(task.title); setEditing(false); }
+                if (e.key === "Enter") { onUpdate({ ...task, title: draftTitle.trim() || task.title }); setEditingTitle(false); }
+                if (e.key === "Escape") { setDraftTitle(task.title); setEditingTitle(false); }
               }}
               style={{
                 width: "100%", fontSize: 13, padding: "4px 6px", borderRadius: 6,
@@ -330,7 +365,7 @@ function TaskCard({ task, onUpdate, onDelete }: {
                 color: TEXT, border: `1px solid ${BOR}`, outline: "none",
               }} />
           ) : (
-            <div onClick={() => setEditing(true)} style={{
+            <div onClick={() => { setDraftTitle(task.title); setEditingTitle(true); }} style={{
               fontSize: 13, lineHeight: 1.45,
               color: task.state === "done" ? MUTED : TEXT,
               textDecoration: task.state === "done" ? "line-through" : "none",
@@ -358,22 +393,195 @@ function TaskCard({ task, onUpdate, onDelete }: {
             {task.due && (
               <span style={{ fontSize: 10, color: MUTED }}>до {task.due}</span>
             )}
+            {subtasks.length > 0 && (
+              <span style={{
+                fontSize: 9, fontWeight: 700, padding: "1px 6px", borderRadius: 4,
+                background: subDone === subtasks.length ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.06)",
+                color: subDone === subtasks.length ? "#22c55e" : MUTED,
+                border: `1px solid ${subDone === subtasks.length ? "rgba(34,197,94,0.30)" : "rgba(255,255,255,0.10)"}`,
+              }}>{subDone}/{subtasks.length}</span>
+            )}
           </div>
 
-          {task.notes && (
-            <div style={{ fontSize: 11, color: MUTED, marginTop: 6, lineHeight: 1.4 }}>
-              {task.notes}
+          {/* Notes — click to edit, multi-line */}
+          {editingNotes ? (
+            <textarea value={draftNotes} autoFocus
+              onChange={e => setDraftNotes(e.target.value)}
+              onBlur={() => { onUpdate({ ...task, notes: draftNotes.trim() || undefined }); setEditingNotes(false); }}
+              onKeyDown={e => {
+                if (e.key === "Escape") { setDraftNotes(task.notes ?? ""); setEditingNotes(false); }
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                  onUpdate({ ...task, notes: draftNotes.trim() || undefined }); setEditingNotes(false);
+                }
+              }}
+              placeholder="Заметки. Cmd/Ctrl+Enter — сохранить."
+              rows={3}
+              style={{
+                width: "100%", fontSize: 11, padding: "6px 8px", borderRadius: 6,
+                background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                color: TEXT, border: `1px solid ${BOR}`, outline: "none",
+                marginTop: 6, fontFamily: "inherit", lineHeight: 1.5, resize: "vertical",
+              }} />
+          ) : task.notes ? (
+            <div onClick={() => { setDraftNotes(task.notes ?? ""); setEditingNotes(true); }} style={{
+              fontSize: 11, color: MUTED, marginTop: 6, lineHeight: 1.4,
+              cursor: "text", whiteSpace: "pre-wrap",
+            }}>{task.notes}</div>
+          ) : (
+            <button onClick={() => { setDraftNotes(""); setEditingNotes(true); }}
+              style={{
+                marginTop: 6, fontSize: 10, color: MUTED, opacity: 0.6,
+                background: "none", border: "none", padding: 0, cursor: "pointer",
+                fontFamily: "inherit",
+              }}>+ заметка</button>
+          )}
+
+          {/* Subtasks list */}
+          {subtasks.length > 0 && (
+            <div style={{ marginTop: 8, paddingLeft: 4 }}>
+              {subtasks.map(s => (
+                <SubtaskItem key={s.id} sub={s} onToggle={() => toggleSub(s.id)} onDelete={() => delSub(s.id)} onEdit={(t) => editSub(s.id, t)} />
+              ))}
             </div>
           )}
+
+          {/* Add subtask input */}
+          <div style={{ display: "flex", gap: 6, marginTop: 6, alignItems: "center" }}>
+            <input value={newSub} onChange={e => setNewSub(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") addSubtask(); }}
+              placeholder="+ подзадача"
+              style={{
+                flex: 1, fontSize: 11, padding: "4px 8px", borderRadius: 6,
+                background: "transparent", color: TEXT,
+                border: `1px dashed ${BOR}`, outline: "none",
+              }} />
+            {newSub.trim() && (
+              <button onClick={addSubtask}
+                style={{
+                  fontSize: 10, fontWeight: 600, padding: "3px 8px", borderRadius: 6,
+                  background: cat.color + "20", color: cat.color, border: `1px solid ${cat.color}40`,
+                  cursor: "pointer",
+                }}>↵</button>
+            )}
+          </div>
         </div>
 
-        {/* Delete */}
-        <button onClick={() => { if (confirm("Удалить?")) onDelete(task.id); }}
-          style={{
-            flexShrink: 0, background: "none", border: "none", cursor: "pointer",
-            color: MUTED, fontSize: 14, padding: 2, opacity: 0.5,
-          }} title="Удалить">×</button>
+        {/* Menu (···) */}
+        <div style={{ position: "relative", flexShrink: 0 }}>
+          <button onClick={() => setMenuOpen(o => !o)}
+            style={{
+              background: "none", border: "none", cursor: "pointer", color: MUTED,
+              fontSize: 16, padding: "0 4px", lineHeight: 1, opacity: 0.6,
+            }} title="Меню">⋯</button>
+          {menuOpen && (
+            <>
+              <div onClick={() => setMenuOpen(false)} style={{
+                position: "fixed", inset: 0, zIndex: 49,
+              }} />
+              <div style={{
+                position: "absolute", top: "100%", right: 0,
+                marginTop: 4, minWidth: 180, zIndex: 50,
+                background: CARD, border: `1px solid ${BOR}`,
+                borderRadius: 8, padding: 4, boxShadow: "0 8px 24px rgba(0,0,0,0.30)",
+              }}>
+                <div style={{ fontSize: 9, fontWeight: 700, padding: "4px 8px", color: MUTED, letterSpacing: "0.06em", textTransform: "uppercase" }}>Перенести в</div>
+                {(["now","soon","ideas","notes"] as Bucket[]).filter(b => b !== task.bucket).map(b => (
+                  <button key={b} onClick={() => moveTo(b)}
+                    style={{
+                      width: "100%", textAlign: "left", padding: "6px 8px",
+                      fontSize: 12, color: TEXT, background: "none", border: "none",
+                      borderRadius: 4, cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: BUCKET_META[b].color }} />
+                    {BUCKET_META[b].label}
+                  </button>
+                ))}
+                <div style={{ height: 1, background: BOR, margin: "4px 0" }} />
+                <div style={{ fontSize: 9, fontWeight: 700, padding: "4px 8px", color: MUTED, letterSpacing: "0.06em", textTransform: "uppercase" }}>Категория</div>
+                {(Object.keys(CAT_META) as Category[]).filter(c => c !== task.category).map(c => (
+                  <button key={c} onClick={() => changeCategory(c)}
+                    style={{
+                      width: "100%", textAlign: "left", padding: "6px 8px",
+                      fontSize: 12, color: TEXT, background: "none", border: "none",
+                      borderRadius: 4, cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: CAT_META[c].color }} />
+                    {CAT_META[c].label}
+                  </button>
+                ))}
+                <div style={{ height: 1, background: BOR, margin: "4px 0" }} />
+                <button onClick={() => { if (confirm("Удалить задачу?")) onDelete(task.id); setMenuOpen(false); }}
+                  style={{
+                    width: "100%", textAlign: "left", padding: "6px 8px",
+                    fontSize: 12, color: "#ef4444", background: "none", border: "none",
+                    borderRadius: 4, cursor: "pointer",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(239,68,68,0.10)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+                  Удалить
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
+    </div>
+  );
+}
+
+// ── SubtaskItem ──────────────────────────────────────────────────────────────
+function SubtaskItem({ sub, onToggle, onDelete, onEdit }: {
+  sub: SubTask;
+  onToggle(): void;
+  onDelete(): void;
+  onEdit(text: string): void;
+}) {
+  const { TEXT, MUTED, BOR, isDark } = useTok();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(sub.text);
+
+  return (
+    <div style={{ display: "flex", alignItems: "flex-start", gap: 6, padding: "2px 0" }}>
+      <button onClick={onToggle}
+        style={{
+          flexShrink: 0, width: 14, height: 14, borderRadius: 3,
+          border: `1.5px solid ${sub.done ? "#22c55e" : MUTED}`,
+          background: sub.done ? "#22c55e" : "transparent",
+          cursor: "pointer", fontSize: 9, lineHeight: 1, marginTop: 2,
+          color: "white", display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+        {sub.done ? "✓" : ""}
+      </button>
+      {editing ? (
+        <input value={draft} autoFocus
+          onChange={e => setDraft(e.target.value)}
+          onBlur={() => { if (draft.trim()) onEdit(draft.trim()); setEditing(false); }}
+          onKeyDown={e => {
+            if (e.key === "Enter") { if (draft.trim()) onEdit(draft.trim()); setEditing(false); }
+            if (e.key === "Escape") { setDraft(sub.text); setEditing(false); }
+          }}
+          style={{
+            flex: 1, fontSize: 11, padding: "1px 4px", borderRadius: 4,
+            background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+            color: TEXT, border: `1px solid ${BOR}`, outline: "none",
+          }} />
+      ) : (
+        <span onClick={() => { setDraft(sub.text); setEditing(true); }}
+          style={{
+            flex: 1, fontSize: 11, lineHeight: 1.4, cursor: "text",
+            color: sub.done ? MUTED : TEXT,
+            textDecoration: sub.done ? "line-through" : "none",
+          }}>{sub.text}</span>
+      )}
+      <button onClick={onDelete}
+        style={{
+          flexShrink: 0, background: "none", border: "none", cursor: "pointer",
+          color: MUTED, fontSize: 11, opacity: 0.4, padding: 0, lineHeight: 1,
+        }} title="Удалить">×</button>
     </div>
   );
 }

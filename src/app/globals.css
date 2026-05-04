@@ -65,28 +65,52 @@
     --chat-code-btn-border:    rgba(255,255,255,0.08);
   }
 
-  html {
+  /* RESET defaults that bring inherent whitespace */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    /* IMPORTANT: width:100% (not 100vw) — 100vw includes scrollbar gutter,
+       which causes 6-15px content overflow visible as white stripe on iPad */
+    width: 100%;
+    max-width: 100%;
     overflow-x: hidden;
-    -webkit-text-size-adjust: 100%;
-    /* CRITICAL: html bg = body bg — prevents iOS rubber-band white stripe */
     background-color: var(--bg);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
     overscroll-behavior-y: none;
+    /* iOS rubber-band fix */
+    background-color: var(--bg);
   }
 
   body {
-    background-color: var(--bg);
     color: var(--text);
     @apply antialiased;
     transition: background-color 0.2s ease, color 0.2s ease;
-    overflow-x: hidden;
-    width: 100%;
     min-height: 100vh;
-    margin: 0;
+    /* Defensive — ensure no UA-derived offsets */
+    position: relative;
+    left: 0;
+    right: 0;
   }
 
-  /* iOS Safari: ensure background follows theme even during scroll-bounce */
+  /* iOS / iPadOS Safari belt-and-suspenders */
   @supports (-webkit-touch-callout: none) {
-    html, body { background-color: var(--bg); }
+    html, body {
+      background-color: var(--bg) !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+  }
+
+  /* All direct page wrappers should never exceed viewport */
+  body > div, body > main, body > nav {
+    max-width: 100%;
   }
 
   /* Scrollbar */
