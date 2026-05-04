@@ -206,7 +206,7 @@ export default function DashboardNav({
             />
           </div>
           {totalXP > 0 && (
-            <div className="hidden sm:flex items-center gap-1.5" data-tour="nav-stats">
+            <div className="hidden lg:flex items-center gap-1.5" data-tour="nav-stats">
               {/* XP pill */}
               <div style={{
                 display: "flex", alignItems: "center", gap: 5, height: 30,
@@ -258,7 +258,7 @@ export default function DashboardNav({
           {!isPro && (
             <Link
               href="/pricing"
-              className="hidden sm:inline-flex items-center text-xs font-semibold px-3 py-1.5 rounded-full transition-all"
+              className="hidden lg:inline-flex items-center text-xs font-semibold px-3 py-1.5 rounded-full transition-all"
               style={{
                 background: dk
                   ? "rgba(69,97,232,0.25)"
@@ -277,7 +277,7 @@ export default function DashboardNav({
             </Link>
           )}
 
-          <form action={logoutAction} className="hidden md:block">
+          <form action={logoutAction} className="hidden lg:block">
             <button
               type="submit"
               className="text-xs transition-colors px-2 py-1.5"
