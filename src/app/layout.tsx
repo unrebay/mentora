@@ -117,9 +117,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Prevent flash of wrong theme */}
         <script dangerouslySetInnerHTML={{ __html: `
           try {
-            var t = localStorage.getItem('mentora-theme');
-            if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            if (t === 'dark') document.documentElement.classList.add('dark');
+            var m = localStorage.getItem('mentora-theme');
+            var sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            // mode can be 'light' | 'dark' | 'system' (or null/legacy → treat as system)
+            var effective = (m === 'light' || m === 'dark') ? m : (sysDark ? 'dark' : 'light');
+            if (effective === 'dark') document.documentElement.classList.add('dark');
           } catch(e){}
         ` }} />
         <meta name="yandex-verification" content="673fbfbebc45f7aa" />
