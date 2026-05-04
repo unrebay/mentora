@@ -103,17 +103,17 @@ const SEED: RoadmapTaskV2[] = [
     createdAt: new Date().toISOString() },
 
   // ═══ Чек-лист «Сейчас»: десктоп-проход всех страниц ═══
-  { id: "ds_landing", title: "🖥️ Десктоп — Лендинг (/)", bucket: "now", category: "design", state: "planned", createdAt: new Date().toISOString() },
-  { id: "ds_pricing", title: "🖥️ Десктоп — Тарифы (/pricing)", bucket: "now", category: "design", state: "planned", createdAt: new Date().toISOString() },
-  { id: "ds_guide", title: "🖥️ Десктоп — Гайд (/guide)", bucket: "now", category: "design", state: "planned", createdAt: new Date().toISOString() },
+  { id: "ds_landing", title: "🖥️ Десктоп — Лендинг (/)", bucket: "now", category: "design", state: "done", createdAt: new Date().toISOString() },
+  { id: "ds_pricing", title: "🖥️ Десктоп — Тарифы (/pricing)", bucket: "now", category: "design", state: "done", createdAt: new Date().toISOString() },
+  { id: "ds_guide", title: "🖥️ Десктоп — Гайд (/guide)", bucket: "now", category: "design", state: "done", createdAt: new Date().toISOString() },
   { id: "ds_auth", title: "🖥️ Десктоп — Вход (/auth)", bucket: "now", category: "design", state: "planned", createdAt: new Date().toISOString() },
-  { id: "ds_about", title: "🖥️ Десктоп — О проекте (/dashboard/about)", bucket: "now", category: "design", state: "planned", createdAt: new Date().toISOString() },
+  { id: "ds_about", title: "🖥️ Десктоп — О проекте (/dashboard/about)", bucket: "now", category: "design", state: "done", createdAt: new Date().toISOString() },
   { id: "ds_dashboard", title: "🖥️ Десктоп — Главная dashboard", bucket: "now", category: "design", state: "planned", createdAt: new Date().toISOString() },
-  { id: "ds_analytics", title: "🖥️ Десктоп — Аналитика+Прогресс", bucket: "now", category: "design", state: "planned", createdAt: new Date().toISOString() },
-  { id: "ds_profile", title: "🖥️ Десктоп — Профиль", bucket: "now", category: "design", state: "planned", createdAt: new Date().toISOString() },
+  { id: "ds_analytics", title: "🖥️ Десктоп — Аналитика+Прогресс", bucket: "now", category: "design", state: "done", createdAt: new Date().toISOString() },
+  { id: "ds_profile", title: "🖥️ Десктоп — Профиль", bucket: "now", category: "design", state: "done", createdAt: new Date().toISOString() },
   { id: "ds_knowledge", title: "🖥️ Десктоп — Galaxy of Knowledge", bucket: "now", category: "design", state: "planned", createdAt: new Date().toISOString() },
   { id: "ds_learn", title: "🖥️ Десктоп — Чат /learn/[subject]", bucket: "now", category: "design", state: "planned", createdAt: new Date().toISOString() },
-  { id: "ds_admin", title: "🖥️ Десктоп — Админка", bucket: "now", category: "design", state: "planned", createdAt: new Date().toISOString() },
+  { id: "ds_admin", title: "🖥️ Десктоп — Админка", bucket: "now", category: "design", state: "done", createdAt: new Date().toISOString() },
   { id: "ds_privacy", title: "🖥️ Десктоп — Privacy / Terms", bucket: "now", category: "design", state: "planned", createdAt: new Date().toISOString() },
 
   // ═══ Чек-лист «Скоро»: мобильный проход всех страниц ═══
