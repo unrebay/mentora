@@ -104,10 +104,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)",  color: "#0a0a18" },
-  ],
+  viewportFit: "cover",
+  // Always dark — hero pages (/, /knowledge, /dashboard) are dark; status bar
+  // looks consistent across themes and on light pages it's a thin dark accent
+  themeColor: "#050a14",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -125,13 +125,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           } catch(e){}
         ` }} />
         <meta name="yandex-verification" content="673fbfbebc45f7aa" />
-        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-        <meta name="theme-color" content="#0a0a18" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="#050a14" />
         <meta name="msapplication-TileColor" content="#4561E8" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
         {/* PWA */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Mentora" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="application-name" content="Mentora" />

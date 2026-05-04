@@ -133,7 +133,7 @@ export default function DashboardNav({
     <nav
       className="sticky top-0 z-20"
       style={{
-        padding: "10px clamp(6px, 2vw, 14px)",
+        padding: "10px clamp(0px, 2vw, 14px)",
         background: "transparent",  // always transparent — pill handles its own bg
         pointerEvents: "none",
       }}
