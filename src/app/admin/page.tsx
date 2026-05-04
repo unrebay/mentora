@@ -1243,7 +1243,6 @@ export default function AdminPanel() {
                 <h1 style={{ fontSize: isMobile ? 18 : 22, fontWeight: 700, margin: 0 }}>{TABS.find(t => t.id === tab)?.label}</h1>
                 <p style={{ fontSize: 13, color: MUTED, marginTop: 4, marginBottom: 0 }}>mentora.su / admin</p>
               </div>
-              </div>
             </div>
             {tab !== "team" && (
               <button onClick={reload} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, border: `1px solid ${BOR}`, background: CARD, color: MUTED, fontSize: 13, cursor: "pointer" }}>
