@@ -76,8 +76,8 @@ const BUCKET_META: Record<Bucket, { label: string; subtitle: string; color: stri
 const SEED: RoadmapTaskV2[] = [
   // ═══ Milestones до 1 июня ═══
   { id: "ms_rag",           title: "RAG: индекс ФГОС-учебников + 5+ публичных источников на каждую из 17 наук",
-    bucket: "now", category: "tech",      state: "in_progress", isMilestone: true, due: "2026-05-25",
-    notes: "pgvector + OpenAI embeddings. Источники: lib.ru/gramota.ru/элементы.ру/arzamas/ПостНаука",
+    bucket: "now", category: "tech",      state: "done",        isMilestone: true, due: "2026-05-25",
+    notes: "✅ ГОТОВО (04.05.2026 вечер): 952 чанка на все 17 наук. pgvector + Edge Function embed (gte-small 384d). search_knowledge RPC + /api/chat retrieval. История РФ — 204 чанка, всемирная — 120, остальные 49-52. Sparse: психология/философия/экономика по 8 — добор предстоит. Критический баг с дублирующейся RPC overload устранён.",
     createdAt: new Date().toISOString() },
   { id: "ms_factcheck",     title: "Multi-agent fact-check (B читает A против тех же chunks)",
     bucket: "now", category: "tech",      state: "planned",     isMilestone: true, due: "2026-05-28",

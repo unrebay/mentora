@@ -231,7 +231,10 @@ export async function POST(req: NextRequest) {
           });
           if (chunks?.length) {
             return chunks
-              .map((c: { content: string; topic: string }) => `[${c.topic}]\n${c.content}`)
+              .map((c: { content: string; topic: string; source?: string }) => {
+                const src = c.source ? ` (источник: ${c.source})` : "";
+                return `[${c.topic}]${src}\n${c.content}`;
+              })
               .join("\n\n");
           }
         } catch (ragErr) {
