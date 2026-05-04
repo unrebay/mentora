@@ -79,7 +79,6 @@ export default function AboutPage() {
           color,
           fontVariant: "small-caps",
         }}>
-          <span style={{ opacity: 0.55, marginRight: 6, fontFamily: "ui-monospace, SF Mono, Menlo, monospace", fontWeight: 700 }}>§</span>
           {children}
         </span>
       </div>
