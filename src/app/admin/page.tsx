@@ -1101,13 +1101,13 @@ export default function AdminPanel() {
 
   const TABS: { id: Tab; icon: React.ReactNode; label: string }[] = [
     { id: "overview",  icon: IGrid,     label: "Обзор" },
-    { id: "users",     icon: IUsers,    label: "Пользователи" },
     { id: "activity",  icon: IActivity, label: "Активность" },
-    { id: "revenue",   icon: IRevenue,  label: "Доходы" },
-    { id: "knowledge", icon: IKb,       label: "База знаний" },
-    { id: "team",      icon: ITeam,     label: "Команда" },
     { id: "roadmap",   icon: IRoadmap,  label: "Роадмап" },
+    { id: "team",      icon: ITeam,     label: "Команда" },
+    { id: "revenue",   icon: IRevenue,  label: "Доходы" },
     { id: "legal",     icon: ILegal,    label: "Право" },
+    { id: "users",     icon: IUsers,    label: "Пользователи" },
+    { id: "knowledge", icon: IKb,       label: "База знаний" },
   ];
 
   return (
@@ -1583,6 +1583,102 @@ function UsersTab() {
 // ── Knowledge Tab ─────────────────────────────────────────────────────────────
 const emptyF = { subject: "mathematics", topic: "", content: "", source: "", language: "ru" };
 
+// ── KbStatCard — visual KPI for Knowledge Base ───────────────────────────────
+function KbStatCard({ label, value, accent, hint, icon }: { label: string; value: string; accent: string; hint?: string; icon: React.ReactNode }) {
+  const { CARD, BOR, TEXT, MUTED } = useTok();
+  return (
+    <div style={{
+      position: "relative", overflow: "hidden",
+      background: CARD,
+      border: `1px solid ${BOR}`,
+      borderRadius: 14, padding: "14px 16px",
+      display: "flex", flexDirection: "column", gap: 8,
+      boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+    }}>
+      <div aria-hidden style={{
+        position: "absolute", top: -25, right: -25, width: 100, height: 100,
+        borderRadius: "50%", opacity: 0.45,
+        background: `radial-gradient(circle, ${accent}33, transparent 65%)`,
+        filter: "blur(8px)", pointerEvents: "none",
+      }} />
+      <div style={{ display: "flex", alignItems: "center", gap: 8, position: "relative" }}>
+        <div style={{
+          width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+          background: `linear-gradient(135deg, ${accent}30, ${accent}10)`,
+          border: `1px solid ${accent}40`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          color: accent,
+        }}>{icon}</div>
+        <span style={{ fontSize: 10, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</span>
+      </div>
+      <div style={{ fontSize: 22, fontWeight: 800, color: TEXT, lineHeight: 1, position: "relative" }}>{value}</div>
+      {hint && <div style={{ fontSize: 11, color: MUTED, position: "relative" }}>{hint}</div>}
+    </div>
+  );
+}
+
+// ── SubjectCoverageGrid — 17 chips showing chunk count per science ─────────
+function SubjectCoverageGrid({ subjectCounts, onSelect, activeFilter }: {
+  subjectCounts: Record<string, number>;
+  onSelect: (s: string) => void;
+  activeFilter: string;
+}) {
+  const { CARD, BOR, TEXT, MUTED, isDark } = useTok();
+  return (
+    <div style={{
+      background: CARD,
+      border: `1px solid ${BOR}`,
+      borderRadius: 14, padding: 16,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>Покрытие по наукам</div>
+          <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>Кликни чип — фильтр по науке</div>
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(155px, 1fr))", gap: 8 }}>
+        {SUBS.map(s => {
+          const count = subjectCounts[s] ?? 0;
+          const filled = count > 0;
+          const isActive = activeFilter === s;
+          const color = filled ? "#22c55e" : "#94a3b8";
+          return (
+            <button key={s} onClick={() => onSelect(isActive ? "" : s)}
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "8px 10px", borderRadius: 10,
+                background: isActive ? `${color}18` : (isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.025)"),
+                border: `1px solid ${isActive ? color + "55" : (filled ? color + "30" : "rgba(127,127,127,0.15)")}`,
+                cursor: "pointer", color: TEXT,
+                transition: "all .15s", outline: "none",
+                fontSize: 12, fontWeight: 500,
+              }}
+              onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"; }}
+              onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.025)"; }}>
+              <span style={{
+                width: 8, height: 8, borderRadius: "50%",
+                background: filled ? color : "rgba(127,127,127,0.4)",
+                boxShadow: filled ? `0 0 6px ${color}88` : "none",
+                flexShrink: 0,
+              }} />
+              <span style={{ flex: 1, textAlign: "left", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {SN[s]}
+              </span>
+              <span style={{
+                fontSize: 11, fontWeight: 700, padding: "1px 6px", borderRadius: 4,
+                background: filled ? `${color}22` : "transparent",
+                color: filled ? color : MUTED,
+                flexShrink: 0,
+                minWidth: 22, textAlign: "center",
+              }}>{count}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function KnowledgeTab() {
   const { CARD, BOR, TEXT, MUTED, inp } = useTok();
   const [chunks, setChunks]   = useState<ChunkRow[]>([]);
@@ -1634,9 +1730,44 @@ function KnowledgeTab() {
     setBusy(false); setBulkTxt(""); setBulk(false); ok(`Добавлено ${lines.length} чанков`); load();
   };
 
+  // Per-subject chunk counts (from current page or full count if no filter)
+  const [subjectCounts, setSubjectCounts] = useState<Record<string, number>>({});
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/knowledge?stats=1").then(r => r.ok ? r.json() : null).then(d => {
+      if (cancelled || !d) return;
+      const map: Record<string, number> = {};
+      if (Array.isArray(d.bySubject)) {
+        for (const row of d.bySubject) map[row.subject] = row.count;
+      }
+      setSubjectCounts(map);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [total]);
+
+  const totalSubjects = SUBS.length;
+  const filledSubjects = Object.values(subjectCounts).filter(c => c > 0).length;
+  const ragReady = filledSubjects === totalSubjects && total > 0;
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {flash && <div style={{ padding: "10px 16px", background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)", borderRadius: 10, color: GREEN, fontSize: 13 }}>{flash}</div>}
+
+      {/* ── Visual overview: KPI cards ─────────────────────────────────── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
+        <KbStatCard label="Всего чанков" value={N(total)} accent="#4561E8" hint="фрагментов знаний в БД" icon={IKb} />
+        <KbStatCard label="Покрыто наук" value={`${filledSubjects} / ${totalSubjects}`} accent={filledSubjects === totalSubjects ? "#22c55e" : "#FF7A00"}
+          hint={filledSubjects === totalSubjects ? "все 17 наук готовы" : `осталось: ${totalSubjects - filledSubjects}`}
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>} />
+        <KbStatCard label="Среднее на науку" value={filledSubjects ? Math.round(total / filledSubjects).toString() : "0"} accent="#9F7AFF" hint="чанков на одну науку"
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 6-6"/></svg>} />
+        <KbStatCard label="RAG готов" value={ragReady ? "Да" : "Нет"} accent={ragReady ? "#22c55e" : "#94a3b8"}
+          hint={ragReady ? "к 1 июня — на старте" : "нужно > 0 на каждую науку"}
+          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>} />
+      </div>
+
+      {/* ── Per-subject coverage grid ──────────────────────────────────── */}
+      <SubjectCoverageGrid subjectCounts={subjectCounts} onSelect={(s) => { setFilter(s); setPage(1); }} activeFilter={filter} />
 
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
         <div style={{ position: "relative" }}>

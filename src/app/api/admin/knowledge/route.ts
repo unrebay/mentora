@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
   if (forbidden) return forbidden;
 
   const { searchParams } = new URL(req.url);
+  const stats   = searchParams.get("stats") === "1";
   const page    = parseInt(searchParams.get("page")  ?? "1");
   const limit   = parseInt(searchParams.get("limit") ?? "20");
   const subject = searchParams.get("subject") ?? "";
@@ -18,6 +19,22 @@ export async function GET(req: NextRequest) {
   const offset  = (page - 1) * limit;
 
   const admin = createAdminSupabase();
+
+  // Stats endpoint — returns chunk counts per subject (for KnowledgeTab visual blocks)
+  if (stats) {
+    const { data, error } = await admin
+      .from("knowledge_chunks")
+      .select("subject");
+    if (error) return NextResponse.json({ bySubject: [], total: 0, error: error.message });
+    const counts: Record<string, number> = {};
+    for (const row of (data ?? [])) {
+      const s = (row as { subject?: string }).subject ?? "";
+      if (!s) continue;
+      counts[s] = (counts[s] ?? 0) + 1;
+    }
+    const bySubject = Object.entries(counts).map(([subject, count]) => ({ subject, count }));
+    return NextResponse.json({ bySubject, total: data?.length ?? 0 });
+  }
   let query = admin
     .from("knowledge_chunks")
     .select(CHUNK_SELECT, { count: "exact" });

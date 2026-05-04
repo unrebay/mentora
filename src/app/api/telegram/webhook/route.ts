@@ -328,12 +328,19 @@ async function handleUpdate(update: Record<string, unknown>) {
   const codeMatch = aiReplyRaw.match(/\[SUPPORT_CODE:\s*([A-F0-9-]+)\]/i);
   const supportCode = codeMatch ? codeMatch[1] : null;
   // Strip ALL service tags from user-facing reply
-  const userReply = aiReplyRaw
+  let userReply = aiReplyRaw
     .replace(/\[ESCALATE:[^\]]+\]/gi, "")
     .replace(/\[OK\]/gi, "")
     .replace(/\[SUPPORT_CODE:[^\]]+\]/gi, "")
     .trim();
 
+  // Defensive: if AI only produced tags with no body, fall back to a polite reply
+  if (!userReply || userReply.length < 5) {
+    console.warn("[telegram] empty userReply after stripping tags, raw:", aiReplyRaw.slice(0, 200));
+    userReply = "Понял, передал команде. Скоро вернусь с ответом.";
+  }
+
+  console.log(`[telegram] reply to ${fromId}: ${userReply.slice(0, 100)} (escalate=${escalateMatch ? "yes" : "no"})`);
   await sendMessage(chatId, userReply);
 
   // Forward to admin ONLY when AI tagged [ESCALATE]
