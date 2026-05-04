@@ -159,10 +159,29 @@ export default function PrivacyPage() {
             style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}>
             <SectionHeading n="05" title="Хранение и защита данных" />
             <p>
-              Ваши данные хранятся на защищённых серверах. Мы используем шифрование HTTPS,
-              ограниченный доступ к данным и регулярный аудит безопасности. Данные хранятся
-              в течение всего срока действия вашего аккаунта и 90 дней после его удаления.
+              Ваши данные хранятся на защищённых серверах. Мы используем шифрование TLS&nbsp;1.3
+              для всех соединений, BCrypt для паролей, ограниченный доступ к данным и регулярный
+              аудит безопасности. Данные хранятся в течение всего срока действия вашего аккаунта
+              и 90 дней после его удаления.
             </p>
+            <a
+              href="https://securityheaders.com/?q=mentora.su"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors hover:bg-white/[0.03]"
+              style={{ borderColor: "rgba(34, 197, 94, 0.30)", background: "rgba(34, 197, 94, 0.06)" }}
+            >
+              <span className="flex items-center justify-center w-9 h-9 rounded-lg font-black text-base"
+                style={{ background: "linear-gradient(135deg, #22c55e, #15803d)", color: "white", boxShadow: "0 4px 14px rgba(34, 197, 94, 0.40)" }}>
+                A+
+              </span>
+              <span className="flex-1">
+                <span className="block text-sm font-bold" style={{ color: "rgba(255,255,255,0.92)" }}>Безопасность уровня A+</span>
+                <span className="block text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>
+                  Все рекомендованные HTTPS-заголовки: HSTS, CSP, X-Frame-Options. Проверь на securityheaders.com →
+                </span>
+              </span>
+            </a>
           </section>
 
           <section className="rounded-2xl border p-6"

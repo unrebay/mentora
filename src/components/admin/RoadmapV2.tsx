@@ -148,9 +148,9 @@ function saveTasks(t: RoadmapTaskV2[]) {
 
 // ── Theme tokens (mirrored from admin/page.tsx, simplified) ──────────────────
 function useTok() {
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
   useEffect(() => {
-    const update = () => setIsDark(document.documentElement.classList.contains("dark") || !document.documentElement.classList.contains("light"));
+    const update = () => setIsDark(document.documentElement.classList.contains("dark"));
     update();
     const obs = new MutationObserver(update);
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
