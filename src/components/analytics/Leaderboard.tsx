@@ -13,6 +13,9 @@ interface Row {
   is_bot: boolean;
   primary_subject: string | null;
 }
+interface NeighborRow extends Row {
+  rank: number;
+}
 interface Props { mySerialId?: number | null }
 
 const TIER_COLORS = ["#94a3b8", "#4561E8", "#7C3AED", "#FF7A00", "#f59e0b", "#c084fc", "#06B6D4", "#FF8B3D"]; // beginner..academic
@@ -41,24 +44,28 @@ const MEDAL_GLOW: Record<number, string> = {
 export default function Leaderboard({ mySerialId }: Props) {
   const t = useTranslations("analytics.leaderboard");
   const [rows, setRows] = useState<Row[] | null>(null);
-    const [error, setError] = useState<string | null>(null);
+  const [neighbors, setNeighbors] = useState<NeighborRow[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/leaderboard?limit=300")
+    fetch("/api/leaderboard?limit=100")
       .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
-      .then(d => { if (!cancelled) setRows(d.top); })
+      .then(d => {
+        if (cancelled) return;
+        setRows(d.top);
+        setNeighbors(Array.isArray(d.neighbors) ? d.neighbors : []);
+      })
       .catch(e => { if (!cancelled) setError(String(e.message ?? e)); });
     return () => { cancelled = true; };
   }, []);
 
   if (error) return null;
-  const myIdx = rows && mySerialId ? rows.findIndex(r => r.serial_id === mySerialId && !r.is_bot) : -1;
   // Top 10 always visible
   const top10 = !rows ? [] : rows.slice(0, 10);
-  // Neighbours: ±2 around the user IF the user is below top-10
-  const showNeighbours = !!(rows && mySerialId && myIdx >= 10);
-  const neighbours = showNeighbours && rows ? rows.slice(Math.max(10, myIdx - 2), myIdx + 3) : [];
+  const myInTop10 = !!(rows && mySerialId && top10.some(r => r.serial_id === mySerialId && !r.is_bot));
+  // Show neighbors block ALWAYS when user is below top-10 — relies on server-side ±1 radius
+  const showNeighbours = !myInTop10 && neighbors.length > 0;
 
   return (
     <div className="rounded-2xl border p-5 relative overflow-hidden"
@@ -174,20 +181,18 @@ export default function Leaderboard({ mySerialId }: Props) {
         })}
 
         {/* Neighbours block (only if user below top-10) */}
-        {showNeighbours && rows && (
+        {showNeighbours && (
           <>
             <div className="text-center py-2" style={{ color: "var(--text-muted)" }}>
               <span className="text-[10px] tracking-[0.2em]">· · ·</span>
             </div>
-            {neighbours.map((r, ni) => {
-              // Index in the full leaderboard for #place
-              const fullIdx = rows.indexOf(r);
+            {neighbors.map((r) => {
               const isMine = mySerialId === r.serial_id && !r.is_bot;
               const tier = tierIdxByXP(r.xp);
               const tierColor = TIER_COLORS[tier];
               const subjColor = r.primary_subject ? subjectColor(r.primary_subject) : tierColor;
               return (
-                <div key={`nb-${r.serial_id}-${ni}`}
+                <div key={`nb-${r.serial_id}-${r.rank}`}
                   className="rounded-xl p-3 flex items-center gap-3 relative overflow-hidden transition-all"
                   style={{
                     background: isMine
@@ -209,7 +214,7 @@ export default function Leaderboard({ mySerialId }: Props) {
                       color: tierColor, fontSize: 14,
                       boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10)",
                     }}>
-                    {fullIdx + 1}
+                    {r.rank}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">

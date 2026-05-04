@@ -8,6 +8,12 @@ const handleI18nRouting = createIntlMiddleware(routing);
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Pass through public analytics share-link pages and their API: skip i18n routing entirely.
+  // /analytics/invite/[token] is a static (locale-less) page; if next-intl runs, it 404s.
+  if (pathname.startsWith("/analytics/invite/")) {
+    return NextResponse.next();
+  }
+
   // /admin paths: do session refresh but skip i18n routing entirely.
   // Admin is a static route (app/admin/) — no locale context needed.
   const isAdminPath = pathname === "/admin" || pathname.startsWith("/admin/");
