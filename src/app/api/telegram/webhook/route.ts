@@ -7,7 +7,11 @@ const ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID || "";
 
 // Diagnostic counters — survive across requests in this Node process.
 const stats = { received: 0, lastReceivedAt: 0 as number, lastFromId: 0, lastText: "" };
-const anthropic     = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY ?? "" });
+const anthropic     = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY ?? "",
+  ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}),
+  ...(process.env.VERCEL_BYPASS_SECRET ? { defaultHeaders: { "x-vercel-protection-bypass": process.env.VERCEL_BYPASS_SECRET } } : {}),
+});
 
 // ── In-memory conversation store (per Telegram user_id → last N messages)
 // Works fine for serverless — history resets after cold start, but that's acceptable.
@@ -87,6 +91,24 @@ async function sendInvoice(chatId: string | number, amount: number) {
       prices:      [{ label: "Поддержка проекта", amount }],
     }),
   });
+}
+
+async function answerPreCheckoutQuery(queryId: string, ok: boolean, errorMessage?: string) {
+  if (!BOT_TOKEN) return;
+  const body: Record<string, unknown> = { pre_checkout_query_id: queryId, ok };
+  if (!ok && errorMessage) body.error_message = errorMessage;
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerPreCheckoutQuery`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await r.json();
+    if (!data.ok) console.error("[telegram] answerPreCheckoutQuery failed:", data.description);
+    else console.log("[telegram] answerPreCheckoutQuery OK", queryId);
+  } catch (err) {
+    console.error("[telegram] answerPreCheckoutQuery error:", err);
+  }
 }
 
 // ── AI support reply ────────────────────────────────────────────────────────
@@ -182,6 +204,14 @@ async function getAIReply(
 // ── Message processing (runs async after 200 is returned to Telegram) ──────────
 
 async function handleUpdate(update: Record<string, unknown>) {
+  // ── pre_checkout_query — MUST be answered within 10s or Telegram rejects payment ──
+  const pcq = update?.pre_checkout_query as Record<string, unknown> | undefined;
+  if (pcq && typeof pcq.id === "string") {
+    console.log("[telegram] pre_checkout_query received", pcq.id, "amount:", pcq.total_amount, pcq.currency);
+    await answerPreCheckoutQuery(pcq.id, true);
+    return;
+  }
+
   const message = update?.message as Record<string, unknown> | undefined;
   if (!message) return;
 

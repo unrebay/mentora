@@ -29,7 +29,8 @@ export async function POST(req: NextRequest) {
 
   const anthropic = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY ?? "",
-    baseURL: process.env.ANTHROPIC_BASE_URL || undefined,
+    ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}),
+    ...(process.env.VERCEL_BYPASS_SECRET ? { defaultHeaders: { "x-vercel-protection-bypass": process.env.VERCEL_BYPASS_SECRET } } : {}),
   });
 
   const start = Date.now();
