@@ -49,12 +49,38 @@ export function isUltima(user: PlanFields): boolean {
   return getEffectivePlan(user) === "ultima";
 }
 
-/** Level reward table */
+/** Level reward table — covers all 8 ladder levels.
+ * Keys include both legacy ("Исследователь") and current ("Любитель") names
+ * so chat/route.ts XP_LEVELS_API ('Исследователь') still finds entries.
+ * Progressive escalation: Pro days → Ultima days. */
 export const LEVEL_REWARDS: Record<string, { plan: PlanTier; days: number }> = {
-  "Исследователь": { plan: "pro",    days: 7  },
-  "Знаток":        { plan: "pro",    days: 14 },
-  "Историк":       { plan: "ultima", days: 3  },
-  "Эксперт":       { plan: "ultima", days: 7  },
+  // Любитель (100 XP) — same as legacy "Исследователь" — entry-level reward
+  "Любитель":      { plan: "pro",    days: 3  },
+  "Исследователь": { plan: "pro",    days: 3  },
+  // Знаток (300 XP)
+  "Знаток":        { plan: "pro",    days: 7  },
+  // Историк (600 XP)
+  "Историк":       { plan: "pro",    days: 14 },
+  // Эксперт (1000 XP) — first Ultima reward
+  "Эксперт":       { plan: "ultima", days: 3  },
+  // Магистр (2500 XP)
+  "Магистр":       { plan: "ultima", days: 7  },
+  // Доктор (5000 XP)
+  "Доктор":        { plan: "ultima", days: 14 },
+  // Учёный (10000 XP) — peak reward
+  "Учёный":        { plan: "ultima", days: 30 },
+};
+
+/** Helper to lookup reward by analytics level key (locale-independent). */
+export const LEVEL_REWARDS_BY_KEY: Record<string, { plan: PlanTier; days: number } | null> = {
+  beginner:  null,                              // no reward at start
+  explorer:  { plan: "pro",    days: 3  },     // Любитель
+  scholar:   { plan: "pro",    days: 7  },     // Знаток
+  historian: { plan: "pro",    days: 14 },     // Историк
+  expert:    { plan: "ultima", days: 3  },     // Эксперт
+  master:    { plan: "ultima", days: 7  },     // Магистр
+  doctor:    { plan: "ultima", days: 14 },     // Доктор
+  academic:  { plan: "ultima", days: 30 },     // Учёный
 };
 
 /**

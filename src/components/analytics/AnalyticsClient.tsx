@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
 import MeLogo from "@/components/MeLogo";
+import { LEVEL_REWARDS_BY_KEY } from "@/lib/plan";
 import Leaderboard from "@/components/analytics/Leaderboard";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -271,6 +272,40 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
               </span>
             </div>
           </div>
+
+          {/* Reward chip — shows what gift the user gets when reaching next level */}
+          {LEVEL_REWARDS_BY_KEY[next.key] && (() => {
+            const reward = LEVEL_REWARDS_BY_KEY[next.key]!;
+            const isUltima = reward.plan === "ultima";
+            const planLabel = isUltima ? "Ultima" : "Pro";
+            const accentColor = isUltima ? "#F5B400" : "#4561E8";
+            const tintBg = isUltima
+              ? "linear-gradient(135deg, rgba(255,215,80,0.18), rgba(245,158,11,0.10))"
+              : "linear-gradient(135deg, rgba(69,97,232,0.18), rgba(124,58,237,0.10))";
+            const tintBorder = isUltima ? "rgba(245,158,11,0.40)" : "rgba(124,58,237,0.30)";
+            const dayWord = reward.days === 1 ? "день" : (reward.days >= 2 && reward.days <= 4 ? "дня" : "дней");
+            return (
+              <div className="mb-3 flex items-center gap-2 px-3 py-2 rounded-xl" style={{
+                background: tintBg,
+                border: `1px solid ${tintBorder}`,
+                boxShadow: `inset 0 1px 0 rgba(255,255,255,0.10), 0 0 12px ${accentColor}1A`,
+              }}>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill={accentColor} style={{ flexShrink: 0 }}>
+                  <path d="M20 12v9H4v-9M22 7H2v5h20zM12 22V7M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"
+                    stroke={accentColor} strokeWidth="1.6" strokeLinejoin="round" fill="none" />
+                </svg>
+                <span className="text-[12px] font-medium" style={{ color: "var(--text-secondary)" }}>
+                  Награда:
+                </span>
+                <span className="text-[12px] font-bold" style={{ color: accentColor }}>
+                  {reward.days} {dayWord} {planLabel}
+                </span>
+                <span className="text-[11px] ml-auto" style={{ color: "var(--text-muted)" }}>
+                  бесплатно
+                </span>
+              </div>
+            );
+          })()}
 
           {/* Sleek progress bar */}
           <div className="relative h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
