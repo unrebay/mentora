@@ -737,8 +737,8 @@ export default async function HomePage() {
               fill="currentColor" />
           </svg>
           {locale === "ru"
-            ? "Тариф Ultima сейчас включает все возможности Pro. Функции распознавания фото, презентаций и аудио находятся в активной разработке и будут добавлены в ближайшие месяцы."
-            : "Ultima currently includes all Pro features. Photo recognition, presentation and audio generation are in active development and will be available soon."}
+            ? "Сейчас Ultima включает все возможности Pro. Распознавание фото, презентации и аудио добавятся в ближайшие месяцы."
+            : "Ultima currently includes all Pro features. Photo recognition, presentations and audio are coming soon."}
         </p>
         </FadeUp>
       </section>
