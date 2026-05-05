@@ -729,19 +729,69 @@ export default function AnalyticsClient(p: Props) {
       {/* KPI grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard label={t("stats.totalXP")} value={p.totalXP.toLocaleString()} color="#4561E8"
-          iconNode={<MeLogo height={20} />}
+          iconNode={
+            /* Centered Me wordmark — wrapper enforces vertical centering, MeLogo's
+               SVG content (text baseline at y=13 of 16-unit viewBox) appears bottom-anchored
+               by default, so we lift it ~2px up via flex+padding. */
+            <div className="w-full h-full flex items-center justify-center" style={{ paddingBottom: 1 }}>
+              <MeLogo height={18} />
+            </div>
+          }
           sparkData={trendCum} deltaPct={dlt} />
         <StatCard label={t("stats.streak")} value={t("stats.streakValue", { n: p.currentStreak })} color="#FF7A00"
           iconNode={
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="#FF7A00" style={{ display: "block", margin: "auto", transform: "translateY(0.5px)" }}>
-              <path d="M12 2C12 2 6 8 6 13.5c0 3.31 2.69 6 6 6s6-2.69 6-6c0-1.5-.5-2.8-1.3-3.8C16.7 9 16 9 15.5 9.5c0 0 0.2 1.5-1.5 2 0.5-2-1-3.5-2-4.5 0.3 1.5-0.5 2.5-1.5 3-1-1-1-2-1-3 0.5-1.5 1.5-3 2.5-5z" />
+            /* Classic flame — clean teardrop silhouette, properly centered */
+            <svg viewBox="0 0 24 24" width="20" height="20" style={{ display: "block" }}>
+              <defs>
+                <linearGradient id="flameGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#FFB347" />
+                  <stop offset="60%" stopColor="#FF7A00" />
+                  <stop offset="100%" stopColor="#E63900" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M12 2.5c0 3-2 4.5-3.5 6.5C7 11 6 13 6 15c0 3.31 2.69 6 6 6s6-2.69 6-6c0-1.5-.5-2.7-1.3-3.6.2.7.3 1.4.3 2.1 0 1.5-.5 2.5-1.5 2.5-.6 0-1-.4-1-1 0-1.5.5-3-.5-4.5-1-1.5-2-3-2-6z"
+                fill="url(#flameGrad)"
+              />
             </svg>
           } />
         <StatCard label={t("stats.messages")} value={p.totalMessages.toLocaleString()} color="#10B981"
           icon="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
           sparkData={p.activity14d.map(d => d.count)} deltaPct={dlt} />
-        <StatCard label={t("stats.badges")} value={t("stats.badgesValue", { earned: earnedBadges, total: p.badges.length })} color="#9F7AFF"
-          icon="M6 4h12v3a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V4zM4 4h2v3a2 2 0 0 1-2 2 2 2 0 0 1 0-4V4zM18 4h2v1a2 2 0 0 1 0 4 2 2 0 0 1-2-2V4zM10 13h4l-.5 3h2l1 4h-9l1-4h2l-.5-3z" />
+        <StatCard label={t("stats.badges")} value={t("stats.badgesValue", { earned: earnedBadges, total: p.badges.length })} color="#F5B400"
+          iconNode={
+            /* Golden trophy cup — classic shape: bowl + handles + stem + base */
+            <svg viewBox="0 0 24 24" width="20" height="20" style={{ display: "block" }}>
+              <defs>
+                <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#FFE17A" />
+                  <stop offset="50%" stopColor="#F5B400" />
+                  <stop offset="100%" stopColor="#B45309" />
+                </linearGradient>
+              </defs>
+              {/* Trophy bowl */}
+              <path
+                d="M7 4h10v3.5a5 5 0 0 1-5 5 5 5 0 0 1-5-5V4z"
+                fill="url(#goldGrad)" stroke="#8C5500" strokeWidth="0.5" strokeLinejoin="round"
+              />
+              {/* Left handle */}
+              <path
+                d="M7 5.5C5.3 5.5 4 6.5 4 8s1.3 2.5 3 2.5"
+                fill="none" stroke="url(#goldGrad)" strokeWidth="1.4" strokeLinecap="round"
+              />
+              {/* Right handle */}
+              <path
+                d="M17 5.5c1.7 0 3 1 3 2.5s-1.3 2.5-3 2.5"
+                fill="none" stroke="url(#goldGrad)" strokeWidth="1.4" strokeLinecap="round"
+              />
+              {/* Stem */}
+              <rect x="11" y="13" width="2" height="3" fill="url(#goldGrad)" />
+              {/* Base */}
+              <path d="M8.5 16h7l-.5 3h-6z" fill="url(#goldGrad)" stroke="#8C5500" strokeWidth="0.4" strokeLinejoin="round" />
+              {/* Star sparkle on bowl */}
+              <circle cx="12" cy="7.5" r="0.9" fill="rgba(255,255,255,0.85)" />
+            </svg>
+          } />
       </div>
 
       {/* Activity area chart */}
