@@ -3,9 +3,25 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import { getTranslations } from "next-intl/server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("guide");
-  return { title: t("metaTitle"), description: t("metaDesc") };
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "guide" });
+  const url = locale === "en" ? "https://mentora.su/en/guide" : "https://mentora.su/ru/guide";
+  return {
+    title: t("metaTitle"),
+    description: t("metaDesc"),
+    alternates: {
+      canonical: url,
+      languages: { ru: "https://mentora.su/ru/guide", en: "https://mentora.su/en/guide", "x-default": "https://mentora.su/ru/guide" },
+    },
+    openGraph: {
+      type: "article",
+      url,
+      title: t("metaTitle"),
+      description: t("metaDesc"),
+      images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
+    },
+  };
 }
 
 /* ── SVG icons per tip — pure data, no localization ─────────── */

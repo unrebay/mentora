@@ -15,35 +15,61 @@ const GalaxyCanvas = nextDynamic(() => import("@/components/GalaxyCanvas"), { ss
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Mentora — новый вид образования | 17 наук с AI-ментором",
-  description:
-    "Персональный AI-ментор для всех возрастов. 17 наук: история, математика, физика, химия, биология, психология, философия и др. Живой диалог вместо учебника. Начни бесплатно — без карты.",
-  keywords: [
-    "AI ментор", "ИИ ментор", "персональный ментор", "AI репетитор", "ИИ образование",
-    "учить историю с ИИ", "история России онлайн", "математика онлайн",
-    "физика онлайн", "химия онлайн", "биология онлайн", "английский с AI",
-    "образование для взрослых", "lifelong learning", "mentora", "mentora.su",
-  ],
-  alternates: {
-    canonical: "https://mentora.su/ru",
-    languages: { "ru": "https://mentora.su/ru", "en": "https://mentora.su/en", "x-default": "https://mentora.su/ru" },
-  },
-  openGraph: {
-    type: "website",
-    url: "https://mentora.su/ru",
-    title: "Mentora — новый вид образования. 17 наук с AI-ментором",
+const META = {
+  ru: {
+    title: "Mentora — новый вид образования | 17 наук с AI-ментором",
     description:
+      "Персональный AI-ментор для всех возрастов. 17 наук: история, математика, физика, химия, биология, психология, философия и др. Живой диалог вместо учебника. Начни бесплатно — без карты.",
+    ogTitle: "Mentora — новый вид образования. 17 наук с AI-ментором",
+    ogDescription:
       "История, математика, физика, химия, биология, психология, философия и ещё 10 наук. Живой диалог вместо учебника — персонально, для любого возраста, бесплатно.",
-    images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "Mentora AI-репетитор" }],
+    twTitle: "Mentora — 17 наук с AI-ментором",
+    twDescription: "Живой диалог вместо учебника. Персонально, для любого возраста, бесплатно.",
+    ogAlt: "Mentora AI-репетитор",
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Mentora — 17 наук с AI-ментором",
-    description: "Живой диалог вместо учебника. Персонально, для любого возраста, бесплатно.",
-    images: ["/opengraph-image.png"],
+  en: {
+    title: "Mentora — a new kind of education | 17 sciences with an AI mentor",
+    description:
+      "A personal AI mentor for all ages. 17 sciences: history, math, physics, chemistry, biology, psychology, philosophy and more. A living dialog instead of a textbook. Start free — no card needed.",
+    ogTitle: "Mentora — a new kind of education. 17 sciences with an AI mentor",
+    ogDescription:
+      "History, math, physics, chemistry, biology, psychology, philosophy and 10 more sciences. A living dialog instead of a textbook — personal, for any age, free.",
+    twTitle: "Mentora — 17 sciences with an AI mentor",
+    twDescription: "A living dialog instead of a textbook. Personal, for any age, free.",
+    ogAlt: "Mentora AI tutor",
   },
-};
+} as const;
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const isEn = locale === "en";
+  const m = isEn ? META.en : META.ru;
+  const url = isEn ? "https://mentora.su/en" : "https://mentora.su/ru";
+  return {
+    title: m.title,
+    description: m.description,
+    keywords: isEn
+      ? ["AI mentor", "AI tutor", "personal mentor", "AI education", "learn history with AI", "online math", "online physics", "online chemistry", "online biology", "lifelong learning", "mentora", "mentora.su"]
+      : ["AI ментор", "ИИ ментор", "персональный ментор", "AI репетитор", "ИИ образование", "учить историю с ИИ", "история России онлайн", "математика онлайн", "физика онлайн", "химия онлайн", "биология онлайн", "английский с AI", "образование для взрослых", "lifelong learning", "mentora", "mentora.su"],
+    alternates: {
+      canonical: url,
+      languages: { "ru": "https://mentora.su/ru", "en": "https://mentora.su/en", "x-default": "https://mentora.su/ru" },
+    },
+    openGraph: {
+      type: "website",
+      url,
+      title: m.ogTitle,
+      description: m.ogDescription,
+      images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: m.ogAlt }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: m.twTitle,
+      description: m.twDescription,
+      images: ["/opengraph-image.png"],
+    },
+  };
+}
 
 const SUBJECT_EMOJIS: Record<string, string> = {
   "russian-history": "🏰",
