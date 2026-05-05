@@ -182,15 +182,15 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
                       : passed
                       ? "linear-gradient(135deg, #4561E8, #2D40A8)"
                       : isPeak
-                      ? "radial-gradient(circle at 30% 30%, rgba(255,215,80,0.30), rgba(245,158,11,0.06) 70%)"
-                      : "rgba(255,255,255,0.04)",
+                      ? "radial-gradient(circle at 30% 30%, rgba(255,215,80,0.55), rgba(245,158,11,0.18) 70%)"
+                      : `radial-gradient(circle at 30% 30%, ${["rgba(69,97,232,0.20)","rgba(124,58,237,0.20)","rgba(159,122,255,0.20)","rgba(255,122,0,0.20)","rgba(245,158,11,0.20)","rgba(192,132,252,0.20)","rgba(6,182,212,0.20)"][i % 7]}, rgba(255,255,255,0.03) 70%)`,
                     border: current
                       ? "1.5px solid rgba(255,255,255,0.5)"
                       : passed
                       ? "1px solid rgba(124,58,237,0.4)"
                       : isPeak
-                      ? "1px solid rgba(245,158,11,0.35)"
-                      : "1px solid rgba(255,255,255,0.10)",
+                      ? "1px solid rgba(245,158,11,0.55)"
+                      : `1px solid ${["rgba(69,97,232,0.30)","rgba(124,58,237,0.30)","rgba(159,122,255,0.30)","rgba(255,122,0,0.30)","rgba(245,158,11,0.30)","rgba(192,132,252,0.30)","rgba(6,182,212,0.30)"][i % 7]}`,
                     backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
                     boxShadow: current
                       ? "0 0 18px rgba(124,58,237,0.85), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 4px rgba(0,0,0,0.3)"
@@ -222,39 +222,63 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
         </div>
       </div>
       {next && (
-        <div className="mt-3 rounded-xl p-3 flex items-center gap-3 relative overflow-hidden"
+        <div className="mt-4 rounded-2xl p-4 relative overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, rgba(124,58,237,0.10), rgba(69,97,232,0.04) 60%, transparent)",
-            border: "1px solid rgba(124,58,237,0.20)",
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+            background: "linear-gradient(135deg, rgba(124,58,237,0.10) 0%, rgba(69,97,232,0.06) 50%, rgba(159,122,255,0.04) 100%), rgba(255,255,255,0.02)",
+            border: "1px solid rgba(124,58,237,0.25)",
+            backdropFilter: "blur(14px) saturate(1.4)",
+            WebkitBackdropFilter: "blur(14px) saturate(1.4)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), 0 8px 28px rgba(124,58,237,0.10)",
           }}>
-          <div className="flex-1 min-w-0">
-            <div className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
+          {/* Soft halo */}
+          <div className="absolute pointer-events-none" aria-hidden
+            style={{ top: -40, right: -20, width: 180, height: 100, opacity: 0.5,
+              background: "radial-gradient(ellipse, rgba(159,122,255,0.40), transparent 65%)", filter: "blur(20px)" }} />
+
+          <div className="relative flex items-start justify-between mb-2.5 gap-3">
+            <div className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: "var(--text-muted)" }}>
               {t("level.toNextLabel")}
             </div>
-            <div className="flex items-baseline gap-1.5 mt-1">
-              <span className="font-black text-xl" style={{
-                background: "linear-gradient(135deg, #6B8FFF, #9F7AFF)",
+            <div className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{
+              background: "linear-gradient(135deg, rgba(124,58,237,0.20), rgba(69,97,232,0.15))",
+              color: "#9F7AFF",
+              border: "1px solid rgba(159,122,255,0.30)",
+            }}>
+              {Math.round(segProgress)}%
+            </div>
+          </div>
+
+          {/* Number row: equal-size XP + Me-logo + arrow-replacement (dot) + next level */}
+          <div className="relative flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-2">
+              <span className="font-black leading-none" style={{
+                fontSize: 36,
+                background: "linear-gradient(135deg, #6B8FFF, #9F7AFF, #C4B5FD)",
                 WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                letterSpacing: "-0.02em",
               }}>
                 {(next.minXP - totalXP).toLocaleString()}
               </span>
-              <MeLogo height={11} />
-              <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>→ {next.name}</span>
+              <MeLogo height={26} />
             </div>
-            {/* Mini progress bar */}
-            <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-              <div className="h-full rounded-full transition-all duration-700" style={{
-                width: `${segProgress}%`,
-                background: "linear-gradient(90deg, #4561E8, #7C3AED, #9F7AFF)",
-                boxShadow: "0 0 8px rgba(124,58,237,0.6)",
+            <div className="flex items-center gap-2 ml-auto">
+              <span className="w-1.5 h-1.5 rounded-full" style={{
+                background: "#9F7AFF",
+                boxShadow: "0 0 8px #9F7AFF",
               }} />
+              <span className="text-sm font-bold" style={{ color: "var(--text)" }}>
+                {next.name}
+              </span>
             </div>
           </div>
-          <div className="text-right flex-shrink-0">
-            <div className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>
-              {Math.round(segProgress)}%
-            </div>
+
+          {/* Sleek progress bar */}
+          <div className="relative h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+            <div className="h-full rounded-full transition-all duration-700" style={{
+              width: `${segProgress}%`,
+              background: "linear-gradient(90deg, #4561E8 0%, #7C3AED 50%, #9F7AFF 100%)",
+              boxShadow: "0 0 10px rgba(124,58,237,0.7)",
+            }} />
           </div>
         </div>
       )}
@@ -287,28 +311,55 @@ function GlobalRankCapsule({ rank, total, mySerialId }: { rank: number | null; t
           TOP {pct < 1 ? "1%" : `${Math.ceil(pct)}%`}
         </div>
       )}
-      <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: "linear-gradient(135deg, #4561E8, #7C3AED)" }}>
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="white">
+      <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 relative"
+        style={{
+          background: "linear-gradient(135deg, #4561E8, #7C3AED)",
+          boxShadow: "0 8px 24px rgba(124,58,237,0.35), inset 0 1px 0 rgba(255,255,255,0.20)",
+        }}>
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="white">
           <path d="M12 2l2.5 7h7.5l-6 4.5 2.5 7.5L12 16.5 5.5 21l2.5-7.5L2 9h7.5z" />
         </svg>
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
-          {t("globalRankLabel")}
+        {/* Top row: section label + ID badge above */}
+        <div className="flex items-center gap-2 flex-wrap mb-1">
+          <span className="text-[10px] font-bold tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>
+            {t("globalRankLabel")}
+          </span>
+          {mySerialId !== null && mySerialId !== undefined && (
+            <span className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full"
+              style={{ background: "rgba(124,58,237,0.18)", color: "#9F7AFF", border: "1px solid rgba(159,122,255,0.30)" }}>
+              ID #{mySerialId}
+            </span>
+          )}
         </div>
-        <div className="font-black text-2xl leading-none mt-1"
-          style={{ background: "linear-gradient(135deg, #6B8FFF, #9F7AFF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-          #{rank}
+        {/* Single-line: #296 (big) + 'из 747 пользователей' (smaller) */}
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <span className="font-black leading-none" style={{
+            fontSize: 30,
+            background: "linear-gradient(135deg, #6B8FFF, #9F7AFF, #C4B5FD)",
+            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+            letterSpacing: "-0.02em",
+          }}>
+            #{rank}
+          </span>
+          <span className="text-[12px] font-medium" style={{ color: "var(--text-muted)" }}>
+            {t("globalRankOf", { n: total.toLocaleString() })}
+          </span>
         </div>
-        {mySerialId !== null && mySerialId !== undefined && (
-          <div className="text-[10px] font-bold tracking-wider mt-1 inline-block px-2 py-0.5 rounded-full"
-            style={{ background: "rgba(124,58,237,0.18)", color: "#9F7AFF", border: "1px solid rgba(159,122,255,0.30)" }}>
-            ID #{mySerialId}
-          </div>
-        )}
-        <div className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
-          {t("globalRankOf", { n: total.toLocaleString() })}
+      </div>
+      {/* Right-side encouragement chip */}
+      <div className="flex-shrink-0 relative">
+        <div className="text-xs font-bold px-3 py-2 rounded-xl text-center" style={{
+          background: "linear-gradient(135deg, rgba(255,215,80,0.18), rgba(245,158,11,0.10))",
+          border: "1px solid rgba(245,158,11,0.40)",
+          color: "#F5B400",
+          boxShadow: "0 0 14px rgba(245,158,11,0.20), inset 0 1px 0 rgba(255,255,255,0.10)",
+          letterSpacing: "0.01em",
+          minWidth: 110,
+          whiteSpace: "nowrap",
+        }}>
+          ✨ Так держать!
         </div>
       </div>
     </div>
