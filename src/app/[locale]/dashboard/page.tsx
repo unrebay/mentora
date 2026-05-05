@@ -45,6 +45,31 @@ function getFirstName(fullName?: string | null, email?: string | null, fallback?
   return fallback ?? "Student";
 }
 
+/**
+ * SUBJECT_SYMBOLS — decorative thematic symbols rendered as low-opacity background
+ * inside the «Продолжить обучение» card. Each subject has 8-12 unicode characters
+ * that hint at the field without taking visual focus.
+ */
+const SUBJECT_SYMBOLS: Record<string, string[]> = {
+  "russian-history":  ["1812", "1861", "1917", "Я", "Ѳ", "ѣ", "Русь", "Иванъ"],
+  "world-history":    ["1492", "1789", "Caesar", "⚔", "Ω", "☥", "Empire", "Renaissance"],
+  "mathematics":      ["∫", "∑", "π", "√", "∂", "∞", "≈", "lim", "x²", "ƒ(x)", "△"],
+  "physics":          ["E=mc²", "F=ma", "λ", "ℏ", "Ω", "⚛", "Δt", "v=s/t", "α", "β"],
+  "chemistry":        ["H₂O", "CO₂", "Fe", "Au", "Cu", "NaCl", "C₆H₁₂O₆", "pH", "⚗"],
+  "biology":          ["DNA", "ATP", "RNA", "C₆H₁₂O₆", "mitosis", "↻"],
+  "english":          ["the", "a/an", "have been", "had", "would", "Past Perfect", "tense", "/ɪŋ/"],
+  "literature":       ["«…»", "✦", "§", "стих", "ямб", "хорей", "глава", "vol.I"],
+  "russian-language": ["А", "Б", "В", "ё", "ъ", "ь", "падеж", "склонение"],
+  "social-studies":   ["§", "⚖", "конст.", "право", "общество", "государство"],
+  "geography":        ["⛰", "⊕", "◯", "N°", "E°", "карта", "широта", "долгота"],
+  "computer-science": ["{ }", "[ ]", ";", "() =>", "//", "==", "0/1", "fn", "API"],
+  "astronomy":        ["☉", "☽", "★", "♁", "♃", "♄", "ly", "AU", "✦"],
+  "psychology":       ["ψ", "Σ", "EQ", "Id", "Ego", "архетип", "стимул", "когниция"],
+  "philosophy":       ["?", "∴", "∵", "∀", "∃", "logos", "cogito", "ψυχή"],
+  "economics":        ["₽", "$", "€", "%", "↑", "↓", "ВВП", "Δ", "GDP"],
+  "discovery":        ["?", "!", "⚡", "✦", "↻", "→", "?!"],
+};
+
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };

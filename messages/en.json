@@ -176,7 +176,7 @@
   "steps": {
     "01": {
       "title": "Open and try immediately",
-      "desc": "No registration required. Ask your first question and get a detailed answer in a second."
+      "desc": "Ask your first question and get a detailed answer in a second."
     },
     "02": {
       "title": "Choose your science",
@@ -253,8 +253,7 @@
         "All sciences",
         "10 messages / 8 hours",
         "XP, levels and achievements",
-        "Streak and progress",
-        "No registration required"
+        "Streak and progress"
       ]
     },
     "pro": {
