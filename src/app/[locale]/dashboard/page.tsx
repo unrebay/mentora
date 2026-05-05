@@ -120,7 +120,7 @@ export default async function DashboardPage() {
       .single();
     if (lastMsg?.content) {
       const raw = lastMsg.content.trim().replace(/\s+/g, " ");
-      lastTopicHint = raw.length > 52 ? raw.slice(0, 52) + "…" : raw;
+      lastTopicHint = raw.length > 140 ? raw.slice(0, 140) + "…" : raw;
     }
   }
 
@@ -451,6 +451,50 @@ export default async function DashboardPage() {
                 background: `linear-gradient(90deg, transparent, ${accent}40, transparent)`,
               }} />
 
+              {/* Decorative subject symbols — themed background pattern */}
+              {SUBJECT_SYMBOLS[lastActiveSubject.id] && (
+                <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
+                  {SUBJECT_SYMBOLS[lastActiveSubject.id].map((sym, i) => {
+                    // Pseudo-random but stable positions/sizes/rotations from index
+                    const positions = [
+                      { top: "8%",  left: "62%", size: 22, rot: -8 },
+                      { top: "18%", left: "82%", size: 36, rot: 12 },
+                      { top: "38%", left: "70%", size: 26, rot: -15 },
+                      { top: "55%", left: "88%", size: 32, rot: 5 },
+                      { top: "72%", left: "65%", size: 24, rot: -12 },
+                      { top: "85%", left: "78%", size: 28, rot: 8 },
+                      { top: "12%", left: "92%", size: 20, rot: 20 },
+                      { top: "62%", left: "92%", size: 18, rot: -5 },
+                      { top: "30%", left: "55%", size: 16, rot: 10 },
+                      { top: "78%", left: "55%", size: 18, rot: -18 },
+                      { top: "48%", left: "94%", size: 22, rot: 15 },
+                      { top: "92%", left: "62%", size: 20, rot: -3 },
+                    ];
+                    const p = positions[i % positions.length];
+                    return (
+                      <span key={i} style={{
+                        position: "absolute",
+                        top: p.top, left: p.left,
+                        fontSize: p.size,
+                        fontFamily: "var(--font-playfair), Georgia, serif",
+                        fontWeight: 700,
+                        background: `linear-gradient(135deg, ${accent}, ${accent}66)`,
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                        opacity: 0.18,
+                        transform: `rotate(${p.rot}deg)`,
+                        userSelect: "none",
+                        whiteSpace: "nowrap",
+                        letterSpacing: "-0.02em",
+                      }}>
+                        {sym}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
               <div className="p-5">
                 {/* Header row: icon + label + title */}
                 <div className="flex items-start gap-4 mb-4">
@@ -477,9 +521,10 @@ export default async function DashboardPage() {
                       <p className="text-sm mt-1.5 leading-snug" style={{
                         color: "var(--text-secondary)",
                         display: "-webkit-box",
-                        WebkitLineClamp: 2,
+                        WebkitLineClamp: 3,
                         WebkitBoxOrient: "vertical",
                         overflow: "hidden",
+                        wordBreak: "break-word",
                       }}>
                         {lastTopicHint}
                       </p>
