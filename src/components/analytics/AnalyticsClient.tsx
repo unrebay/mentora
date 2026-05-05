@@ -156,7 +156,7 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
           <MeLogo height={14} />
         </span>
       </div>
-      <div className="relative" style={{ paddingTop: 4, paddingBottom: 30 }}>
+      <div className="relative" style={{ paddingTop: 4, paddingBottom: 56 }}>
         {/* Background line */}
         <div className="absolute left-2 right-2 top-1/2 -translate-y-1/2 h-[2px] rounded-full"
           style={{ background: "var(--border)" }} />
@@ -205,7 +205,7 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                   ) : null}
                 </div>
-                <div className="absolute top-full mt-2 text-center" style={{ width: 56, marginLeft: -19 }}>
+                <div className="absolute top-full mt-2 text-center flex flex-col items-center" style={{ width: 72, marginLeft: -27 }}>
                   <div className="text-[9px] font-bold leading-tight" style={{
                     color: current ? "var(--text)" : passed ? "var(--text-muted)" : "var(--text-muted)",
                     opacity: current ? 1 : passed ? 0.85 : 0.55,
@@ -216,6 +216,24 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
                     {lvl.minXP >= 1000 ? `${lvl.minXP / 1000}k` : lvl.minXP}
                     <MeLogo height={7} />
                   </div>
+                  {/* Reward chip — shows what plan/days the user gets at this level */}
+                  {LEVEL_REWARDS_BY_KEY[lvl.key] && (() => {
+                    const r = LEVEL_REWARDS_BY_KEY[lvl.key]!;
+                    const isUltima = r.plan === "ultima";
+                    const c = isUltima ? "#F5B400" : "#4561E8";
+                    return (
+                      <div className="text-[8px] font-bold mt-1 px-1.5 py-0.5 rounded inline-block" style={{
+                        color: c,
+                        background: isUltima ? "rgba(245,158,11,0.10)" : "rgba(69,97,232,0.10)",
+                        border: `1px solid ${isUltima ? "rgba(245,158,11,0.30)" : "rgba(69,97,232,0.25)"}`,
+                        letterSpacing: "0.02em",
+                        whiteSpace: "nowrap",
+                        opacity: passed ? 0.55 : current ? 1 : 0.85,
+                      }}>
+                        +{r.days}д {isUltima ? "Ultima" : "Pro"}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             );
