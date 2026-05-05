@@ -123,7 +123,7 @@ const FEATURE_ICONS = [
   `<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>`,
   `<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>`,
   `<circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>`,
-  `<circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="2" fill="none"/><circle cx="15" cy="15" r="6" stroke="currentColor" strokeWidth="2" fill="none"/>`,
+  `<ellipse cx="12" cy="6" rx="7" ry="2.2" stroke="currentColor" strokeWidth="2" fill="none"/><path d="M5 6v2a7 2.2 0 0 0 14 0V6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/><path d="M5 11.5a7 2.2 0 0 0 14 0v2.5a7 2.2 0 0 1-14 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/><path d="M5 17a7 2.2 0 0 0 14 0v1a7 2.2 0 0 1-14 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>`,
 ];
 
 const FEATURE_COLORS = ["#4561E8", "#10B981", "#FF7A00", "#A78BFA", "#06B6D4", "#F59E0B"];

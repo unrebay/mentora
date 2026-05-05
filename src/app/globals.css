@@ -77,7 +77,12 @@
        which causes 6-15px content overflow visible as white stripe on iPad */
     width: 100%;
     max-width: 100%;
+    /* overflow-x: clip prevents horizontal scroll WITHOUT breaking position:sticky
+       on descendants. overflow-x:hidden creates a scroll container which makes
+       sticky elements anchor wrong — that broke the sticky LandingNav.
+       Cascade: hidden as fallback for iOS <16, clip for modern (overrides). */
     overflow-x: hidden;
+    overflow-x: clip;
     background-color: var(--bg);
   }
 

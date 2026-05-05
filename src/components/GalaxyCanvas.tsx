@@ -186,11 +186,11 @@ export default function GalaxyCanvas({ className }: Props) {
           color, size, transparent: true, opacity: op, blending: ADD, depthWrite: false, sizeAttenuation: false,
         })));
       }
-      mkStars(18000, 35, 350, 0xffffff, 1.7, 0.22);
-      mkStars( 3000, 20,  80, 0xaabbff, 2.0, 0.16);
-      mkStars(  500, 15,  40, 0xfff0cc, 2.7, 0.26);
-      mkStars(  900, 25, 150, 0x88aaff, 1.4, 0.14);
-      mkStars(  300, 10,  30, 0xffffff, 3.6, 0.36);
+      mkStars(18000, 35, 350, 0xffffff, 1.8, 0.30);
+      mkStars( 3000, 20,  80, 0xaabbff, 2.0, 0.22);
+      mkStars(  500, 15,  40, 0xfff0cc, 2.7, 0.32);
+      mkStars(  900, 25, 150, 0x88aaff, 1.5, 0.22);
+      mkStars(  300, 10,  30, 0xffffff, 3.6, 0.42);
       // Milky Way band
       { const geo=new THREE.BufferGeometry(); const pos=new Float32Array(8000*3);
         for (let i=0;i<8000;i++) { const r=80+Math.random()*200,a=Math.random()*Math.PI*2,y=(Math.random()-0.5)*28; pos[i*3]=Math.cos(a)*r; pos[i*3+1]=y; pos[i*3+2]=Math.sin(a)*r; }
