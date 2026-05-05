@@ -7,28 +7,40 @@ import TelegramSupportButton from "@/components/TelegramSupportButton";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export const metadata = {
-  title: "Тарифы — Mentora AI-репетитор",
-  description:
-    "Начни бесплатно — 10 сообщений за 8 часов без карты. Pro за 499 ₽/мес открывает все 17 наук без лимита. Ultra добавляет PDF-конспекты, приоритет и расширенную память.",
-  keywords: ["тарифы AI репетитора", "стоимость репетитора онлайн", "Pro план Mentora", "Ultra", "AI обучение цена"],
-  alternates: {
-    canonical: "https://mentora.su/ru/pricing",
-    languages: { "ru": "https://mentora.su/ru/pricing", "en": "https://mentora.su/en/pricing" },
-  },
-  openGraph: {
-    title: "Тарифы Mentora — от 0 ₽",
-    description: "Бесплатно, Pro 499 ₽/мес или Ultra 799 ₽/мес. Без договоров — отмени в любой момент.",
-    url: "https://mentora.su/ru/pricing",
-    images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: "summary_large_image" as const,
-    title: "Тарифы Mentora — от 0 ₽",
-    description: "AI-репетитор по 17 наукам. Free / Pro / Ultra. Начни без карты.",
-    images: ["/opengraph-image.png"],
-  },
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const isEn = locale === "en";
+  const url = isEn ? "https://mentora.su/en/pricing" : "https://mentora.su/ru/pricing";
+  return {
+    title: isEn ? "Pricing — Mentora AI tutor" : "Тарифы — Mentora AI-репетитор",
+    description: isEn
+      ? "Start free — 10 messages per 8 hours, no card. Pro for ~$5/mo unlocks all 17 sciences with no limit. Ultra adds PDF summaries, priority, and extended memory."
+      : "Начни бесплатно — 10 сообщений за 8 часов без карты. Pro за 499 ₽/мес открывает все 17 наук без лимита. Ultra добавляет PDF-конспекты, приоритет и расширенную память.",
+    keywords: isEn
+      ? ["AI tutor pricing", "online tutor cost", "Mentora Pro", "Ultra", "AI education price"]
+      : ["тарифы AI репетитора", "стоимость репетитора онлайн", "Pro план Mentora", "Ultra", "AI обучение цена"],
+    alternates: {
+      canonical: url,
+      languages: { ru: "https://mentora.su/ru/pricing", en: "https://mentora.su/en/pricing", "x-default": "https://mentora.su/ru/pricing" },
+    },
+    openGraph: {
+      title: isEn ? "Mentora pricing — from $0" : "Тарифы Mentora — от 0 ₽",
+      description: isEn
+        ? "Free, Pro $5/mo or Ultra $9/mo. No contracts — cancel anytime."
+        : "Бесплатно, Pro 499 ₽/мес или Ultra 799 ₽/мес. Без договоров — отмени в любой момент.",
+      url,
+      images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image" as const,
+      title: isEn ? "Mentora pricing — from $0" : "Тарифы Mentora — от 0 ₽",
+      description: isEn
+        ? "AI tutor across 17 sciences. Free / Pro / Ultra. Start without a card."
+        : "AI-репетитор по 17 наукам. Free / Pro / Ultra. Начни без карты.",
+      images: ["/opengraph-image.png"],
+    },
+  };
+}
 
 export default async function PricingPage() {
   const cookieStore = await cookies();
