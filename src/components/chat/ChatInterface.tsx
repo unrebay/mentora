@@ -302,11 +302,16 @@ function TextBlock({ content }: { content: string }) {
       if (listBuffer.length > 0) flushLists();
       orderedBuffer.push(ordMatch[1]); continue;
     }
-    // Multi-line list continuation
+    // Multi-line list continuation (non-empty line, when we're inside a list)
     if (line.trim() !== "") {
       if (orderedBuffer.length > 0) { orderedBuffer[orderedBuffer.length-1] += " " + line.trim(); continue; }
       if (listBuffer.length > 0)    { listBuffer[listBuffer.length-1]    += " " + line.trim(); continue; }
     }
+
+    // Blank line — preserve in-progress list buffer (CRITICAL: don't flush!)
+    // Markdown allows blank lines BETWEEN ordered list items, the next "1."/"2."/etc
+    // line will continue the same buffer.
+    if (line.trim() === "") { if (elements.length > 0) elements.push(<div key={keyIdx++} className="h-1.5" />); continue; }
 
     flushLists();
 
@@ -314,9 +319,6 @@ function TextBlock({ content }: { content: string }) {
     const h1 = line.match(/^# (.+)/);   if (h1) { elements.push(<h2 key={keyIdx++} className="font-bold mt-4 mb-2 leading-snug" style={{ fontSize:"1.1rem", color:"var(--text)" }}>{parseInline(h1[1])}</h2>); continue; }
     const h2 = line.match(/^## (.+)/);  if (h2) { elements.push(<h3 key={keyIdx++} className="font-semibold mt-3 mb-1.5 leading-snug" style={{ fontSize:"1rem", color:"var(--text)" }}>{parseInline(h2[1])}</h3>); continue; }
     const h3 = line.match(/^### (.+)/); if (h3) { elements.push(<p  key={keyIdx++} className="font-semibold mt-2 mb-1" style={{ color:"var(--text)" }}>{parseInline(h3[1])}</p>); continue; }
-
-    // Blank line
-    if (line.trim() === "") { if (elements.length > 0) elements.push(<div key={keyIdx++} className="h-1.5" />); continue; }
 
     elements.push(<p key={keyIdx++} className="leading-relaxed">{parseInline(line)}</p>);
   }
