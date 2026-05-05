@@ -910,8 +910,8 @@ export default async function HomePage() {
                 color: "#FF7A00",
                 title: locale === "ru" ? "Наставник, который помнит тебя" : "A mentor who knows you",
                 desc: locale === "ru"
-                  ? "Он помнит твой прогресс, знает твои пробелы и никогда не устаёт объяснять. Именно так работает настоящий ментор."
-                  : "It remembers your progress, knows your gaps, and never gets tired of explaining. That's what a real mentor does.",
+                  ? "Он помнит твой прогресс, знает твои пробелы, анализирует и подстраивается под стиль общения. И никогда не устаёт объяснять — именно так работает настоящий ментор."
+                  : "It remembers your progress, knows your gaps, analyzes and adapts to your style of communication. And never gets tired of explaining — that's what a real mentor does.",
               },
             ].map((pillar, i) => (
               <FadeUp key={i} delay={0.22 + i * 0.1}>

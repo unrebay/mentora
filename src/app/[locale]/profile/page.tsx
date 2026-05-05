@@ -322,11 +322,27 @@ export default async function ProfilePage() {
         </div>
 
         {/* ── Stats grid ───────────────────────────────────── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-fade-in-up" style={{ animationDelay: "60ms", opacity: 0 }}>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 animate-fade-in-up" style={{ animationDelay: "60ms", opacity: 0 }}>
           <StatCard label="Мент"          value={totalXP}       icon={<MentIcon />}    accent="var(--brand)" isBrand />
           <StatCard label="Рекорд стрика" value={bestStreak}    icon={<FlameIcon />}   accent="#FF7A00" />
           <StatCard label="Сообщений"     value={totalMessages} icon={<MessageIcon />} accent="#10B981" />
           <StatCard label="Достижений"    value={earned.length} icon={<StarIcon />}    accent="#f59e0b" />
+          <StatCard
+            label={
+              (rankRow as { total?: number | string | null } | null)?.total
+                ? `Место из ${Number((rankRow as { total: number | string }).total).toLocaleString("ru-RU")}`
+                : "Место"
+            }
+            value={(rankRow as { rank?: number | string | null } | null)?.rank ? Number((rankRow as { rank: number | string }).rank) : 0}
+            icon={
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M6 4h12v3a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V4z" />
+                <path d="M4 4h2v3a2 2 0 0 1-2 2 2 2 0 0 1 0-4V4zM18 4h2v1a2 2 0 0 1 0 4 2 2 0 0 1-2-2V4z" />
+                <path d="M9 17h6l-1 4h-4l-1-4z" />
+              </svg>
+            }
+            accent="#7C3AED"
+          />
         </div>
 
         {/* ── Avatar grid ──────────────────────────────────── */}
