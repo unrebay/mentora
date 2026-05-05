@@ -134,10 +134,26 @@
   }
 
   /* Scrollbar */
-  ::-webkit-scrollbar         { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track   { background: transparent; }
-  ::-webkit-scrollbar-thumb   { background: var(--border); border-radius: 3px; }
+  /* Scrollbar styling — both light and dark mode.
+     The scrollbar bar itself, its track, and its corner all need explicit
+     transparent backgrounds — otherwise Chrome shows a light grey "track gutter"
+     visible as a vertical white stripe on the right edge in dark sections. */
+  ::-webkit-scrollbar          { width: 8px; height: 8px; background: transparent; }
+  ::-webkit-scrollbar-track    { background: transparent; }
+  ::-webkit-scrollbar-corner   { background: transparent; }
+  ::-webkit-scrollbar-thumb    { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
   .dark ::-webkit-scrollbar-thumb { background: #323258; }
+  .dark ::-webkit-scrollbar-thumb:hover { background: #4d4d80; }
+}
+
+/* Firefox + modern browsers: thin scrollbar with transparent track */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+html.dark {
+  scrollbar-color: #323258 transparent;
 }
 
 /* ── Smooth theme transitions ─────────────────────────────────────────────── */
