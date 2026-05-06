@@ -122,9 +122,11 @@ export default function DashboardNav({
   ];
 
   const mobileLinks = [
-    ...navLinks.slice(0, 3),
-    { href: "/knowledge", label: t("dashboard.nav.galaxyFull") },
-    ...navLinks.slice(4),
+    { href: "/dashboard",           label: t("dashboard.nav.subjects") },
+    { href: "/dashboard/analytics", label: t("dashboard.nav.analytics") },
+    { href: "/knowledge",           label: t("dashboard.nav.galaxyFull") },
+    { href: "/dashboard/about",     label: t("dashboard.nav.about") },
+    { href: "/profile",             label: t("dashboard.nav.profile") },
     ...(!isPro ? [{ href: "/pricing", label: t("nav.pricing") }] : []),
   ];
 
