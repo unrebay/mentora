@@ -180,36 +180,40 @@ export default async function HomePage() {
       {/* ── DARK UNIVERSE: nav gap + hero + stats + features in one seamless block ── */}
       <div className="relative" style={{ background: "#050a14", marginTop: "-100px", paddingBottom: "200px" }}>
 
-      {/* HERO — padding-top compensates for the negative margin (100px covers nav on all devices).
-            Galaxy + overlays live INSIDE the hero so the galaxy core is anchored to the
-            visible hero zone (one 100dvh block) instead of being centered across the
-            entire dark universe (hero + stats + features), which on mobile pushed the
-            core well below the fold on first paint. */}
-      <section className="relative overflow-hidden" style={{ paddingTop: "100px" }}>
-        {/* Galaxy — spans the hero section only, reacts to cursor */}
-        <GalaxyCanvas className="absolute inset-0 w-full h-full z-0" />
+        {/* Galaxy — anchored to the TOP of the dark universe.
+            • Mobile: clipped to one 100dvh block so the core is visible on
+              the first screen and doesn't render across (and waste GPU on)
+              the much taller hero+stats+features stack.
+            • Desktop: spans the entire dark universe (hero + stats + features)
+              like before — the wide right-side fade reads as space dust. */}
+        <div className="absolute inset-x-0 top-0 z-0 pointer-events-none h-[100dvh] md:h-full">
+          <GalaxyCanvas className="absolute inset-0 w-full h-full" />
+        </div>
 
-        {/* Desktop tint — left dark, right faded so right-side DemoChat reads on hero */}
+        {/* ── Tint layer covers the WHOLE dark-block (hero + stats + features) on desktop.
+              On mobile we use a "porthole" gradient scoped to the hero only (below). ── */}
         <div className="absolute inset-0 pointer-events-none hidden md:block z-[1]" style={{
           background: "linear-gradient(to right, rgba(4,6,15,0.78) 0%, rgba(4,6,15,0.65) 35%, rgba(4,6,15,0.40) 65%, rgba(4,6,15,0.22) 100%)",
         }} />
         <div className="absolute inset-0 pointer-events-none hidden md:block z-[1]" style={{
           background: "radial-gradient(ellipse 90% 70% at 50% 25%, transparent 30%, rgba(4,6,15,0.45) 75%, rgba(4,6,15,0.65) 100%)",
         }} />
-        {/* Mobile "porthole" — clear middle band lets galaxy core shine between buttons and chat */}
+
+      {/* HERO — exactly 100dvh on mobile (text top, buttons bottom). Desktop: vertically centered with chat on the right. */}
+      <section className="relative overflow-hidden" style={{ paddingTop: "100px" }}>
+        {/* Mobile-only "porthole" — hero gets a clear middle band so galaxy core reads strongly */}
         <div className="absolute inset-0 pointer-events-none md:hidden z-[1]" style={{
-          background: "linear-gradient(180deg, rgba(4,6,15,0.65) 0%, rgba(4,6,15,0.40) 22%, rgba(4,6,15,0.15) 38%, rgba(4,6,15,0.10) 50%, rgba(4,6,15,0.18) 62%, rgba(4,6,15,0.45) 78%, rgba(4,6,15,0.65) 100%)",
+          background: "linear-gradient(180deg, rgba(4,6,15,0.55) 0%, rgba(4,6,15,0.30) 22%, rgba(4,6,15,0.12) 40%, rgba(4,6,15,0.10) 55%, rgba(4,6,15,0.30) 78%, rgba(4,6,15,0.65) 100%)",
         }} />
 
-
-
-        {/* ── Hero grid — desktop: 2-col side-by-side, vertically centered.
-              Mobile: flex column filling full viewport (100dvh) so the
-              text + buttons sit at the top, the DemoChat sits at the bottom,
-              and the galaxy core is visible in the middle gap. ────────── */}
+        {/* ── Hero content — desktop: 2-col side-by-side, vertically centered.
+              Mobile: flex column filling exactly 100dvh; text top, buttons
+              pinned to bottom. DemoChat is rendered separately BELOW the hero
+              section on mobile so the user sees buttons + galaxy on the first
+              screen and the chat as the next thing on scroll. ────────── */}
         <div className="relative z-10 max-w-6xl mx-auto px-6 w-full flex md:items-center" style={{ minHeight: "calc(100dvh - 100px)" }}>
           <div className="w-full md:py-10 pt-6 pb-6 flex flex-col md:grid md:grid-cols-2 md:gap-12 md:items-center" style={{ minHeight: "inherit" }}>
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 md:flex-shrink md:flex md:flex-col md:justify-center w-full md:w-auto">
               <FadeUp delay={0.08}>
               <h1 className="text-[2rem] sm:text-[2.75rem] md:text-[3.4rem] lg:text-[4.2rem] font-semibold leading-[1.08] mb-4 tracking-tight text-white" style={{ letterSpacing: "-0.02em" }}>
                 {locale === "en" ? (
@@ -259,11 +263,21 @@ export default async function HomePage() {
               </FadeUp>
             </div>
 
-            {/* Mobile-only flexible spacer — galaxy core shines through here.
-                Pushes DemoChat to the bottom of the viewport. ────────── */}
+            {/* Mobile flexible spacer — pushes buttons to the bottom of the 100dvh hero. */}
             <div aria-hidden className="md:hidden flex-1 min-h-[24px]" />
 
-            <FadeUp delay={0.18} className="flex flex-col gap-4 flex-shrink-0 mt-auto md:mt-0" id="demo">
+            {/* Mobile-only "↓ scroll for demo" hint — sits just above the bottom edge */}
+            <div className="md:hidden text-center pb-2 pt-4 flex flex-col items-center gap-2" aria-hidden>
+              <p className="text-xs uppercase tracking-[0.18em] font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>
+                {locale === "en" ? "Try the demo" : "Попробуй демо"}
+              </p>
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-bounce" style={{ animationDuration: "1.6s" }}>
+                <path d="M12 5v14M19 12l-7 7-7-7" />
+              </svg>
+            </div>
+
+            {/* Chat — DESKTOP ONLY. On mobile we render a dedicated section below the hero. */}
+            <FadeUp delay={0.18} className="hidden md:flex flex-col gap-4 flex-shrink-0" id="demo">
               <DemoChat />
               <FadeUp delay={0.28} fade>
               <p className="text-sm text-gray-500 text-center leading-relaxed">
@@ -281,6 +295,34 @@ export default async function HomePage() {
             </FadeUp>
           </div>
         </div>{/* /hero grid */}
+
+        {/* ── Mobile-only DemoChat block — sits BELOW the 100dvh hero so the
+              first viewport stays text + buttons + galaxy. The user scrolls
+              one tap to discover the live demo, signposted by the bouncing
+              arrow above. ───────────────────────────────────────────────── */}
+        <div className="md:hidden relative z-10 max-w-2xl mx-auto px-5 pb-10 -mt-2" id="demo-mobile">
+          <FadeUp delay={0.05} className="flex flex-col gap-3">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="h-px w-10" style={{ background: "rgba(255,255,255,0.18)" }} />
+              <span className="text-xs uppercase tracking-[0.2em] font-semibold" style={{ color: "rgba(255,255,255,0.65)" }}>
+                {locale === "en" ? "Live demo" : "Живое демо"}
+              </span>
+              <span className="h-px w-10" style={{ background: "rgba(255,255,255,0.18)" }} />
+            </div>
+            <DemoChat />
+            <p className="text-sm text-gray-500 text-center leading-relaxed mt-1">
+              {locale === "en" ? (
+                <>Ask the question you couldn&apos;t{" "}
+                  <span className="text-[#4561E8] font-medium">say out loud</span>
+                </>
+              ) : (
+                <>Задай вопрос, который не решался{" "}
+                  <span className="text-[#4561E8] font-medium">произнести вслух</span>
+                </>
+              )}
+            </p>
+          </FadeUp>
+        </div>
 
         {/* Floating questions — Russian only, below the fold */}
         {locale === "ru" && (
