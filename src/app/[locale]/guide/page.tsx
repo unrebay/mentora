@@ -212,16 +212,21 @@ export default async function GuidePage() {
         </div>
       </main>
 
-      {/* ── Footer CTA — single button «Начать учиться» (no arrow, no «бесплатно») ─ */}
+      {/* ── Footer CTA — clean section. No decorative halo (looked broken).
+            Thin gradient divider line + a very subtle top tint that fades
+            into the page background give intentional separation. ────── */}
       <section className="relative overflow-hidden py-20 px-6 text-center"
         style={{ background: "var(--bg)" }}>
-        <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none rounded-full"
+        {/* Subtle top tint — fades from a 4% blue wash to fully transparent over 200px */}
+        <div className="absolute top-0 left-0 right-0 pointer-events-none"
           style={{
-            top: "-60px",
-            width: "min(560px, 92vw)",
-            height: "240px",
-            background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(69,97,232,0.22) 0%, rgba(69,97,232,0.10) 35%, transparent 75%)",
-            filter: "blur(8px)",
+            height: "220px",
+            background: "linear-gradient(180deg, rgba(69,97,232,0.05) 0%, rgba(69,97,232,0.02) 50%, transparent 100%)",
+          }} />
+        {/* Top accent line — soft fade on both ends */}
+        <div className="absolute top-0 left-0 right-0 h-px pointer-events-none"
+          style={{
+            background: "linear-gradient(90deg, transparent 0%, rgba(69,97,232,0.20) 35%, rgba(69,97,232,0.30) 50%, rgba(69,97,232,0.20) 65%, transparent 100%)",
           }} />
         <div className="relative z-10">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight" style={{ color: "var(--text)" }}>
