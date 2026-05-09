@@ -203,32 +203,31 @@ export default async function HomePage() {
           <div className="grid md:grid-cols-2 gap-12 items-center w-full py-10">
             <div>
               <FadeUp delay={0.08}>
-              <h1 className="text-[2.6rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[4.6rem] font-black leading-[1.02] mb-4 tracking-tight text-white">
+              <h1 className="text-[2.2rem] sm:text-[3rem] md:text-[3.6rem] lg:text-[4.4rem] font-black leading-[1.05] mb-4 tracking-tight text-white">
                 {locale === "en" ? (
                   <>
-                    A new kind<br />
-                    of{" "}
+                    Become the best{" "}
                     <span style={{
                       background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
-                    }}>education.</span>
+                    }}>version</span>{" "}of yourself.
                   </>
                 ) : (
                   <>
-                    Новый вид<br />
+                    Стань лучшей{" "}
                     <span style={{
                       background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       backgroundClip: "text",
-                    }}>образования.</span>
+                    }}>версией</span>{" "}себя.
                   </>
                 )}
               </h1>
               <p className="text-base font-semibold tracking-wide mb-5" style={{ color: "#6B8FFF" }}>
-                {locale === "en" ? "For everyone. Everywhere. Right now." : "Доступный каждому. Везде. Прямо сейчас."}
+                {locale === "en" ? "Learn with an AI mentor who knows you." : "Учись с AI-ментором, который знает тебя."}
               </p>
               </FadeUp>
               <FadeUp delay={0.16}>
@@ -237,7 +236,9 @@ export default async function HomePage() {
                 </p>
               </FadeUp>
               <FadeUp delay={0.24}>
-                <div className="flex flex-wrap gap-3">
+                {/* py-2 + -my-2 gives the buttons' box-shadow extra vertical space without
+                    expanding the visible block, so the blue glow under the CTA is not clipped */}
+                <div className="flex flex-wrap gap-3 py-2 -my-2">
                   <Link href="/auth"
                     className="px-7 py-3.5 font-semibold rounded-full text-white transition-all hover:scale-[1.03] active:scale-95"
                     style={{ background: "linear-gradient(135deg, #5575FF 0%, #4561E8 50%, #6B4FF0 100%)", boxShadow: "0 4px 20px rgba(69,97,232,0.45), 0 1px 0 rgba(255,255,255,0.2) inset" }}>
@@ -946,7 +947,7 @@ export default async function HomePage() {
               },
             ].map((pillar, i) => (
               <FadeUp key={i} delay={0.22 + i * 0.1}>
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 items-center md:items-start text-center md:text-left">
                   <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
                     style={{ background: `${pillar.color}15`, color: pillar.color }}>
                     {pillar.icon}

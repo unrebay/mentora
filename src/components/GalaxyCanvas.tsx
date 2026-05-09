@@ -98,8 +98,12 @@ export default function GalaxyCanvas({ className }: Props) {
 
       const scene  = new THREE.Scene();
       scene.background = new THREE.Color(0x020308);
-      const camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 1000);
-      camera.position.set(0, 3.0, 60); // z=60: distant view like /knowledge page
+      // On mobile (w<768) zoom out further so galaxy doesn't overpower the text;
+      // on desktop keep z=60 distance which feels balanced.
+      const isMobile = w < 768;
+      const camZ = isMobile ? 95 : 60;
+      const camera = new THREE.PerspectiveCamera(isMobile ? 60 : 55, w / h, 0.1, 1000);
+      camera.position.set(0, isMobile ? 4.0 : 3.0, camZ);
       camera.lookAt(0, 0, 0);
 
       const ADD = THREE.AdditiveBlending;
