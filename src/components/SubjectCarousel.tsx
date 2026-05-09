@@ -138,11 +138,31 @@ export default function SubjectCarousel({ subjects }: { subjects: Subject[] }) {
         .mentora-carousel-track:hover {
           animation-play-state: paused;
         }
+        /* Mobile: replace auto-marquee with native swipe scroll
+           — user can flick through subjects manually. */
+        @media (max-width: 767px) {
+          .mentora-carousel-outer {
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+          }
+          .mentora-carousel-outer::-webkit-scrollbar { display: none; }
+          .mentora-carousel-track {
+            animation: none;
+          }
+          .mentora-carousel-track > * {
+            scroll-snap-align: start;
+          }
+          .mentora-carousel-tilt {
+            transform: none !important;
+          }
+        }
       `}</style>
 
       {/* Outer container: perspective gives 3-D depth */}
       <div
-        className="relative overflow-hidden"
+        className="relative overflow-hidden mentora-carousel-outer"
         style={{
           perspective: "1100px",
           perspectiveOrigin: "50% 30%",
@@ -169,6 +189,7 @@ export default function SubjectCarousel({ subjects }: { subjects: Subject[] }) {
 
         {/* 3-D tilt wrapper — gives the ring / conveyor-belt look */}
         <div
+          className="mentora-carousel-tilt"
           style={{
             transform: "rotateX(7deg) scaleX(1.04)",
             transformStyle: "preserve-3d",
