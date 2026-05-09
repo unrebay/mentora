@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       title: isEn ? "Sign in to Mentora" : "Войти в Mentora",
       description: isEn ? "Personal AI tutor. 17 sciences. Free." : "Персональный AI-репетитор. 17 наук. Бесплатно.",
       url,
-      images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
+      images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
     },
   };
 }

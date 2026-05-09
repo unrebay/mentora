@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
         ? "Free, Pro $5/mo or Ultra $9/mo. No contracts — cancel anytime."
         : "Бесплатно, Pro 499 ₽/мес или Ultra 799 ₽/мес. Без договоров — отмени в любой момент.",
       url,
-      images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
+      images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image" as const,
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       description: isEn
         ? "AI tutor across 17 sciences. Free / Pro / Ultra. Start without a card."
         : "AI-репетитор по 17 наукам. Free / Pro / Ultra. Начни без карты.",
-      images: ["/opengraph-image.png"],
+      images: ["/opengraph-image"],
     },
   };
 }
