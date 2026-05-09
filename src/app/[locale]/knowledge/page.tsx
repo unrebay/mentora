@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/server";
 import DashboardNav from "@/components/DashboardNav";
+import LandingNav from "@/components/LandingNav";
 import BodyScrollLock from "@/components/BodyScrollLock";
 import { redirect } from "next/navigation";
 
@@ -18,12 +19,17 @@ const DeepSpaceBlobs = dynamic(() => import("@/components/DeepSpaceBlobs"), { ss
 export default async function KnowledgePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/auth");
 
-  const [{ data: profile }, { data: progressData }] = await Promise.all([
-    supabase.from("users").select("plan, trial_expires_at").eq("id", user.id).single(),
-    supabase.from("user_progress").select("xp_total, streak_days, best_streak, subject").eq("user_id", user.id),
-  ]);
+  // Knowledge galaxy is PUBLIC — anyone can explore. If not logged in, we just
+  // skip personalized progress data; the galaxy still renders for marketing.
+  const [profileRes, progressRes] = user
+    ? await Promise.all([
+        supabase.from("users").select("plan, trial_expires_at").eq("id", user.id).single(),
+        supabase.from("user_progress").select("xp_total, streak_days, best_streak, subject").eq("user_id", user.id),
+      ])
+    : [{ data: null }, { data: null }];
+  const profile = profileRes.data;
+  const progressData = progressRes.data;
 
   const isTrialActive = profile?.trial_expires_at ? new Date(profile.trial_expires_at) > new Date() : false;
   const isUltima = profile?.plan === "ultima";
@@ -46,7 +52,12 @@ export default async function KnowledgePage() {
     <div className="flex flex-col bg-[#06060f] text-white" style={{ height: "100dvh", overflow: "hidden" }}>
       <BodyScrollLock />
       {/* Nav */}
-      <DashboardNav isPro={isPro} isUltima={isUltima} totalXP={totalXP} currentStreak={currentStreak} bestStreak={bestStreak} logoutAction={handleLogout} variant="dark" />
+      {/* Nav: full DashboardNav for logged-in users, simple LandingNav for guests */}
+      {user ? (
+        <DashboardNav isPro={isPro} isUltima={isUltima} totalXP={totalXP} currentStreak={currentStreak} bestStreak={bestStreak} logoutAction={handleLogout} variant="dark" />
+      ) : (
+        <LandingNav />
+      )}
 
       {/* Title */}
       <div className="flex-shrink-0 px-5 pt-4 pb-2">

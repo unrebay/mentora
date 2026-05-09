@@ -11,7 +11,12 @@ import LandingNav from "@/components/LandingNav";
 import BuyProButton from "@/components/BuyProButton";
 import FadeUp from "@/components/FadeUp";
 import nextDynamic from "next/dynamic";
-const GalaxyCanvas = nextDynamic(() => import("@/components/GalaxyCanvas"), { ssr: false });
+const GalaxyCanvas = nextDynamic(() => import("@/components/GalaxyCanvas"), {
+  ssr: false,
+  // Lazy-loaded after first paint — until Three.js (~150KB) loads, the dark gradient
+  // hero background still looks correct (we already paint #050a14 + tint layers).
+  loading: () => null,
+});
 
 export const dynamic = "force-dynamic";
 

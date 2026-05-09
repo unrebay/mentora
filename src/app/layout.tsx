@@ -10,6 +10,8 @@ const golos = Golos_Text({
   subsets: ["latin", "cyrillic"],
   variable: "--font-golos",
   weight: ["400", "500", "600", "700"],
+  display: "swap",
+  preload: true,
 });
 
 const playfair = Playfair_Display({
@@ -17,6 +19,8 @@ const playfair = Playfair_Display({
   variable: "--font-playfair",
   weight: ["700"],
   style: ["normal", "italic"],
+  display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {
