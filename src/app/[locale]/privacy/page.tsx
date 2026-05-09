@@ -1,10 +1,21 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
 
-export const metadata = {
-  title: "Политика конфиденциальности | Mentora",
-  description: "Политика конфиденциальности образовательной платформы Mentora",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const isEn = locale === "en";
+  const url = isEn ? "https://mentora.su/en/privacy" : "https://mentora.su/ru/privacy";
+  return {
+    title: isEn ? "Privacy policy" : "Политика конфиденциальности",
+    description: isEn
+      ? "Privacy policy of the Mentora educational platform"
+      : "Политика конфиденциальности образовательной платформы Mentora",
+    alternates: {
+      canonical: url,
+      languages: { ru: "https://mentora.su/ru/privacy", en: "https://mentora.su/en/privacy", "x-default": "https://mentora.su/ru/privacy" },
+    },
+  };
+}
 
 function SectionHeading({ n, title }: { n: string; title: string }) {
   return (

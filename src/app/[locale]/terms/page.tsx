@@ -1,10 +1,21 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
 
-export const metadata = {
-  title: "Условия использования | Mentora",
-  description: "Условия использования образовательной платформы Mentora",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const isEn = locale === "en";
+  const url = isEn ? "https://mentora.su/en/terms" : "https://mentora.su/ru/terms";
+  return {
+    title: isEn ? "Terms of service" : "Условия использования",
+    description: isEn
+      ? "Terms of service of the Mentora educational platform"
+      : "Условия использования образовательной платформы Mentora",
+    alternates: {
+      canonical: url,
+      languages: { ru: "https://mentora.su/ru/terms", en: "https://mentora.su/en/terms", "x-default": "https://mentora.su/ru/terms" },
+    },
+  };
+}
 
 function SectionHeading({ n, title }: { n: string; title: string }) {
   return (
