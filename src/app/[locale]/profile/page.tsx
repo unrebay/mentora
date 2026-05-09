@@ -2,6 +2,7 @@ import React from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { ProfileNameEditor } from "@/components/ProfileNameEditor";
 import ReferralWidget from "@/components/ReferralWidget";
 import GiftProBanner from "@/components/GiftProBanner";
@@ -344,6 +345,53 @@ export default async function ProfilePage() {
             accent="#7C3AED"
           />
         </div>
+
+        {/* ── Upgrade CTA — only for free users ──────────── */}
+        {!isPro && (
+          <Link
+            href="/pricing"
+            className="block rounded-2xl p-5 relative overflow-hidden transition-all hover:scale-[1.005] animate-fade-in-up"
+            style={{
+              background: "linear-gradient(135deg, rgba(69,97,232,0.15) 0%, rgba(124,58,237,0.10) 50%, rgba(245,158,11,0.06) 100%), var(--bg-card)",
+              border: "1px solid rgba(124,58,237,0.30)",
+              backdropFilter: "blur(16px) saturate(1.4)",
+              WebkitBackdropFilter: "blur(16px) saturate(1.4)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), 0 8px 28px rgba(124,58,237,0.15)",
+              animationDelay: "100ms",
+              opacity: 0,
+            }}
+          >
+            <div className="absolute pointer-events-none" aria-hidden style={{
+              top: -40, right: -40, width: 180, height: 180, opacity: 0.6,
+              background: "radial-gradient(circle, rgba(159,122,255,0.45), transparent 65%)",
+              filter: "blur(20px)",
+            }} />
+            <div className="relative flex items-center gap-4">
+              <div className="flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center" style={{
+                background: "linear-gradient(135deg, #4561E8, #7C3AED)",
+                boxShadow: "0 8px 20px rgba(124,58,237,0.40), inset 0 1px 0 rgba(255,255,255,0.20)",
+              }}>
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="white">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[10px] font-bold tracking-[0.18em] uppercase" style={{ color: "#9F7AFF" }}>
+                  Открой больше с Pro
+                </div>
+                <div className="font-black text-lg leading-tight mt-0.5" style={{ color: "var(--text)" }}>
+                  17 наук без лимита · 499 ₽ / мес
+                </div>
+                <div className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
+                  Безлимитные сообщения, PDF-конспекты, приоритетная поддержка
+                </div>
+              </div>
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#9F7AFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </div>
+          </Link>
+        )}
 
         {/* ── Avatar grid ──────────────────────────────────── */}
         <div className="animate-fade-in-up" style={{ animationDelay: "120ms", opacity: 0 }}>
