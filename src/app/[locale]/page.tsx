@@ -179,25 +179,27 @@ export default async function HomePage() {
 
       {/* ── DARK UNIVERSE: nav gap + hero + stats + features in one seamless block ── */}
       <div className="relative" style={{ background: "#050a14", marginTop: "-100px", paddingBottom: "200px" }}>
-        {/* Galaxy — spans the entire dark section, reacts to cursor */}
+
+      {/* HERO — padding-top compensates for the negative margin (100px covers nav on all devices).
+            Galaxy + overlays live INSIDE the hero so the galaxy core is anchored to the
+            visible hero zone (one 100dvh block) instead of being centered across the
+            entire dark universe (hero + stats + features), which on mobile pushed the
+            core well below the fold on first paint. */}
+      <section className="relative overflow-hidden" style={{ paddingTop: "100px" }}>
+        {/* Galaxy — spans the hero section only, reacts to cursor */}
         <GalaxyCanvas className="absolute inset-0 w-full h-full z-0" />
 
-        {/* ── Tint layer covers the WHOLE dark-block (hero + stats + features) ── */}
+        {/* Desktop tint — left dark, right faded so right-side DemoChat reads on hero */}
         <div className="absolute inset-0 pointer-events-none hidden md:block z-[1]" style={{
           background: "linear-gradient(to right, rgba(4,6,15,0.78) 0%, rgba(4,6,15,0.65) 35%, rgba(4,6,15,0.40) 65%, rgba(4,6,15,0.22) 100%)",
         }} />
         <div className="absolute inset-0 pointer-events-none hidden md:block z-[1]" style={{
           background: "radial-gradient(ellipse 90% 70% at 50% 25%, transparent 30%, rgba(4,6,15,0.45) 75%, rgba(4,6,15,0.65) 100%)",
         }} />
+        {/* Mobile "porthole" — clear middle band lets galaxy core shine between buttons and chat */}
         <div className="absolute inset-0 pointer-events-none md:hidden z-[1]" style={{
-          /* Soft "porthole" — top + bottom darker so text/CTA + chat stay legible,
-             middle band (35%-65%) very transparent so the galaxy core reads
-             clearly between the buttons and DemoChat. */
           background: "linear-gradient(180deg, rgba(4,6,15,0.65) 0%, rgba(4,6,15,0.40) 22%, rgba(4,6,15,0.15) 38%, rgba(4,6,15,0.10) 50%, rgba(4,6,15,0.18) 62%, rgba(4,6,15,0.45) 78%, rgba(4,6,15,0.65) 100%)",
         }} />
-
-      {/* HERO — padding-top compensates for the negative margin (100px covers nav on all devices) */}
-      <section className="relative overflow-hidden" style={{ paddingTop: "100px" }}>
 
 
 

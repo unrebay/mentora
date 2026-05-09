@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import SubjectIcon, { subjectColor, SUBJECT_META_COLORS } from "@/components/SubjectIcon";
 
 type Subject = {
@@ -117,11 +118,71 @@ export default function SubjectCarousel({ subjects }: { subjects: Subject[] }) {
   // Filter out "suggest" placeholders — only real subject cards
   const cards = subjects.filter((s) => !s.suggest);
 
-  // Triple-duplicate so the loop is seamless at any viewport width
-  const track = [...cards, ...cards, ...cards];
+  // 5×-duplicate track so we can fake an infinite swipe loop on mobile by
+  // resetting the scroll position from the edge copies back to the middle
+  // copy — gives the user "endless" left/right swiping without ever hitting
+  // a boundary. Desktop uses CSS marquee animation as before.
+  const COPIES = 5;
+  const track = Array.from({ length: COPIES }, () => cards).flat();
 
-  // Duration: ~4s per card → feels slow and graceful
+  // Duration: ~4s per card → feels slow and graceful (desktop marquee)
   const durationSec = cards.length * 4;
+
+  // Mobile infinite-loop scroll: when the user nears either edge of the
+  // track, silently jump scrollLeft back to the same offset within the
+  // middle copy. Browsers don't render the jump because we use auto-behavior
+  // and skip the next scroll event.
+  const outerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = outerRef.current;
+    if (!el) return;
+
+    let resetting = false;
+    let mounted = true;
+
+    function isMobile() {
+      return window.matchMedia("(max-width: 767px)").matches;
+    }
+
+    // Position to the middle copy on mount (mobile only).
+    function centerScroll() {
+      if (!el || !isMobile()) return;
+      const oneCopyWidth = el.scrollWidth / COPIES;
+      // Land at the start of copy index 2 (0-indexed) — middle of 5
+      el.scrollLeft = oneCopyWidth * 2;
+    }
+
+    function onScroll() {
+      if (!el || resetting || !isMobile()) return;
+      const oneCopyWidth = el.scrollWidth / COPIES;
+      // If scrolled past copies 0-1 boundary into copy 1 → jump to copy 3
+      if (el.scrollLeft < oneCopyWidth * 1) {
+        resetting = true;
+        el.scrollLeft = el.scrollLeft + oneCopyWidth * 2;
+        requestAnimationFrame(() => {
+          if (mounted) resetting = false;
+        });
+      } else if (el.scrollLeft > oneCopyWidth * 4) {
+        // Past copy 3 into copy 4 → jump to copy 1
+        resetting = true;
+        el.scrollLeft = el.scrollLeft - oneCopyWidth * 2;
+        requestAnimationFrame(() => {
+          if (mounted) resetting = false;
+        });
+      }
+    }
+
+    // Defer initial centering until layout has settled (next frame)
+    const raf = requestAnimationFrame(centerScroll);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", centerScroll);
+    return () => {
+      mounted = false;
+      cancelAnimationFrame(raf);
+      el.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", centerScroll);
+    };
+  }, []);
 
   return (
     <>
@@ -129,7 +190,7 @@ export default function SubjectCarousel({ subjects }: { subjects: Subject[] }) {
       <style>{`
         @keyframes mentora-carousel-rtl {
           0%   { transform: translateX(0); }
-          100% { transform: translateX(-33.3334%); }
+          100% { transform: translateX(-20%); }
         }
         .mentora-carousel-track {
           animation: mentora-carousel-rtl ${durationSec}s linear infinite;
@@ -162,6 +223,7 @@ export default function SubjectCarousel({ subjects }: { subjects: Subject[] }) {
 
       {/* Outer container: perspective gives 3-D depth */}
       <div
+        ref={outerRef}
         className="relative overflow-hidden mentora-carousel-outer"
         style={{
           perspective: "1100px",
