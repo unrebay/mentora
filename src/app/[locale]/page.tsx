@@ -206,25 +206,25 @@ export default async function HomePage() {
               <h1 className="text-[2rem] sm:text-[2.75rem] md:text-[3.4rem] lg:text-[4.2rem] font-semibold leading-[1.08] mb-4 tracking-tight text-white" style={{ letterSpacing: "-0.02em" }}>
                 {locale === "en" ? (
                   <>
-                    Become the best{" "}
+                    Become the{" "}
                     <span style={{
                       fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
                       fontStyle: "italic",
                       fontWeight: 600,
                       color: "#6B8FFF",
                       letterSpacing: "-0.01em",
-                    }}>version</span>{" "}of yourself.
+                    }}>best version</span>{" "}of yourself.
                   </>
                 ) : (
                   <>
-                    Стань лучшей{" "}
+                    Стань{" "}
                     <span style={{
                       fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
                       fontStyle: "italic",
                       fontWeight: 600,
                       color: "#6B8FFF",
                       letterSpacing: "-0.01em",
-                    }}>версией</span>{" "}себя.
+                    }}>лучшей версией</span>{" "}себя.
                   </>
                 )}
               </h1>

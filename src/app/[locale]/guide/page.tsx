@@ -215,8 +215,14 @@ export default async function GuidePage() {
       {/* ── Footer CTA — single button «Начать учиться» (no arrow, no «бесплатно») ─ */}
       <section className="relative overflow-hidden py-20 px-6 text-center"
         style={{ background: "var(--bg)" }}>
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-40 pointer-events-none rounded-full"
-          style={{ background: "radial-gradient(ellipse, rgba(69,97,232,0.18) 0%, transparent 70%)", top: "-20px" }} />
+        <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none rounded-full"
+          style={{
+            top: "-60px",
+            width: "min(560px, 92vw)",
+            height: "240px",
+            background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(69,97,232,0.22) 0%, rgba(69,97,232,0.10) 35%, transparent 75%)",
+            filter: "blur(8px)",
+          }} />
         <div className="relative z-10">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight" style={{ color: "var(--text)" }}>
             {t("footerCtaTitle")}

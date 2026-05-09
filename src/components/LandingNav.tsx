@@ -165,31 +165,69 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
               {isLoggedIn ? <span className="inline-flex items-center gap-1.5">{t("dashboard")}<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span> : t("tryFreeShort")}
             </Link>
 
-            {/* Mobile: hamburger */}
+            {/* Mobile: hamburger / close icon — SVG crossfade for clean X without transform clipping */}
             <button
-              className="md:hidden flex flex-col justify-center items-center w-9 h-9 gap-[5.5px] rounded-full transition-colors shrink-0"
+              className="md:hidden relative flex items-center justify-center w-10 h-10 rounded-full transition-colors shrink-0"
               style={{
-                color: isDark ? "rgba(255,255,255,0.8)" : "var(--text)",
+                color: isDark ? "rgba(255,255,255,0.85)" : "var(--text)",
                 background: "transparent",
               }}
               onClick={() => setMobileOpen((v) => !v)}
               aria-label={mobileOpen ? t("closeMenu") : t("openMenu")}
+              aria-expanded={mobileOpen}
             >
-              <span className="block w-4 h-[1.5px] bg-current transition-all duration-200 origin-center"
-                style={{ transform: mobileOpen ? "rotate(45deg) translate(0, 7px)" : "none" }} />
-              <span className="block w-4 h-[1.5px] bg-current transition-all duration-200"
-                style={{ opacity: mobileOpen ? 0 : 1 }} />
-              <span className="block w-4 h-[1.5px] bg-current transition-all duration-200 origin-center"
-                style={{ transform: mobileOpen ? "rotate(-45deg) translate(0, -7px)" : "none" }} />
+              {/* Burger (3 lines) */}
+              <svg
+                viewBox="0 0 24 24"
+                width="20" height="20"
+                fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
+                style={{
+                  position: "absolute",
+                  opacity: mobileOpen ? 0 : 1,
+                  transform: mobileOpen ? "rotate(-90deg) scale(0.85)" : "rotate(0deg) scale(1)",
+                  transition: "opacity 180ms ease, transform 220ms cubic-bezier(0.34,1.56,0.64,1)",
+                }}
+              >
+                <path d="M4 7h16" />
+                <path d="M4 12h16" />
+                <path d="M4 17h16" />
+              </svg>
+              {/* X (close) */}
+              <svg
+                viewBox="0 0 24 24"
+                width="20" height="20"
+                fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"
+                style={{
+                  position: "absolute",
+                  opacity: mobileOpen ? 1 : 0,
+                  transform: mobileOpen ? "rotate(0deg) scale(1)" : "rotate(90deg) scale(0.85)",
+                  transition: "opacity 180ms ease, transform 220ms cubic-bezier(0.34,1.56,0.64,1)",
+                }}
+              >
+                <path d="M6 6l12 12" />
+                <path d="M18 6L6 18" />
+              </svg>
             </button>
           </div>
         </div>
 
-        {/* Mobile dropdown — inside the glass pill, styled as menu list */}
-        {mobileOpen && (
+        {/* Mobile dropdown — inside the glass pill. Always rendered, animated via max-height + opacity for a smooth open/close. */}
+        <div
+          className="md:hidden overflow-hidden"
+          style={{
+            maxHeight: mobileOpen ? 360 : 0,
+            opacity: mobileOpen ? 1 : 0,
+            transition: "max-height 280ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease",
+          }}
+          aria-hidden={!mobileOpen}
+        >
           <div
-            className="md:hidden px-3 pt-2 pb-3 flex flex-col gap-0.5"
-            style={{ borderTop: `1px solid ${mobileBorder}` }}
+            className="px-3 pt-2 pb-3 flex flex-col gap-0.5"
+            style={{
+              borderTop: `1px solid ${mobileBorder}`,
+              transform: mobileOpen ? "translateY(0)" : "translateY(-8px)",
+              transition: "transform 260ms cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
           >
             <Link href="/#subjects"
               className="text-sm font-medium px-3 py-3 rounded-xl transition-all"
@@ -215,7 +253,7 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
               <LanguageSwitcher dark={isDark} />
             </div>
           </div>
-        )}
+        </div>
         </div>{/* end glass pill */}
       </div>
     </nav>
