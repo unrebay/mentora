@@ -82,12 +82,13 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
             background: navBg,
             backdropFilter: navBlur,
             WebkitBackdropFilter: navBlur,
-            borderRadius: 9999,
+            // When mobile menu is open, use a softer radius so the dropdown sits naturally below.
+            borderRadius: mobileOpen ? 24 : 9999,
             border: navBorder,
             boxShadow: navShadow,
             overflow: "hidden",
             position: "relative",
-            transition: "background 0.3s, box-shadow 0.3s",
+            transition: "background 0.3s, box-shadow 0.3s, border-radius 0.2s",
           }}
         >
           {/* Thin top shimmer */}
@@ -184,22 +185,33 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
           </div>
         </div>
 
-        {/* Mobile dropdown — inside the glass pill */}
+        {/* Mobile dropdown — inside the glass pill, styled as menu list */}
         {mobileOpen && (
           <div
-            className="md:hidden border-t px-5 py-4 flex flex-col gap-1"
-            style={{ borderColor: mobileBorder }}
+            className="md:hidden px-3 pt-2 pb-3 flex flex-col gap-0.5"
+            style={{ borderTop: `1px solid ${mobileBorder}` }}
           >
-            <Link href="/#subjects" className="text-sm font-medium py-2.5 border-b"
-              style={{ color: linkColor, borderColor: mobileBorder }}
+            <Link href="/#subjects"
+              className="text-sm font-medium px-3 py-3 rounded-xl transition-all"
+              style={{ color: linkColor, background: "transparent" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
               onClick={() => setMobileOpen(false)}>{t("subjects")}</Link>
-            <Link href="/#how" className="text-sm font-medium py-2.5 border-b"
-              style={{ color: linkColor, borderColor: mobileBorder }}
+            <Link href="/#how"
+              className="text-sm font-medium px-3 py-3 rounded-xl transition-all"
+              style={{ color: linkColor, background: "transparent" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
               onClick={() => setMobileOpen(false)}>{t("how")}</Link>
-            <Link href="/#pricing" className="text-sm font-medium py-2.5 border-b"
-              style={{ color: activePage === "pricing" ? (isDark ? "white" : "var(--text)") : linkColor, fontWeight: activePage === "pricing" ? 600 : undefined, borderColor: mobileBorder }}
+            <Link href="/#pricing"
+              className="text-sm font-medium px-3 py-3 rounded-xl transition-all"
+              style={{
+                color: activePage === "pricing" ? (isDark ? "white" : "var(--text)") : linkColor,
+                fontWeight: activePage === "pricing" ? 700 : 500,
+                background: activePage === "pricing" ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(69,97,232,0.06)") : "transparent",
+              }}
               onClick={() => setMobileOpen(false)}>{t("pricing")}</Link>
-            <div className="pt-3 flex items-center gap-3">
+            <div className="mt-2 pt-3 flex items-center justify-between gap-3 px-3" style={{ borderTop: `1px solid ${mobileBorder}` }}>
               <LanguageSwitcher dark={isDark} />
             </div>
           </div>

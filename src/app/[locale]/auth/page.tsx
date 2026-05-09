@@ -561,19 +561,31 @@ function AuthPageContent() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setLoading(true); setError(null);
     if (mode === "signup") {
-      if (HCAPTCHA_SITE_KEY && !captchaToken) { setError(t("errorRobot")); setLoading(false); return; }
-      const { data: signUpData, error } = await supabase.auth.signUp({ email, password, options: { captchaToken: captchaToken ?? undefined } });
-      if (error) {
-        if (error.message.includes("already registered")) setError(t("errorEmailExists"));
-        else if (error.message.includes("captcha"))       setError(t("errorCaptcha"));
-        else                                               setError(error.message);
-      } else {
-        const refCode = searchParams.get("ref");
-        if (refCode && signUpData.user?.id) {
-          fetch("/api/referral", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: refCode, newUserId: signUpData.user.id }) }).catch(() => {});
+      // Use server-side /api/signup which bypasses Supabase captcha protection
+      // (we have rate-limit + format guard). After successful create — sign in.
+      const refCode = searchParams.get("ref");
+      try {
+        const res = await fetch("/api/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, refCode }),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setError(json?.error ?? t("errorEmailExists"));
+        } else {
+          // Account created — now log in (this gets a session cookie)
+          const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+          if (signInError) {
+            // Fallback: account exists, just confirm via email-sent screen
+            setEmailSent(email);
+          } else {
+            router.push("/onboarding");
+            router.refresh();
+          }
         }
-        if (!signUpData.session) setEmailSent(email);
-        else { router.push("/onboarding"); router.refresh(); }
+      } catch (e) {
+        setError(String(e));
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -834,45 +846,38 @@ function AuthPageContent() {
 
               <div id="telegram-login-widget" style={{ position:"absolute", opacity:0, width:1, height:1, overflow:"hidden", pointerEvents:"none" }} />
 
-              {/* Telegram button */}
+              {/* Telegram button — always enabled.
+                  Primary path: telegram-widget.js loaded → Telegram.Login.auth() popup.
+                  Fallback (RU без VPN): open the bot directly via t.me deep link;
+                  bot's /start handler triggers an auth flow on the Mentora side. */}
               <div>
-                {tgAvailable === false ? (
-                  <div className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-xs"
-                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.35)" }}>
-                    <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0 opacity-50" fill="currentColor">
-                      <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/>
-                    </svg>
-                    {t("telegramUnavailable")}
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    disabled={tgLoading || tgAvailable === null}
-                    onClick={() => {
-                      const tg = window.Telegram;
-                      if (tg?.Login?.auth) {
-                        tg.Login.auth({ bot_id: 8558784965, request_access: "write" }, (user) => {
-                          if (user && window.onTelegramAuth) window.onTelegramAuth(user);
-                          else if (!user) setError(t("errorTelegramFailed"));
-                        });
-                      } else { setError(t("errorTelegramUnavailable")); }
-                    }}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-60"
-                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.7)" }}
-                  >
-                    {tgLoading ? (
-                      <><span className="w-4 h-4 border-2 rounded-full animate-spin"
-                          style={{ borderColor: "rgba(255,255,255,0.15)", borderTopColor: "rgba(255,255,255,0.7)" }} />{t("signingInTelegram")}</>
-                    ) : tgAvailable === null ? (
-                      <><span className="w-4 h-4 border-2 rounded-full animate-spin"
-                          style={{ borderColor: "rgba(255,255,255,0.10)", borderTopColor: "rgba(255,255,255,0.4)" }} />{t("checkingTelegram")}</>
-                    ) : (
-                      <><svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#2AABEE]">
-                          <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/>
-                        </svg>{t("signInTelegram")}</>
-                    )}
-                  </button>
-                )}
+                <button
+                  type="button"
+                  disabled={tgLoading}
+                  onClick={() => {
+                    const tg = window.Telegram;
+                    if (tg?.Login?.auth) {
+                      tg.Login.auth({ bot_id: 8558784965, request_access: "write" }, (user) => {
+                        if (user && window.onTelegramAuth) window.onTelegramAuth(user);
+                        else if (!user) setError(t("errorTelegramFailed"));
+                      });
+                    } else {
+                      // telegram.org заблокирован → открываем бот напрямую через t.me
+                      window.open("https://t.me/mentora_su_bot?start=auth", "_blank", "noopener");
+                    }
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-60"
+                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.7)" }}
+                >
+                  {tgLoading ? (
+                    <><span className="w-4 h-4 border-2 rounded-full animate-spin"
+                        style={{ borderColor: "rgba(255,255,255,0.15)", borderTopColor: "rgba(255,255,255,0.7)" }} />{t("signingInTelegram")}</>
+                  ) : (
+                    <><svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#2AABEE]">
+                        <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19l-2.04 9.6c-.15.68-.54.85-1.1.53l-3-2.21-1.45 1.4c-.16.16-.3.3-.61.3l.21-3.03 5.49-4.96c.24-.21-.05-.33-.37-.12L6.8 14.26l-2.96-.92c-.64-.2-.65-.64.14-.95l11.57-4.46c.53-.2 1 .13.39.26z"/>
+                      </svg>{t("signInTelegram")}</>
+                  )}
+                </button>
               </div>
 
             </div>{/* /glass card */}
