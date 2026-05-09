@@ -77,8 +77,14 @@
        which causes 6-15px content overflow visible as white stripe on iPad */
     width: 100%;
     max-width: 100%;
-    background-color: var(--bg);
   }
+  /* html bg is what shows in iOS Safari TOP rubber-band overscroll (when
+     user pulls down at scrollY=0). Most pages start dark (landing hero,
+     /knowledge, /dashboard) — making html dark navy means the rubber-band
+     stripe matches the hero instead of flashing white in light theme.
+     body bg is what shows in BOTTOM rubber-band — keep it theme-aware. */
+  html { background-color: #050a14; }
+  body { background-color: var(--bg); }
   /* overflow-x: hidden ONLY on body, NOT html.
      If applied to html, html becomes the horizontal scroll container which
      breaks position:sticky on descendants (nav stops sticking on scroll).
@@ -89,9 +95,9 @@
 
   html {
     -webkit-text-size-adjust: 100%;
-    overscroll-behavior-y: none;
-    /* iOS rubber-band fix */
-    background-color: var(--bg);
+    /* Allow rubber-band so iOS Safari URL bar shrinks (better immersion);
+       html bg above (#050a14) becomes the visible plate during top overscroll. */
+    overscroll-behavior-y: auto;
   }
 
   body {
@@ -105,10 +111,10 @@
     right: 0;
   }
 
-  /* iOS / iPadOS Safari belt-and-suspenders */
+  /* iOS / iPadOS Safari belt-and-suspenders — width only; keep separate
+     html/body bg colors above so rubber-band shows the right plate. */
   @supports (-webkit-touch-callout: none) {
     html, body {
-      background-color: var(--bg) !important;
       width: 100% !important;
       max-width: 100% !important;
     }
