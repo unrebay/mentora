@@ -190,7 +190,10 @@ export default async function HomePage() {
           background: "radial-gradient(ellipse 90% 70% at 50% 25%, transparent 30%, rgba(4,6,15,0.45) 75%, rgba(4,6,15,0.65) 100%)",
         }} />
         <div className="absolute inset-0 pointer-events-none md:hidden z-[1]" style={{
-          background: "linear-gradient(180deg, rgba(4,6,15,0.55) 0%, rgba(4,6,15,0.30) 35%, rgba(4,6,15,0.30) 65%, rgba(4,6,15,0.55) 100%)",
+          /* Soft "porthole" — top + bottom darker so text/CTA + chat stay legible,
+             middle band (35%-65%) very transparent so the galaxy core reads
+             clearly between the buttons and DemoChat. */
+          background: "linear-gradient(180deg, rgba(4,6,15,0.65) 0%, rgba(4,6,15,0.40) 22%, rgba(4,6,15,0.15) 38%, rgba(4,6,15,0.10) 50%, rgba(4,6,15,0.18) 62%, rgba(4,6,15,0.45) 78%, rgba(4,6,15,0.65) 100%)",
         }} />
 
       {/* HERO — padding-top compensates for the negative margin (100px covers nav on all devices) */}
@@ -198,10 +201,13 @@ export default async function HomePage() {
 
 
 
-        {/* ── Hero grid — fills full viewport height ── */}
-        <div className="relative z-10 max-w-6xl mx-auto px-6 w-full" style={{ minHeight: "calc(100vh - 100px)", display: "flex", alignItems: "center" }}>
-          <div className="grid md:grid-cols-2 gap-12 items-center w-full py-10">
-            <div>
+        {/* ── Hero grid — desktop: 2-col side-by-side, vertically centered.
+              Mobile: flex column filling full viewport (100dvh) so the
+              text + buttons sit at the top, the DemoChat sits at the bottom,
+              and the galaxy core is visible in the middle gap. ────────── */}
+        <div className="relative z-10 max-w-6xl mx-auto px-6 w-full flex md:items-center" style={{ minHeight: "calc(100dvh - 100px)" }}>
+          <div className="w-full md:py-10 pt-6 pb-6 flex flex-col md:grid md:grid-cols-2 md:gap-12 md:items-center" style={{ minHeight: "inherit" }}>
+            <div className="flex-shrink-0">
               <FadeUp delay={0.08}>
               <h1 className="text-[2rem] sm:text-[2.75rem] md:text-[3.4rem] lg:text-[4.2rem] font-semibold leading-[1.08] mb-4 tracking-tight text-white" style={{ letterSpacing: "-0.02em" }}>
                 {locale === "en" ? (
@@ -251,7 +257,11 @@ export default async function HomePage() {
               </FadeUp>
             </div>
 
-            <FadeUp delay={0.18} className="flex flex-col gap-4" id="demo">
+            {/* Mobile-only flexible spacer — galaxy core shines through here.
+                Pushes DemoChat to the bottom of the viewport. ────────── */}
+            <div aria-hidden className="md:hidden flex-1 min-h-[24px]" />
+
+            <FadeUp delay={0.18} className="flex flex-col gap-4 flex-shrink-0 mt-auto md:mt-0" id="demo">
               <DemoChat />
               <FadeUp delay={0.28} fade>
               <p className="text-sm text-gray-500 text-center leading-relaxed">
