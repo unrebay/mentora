@@ -106,17 +106,13 @@ export default async function GuidePage() {
             </svg>
             {t("badge")}
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight tracking-tight" style={{
-            background: "linear-gradient(135deg, var(--text) 30%, #4561E8 80%)",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          }}>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight tracking-tight" style={{ color: "var(--text)" }}>
             {t("heroTitle")}{" "}
             <span style={{
               fontFamily: "var(--font-playfair), Georgia, serif",
               fontWeight: 700,
               letterSpacing: "-0.01em",
-              background: "linear-gradient(135deg, var(--text), #4561E8)",
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+              color: "var(--text)",
             }}>
               M<span style={{ color: "#4561E8", fontStyle: "italic", marginRight: "0.05em" }}>e</span>ntora
             </span>
