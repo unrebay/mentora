@@ -146,9 +146,9 @@ export default async function GuidePage() {
                 <div aria-hidden className="absolute -top-16 -right-16 w-56 h-56 rounded-full pointer-events-none transition-opacity duration-500 opacity-30 group-hover:opacity-90"
                   style={{ background: `radial-gradient(circle, ${meta.accent}26 0%, transparent 65%)` }} />
 
-                <div className="flex items-start gap-5 p-6 md:p-7 relative z-10">
+                <div className="flex items-center gap-5 p-6 md:p-7 relative z-10">
                   {/* Icon badge with gradient + colored border */}
-                  <div className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center mt-0.5 transition-transform duration-300 group-hover:scale-105"
+                  <div className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
                     style={{
                       background: `linear-gradient(135deg, ${meta.accent}33, ${meta.accent}0F)`,
                       border: `1px solid ${meta.accent}40`,
@@ -161,12 +161,7 @@ export default async function GuidePage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-3 mb-2">
                       <span className="text-2xl font-black tracking-tight leading-none"
-                        style={{
-                          background: `linear-gradient(135deg, ${meta.accent}, ${meta.accent}AA)`,
-                          WebkitBackgroundClip: "text",
-                          WebkitTextFillColor: "transparent",
-                          backgroundClip: "text",
-                        }}>
+                        style={{ color: meta.accent }}>
                         {meta.n}
                       </span>
                       <h2 className="font-bold text-[17px] leading-snug" style={{ color: "var(--text)" }}>{t(`${key}.title`)}</h2>
