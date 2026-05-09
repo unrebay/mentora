@@ -101,7 +101,7 @@ export default function DemoChat() {
     <div className="flex flex-col gap-3" style={{ maxWidth: 560 }}>
 
       {/* ── 1. Floating header pill (separate glass) ────────────────────── */}
-      <div className="self-start flex items-center gap-2.5"
+      <div className="self-center flex items-center gap-2.5"
         style={{
           background: GLASS_BG,
           backdropFilter: GLASS_BLUR,

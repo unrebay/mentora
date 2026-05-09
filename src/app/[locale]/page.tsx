@@ -190,7 +190,7 @@ export default async function HomePage() {
           background: "radial-gradient(ellipse 90% 70% at 50% 25%, transparent 30%, rgba(4,6,15,0.45) 75%, rgba(4,6,15,0.65) 100%)",
         }} />
         <div className="absolute inset-0 pointer-events-none md:hidden z-[1]" style={{
-          background: "rgba(4,6,15,0.70)",
+          background: "linear-gradient(180deg, rgba(4,6,15,0.55) 0%, rgba(4,6,15,0.30) 35%, rgba(4,6,15,0.30) 65%, rgba(4,6,15,0.55) 100%)",
         }} />
 
       {/* HERO — padding-top compensates for the negative margin (100px covers nav on all devices) */}
@@ -203,25 +203,27 @@ export default async function HomePage() {
           <div className="grid md:grid-cols-2 gap-12 items-center w-full py-10">
             <div>
               <FadeUp delay={0.08}>
-              <h1 className="text-[2.2rem] sm:text-[3rem] md:text-[3.6rem] lg:text-[4.4rem] font-black leading-[1.05] mb-4 tracking-tight text-white">
+              <h1 className="text-[2rem] sm:text-[2.75rem] md:text-[3.4rem] lg:text-[4.2rem] font-semibold leading-[1.08] mb-4 tracking-tight text-white" style={{ letterSpacing: "-0.02em" }}>
                 {locale === "en" ? (
                   <>
                     Become the best{" "}
                     <span style={{
-                      background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
+                      fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
+                      fontStyle: "italic",
+                      fontWeight: 600,
+                      color: "#6B8FFF",
+                      letterSpacing: "-0.01em",
                     }}>version</span>{" "}of yourself.
                   </>
                 ) : (
                   <>
                     Стань лучшей{" "}
                     <span style={{
-                      background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
+                      fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
+                      fontStyle: "italic",
+                      fontWeight: 600,
+                      color: "#6B8FFF",
+                      letterSpacing: "-0.01em",
                     }}>версией</span>{" "}себя.
                   </>
                 )}
