@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       url,
       title: t("metaTitle"),
       description: t("metaDesc"),
-      images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
+      images: [{ url: "/icon-512.png", width: 512, height: 512 }],
     },
   };
 }

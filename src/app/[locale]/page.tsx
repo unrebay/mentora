@@ -60,13 +60,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       url,
       title: m.ogTitle,
       description: m.ogDescription,
-      images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: m.ogAlt }],
+      images: [{ url: "/icon-512.png", width: 512, height: 512, alt: m.ogAlt }],
     },
     twitter: {
       card: "summary_large_image",
       title: m.twTitle,
       description: m.twDescription,
-      images: ["/opengraph-image"],
+      images: ["/icon-512.png"],
     },
   };
 }
