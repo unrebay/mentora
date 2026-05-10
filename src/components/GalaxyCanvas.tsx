@@ -192,16 +192,18 @@ export default function GalaxyCanvas({ className }: Props) {
           color, size, transparent: true, opacity: op, blending: ADD, depthWrite: false, sizeAttenuation: false,
         })));
       }
-      mkStars(18000, 35, 350, 0xffffff, 1.8, 0.30);
-      mkStars( 3000, 20,  80, 0xaabbff, 2.0, 0.22);
-      mkStars(  500, 15,  40, 0xfff0cc, 2.7, 0.32);
-      mkStars(  900, 25, 150, 0x88aaff, 1.5, 0.22);
-      mkStars(  300, 10,  30, 0xffffff, 3.6, 0.42);
+      // Background stars halved in pixel-size — Andy: 'they look like pixels'.
+      // Smaller dots read as actual distant stars instead of a Minecraft sky.
+      mkStars(18000, 35, 350, 0xffffff, 0.9, 0.30);
+      mkStars( 3000, 20,  80, 0xaabbff, 1.0, 0.22);
+      mkStars(  500, 15,  40, 0xfff0cc, 1.35, 0.32);
+      mkStars(  900, 25, 150, 0x88aaff, 0.75, 0.22);
+      mkStars(  300, 10,  30, 0xffffff, 1.8, 0.42);
       // Milky Way band
       { const geo=new THREE.BufferGeometry(); const pos=new Float32Array(8000*3);
         for (let i=0;i<8000;i++) { const r=80+Math.random()*200,a=Math.random()*Math.PI*2,y=(Math.random()-0.5)*28; pos[i*3]=Math.cos(a)*r; pos[i*3+1]=y; pos[i*3+2]=Math.sin(a)*r; }
         geo.setAttribute("position",new THREE.BufferAttribute(pos,3));
-        bgGrp.add(new THREE.Points(geo,new THREE.PointsMaterial({ color:0xaabbff,size:1.3,transparent:true,opacity:0.10,blending:ADD,depthWrite:false,sizeAttenuation:false }))); }
+        bgGrp.add(new THREE.Points(geo,new THREE.PointsMaterial({ color:0xaabbff,size:0.65,transparent:true,opacity:0.10,blending:ADD,depthWrite:false,sizeAttenuation:false }))); }
 
 
       // ── Comets — occasional fading streaks across deep sky (own meshes for indep. fade) ──
@@ -221,9 +223,13 @@ export default function GalaxyCanvas({ className }: Props) {
         comets.push({ head, halo, pos: new THREE.Vector3(), dir: new THREE.Vector3(),
                       speed: 0, t: 0, duration: 5, active: false, startDelay: i * 9 + Math.random() * 6 });
       }
-      // ── Science positions — two rings of 17 nodes ─────────────────────────────
+      // ── Science positions — two rings of 17 nodes. Sphere radius 15
+      //     (was 10) — Andy: 'main galaxy zone +50%'. The 17×2 nodes now
+      //     spread across a larger sphere; edges between them stretch
+      //     proportionally and the central science cluster reads as the
+      //     dominant feature of the scene. ─────────────────────────────
       const NODE_COUNT = SUBS.length * 2;
-      const sciPos = fibSph(NODE_COUNT, 10.0);
+      const sciPos = fibSph(NODE_COUNT, 15.0);
 
       // ── Soft glow texture — canvas radial gradient, cached per hex color ──────
       const glowTexCache = new Map<number, THREE.Texture>();
