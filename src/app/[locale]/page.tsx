@@ -249,7 +249,8 @@ export default async function HomePage() {
                   {t("landing.heroSubtitle")}
                 </p>
               </FadeUp>
-              <FadeUp delay={0.24}>
+              {/* Buttons — DESKTOP only. On mobile they live in the bottom-pinned block below. */}
+              <FadeUp delay={0.24} className="hidden md:block">
                 {/* py-2 + -my-2 gives the buttons' box-shadow extra vertical space without
                     expanding the visible block, so the blue glow under the CTA is not clipped */}
                 <div className="flex flex-wrap gap-3 py-2 -my-2">
@@ -263,17 +264,30 @@ export default async function HomePage() {
               </FadeUp>
             </div>
 
-            {/* Mobile flexible spacer — pushes buttons to the bottom of the 100dvh hero. */}
+            {/* Mobile flexible spacer — fills the gap between the title block (top) and
+                the buttons (bottom of viewport). Galaxy core shines through here. */}
             <div aria-hidden className="md:hidden flex-1 min-h-[24px]" />
 
-            {/* Mobile-only "↓ scroll for demo" hint — sits just above the bottom edge */}
-            <div className="md:hidden text-center pb-2 pt-4 flex flex-col items-center gap-2" aria-hidden>
-              <p className="text-xs uppercase tracking-[0.18em] font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>
-                {locale === "en" ? "Try the demo" : "Попробуй демо"}
-              </p>
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-bounce" style={{ animationDuration: "1.6s" }}>
-                <path d="M12 5v14M19 12l-7 7-7-7" />
-              </svg>
+            {/* Mobile-only bottom block: BUTTONS pinned to viewport bottom + ↓ scroll hint. */}
+            <div className="md:hidden flex flex-col items-stretch gap-4 pb-2">
+              <FadeUp delay={0.24}>
+                <div className="flex flex-wrap gap-3 py-2 -my-2">
+                  <Link href="/auth"
+                    className="px-7 py-3.5 font-semibold rounded-full text-white transition-all hover:scale-[1.03] active:scale-95"
+                    style={{ background: "linear-gradient(135deg, #5575FF 0%, #4561E8 50%, #6B4FF0 100%)", boxShadow: "0 4px 20px rgba(69,97,232,0.45), 0 1px 0 rgba(255,255,255,0.2) inset" }}>
+                    {t("landing.heroCtaStart")}
+                  </Link>
+                  <DemoScrollButton />
+                </div>
+              </FadeUp>
+              <div className="text-center flex flex-col items-center gap-1.5 pt-1" aria-hidden>
+                <p className="text-[11px] uppercase tracking-[0.18em] font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>
+                  {locale === "en" ? "Try the demo" : "Попробуй демо"}
+                </p>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-bounce" style={{ animationDuration: "1.6s" }}>
+                  <path d="M12 5v14M19 12l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
 
             {/* Chat — DESKTOP ONLY. On mobile we render a dedicated section below the hero. */}
