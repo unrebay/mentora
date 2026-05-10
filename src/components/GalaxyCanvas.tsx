@@ -98,19 +98,14 @@ export default function GalaxyCanvas({ className }: Props) {
 
       const scene  = new THREE.Scene();
       scene.background = new THREE.Color(0x020308);
-      // Camera framing:
-      // • Desktop — slightly elevated (Y=3) looking down at origin, far enough
-      //   away (Z=60) to show the full galaxy + nebula as a wide cosmic scene.
-      // • Mobile — looks STRAIGHT at origin (Y=0, no downward tilt) so the
-      //   science sphere (radius 10 around origin) sits dead-center in the
-      //   portrait viewport. Camera pulled in to Z=38 with a tight FOV so the
-      //   sphere fills the screen WIDTH; the rest of the galaxy fades around
-      //   the edges instead of dominating the frame.
+      // Camera framing — both desktop and mobile use the same well-balanced
+      // wide-cosmic-scene framing (Y=3 slight downward tilt, looking at origin).
+      // Mobile pulls the camera back a touch so the galaxy reads as a complete
+      // scene in the portrait viewport instead of being cropped horizontally.
       const isMobile = w < 768;
-      const camZ = isMobile ? 38 : 60;
-      const camFovV = isMobile ? 58 : 55;
-      const camera = new THREE.PerspectiveCamera(camFovV, w / h, 0.1, 1000);
-      camera.position.set(0, isMobile ? 0 : 3.0, camZ);
+      const camZ = isMobile ? 70 : 60;
+      const camera = new THREE.PerspectiveCamera(isMobile ? 65 : 55, w / h, 0.1, 1000);
+      camera.position.set(0, 3.0, camZ);
       camera.lookAt(0, 0, 0);
 
       const ADD = THREE.AdditiveBlending;
