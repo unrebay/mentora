@@ -196,11 +196,42 @@ export default async function HomePage() {
               dark-universe block, far less dense — reads as background space
               while the hero+stats+features grid sits in front). */}
         <div className="absolute inset-x-0 top-0 z-0 pointer-events-none h-[100dvh] md:hidden overflow-hidden">
-          <KnowledgeGraph3D className="absolute inset-0 w-full h-full" userProgress={[]} />
+          {/* CSS scale(0.8) makes the constellation 20% smaller as Andy asked,
+              without touching the heavy Three.js scene. transform-origin keeps
+              the sphere centered. */}
+          <div className="absolute inset-0" style={{ transform: "scale(0.8)", transformOrigin: "center center" }}>
+            <KnowledgeGraph3D className="absolute inset-0 w-full h-full" userProgress={[]} />
+          </div>
+          {/* Dark tint — fades from solid-ish at the top (behind the title
+              and description so text stays legible) to fully transparent
+              around 60%, where the galaxy core is meant to read clearly,
+              then darkens again at the bottom for the buttons. */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: "linear-gradient(180deg, rgba(5,10,20,0.62) 0%, rgba(5,10,20,0.55) 18%, rgba(5,10,20,0.38) 38%, rgba(5,10,20,0.12) 55%, rgba(5,10,20,0.10) 70%, rgba(5,10,20,0.35) 85%, rgba(5,10,20,0.60) 100%)",
+          }} />
         </div>
         <div className="absolute inset-x-0 top-0 z-0 pointer-events-none h-full hidden md:block">
           <GalaxyCanvas className="absolute inset-0 w-full h-full" />
         </div>
+        {/* Mobile-only: starfield extension below the hero so the dark
+            stats+features stretch isn't a starless void. Sits BETWEEN
+            the hero (top 100dvh) and the smooth gradient blend at the
+            bottom (-260px). Pure CSS dot pattern — no extra Three.js. */}
+        <div
+          aria-hidden
+          className="md:hidden absolute inset-x-0 z-0 pointer-events-none"
+          style={{
+            top: "100dvh",
+            bottom: "260px",
+            backgroundImage: `
+              radial-gradient(circle, rgba(255,255,255,0.55) 0.4px, transparent 1px),
+              radial-gradient(circle, rgba(170,190,255,0.45) 0.35px, transparent 1px),
+              radial-gradient(circle, rgba(255,255,255,0.35) 0.3px, transparent 1px)
+            `,
+            backgroundSize: "70px 70px, 90px 90px, 50px 50px",
+            backgroundPosition: "0 0, 25px 35px, 45px 12px",
+          }}
+        />
 
         {/* ── Tint layer covers the WHOLE dark-block (hero + stats + features) on desktop.
               On mobile we use a "porthole" gradient scoped to the hero only (below). ── */}
@@ -232,25 +263,25 @@ export default async function HomePage() {
               <h1 className="text-[2.4rem] sm:text-[2.75rem] md:text-[3.4rem] lg:text-[4.2rem] font-semibold leading-[1.05] mb-4 tracking-tight text-white" style={{ letterSpacing: "-0.02em" }}>
                 {locale === "en" ? (
                   <>
-                    <span className="block md:inline">Become the</span>{" "}
-                    <span className="block md:inline" style={{
+                    <span className="block md:inline text-left md:text-left">Become the</span>{" "}
+                    <span className="block md:inline text-center" style={{
                       fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
                       fontWeight: 600,
                       color: "#6B8FFF",
                       letterSpacing: "-0.01em",
                     }}>best version</span>{" "}
-                    <span className="block md:inline">of yourself.</span>
+                    <span className="block md:inline text-right md:text-left">of yourself.</span>
                   </>
                 ) : (
                   <>
-                    <span className="block md:inline">Стань</span>{" "}
-                    <span className="block md:inline" style={{
+                    <span className="block md:inline text-left md:text-left">Стань</span>{" "}
+                    <span className="block md:inline text-center" style={{
                       fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
                       fontWeight: 600,
                       color: "#6B8FFF",
                       letterSpacing: "-0.01em",
                     }}>лучшей версией</span>{" "}
-                    <span className="block md:inline">себя.</span>
+                    <span className="block md:inline text-right md:text-left">себя.</span>
                   </>
                 )}
               </h1>
