@@ -98,14 +98,16 @@ export default function GalaxyCanvas({ className }: Props) {
 
       const scene  = new THREE.Scene();
       scene.background = new THREE.Color(0x020308);
-      // Camera framing — both desktop and mobile use the same well-balanced
-      // wide-cosmic-scene framing (Y=3 slight downward tilt, looking at origin).
-      // Mobile pulls the camera back a touch so the galaxy reads as a complete
-      // scene in the portrait viewport instead of being cropped horizontally.
+      // Camera framing.
+      // • Desktop: slight downward tilt (Y=3), z=60, FOV 55. Wide cosmic scene.
+      // • Mobile: NO downward tilt (Y=0) so the science sphere is centered
+      //   vertically in the portrait viewport. Camera pulled back to z=95
+      //   to fit the now-larger sphere (radius 22.5 → diameter 45) with
+      //   breathing room around it on a 0.46-aspect screen.
       const isMobile = w < 768;
-      const camZ = isMobile ? 70 : 60;
+      const camZ = isMobile ? 95 : 60;
       const camera = new THREE.PerspectiveCamera(isMobile ? 65 : 55, w / h, 0.1, 1000);
-      camera.position.set(0, 3.0, camZ);
+      camera.position.set(0, isMobile ? 0 : 3.0, camZ);
       camera.lookAt(0, 0, 0);
 
       const ADD = THREE.AdditiveBlending;
@@ -223,13 +225,14 @@ export default function GalaxyCanvas({ className }: Props) {
         comets.push({ head, halo, pos: new THREE.Vector3(), dir: new THREE.Vector3(),
                       speed: 0, t: 0, duration: 5, active: false, startDelay: i * 9 + Math.random() * 6 });
       }
-      // ── Science positions — two rings of 17 nodes. Sphere radius 15
-      //     (was 10) — Andy: 'main galaxy zone +50%'. The 17×2 nodes now
-      //     spread across a larger sphere; edges between them stretch
-      //     proportionally and the central science cluster reads as the
-      //     dominant feature of the scene. ─────────────────────────────
+      // ── Science positions — two rings of 17 nodes. Sphere radius 22.5
+      //     (was 15, originally 10) — Andy bumped the main galaxy zone
+      //     by another +50%. The 17×2 nodes spread across a larger sphere;
+      //     edges, comets, plasma beads scale with it. Camera is pulled
+      //     further back below so the bigger sphere fits centered on
+      //     mobile portrait. ─────────────────────────────────────────
       const NODE_COUNT = SUBS.length * 2;
-      const sciPos = fibSph(NODE_COUNT, 15.0);
+      const sciPos = fibSph(NODE_COUNT, 22.5);
 
       // ── Soft glow texture — canvas radial gradient, cached per hex color ──────
       const glowTexCache = new Map<number, THREE.Texture>();

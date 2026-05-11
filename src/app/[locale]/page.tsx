@@ -525,16 +525,12 @@ export default async function HomePage() {
 
       </div>
 
-      {/* Wave: absolutely pinned to bottom, overlaps the gap, white fills below curve */}
-      <div aria-hidden style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 2, lineHeight: 0, pointerEvents: "none" }}>
-        <svg viewBox="0 0 1440 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
-          style={{ display: "block", width: "100%", height: 200 }}>
-          <path
-            d="M0,200 C120,130 280,110 480,150 C640,185 800,120 960,145 C1120,170 1300,120 1440,145 L1440,200 Z"
-            fill="var(--bg)"
-          />
-        </svg>
-      </div>
+      {/* Smooth gradient blend — replaces the previous hard-edged wave.
+            260px tall fade from transparent (top, lets the dark universe
+            show through) to var(--bg) (bottom, matches the next section).
+            Andy: 'переход фона должен быть плавным между первым блоком
+            и вторым'. ───────────────────────────────────────────────── */}
+      <div aria-hidden style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 2, height: 260, lineHeight: 0, pointerEvents: "none", background: "linear-gradient(180deg, rgba(5,10,20,0) 0%, rgba(5,10,20,0.35) 35%, var(--bg) 100%)" }} />
 
       </div>{/* /DARK UNIVERSE */}
 
