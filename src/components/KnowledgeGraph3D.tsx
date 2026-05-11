@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 interface UserProgress { subject: string; xp_total: number }
-interface Props { className?: string; userProgress?: UserProgress[] }
+interface Props { className?: string; userProgress?: UserProgress[]; cameraZ?: number; cameraLookAtY?: number }
 
 const FULL_SUBJECTS = new Set(["russian-history"]);
 
@@ -185,7 +185,7 @@ function PopupCard({ pop, onClose }: { pop: PopupState; onClose: () => void }) {
 }
 
 // ── Main component ─────────────────────────────────────────────────────────────
-export default function KnowledgeGraph3D({ className, userProgress }: Props) {
+export default function KnowledgeGraph3D({ className, userProgress, cameraZ, cameraLookAtY }: Props) {
   const mountRef  = useRef<HTMLDivElement>(null);
   const hovRef    = useRef<number | null>(null);
   const sciScr    = useRef(SUBS.map(() => ({ x: 0, y: 0 })));
@@ -244,8 +244,14 @@ export default function KnowledgeGraph3D({ className, userProgress }: Props) {
       const scene  = new THREE.Scene();
       scene.background = new THREE.Color(0x020308);
       const camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 1000);
-      camera.position.set(0, 3.0, 26); // slightly closer for larger apparent galaxy
-      camera.lookAt(0, 0, 0);
+      // cameraZ prop lets the hero variant pull the camera back so the galaxy
+      // sphere appears smaller within a FULL-width canvas (no empty side
+      // borders, since the background star field still fills the whole canvas).
+      // Default 26 preserves the /knowledge page framing.
+      const _z = typeof cameraZ === "number" ? cameraZ : 26;
+      const _lookY = typeof cameraLookAtY === "number" ? cameraLookAtY : 0;
+      camera.position.set(0, 3.0, _z);
+      camera.lookAt(0, _lookY, 0);
 
       const ADD = THREE.AdditiveBlending;
       const mkMat = (color: number, op: number) =>

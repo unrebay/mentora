@@ -196,12 +196,17 @@ export default async function HomePage() {
               dark-universe block, far less dense — reads as background space
               while the hero+stats+features grid sits in front). */}
         <div className="absolute inset-x-0 top-0 z-0 pointer-events-none h-[100dvh] md:hidden overflow-hidden">
-          {/* CSS scale(0.8) makes the constellation 20% smaller as Andy asked,
-              without touching the heavy Three.js scene. transform-origin keeps
-              the sphere centered. */}
-          <div className="absolute inset-0" style={{ transform: "scale(0.8)", transformOrigin: "center center" }}>
-            <KnowledgeGraph3D className="absolute inset-0 w-full h-full" userProgress={[]} />
-          </div>
+          {/* cameraZ=33 (default 26) pulls the camera back ~27% — galaxy SPHERE
+              reads ~20% smaller in the viewport, while the background star
+              field still fills the entire canvas width (no empty side strips).
+              cameraLookAtY=4 tilts the lens up so the sphere sits slightly
+              below center, behind the description text. */}
+          <KnowledgeGraph3D
+            className="absolute inset-0 w-full h-full"
+            userProgress={[]}
+            cameraZ={33}
+            cameraLookAtY={4}
+          />
           {/* Dark tint — fades from solid-ish at the top (behind the title
               and description so text stays legible) to fully transparent
               around 60%, where the galaxy core is meant to read clearly,
