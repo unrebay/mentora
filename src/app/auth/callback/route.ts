@@ -67,9 +67,15 @@ export async function GET(request: NextRequest) {
         });
         // Surface the actual error to the URL so we can debug what's broken
         // without server-log access. Truncate to keep URL short.
-        const reason = (exchangeError.message || exchangeError.name || "unknown").slice(0, 100);
+        // Diagnostic: which cookie NAMES did the server actually receive?
+        // (Names only — never values — for privacy.) The PKCE verifier cookie
+        // should be named like `sb-<ref>-auth-token-code-verifier`. If it
+        // isn't in this list, the cookie never made it back from the browser.
+        const cookieNames = cookieStore.getAll().map((c) => c.name);
+        const hasVerifier = cookieNames.some((n) => n.endsWith("-code-verifier"));
+        const reason = (exchangeError.message || exchangeError.name || "unknown").slice(0, 80);
         return NextResponse.redirect(
-          `${origin}/auth?error=oauth_callback&reason=${encodeURIComponent(reason)}&stage=exchange`
+          `${origin}/auth?error=oauth_callback&reason=${encodeURIComponent(reason)}&stage=exchange&hasVerifier=${hasVerifier}&cookieCount=${cookieNames.length}`
         );
       }
       const { data: { user } } = await supabase.auth.getUser();
