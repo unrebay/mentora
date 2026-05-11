@@ -220,14 +220,15 @@ export default async function HomePage() {
         </div>
         {/* Mobile-only: starfield extension below the hero so the dark
             stats+features stretch isn't a starless void. Sits BETWEEN
-            the hero (top 100dvh) and the smooth gradient blend at the
-            bottom (-260px). Pure CSS dot pattern — no extra Three.js. */}
+            the hero (top 100dvh) and the SVG wave divider at the bottom
+            (200px tall — same as the <svg> below). Stars stay visible
+            right up to the wave curve. Pure CSS, no extra Three.js. */}
         <div
           aria-hidden
           className="md:hidden absolute inset-x-0 z-0 pointer-events-none"
           style={{
             top: "100dvh",
-            bottom: "260px",
+            bottom: "200px",
             backgroundImage: `
               radial-gradient(circle, rgba(255,255,255,0.55) 0.4px, transparent 1px),
               radial-gradient(circle, rgba(170,190,255,0.45) 0.35px, transparent 1px),
@@ -576,12 +577,20 @@ export default async function HomePage() {
 
       </div>
 
-      {/* Smooth gradient blend — replaces the previous hard-edged wave.
-            260px tall fade from transparent (top, lets the dark universe
-            show through) to var(--bg) (bottom, matches the next section).
-            Andy: 'переход фона должен быть плавным между первым блоком
-            и вторым'. ───────────────────────────────────────────────── */}
-      <div aria-hidden style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 2, height: 260, lineHeight: 0, pointerEvents: "none", background: "linear-gradient(180deg, rgba(5,10,20,0) 0%, rgba(5,10,20,0.35) 35%, var(--bg) 100%)" }} />
+      {/* Wave divider — SVG ink-splash that fills the bottom with var(--bg).
+            Restored per Andy: keeps the dark area (with the starfield) until
+            the wave starts, then a sharp painterly curve into the light
+            section below. Note: stars above the wave stay visible because
+            the SVG only covers the bottom ~200px. */}
+      <div aria-hidden style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 2, lineHeight: 0, pointerEvents: "none" }}>
+        <svg viewBox="0 0 1440 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
+          style={{ display: "block", width: "100%", height: 200 }}>
+          <path
+            d="M0,200 C120,130 280,110 480,150 C640,185 800,120 960,145 C1120,170 1300,120 1440,145 L1440,200 Z"
+            fill="var(--bg)"
+          />
+        </svg>
+      </div>
 
       </div>{/* /DARK UNIVERSE */}
 
