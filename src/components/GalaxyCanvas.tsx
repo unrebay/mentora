@@ -101,19 +101,17 @@ export default function GalaxyCanvas({ className }: Props) {
       // Camera framing.
       // • Desktop: slight downward tilt (Y=3, lookAt 0,0,0), z=60, FOV 55.
       //   Wide cosmic scene, unchanged.
-      // • Mobile: camera at origin level (Y=0) but LOOKS UP at (0, 14, 0).
-      //   Tilting the camera up by ~8.4° drops the science-sphere origin
-      //   (the densest part of the galaxy + the wire mesh of edges) into
-      //   the lower portion of the portrait viewport — about 64% from the
-      //   top of the visible hero, which is exactly where Andy circled
-      //   ("на середину скриншота, примерно где находится описание").
-      //   Note: lookAt(0,0,0) puts origin at image center; lookAt(0,+Y,0)
-      //   shifts origin down because the lens is pointing slightly above it.
+      // • Mobile: Andy: 'приблизь камеру к галактике на 20% и опусти ещё на 64%'.
+      //   - z: 95 → 76 (−20% — sphere appears larger / closer).
+      //   - lookAt Y: 14 → 23 (+64% — origin drops further; the lens tilts
+      //     up by ~17°, so the science-sphere origin lands at ~76% from
+      //     the top of the rendered image, with the top of the sphere
+      //     around 37%). Camera position stays at Y=0.
       const isMobile = w < 768;
-      const camZ = isMobile ? 95 : 60;
+      const camZ = isMobile ? 76 : 60;
       const camera = new THREE.PerspectiveCamera(isMobile ? 65 : 55, w / h, 0.1, 1000);
       camera.position.set(0, isMobile ? 0 : 3.0, camZ);
-      camera.lookAt(0, isMobile ? 14 : 0, 0);
+      camera.lookAt(0, isMobile ? 23 : 0, 0);
 
       const ADD = THREE.AdditiveBlending;
 
