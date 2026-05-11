@@ -17,6 +17,12 @@ const GalaxyCanvas = nextDynamic(() => import("@/components/GalaxyCanvas"), {
   // hero background still looks correct (we already paint #050a14 + tint layers).
   loading: () => null,
 });
+// KnowledgeGraph3D — the dense "knowledge constellation" used on /knowledge.
+// Used as hero background on mobile (Andy: this is the look he wants there).
+const KnowledgeGraph3D = nextDynamic(() => import("@/components/KnowledgeGraph3D"), {
+  ssr: false,
+  loading: () => null,
+});
 
 export const dynamic = "force-dynamic";
 
@@ -180,13 +186,19 @@ export default async function HomePage() {
       {/* ── DARK UNIVERSE: nav gap + hero + stats + features in one seamless block ── */}
       <div className="relative" style={{ background: "#050a14", marginTop: "-100px", paddingBottom: "200px" }}>
 
-        {/* Galaxy — anchored to the TOP of the dark universe.
-            • Mobile: clipped to one 100dvh block so the core is visible on
-              the first screen and doesn't render across (and waste GPU on)
-              the much taller hero+stats+features stack.
-            • Desktop: spans the entire dark universe (hero + stats + features)
-              like before — the wide right-side fade reads as space dust. */}
-        <div className="absolute inset-x-0 top-0 z-0 pointer-events-none h-[100dvh] md:h-full">
+        {/* Galaxy — two different visuals by breakpoint:
+            • Mobile: use the DENSE "knowledge constellation" (KnowledgeGraph3D)
+              — the same one /knowledge renders. Andy specifically asked for
+              THIS look as the hero background on phones. Wrapper disables
+              pointer events so the science stars aren't accidentally
+              clickable while the hero copy sits on top.
+            • Desktop: keep the wider cosmic GalaxyCanvas (spans the whole
+              dark-universe block, far less dense — reads as background space
+              while the hero+stats+features grid sits in front). */}
+        <div className="absolute inset-x-0 top-0 z-0 pointer-events-none h-[100dvh] md:hidden overflow-hidden">
+          <KnowledgeGraph3D className="absolute inset-0 w-full h-full" userProgress={[]} />
+        </div>
+        <div className="absolute inset-x-0 top-0 z-0 pointer-events-none h-full hidden md:block">
           <GalaxyCanvas className="absolute inset-0 w-full h-full" />
         </div>
 
