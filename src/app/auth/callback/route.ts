@@ -65,25 +65,34 @@ export async function GET(request: NextRequest) {
         console.error("[auth-callback] exchangeCodeForSession error", {
           name: exchangeError.name, message: exchangeError.message, status: exchangeError.status,
         });
+        // Surface the actual error to the URL so we can debug what's broken
+        // without server-log access. Truncate to keep URL short.
+        const reason = (exchangeError.message || exchangeError.name || "unknown").slice(0, 100);
+        return NextResponse.redirect(
+          `${origin}/auth?error=oauth_callback&reason=${encodeURIComponent(reason)}&stage=exchange`
+        );
       }
-      if (!exchangeError) {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: profile } = await supabase
-            .from("users")
-            .select("onboarding_completed")
-            .eq("id", user.id)
-            .single();
-          if (!profile?.onboarding_completed) {
-            return NextResponse.redirect(`${origin}/onboarding`);
-          }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from("users")
+          .select("onboarding_completed")
+          .eq("id", user.id)
+          .single();
+        if (!profile?.onboarding_completed) {
+          return NextResponse.redirect(`${origin}/onboarding`);
         }
-        return NextResponse.redirect(`${origin}${next}`);
       }
-    } catch {
-      // fall through to error redirect below
+      return NextResponse.redirect(`${origin}${next}`);
+    } catch (e) {
+      const msg = (e instanceof Error ? e.message : String(e)).slice(0, 100);
+      console.error("[auth-callback] exchangeCodeForSession threw", msg);
+      return NextResponse.redirect(
+        `${origin}/auth?error=oauth_callback&reason=${encodeURIComponent(msg)}&stage=throw`
+      );
     }
   }
 
-  return NextResponse.redirect(`${origin}/auth?error=oauth_callback`);
+  // No code AND no token_hash — likely a cookie/cache-related landing without proper params.
+  return NextResponse.redirect(`${origin}/auth?error=oauth_callback&stage=no_code`);
 }
