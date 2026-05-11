@@ -195,7 +195,7 @@ export default async function HomePage() {
             • Desktop: keep the wider cosmic GalaxyCanvas (spans the whole
               dark-universe block, far less dense — reads as background space
               while the hero+stats+features grid sits in front). */}
-        <div className="absolute inset-x-0 top-0 z-0 pointer-events-none h-[100dvh] md:hidden overflow-hidden">
+        <div className="absolute inset-x-0 top-0 z-0 pointer-events-none h-[100vh] md:hidden overflow-hidden">
           {/* cameraZ=33 (default 26) pulls the camera back ~27% — galaxy SPHERE
               reads ~20% smaller in the viewport, while the background star
               field still fills the entire canvas width (no empty side strips).

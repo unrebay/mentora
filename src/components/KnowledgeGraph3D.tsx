@@ -575,9 +575,17 @@ export default function KnowledgeGraph3D({ className, userProgress, cameraZ, cam
         targetRotY = ((e.touches[0].clientX/window.innerWidth)-.5)*2*0.55;
         targetRotX = 0.20+((e.touches[0].clientY/window.innerHeight)-.5)*2*0.30;
       };
+      // rAF-debounced resize: iOS Safari fires multiple resize events when
+      // the URL bar shows/hides during scroll. Without coalescing, the canvas
+      // visibly jitters. Schedule at most one resize per frame.
+      let _resizeRaf = 0;
       onRSFn = () => {
-        const nw=container.clientWidth||window.innerWidth, nh=container.clientHeight||window.innerHeight;
-        camera.aspect=nw/nh; camera.updateProjectionMatrix(); renderer.setSize(nw,nh);
+        if (_resizeRaf) return;
+        _resizeRaf = requestAnimationFrame(() => {
+          _resizeRaf = 0;
+          const nw=container.clientWidth||window.innerWidth, nh=container.clientHeight||window.innerHeight;
+          camera.aspect=nw/nh; camera.updateProjectionMatrix(); renderer.setSize(nw,nh);
+        });
       };
       onClkFn = () => {
         const hIdx = hovRef.current;
