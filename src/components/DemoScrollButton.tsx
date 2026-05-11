@@ -11,7 +11,7 @@ export default function DemoScrollButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="px-7 py-3.5 border border-white/20 text-gray-300 font-medium rounded-full hover:border-white/40 hover:text-white transition-colors backdrop-blur-sm inline-flex items-center gap-2"
+        className="px-5 py-3 md:px-7 md:py-3.5 text-sm md:text-base border border-white/20 text-gray-300 font-medium rounded-full hover:border-white/40 hover:text-white transition-colors backdrop-blur-sm inline-flex items-center gap-2 whitespace-nowrap"
         style={{ background: "rgba(255,255,255,0.06)" }}
       >
         {/* Play icon */}

@@ -225,14 +225,15 @@ export default function GalaxyCanvas({ className }: Props) {
         comets.push({ head, halo, pos: new THREE.Vector3(), dir: new THREE.Vector3(),
                       speed: 0, t: 0, duration: 5, active: false, startDelay: i * 9 + Math.random() * 6 });
       }
-      // ── Science positions — two rings of 17 nodes. Sphere radius 22.5
-      //     (was 15, originally 10) — Andy bumped the main galaxy zone
-      //     by another +50%. The 17×2 nodes spread across a larger sphere;
-      //     edges, comets, plasma beads scale with it. Camera is pulled
-      //     further back below so the bigger sphere fits centered on
-      //     mobile portrait. ─────────────────────────────────────────
+      // ── Science positions — two rings of 17 nodes. Sphere radius 35
+      //     (was 22.5). Andy annotated a yellow circle on the screenshot
+      //     showing the desired galaxy footprint — it extends beyond the
+      //     viewport horizontally and fills most of the visible hero
+      //     vertically. r=35 → diameter 70, which at camera z=95 covers
+      //     ~125% of horizontal viewport on mobile portrait. The wire
+      //     mesh of edges between nodes reads as the main feature. ───
       const NODE_COUNT = SUBS.length * 2;
-      const sciPos = fibSph(NODE_COUNT, 22.5);
+      const sciPos = fibSph(NODE_COUNT, 35.0);
 
       // ── Soft glow texture — canvas radial gradient, cached per hex color ──────
       const glowTexCache = new Map<number, THREE.Texture>();

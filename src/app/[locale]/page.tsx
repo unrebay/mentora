@@ -213,39 +213,41 @@ export default async function HomePage() {
               screen and the chat as the next thing on scroll. ────────── */}
         <div className="relative z-10 max-w-6xl mx-auto px-6 w-full flex md:items-center" style={{ minHeight: "calc(100dvh - 100px)" }}>
           <div className="w-full md:py-10 pt-6 pb-6 flex flex-col md:grid md:grid-cols-2 md:gap-12 md:items-center" style={{ minHeight: "inherit" }}>
-            <div className="flex-shrink-0 md:flex-shrink md:flex md:flex-col md:justify-center w-full md:w-auto">
+            <div className="flex-shrink-0 md:flex-shrink md:flex md:flex-col md:justify-center w-full md:w-auto text-center md:text-left">
               <FadeUp delay={0.08}>
-              <h1 className="text-[2rem] sm:text-[2.75rem] md:text-[3.4rem] lg:text-[4.2rem] font-semibold leading-[1.08] mb-4 tracking-tight text-white" style={{ letterSpacing: "-0.02em" }}>
+              {/* Title — mobile: 3 centered lines (white / blue / white). No italic.
+                   Desktop: kept inline so it flows naturally beside the chat column. */}
+              <h1 className="text-[2.4rem] sm:text-[2.75rem] md:text-[3.4rem] lg:text-[4.2rem] font-semibold leading-[1.05] mb-4 tracking-tight text-white" style={{ letterSpacing: "-0.02em" }}>
                 {locale === "en" ? (
                   <>
-                    Become the{" "}
-                    <span style={{
+                    <span className="block md:inline">Become the</span>{" "}
+                    <span className="block md:inline" style={{
                       fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
-                      fontStyle: "italic",
                       fontWeight: 600,
                       color: "#6B8FFF",
                       letterSpacing: "-0.01em",
-                    }}>best version</span>{" "}of yourself.
+                    }}>best version</span>{" "}
+                    <span className="block md:inline">of yourself.</span>
                   </>
                 ) : (
                   <>
-                    Стань{" "}
-                    <span style={{
+                    <span className="block md:inline">Стань</span>{" "}
+                    <span className="block md:inline" style={{
                       fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
-                      fontStyle: "italic",
                       fontWeight: 600,
                       color: "#6B8FFF",
                       letterSpacing: "-0.01em",
-                    }}>лучшей версией</span>{" "}себя.
+                    }}>лучшей версией</span>{" "}
+                    <span className="block md:inline">себя.</span>
                   </>
                 )}
               </h1>
-              <p className="text-base font-semibold tracking-wide mb-5" style={{ color: "#6B8FFF" }}>
-                {locale === "en" ? "Learn with an AI mentor who knows you." : "Учись с AI-ментором, который знает тебя."}
+              <p className="text-base sm:text-lg font-semibold tracking-wide mb-5" style={{ color: "#6B8FFF" }}>
+                {locale === "en" ? "Learn with your personal AI mentor." : "Учись с персональным AI-ментором."}
               </p>
               </FadeUp>
               <FadeUp delay={0.16}>
-                <p className="text-lg text-gray-400 leading-relaxed mb-8 max-w-md">
+                <p className="text-base sm:text-lg text-gray-300 leading-relaxed mb-8 max-w-md md:max-w-md mx-auto md:mx-0">
                   {t("landing.heroSubtitle")}
                 </p>
               </FadeUp>
@@ -268,12 +270,13 @@ export default async function HomePage() {
                 the buttons (bottom of viewport). Galaxy core shines through here. */}
             <div aria-hidden className="md:hidden flex-1 min-h-[24px]" />
 
-            {/* Mobile-only bottom block: BUTTONS pinned to viewport bottom + ↓ scroll hint. */}
-            <div className="md:hidden flex flex-col items-stretch gap-4 pb-2">
-              <FadeUp delay={0.24}>
-                <div className="flex flex-wrap gap-3 py-2 -my-2">
+            {/* Mobile-only bottom block: BUTTONS pinned to viewport bottom + ↓ scroll hint.
+                  Buttons sit in a SINGLE row, centered horizontally. */}
+            <div className="md:hidden flex flex-col items-center gap-4 pb-2">
+              <FadeUp delay={0.24} className="w-full">
+                <div className="flex flex-row flex-nowrap justify-center items-center gap-3 py-2 -my-2">
                   <Link href="/auth"
-                    className="px-7 py-3.5 font-semibold rounded-full text-white transition-all hover:scale-[1.03] active:scale-95"
+                    className="px-5 py-3 text-sm font-semibold rounded-full text-white transition-all hover:scale-[1.03] active:scale-95 whitespace-nowrap"
                     style={{ background: "linear-gradient(135deg, #5575FF 0%, #4561E8 50%, #6B4FF0 100%)", boxShadow: "0 4px 20px rgba(69,97,232,0.45), 0 1px 0 rgba(255,255,255,0.2) inset" }}>
                     {t("landing.heroCtaStart")}
                   </Link>
