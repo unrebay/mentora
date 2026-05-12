@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import LevelAvatar, { LEVEL_TIER_NAMES, unlockedLevel } from "@/components/LevelAvatar";
+import { useTheme } from "@/components/ThemeProvider";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 interface Props {
   totalXP: number;
@@ -15,13 +17,17 @@ interface Props {
   displayName?: string | null;
   initialRank?: number | null;
   initialTotal?: number | null;
+  logoutAction?: () => Promise<void>;
 }
 
 export default function UserDropdown({
   totalXP, currentStreak, isPro, isUltima,
   selectedAvatarLevel, serialId, email, displayName,
-  initialRank, initialTotal,
+  initialRank, initialTotal, logoutAction,
 }: Props) {
+  const { mode, cycle: cycleTheme, theme } = useTheme();
+  const [pulsing, setPulsing] = useState(false);
+  const pulseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [open, setOpen] = useState(false);
   const [rank, setRank] = useState<{ rank: number; total: number } | null>(
     initialRank && initialTotal ? { rank: Number(initialRank), total: Number(initialTotal) } : null
@@ -63,6 +69,24 @@ export default function UserDropdown({
     };
   }, [open]);
 
+  // Inactivity pulse — soft breathing glow around the avatar trigger after 10s
+  // of no user input. Same UX language as the navbar TourButton pulse.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const arm = () => {
+      if (pulseTimerRef.current) clearTimeout(pulseTimerRef.current);
+      setPulsing(false);
+      pulseTimerRef.current = setTimeout(() => setPulsing(true), 10_000);
+    };
+    const events = ["mousemove", "touchstart", "keydown", "scroll", "click"] as const;
+    events.forEach((e) => window.addEventListener(e, arm, { passive: true }));
+    arm();
+    return () => {
+      if (pulseTimerRef.current) clearTimeout(pulseTimerRef.current);
+      events.forEach((e) => window.removeEventListener(e, arm));
+    };
+  }, []);
+
   // Name fallback: full_name → display_name → email username → "Пользователь"
   const name = displayName?.trim() || (email ? email.split("@")[0] : "") || "Пользователь";
   const planLabel = isUltima ? "Ultra" : isPro ? "Pro" : "Free";
@@ -73,7 +97,7 @@ export default function UserDropdown({
       {/* Trigger — circular avatar */}
       <button
         type="button"
-        onClick={() => setOpen(v => !v)}
+        onClick={() => { setPulsing(false); setOpen(v => !v); }}
         aria-label="Открыть меню профиля"
         aria-expanded={open}
         style={{
@@ -81,7 +105,15 @@ export default function UserDropdown({
           display: "inline-flex", alignItems: "center", justifyContent: "center",
           border: open ? "1.5px solid rgba(124,58,237,0.55)" : "1px solid var(--border)",
           background: "var(--bg-secondary)", overflow: "hidden", cursor: "pointer",
-          boxShadow: open ? "0 0 18px rgba(124,58,237,0.35)" : "inset 0 1px 0 rgba(255,255,255,0.06)",
+          boxShadow: open
+            ? "0 0 18px rgba(124,58,237,0.35)"
+            : pulsing
+              ? undefined  // animated via box-shadow keyframes below
+              : "inset 0 1px 0 rgba(255,255,255,0.06)",
+          // mentoraTourPulse is defined in globals.css and breathes a soft brand
+          // glow around any rounded element — same animation as the navbar tour
+          // button so the UX language is consistent across both surfaces.
+          animation: !open && pulsing ? "mentoraTourPulse 2.4s ease-in-out infinite" : "none",
           transition: "all .15s",
         }}
       >
@@ -171,6 +203,55 @@ export default function UserDropdown({
           <div style={{ padding: "8px 0" }}>
             <Item href="/profile" icon={<IconUser />} label="Открыть профиль" onClick={() => setOpen(false)} />
           </div>
+
+          {/* Divider */}
+          <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.10) 20%, rgba(255,255,255,0.10) 80%, transparent)" }} />
+
+          {/* Settings — theme cycle, language, logout. Moved here from the
+              navbar so the top bar is clean (only icon + pills + avatar). */}
+          <div style={{ padding: "8px 16px 4px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); cycleTheme(); }}
+              title="Сменить тему (system → light → dark)"
+              style={{
+                display: "flex", alignItems: "center", gap: 6, padding: "7px 12px",
+                fontSize: 12, fontWeight: 600, color: "var(--text)",
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid var(--border)",
+                borderRadius: 9, cursor: "pointer",
+                flex: 1,
+              }}
+            >
+              <span style={{ fontSize: 14, lineHeight: 1 }}>
+                {mode === "light" ? "☀" : mode === "dark" ? "🌙" : "🖥"}
+              </span>
+              <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                {mode === "system" ? `Авто · ${theme === "dark" ? "тёмная" : "светлая"}` : mode === "light" ? "Светлая" : "Тёмная"}
+              </span>
+            </button>
+            <LanguageSwitcher />
+          </div>
+
+          {/* Logout — server-action form */}
+          {logoutAction && (
+            <div style={{ padding: "4px 16px 12px" }}>
+              <form action={logoutAction}>
+                <button
+                  type="submit"
+                  style={{
+                    width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                    padding: "9px 10px", fontSize: 12, fontWeight: 600,
+                    background: "rgba(220,38,38,0.10)", color: "#f87171",
+                    border: "1px solid rgba(220,38,38,0.30)",
+                    borderRadius: 9, cursor: "pointer",
+                  }}
+                >
+                  Выйти из аккаунта
+                </button>
+              </form>
+            </div>
+          )}
 
           {/* Divider */}
           <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.10) 20%, rgba(255,255,255,0.10) 80%, transparent)" }} />
