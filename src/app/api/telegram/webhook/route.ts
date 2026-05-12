@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { BOT_PLATFORM_KNOWLEDGE } from "@/lib/bot-knowledge";
 
 const BOT_TOKEN     = process.env.TELEGRAM_SUPPORT_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN || "";
@@ -234,6 +235,89 @@ async function getAIReply(
   }
 }
 
+// ── /start auth — Telegram-login flow ──────────────────────────────────────
+// User clicked «Войти через Telegram» on the web auth page; the widget fallback
+// opened t.me/<bot>?start=auth, so Telegram delivered /start auth to us.
+// We: ensure the Supabase auth.user exists (idempotent), generate a one-shot
+// magiclink via admin API, and send the user a button that opens
+// mentora.su/auth/callback?token_hash=...&type=magiclink&next=/dashboard.
+// The existing /auth/callback handler then exchanges the token_hash → session.
+async function startTelegramAuthFlow(
+  chatId: string | number,
+  fromId: number,
+  firstName: string,
+  lastName: string,
+  username: string | undefined,
+): Promise<void> {
+  const supabaseUrl     = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey  = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const baseUrl         = (process.env.NEXT_PUBLIC_BASE_URL ?? "https://mentora.su").replace(/\/$/, "");
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    console.error("[tg-auth-start] Supabase env missing");
+    await sendMessage(chatId, "Сейчас не получилось запустить вход. Попробуй чуть позже.");
+    return;
+  }
+
+  const supabaseAdmin = createSupabaseAdmin(supabaseUrl, serviceRoleKey);
+  const telegramEmail = `tg_${fromId}@mentora.su`;
+
+  // Ensure user exists — same logic as /api/auth/telegram POST. Idempotent.
+  const { error: createErr } = await supabaseAdmin.auth.admin.createUser({
+    email: telegramEmail,
+    email_confirm: true,
+    user_metadata: {
+      telegram_id: fromId,
+      full_name: [firstName, lastName].filter(Boolean).join(" "),
+      username,
+      provider: "telegram",
+    },
+  });
+  if (createErr && !createErr.message.toLowerCase().includes("already")) {
+    console.error("[tg-auth-start] createUser failed", createErr.message);
+    await sendMessage(chatId, "Не получилось создать аккаунт. Напиши hello@mentora.su.");
+    return;
+  }
+
+  // Generate magic-link → extract hashed_token for our own /auth/callback handler.
+  // We construct the final URL on the mentora.su side so the user does not bounce
+  // off the Supabase domain (some RU networks block it).
+  const { data: linkData, error: linkErr } =
+    await supabaseAdmin.auth.admin.generateLink({
+      type: "magiclink",
+      email: telegramEmail,
+    });
+
+  if (linkErr || !linkData?.properties?.hashed_token) {
+    console.error("[tg-auth-start] generateLink failed", linkErr?.message);
+    await sendMessage(chatId, "Не получилось сгенерировать ссылку входа. Попробуй ещё раз через минуту.");
+    return;
+  }
+
+  const tokenHash = linkData.properties.hashed_token;
+  const loginUrl  = `${baseUrl}/auth/callback?token_hash=${encodeURIComponent(tokenHash)}&type=magiclink&next=${encodeURIComponent("/dashboard")}`;
+
+  await sendMessage(
+    chatId,
+    `Привет, ${firstName}! 👋\n\nНажми кнопку ниже, чтобы войти на <b>mentora.su</b>.\n` +
+    `Ссылка одноразовая и работает только для тебя.`,
+    {
+      reply_markup: {
+        inline_keyboard: [[{ text: "🔐 Войти на mentora.su", url: loginUrl }]],
+      },
+    },
+  );
+
+  // Silent admin ping
+  if (ADMIN_CHAT_ID) {
+    await sendMessage(
+      ADMIN_CHAT_ID,
+      `📨 <b>TG-login</b>\n👤 ${firstName} ${lastName ?? ""} (${username ? "@" + username : "no username"}, TG: <code>${fromId}</code>)\n📧 ${telegramEmail}`,
+      { disable_notification: true },
+    );
+  }
+}
+
 // ── Message processing (runs async after 200 is returned to Telegram) ──────────
 
 async function handleUpdate(update: Record<string, unknown>) {
@@ -317,6 +401,19 @@ async function handleUpdate(update: Record<string, unknown>) {
     const startPayload = text.slice(6).trim();
     const codeMatch = startPayload.match(/^([A-F0-9]{5}-[A-F0-9]{5})$/i);
     const deepCode = codeMatch ? codeMatch[1].toUpperCase() : null;
+
+    // /start auth — Telegram login fallback (widget was blocked/popup-denied)
+    if (startPayload === "auth") {
+      const fromObj = message.from as Record<string, unknown> | undefined;
+      await startTelegramAuthFlow(
+        chatId,
+        fromId,
+        (fromObj?.first_name as string) ?? "Друг",
+        (fromObj?.last_name as string) ?? "",
+        fromObj?.username as string | undefined,
+      );
+      return;
+    }
 
     if (deepCode) {
       // User arrived via profile deep link — we already know who they are
