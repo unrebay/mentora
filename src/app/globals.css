@@ -388,3 +388,11 @@ code:not([class]) {
   70%  { opacity: 0.7; transform: translateY(-24px) scale(0.8); }
   100% { opacity: 0;   transform: translateY(-36px) scale(0.3); }
 }
+
+/* Navigation top-loader indeterminate animation. Moves a gradient sliver from
+   left to right and back — reads as "loading" without faking real progress. */
+@keyframes mentoraNavProgress {
+  0%   { transform: translateX(-100%); }
+  50%  { transform: translateX(180%); }
+  100% { transform: translateX(-100%); }
+}
