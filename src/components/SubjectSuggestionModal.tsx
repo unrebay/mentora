@@ -1,4 +1,5 @@
 "use client";
+import BodyScrollLock from "@/components/BodyScrollLock";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useTranslations } from "next-intl";
@@ -43,6 +44,7 @@ export default function SubjectSuggestionModal({ open, onClose, userId }: Props)
       style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
+      <BodyScrollLock />
       <div
         className="w-full max-w-md rounded-2xl border p-6 shadow-xl"
         style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}

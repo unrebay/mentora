@@ -228,7 +228,7 @@ export default async function DashboardPage() {
       <StreakRewardCelebration />
       <PostHogIdentify userId={user.id} email={user.email ?? ""} />
       <Suspense fallback={null}><PaymentSuccessTracker /></Suspense>
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="max-w-5xl mx-auto px-5 sm:px-6 pt-6 pb-2 sm:pt-10 sm:pb-10">
 
         {/* ── Pro activation banner (payment=success in URL) ────────── */}
         <ProActivationBanner plan={profile?.plan ?? "free"} />
@@ -631,7 +631,7 @@ export default async function DashboardPage() {
 
         {/* ── Support ──────────────────────────────────────── */}
         <FadeUp delay={0.15} fade>
-        <div className="mt-6 mb-6 flex flex-col items-center gap-2 text-center">
+        <div className="mt-4 mb-2 sm:mt-6 sm:mb-6 flex flex-col items-center gap-2 text-center">
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>{t("needHelp")}</p>
           <div className="flex gap-2 flex-wrap justify-center items-start">
             <TelegramSupportButton size="sm" label={t("support")} />

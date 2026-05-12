@@ -1,4 +1,5 @@
 "use client";
+import BodyScrollLock from "@/components/BodyScrollLock";
 import { useState, useTransition } from "react";
 import { SUBJECTS } from "@/lib/types";
 import { addUserSubject } from "@/app/dashboard/actions";
@@ -33,7 +34,9 @@ export default function AddSubjectModal({ open, onClose, existingSubjectIds }: P
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => 
+      <BodyScrollLock />
+      { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
         className="w-full max-w-2xl rounded-2xl border shadow-xl overflow-hidden"

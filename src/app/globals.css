@@ -133,6 +133,21 @@
     pointer-events: none;
   }
   body { position: relative; z-index: 0; }
+  /* ── iOS Safari mobile zoom guard ──────────────────────────────────────
+     Safari auto-zooms when tapping any text input with computed font-size
+     less than 16px, then DOESN'T zoom back out. Forces an unwanted zoom
+     state on the whole page. The site-wide fix is to make every
+     input/textarea/select render at >= 16px on mobile. */
+  @media (max-width: 767px) {
+    input, textarea, select, [contenteditable="true"] {
+      font-size: 16px !important;
+    }
+  }
+  /* Prevent the double-tap-to-zoom Safari quirk on tappable elements */
+  button, a, label, [role="button"], .key {
+    touch-action: manipulation;
+  }
+
 
   /* All direct page wrappers should never exceed viewport */
   body > div, body > main, body > nav {
