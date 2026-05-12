@@ -170,7 +170,7 @@ export default function DashboardNav({
 
         {/* Left: logo + desktop links */}
         <div className="flex items-center gap-1">
-          <Logo size="sm" href="" textColor={dk ? "rgba(255,255,255,0.95)" : undefined} />
+          <Logo size="sm" href="/dashboard" textColor={dk ? "rgba(255,255,255,0.95)" : undefined} />
 
           <div className="hidden md:flex items-center gap-1 ml-7">
             {navLinks.map(({ href, label }) => (
