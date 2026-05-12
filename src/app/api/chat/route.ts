@@ -35,21 +35,66 @@ function getLevelColor(level: string): string {
   };
   return colors[level] ?? "#4561E8";
 }
-function getLevelUpMessage(newLevel: string, subjectTitle: string, locale?: string): string {
+// Nominative subject titles — used in level-up messages so case-declension
+// issues (e.g. «в Английский язык» vs «в английскому языку») never arise.
+const SUBJECT_TITLE_RU: Record<string, string> = {
+  "russian-history": "История России",
+  "world-history": "Всемирная история",
+  "mathematics": "Математика",
+  "physics": "Физика",
+  "chemistry": "Химия",
+  "biology": "Биология",
+  "russian-language": "Русский язык",
+  "literature": "Литература",
+  "english": "Английский язык",
+  "social-studies": "Обществознание",
+  "geography": "География",
+  "computer-science": "Информатика",
+  "astronomy": "Астрономия",
+  "discovery": "Расширение кругозора",
+  "psychology": "Психология",
+  "economics": "Экономика",
+  "philosophy": "Философия",
+};
+const SUBJECT_TITLE_EN: Record<string, string> = {
+  "russian-history": "Russian History",
+  "world-history": "World History",
+  "mathematics": "Mathematics",
+  "physics": "Physics",
+  "chemistry": "Chemistry",
+  "biology": "Biology",
+  "russian-language": "Russian Language",
+  "literature": "Literature",
+  "english": "English",
+  "social-studies": "Social Studies",
+  "geography": "Geography",
+  "computer-science": "Computer Science",
+  "astronomy": "Astronomy",
+  "discovery": "Discovery",
+  "psychology": "Psychology",
+  "economics": "Economics",
+  "philosophy": "Philosophy",
+};
+
+function getLevelUpMessage(newLevel: string, subjectId: string, locale?: string): string {
   if (locale === "en") {
+    const title = SUBJECT_TITLE_EN[subjectId] ?? subjectId;
     const msgs: Record<string, string> = {
-      "Explorer": `Explorer level! You already know more about "${subjectTitle}" than most beginners. Keep going — every question makes you stronger.`,
-      "Adept": `Adept! Your effort in "${subjectTitle}" is clear. Mentora sees your progress — keep it up.`,
-      "Scholar": `Scholar! Impressive results in "${subjectTitle}". You're one step from the top — don't stop now.`,
-      "Expert": `Expert — the pinnacle! You're among those who reached the top in "${subjectTitle}". Mentora is proud of you.`,
+      "Explorer": `Explorer level — «${title}»! You already know more than most beginners. Keep going — every question makes you stronger.`,
+      "Adept": `Adept — «${title}»! Your effort is clear. Mentora sees your progress — keep it up.`,
+      "Scholar": `Scholar — «${title}»! Impressive results. You're one step from the top — don't stop now.`,
+      "Expert": `Expert — «${title}», the pinnacle! You're among those who reached the top. Mentora is proud of you.`,
     };
     return msgs[newLevel] ?? `New level — ${newLevel}!`;
   }
+  const title = SUBJECT_TITLE_RU[subjectId] ?? subjectId;
+  // Tag pattern «Уровень — «Название»!» keeps the title in nominative as a
+  // standalone tag (like a book title), avoiding any case-declension errors.
   const msgs: Record<string, string> = {
-    "Исследователь": `Уровень Исследователя! Ты уже разбираешься в «${subjectTitle}» лучше большинства новичков. Продолжай — каждый вопрос делает тебя сильнее.`,
-    "Знаток": `Знаток! Твои усилия по теме «${subjectTitle}» очевидны. Ментора видит прогресс — так держать.`,
-    "Историк": `Историк! Серьёзный результат по «${subjectTitle}». До вершины один шаг — не останавливайся.`,
-    "Эксперт": `Эксперт — вершина! Ты в числе тех, кто дошёл до конца в «${subjectTitle}». Ментора гордится.`,
+    "Исследователь": `Уровень Исследователя — «${title}»! Ты уже знаешь больше большинства новичков. Продолжай — каждый вопрос делает тебя сильнее.`,
+    "Знаток": `Знаток — «${title}»! Твои усилия очевидны. Ментора видит прогресс — так держать.`,
+    "Историк": `Историк — «${title}»! Серьёзный результат. До вершины один шаг — не останавливайся.`,
+    "Эксперт": `Эксперт — «${title}», вершина! Ты в числе тех, кто дошёл до конца. Ментора гордится.`,
   };
   return msgs[newLevel] ?? `Новый уровень — ${newLevel}!`;
 }
@@ -400,7 +445,7 @@ ${PLATFORM_BLOCK}`
       : `Ты — Mentora, персональный AI-ментор по ${subjectLabel}. Твоё имя женского рода — всегда говори о себе в женском роде: «я рассказала», «я думаю», «мне кажется». Говоришь живо и увлечённо, как умный интеллигентный собеседник — не как учебник, но и не как чат-бот с заигрыванием.${isEnglish ? "\n\nЯЗЫК: Объяснения давай на русском, но примеры, задания и диалоги — на английском." : ""}
 
 ОБЛАСТЬ ЗНАНИЙ:
-Ты ментор по всей науке «${subjectLabel}», а не только по школьной программе. Любой вопрос из жизни, связанный с этой наукой, — твоя прямая зона. Биология → растениеводство, уход за животными, экология, медицина, садоводство, питание. Химия → кулинария, косметология, домашние эксперименты. История → любые исторические вопросы, не только ЕГЭ. Физика → принципы работы техники, природные явления. Ответь на практический вопрос из жизни — потом, если уместно, покажи связь с научной основой.
+Ты ментор по всей науке «${SUBJECT_TITLE_RU[subject] ?? subjectLabel}», а не только по школьной программе. Любой вопрос из жизни, связанный с этой наукой, — твоя прямая зона. Биология → растениеводство, уход за животными, экология, медицина, садоводство, питание. Химия → кулинария, косметология, домашние эксперименты. История → любые исторические вопросы, не только ЕГЭ. Физика → принципы работы техники, природные явления. Ответь на практический вопрос из жизни — потом, если уместно, покажи связь с научной основой.
 
 ПРОФИЛЬ УЧЕНИКА:
 - Стиль подачи: ${STYLE_GUIDE[style]}
@@ -567,7 +612,7 @@ ${PLATFORM_BLOCK}`;
         levelUp = {
           newLevel,
           oldLevel,
-          message: getLevelUpMessage(newLevel, subjectLabel, locale),
+          message: getLevelUpMessage(newLevel, subject, locale),
           color: getLevelColor(newLevel),
           ...(reward ? { reward } : {}),
         };
