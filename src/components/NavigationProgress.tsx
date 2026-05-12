@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 /**
  * Thin top progress bar shown during route transitions.
@@ -20,7 +20,6 @@ import { usePathname, useSearchParams } from "next/navigation";
  */
 export default function NavigationProgress() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [active, setActive] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -31,7 +30,7 @@ export default function NavigationProgress() {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   // Intercept clicks bubbling up to <body>
   useEffect(() => {

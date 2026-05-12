@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Golos_Text, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { PostHogProvider } from "@/components/PostHogProvider";
+import { Suspense } from "react";
 import NavigationProgress from "@/components/NavigationProgress";
 import { SplashScreen } from "@/components/SplashScreen";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -155,7 +156,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <PostHogProvider>
             <SplashScreen />
-            <NavigationProgress />
+            <Suspense fallback={null}><NavigationProgress /></Suspense>
             <TiltProvider />
             {children}
           </PostHogProvider>
