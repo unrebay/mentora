@@ -125,7 +125,29 @@ function cardPos(
   const NAV_H = 92;
 
   if (isMobile) {
-    return { x: Math.max(8, (vw - cw) / 2), y: vh - ch - 36 };
+    const x = Math.max(8, (vw - cw) / 2);
+
+    // No anchor → centred card
+    if (!spot || side === "center") {
+      return { x, y: clamp(vh / 2 - ch / 2, NAV_H, vh - ch - 16) };
+    }
+
+    // Position the card relative to the spotlight: below if there's room
+    // under it (or the step asked for bottom), otherwise above.
+    const belowY = spot.y + spot.h + CARD_GAP;
+    const aboveY = spot.y - ch - CARD_GAP;
+    const roomBelow = vh - belowY >= ch + 16;
+    const roomAbove = aboveY >= NAV_H;
+
+    if (side === "top") {
+      if (roomAbove) return { x, y: aboveY };
+      if (roomBelow) return { x, y: belowY };
+      return { x, y: vh - ch - 16 };
+    }
+    // "bottom" / default
+    if (roomBelow) return { x, y: belowY };
+    if (roomAbove) return { x, y: aboveY };
+    return { x, y: vh - ch - 16 };
   }
 
   if (!spot || side === "center") {
@@ -282,14 +304,36 @@ export default function OnboardingTour() {
       return;
     }
 
-    // Scroll element into view with nav clearance
-    const scrollY = window.scrollY + el.getBoundingClientRect().top - 130;
+    // Scroll element into view. On mobile we want the target in the
+    // upper third so the tooltip card has room below; on desktop a small
+    // 130px nav-clearance offset is enough.
+    const rect = el.getBoundingClientRect();
+    let scrollOffset: number;
+    if (mobile) {
+      // For "top"-side cards, scroll the target into the LOWER half so the
+      // card has room above. Otherwise put the target into the upper third.
+      scrollOffset = s.cardSide === "top" ? vh * 0.6 : vh * 0.18;
+    } else {
+      scrollOffset = 130;
+    }
+    const scrollY = window.scrollY + rect.top - scrollOffset;
     window.scrollTo({ top: Math.max(0, scrollY), behavior: "smooth" });
 
+    // Re-query the spot AFTER the scroll completes — also do a second pass
+    // in case iOS Safari finishes the smooth scroll later than expected.
     const timer = setTimeout(() => {
       const r = querySpot(s.targetSelector!);
       setSpot(r);
       setPos(cardPos(r, s.cardSide, stepIdx, vw, vh, mobile));
+      // Belt-and-suspenders: re-snap after another 300ms in case smooth scroll
+      // was still mid-animation on iOS.
+      setTimeout(() => {
+        const r2 = querySpot(s.targetSelector!);
+        if (r2) {
+          setSpot(r2);
+          setPos(cardPos(r2, s.cardSide, stepIdx, vw, vh, mobile));
+        }
+      }, 300);
     }, 420);
     return timer;
   }, []);
