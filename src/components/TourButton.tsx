@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -15,11 +15,21 @@ function BookIcon({ size = 16, color = "currentColor" }: { size?: number; color?
   );
 }
 
+/** True when the current pathname is /dashboard exactly (not /dashboard/analytics
+ *  or /dashboard/about). Locale-prefix-aware: matches /dashboard, /ru/dashboard,
+ *  /en/dashboard, etc. */
+function useIsDashboardRoot() {
+  const pathname = usePathname();
+  if (!pathname) return false;
+  const segments = pathname.split("/").filter(Boolean);
+  return segments[segments.length - 1] === "dashboard";
+}
+
 function useOpenTour() {
   const pathname = usePathname();
   const router = useRouter();
   return () => {
-    if (pathname === "/dashboard") {
+    if (pathname && pathname.split("/").filter(Boolean).pop() === "dashboard") {
       window.dispatchEvent(new CustomEvent("mentora:open-tour"));
     } else {
       router.push("/dashboard?tour=1");
@@ -27,7 +37,7 @@ function useOpenTour() {
   };
 }
 
-/* ── One-time hint bubble pointing at the tour button ─────────────── */
+/* ── One-time hint bubble pointing at the tour button (first visit only) ─── */
 const HINT_KEY = "mentora_tour_hint_v1";
 
 function TourHintBubble({ forceDark }: { forceDark: boolean }) {
@@ -40,7 +50,6 @@ function TourHintBubble({ forceDark }: { forceDark: boolean }) {
     const timer = setTimeout(() => {
       setShow(true);
       localStorage.setItem(HINT_KEY, "1");
-      // Auto-hide after 5 seconds
       setTimeout(() => setShow(false), 5000);
     }, 2800);
 
@@ -66,33 +75,20 @@ function TourHintBubble({ forceDark }: { forceDark: boolean }) {
             userSelect: "none",
           }}
         >
-          {/* Arrow pointing up */}
           <div style={{
-            position: "absolute",
-            top: -5,
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: 10,
-            height: 5,
-            overflow: "hidden",
+            position: "absolute", top: -5, left: "50%", transform: "translateX(-50%)",
+            width: 10, height: 5, overflow: "hidden",
           }}>
             <div style={{
-              width: 8,
-              height: 8,
+              width: 8, height: 8,
               background: forceDark ? "rgba(18,18,38,0.95)" : "rgba(255,255,255,0.97)",
               border: `1px solid ${forceDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.10)"}`,
               transform: "rotate(45deg) translate(1px, 1px)",
             }} />
           </div>
-
-          {/* Bubble */}
           <div style={{
-            whiteSpace: "nowrap",
-            padding: "6px 11px",
-            borderRadius: 10,
-            fontSize: 11.5,
-            fontWeight: 600,
-            lineHeight: 1.4,
+            whiteSpace: "nowrap", padding: "6px 11px", borderRadius: 10,
+            fontSize: 11.5, fontWeight: 600, lineHeight: 1.4,
             background: forceDark ? "rgba(18,18,38,0.95)" : "rgba(255,255,255,0.97)",
             border: `1px solid ${forceDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.10)"}`,
             color: forceDark ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.55)",
@@ -110,15 +106,65 @@ function TourHintBubble({ forceDark }: { forceDark: boolean }) {
   );
 }
 
-/* ── Desktop button (injected into DashboardNav) ──────────────────── */
+/* ── Navbar tour button — only renders on /dashboard root ─────────────────
+ *  Why /dashboard only: the tour walks the user through dashboard widgets;
+ *  on other pages clicking it just teleports them to /dashboard, which is
+ *  jarring. Per-page tutorials would justify keeping the button on every
+ *  page — until then, hide it elsewhere.
+ *
+ *  Inactivity pulse: after 10s without user input, the button gets a soft
+ *  pulsing glow around its contour. Calls attention without being a
+ *  floating CTA in the corner.
+ */
+const INACTIVITY_MS = 10_000;
+
 export function TourButtonDesktop({ forceDark = false }: { forceDark?: boolean }) {
   const [hovered, setHovered] = useState(false);
+  const [pulsing, setPulsing] = useState(false);
+  const isDashboardRoot = useIsDashboardRoot();
   const openTour = useOpenTour();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Inactivity timer — start a soft pulsing glow after 10s of no input.
+  // User interaction kills the timer; the glow restarts the cycle.
+  useEffect(() => {
+    if (!isDashboardRoot) return;
+
+    const arm = () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      setPulsing(false);
+      timerRef.current = setTimeout(() => setPulsing(true), INACTIVITY_MS);
+    };
+
+    const events = ["mousemove", "touchstart", "keydown", "scroll", "click"] as const;
+    events.forEach((e) => window.addEventListener(e, arm, { passive: true }));
+    arm();
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      events.forEach((e) => window.removeEventListener(e, arm));
+    };
+  }, [isDashboardRoot]);
+
+  // Stop the pulse when the user finally interacts with the button itself
+  const handleClick = () => {
+    setPulsing(false);
+    openTour();
+  };
+
+  if (!isDashboardRoot) return null;
+
+  // Soft, slow, breathing glow — fades in/out a colored shadow around the
+  // button's border-radius. Color matches the brand accent.
+  const glowColor = "107,135,255";
+  const pulseShadow = pulsing
+    ? `0 0 0 1px rgba(${glowColor},0.30), 0 0 16px 2px rgba(${glowColor},0.45)`
+    : "none";
 
   return (
     <div style={{ position: "relative" }}>
       <button
-        onClick={openTour}
+        onClick={handleClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         title="Как пользоваться Mentora"
@@ -133,94 +179,27 @@ export function TourButtonDesktop({ forceDark = false }: { forceDark?: boolean }
           color: forceDark ? "rgba(255,255,255,0.38)" : "var(--text-muted)",
           cursor: "pointer",
           display: "flex", alignItems: "center", justifyContent: "center",
-          transition: "background 0.15s ease, color 0.15s ease, border-color 0.15s ease",
+          // Animate boxShadow for the slow soft breathing effect. Long
+          // transition + the `mentoraTourPulse` keyframes give a calm pulse
+          // that reads as "this is where help lives" rather than a panic
+          // notification.
+          boxShadow: pulseShadow,
+          transition: "background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 1.6s ease-in-out",
+          animation: pulsing ? "mentoraTourPulse 2.4s ease-in-out infinite" : "none",
           flexShrink: 0,
         }}
       >
         <BookIcon size={15} />
       </button>
-
       <TourHintBubble forceDark={forceDark} />
     </div>
   );
 }
 
-/* ── Mobile floating button (appears after 10s of inactivity) ─────── */
-const INACTIVITY_MS = 10_000;
-
+/* `TourButtonMobile` was a floating-CTA that popped up bottom-right after
+ * inactivity — removed in favor of the navbar button's pulse glow above.
+ * Kept as a no-op export so existing imports don't break across deploys
+ * (will be cleaned up once layout.tsx removes the reference). */
 export function TourButtonMobile() {
-  const [visible, setVisible] = useState(false);
-  const [pulsed, setPulsed] = useState(false);
-  const openTour = useOpenTour();
-
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
-
-    const reset = () => {
-      clearTimeout(timer);
-      setVisible(false);
-      timer = setTimeout(() => {
-        setVisible(true);
-        setPulsed(true);
-        setTimeout(() => setPulsed(false), 2000);
-      }, INACTIVITY_MS);
-    };
-
-    if (window.innerWidth >= 768) return;
-
-    const events = ["mousemove", "touchstart", "keydown", "scroll", "click"];
-    events.forEach(e => window.addEventListener(e, reset, { passive: true }));
-    reset();
-
-    return () => {
-      clearTimeout(timer);
-      events.forEach(e => window.removeEventListener(e, reset));
-    };
-  }, []);
-
-  return (
-    <AnimatePresence>
-      {visible && (
-        <motion.button
-          key="tour-float"
-          initial={{ opacity: 0, scale: 0.7, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.7, y: 20 }}
-          transition={{ type: "spring", stiffness: 300, damping: 22 }}
-          onClick={() => { setVisible(false); openTour(); }}
-          aria-label="Как пользоваться"
-          style={{
-            position: "fixed",
-            bottom: 88,
-            right: 18,
-            zIndex: 9000,
-            width: 46, height: 46,
-            borderRadius: 14,
-            border: "1px solid rgba(255,255,255,0.14)",
-            background: "rgba(12,12,28,0.88)",
-            backdropFilter: "blur(14px)",
-            WebkitBackdropFilter: "blur(14px)",
-            color: "rgba(255,255,255,0.5)",
-            boxShadow: "0 4px 24px rgba(0,0,0,0.45)",
-            cursor: "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}
-        >
-          <BookIcon size={18} />
-          {pulsed && (
-            <motion.span
-              initial={{ scale: 1, opacity: 0.6 }}
-              animate={{ scale: 2.2, opacity: 0 }}
-              transition={{ duration: 0.9 }}
-              style={{
-                position: "absolute", inset: 0, borderRadius: 14,
-                border: "2px solid rgba(107,135,255,0.5)",
-                pointerEvents: "none",
-              }}
-            />
-          )}
-        </motion.button>
-      )}
-    </AnimatePresence>
-  );
+  return null;
 }

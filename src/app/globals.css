@@ -396,3 +396,14 @@ code:not([class]) {
   50%  { transform: translateX(180%); }
   100% { transform: translateX(-100%); }
 }
+
+/* Slow breathing glow on the navbar tour button after inactivity. Calm
+   amplitude so it reads as "here's the help" rather than a panic notification. */
+@keyframes mentoraTourPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 1px rgba(107,135,255,0.22), 0 0 10px 1px rgba(107,135,255,0.28);
+  }
+  50% {
+    box-shadow: 0 0 0 1px rgba(107,135,255,0.40), 0 0 22px 4px rgba(107,135,255,0.55);
+  }
+}

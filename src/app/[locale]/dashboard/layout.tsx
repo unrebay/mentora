@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import DashboardNav from "@/components/DashboardNav";
 import OnboardingTour from "@/components/OnboardingTour";
-import { TourButtonMobile } from "@/components/TourButton";
 import ReferralProcessor from "@/components/ReferralProcessor";
 
 export const metadata: Metadata = {
@@ -74,7 +73,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
         {children}
       </div>
       <OnboardingTour />
-      <TourButtonMobile />
       <ReferralProcessor />
     </>
   );
