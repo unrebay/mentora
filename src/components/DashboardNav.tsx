@@ -189,8 +189,12 @@ export default function DashboardNav({
         {/* Right: stats + actions */}
         <div className="flex items-center gap-2">
           <TourButtonDesktop forceDark={dk} />
-          <ThemeToggle forceDark={dk} />
-          <LanguageSwitcher dark={dk} />
+          {/* Theme + language switchers are hidden on mobile — moved into the
+              burger dropdown below so the top bar reads cleaner. */}
+          <div className="hidden md:inline-flex items-center gap-2">
+            <ThemeToggle forceDark={dk} />
+            <LanguageSwitcher dark={dk} />
+          </div>
 
           {/* Avatar dropdown — replaces direct profile link */}
           <div className="hidden md:flex items-center" style={{ marginRight: 6 }}>
@@ -289,13 +293,15 @@ export default function DashboardNav({
             </button>
           </form>
 
-          {/* Burger — mobile */}
+          {/* Burger — mobile. SVG crossfade (same as LandingNav) so the
+              three bars render at integer pixel widths on every DPR. */}
           <button
             onClick={() => setOpen((o) => !o)}
             aria-label={open ? t("nav.closeMenu") : t("nav.openMenu")}
             aria-expanded={open}
-            className="md:hidden flex items-center justify-center w-8 h-8 rounded-full transition-all"
+            className="md:hidden relative flex items-center justify-center w-9 h-9 rounded-full transition-all shrink-0"
             style={{
+              color: dk ? "rgba(255,255,255,0.85)" : "var(--text)",
               background: open
                 ? (dk ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.06)")
                 : "transparent",
@@ -304,14 +310,37 @@ export default function DashboardNav({
                 : "1px solid transparent",
             }}
           >
-            <div className="relative w-[16px] h-[11px]">
-              <span className={`absolute left-0 w-full h-[1.5px] rounded-full transition-all duration-200 origin-center ${open ? "top-[4.75px] rotate-45" : "top-0"}`}
-                style={{ background: dk ? "rgba(255,255,255,0.85)" : "var(--text)" }} />
-              <span className={`absolute left-0 top-[4.75px] w-full h-[1.5px] rounded-full transition-all duration-200 ${open ? "opacity-0 scale-x-0" : ""}`}
-                style={{ background: dk ? "rgba(255,255,255,0.85)" : "var(--text)" }} />
-              <span className={`absolute left-0 w-full h-[1.5px] rounded-full transition-all duration-200 origin-center ${open ? "bottom-[4.75px] -rotate-45" : "bottom-0"}`}
-                style={{ background: dk ? "rgba(255,255,255,0.85)" : "var(--text)" }} />
-            </div>
+            {/* Burger (3 lines) */}
+            <svg
+              viewBox="0 0 24 24"
+              width="18" height="18"
+              fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
+              style={{
+                position: "absolute",
+                opacity: open ? 0 : 1,
+                transform: open ? "rotate(-90deg) scale(0.85)" : "rotate(0deg) scale(1)",
+                transition: "opacity 180ms ease, transform 220ms cubic-bezier(0.34,1.56,0.64,1)",
+              }}
+            >
+              <path d="M4 7h16" />
+              <path d="M4 12h16" />
+              <path d="M4 17h16" />
+            </svg>
+            {/* X (close) */}
+            <svg
+              viewBox="0 0 24 24"
+              width="18" height="18"
+              fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"
+              style={{
+                position: "absolute",
+                opacity: open ? 1 : 0,
+                transform: open ? "rotate(0deg) scale(1)" : "rotate(90deg) scale(0.85)",
+                transition: "opacity 180ms ease, transform 220ms cubic-bezier(0.34,1.56,0.64,1)",
+              }}
+            >
+              <path d="M6 6l12 12" />
+              <path d="M18 6L6 18" />
+            </svg>
           </button>
         </div>
       </div>{/* end top bar */}
@@ -377,8 +406,10 @@ export default function DashboardNav({
               className="border-t mt-1 pt-1"
               style={{ borderColor: dk ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)" }}
             >
-              {/* Language switcher in mobile */}
-              <div className="px-3 py-2">
+              {/* Theme + language switchers — both moved here from the top bar.
+                  Inline on one row to keep the menu compact. */}
+              <div className="px-3 py-2 flex items-center gap-3">
+                <ThemeToggle forceDark={dk} />
                 <LanguageSwitcher dark={dk} />
               </div>
               <form action={logoutAction}>

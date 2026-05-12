@@ -2,6 +2,7 @@
 import MeLogo from "@/components/MeLogo";
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "@/i18n/navigation";
 import { motion } from "framer-motion";
 import AddSubjectModal from "@/components/AddSubjectModal";
 import SubjectSuggestionModal from "@/components/SubjectSuggestionModal";
@@ -60,6 +61,7 @@ interface Props {
 export default function SubjectLibrarySection({ userSubjects, existingSubjectIds, userId, progressEntries }: Props) {
   const t = useTranslations("subjectsSection");
   const locale = useLocale();
+  const router = useRouter();
   const [addOpen, setAddOpen] = useState(false);
   const [suggestOpen, setSuggestOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(
@@ -190,7 +192,13 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                       ? `0 0 0 2px white, 0 8px 32px ${color}50`
                       : `0 4px 20px ${color}30`,
                   }}
-                  onClick={() => setSelectedId(id => id === subject.id ? null : subject.id)}
+                  onClick={() => {
+                    if (selectedId === subject.id) {
+                      router.push(`/learn/${subject.id}` as never);
+                    } else {
+                      setSelectedId(subject.id);
+                    }
+                  }}
                 >
                   {/* Depth overlay */}
                   <div className="absolute inset-0 pointer-events-none"
@@ -283,7 +291,13 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                   borderColor: isSelected ? color : "var(--border)",
                   boxShadow: isSelected ? `0 0 0 1px ${color}, 0 4px 20px ${color}25` : "none",
                 }}
-                onClick={() => setSelectedId(id => id === subject.id ? null : subject.id)}
+                onClick={() => {
+                  if (selectedId === subject.id) {
+                    router.push(`/learn/${subject.id}` as never);
+                  } else {
+                    setSelectedId(subject.id);
+                  }
+                }}
               >
                 {/* Subject-color top accent */}
                 <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl"
@@ -361,10 +375,12 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
         >
         <button
           onClick={() => setAddOpen(true)}
-          className="relative w-full rounded-2xl border-dashed border-2 flex flex-col items-center justify-center p-5 gap-3 transition-all duration-200 group overflow-hidden"
+          className="relative w-full h-full rounded-2xl border-dashed border-2 flex flex-col items-center justify-center p-5 gap-3 transition-all duration-200 group overflow-hidden"
           style={{
-            aspectRatio: "1 / 1",
-            minHeight: 200,
+            /* Match the size of regular subject cards in the same row — no
+               forced 1:1 aspect ratio. h-full lets the grid stretch the card
+               to the row height (which is set by the tallest neighbour). */
+            minHeight: 240,
             background: "linear-gradient(135deg, rgba(69,97,232,0.04) 0%, rgba(124,58,237,0.03) 100%), var(--bg-card)",
             borderColor: "var(--border)",
             boxShadow: "0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)",
