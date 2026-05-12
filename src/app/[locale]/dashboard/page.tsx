@@ -170,7 +170,7 @@ export default async function DashboardPage() {
   const daysLeft = 7 - currentStreak;
 
   return (
-    <main className="min-h-screen text-[var(--text)]" style={{ background: "var(--bg)" }}>
+    <main className="text-[var(--text)]" style={{ background: "var(--bg)" }}>
       {/* Dark theme: 3D sphere blobs */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden dark:block hidden">
         <SphereBlobScene spheres={SUBTLE_SPHERES} intensity={0.5} />
@@ -228,7 +228,7 @@ export default async function DashboardPage() {
       <StreakRewardCelebration />
       <PostHogIdentify userId={user.id} email={user.email ?? ""} />
       <Suspense fallback={null}><PaymentSuccessTracker /></Suspense>
-      <div className="max-w-5xl mx-auto px-5 sm:px-6 pt-6 pb-2 sm:pt-10 sm:pb-10">
+      <div className="max-w-5xl mx-auto px-5 sm:px-6 pt-6 pb-0 sm:pt-10 sm:pb-10">
 
         {/* ── Pro activation banner (payment=success in URL) ────────── */}
         <ProActivationBanner plan={profile?.plan ?? "free"} />
