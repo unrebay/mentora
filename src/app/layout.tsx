@@ -109,27 +109,38 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  // Always dark — hero pages (/, /knowledge, /dashboard) are dark; status bar
-  // looks consistent across themes and on light pages it's a thin dark accent
-  themeColor: "#050a14",
+  // Theme-color resolves to user's selected theme via media-query meta tags
+  // in <head>. This here is the default for clients that ignore the media variants.
+  themeColor: "#f8f9fb",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru" suppressHydrationWarning>
       <head>
-        {/* Prevent flash of wrong theme */}
+        {/* Prevent flash of wrong theme + sync iOS Safari chrome (status bar +
+            bottom toolbar) to the active theme so there's no opaque dark band
+            on light pages or vice-versa. */}
         <script dangerouslySetInnerHTML={{ __html: `
           try {
             var m = localStorage.getItem('mentora-theme');
             var sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            // mode can be 'light' | 'dark' | 'system' (or null/legacy → treat as system)
             var effective = (m === 'light' || m === 'dark') ? m : (sysDark ? 'dark' : 'light');
             if (effective === 'dark') document.documentElement.classList.add('dark');
+            // Sync iOS theme-color meta to active theme so Safari chrome matches
+            // the page bg (instead of always painting the dark accent).
+            var tc = effective === 'dark' ? '#050a14' : '#f8f9fb';
+            var meta = document.querySelector('meta[name="theme-color"]:not([media])');
+            if (meta) meta.setAttribute('content', tc);
           } catch(e){}
         ` }} />
         <meta name="yandex-verification" content="673fbfbebc45f7aa" />
-        <meta name="theme-color" content="#050a14" />
+        {/* Two media-variant metas — iOS picks the matching one. Plus a third
+            no-media meta that the inline script above overrides to the active
+            user theme (covers light-mode-system-but-user-picked-dark case). */}
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8f9fb" />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#050a14" />
+        <meta name="theme-color" content="#f8f9fb" />
         <meta name="msapplication-TileColor" content="#4561E8" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
         {/* PWA */}

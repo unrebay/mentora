@@ -36,6 +36,13 @@ function readStoredMode(): ThemeMode {
 
 function applyTheme(t: Theme) {
   document.documentElement.classList.toggle("dark", t === "dark");
+  // Keep iOS Safari chrome (status bar + bottom toolbar) in sync with the active
+  // theme — otherwise a dark theme-color paints a visible dark band on light pages.
+  if (typeof document !== "undefined") {
+    const tc = t === "dark" ? "#050a14" : "#f8f9fb";
+    const metas = document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]:not([media])');
+    metas.forEach((m) => m.setAttribute("content", tc));
+  }
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {

@@ -631,7 +631,7 @@ export default async function DashboardPage() {
 
         {/* ── Support ──────────────────────────────────────── */}
         <FadeUp delay={0.15} fade>
-        <div className="mt-4 mb-2 sm:mt-6 sm:mb-6 flex flex-col items-center gap-2 text-center">
+        <div className="mt-4 mb-8 sm:mt-6 sm:mb-12 flex flex-col items-center gap-2 text-center">
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>{t("needHelp")}</p>
           <div className="flex gap-2 flex-wrap justify-center items-start">
             <TelegramSupportButton size="sm" label={t("support")} />
