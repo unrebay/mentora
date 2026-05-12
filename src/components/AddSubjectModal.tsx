@@ -34,10 +34,9 @@ export default function AddSubjectModal({ open, onClose, existingSubjectIds }: P
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
-      onClick={(e) => 
-      <BodyScrollLock />
-      { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
+      <BodyScrollLock />
       <div
         className="w-full max-w-2xl rounded-2xl border shadow-xl overflow-hidden"
         style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
