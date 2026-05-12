@@ -150,7 +150,11 @@
   /* Career ladder mobile compaction — names are smaller, reward chips hidden
      because they duplicate the info in the «до следующего уровня» card. */
   @media (max-width: 767px) {
-    .career-ladder-label { width: 48px !important; margin-left: -16px !important; }
+    /* Tighter horizontal padding on mobile so 8 labels fit without overflow */
+    .career-ladder-track { padding-left: 18px !important; padding-right: 18px !important; }
+    /* Labels are truly centered via left:50% + translateX(-50%) (inline style).
+       On mobile we shrink width to avoid neighbor collision. NO margin-left here. */
+    .career-ladder-label { width: 44px !important; }
     .career-ladder-name  { font-size: 8px; }
     .career-ladder-xp    { font-size: 7px; }
     .career-ladder-reward { display: none !important; }

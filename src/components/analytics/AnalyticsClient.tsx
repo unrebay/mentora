@@ -161,19 +161,20 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
           <MeLogo height={14} />
         </span>
       </div>
-      <div className="relative" style={{ paddingTop: 4, paddingBottom: 56 }}>
-        {/* Background line */}
-        <div className="absolute left-2 right-2 top-1/2 -translate-y-1/2 h-[2px] rounded-full"
-          style={{ background: "var(--border)" }} />
-        {/* Progress fill */}
-        <div className="absolute left-2 top-1/2 -translate-y-1/2 h-[2px] rounded-full transition-all duration-700"
-          style={{
-            width: `calc(${(currentIdx + segProgress / 100) / (levels.length - 1) * 100}% - 16px)`,
-            background: "linear-gradient(90deg, #4561E8, #7C3AED, #FF7A00)",
-            boxShadow: "0 0 8px rgba(124,58,237,0.6)",
-          }} />
-        {/* Nodes */}
+      <div className="relative career-ladder-track" style={{ paddingTop: 4, paddingBottom: 56, paddingLeft: 22, paddingRight: 22 }}>
+        {/* Nodes — line is rendered INSIDE this row so it centers on the dot axis, not on the (padded) container midpoint */}
         <div className="relative flex justify-between items-center">
+          {/* Background line (centered on dot row via items-center) */}
+          <div className="absolute left-0 right-0 h-[2px] rounded-full pointer-events-none"
+            style={{ top: "50%", transform: "translateY(-50%)", background: "var(--border)" }} />
+          {/* Progress fill */}
+          <div className="absolute left-0 h-[2px] rounded-full pointer-events-none transition-all duration-700"
+            style={{
+              top: "50%", transform: "translateY(-50%)",
+              width: `${(currentIdx + segProgress / 100) / (levels.length - 1) * 100}%`,
+              background: "linear-gradient(90deg, #4561E8, #7C3AED, #FF7A00)",
+              boxShadow: "0 0 8px rgba(124,58,237,0.6)",
+            }} />
           {levels.map((lvl, i) => {
             const passed = i < currentIdx;
             const current = i === currentIdx;
@@ -210,7 +211,7 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                   ) : null}
                 </div>
-                <div className="absolute top-full mt-2 text-center flex flex-col items-center career-ladder-label" style={{ width: 60, marginLeft: -21 }}>
+                <div className="absolute top-full mt-2 text-center flex flex-col items-center career-ladder-label" style={{ width: 60, left: "50%", transform: "translateX(-50%)" }}>
                   <div className="font-bold leading-tight career-ladder-name" style={{
                     color: current ? "var(--text)" : passed ? "var(--text-muted)" : "var(--text-muted)",
                     opacity: current ? 1 : passed ? 0.85 : 0.55,
