@@ -85,9 +85,9 @@ function Sparkline({ data, color, height = 28 }: { data: number[]; color: string
 }
 
 // ── KPI card with sparkline ──────────────────────────────────────────────────
-function StatCard({ label, value, color, icon, iconNode, sparkData, deltaPct }: {
+function StatCard({ label, value, color, icon, iconNode, sparkData, deltaPct, deltaLabel }: {
   label: string; value: string | number; color: string; icon?: string; iconNode?: React.ReactNode;
-  sparkData?: number[]; deltaPct?: number | null;
+  sparkData?: number[]; deltaPct?: number | null; deltaLabel?: string;
 }) {
   return (
     <div className="rounded-2xl p-4 border flex flex-col gap-2 relative overflow-hidden group transition-all hover:-translate-y-0.5"
@@ -114,13 +114,18 @@ function StatCard({ label, value, color, icon, iconNode, sparkData, deltaPct }: 
           {iconNode ?? (icon && <svg viewBox="0 0 24 24" width="18" height="18" fill={color}><path d={icon} /></svg>)}
         </div>
         {deltaPct !== undefined && deltaPct !== null && (
-          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
-            style={{
-              color: deltaPct >= 0 ? "#10B981" : "#ef4444",
-              background: deltaPct >= 0 ? "rgba(16,185,129,0.10)" : "rgba(239,68,68,0.10)",
-            }}>
-            {deltaPct >= 0 ? "+" : ""}{deltaPct.toFixed(0)}%
-          </span>
+          <div className="flex flex-col items-end gap-0.5">
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded leading-none"
+              style={{
+                color: deltaPct >= 0 ? "#10B981" : "#ef4444",
+                background: deltaPct >= 0 ? "rgba(16,185,129,0.10)" : "rgba(239,68,68,0.10)",
+              }}>
+              {deltaPct >= 0 ? "+" : ""}{deltaPct.toFixed(0)}%
+            </span>
+            <span className="text-[9px] leading-none whitespace-nowrap" style={{ color: "var(--text-muted)", opacity: 0.75 }}>
+              {deltaLabel ?? "vs пред. неделя"}
+            </span>
+          </div>
         )}
       </div>
       <div className="font-black text-2xl leading-tight relative" style={{ color: "var(--text)" }}>{value}</div>
@@ -146,7 +151,7 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
     : 100;
 
   return (
-    <div className="rounded-2xl p-5 border relative overflow-hidden" style={{ background: "linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01) 60%, transparent), var(--bg-card)", borderColor: "rgba(255,255,255,0.10)", backdropFilter: "blur(16px) saturate(1.3)", WebkitBackdropFilter: "blur(16px) saturate(1.3)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 20px rgba(0,0,0,0.06)" }}>
+    <div className="rounded-2xl p-5 border relative overflow-hidden" style={{ background: "linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01) 60%, transparent), var(--bg-card)", borderColor: "rgba(255,255,255,0.10)", backdropFilter: "blur(16px) saturate(1.3)", WebkitBackdropFilter: "blur(16px) saturate(1.3)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 1px 0 rgba(0,0,0,0.04), 0 14px 40px -8px rgba(69,97,232,0.18), 0 22px 60px -12px rgba(0,0,0,0.18)" }}>
       <div className="flex items-center justify-between mb-4 relative">
         <span className="text-xs font-bold tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>
           {t("level.career")}
@@ -205,14 +210,14 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                   ) : null}
                 </div>
-                <div className="absolute top-full mt-2 text-center flex flex-col items-center" style={{ width: 72, marginLeft: -27 }}>
-                  <div className="text-[9px] font-bold leading-tight" style={{
+                <div className="absolute top-full mt-2 text-center flex flex-col items-center career-ladder-label" style={{ width: 60, marginLeft: -21 }}>
+                  <div className="font-bold leading-tight career-ladder-name" style={{
                     color: current ? "var(--text)" : passed ? "var(--text-muted)" : "var(--text-muted)",
                     opacity: current ? 1 : passed ? 0.85 : 0.55,
                   }}>
                     {lvl.name}
                   </div>
-                  <div className="text-[8px] flex items-center justify-center gap-0.5 mt-0.5" style={{ color: "var(--text-muted)", opacity: 0.7 }}>
+                  <div className="text-[8px] flex items-center justify-center gap-0.5 mt-0.5 career-ladder-xp" style={{ color: "var(--text-muted)", opacity: 0.7 }}>
                     {lvl.minXP >= 1000 ? `${lvl.minXP / 1000}k` : lvl.minXP}
                     <MeLogo height={7} />
                   </div>
@@ -222,7 +227,7 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
                     const isUltima = r.plan === "ultima";
                     const c = isUltima ? "#F5B400" : "#4561E8";
                     return (
-                      <div className="text-[8px] font-bold mt-1 px-1.5 py-0.5 rounded inline-block" style={{
+                      <div className="text-[8px] font-bold mt-1 px-1.5 py-0.5 rounded inline-block career-ladder-reward" style={{
                         color: c,
                         background: isUltima ? "rgba(245,158,11,0.10)" : "rgba(69,97,232,0.10)",
                         border: `1px solid ${isUltima ? "rgba(245,158,11,0.30)" : "rgba(69,97,232,0.25)"}`,
@@ -247,7 +252,7 @@ function CareerLadder({ levels, totalXP, currentKey }: { levels: CareerLevel[]; 
             border: "1px solid rgba(124,58,237,0.25)",
             backdropFilter: "blur(14px) saturate(1.4)",
             WebkitBackdropFilter: "blur(14px) saturate(1.4)",
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), 0 8px 28px rgba(124,58,237,0.10)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.14), 0 1px 0 rgba(0,0,0,0.05), 0 16px 42px -8px rgba(124,58,237,0.30), 0 28px 80px -16px rgba(124,58,237,0.18)",
           }}>
           {/* Soft halo */}
           <div className="absolute pointer-events-none" aria-hidden

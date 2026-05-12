@@ -147,6 +147,15 @@
   button, a, label, [role="button"], .key {
     touch-action: manipulation;
   }
+  /* Career ladder mobile compaction — names are smaller, reward chips hidden
+     because they duplicate the info in the «до следующего уровня» card. */
+  @media (max-width: 767px) {
+    .career-ladder-label { width: 48px !important; margin-left: -16px !important; }
+    .career-ladder-name  { font-size: 8px; }
+    .career-ladder-xp    { font-size: 7px; }
+    .career-ladder-reward { display: none !important; }
+  }
+
 
 
   /* All direct page wrappers should never exceed viewport */

@@ -366,7 +366,7 @@ export default async function DashboardPage() {
           <LaunchBanner />
 
           {/* Stats pills */}
-          <div className="flex flex-wrap gap-2 items-center">
+          <div data-tour="stats-chips" className="flex flex-wrap gap-2 items-center">
             {!isPro && (
               <div className="flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm border"
                 style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>

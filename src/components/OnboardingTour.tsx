@@ -68,7 +68,8 @@ const STEPS: Step[] = [
     tip: "Можно переспрашивать сколько угодно",
   },
   {
-    targetSelector: "[data-tour='nav-stats']",
+    // Try desktop selector first; fall back to the mobile pill cluster on the dashboard hero.
+    targetSelector: "[data-tour='nav-stats'], [data-tour='stats-chips']",
     cardSide: "bottom",
     icon: "flame",
     tag: "Прогресс",
@@ -100,16 +101,22 @@ interface SpotRect { x: number; y: number; w: number; h: number }
 function clamp(v: number, lo: number, hi: number) { return Math.max(lo, Math.min(hi, v)); }
 
 function querySpot(selector: string): SpotRect | null {
-  const el = document.querySelector(selector);
-  if (!el) return null;
-  const r = el.getBoundingClientRect();
-  if (r.width === 0 || r.height === 0) return null;
-  return {
-    x: r.left - SPOT_PAD,
-    y: r.top  - SPOT_PAD,
-    w: r.width  + SPOT_PAD * 2,
-    h: r.height + SPOT_PAD * 2,
-  };
+  // Selector may be a comma-separated fallback list (e.g. "[data-tour='a'], [data-tour='b']").
+  // querySelectorAll returns matches in document order; pick the first one that is
+  // both in the DOM AND has non-zero rendered size (so display:none branches
+  // don't win the lookup).
+  const els = document.querySelectorAll(selector);
+  for (const el of Array.from(els)) {
+    const r = (el as HTMLElement).getBoundingClientRect();
+    if (r.width === 0 || r.height === 0) continue;
+    return {
+      x: r.left - SPOT_PAD,
+      y: r.top  - SPOT_PAD,
+      w: r.width  + SPOT_PAD * 2,
+      h: r.height + SPOT_PAD * 2,
+    };
+  }
+  return null;
 }
 
 function cardPos(
@@ -297,7 +304,13 @@ export default function OnboardingTour() {
       return;
     }
 
-    const el = document.querySelector(s.targetSelector) as HTMLElement | null;
+    // Pick the first visible element matching the selector (selector may be a
+    // comma-separated fallback list — see querySpot for details).
+    let el: HTMLElement | null = null;
+    for (const candidate of Array.from(document.querySelectorAll(s.targetSelector))) {
+      const r = (candidate as HTMLElement).getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) { el = candidate as HTMLElement; break; }
+    }
     if (!el) {
       setSpot(null);
       setPos(cardPos(null, "center", stepIdx, vw, vh, mobile));
@@ -310,9 +323,9 @@ export default function OnboardingTour() {
     const rect = el.getBoundingClientRect();
     let scrollOffset: number;
     if (mobile) {
-      // For "top"-side cards, scroll the target into the LOWER half so the
-      // card has room above. Otherwise put the target into the upper third.
-      scrollOffset = s.cardSide === "top" ? vh * 0.6 : vh * 0.18;
+      // For "top"-side cards, scroll the target into the LOWER part so the
+      // card has clear room above. Otherwise put the target into the upper third.
+      scrollOffset = s.cardSide === "top" ? vh * 0.72 : vh * 0.16;
     } else {
       scrollOffset = 130;
     }
