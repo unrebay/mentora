@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/server";
 import DashboardNav from "@/components/DashboardNav";
@@ -10,6 +10,12 @@ export const metadata: Metadata = {
   title: "Галактика знаний",
   description: "Интерактивная карта всех предметов Mentora. Наведи на звезду чтобы увидеть темы.",
   robots: { index: false, follow: false },
+};
+
+// Override the global theme-color so iOS Safari paints the top status-bar area
+// dark to match the galaxy (otherwise it shows the body-light colour).
+export const viewport: Viewport = {
+  themeColor: "#06060f",
 };
 
 const KnowledgeGraph = dynamic(() => import("@/components/KnowledgeGraph3D"), { ssr: false });
@@ -49,7 +55,11 @@ export default async function KnowledgePage() {
   }
 
   return (
-    <div className="flex flex-col bg-[#06060f] text-white" style={{ height: "100dvh", overflow: "hidden" }}>
+    <>
+      {/* Dark plate fills the viewport AND extends behind the iOS safe-area so any
+          rubber-band / overscroll reveals galaxy-dark, not the body's light bg. */}
+      <div aria-hidden className="fixed inset-0 z-[-1]" style={{ background: "#06060f" }} />
+    <div className="fixed inset-0 flex flex-col bg-[#06060f] text-white" style={{ overflow: "hidden", overscrollBehavior: "none" }}>
       <BodyScrollLock />
       {/* Nav */}
       {/* Nav: full DashboardNav for logged-in users, simple LandingNav for guests */}
@@ -89,5 +99,6 @@ export default async function KnowledgePage() {
         <KnowledgeGraph className="absolute inset-0 w-full h-full z-10" userProgress={userProgress} />
       </div>
     </div>
+    </>
   );
 }

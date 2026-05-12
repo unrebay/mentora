@@ -546,13 +546,14 @@ function GalaxyOfKnowledge({ subjects }: { subjects: SubjectStat[] }) {
           {t("active", { n: subjects.length })}
         </span>
       </div>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 8, minHeight: MAX_H + 64 }}>
+      {/* DESKTOP: vertical bars (existing). HIDDEN on mobile via md: breakpoint */}
+      <div className="hidden md:flex" style={{ alignItems: "flex-end", gap: 8, minHeight: MAX_H + 64 }}>
         {subjects.map(s => {
           const color = subjectColor(s.id);
           const barH = mounted ? Math.max(14, Math.round((s.xp / maxXP) * MAX_H)) : 0;
           return (
             <Link key={s.id} href={`/learn/${s.id}`}
-              style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, textDecoration: "none" }}>
+              style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, textDecoration: "none" }}>
               <span style={{
                 fontSize: 10, fontWeight: 700, color,
                 opacity: mounted ? 1 : 0, transition: "opacity 0.5s ease 0.4s",
@@ -592,6 +593,49 @@ function GalaxyOfKnowledge({ subjects }: { subjects: SubjectStat[] }) {
               }}>
                 {s.title.split(" ")[0]}
               </span>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* MOBILE: horizontal-row list — icon + name on left, progress fill + Me count on right */}
+      <div className="flex md:hidden flex-col gap-2">
+        {subjects.map(s => {
+          const color = subjectColor(s.id);
+          const fillPct = Math.round((s.xp / maxXP) * 100);
+          return (
+            <Link key={s.id} href={`/learn/${s.id}`}
+              className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-colors active:opacity-80"
+              style={{ textDecoration: "none", background: `${color}0D`, border: `1px solid ${color}26` }}>
+              <SubjectIcon id={s.id} size={26} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  fontSize: 11, fontWeight: 700, color: "var(--text)",
+                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 4,
+                }}>
+                  {s.title.split(" ")[0]}
+                </div>
+                <div style={{
+                  height: 6, width: "100%", borderRadius: 999,
+                  background: "rgba(255,255,255,0.06)", overflow: "hidden",
+                  border: `1px solid ${color}33`,
+                }}>
+                  <div style={{
+                    height: "100%", width: mounted ? `${fillPct}%` : "0%",
+                    background: `linear-gradient(90deg, ${color}, ${color}AA)`,
+                    boxShadow: `0 0 10px ${color}55`,
+                    transition: "width 1s cubic-bezier(0.34,1.15,0.64,1)",
+                  }} />
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", flexShrink: 0 }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color, display: "flex", alignItems: "center", gap: 2 }}>
+                  {s.xp}<MeLogo height={9} />
+                </span>
+                <span style={{ fontSize: 8, fontWeight: 600, color: "var(--text-muted)", marginTop: 1 }}>
+                  {s.level.name}
+                </span>
+              </div>
             </Link>
           );
         })}
