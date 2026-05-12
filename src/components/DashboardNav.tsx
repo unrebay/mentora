@@ -198,7 +198,7 @@ export default function DashboardNav({
           </div>
 
           {/* Avatar dropdown — replaces direct profile link */}
-          <div className="hidden md:flex items-center" style={{ marginRight: 6 }}>
+          <div className="hidden md:flex items-center">
             <UserDropdown
               totalXP={totalXP}
               currentStreak={currentStreak}

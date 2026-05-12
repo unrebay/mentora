@@ -101,7 +101,7 @@ export default function UserDropdown({
         aria-label="Открыть меню профиля"
         aria-expanded={open}
         style={{
-          width: 36, height: 36, borderRadius: "50%",
+          width: 30, height: 30, borderRadius: "50%",
           display: "inline-flex", alignItems: "center", justifyContent: "center",
           border: open ? "1.5px solid rgba(124,58,237,0.55)" : "1px solid var(--border)",
           background: "var(--bg-secondary)", overflow: "hidden", cursor: "pointer",
@@ -117,7 +117,7 @@ export default function UserDropdown({
           transition: "all .15s",
         }}
       >
-        <LevelAvatar level={lvl} size={36} />
+        <LevelAvatar level={lvl} size={30} />
       </button>
 
       {/* Dropdown panel */}
