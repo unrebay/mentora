@@ -32,7 +32,7 @@ export default function BuyProButton({ isLoggedIn, isPro, isUltima = false, plan
   if (isUltimaPlan && isUltima) {
     const cls = "block text-center py-2.5 px-5 bg-emerald-800/60 text-emerald-300 font-semibold rounded-xl border border-emerald-700/50 text-sm transition-colors hover:bg-emerald-700/70";
     return manageHref ? (
-      <Link href={manageHref} className={cls}>{t("ultraActive")} →</Link>
+      <Link href={manageHref} className={cls}>{t("ultraActive")}</Link>
     ) : (
       <div className={cls}>{t("ultraActive")}</div>
     );
@@ -40,7 +40,7 @@ export default function BuyProButton({ isLoggedIn, isPro, isUltima = false, plan
   if (!isUltimaPlan && isPro) {
     const cls = "block text-center py-2.5 px-5 bg-green-50 text-green-700 font-semibold rounded-xl border-2 border-green-200 text-sm transition-colors hover:bg-green-100";
     return manageHref ? (
-      <Link href={manageHref} className={cls}>{t("proActive")} →</Link>
+      <Link href={manageHref} className={cls}>{t("proActive")}</Link>
     ) : (
       <div className={cls}>{t("proActive")}</div>
     );

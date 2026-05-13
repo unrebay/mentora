@@ -404,12 +404,12 @@ export default async function PricingPage() {
                       color: "#F5B400",
                       border: "1px solid rgba(245,180,0,0.40)",
                     }}>
-                    {locale === "en" ? "Included with Ultra" : "Входит в Ultra"} →
+                    {locale === "en" ? "Included with Ultra" : "Входит в Ultra"}
                   </Link>
                 ) : isPro ? (
                   // Pro user viewing Pro card — single active badge (not two)
                   <Link href="/pricing#subscription" className="block text-center py-2.5 px-5 bg-green-50 text-green-700 font-semibold rounded-xl border-2 border-green-200 text-sm hover:bg-green-100 transition-colors">
-                    {locale === "en" ? "Subscription active" : "Подписка активна"} →
+                    {locale === "en" ? "Subscription active" : "Подписка активна"}
                   </Link>
                 ) : (
                   <>
@@ -478,7 +478,7 @@ export default async function PricingPage() {
                 {isUltima ? (
                   // Ultra user — single active badge (not two)
                   <Link href="/pricing#subscription" className="block text-center py-2.5 px-5 bg-emerald-800/60 text-emerald-300 font-semibold rounded-xl border border-emerald-700/50 text-sm hover:bg-emerald-700/70 transition-colors">
-                    {locale === "en" ? "Ultra active" : "Ultra активна"} →
+                    {locale === "en" ? "Ultra active" : "Ultra активна"}
                   </Link>
                 ) : (
                   <>
@@ -524,7 +524,7 @@ export default async function PricingPage() {
                     <path d="M6 0.5L7.1 4.1L10.5 2.5L8.9 5.9L12.5 6L8.9 6.1L10.5 9.5L7.1 7.9L6 11.5L4.9 7.9L1.5 9.5L3.1 6.1L-0.5 6L3.1 5.9L1.5 2.5L4.9 4.1Z"
                       fill="currentColor" />
                   </svg>
-                  Отмечено «скоро» — функции в активной разработке, появятся в ближайшие месяцы.
+                  «скоро» — функции в активной разработке, появятся в ближайшие месяцы.
                 </p>
               )}
             </div>
