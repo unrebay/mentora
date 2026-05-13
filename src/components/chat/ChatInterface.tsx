@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { MessageRole } from "@/lib/types";
 import ChatParticles from "@/components/ChatParticles";
+import BodyScrollLock from "@/components/BodyScrollLock";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
 import MeLogo from "@/components/MeLogo";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
@@ -534,7 +535,8 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const [showHelp, setShowHelp] = useState(false);
 
   return (
-    <div className="flex flex-col" style={{ height:"100dvh", background:"var(--chat-bg)", position:"relative" }}>
+    <div className="flex flex-col" style={{ position:"fixed", inset:0, background:"var(--chat-bg)", overflow:"hidden", overscrollBehavior:"none" }}>
+      <BodyScrollLock />
 
       {/* ── Header ── 3 separate floating glass elements ────────────────── */}
       <header
