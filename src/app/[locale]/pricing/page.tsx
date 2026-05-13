@@ -3,7 +3,7 @@ import { Link } from "@/i18n/navigation";
 import LandingNav from "@/components/LandingNav";
 import DashboardNav from "@/components/DashboardNav";
 import BuyProButton from "@/components/BuyProButton";
-import ManageSubscription, { type PaymentItem } from "@/components/ManageSubscription";
+import { ActivePlanSection, PaymentInfoSection, type PaymentItem } from "@/components/ManageSubscription";
 import PricingFAQ from "@/components/PricingFAQ";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
 import { createServerClient } from "@supabase/ssr";
@@ -214,18 +214,22 @@ export default async function PricingPage() {
         )}
       </section>
 
-      {/* ── Current subscription card — ONLY for logged-in users ──
-          Lives at the top of /pricing so the manage view shows the
-          active plan + management actions first, before the upgrade/compare cards. */}
+      {/* ── Top: Active plan summary only. Tariff cards + promo come next,
+          payment info (method / history / cancel) is below the promo banner. */}
       {isLoggedIn && (
         <section id="subscription" className="relative z-10 max-w-5xl mx-auto px-6 pb-6 scroll-mt-24">
           <h2 className="text-xs font-bold tracking-[0.18em] uppercase mb-3 flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
+            {/* Non-money icon: subscription = personal badge / membership crown */}
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 7h18M5 7v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              <path d="M3 9l3.5-6h11L21 9l-9 12L3 9z" />
+              <path d="M3 9h18" />
+              <path d="M8 9l4 12 4-12" />
+              <path d="M8 9l3.5-6" />
+              <path d="M16 9l-3.5-6" />
             </svg>
             {locale === "en" ? "Subscription" : "Подписка"}
           </h2>
-          <ManageSubscription
+          <ActivePlanSection
             locale={(locale === "en" ? "en" : "ru") as "en" | "ru"}
             isPro={isPro}
             isUltima={isUltima}
@@ -235,50 +239,6 @@ export default async function PricingPage() {
             cardLast4={null}
             payments={payments}
           />
-        </section>
-      )}
-
-      {/* PROMO BANNER — Russian only */}
-      {locale === "ru" && (
-        <section className="relative z-10 max-w-5xl mx-auto px-6 pb-6">
-          <div className="relative overflow-hidden rounded-2xl px-5 py-4 flex flex-wrap items-center gap-3"
-            style={isLoggedIn ? {
-              background: "linear-gradient(135deg, rgba(69,97,232,0.10) 0%, rgba(159,122,255,0.06) 100%), var(--bg-card)",
-              border: "1px solid rgba(107,143,255,0.30)",
-            } : {
-              background: "linear-gradient(135deg, rgba(69,97,232,0.18) 0%, rgba(159,122,255,0.12) 100%)",
-              border: "1px solid rgba(107,143,255,0.2)",
-              backdropFilter: "blur(12px)",
-            }}>
-            <div className="absolute -top-6 left-8 w-32 h-16 rounded-full pointer-events-none"
-              style={{ background: "rgba(69,97,232,0.18)", filter: "blur(24px)" }} />
-            <div className="relative z-10 flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background: "rgba(245,158,11,0.15)" }}>
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-                <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#f59e0b" />
-              </svg>
-            </div>
-            <div className="relative z-10 flex-1 min-w-0">
-              <span className="font-bold text-sm" style={{ color: isLoggedIn ? "var(--text)" : "#fff" }}>Только до 1 июня —</span>{" "}
-              <span className="text-sm" style={{ color: isLoggedIn ? "var(--text-secondary)" : "rgba(255,255,255,0.55)" }}>
-                при покупке годового плана <strong style={{ color: isLoggedIn ? "#4561E8" : "#9BB4FF" }}>+3 месяца в подарок</strong>.
-                Платишь за 12 месяцев — пользуешься 15.
-              </span>
-            </div>
-            <div className="relative z-10 flex-shrink-0">
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg"
-                style={isLoggedIn
-                  ? { background: "rgba(69,97,232,0.10)", border: "1px solid rgba(69,97,232,0.30)", color: "#4561E8" }
-                  : { background: "rgba(107,143,255,0.2)", border: "1px solid rgba(107,143,255,0.3)", color: "#9BB4FF" }
-                }>
-                <svg viewBox="0 0 12 12" width="9" height="9" fill="currentColor">
-                  <circle cx="6" cy="6" r="2.5" />
-                  <circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5" />
-                </svg>
-                Успей до 1 июня
-              </span>
-            </div>
-          </div>
         </section>
       )}
 
@@ -642,6 +602,74 @@ export default async function PricingPage() {
 
       </section>
 
+      {/* PROMO BANNER — Russian only */}
+      {locale === "ru" && (
+        <section className="relative z-10 max-w-5xl mx-auto px-6 pb-6">
+          <div className="relative overflow-hidden rounded-2xl px-5 py-4 flex flex-wrap items-center gap-3"
+            style={isLoggedIn ? {
+              background: "linear-gradient(135deg, rgba(69,97,232,0.10) 0%, rgba(159,122,255,0.06) 100%), var(--bg-card)",
+              border: "1px solid rgba(107,143,255,0.30)",
+            } : {
+              background: "linear-gradient(135deg, rgba(69,97,232,0.18) 0%, rgba(159,122,255,0.12) 100%)",
+              border: "1px solid rgba(107,143,255,0.2)",
+              backdropFilter: "blur(12px)",
+            }}>
+            <div className="absolute -top-6 left-8 w-32 h-16 rounded-full pointer-events-none"
+              style={{ background: "rgba(69,97,232,0.18)", filter: "blur(24px)" }} />
+            <div className="relative z-10 flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{ background: "rgba(245,158,11,0.15)" }}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#f59e0b" />
+              </svg>
+            </div>
+            <div className="relative z-10 flex-1 min-w-0">
+              <span className="font-bold text-sm" style={{ color: isLoggedIn ? "var(--text)" : "#fff" }}>Только до 1 июня —</span>{" "}
+              <span className="text-sm" style={{ color: isLoggedIn ? "var(--text-secondary)" : "rgba(255,255,255,0.55)" }}>
+                при покупке годового плана <strong style={{ color: isLoggedIn ? "#4561E8" : "#9BB4FF" }}>+3 месяца в подарок</strong>.
+                Платишь за 12 месяцев — пользуешься 15.
+              </span>
+            </div>
+            <div className="relative z-10 flex-shrink-0">
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg"
+                style={isLoggedIn
+                  ? { background: "rgba(69,97,232,0.10)", border: "1px solid rgba(69,97,232,0.30)", color: "#4561E8" }
+                  : { background: "rgba(107,143,255,0.2)", border: "1px solid rgba(107,143,255,0.3)", color: "#9BB4FF" }
+                }>
+                <svg viewBox="0 0 12 12" width="9" height="9" fill="currentColor">
+                  <circle cx="6" cy="6" r="2.5" />
+                  <circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+                </svg>
+                Успей до 1 июня
+              </span>
+            </div>
+          </div>
+        </section>
+      )}
+
+
+      {/* ── Payment info — method / history / cancel — only for Pro/Ultra users. ── */}
+      {isLoggedIn && isPro && (
+        <section className="relative z-10 max-w-5xl mx-auto px-6 pb-8">
+          <h2 className="text-xs font-bold tracking-[0.18em] uppercase mb-3 flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="7" width="18" height="13" rx="2" />
+              <path d="M3 11h18" />
+              <path d="M7 16h3" />
+            </svg>
+            {locale === "en" ? "Payments" : "Платежи"}
+          </h2>
+          <PaymentInfoSection
+            locale={(locale === "en" ? "en" : "ru") as "en" | "ru"}
+            isPro={isPro}
+            isUltima={isUltima}
+            trialExpiresAt={trialExpiresAt}
+            planExpiresAt={null}
+            autoRenew={null}
+            cardLast4={null}
+            payments={payments}
+          />
+        </section>
+      )}
       {/* FAQ — Russian only, marketing-only — hidden for logged-in */}
       {locale === "ru" && !isLoggedIn && (
         <section className="relative z-10 max-w-2xl mx-auto px-6 pt-16 pb-20">

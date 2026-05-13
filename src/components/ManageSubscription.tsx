@@ -290,6 +290,29 @@ function CancelCard({ locale, isPro, autoRenew, planExpiresAt }: Pick<Props, "lo
   );
 }
 
+/** Top section — just the active plan summary. Rendered at the very top of /pricing. */
+export function ActivePlanSection(props: Props) {
+  return (
+    <div className="space-y-3 sm:space-y-4">
+      <ActivePlanCard {...props} />
+    </div>
+  );
+}
+
+/** Bottom section — payment method, history, cancel. Rendered AFTER the tariff cards
+ *  + promo banner on /pricing. Order: who pays first, then what they can manage. */
+export function PaymentInfoSection(props: Props) {
+  if (!props.isPro) return null;
+  return (
+    <div className="space-y-3 sm:space-y-4">
+      <PaymentMethodCard {...props} />
+      <PaymentHistoryCard {...props} />
+      <CancelCard {...props} />
+    </div>
+  );
+}
+
+/** Backwards-compatible default: renders both sections stacked. */
 export default function ManageSubscription(props: Props) {
   return (
     <div className="space-y-3 sm:space-y-4">
