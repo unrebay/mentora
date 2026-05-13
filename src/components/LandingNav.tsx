@@ -222,7 +222,8 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
             maxHeight: mobileOpen ? 360 : 0,
             opacity: mobileOpen ? 1 : 0,
             pointerEvents: mobileOpen ? "all" : "none",
-            background: navBg,
+            // Dropdown is more matte than the nav pill itself (which stays transparent).
+            background: isDark ? "rgba(18,20,38,0.82)" : "rgba(255,255,255,0.82)",
             backdropFilter: navBlur,
             WebkitBackdropFilter: navBlur,
             borderRadius: 24,

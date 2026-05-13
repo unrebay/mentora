@@ -361,7 +361,7 @@ export default function DashboardNav({
             maxWidth: "64rem",
             margin: "0 auto",
             pointerEvents: "all",
-            background: dk ? "rgba(18,20,38,0.38)" : "rgba(255,255,255,0.38)",
+            background: dk ? "rgba(18,20,38,0.82)" : "rgba(255,255,255,0.82)",
             backdropFilter: "blur(32px) saturate(1.9)",
             WebkitBackdropFilter: "blur(32px) saturate(1.9)",
             borderRadius: 28,
