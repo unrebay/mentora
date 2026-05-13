@@ -282,8 +282,8 @@ function CancelCard({ locale, isPro, autoRenew, planExpiresAt }: Pick<Props, "lo
       ) : (
         <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
           {locale === "en"
-            ? "Right now payments are one-time — your subscription does not auto-renew. You won't be charged again unless you buy another plan. Self-serve cancellation lands with the recurring-billing rollout before June 1."
-            : "Сейчас платежи разовые — подписка не продлевается автоматически. С тебя не спишут повторно, пока не купишь новый тариф. Кнопка отмены подписки появится с переходом на recurring до 1 июня."}
+            ? "Right now payments are one-time — your subscription does not auto-renew. You won’t be charged again unless you buy another plan. Auto-renewal will be unlocked starting from level 2."
+            : "Сейчас платежи разовые — подписка не продлевается автоматически. С тебя не спишут повторно, пока не купишь новый тариф. Возможность автопродления подписки будет разблокирована со второго уровня."}
         </p>
       )}
     </Card>
