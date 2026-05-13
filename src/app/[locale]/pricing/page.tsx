@@ -528,8 +528,8 @@ export default async function PricingPage() {
               {[
                 { label: "Все 17 наук", free: true,  pro: true,  ultra: true  },
                 { label: "Безлимитные сообщения", free: false, pro: true,  ultra: true  },
-                { label: "Галактика знаний", free: false, pro: true,  ultra: true  },
-                { label: "Аналитика прогресса", free: false, pro: true,  ultra: true  },
+                { label: "Галактика знаний", free: true,  pro: true,  ultra: true  },
+                { label: "Аналитика прогресса", free: true,  pro: true,  ultra: true  },
                 { label: "PDF-конспекты по темам", free: false, pro: true,  ultra: true  },
                 { label: "Распознавание фото", free: false, pro: false, ultra: true  },
                 { label: "Генерация презентаций", free: false, pro: false, ultra: true  },

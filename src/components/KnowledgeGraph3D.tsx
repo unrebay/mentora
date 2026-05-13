@@ -119,15 +119,28 @@ function PopupCard({ pop, onClose }: { pop: PopupState; onClose: () => void }) {
   const ph = 260;
   const cw = typeof window !== "undefined" ? window.innerWidth  : 1200;
   const ch = typeof window !== "undefined" ? window.innerHeight : 800;
+  // Position: fixed (viewport coords) — sciScr.x/y are viewport coords too.
+  // Prefer placing the card ABOVE the clicked star (top = sy - ph - 24).
+  // If there's not enough room above, flip BELOW (top = sy + 24). If neither
+  // fits, just clamp to the viewport so the whole card stays on screen.
   const left = Math.min(Math.max(pop.sx - pw / 2, 12), cw - pw - 12);
-  const top  = Math.min(Math.max(pop.sy - ph - 24, 12), ch - ph - 12);
+  const aboveTop = pop.sy - ph - 24;
+  const belowTop = pop.sy + 24;
+  let top: number;
+  if (aboveTop >= 12) {
+    top = aboveTop;                                          // fits above
+  } else if (belowTop + ph + 12 <= ch) {
+    top = belowTop;                                          // flip to below
+  } else {
+    top = Math.min(Math.max(12, aboveTop), ch - ph - 12);    // best-effort clamp
+  }
   const color = hexToCSS(pop.hex);
   const pct   = Math.min(100, Math.round(pop.xp / 5));
 
   return (
     <div
       style={{
-        position: "absolute", left, top, width: pw, zIndex: 60,
+        position: "fixed", left, top, width: pw, zIndex: 60,
         background: "rgba(6,6,22,0.88)",
         backdropFilter: "blur(24px)",
         WebkitBackdropFilter: "blur(24px)",

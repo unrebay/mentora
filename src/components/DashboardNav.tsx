@@ -213,6 +213,7 @@ export default function DashboardNav({
               initialRank={initialRank}
               initialTotal={initialTotal}
               logoutAction={logoutAction}
+              forceDark={variant === "dark"}
             />
           </div>
           {totalXP > 0 && (

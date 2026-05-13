@@ -18,12 +18,14 @@ interface Props {
   initialRank?: number | null;
   initialTotal?: number | null;
   logoutAction?: () => Promise<void>;
+  /** Force dark theme styling (for pages like /knowledge that are always dark) */
+  forceDark?: boolean;
 }
 
 export default function UserDropdown({
   totalXP, currentStreak, isPro, isUltima,
   selectedAvatarLevel, serialId, email, displayName,
-  initialRank, initialTotal, logoutAction,
+  initialRank, initialTotal, logoutAction, forceDark = false,
 }: Props) {
   const { mode, cycle: cycleTheme, theme } = useTheme();
   const [pulsing, setPulsing] = useState(false);
@@ -93,7 +95,7 @@ export default function UserDropdown({
   const planColor = isUltima ? "#a78bfa" : isPro ? "#4561E8" : "#9ca3af";
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className={`relative${forceDark ? " dark" : ""}`}>
       {/* Trigger — circular avatar */}
       <button
         type="button"
