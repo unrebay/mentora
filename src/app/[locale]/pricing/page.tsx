@@ -207,7 +207,10 @@ export default async function PricingPage() {
       {locale === "ru" && (
         <section className="relative z-10 max-w-5xl mx-auto px-6 pb-6">
           <div className="relative overflow-hidden rounded-2xl px-5 py-4 flex flex-wrap items-center gap-3"
-            style={{
+            style={isLoggedIn ? {
+              background: "linear-gradient(135deg, rgba(69,97,232,0.10) 0%, rgba(159,122,255,0.06) 100%), var(--bg-card)",
+              border: "1px solid rgba(107,143,255,0.30)",
+            } : {
               background: "linear-gradient(135deg, rgba(69,97,232,0.18) 0%, rgba(159,122,255,0.12) 100%)",
               border: "1px solid rgba(107,143,255,0.2)",
               backdropFilter: "blur(12px)",
@@ -221,15 +224,18 @@ export default async function PricingPage() {
               </svg>
             </div>
             <div className="relative z-10 flex-1 min-w-0">
-              <span className="font-bold text-sm text-white">Только до 1 июня —</span>{" "}
-              <span className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
-                при покупке годового плана <strong style={{ color: "#9BB4FF" }}>+3 месяца в подарок</strong>.
+              <span className="font-bold text-sm" style={{ color: isLoggedIn ? "var(--text)" : "#fff" }}>Только до 1 июня —</span>{" "}
+              <span className="text-sm" style={{ color: isLoggedIn ? "var(--text-secondary)" : "rgba(255,255,255,0.55)" }}>
+                при покупке годового плана <strong style={{ color: isLoggedIn ? "#4561E8" : "#9BB4FF" }}>+3 месяца в подарок</strong>.
                 Платишь за 12 месяцев — пользуешься 15.
               </span>
             </div>
             <div className="relative z-10 flex-shrink-0">
               <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg"
-                style={{ background: "rgba(107,143,255,0.2)", border: "1px solid rgba(107,143,255,0.3)", color: "#9BB4FF" }}>
+                style={isLoggedIn
+                  ? { background: "rgba(69,97,232,0.10)", border: "1px solid rgba(69,97,232,0.30)", color: "#4561E8" }
+                  : { background: "rgba(107,143,255,0.2)", border: "1px solid rgba(107,143,255,0.3)", color: "#9BB4FF" }
+                }>
                 <svg viewBox="0 0 12 12" width="9" height="9" fill="currentColor">
                   <circle cx="6" cy="6" r="2.5" />
                   <circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5" />
@@ -245,34 +251,43 @@ export default async function PricingPage() {
       <section className="relative z-10 max-w-5xl mx-auto px-6 pb-8">
         <div className="grid md:grid-cols-3 gap-6 md:gap-4 items-stretch">
 
-          {/* FREE */}
+          {/* FREE — styles branch on isLoggedIn so the card stays visible on light theme.
+              Marketing version keeps the dark-glass aesthetic; manage version uses theme tokens. */}
           <div data-tilt data-tilt-strength="4" className="rounded-2xl p-7 flex flex-col"
-            style={{
+            style={isLoggedIn ? {
+              background: "var(--bg-secondary)",
+              border: "1px solid var(--border)",
+              boxShadow: "0 1px 0 rgba(0,0,0,0.02), 0 8px 24px -8px rgba(69,97,232,0.10)",
+            } : {
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.08)",
               backdropFilter: "blur(16px)",
             }}>
             <div className="mb-6">
-              <p className="text-[11px] font-bold tracking-[0.15em] uppercase mb-4" style={{ color: "rgba(255,255,255,0.4)" }}>{t("pricing.free.name")}</p>
+              <p className="text-[11px] font-bold tracking-[0.15em] uppercase mb-4" style={{ color: isLoggedIn ? "var(--text-muted)" : "rgba(255,255,255,0.4)" }}>{t("pricing.free.name")}</p>
               <div className="flex items-end gap-1.5">
-                <span className="text-4xl sm:text-5xl font-bold tracking-tight text-white">{t("pricing.free.price")}</span>
+                <span className="text-4xl sm:text-5xl font-bold tracking-tight" style={{ color: isLoggedIn ? "var(--text)" : "#fff" }}>{t("pricing.free.price")}</span>
               </div>
-              <p className="text-sm mt-2" style={{ color: "rgba(255,255,255,0.4)" }}>{t("pricing.freeDesc")}</p>
+              <p className="text-sm mt-2" style={{ color: isLoggedIn ? "var(--text-muted)" : "rgba(255,255,255,0.4)" }}>{t("pricing.freeDesc")}</p>
             </div>
             <Link
-              href="/auth"
+              href={isLoggedIn ? "/dashboard" : "/auth"}
               className="block text-center py-3 px-5 font-semibold rounded-xl transition-all duration-200 mb-8 text-sm"
-              style={{
+              style={isLoggedIn ? {
+                color: "var(--text-secondary)",
+                border: "1px solid var(--border)",
+                background: "var(--bg-card)",
+              } : {
                 color: "rgba(255,255,255,0.6)",
                 border: "1px solid rgba(255,255,255,0.12)",
                 background: "rgba(255,255,255,0.05)",
               }}
             >
-              {t("pricing.free.cta")}
+              {isLoggedIn ? (locale === "en" ? "Current free tier" : "Текущий бесплатный план") : t("pricing.free.cta")}
             </Link>
             <ul className="space-y-3 flex-1">
               {freeFeatures.map((f: string) => (
-                <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+                <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: isLoggedIn ? "var(--text-secondary)" : "rgba(255,255,255,0.55)" }}>
                   <Check />{f}
                 </li>
               ))}
@@ -417,8 +432,8 @@ export default async function PricingPage() {
         </div>
 
 
-        {/* COMPARISON TABLE — Russian only */}
-        {locale === "ru" && (
+        {/* COMPARISON TABLE — Russian only, marketing-only — hidden for logged-in */}
+        {locale === "ru" && !isLoggedIn && (
           <div className="mt-8 overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0" style={{
             scrollbarWidth: "thin",
             WebkitOverflowScrolling: "touch",
@@ -476,8 +491,8 @@ export default async function PricingPage() {
           </div>
         )}
 
-        {/* STREAK PROMO — Russian only */}
-        {locale === "ru" && (
+        {/* STREAK PROMO — Russian only, marketing-only — hidden for logged-in (manage view) */}
+        {locale === "ru" && !isLoggedIn && (
           <div className="mt-4 flex items-center gap-4 rounded-2xl px-6 py-4"
             style={{
               background: "linear-gradient(135deg, rgba(255,122,0,0.1) 0%, rgba(255,80,0,0.06) 100%)",
@@ -505,8 +520,8 @@ export default async function PricingPage() {
           </div>
         )}
 
-        {/* SCHOOL CALLOUT — Russian only */}
-        {locale === "ru" && (
+        {/* SCHOOL CALLOUT — Russian only, marketing-only — hidden for logged-in */}
+        {locale === "ru" && !isLoggedIn && (
           <div className="mt-4 rounded-2xl px-7 py-6"
             style={{
               background: "rgba(255,255,255,0.04)",
@@ -541,8 +556,8 @@ export default async function PricingPage() {
 
       </section>
 
-      {/* FAQ — Russian only */}
-      {locale === "ru" && (
+      {/* FAQ — Russian only, marketing-only — hidden for logged-in */}
+      {locale === "ru" && !isLoggedIn && (
         <section className="relative z-10 max-w-2xl mx-auto px-6 pt-16 pb-20">
           <div className="text-center mb-10">
             <p className="text-[11px] font-bold tracking-[0.15em] uppercase mb-3" style={{ color: "rgba(107,143,255,0.7)" }}>
