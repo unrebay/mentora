@@ -6,11 +6,16 @@ import LandingNav from "@/components/LandingNav";
 import BodyScrollLock from "@/components/BodyScrollLock";
 import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Галактика знаний",
-  description: "Интерактивная карта всех предметов Mentora. Наведи на звезду чтобы увидеть темы.",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const { getTranslations } = await import("next-intl/server");
+  const t = await getTranslations({ locale, namespace: "knowledge" });
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    robots: { index: false, follow: false },
+  };
+}
 
 // Override the global theme-color so iOS Safari paints the top status-bar area
 // dark to match the galaxy (otherwise it shows the body-light colour).
@@ -22,7 +27,10 @@ const KnowledgeGraph = dynamic(() => import("@/components/KnowledgeGraph3D"), { 
 const ParticleField = dynamic(() => import("@/components/ParticleField"), { ssr: false });
 const DeepSpaceBlobs = dynamic(() => import("@/components/DeepSpaceBlobs"), { ssr: false });
 
-export default async function KnowledgePage() {
+export default async function KnowledgePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const { getTranslations } = await import("next-intl/server");
+  const t = await getTranslations({ locale, namespace: "knowledge" });
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -72,20 +80,20 @@ export default async function KnowledgePage() {
       {/* Title */}
       <div className="flex-shrink-0 px-5 pt-4 pb-2">
         <h1 className="text-xl md:text-2xl font-bold leading-tight text-white">
-          Все знания{" "}
+          {t("titleA")}{" "}
           <span style={{
             background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             backgroundClip: "text",
           }}>
-            в одной галактике
+            {t("titleB")}
           </span>
         </h1>
         <p className="text-xs mt-1 leading-relaxed" style={{ color: "rgba(255,255,255,0.35)" }}>
-          Каждая крупная звезда — Наука. Нажми, чтобы открыть карточку.{" "}
-          <span style={{ color: "#ffa040" }}>Оранжевым</span>{" "}
-          светится то, что изучаешь прямо сейчас — пройденные темы загораются вокруг своей Науки.
+          {t("captionA")}{" "}
+          <span style={{ color: "#ffa040" }}>{t("captionHighlight")}</span>{" "}
+          {t("captionB")}
         </p>
       </div>
 

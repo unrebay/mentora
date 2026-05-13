@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useRouter, Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Logo from "@/components/Logo";
@@ -483,6 +483,7 @@ function AuthPageContent() {
   const supabase     = createClient();
   const captchaRef   = useRef<HTMLDivElement>(null);
   const t = useTranslations("auth");
+  const locale = useLocale();
 
   useEffect(() => {
     const oauthError = searchParams.get("error");
@@ -690,7 +691,7 @@ function AuthPageContent() {
           {/* Mobile-only back button — glass circle, returns to landing */}
           <Link
             href="/"
-            aria-label="Назад"
+            aria-label={locale === "en" ? "Back" : "Назад"}
             className="lg:hidden absolute top-5 left-5 flex items-center justify-center transition-all hover:scale-[1.05] active:scale-95"
             style={{
               width: 40, height: 40, borderRadius: "50%",

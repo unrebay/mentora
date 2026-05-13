@@ -655,6 +655,59 @@ export default function AboutPage() {
           `}</style>
         </section>
 
+        {/* ── TECH & SECURITY ──────────────────────────────────── */}
+        <section className="max-w-5xl mx-auto px-5 sm:px-8 pb-14">
+          <Tag color="#22C55E">{t("techTag")}</Tag>
+          <h2 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", margin: "16px 0 6px", letterSpacing: "-0.5px" }}>{t("techTitle")}</h2>
+          <p style={{ color: "var(--text-secondary)", fontSize: 15, lineHeight: 1.6, marginBottom: 20 }}>
+            {t("techSubtitle")}
+          </p>
+          <div className="grid gap-3 md:grid-cols-2">
+            {[
+              { titleKey: "techItem1Title", bodyKey: "techItem1Body", color: "#4561E8", icon: (
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
+              ) },
+              { titleKey: "techItem2Title", bodyKey: "techItem2Body", color: "#22C55E", icon: (
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+              ) },
+              { titleKey: "techItem3Title", bodyKey: "techItem3Body", color: "#9F7AFF", icon: (
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M3 5v14a9 3 0 0 0 18 0V5" /><path d="M3 12a9 3 0 0 0 18 0" /></svg>
+              ) },
+              { titleKey: "techItem4Title", bodyKey: "techItem4Body", color: "#F59E0B", icon: (
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+              ) },
+            ].map(({ titleKey, bodyKey, color, icon }) => (
+              <div key={titleKey} className="relative overflow-hidden" style={{
+                background: `linear-gradient(135deg, ${color}14, ${color}06 60%, transparent), var(--bg-card)`,
+                border: `1px solid ${color}33`,
+                borderRadius: 16,
+                padding: "18px 20px",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 6px 18px rgba(0,0,0,0.05)",
+              }}>
+                <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                    background: `${color}1f`,
+                    border: `1px solid ${color}33`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color,
+                  }}>
+                    {icon}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 4, letterSpacing: "-0.01em" }}>
+                      {t(titleKey)}
+                    </div>
+                    <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.55 }}>
+                      {t(bodyKey)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* ── ULTIMA NOTE ──────────────────────────────────────── */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
           <div className="relative overflow-hidden" style={{

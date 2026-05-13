@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useTheme } from "./ThemeProvider";
 
 interface ThemeToggleProps {
@@ -47,8 +48,12 @@ function AutoIcon() {
 
 export default function ThemeToggle({ className = "", forceDark = false }: ThemeToggleProps) {
   const { mode, theme, cycle } = useTheme();
-  const isDark = forceDark || theme === "dark";
-  const isAuto = !forceDark && mode === "system";
+  const t = useTranslations("theme");
+  // `forceDark` only controls the surrounding chrome color (track tint) —
+  // it must NOT lock the thumb to "dark" position, otherwise users on dark
+  // theme cannot visually see when they've switched to system.
+  const surfaceDark = forceDark || theme === "dark";
+  const isAuto = mode === "system";
 
   const [stretching, setStretching] = useState(false);
 
@@ -68,23 +73,29 @@ export default function ThemeToggle({ className = "", forceDark = false }: Theme
     system: (TRACK_W - THUMB_W) / 2,
     dark:   TRACK_W - THUMB_W - 3,
   };
-  const thumbLeft = forceDark ? positions.dark : positions[mode];
+  // Thumb position ALWAYS reflects the actual mode — even when the surrounding
+  // surface is dark. Otherwise the slider feels stuck.
+  const thumbLeft = positions[mode];
 
   // Visual track gradient hint at all 3 zones
-  const trackBg = isDark
+  const trackBg = surfaceDark
     ? "linear-gradient(135deg, #4561E8 0%, #2438B0 100%)"
     : isAuto
     ? "linear-gradient(135deg, #d1d5db 0%, #6B8FFF 50%, #1f2a4d 100%)"
     : "#d1d5db";
 
   const tooltip =
-    forceDark ? "Тёмная тема" :
-    mode === "system" ? "Системная (следует за устройством) · клик: тёмная" :
-    mode === "light"  ? "Светлая · клик: системная" :
-                        "Тёмная · клик: светлая";
+    mode === "system" ? t("tooltipSystem") :
+    mode === "light"  ? t("tooltipLight") :
+                        t("tooltipDark");
 
-  // Icon shown inside the thumb based on effective state
-  const thumbIcon = isAuto ? <AutoIcon /> : isDark ? <MoonIcon /> : <SunIcon />;
+  // Icon shown inside the thumb — reflects the SELECTED mode, not surface tint.
+  const thumbIcon =
+    mode === "system" ? <AutoIcon /> :
+    mode === "dark"   ? <MoonIcon /> :
+                        <SunIcon />;
+  // Background for the thumb itself depends on its current position so light-mode
+  // dot on dark surface still reads as "sun on white pill".
 
   return (
     <button
@@ -99,63 +110,57 @@ export default function ThemeToggle({ className = "", forceDark = false }: Theme
         position: "absolute", inset: 0, borderRadius: 99,
         background: trackBg,
         transition: "background 0.25s ease",
-        boxShadow: isDark
+        boxShadow: surfaceDark
           ? "inset 0 1px 3px rgba(0,0,0,0.3)"
           : "inset 0 1px 3px rgba(0,0,0,0.15)",
       }} />
 
-      {/* 3 background hint markers (only show when not forceDark) */}
-      {!forceDark && (
-        <>
-          <span style={{
-            position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)",
-            width: 8, height: 8, color: mode === "light" ? "transparent" : "rgba(255,255,255,0.30)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            transition: "color 0.2s",
-          }}>
-            <SunIcon />
-          </span>
-          <span style={{
-            position: "absolute", left: TRACK_W / 2 - 4, top: "50%", transform: "translateY(-50%)",
-            color: mode === "system" ? "transparent" : "rgba(255,255,255,0.28)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            transition: "color 0.2s",
-          }}>
-            <AutoIcon />
-          </span>
-          <span style={{
-            position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)",
-            color: mode === "dark" ? "transparent" : "rgba(255,255,255,0.34)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            transition: "color 0.2s",
-          }}>
-            <MoonIcon />
-          </span>
-        </>
-      )}
+      {/* 3 background hint markers — always shown so user sees all 3 zones */}
+      <span style={{
+        position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)",
+        width: 8, height: 8, color: mode === "light" ? "transparent" : "rgba(255,255,255,0.30)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        transition: "color 0.2s",
+      }}>
+        <SunIcon />
+      </span>
+      <span style={{
+        position: "absolute", left: TRACK_W / 2 - 4, top: "50%", transform: "translateY(-50%)",
+        color: mode === "system" ? "transparent" : "rgba(255,255,255,0.28)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        transition: "color 0.2s",
+      }}>
+        <AutoIcon />
+      </span>
+      <span style={{
+        position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)",
+        color: mode === "dark" ? "transparent" : "rgba(255,255,255,0.34)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        transition: "color 0.2s",
+      }}>
+        <MoonIcon />
+      </span>
 
       {/* Thumb */}
       <div style={{
         position: "absolute", top: "50%", transform: "translateY(-50%)",
         left: thumbLeft, width: THUMB_W, height: THUMB_H,
         borderRadius: 99,
-        background: isDark
+        background: mode === "dark"
           ? "rgba(160,185,255,0.25)"
-          : isAuto
-          ? "rgba(255,255,255,0.95)"
-          : "rgba(255,255,255,0.92)",
+          : "rgba(255,255,255,0.95)",
         backdropFilter: "blur(10px) saturate(1.6)",
         WebkitBackdropFilter: "blur(10px) saturate(1.6)",
-        border: isDark
+        border: mode === "dark"
           ? "1px solid rgba(200,220,255,0.45)"
           : "1px solid rgba(255,255,255,0.95)",
-        boxShadow: isDark
+        boxShadow: mode === "dark"
           ? `0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.35), 0 0 10px rgba(69,97,232,0.3)`
           : `0 2px 8px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,1)`,
         transition: "left 0.22s cubic-bezier(.34,1.56,.64,1), width 0.14s ease, background 0.22s, box-shadow 0.22s",
         willChange: "left, width",
         display: "flex", alignItems: "center", justifyContent: "center",
-        color: isDark ? "rgba(190,215,255,0.95)" : isAuto ? "rgba(80,100,150,0.85)" : "rgba(90,110,150,0.85)",
+        color: mode === "dark" ? "rgba(190,215,255,0.95)" : mode === "system" ? "rgba(80,100,150,0.85)" : "rgba(90,110,150,0.85)",
         zIndex: 1,
       }}>
         {thumbIcon}
