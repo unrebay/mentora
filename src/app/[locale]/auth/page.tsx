@@ -690,7 +690,7 @@ function AuthPageContent() {
           {/* Mobile-only back button — glass circle, returns to landing */}
           <Link
             href="/"
-            aria-label={locale === "en" ? "Back" : "Назад"}
+            aria-label="Назад"
             className="lg:hidden absolute top-5 left-5 flex items-center justify-center transition-all hover:scale-[1.05] active:scale-95"
             style={{
               width: 40, height: 40, borderRadius: "50%",
