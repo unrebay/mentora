@@ -170,8 +170,8 @@ export function TourButtonDesktop({ forceDark = false }: { forceDark?: boolean }
         title="Как пользоваться Mentora"
         aria-label="Открыть обучение"
         style={{
-          width: 34, height: 34,
-          borderRadius: 10,
+          width: 30, height: 30,
+          borderRadius: 8,
           border: `1px solid ${forceDark ? "rgba(255,255,255,0.1)" : "var(--border)"}`,
           background: hovered
             ? forceDark ? "rgba(255,255,255,0.10)" : "var(--bg-secondary)"
@@ -189,7 +189,7 @@ export function TourButtonDesktop({ forceDark = false }: { forceDark?: boolean }
           flexShrink: 0,
         }}
       >
-        <BookIcon size={15} />
+        <BookIcon size={14} />
       </button>
       <TourHintBubble forceDark={forceDark} />
     </div>

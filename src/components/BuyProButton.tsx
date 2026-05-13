@@ -2,17 +2,22 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 type PlanKey = "monthly" | "annual" | "ultima_monthly" | "ultima_annual";
 
 interface Props {
+  /** When provided AND the user already owns this plan/higher, render the
+   *  active-badge as a clickable Link to this href (typically /profile#subscription)
+   *  instead of a dead-end <div>. */
+  manageHref?: string;
   isLoggedIn: boolean;
   isPro: boolean;
   isUltima?: boolean;
   plan: PlanKey;
 }
 
-export default function BuyProButton({ isLoggedIn, isPro, isUltima = false, plan }: Props) {
+export default function BuyProButton({ isLoggedIn, isPro, isUltima = false, plan, manageHref }: Props) {
   const t = useTranslations("buyPro");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -20,19 +25,24 @@ export default function BuyProButton({ isLoggedIn, isPro, isUltima = false, plan
   const isUltimaPlan = plan.startsWith("ultima");
   const isAnnual = plan.endsWith("annual");
 
-  // Already on correct or higher plan
+  // Already on correct or higher plan — render the badge. If a manageHref is
+  // provided, make it a clickable link to subscription management (so a logged-in
+  // user actually has a way to change/cancel their plan from /pricing). Otherwise
+  // keep the inert div for landing/logged-out previews.
   if (isUltimaPlan && isUltima) {
-    return (
-      <div className="block text-center py-2.5 px-5 bg-emerald-800/60 text-emerald-300 font-semibold rounded-xl border border-emerald-700/50 text-sm">
-        {t("ultraActive")}
-      </div>
+    const cls = "block text-center py-2.5 px-5 bg-emerald-800/60 text-emerald-300 font-semibold rounded-xl border border-emerald-700/50 text-sm transition-colors hover:bg-emerald-700/70";
+    return manageHref ? (
+      <Link href={manageHref} className={cls}>{t("ultraActive")} →</Link>
+    ) : (
+      <div className={cls}>{t("ultraActive")}</div>
     );
   }
   if (!isUltimaPlan && isPro) {
-    return (
-      <div className="block text-center py-2.5 px-5 bg-green-50 text-green-700 font-semibold rounded-xl border-2 border-green-200 text-sm">
-        {t("proActive")}
-      </div>
+    const cls = "block text-center py-2.5 px-5 bg-green-50 text-green-700 font-semibold rounded-xl border-2 border-green-200 text-sm transition-colors hover:bg-green-100";
+    return manageHref ? (
+      <Link href={manageHref} className={cls}>{t("proActive")} →</Link>
+    ) : (
+      <div className={cls}>{t("proActive")}</div>
     );
   }
 

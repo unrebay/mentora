@@ -455,6 +455,81 @@ export default async function ProfilePage() {
           </p>
         </div>
 
+        {/* ── Subscription · current plan + manage actions ──────────
+            Anchor target #subscription so the /pricing «✓ Подписка активна / Ultra
+            активна» badges (which now Link here) land the user in the right place. */}
+        <div id="subscription" className="animate-fade-in-up scroll-mt-24" style={{ animationDelay: "220ms", opacity: 0 }}>
+          <h2 className="text-xs font-bold tracking-[0.18em] uppercase mb-4 flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 7h18M5 7v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
+            Подписка
+          </h2>
+          {(() => {
+            const planLabel = isUltima ? "Ultra" : profile?.plan === "pro" ? "Pro" : isTrialActive ? "Pro (триал)" : "Free";
+            const planAccent = isUltima ? "#F5B400" : isPro ? "#4561E8" : "#9ca3af";
+            const trialEndsAt = profile?.trial_expires_at ? new Date(profile.trial_expires_at) : null;
+            const planSub = isUltima
+              ? "Максимальный план — все возможности Mentora"
+              : profile?.plan === "pro"
+                ? "Pro подписка активна"
+                : isTrialActive && trialEndsAt
+                  ? `Пробный период · до ${trialEndsAt.toLocaleDateString("ru-RU")}`
+                  : "10 сообщений за 8 часов · без карты";
+            return (
+              <div className="rounded-2xl p-5 border relative overflow-hidden"
+                style={{
+                  borderColor: `${planAccent}40`,
+                  background: `linear-gradient(135deg, ${planAccent}12, ${planAccent}04 60%, var(--bg-card))`,
+                }}
+              >
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div style={{ minWidth: 0 }}>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.18em] mb-1" style={{ color: "var(--text-muted)" }}>
+                      Текущий план
+                    </div>
+                    <div className="text-2xl font-black leading-none" style={{ color: planAccent }}>
+                      {planLabel}
+                    </div>
+                    <p className="text-xs mt-1.5" style={{ color: "var(--text-secondary)" }}>
+                      {planSub}
+                    </p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Link
+                      href="/pricing"
+                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all"
+                      style={{
+                        background: `${planAccent}22`,
+                        color: planAccent,
+                        border: `1px solid ${planAccent}55`,
+                      }}
+                    >
+                      {isPro ? "Сменить тариф" : "Перейти на Pro"}
+                      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </Link>
+                    {isPro && (
+                      <a
+                        href="https://t.me/mentora_su_bot?start=billing"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all"
+                        style={{
+                          background: "rgba(35,156,234,0.10)",
+                          color: "#239CEA",
+                          border: "1px solid rgba(35,156,234,0.35)",
+                        }}
+                      >
+                        Способ оплаты / отмена
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+
         {/* ── Earned badges ────────────────────────────────── */}
         {earned.length > 0 && (
           <div className="animate-fade-in-up" style={{ animationDelay: "240ms", opacity: 0 }}>

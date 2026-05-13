@@ -1,6 +1,7 @@
 import { getTranslations, getLocale, getMessages } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import LandingNav from "@/components/LandingNav";
+import DashboardNav from "@/components/DashboardNav";
 import BuyProButton from "@/components/BuyProButton";
 import PricingFAQ from "@/components/PricingFAQ";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
@@ -53,10 +54,33 @@ export default async function PricingPage() {
   const isLoggedIn = !!user;
   let isPro = false;
   let isUltima = false;
+  let totalXP = 0;
+  let currentStreak = 0;
+  let bestStreak = 0;
   if (user) {
-    const { data: profile } = await supabase.from("users").select("plan").eq("id", user.id).single();
+    const [profileRes, progressRes] = await Promise.all([
+      supabase.from("users").select("plan, trial_expires_at").eq("id", user.id).single(),
+      supabase.from("user_progress").select("xp_total, streak_days, best_streak").eq("user_id", user.id),
+    ]);
+    const profile = profileRes.data;
+    const progressData = progressRes.data;
+    const isTrialActive = profile?.trial_expires_at ? new Date(profile.trial_expires_at) > new Date() : false;
     isUltima = profile?.plan === "ultima";
-    isPro = isUltima || profile?.plan === "pro";
+    isPro = isUltima || profile?.plan === "pro" || isTrialActive;
+    totalXP = progressData?.reduce((acc, p) => acc + (p.xp_total ?? 0), 0) ?? 0;
+    currentStreak = progressData?.reduce((m, p) => Math.max(m, p.streak_days ?? 0), 0) ?? 0;
+    bestStreak = progressData?.reduce((m, p) => Math.max(m, p.best_streak ?? 0), 0) ?? 0;
+  }
+
+  // Server action: log the user out from inside DashboardNav's burger menu.
+  // Mirrors the pattern used by /knowledge/page.tsx.
+  async function handleLogout() {
+    "use server";
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase2 = await createClient();
+    await supabase2.auth.signOut();
+    const { redirect } = await import("next/navigation");
+    redirect("/");
   }
 
   const locale = await getLocale();
@@ -76,7 +100,10 @@ export default async function PricingPage() {
   );
 
   return (
-    <div className="min-h-screen" style={{ background: "#04060f", color: "#fff" }}>
+    <div className="min-h-screen" style={isLoggedIn
+      ? { background: "var(--bg)", color: "var(--text)" }
+      : { background: "#04060f", color: "#fff" }
+    }>
 
       {/* ── Ambient background blobs ── */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
@@ -99,15 +126,28 @@ export default async function PricingPage() {
 
       {/* NAV */}
       <div className="relative z-10">
+        {isLoggedIn ? (
+        <DashboardNav
+          isPro={isPro}
+          isUltima={isUltima}
+          totalXP={totalXP}
+          currentStreak={currentStreak}
+          bestStreak={bestStreak}
+          logoutAction={handleLogout}
+        />
+      ) : (
         <LandingNav isLoggedIn={isLoggedIn} activePage="pricing" />
+      )}
       </div>
 
       {/* HERO */}
       <section className="relative z-10 max-w-4xl mx-auto px-6 pt-24 pb-16 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6 text-xs font-bold tracking-widest uppercase"
-          style={{ background: "rgba(69,97,232,0.15)", border: "1px solid rgba(69,97,232,0.25)", color: "rgba(107,143,255,0.9)" }}>
-          {t("pricing.faqLabel")}
-        </div>
+        {!isLoggedIn && (
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6 text-xs font-bold tracking-widest uppercase"
+            style={{ background: "rgba(69,97,232,0.15)", border: "1px solid rgba(69,97,232,0.25)", color: "rgba(107,143,255,0.9)" }}>
+            {t("pricing.faqLabel")}
+          </div>
+        )}
         {/* Decorative orbital ring */}
         <div className="absolute pointer-events-none hidden md:block" aria-hidden style={{
           top: 60, right: "10%", width: 220, height: 220,
@@ -115,24 +155,48 @@ export default async function PricingPage() {
           background: "conic-gradient(from 90deg, transparent 0deg, rgba(124,58,237,0.18) 90deg, transparent 180deg, rgba(69,97,232,0.14) 270deg, transparent 360deg)",
           filter: "blur(24px)", opacity: 0.7, zIndex: 1,
         }} />
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-5 leading-[1.1] relative z-10" style={{
-          background: "linear-gradient(135deg, #ffffff 30%, #B4C7FF 70%, #C9B5FF 100%)",
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-        }}>
-          {t("pricing.hero.title")}<br />
-          <span style={{
-            background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-            fontStyle: "italic",
-          }}>
-            {t("pricing.hero.titleGradient")}
-          </span>
-        </h1>
-        <p className="text-lg max-w-lg mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
-          {t("pricing.hero.subtitle")}
-        </p>
+        {isLoggedIn ? (
+          <>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-[1.1] relative z-10" style={{ color: "var(--text)" }}>
+              {locale === "en" ? "Manage your " : "Управление "}
+              <span style={{
+                background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                fontStyle: "italic",
+              }}>
+                {locale === "en" ? "subscription" : "подпиской"}
+              </span>
+            </h1>
+            <p className="text-base max-w-lg mx-auto leading-relaxed" style={{ color: "var(--text-muted)" }}>
+              {locale === "en"
+                ? "Compare plans, switch up or down, change payment method — all in one place."
+                : "Сравни тарифы, переключи план, измени способ оплаты — всё в одном месте."}
+            </p>
+          </>
+        ) : (
+          <>
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-5 leading-[1.1] relative z-10" style={{
+              background: "linear-gradient(135deg, #ffffff 30%, #B4C7FF 70%, #C9B5FF 100%)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+            }}>
+              {t("pricing.hero.title")}<br />
+              <span style={{
+                background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                fontStyle: "italic",
+              }}>
+                {t("pricing.hero.titleGradient")}
+              </span>
+            </h1>
+            <p className="text-lg max-w-lg mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
+              {t("pricing.hero.subtitle")}
+            </p>
+          </>
+        )}
       </section>
 
       {/* PROMO BANNER — Russian only */}
@@ -243,8 +307,8 @@ export default async function PricingPage() {
                 )}
               </div>
               <div className="space-y-2 mb-7">
-                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} plan="monthly" />
-                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} plan="annual" />
+                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} plan="monthly" manageHref="/profile#subscription" />
+                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} plan="annual" manageHref="/profile#subscription" />
               </div>
               <ul className="space-y-3 flex-1">
                 {proFeatures.map((f: string) => (
@@ -304,8 +368,8 @@ export default async function PricingPage() {
                 )}
               </div>
               <div className="space-y-2 mb-7 relative z-10">
-                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_monthly" />
-                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_annual" />
+                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_monthly" manageHref="/profile#subscription" />
+                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_annual" manageHref="/profile#subscription" />
               </div>
               <ul className="space-y-3 flex-1 relative z-10">
                 {ultraFeatures.map((label: string, i: number) => {
@@ -493,6 +557,7 @@ export default async function PricingPage() {
       )}
 
       {/* FOOTER CTA */}
+      {!isLoggedIn && (
       <section className="relative z-10 overflow-hidden py-24 px-6 text-center" style={{ background: "rgba(0,0,0,0.3)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-64 rounded-full pointer-events-none"
           style={{ background: "radial-gradient(ellipse, rgba(69,97,232,0.2) 0%, transparent 70%)", top: "-40px" }} />
@@ -527,6 +592,7 @@ export default async function PricingPage() {
         </div>
       </section>
 
+      )}
       <footer className="relative z-10 py-8" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
         <div className="max-w-5xl mx-auto px-6 flex flex-col items-center gap-4 text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
           <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
