@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { useRouter, Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Logo from "@/components/Logo";
 import posthog from "posthog-js";
@@ -681,18 +681,31 @@ function AuthPageContent() {
               {t("leftSubtitle")}
             </p>
 
-            <div className="flex items-center gap-4 text-xs" style={{ color: "rgba(255,255,255,0.28)" }}>
-              <span>{t("leftStats1")}</span>
-              <span style={{ color: "rgba(255,255,255,0.12)" }}>·</span>
-              <span>{t("leftStats2")}</span>
-              <span style={{ color: "rgba(255,255,255,0.12)" }}>·</span>
-              <span>{t("leftStats3")}</span>
-            </div>
           </div>
         </div>
 
         {/* ── RIGHT: form panel ─────────────────────────────────────── */}
-        <div className="w-full lg:w-[46%] flex flex-col items-center justify-center px-5 sm:px-8 py-10 min-h-screen">
+        <div className="w-full lg:w-[46%] flex flex-col items-center justify-center px-5 sm:px-8 py-10 min-h-screen relative">
+
+          {/* Mobile-only back button — glass circle, returns to landing */}
+          <Link
+            href="/"
+            aria-label={locale === "en" ? "Back" : "Назад"}
+            className="lg:hidden absolute top-5 left-5 flex items-center justify-center transition-all hover:scale-[1.05] active:scale-95"
+            style={{
+              width: 40, height: 40, borderRadius: "50%",
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.14)",
+              backdropFilter: "blur(16px) saturate(1.4)",
+              WebkitBackdropFilter: "blur(16px) saturate(1.4)",
+              color: "rgba(255,255,255,0.85)",
+              zIndex: 5,
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </Link>
 
           {/* Mobile-only logo */}
           <div className="lg:hidden mb-8">
@@ -700,9 +713,9 @@ function AuthPageContent() {
           </div>
 
           {/* Mobile-only headline */}
-          <div className="lg:hidden text-center mb-8 max-w-xs">
-            <h1 className="font-black leading-tight text-white text-2xl mb-2">
-              {t("leftHeading1")}{" "}{t("leftHeading2")}{" "}
+          <div className="lg:hidden text-center mb-8" style={{ maxWidth: 340 }}>
+            <h1 className="font-black leading-[1.15] text-white mb-2" style={{ fontSize: "21px" }}>
+              {t("leftHeading1")} {t("leftHeading2")}{" "}
               <span style={{
                 background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 40%, #ffa040 100%)",
                 WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
@@ -716,11 +729,11 @@ function AuthPageContent() {
           <div className="w-full mb-3 animate-fade-in-up" style={{ maxWidth: 420 }}>
             <div className="relative flex p-1 rounded-2xl"
               style={{
-                background: "rgba(8,14,36,0.88)",
+                background: "rgba(8,14,36,0.55)",
                 border: "1px solid rgba(255,255,255,0.16)",
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-                boxShadow: "0 4px 24px rgba(0,0,0,0.60)",
+                backdropFilter: "blur(28px) saturate(1.3)",
+                WebkitBackdropFilter: "blur(28px) saturate(1.3)",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.45)",
               }}>
               <div className="absolute top-1 bottom-1 rounded-xl transition-all duration-200"
                 style={{
@@ -750,11 +763,11 @@ function AuthPageContent() {
           <div className="w-full animate-fade-in-up" style={{ maxWidth: 420 }}>
             <div className="rounded-3xl p-7 space-y-4"
               style={{
-                background: "rgba(6,10,30,0.88)",
-                border: "1px solid rgba(255,255,255,0.18)",
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-                boxShadow: "0 8px 60px rgba(0,0,0,0.75), 0 2px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.12)",
+                background: "rgba(6,10,30,0.55)",
+                border: "1px solid rgba(255,255,255,0.16)",
+                backdropFilter: "blur(28px) saturate(1.3)",
+                WebkitBackdropFilter: "blur(28px) saturate(1.3)",
+                boxShadow: "0 8px 60px rgba(0,0,0,0.55), 0 2px 20px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.10)",
               }}>
 
               <div className="mb-1">
