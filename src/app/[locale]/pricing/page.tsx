@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import LandingNav from "@/components/LandingNav";
 import DashboardNav from "@/components/DashboardNav";
 import BuyProButton from "@/components/BuyProButton";
+import ManageSubscription, { type PaymentItem } from "@/components/ManageSubscription";
 import PricingFAQ from "@/components/PricingFAQ";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
 import { createServerClient } from "@supabase/ssr";
@@ -57,19 +58,29 @@ export default async function PricingPage() {
   let totalXP = 0;
   let currentStreak = 0;
   let bestStreak = 0;
+  let trialExpiresAt: string | null = null;
+  let payments: PaymentItem[] = [];
   if (user) {
-    const [profileRes, progressRes] = await Promise.all([
+    const [profileRes, progressRes, paymentsRes] = await Promise.all([
       supabase.from("users").select("plan, trial_expires_at").eq("id", user.id).single(),
       supabase.from("user_progress").select("xp_total, streak_days, best_streak").eq("user_id", user.id),
+      supabase
+        .from("subscriptions")
+        .select("id, status, plan, amount, created_at, started_at, expires_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(50),
     ]);
     const profile = profileRes.data;
     const progressData = progressRes.data;
-    const isTrialActive = profile?.trial_expires_at ? new Date(profile.trial_expires_at) > new Date() : false;
+    trialExpiresAt = profile?.trial_expires_at ?? null;
+    const isTrialActive = trialExpiresAt ? new Date(trialExpiresAt) > new Date() : false;
     isUltima = profile?.plan === "ultima";
     isPro = isUltima || profile?.plan === "pro" || isTrialActive;
     totalXP = progressData?.reduce((acc, p) => acc + (p.xp_total ?? 0), 0) ?? 0;
     currentStreak = progressData?.reduce((m, p) => Math.max(m, p.streak_days ?? 0), 0) ?? 0;
     bestStreak = progressData?.reduce((m, p) => Math.max(m, p.best_streak ?? 0), 0) ?? 0;
+    payments = (paymentsRes.data ?? []) as PaymentItem[];
   }
 
   // Server action: log the user out from inside DashboardNav's burger menu.
@@ -214,61 +225,16 @@ export default async function PricingPage() {
             </svg>
             {locale === "en" ? "Subscription" : "Подписка"}
           </h2>
-          {(() => {
-            const planLabel = isUltima ? "Ultra" : isPro ? "Pro" : "Free";
-            const planAccent = isUltima ? "#F5B400" : isPro ? "#4561E8" : "#9ca3af";
-            const planSub = isUltima
-              ? (locale === "en" ? "Top tier — every Mentora capability" : "Максимальный план — все возможности Mentora")
-              : isPro
-                ? (locale === "en" ? "Pro subscription active" : "Pro подписка активна")
-                : (locale === "en" ? "10 messages per 8 hours · no card" : "10 сообщений за 8 часов · без карты");
-            return (
-              <div className="rounded-2xl p-5 border relative overflow-hidden"
-                style={{
-                  borderColor: `${planAccent}40`,
-                  background: `linear-gradient(135deg, ${planAccent}12, ${planAccent}04 60%, var(--bg-card))`,
-                }}>
-                <div className="flex items-center justify-between gap-4 flex-wrap">
-                  <div style={{ minWidth: 0 }}>
-                    <div className="text-[10px] font-bold uppercase tracking-[0.18em] mb-1" style={{ color: "var(--text-muted)" }}>
-                      {locale === "en" ? "Current plan" : "Текущий план"}
-                    </div>
-                    <div className="text-2xl font-black leading-none" style={{ color: planAccent }}>{planLabel}</div>
-                    <p className="text-xs mt-1.5" style={{ color: "var(--text-secondary)" }}>{planSub}</p>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    {/* Anchor to the cards section below — no nav change, just scroll */}
-                    <a
-                      href="#tariffs"
-                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all"
-                      style={{
-                        background: `${planAccent}22`,
-                        color: planAccent,
-                        border: `1px solid ${planAccent}55`,
-                      }}
-                    >
-                      {isPro ? (locale === "en" ? "Switch plan" : "Сменить тариф") : (locale === "en" ? "Upgrade to Pro" : "Перейти на Pro")}
-                    </a>
-                    {isPro && (
-                      <a
-                        href="https://t.me/mentora_su_bot?start=billing"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all"
-                        style={{
-                          background: "rgba(35,156,234,0.10)",
-                          color: "#239CEA",
-                          border: "1px solid rgba(35,156,234,0.35)",
-                        }}
-                      >
-                        {locale === "en" ? "Billing / cancel" : "Способ оплаты / отмена"}
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
+          <ManageSubscription
+            locale={(locale === "en" ? "en" : "ru") as "en" | "ru"}
+            isPro={isPro}
+            isUltima={isUltima}
+            trialExpiresAt={trialExpiresAt}
+            planExpiresAt={null}
+            autoRenew={null}
+            cardLast4={null}
+            payments={payments}
+          />
         </section>
       )}
 
