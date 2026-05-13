@@ -183,7 +183,7 @@ function CodeBlock({ lang, code }: { lang: string; code: string }) {
 }
 
 // ─── Inline parser: **bold**, *italic*, `code`, $math$, $$math$$ ──────────
-function parseInline(text: string): React.ReactNode {
+function parseInline(text: string, allowInlineCode = true): React.ReactNode {
   const parts = text.split(/(\$\$[^$]+\$\$|\$[^$\n]+\$|\*\*[^*]+\*\*|\*[^*\n]+\*|`[^`]+`)/g);
   return (
     <>
@@ -196,10 +196,20 @@ function parseInline(text: string): React.ReactNode {
           return <strong key={i} className="font-semibold">{part.slice(2,-2)}</strong>;
         if (part.startsWith("*") && part.endsWith("*") && part.length > 2)
           return <em key={i} className="italic">{part.slice(1,-1)}</em>;
-        if (part.startsWith("`") && part.endsWith("`") && part.length > 2)
-          return <code key={i} className="rounded-md px-1.5 py-0.5 text-[13px] font-mono" style={{
-            background: "rgba(69,97,232,0.12)", color: "#6B8FFF", border: "1px solid rgba(107,143,255,0.28)",
-          }}>{part.slice(1,-1)}</code>;
+        if (part.startsWith("`") && part.endsWith("`") && part.length > 2) {
+          const inner = part.slice(1, -1);
+          return allowInlineCode
+            ? <code key={i} className="rounded-md px-1.5 py-0.5 text-[13px] font-mono" style={{
+                background: "rgba(69,97,232,0.12)", color: "#6B8FFF", border: "1px solid rgba(107,143,255,0.28)",
+              }}>{inner}</code>
+            : <em key={i} style={{
+                fontFamily: "var(--font-playfair), Georgia, serif",
+                fontStyle: "italic",
+                color: "#4561E8",
+                fontSize: "1.05em",
+                fontWeight: 500,
+              }}>{inner}</em>;
+        }
         return <span key={i}>{part}</span>;
       })}
     </>
@@ -226,7 +236,8 @@ function splitByCodeBlocks(content: string): Seg[] {
 }
 
 // ─── Text block renderer (lines → React nodes) ────────────────────────────
-function TextBlock({ content }: { content: string }) {
+function TextBlock({ content, subject }: { content: string; subject?: string }) {
+  const allowInlineCode = subject ? CODE_SUBJECTS.has(subject) : true;
   const lines = content.split("\n");
   const elements: React.ReactNode[] = [];
   let listBuffer: string[] = [];
@@ -242,7 +253,7 @@ function TextBlock({ content }: { content: string }) {
           {listBuffer.map((item, i) => (
             <li key={i} className="flex gap-2 items-start">
               <span className="mt-[7px] w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--brand)", opacity: 0.8 }} />
-              <span className="flex-1">{parseInline(item)}</span>
+              <span className="flex-1">{parseInline(item, allowInlineCode)}</span>
             </li>
           ))}
         </ul>
@@ -255,7 +266,7 @@ function TextBlock({ content }: { content: string }) {
           {orderedBuffer.map((item, i) => (
             <li key={i} className="flex gap-2 items-start">
               <span className="shrink-0 font-semibold text-sm min-w-[20px]" style={{ color: "var(--brand)" }}>{i+1}.</span>
-              <span className="flex-1">{parseInline(item)}</span>
+              <span className="flex-1">{parseInline(item, allowInlineCode)}</span>
             </li>
           ))}
         </ol>
@@ -287,7 +298,7 @@ function TextBlock({ content }: { content: string }) {
         <blockquote key={keyIdx++} className="pl-3 my-1.5 italic text-sm leading-relaxed" style={{
           borderLeft: "2.5px solid var(--brand)", color: "var(--text-muted)",
         }}>
-          {parseInline(line.slice(2))}
+          {parseInline(line.slice(2), allowInlineCode)}
         </blockquote>
       );
       continue;
@@ -317,25 +328,52 @@ function TextBlock({ content }: { content: string }) {
     flushLists();
 
     // Headings
-    const h1 = line.match(/^# (.+)/);   if (h1) { elements.push(<h2 key={keyIdx++} className="font-bold mt-4 mb-2 leading-snug" style={{ fontSize:"1.1rem", color:"var(--text)" }}>{parseInline(h1[1])}</h2>); continue; }
-    const h2 = line.match(/^## (.+)/);  if (h2) { elements.push(<h3 key={keyIdx++} className="font-semibold mt-3 mb-1.5 leading-snug" style={{ fontSize:"1rem", color:"var(--text)" }}>{parseInline(h2[1])}</h3>); continue; }
-    const h3 = line.match(/^### (.+)/); if (h3) { elements.push(<p  key={keyIdx++} className="font-semibold mt-2 mb-1" style={{ color:"var(--text)" }}>{parseInline(h3[1])}</p>); continue; }
+    const h1 = line.match(/^# (.+)/);   if (h1) { elements.push(<h2 key={keyIdx++} className="font-bold mt-4 mb-2 leading-snug" style={{ fontSize:"1.1rem", color:"var(--text)" }}>{parseInline(h1[1], allowInlineCode)}</h2>); continue; }
+    const h2 = line.match(/^## (.+)/);  if (h2) { elements.push(<h3 key={keyIdx++} className="font-semibold mt-3 mb-1.5 leading-snug" style={{ fontSize:"1rem", color:"var(--text)" }}>{parseInline(h2[1], allowInlineCode)}</h3>); continue; }
+    const h3 = line.match(/^### (.+)/); if (h3) { elements.push(<p  key={keyIdx++} className="font-semibold mt-2 mb-1" style={{ color:"var(--text)" }}>{parseInline(h3[1], allowInlineCode)}</p>); continue; }
 
-    elements.push(<p key={keyIdx++} className="leading-relaxed">{parseInline(line)}</p>);
+    elements.push(<p key={keyIdx++} className="leading-relaxed">{parseInline(line, allowInlineCode)}</p>);
   }
   flushLists();
   return <>{elements}</>;
 }
 
+// ─── EmphasisBlock — Playfair italic blue, replaces CodeBlock for non-code subjects.
+// Use case: English subject — sometimes AI uses ``` for dialogue (Person A / Person B).
+// Rendering as syntax-highlighted code looks jarring. Italic blue prose feels right.
+function EmphasisBlock({ code }: { code: string }) {
+  return (
+    <div className="my-3 px-4 py-3 rounded-2xl" style={{
+      background: "rgba(69,97,232,0.06)",
+      border: "1px solid rgba(69,97,232,0.18)",
+      fontFamily: "var(--font-playfair), Georgia, serif",
+      fontStyle: "italic",
+      fontSize: "17px",
+      lineHeight: 1.55,
+      color: "#4561E8",
+      whiteSpace: "pre-wrap",
+    }}>
+      {code}
+    </div>
+  );
+}
+
+// Subjects where ``` blocks should render as real syntax-highlighted code.
+// All other subjects use EmphasisBlock (prose-style italic blue).
+const CODE_SUBJECTS = new Set(["computer-science", "mathematics", "physics", "chemistry"]);
+
 // ─── Full markdown message ────────────────────────────────────────────────
-function MarkdownMessage({ content }: { content: string }) {
+function MarkdownMessage({ content, subject }: { content: string; subject?: string }) {
   const segs = splitByCodeBlocks(content);
+  const allowCode = subject ? CODE_SUBJECTS.has(subject) : true;
   return (
     <div className="space-y-0.5 text-[15px]">
       {segs.map((seg, i) =>
         seg.type === "code"
-          ? <CodeBlock key={i} lang={seg.lang} code={seg.code} />
-          : <TextBlock key={i} content={seg.content} />
+          ? (allowCode
+              ? <CodeBlock key={i} lang={seg.lang} code={seg.code} />
+              : <EmphasisBlock key={i} code={seg.code} />)
+          : <TextBlock key={i} content={seg.content} subject={subject} />
       )}
     </div>
   );
@@ -448,7 +486,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
 
   const dismissLevelUp = useCallback(() => {
     if (levelUpTimerRef.current) clearTimeout(levelUpTimerRef.current);
-    setLevelUpFading(true); setTimeout(() => { setShowLevelUp(false); setLevelUpData(null); }, 500);
+    setLevelUpFading(true); setTimeout(() => { setShowLevelUp(false); setLevelUpData(null); }, 700);
   }, []);
 
   const handleExportPdf = async () => {
@@ -523,7 +561,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         setLevelUpData(data.levelUp);setLevelUpFading(true);setShowLevelUp(true);
         requestAnimationFrame(()=>requestAnimationFrame(()=>setLevelUpFading(false)));
         if(levelUpTimerRef.current)clearTimeout(levelUpTimerRef.current);
-        levelUpTimerRef.current=setTimeout(()=>{setLevelUpFading(true);setTimeout(()=>{setShowLevelUp(false);setLevelUpData(null);},500);},10000);
+        levelUpTimerRef.current=setTimeout(()=>{setLevelUpFading(true);setTimeout(()=>{setShowLevelUp(false);setLevelUpData(null);},700);},18000);
       }
       if(data.streakRewardEarned){setTimeout(()=>{window.location.href="/dashboard?streak_reward=1";},1500);}
     } catch {setMessages(prev=>[...prev,{role:"assistant",content:tChat("errorNoInternet"),isError:true}]);}
@@ -788,7 +826,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             >
               {msg.role === "assistant" ? (
                 <>
-                  <MarkdownMessage content={msg.content} />
+                  <MarkdownMessage content={msg.content} subject={subject} />
                   {msg.imageUrl && (
                     <div className="mt-3">
                       <img src={msg.imageUrl} alt={tChat("imageAlt")} className="rounded-xl w-full max-w-sm object-cover" style={{ border:"1px solid var(--chat-msg-border)" }} loading="lazy" />
@@ -918,7 +956,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                   title={tChat("cameraTitle")}
                   className="shrink-0 flex items-center justify-center transition-all hover:scale-[1.05] active:scale-95"
                   style={{
-                    width: 44, height: 44, borderRadius: "50%",
+                    width: 48, height: 48, borderRadius: "50%",
                     background: "var(--bg-nav)",
                     backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
                     WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
@@ -959,7 +997,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                     background: "transparent",
                     color: "var(--text)",
                     resize: "none",
-                    minHeight: "44px",
+                    minHeight: "48px",
                     maxHeight: "240px",
                     overflowY: "hidden",
                     lineHeight: "1.5",
@@ -977,7 +1015,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                 disabled={loading || (!input.trim() && !pendingImage)}
                 className="shrink-0 flex items-center justify-center transition-all disabled:opacity-35 active:scale-95 hover:scale-[1.05]"
                 style={{
-                  width: 44, height: 44, borderRadius: "50%",
+                  width: 48, height: 48, borderRadius: "50%",
                   background: (input.trim() || pendingImage) && !loading
                     ? `linear-gradient(135deg, ${subjColor}, ${subjColor}cc)`
                     : "var(--bg-nav)",
@@ -1011,8 +1049,8 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             zIndex:9999,
             transform:`translateX(-50%) translateY(${levelUpFading?"8px":"0"})`,
             opacity: levelUpFading ? 0 : 1,
-            transition:"opacity 0.5s ease, transform 0.5s ease",
-            background:`linear-gradient(135deg,${levelUpData.color}ee,${levelUpData.color}99)`,
+            transition:"opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)",
+            background:`linear-gradient(135deg,${levelUpData.color}f5,${levelUpData.color}cc)`,
           }}
         >
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
