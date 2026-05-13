@@ -342,22 +342,22 @@ export default function AboutPage() {
                     <th key={h} style={{
                       padding: "10px 14px",
                       fontSize: 12, fontWeight: 700, textAlign: "left" as const,
-                      color: i === 3 ? "#4561E8" : "var(--text-muted)",
-                      background: i === 3
+                      color: i === 1 ? "#4561E8" : "var(--text-muted)",
+                      background: i === 1
                         ? "linear-gradient(180deg, rgba(69,97,232,0.18) 0%, rgba(124,58,237,0.10) 50%, rgba(69,97,232,0.06) 100%), rgba(255,255,255,0.04)"
                         : "var(--bg-secondary)",
-                      borderBottom: i === 3 ? "1px solid rgba(69,97,232,0.30)" : "1px solid var(--border)",
+                      borderBottom: i === 1 ? "1px solid rgba(69,97,232,0.30)" : "1px solid var(--border)",
                       borderTop: "1px solid var(--border-light)",
-                      borderLeft: i === 3 ? "1px solid rgba(69,97,232,0.28)" : i === 0 ? "1px solid var(--border-light)" : "none",
-                      borderRight: i === 3 ? "1px solid rgba(69,97,232,0.28)" : i === 4 ? "1px solid var(--border-light)" : "none",
+                      borderLeft: i === 1 ? "1px solid rgba(69,97,232,0.28)" : i === 0 ? "1px solid var(--border-light)" : "none",
+                      borderRight: i === 1 ? "1px solid rgba(69,97,232,0.28)" : i === 4 ? "1px solid var(--border-light)" : "none",
                       borderRadius: i === 0 ? "12px 0 0 0" : i === 4 ? "0 12px 0 0" : 0,
                       whiteSpace: "nowrap" as const,
                       letterSpacing: "0.03em",
-                      backdropFilter: i === 3 ? "blur(10px) saturate(1.4)" : undefined,
-                      WebkitBackdropFilter: i === 3 ? "blur(10px) saturate(1.4)" : undefined,
-                      boxShadow: i === 3 ? "inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -1px 0 rgba(124,58,237,0.20)" : undefined,
+                      backdropFilter: i === 1 ? "blur(10px) saturate(1.4)" : undefined,
+                      WebkitBackdropFilter: i === 1 ? "blur(10px) saturate(1.4)" : undefined,
+                      boxShadow: i === 1 ? "inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -1px 0 rgba(124,58,237,0.20)" : undefined,
                     }}>
-                      {i === 3 ? (
+                      {i === 1 ? (
                         <span style={{
                           fontFamily: "var(--font-playfair), Georgia, serif",
                           fontWeight: 800,
@@ -380,18 +380,18 @@ export default function AboutPage() {
                     fontSize: 13,
                     color: val === "✓" ? "#10B981"
                       : val === "✗" ? "var(--text-muted)"
-                      : i === 3 ? "#4561E8"
+                      : i === 1 ? "#4561E8"
                       : "var(--text-secondary)",
                     fontWeight: val === "✓" || val === "✗" ? 700 : 500,
-                    background: i === 3
+                    background: i === 1
                       ? "linear-gradient(180deg, rgba(69,97,232,0.12) 0%, rgba(124,58,237,0.06) 50%, rgba(69,97,232,0.10) 100%), rgba(255,255,255,0.02)"
                       : ri % 2 === 0 ? "var(--bg-secondary)" : "transparent",
                     borderBottom: "1px solid var(--border-light)",
-                    borderLeft: i === 3 ? "1px solid rgba(69,97,232,0.22)" : i === 0 ? "1px solid var(--border-light)" : "none",
-                    borderRight: i === 3 ? "1px solid rgba(69,97,232,0.22)" : i === 4 ? "1px solid var(--border-light)" : "none",
+                    borderLeft: i === 1 ? "1px solid rgba(69,97,232,0.22)" : i === 0 ? "1px solid var(--border-light)" : "none",
+                    borderRight: i === 1 ? "1px solid rgba(69,97,232,0.22)" : i === 4 ? "1px solid var(--border-light)" : "none",
                     borderRadius: isLast && i === 0 ? "0 0 0 12px" : isLast && i === 4 ? "0 0 12px 0" : 0,
-                    backdropFilter: i === 3 ? "blur(8px) saturate(1.3)" : undefined,
-                    WebkitBackdropFilter: i === 3 ? "blur(8px) saturate(1.3)" : undefined,
+                    backdropFilter: i === 1 ? "blur(8px) saturate(1.3)" : undefined,
+                    WebkitBackdropFilter: i === 1 ? "blur(8px) saturate(1.3)" : undefined,
                     lineHeight: 1.4,
                   });
                   return (
@@ -400,9 +400,9 @@ export default function AboutPage() {
                         <div style={{ color: "var(--text)", fontWeight: 600, fontSize: 13 }}>{row.criterion}</div>
                         {row.note && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2, lineHeight: 1.4 }}>{row.note}</div>}
                       </td>
-                      <td style={cellStyle(1, row.search)}>{row.search}</td>
-                      <td style={cellStyle(2, row.ai)}>{row.ai}</td>
-                      <td style={cellStyle(3, row.mentora)}>{row.mentora}</td>
+                      <td style={cellStyle(1, row.mentora)}>{row.mentora}</td>
+                      <td style={cellStyle(2, row.search)}>{row.search}</td>
+                      <td style={cellStyle(3, row.ai)}>{row.ai}</td>
                       <td style={cellStyle(4, row.tutor)}>{row.tutor}</td>
                     </tr>
                   );
