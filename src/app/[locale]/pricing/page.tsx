@@ -248,7 +248,6 @@ export default async function PricingPage() {
                       }}
                     >
                       {isPro ? (locale === "en" ? "Switch plan" : "Сменить тариф") : (locale === "en" ? "Upgrade to Pro" : "Перейти на Pro")}
-                      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </a>
                     {isPro && (
                       <a
