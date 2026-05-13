@@ -685,7 +685,7 @@ function AuthPageContent() {
         </div>
 
         {/* ── RIGHT: form panel ─────────────────────────────────────── */}
-        <div className="w-full lg:w-[46%] flex flex-col items-center justify-center px-5 sm:px-8 py-10 min-h-screen relative">
+        <div className="w-full lg:w-[46%] flex flex-col items-center justify-start lg:justify-center px-5 sm:px-8 py-4 lg:py-10 min-h-screen relative">
 
           {/* Mobile-only back button — glass circle, returns to landing */}
           <Link
@@ -708,13 +708,13 @@ function AuthPageContent() {
           </Link>
 
           {/* Mobile-only logo */}
-          <div className="lg:hidden mb-8">
+          <div className="lg:hidden mb-2 mt-1">
             <Logo size="sm" textColor="rgba(255,255,255,0.95)" />
           </div>
 
           {/* Mobile-only headline */}
-          <div className="lg:hidden text-center mb-8" style={{ maxWidth: 340 }}>
-            <h1 className="font-black leading-[1.15] text-white mb-2" style={{ fontSize: "21px" }}>
+          <div className="lg:hidden text-center mb-3" style={{ maxWidth: 320 }}>
+            <h1 className="font-black leading-[1.15] text-white" style={{ fontSize: "18px" }}>
               {t("leftHeading1")} {t("leftHeading2")}{" "}
               <span style={{
                 background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 40%, #ffa040 100%)",
@@ -726,7 +726,7 @@ function AuthPageContent() {
           </div>
 
           {/* ── Mode toggle pill ─────────────────────────────────────── */}
-          <div className="w-full mb-3 animate-fade-in-up" style={{ maxWidth: 420 }}>
+          <div className="w-full mb-2 lg:mb-3 animate-fade-in-up" style={{ maxWidth: 420 }}>
             <div className="relative flex p-1 rounded-2xl"
               style={{
                 background: "rgba(8,14,36,0.55)",
@@ -761,7 +761,7 @@ function AuthPageContent() {
 
           {/* ── Glass card ───────────────────────────────────────────── */}
           <div className="w-full animate-fade-in-up" style={{ maxWidth: 420 }}>
-            <div className="rounded-3xl p-7 space-y-4"
+            <div className="rounded-3xl p-5 lg:p-7 space-y-3 lg:space-y-4"
               style={{
                 background: "rgba(6,10,30,0.55)",
                 border: "1px solid rgba(255,255,255,0.16)",
@@ -897,7 +897,7 @@ function AuthPageContent() {
           </div>
 
           {/* Switch mode link */}
-          <p className="text-center text-sm mt-5" style={{ color: "rgba(255,255,255,0.35)" }}>
+          <p className="text-center text-sm mt-3 lg:mt-5" style={{ color: "rgba(255,255,255,0.35)" }}>
             {isSignup ? (
               <>{t("hasAccount")}{" "}
                 <button onClick={() => switchMode("signin")} className="font-semibold hover:underline" style={{ color: "#6B8FFF" }}>{t("signIn")}</button>
@@ -908,15 +908,6 @@ function AuthPageContent() {
               </>
             )}
           </p>
-
-          {/* Mobile stats */}
-          <div className="lg:hidden flex items-center gap-3 mt-6 text-xs" style={{ color: "rgba(255,255,255,0.22)" }}>
-            <span>{t("leftStats1")}</span>
-            <span style={{ color: "rgba(255,255,255,0.1)" }}>·</span>
-            <span>{t("leftStats2")}</span>
-            <span style={{ color: "rgba(255,255,255,0.1)" }}>·</span>
-            <span>{t("leftStats3")}</span>
-          </div>
 
         </div>{/* /right panel */}
       </div>{/* /split layout */}
