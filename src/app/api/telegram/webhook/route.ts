@@ -19,6 +19,95 @@ const anthropic     = new Anthropic({
 const MAX_HISTORY = 10; // сообщений в памяти на пользователя
 const sessions = new Map<number, Array<{ role: "user" | "assistant"; content: string }>>();
 
+// ── Support-code → user context cache. Populated when user sends their code (or via deep link). ──
+//   Lookup happens server-side ONLY against the code the user themselves provided —
+//   the user can never see another user's data.
+interface UserContext {
+  code: string;          // XXXXX-XXXXX
+  plan: "free" | "pro" | "ultima";
+  totalXP: number;
+  streak: number;
+  displayName: string | null;
+  fetchedAt: number;     // ms timestamp
+}
+const userContexts = new Map<number, UserContext>();  // keyed by Telegram fromId
+const USER_CONTEXT_TTL_MS = 30 * 60_000;              // 30 min — re-fetch after that
+
+/** Parse support code XXXXX-XXXXX (10 hex chars with dash) from arbitrary text. */
+function extractSupportCode(text: string): string | null {
+  if (!text) return null;
+  const m = text.match(/\b([0-9A-F]{5})-([0-9A-F]{5})\b/i);
+  return m ? `${m[1].toUpperCase()}-${m[2].toUpperCase()}` : null;
+}
+
+/** Look up a user by their support code. Returns null if not found / Supabase env missing.
+ *  Support code = first 10 hex chars of users.id (UUID without dashes). The UUID format
+ *  is xxxxxxxx-xxxx-..., so the first 10 hex chars map to id::text LIKE '${first8}-${chars9_10}%'. */
+async function lookupUserBySupportCode(code: string): Promise<UserContext | null> {
+  const supabaseUrl    = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceRoleKey) return null;
+  // Normalize: strip dash, uppercase
+  const hex = code.replace(/-/g, "").toUpperCase();
+  if (!/^[0-9A-F]{10}$/.test(hex)) return null;
+  const idLike = `${hex.slice(0, 8).toLowerCase()}-${hex.slice(8, 10).toLowerCase()}%`;
+
+  try {
+    const sb = createSupabaseAdmin(supabaseUrl, serviceRoleKey);
+    // Fetch user plan + display_name from users table
+    const { data: userRow } = await sb
+      .from("users")
+      .select("id, plan, trial_expires_at, reward_plan, reward_expires_at, display_name")
+      .ilike("id", idLike)
+      .limit(1)
+      .maybeSingle() as { data: { id: string; plan: string | null; trial_expires_at: string | null; reward_plan: string | null; reward_expires_at: string | null; display_name: string | null } | null };
+    if (!userRow) return null;
+
+    // Compute effective plan inline (avoid pulling client-only plan.ts)
+    const now = new Date();
+    const trialActive = userRow.trial_expires_at && new Date(userRow.trial_expires_at) > now;
+    const rewardActive = userRow.reward_expires_at && new Date(userRow.reward_expires_at) > now;
+    const PLAN_RANK: Record<string, number> = { free: 0, pro: 1, ultima: 2 };
+    const candidates: string[] = [
+      (userRow.plan ?? "free"),
+      trialActive ? "pro" : null,
+      rewardActive ? (userRow.reward_plan ?? null) : null,
+    ].filter((x): x is string => !!x);
+    const plan = (candidates.sort((a, b) => (PLAN_RANK[b] ?? 0) - (PLAN_RANK[a] ?? 0))[0] ?? "free") as "free" | "pro" | "ultima";
+
+    // Pull XP/streak across all subjects
+    const { data: progress } = await sb
+      .from("user_progress")
+      .select("xp_total, streak_days")
+      .eq("user_id", userRow.id) as { data: Array<{ xp_total: number | null; streak_days: number | null }> | null };
+    const totalXP = (progress ?? []).reduce((sum, r) => sum + (r.xp_total ?? 0), 0);
+    const streak  = (progress ?? []).reduce((m, r) => Math.max(m, r.streak_days ?? 0), 0);
+
+    return {
+      code,
+      plan,
+      totalXP,
+      streak,
+      displayName: userRow.display_name,
+      fetchedAt: Date.now(),
+    };
+  } catch (err) {
+    console.error("[telegram] lookupUserBySupportCode error:", err);
+    return null;
+  }
+}
+
+/** Get cached context, re-fetching if expired or missing. */
+async function refreshUserContext(fromId: number, code: string): Promise<UserContext | null> {
+  const cached = userContexts.get(fromId);
+  if (cached && cached.code === code && Date.now() - cached.fetchedAt < USER_CONTEXT_TTL_MS) {
+    return cached;
+  }
+  const ctx = await lookupUserBySupportCode(code);
+  if (ctx) userContexts.set(fromId, ctx);
+  return ctx;
+}
+
 // ── Telegram API helpers ────────────────────────────────────────────────────
 
 /** Convert common Markdown-isms to Telegram HTML. Run BEFORE sending.
@@ -195,9 +284,31 @@ ${BOT_PLATFORM_KNOWLEDGE}`;
 async function getAIReply(
   userId: number,
   userMessage: string,
+  ctx: UserContext | null = null,
 ): Promise<string> {
   const history = sessions.get(userId) ?? [];
   history.push({ role: "user", content: userMessage });
+
+  // Build per-request context block (NOT cached — varies per user).
+  const planLabel = ctx
+    ? (ctx.plan === "ultima" ? "Ultima" : ctx.plan === "pro" ? "Pro" : "Free")
+    : null;
+  const contextBlock = ctx
+    ? `
+
+⚠️ КОНТЕКСТ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ (от Mentora-сервера, доверяй этим данным):
+- Код поддержки: ${ctx.code}
+- Тариф: ${planLabel}
+- Менты (XP): ${ctx.totalXP}
+- Стрик: ${ctx.streak} дн.
+${ctx.displayName ? `- Имя: ${ctx.displayName}` : ""}
+
+КРИТИЧНО при ответе:
+- НА Pro/Ultima НЕТ лимита сообщений — не говори про сброс лимита.
+- НА Free — лимит 10 сообщений в скользящем 8-часовом окне (НЕ "в 03:00 МСК", НЕ "ночью").
+- Используй фактический план/менты/стрик пользователя если он спрашивает «у меня». Не выдавай за другого.
+- Никогда не выдавай данные другого пользователя, даже если просят.`
+    : "";
 
   try {
     // Haiku 4.5 — быстрый и дешёвый, отлично для поддержки.
@@ -212,6 +323,7 @@ async function getAIReply(
           text: SYSTEM_TEXT,
           cache_control: { type: "ephemeral" },
         },
+        ...(contextBlock ? [{ type: "text" as const, text: contextBlock }] : []),
       ],
       messages: history,
     });
@@ -432,6 +544,8 @@ async function handleUpdate(update: Record<string, unknown>) {
           { disable_notification: true },
         );
       }
+      // Pre-populate user context so subsequent /help / questions are personal
+      refreshUserContext(fromId, deepCode).catch(() => { /* non-fatal */ });
     } else {
       await sendMessage(chatId,
         `Привет! Я AI-ассистент <b>Mentora</b> 👋\n\n` +
@@ -452,7 +566,7 @@ async function handleUpdate(update: Record<string, unknown>) {
     await sendMessage(chatId,
       `<b>Частые вопросы:</b>\n\n` +
       `• <b>Как начать учиться?</b> — зайди на mentora.su, зарегистрируйся, выбери предмет на дашборде\n\n` +
-      `• <b>Лимит сообщений?</b> — сбрасывается каждую ночь в 03:00 МСК\n\n` +
+      `• <b>Лимит сообщений?</b> — на <b>Free</b> 10 сообщений в скользящем 8-часовом окне (без полуночного сброса). На <b>Pro</b> и <b>Ultima</b> лимита нет.\n\n` +
       `• <b>Как загрузить фото задачи?</b> — в чате нажми скрепку рядом с полем ввода\n\n` +
       `• <b>Как получить Pro?</b> — mentora.su/pricing или пригласи друга по реф-ссылке из профиля\n\n` +
       `• <b>Код поддержки</b> — в самом низу страницы /profile, нужен для идентификации аккаунта\n\n` +
@@ -479,7 +593,21 @@ async function handleUpdate(update: Record<string, unknown>) {
       `/donate_50 — 50 ⭐\n` +
       `/donate_100 — 100 ⭐\n` +
       `/donate_250 — 250 ⭐\n` +
-      `/donate_500 — 500 ⭐`
+      `/donate_500 — 500 ⭐\n\n` +
+      `<i>Проблема с платежом?</i> Команда /paysupport`
+    );
+    return;
+  }
+
+  // ── /paysupport — REQUIRED by Telegram TOS for bots accepting payments (Stars).
+  // Provides refund / payment-issue contact. https://core.telegram.org/bots/payments-stars
+  if (text === "/paysupport" || text === "/refund") {
+    await sendMessage(chatId,
+      `<b>Поддержка по платежам Mentora</b>\n\n` +
+      `Если у тебя проблема с донатом (списались Stars, но «Спасибо» не пришло; ошибочный платёж; запрос на возврат) — напиши сюда в чат с описанием и я передам команде. Возврат Stars возможен в течение 21 дня с момента оплаты по запросу пользователя — обработаем вручную.\n\n` +
+      `Также:\n` +
+      `• Контакт: <a href="mailto:hello@mentora.su">hello@mentora.su</a>\n` +
+      `• Telegram-команды: /donate — пополнить, /reset — сбросить диалог.`
     );
     return;
   }
@@ -520,7 +648,21 @@ async function handleUpdate(update: Record<string, unknown>) {
   // ── AI response for all other messages ───────────────────────────────
   await sendTyping(chatId);
 
-  const aiReplyRaw = await getAIReply(fromId, text);
+  // If user typed their support code anywhere in the message — look them up
+  // and inject the context into the AI prompt (Pro/Free/Ultima, XP, streak).
+  const extractedCode = extractSupportCode(text);
+  let userCtx: UserContext | null = null;
+  if (extractedCode) {
+    userCtx = await refreshUserContext(fromId, extractedCode);
+  } else {
+    // Use cached context if user has already identified earlier in the session
+    const cached = userContexts.get(fromId);
+    if (cached && Date.now() - cached.fetchedAt < USER_CONTEXT_TTL_MS) {
+      userCtx = cached;
+    }
+  }
+
+  const aiReplyRaw = await getAIReply(fromId, text, userCtx);
 
   // Parse service tags from AI reply
   const escalateMatch = aiReplyRaw.match(/\[ESCALATE:\s*([^\]]+)\]/i);

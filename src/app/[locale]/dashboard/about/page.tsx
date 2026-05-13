@@ -837,7 +837,7 @@ export default function AboutPage() {
 
       {/* Floating "Пригласить" CTA */}
       <a
-        href="https://t.me/share/url?url=https://mentora.su&text=Mentora — твой персональный AI-ментор по 17 наукам"
+        href="https://t.me/share/url?url=https://mentora.su/ru&text=Mentora — новый вид образования. 17 наук с AI-ментором, доступно каждому."
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-40 group"

@@ -71,13 +71,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       url,
       title: m.ogTitle,
       description: m.ogDescription,
-      images: [{ url: "/icon-512.png", width: 512, height: 512, alt: m.ogAlt }],
+      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: m.ogAlt }],
     },
     twitter: {
       card: "summary_large_image",
       title: m.twTitle,
       description: m.twDescription,
-      images: ["/icon-512.png"],
+      images: ["/og-image.png"],
     },
   };
 }
@@ -273,7 +273,8 @@ export default async function HomePage() {
                     <span className="block md:inline text-center" style={{
                       fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
                       fontWeight: 600,
-                      color: "#6B8FFF",
+                      fontStyle: "italic",
+                      color: "#4561E8",
                       letterSpacing: "-0.01em",
                     }}>best version</span>{" "}
                     <span className="block md:inline text-right md:text-left">of yourself.</span>
@@ -284,7 +285,8 @@ export default async function HomePage() {
                     <span className="block md:inline text-center" style={{
                       fontFamily: "var(--font-playfair), 'Playfair Display', Georgia, serif",
                       fontWeight: 600,
-                      color: "#6B8FFF",
+                      fontStyle: "italic",
+                      color: "#4561E8",
                       letterSpacing: "-0.01em",
                     }}>лучшей версией</span>{" "}
                     <span className="block md:inline text-right md:text-left">себя.</span>
