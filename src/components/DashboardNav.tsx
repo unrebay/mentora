@@ -103,16 +103,15 @@ export default function DashboardNav({
         ? "hover:text-white/90 hover:bg-white/[0.06]"
         : "hover:text-[var(--text)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]";
 
-  /* ── iOS 26 Liquid Glass pill ── */
-  const navBg = dk ? "rgba(6,6,18,0.38)" : "rgba(255,255,255,0.50)";
-  const navBlur = "blur(16px) saturate(1.6) brightness(1.02)";
-  // No visible border — white border on light is invisible, subtle glow on dark
+  /* ── Apple Liquid Glass: more transparent + stronger blur ── */
+  const navBg = dk ? "rgba(18,20,38,0.32)" : "rgba(255,255,255,0.32)";
+  const navBlur = "blur(28px) saturate(1.8) brightness(1.04)";
   const navBorder = dk
-    ? "1px solid rgba(255,255,255,0.09)"
-    : "1px solid rgba(255,255,255,0.70)";
+    ? "1px solid rgba(255,255,255,0.10)"
+    : "1px solid rgba(255,255,255,0.45)";
   const navShadow = dk
-    ? "0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 48px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.08) inset"
-    : "0 0 0 1px rgba(255,255,255,0.95) inset, 0 8px 40px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.05)";
+    ? "0 0 0 1px rgba(255,255,255,0.05) inset, 0 12px 40px rgba(0,0,0,0.30), 0 1px 0 rgba(255,255,255,0.10) inset"
+    : "0 0 0 1px rgba(255,255,255,0.65) inset, 0 12px 32px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.03)";
 
   const navLinks = [
     { href: "/dashboard",           label: t("dashboard.nav.subjects") },
@@ -362,9 +361,9 @@ export default function DashboardNav({
             maxWidth: "64rem",
             margin: "0 auto",
             pointerEvents: "all",
-            background: dk ? "rgba(6,6,18,0.96)" : "rgba(255,255,255,0.82)",
-            backdropFilter: "blur(40px) saturate(2.2)",
-            WebkitBackdropFilter: "blur(40px) saturate(2.2)",
+            background: dk ? "rgba(18,20,38,0.38)" : "rgba(255,255,255,0.38)",
+            backdropFilter: "blur(32px) saturate(1.9)",
+            WebkitBackdropFilter: "blur(32px) saturate(1.9)",
             borderRadius: 28,
             border: navBorder,
             boxShadow: navShadow,

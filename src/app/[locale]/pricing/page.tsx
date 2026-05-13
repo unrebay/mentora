@@ -139,8 +139,8 @@ export default async function PricingPage() {
         }} />
       </div>
 
-      {/* NAV */}
-      <div className="relative z-10">
+      {/* NAV — z-40 so dropdown overlays hero (which is z-10) */}
+      <div className="relative z-40">
         {isLoggedIn ? (
         <DashboardNav
           isPro={isPro}

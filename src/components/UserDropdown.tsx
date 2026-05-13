@@ -128,11 +128,11 @@ export default function UserDropdown({
             position: "absolute", top: "calc(100% + 10px)", right: 0,
             width: 296, zIndex: 50,
             borderRadius: 16, overflow: "hidden",
-            background: "linear-gradient(160deg, rgba(124,58,237,0.12), rgba(255,255,255,0.02) 60%, transparent), var(--bg-card)",
-            border: "1px solid rgba(124,58,237,0.30)",
-            backdropFilter: "blur(22px) saturate(1.5)",
-            WebkitBackdropFilter: "blur(22px) saturate(1.5)",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.50), 0 0 0 1px rgba(124,58,237,0.10), inset 0 1px 0 rgba(255,255,255,0.10)",
+            background: "linear-gradient(160deg, rgba(124,58,237,0.10), rgba(255,255,255,0.02) 60%, transparent), color-mix(in srgb, var(--bg-card) 38%, transparent)",
+            border: "1px solid rgba(124,58,237,0.22)",
+            backdropFilter: "blur(32px) saturate(1.9)",
+            WebkitBackdropFilter: "blur(32px) saturate(1.9)",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.35), 0 0 0 1px rgba(124,58,237,0.08), inset 0 1px 0 rgba(255,255,255,0.14)",
             animation: "userDropdownIn 0.18s ease-out",
           }}
         >
