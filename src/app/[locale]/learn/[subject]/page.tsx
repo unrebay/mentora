@@ -122,14 +122,21 @@ export default async function LearnSubjectPage({ params, searchParams }: Props) 
   const subjectData = SUBJECTS.find((s) => s.id === subject);
   if (!subjectData || !subjectData.available) redirect("/dashboard");
 
-  // Load recent chat history (last 20 messages)
-  const { data: history } = await supabase
+  // Load LAST 50 messages (newest first) and reverse to chronological order.
+  // The old query was .order("created_at", { ascending: true }).limit(20) —
+  // that returned the OLDEST 20 messages, so any user with >20 messages saw
+  // ancient history instead of their recent conversation, and messages from
+  // another device wouldn't appear because the desktop session pushed past 20.
+  // Cross-device sync bug: same user_id + subject on phone after laptop session
+  // saw stale start-of-conversation instead of the laptop messages.
+  const { data: historyDesc } = await supabase
     .from("chat_messages")
     .select("role, content, created_at")
     .eq("user_id", user.id)
     .eq("subject", subject)
-    .order("created_at", { ascending: true })
-    .limit(20);
+    .order("created_at", { ascending: false })
+    .limit(50);
+  const history = (historyDesc ?? []).slice().reverse();
 
   // Calculate remaining messages for today
   const { data: profile } = await supabase

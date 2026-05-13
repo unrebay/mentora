@@ -118,16 +118,19 @@ export default function DashboardNav({
     { href: "/dashboard",           label: t("dashboard.nav.subjects") },
     { href: "/dashboard/analytics", label: t("dashboard.nav.analytics") },
     { href: "/knowledge",           label: t("dashboard.nav.galaxy") },
+    { href: "/pricing",             label: t("nav.pricing") },
     { href: "/dashboard/about",     label: t("dashboard.nav.about") },
   ];
 
+  // Mobile menu: show Tariffs for ALL plan tiers (incl. Ultra) so users can
+  // always find where to upgrade / compare / downgrade their plan.
   const mobileLinks = [
     { href: "/dashboard",           label: t("dashboard.nav.subjects") },
     { href: "/dashboard/analytics", label: t("dashboard.nav.analytics") },
     { href: "/knowledge",           label: t("dashboard.nav.galaxyFull") },
+    { href: "/pricing",             label: t("nav.pricing") },
     { href: "/dashboard/about",     label: t("dashboard.nav.about") },
     { href: "/profile",             label: t("dashboard.nav.profile") },
-    ...(!isPro ? [{ href: "/pricing", label: t("nav.pricing") }] : []),
   ];
 
   return (
