@@ -624,26 +624,24 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             </div>
           )}
 
-          {/* Export PDF — Pro+ feature (Pro, Ultra, active trial) */}
+          {/* Export PDF — round glass circle matching the «?» button next door */}
           {isPro && messages.filter(m => !m.isError).length >= 3 && (
             <button
-              onClick={handleExportPdf} disabled={exportingPdf} title={tChat("exportTitle")}
-              className="flex items-center gap-1.5 transition-all disabled:opacity-50 hover:scale-[1.04] active:scale-95"
+              onClick={handleExportPdf} disabled={exportingPdf} title={tChat("exportTitle")} aria-label={tChat("export")}
+              className="flex items-center justify-center transition-all disabled:opacity-50 hover:scale-[1.05] active:scale-95"
               style={{
-                padding: "0 12px", height: 44, borderRadius: 22,
+                width: 44, height: 44, borderRadius: "50%",
                 background: "var(--bg-nav)",
                 backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
                 WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
                 border: "1px solid var(--border-light)",
                 boxShadow: "0 2px 12px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.06) inset",
                 color: "var(--text-muted)",
-                fontSize: 12, fontWeight: 500,
               }}
             >
               {exportingPdf
-                ? <span style={{ display: "inline-block", width: 12, height: 12, border: "1.5px solid var(--text-muted)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
-                : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>}
-              <span className="hidden sm:inline">{exportingPdf ? tChat("exporting") : tChat("export")}</span>
+                ? <span style={{ display: "inline-block", width: 14, height: 14, border: "1.5px solid var(--text-muted)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+                : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>}
             </button>
           )}
 
@@ -804,11 +802,13 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           </div>
         ))}
 
-        {/* Typing indicator */}
+        {/* Typing indicator — avatar uses the brand color (not subjColor) so
+            it doesn't fake science tinting while Mentora is still "thinking".
+            The science-color hint stays as the bubble's left accent. */}
         {loading && (
           <div className="flex justify-start gap-2">
-            <div className="w-7 h-7 rounded-2xl flex items-center justify-center shrink-0 mt-auto" style={{ background:`linear-gradient(135deg,${subjColor}22,${subjColor}11)`, border:`1.5px solid ${subjColor}30` }}>
-              <MeLogo height={13} colorM="var(--text)" colorE={subjColor} />
+            <div className="w-7 h-7 rounded-2xl flex items-center justify-center shrink-0 mt-auto" style={{ background:"linear-gradient(135deg,rgba(69,97,232,0.14),rgba(69,97,232,0.06))", border:"1.5px solid rgba(69,97,232,0.22)" }}>
+              <MeLogo height={13} colorM="var(--text)" colorE="#4561E8" />
             </div>
             <div className="px-5 py-4" style={{ background:"var(--chat-msg-bg)", backdropFilter:"blur(16px)", border:`1px solid var(--chat-msg-border)`, borderLeft:`2.5px solid ${subjColor}55`, borderRadius:"20px 20px 20px 4px" }}>
               <div className="flex gap-1.5 items-end h-4">

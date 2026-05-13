@@ -1,8 +1,20 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "@/i18n/navigation";
 import { SUBJECTS } from "@/lib/types";
 import ChatInterface from "@/components/chat/ChatInterface";
+
+// iOS Safari paints its bottom toolbar / safe-area zone using the page's
+// theme-color meta. The chat bg is --chat-bg (#f4f4f8 light / #06060f dark) —
+// different from the global page bg (#ffffff / #050a14). Without this override,
+// iOS shows a visible band at the bottom where chat-bg ends and body-bg begins.
+// Two themed metas so iOS picks the matching one; matches globals.css vars.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4f4f8" },
+    { media: "(prefers-color-scheme: dark)",  color: "#06060f" },
+  ],
+};
 
 const WINDOW_LIMIT = 20; // rolling 24h window, matches api/chat/route.ts
 
