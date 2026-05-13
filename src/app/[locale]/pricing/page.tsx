@@ -100,10 +100,14 @@ export default async function PricingPage() {
   );
 
   return (
-    <div className="min-h-screen" style={isLoggedIn
-      ? { background: "var(--bg)", color: "var(--text)" }
-      : { background: "#04060f", color: "#fff" }
-    }>
+    <div
+      className={isLoggedIn ? "min-h-screen pricing-manage" : "min-h-screen"}
+      data-mode={isLoggedIn ? "manage" : "marketing"}
+      style={isLoggedIn
+        ? { background: "var(--bg)", color: "var(--text)" }
+        : { background: "#04060f", color: "#fff" }
+      }
+    >
 
       {/* ── Ambient background blobs ── */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>

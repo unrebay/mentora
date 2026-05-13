@@ -136,7 +136,7 @@ export default function DashboardNav({
   return (
     /* Outer sticky strip — transparent, just provides the floating gap */
     <nav
-      className="sticky top-0 z-20"
+      className="sticky top-0 z-50"
       style={{
         padding: "10px clamp(0px, 2vw, 14px)",
         background: "transparent",  // always transparent — pill handles its own bg

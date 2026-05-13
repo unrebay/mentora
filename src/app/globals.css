@@ -407,3 +407,48 @@ code:not([class]) {
     box-shadow: 0 0 0 1px rgba(107,135,255,0.40), 0 0 22px 4px rgba(107,135,255,0.55);
   }
 }
+
+/* ── /pricing logged-in (manage subscription) light-theme overrides ──
+   The /pricing page is a dark marketing surface — cards use hardcoded
+   rgba(255,255,255,...) tints. For logged-in users on light theme that's
+   white-on-white. Scope overrides to `.pricing-manage` + light theme only. */
+
+/* Hide cosmic ambient blobs — invisible on white anyway */
+html:not(.dark) .pricing-manage .fixed.inset-0.pointer-events-none.overflow-hidden {
+  display: none !important;
+}
+
+/* FREE card (rgba(255,255,255,0.04) ghost on white) → bg-card with visible border */
+html:not(.dark) .pricing-manage [data-tilt][class*="rounded-2xl"][class*="p-7"]:not([class*="rounded-\[17px\]"]):not([class*="rounded-[17px]"]) {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+  backdrop-filter: none !important;
+}
+
+/* Text inside FREE card */
+html:not(.dark) .pricing-manage [data-tilt] [style*="rgba(255,255,255,0.4)"] {
+  color: var(--text-muted) !important;
+}
+
+/* Promo banner — soft brand-tinted bg + readable text on white */
+html:not(.dark) .pricing-manage section.relative.z-10.max-w-5xl.mx-auto > .relative.overflow-hidden.rounded-2xl.px-5.py-4 {
+  background: linear-gradient(135deg, rgba(69,97,232,0.10) 0%, rgba(159,122,255,0.06) 100%) !important;
+  border: 1px solid rgba(107,143,255,0.30) !important;
+}
+html:not(.dark) .pricing-manage section.relative.z-10.max-w-5xl.mx-auto > .relative.overflow-hidden.rounded-2xl.px-5.py-4 .text-white {
+  color: var(--text) !important;
+}
+
+/* FAQ-section h1 hero gradient is white-to-cosmic — invisible on light bg */
+html:not(.dark) .pricing-manage h1[style*="#ffffff 30%, #B4C7FF 70%"] {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: var(--text) !important;
+  color: var(--text) !important;
+}
+
+/* Subtitle on hero — bumped to text-muted for legibility */
+html:not(.dark) .pricing-manage section.text-center p[style*="color:rgba(255,255,255,0.5)"] {
+  color: var(--text-muted) !important;
+}
+
