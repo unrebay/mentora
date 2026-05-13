@@ -46,9 +46,29 @@ function AutoIcon() {
   );
 }
 
+// Safe tooltips: useTranslations throws if no NextIntlClientProvider ancestor
+// (e.g. /admin pages which live outside the [locale] layout). Wrap so the
+// toggle still renders with RU fallbacks instead of crashing the whole page.
+function useThemeTooltips(): { system: string; light: string; dark: string } {
+  try {
+    const tt = useTranslations("theme");
+    return {
+      system: tt("tooltipSystem"),
+      light:  tt("tooltipLight"),
+      dark:   tt("tooltipDark"),
+    };
+  } catch {
+    return {
+      system: "Системная (следует за устройством) · клик: тёмная",
+      light:  "Светлая · клик: системная",
+      dark:   "Тёмная · клик: светлая",
+    };
+  }
+}
+
 export default function ThemeToggle({ className = "", forceDark = false }: ThemeToggleProps) {
   const { mode, theme, cycle } = useTheme();
-  const t = useTranslations("theme");
+  const tooltips = useThemeTooltips();
   // `forceDark` only controls the surrounding chrome color (track tint) —
   // it must NOT lock the thumb to "dark" position, otherwise users on dark
   // theme cannot visually see when they've switched to system.
@@ -85,9 +105,9 @@ export default function ThemeToggle({ className = "", forceDark = false }: Theme
     : "#d1d5db";
 
   const tooltip =
-    mode === "system" ? t("tooltipSystem") :
-    mode === "light"  ? t("tooltipLight") :
-                        t("tooltipDark");
+    mode === "system" ? tooltips.system :
+    mode === "light"  ? tooltips.light :
+                        tooltips.dark;
 
   // Icon shown inside the thumb — reflects the SELECTED mode, not surface tint.
   const thumbIcon =
