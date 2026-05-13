@@ -351,11 +351,16 @@ export default function DashboardNav({
       </div>{/* end top bar */}
       </div>{/* end pill */}
 
-      {/* ── Mobile dropdown (pill below) ── */}
+      {/* ── Mobile dropdown — absolute overlay, doesn't push content below ── */}
       {open && (
         <div
-          className="md:hidden max-w-5xl mx-auto mt-2"
+          className="md:hidden absolute"
           style={{
+            top: "calc(100% - 4px)",
+            left: 14,
+            right: 14,
+            maxWidth: "64rem",
+            margin: "0 auto",
             pointerEvents: "all",
             background: dk ? "rgba(6,6,18,0.96)" : "rgba(255,255,255,0.82)",
             backdropFilter: "blur(40px) saturate(2.2)",
@@ -363,6 +368,7 @@ export default function DashboardNav({
             borderRadius: 28,
             border: navBorder,
             boxShadow: navShadow,
+            zIndex: 60,
           }}
         >
           <div className="px-3 py-2 flex flex-col gap-0.5">

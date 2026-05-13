@@ -211,20 +211,30 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
           </div>
         </div>
 
-        {/* Mobile dropdown — inside the glass pill. Always rendered, animated via max-height + opacity for a smooth open/close. */}
+        </div>{/* end glass pill */}
+
+        {/* Mobile dropdown — absolute overlay (doesn't push content). Animated via max-height + opacity. */}
         <div
-          className="md:hidden overflow-hidden"
+          className="md:hidden absolute left-0 right-0 overflow-hidden"
           style={{
+            top: "calc(100% + 8px)",
             maxHeight: mobileOpen ? 360 : 0,
             opacity: mobileOpen ? 1 : 0,
-            transition: "max-height 280ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease",
+            pointerEvents: mobileOpen ? "all" : "none",
+            background: navBg,
+            backdropFilter: navBlur,
+            WebkitBackdropFilter: navBlur,
+            borderRadius: 24,
+            border: mobileOpen ? navBorder : "1px solid transparent",
+            boxShadow: mobileOpen ? navShadow : "none",
+            transition: "max-height 280ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease, border-color 200ms ease, box-shadow 200ms ease",
+            zIndex: 60,
           }}
           aria-hidden={!mobileOpen}
         >
           <div
-            className="px-3 pt-2 pb-3 flex flex-col gap-0.5"
+            className="px-3 pt-3 pb-3 flex flex-col gap-0.5"
             style={{
-              borderTop: `1px solid ${mobileBorder}`,
               transform: mobileOpen ? "translateY(0)" : "translateY(-8px)",
               transition: "transform 260ms cubic-bezier(0.4, 0, 0.2, 1)",
             }}
@@ -254,7 +264,6 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
             </div>
           </div>
         </div>
-        </div>{/* end glass pill */}
       </div>
     </nav>
   );
