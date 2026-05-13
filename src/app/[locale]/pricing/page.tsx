@@ -203,6 +203,76 @@ export default async function PricingPage() {
         )}
       </section>
 
+      {/* ── Current subscription card — ONLY for logged-in users ──
+          Lives at the top of /pricing so the manage view shows the
+          active plan + management actions first, before the upgrade/compare cards. */}
+      {isLoggedIn && (
+        <section id="subscription" className="relative z-10 max-w-5xl mx-auto px-6 pb-6 scroll-mt-24">
+          <h2 className="text-xs font-bold tracking-[0.18em] uppercase mb-3 flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 7h18M5 7v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
+            {locale === "en" ? "Subscription" : "Подписка"}
+          </h2>
+          {(() => {
+            const planLabel = isUltima ? "Ultra" : isPro ? "Pro" : "Free";
+            const planAccent = isUltima ? "#F5B400" : isPro ? "#4561E8" : "#9ca3af";
+            const planSub = isUltima
+              ? (locale === "en" ? "Top tier — every Mentora capability" : "Максимальный план — все возможности Mentora")
+              : isPro
+                ? (locale === "en" ? "Pro subscription active" : "Pro подписка активна")
+                : (locale === "en" ? "10 messages per 8 hours · no card" : "10 сообщений за 8 часов · без карты");
+            return (
+              <div className="rounded-2xl p-5 border relative overflow-hidden"
+                style={{
+                  borderColor: `${planAccent}40`,
+                  background: `linear-gradient(135deg, ${planAccent}12, ${planAccent}04 60%, var(--bg-card))`,
+                }}>
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div style={{ minWidth: 0 }}>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.18em] mb-1" style={{ color: "var(--text-muted)" }}>
+                      {locale === "en" ? "Current plan" : "Текущий план"}
+                    </div>
+                    <div className="text-2xl font-black leading-none" style={{ color: planAccent }}>{planLabel}</div>
+                    <p className="text-xs mt-1.5" style={{ color: "var(--text-secondary)" }}>{planSub}</p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    {/* Anchor to the cards section below — no nav change, just scroll */}
+                    <a
+                      href="#tariffs"
+                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all"
+                      style={{
+                        background: `${planAccent}22`,
+                        color: planAccent,
+                        border: `1px solid ${planAccent}55`,
+                      }}
+                    >
+                      {isPro ? (locale === "en" ? "Switch plan" : "Сменить тариф") : (locale === "en" ? "Upgrade to Pro" : "Перейти на Pro")}
+                      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                    {isPro && (
+                      <a
+                        href="https://t.me/mentora_su_bot?start=billing"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all"
+                        style={{
+                          background: "rgba(35,156,234,0.10)",
+                          color: "#239CEA",
+                          border: "1px solid rgba(35,156,234,0.35)",
+                        }}
+                      >
+                        {locale === "en" ? "Billing / cancel" : "Способ оплаты / отмена"}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </section>
+      )}
+
       {/* PROMO BANNER — Russian only */}
       {locale === "ru" && (
         <section className="relative z-10 max-w-5xl mx-auto px-6 pb-6">
@@ -248,7 +318,7 @@ export default async function PricingPage() {
       )}
 
       {/* PRICING CARDS */}
-      <section className="relative z-10 max-w-5xl mx-auto px-6 pb-8">
+      <section id="tariffs" className="relative z-10 max-w-5xl mx-auto px-6 pb-8 scroll-mt-24">
         <div className="grid md:grid-cols-3 gap-6 md:gap-4 items-stretch">
 
           {/* FREE — styles branch on isLoggedIn so the card stays visible on light theme.
@@ -326,8 +396,8 @@ export default async function PricingPage() {
                 )}
               </div>
               <div className="space-y-2 mb-7">
-                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} plan="monthly" manageHref="/profile#subscription" />
-                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} plan="annual" manageHref="/profile#subscription" />
+                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} plan="monthly" manageHref="/pricing#subscription" />
+                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} plan="annual" manageHref="/pricing#subscription" />
               </div>
               <ul className="space-y-3 flex-1">
                 {proFeatures.map((f: string) => (
@@ -387,8 +457,8 @@ export default async function PricingPage() {
                 )}
               </div>
               <div className="space-y-2 mb-7 relative z-10">
-                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_monthly" manageHref="/profile#subscription" />
-                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_annual" manageHref="/profile#subscription" />
+                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_monthly" manageHref="/pricing#subscription" />
+                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_annual" manageHref="/pricing#subscription" />
               </div>
               <ul className="space-y-3 flex-1 relative z-10">
                 {ultraFeatures.map((label: string, i: number) => {
