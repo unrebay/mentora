@@ -396,8 +396,27 @@ export default async function PricingPage() {
                 )}
               </div>
               <div className="space-y-2 mb-7">
-                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} plan="monthly" manageHref="/pricing#subscription" />
-                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} plan="annual" manageHref="/pricing#subscription" />
+                {isUltima ? (
+                  // Ultra includes Pro — show that explicitly instead of two duplicate active badges
+                  <Link href="/pricing#subscription" className="block text-center py-2.5 px-5 font-semibold rounded-xl text-sm transition-colors"
+                    style={{
+                      background: "rgba(245,180,0,0.10)",
+                      color: "#F5B400",
+                      border: "1px solid rgba(245,180,0,0.40)",
+                    }}>
+                    {locale === "en" ? "Included with Ultra" : "Входит в Ultra"} →
+                  </Link>
+                ) : isPro ? (
+                  // Pro user viewing Pro card — single active badge (not two)
+                  <Link href="/pricing#subscription" className="block text-center py-2.5 px-5 bg-green-50 text-green-700 font-semibold rounded-xl border-2 border-green-200 text-sm hover:bg-green-100 transition-colors">
+                    {locale === "en" ? "Subscription active" : "Подписка активна"} →
+                  </Link>
+                ) : (
+                  <>
+                    <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} plan="monthly" manageHref="/pricing#subscription" />
+                    <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} plan="annual" manageHref="/pricing#subscription" />
+                  </>
+                )}
               </div>
               <ul className="space-y-3 flex-1">
                 {proFeatures.map((f: string) => (
@@ -415,10 +434,9 @@ export default async function PricingPage() {
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap">
               <span className="text-white text-[10px] font-bold px-4 py-1.5 rounded-full tracking-widest uppercase"
                 style={{
-                  background: "linear-gradient(135deg, rgba(255,122,0,0.75), rgba(124,58,237,0.75))",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  backdropFilter: "blur(8px)",
-                  boxShadow: "0 2px 12px rgba(255,122,0,0.25)",
+                  background: "linear-gradient(135deg, #FF7A00 0%, #7C3AED 100%)",
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  boxShadow: "0 2px 12px rgba(255,122,0,0.35)",
                 }}>
                 {t("common.new").toUpperCase()}
               </span>
@@ -457,8 +475,17 @@ export default async function PricingPage() {
                 )}
               </div>
               <div className="space-y-2 mb-7 relative z-10">
-                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_monthly" manageHref="/pricing#subscription" />
-                <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_annual" manageHref="/pricing#subscription" />
+                {isUltima ? (
+                  // Ultra user — single active badge (not two)
+                  <Link href="/pricing#subscription" className="block text-center py-2.5 px-5 bg-emerald-800/60 text-emerald-300 font-semibold rounded-xl border border-emerald-700/50 text-sm hover:bg-emerald-700/70 transition-colors">
+                    {locale === "en" ? "Ultra active" : "Ultra активна"} →
+                  </Link>
+                ) : (
+                  <>
+                    <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_monthly" manageHref="/pricing#subscription" />
+                    <BuyProButton isLoggedIn={isLoggedIn} isPro={isPro} isUltima={isUltima} plan="ultima_annual" manageHref="/pricing#subscription" />
+                  </>
+                )}
               </div>
               <ul className="space-y-3 flex-1 relative z-10">
                 {ultraFeatures.map((label: string, i: number) => {
@@ -466,20 +493,24 @@ export default async function PricingPage() {
                   return (
                     <li key={label} className="flex items-start gap-2.5 text-sm text-white/70">
                       <Check />
-                      <span className="flex items-center gap-2 flex-wrap">
+                      <span>
                         {label}
                         {isSoon && (
-                          <span className="inline-flex items-center gap-1">
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md tracking-wide"
-                              style={{ background: "rgba(255,122,0,0.18)", color: "#FF9A3C", border: "1px solid rgba(255,122,0,0.25)" }}>
-                              {t("pricing.soon")}
-                            </span>
-                            {/* 8-pointed star asterisk */}
-                            <svg viewBox="0 0 12 12" width="9" height="9" aria-hidden style={{ flexShrink: 0 }}>
-                              <path d="M6 0.5L7.1 4.1L10.5 2.5L8.9 5.9L12.5 6L8.9 6.1L10.5 9.5L7.1 7.9L6 11.5L4.9 7.9L1.5 9.5L3.1 6.1L-0.5 6L3.1 5.9L1.5 2.5L4.9 4.1Z"
-                                fill="#FF9A3C" opacity="0.75" />
-                            </svg>
-                          </span>
+                          <sup
+                            style={{
+                              fontSize: "0.55em",
+                              fontWeight: 700,
+                              color: "#FF9A3C",
+                              marginLeft: "0.35em",
+                              letterSpacing: "0.04em",
+                              verticalAlign: "super",
+                              textTransform: "lowercase",
+                            }}
+                            title={t("pricing.soon")}
+                            aria-label={t("pricing.soon")}
+                          >
+                            {t("pricing.soon")}
+                          </sup>
                         )}
                       </span>
                     </li>
@@ -502,13 +533,17 @@ export default async function PricingPage() {
         </div>
 
 
-        {/* COMPARISON TABLE — Russian only, marketing-only — hidden for logged-in */}
-        {locale === "ru" && !isLoggedIn && (
+        {/* COMPARISON TABLE — Russian only. Useful for both marketing and logged-in manage views. */}
+        {locale === "ru" && (
           <div className="mt-8 overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0" style={{
             scrollbarWidth: "thin",
             WebkitOverflowScrolling: "touch",
           }}>
-            <div className="rounded-2xl overflow-hidden" style={{
+            <div className="rounded-2xl overflow-hidden" style={isLoggedIn ? {
+              border: "1px solid var(--border)",
+              background: "var(--bg-card)",
+              minWidth: 480,
+            } : {
               border: "1px solid rgba(255,255,255,0.08)",
               background: "rgba(255,255,255,0.03)",
               backdropFilter: "blur(16px)",
@@ -516,7 +551,10 @@ export default async function PricingPage() {
             }}>
               {/* Table header */}
               <div className="grid grid-cols-4 px-5 py-3 text-xs font-bold tracking-widest uppercase"
-                style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.35)" }}>
+                style={isLoggedIn
+                  ? { borderBottom: "1px solid var(--border)", color: "var(--text-muted)" }
+                  : { borderBottom: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.35)" }
+                }>
                 <div className="col-span-2">Возможности</div>
                 <div className="text-center">Pro</div>
                 <div className="text-center">Ultra</div>
@@ -532,18 +570,21 @@ export default async function PricingPage() {
                 { label: "Ранний доступ к фичам", free: false, pro: false, ultra: true  },
               ].map((row, i) => (
                 <div key={row.label} className="grid grid-cols-4 px-5 py-3 text-sm items-center"
-                  style={{
+                  style={isLoggedIn ? {
+                    borderBottom: i < 7 ? "1px solid var(--border)" : "none",
+                    background: i % 2 === 0 ? "transparent" : "var(--bg-secondary)",
+                  } : {
                     borderBottom: i < 7 ? "1px solid rgba(255,255,255,0.05)" : "none",
                     background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
                   }}>
-                  <div className="col-span-2" style={{ color: "rgba(255,255,255,0.6)" }}>{row.label}</div>
+                  <div className="col-span-2" style={{ color: isLoggedIn ? "var(--text-secondary)" : "rgba(255,255,255,0.6)" }}>{row.label}</div>
                   <div className="text-center">
                     {row.pro
                       ? <svg className="w-4 h-4 inline" viewBox="0 0 16 16" fill="none">
                           <circle cx="8" cy="8" r="7" fill="rgba(107,143,255,0.15)" />
                           <path d="M5 8l2 2 4-4" stroke="#6B8FFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
-                      : <span style={{ color: "rgba(255,255,255,0.15)" }}>—</span>
+                      : <span style={{ color: isLoggedIn ? "var(--text-muted)" : "rgba(255,255,255,0.15)", opacity: 0.5 }}>—</span>
                     }
                   </div>
                   <div className="text-center">
@@ -552,7 +593,7 @@ export default async function PricingPage() {
                           <circle cx="8" cy="8" r="7" fill="rgba(255,122,0,0.12)" />
                           <path d="M5 8l2 2 4-4" stroke="#FF9A3C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
-                      : <span style={{ color: "rgba(255,255,255,0.15)" }}>—</span>
+                      : <span style={{ color: isLoggedIn ? "var(--text-muted)" : "rgba(255,255,255,0.15)", opacity: 0.5 }}>—</span>
                     }
                   </div>
                 </div>
