@@ -728,44 +728,6 @@ async function handleUpdate(update: Record<string, unknown>) {
     return;
   }
 
-  // ── /stars_balance — ADMIN only. Calls getMyStarBalance Bot API and
-  //   replies with the bot's current Stars balance + USD-rough estimate.
-  //   This is the ONLY reliable way to see the balance — BotFather UI
-  //   only shows the section after a threshold (Telegram rolls it out
-  //   gradually). Falls back gracefully if Bot API method unsupported. ──
-  if (text === "/stars_balance" && String(chatId) === String(ADMIN_CHAT_ID)) {
-    try {
-      const r = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getMyStarBalance`, { method: "POST" });
-      const data = await r.json() as { ok: boolean; result?: { amount: number }; description?: string };
-      if (!data.ok) {
-        await sendMessage(ADMIN_CHAT_ID,
-          `⭐ <b>Баланс Stars недоступен через API</b>\n\n` +
-          `<code>${data.description ?? "method not supported on this Bot API"}</code>\n\n` +
-          `Проверь вручную в BotFather → /mybots → @mentora_su_bot → Bot Settings.`
-        );
-        return;
-      }
-      const stars = data.result?.amount ?? 0;
-      // Rough USD estimate: $0.013 per Star (current Telegram cashout rate).
-      // Stars cashout requires conversion to TON via Fragment.
-      const usdRough = (stars * 0.013).toFixed(2);
-      const withdrawMin = 1000;
-      const status = stars >= withdrawMin
-        ? `✅ Можно конвертировать в TON (минимум ${withdrawMin})`
-        : `⏳ До вывода нужно ещё <b>${withdrawMin - stars}</b> ⭐`;
-      await sendMessage(ADMIN_CHAT_ID,
-        `⭐ <b>Баланс Stars</b>\n\n` +
-        `Текущий: <b>${stars}</b> ⭐\n` +
-        `≈ $${usdRough} USD по текущему курсу TON\n\n` +
-        `${status}\n\n` +
-        `<i>Вывод: BotFather → @mentora_su_bot → Bot Settings → Stars → Convert to TON → Fragment.</i>`
-      );
-    } catch (err) {
-      await sendMessage(ADMIN_CHAT_ID, `❌ Ошибка запроса баланса: ${String(err)}`);
-    }
-    return;
-  }
-
   // ── /donations — ADMIN only. Show recent donations from Supabase. ────
   if (text === "/donations" && String(chatId) === String(ADMIN_CHAT_ID)) {
     const supabaseUrl    = process.env.NEXT_PUBLIC_SUPABASE_URL;
