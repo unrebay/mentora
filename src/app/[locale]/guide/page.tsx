@@ -106,17 +106,12 @@ export default async function GuidePage() {
             </svg>
             {t("badge")}
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight tracking-tight" style={{ color: "var(--text)" }}>
-            {t("heroTitle")}{" "}
-            <span style={{
-              fontFamily: "var(--font-playfair), Georgia, serif",
-              fontWeight: 700,
-              fontStyle: "normal",
-              letterSpacing: "-0.01em",
-              color: "var(--text)",
-            }}>
-<span style={{ fontStyle: "normal" }}>M</span><span style={{ color: "#4561E8", fontStyle: "italic", marginRight: "0.05em" }}>e</span><span style={{ fontStyle: "normal" }}>ntora</span>
-            </span>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight tracking-tight inline-flex flex-wrap items-baseline gap-x-3 justify-center" style={{ color: "var(--text)" }}>
+            <span>{t("heroTitle")}</span>
+            {/* Use the canonical Logo component so the Mentora wordmark
+                always matches the brand shape (M upright + italic blue e
+                + ntora upright). href="" disables the Link wrapper. */}
+            <Logo size="lg" href="" />
           </h1>
           <p className="text-lg max-w-xl mx-auto leading-relaxed" style={{ color: "var(--text-muted)" }}>
             {t("heroSubtitle")}
