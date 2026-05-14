@@ -8,6 +8,7 @@ import SubjectGrid from "@/components/SubjectGrid";
 import SubjectCarousel from "@/components/SubjectCarousel";
 import DemoScrollButton from "@/components/DemoScrollButton";
 import LandingNav from "@/components/LandingNav";
+import StickyMobileCTA from "@/components/StickyMobileCTA";
 import BuyProButton from "@/components/BuyProButton";
 import FadeUp from "@/components/FadeUp";
 import nextDynamic from "next/dynamic";
@@ -1182,6 +1183,7 @@ export default async function HomePage() {
           </a>
         </div>
       </footer>
+      <StickyMobileCTA />
     </div>
   );
 }
