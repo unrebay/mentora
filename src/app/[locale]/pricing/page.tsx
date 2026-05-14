@@ -5,6 +5,7 @@ import DashboardNav from "@/components/DashboardNav";
 import BuyProButton from "@/components/BuyProButton";
 import { ActivePlanSection, PaymentInfoSection, type PaymentItem } from "@/components/ManageSubscription";
 import PricingFAQ from "@/components/PricingFAQ";
+import { PublicFooter } from "@/components/SiteFooter";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
@@ -749,17 +750,7 @@ export default async function PricingPage() {
       </section>
 
       )}
-      <footer className="relative z-10 py-8" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
-        <div className="max-w-5xl mx-auto px-6 flex flex-col items-center gap-4 text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
-          <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
-            <span>{t("landing.footerRights")}</span>
-            <div className="flex gap-6">
-              <Link href="/privacy" className="hover:t-secondary transition-colors">{t("landing.footerPrivacy")}</Link>
-              <Link href="/terms" className="hover:t-secondary transition-colors">{t("landing.footerTerms")}</Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import SubjectGrid from "@/components/SubjectGrid";
 import SubjectCarousel from "@/components/SubjectCarousel";
 import DemoScrollButton from "@/components/DemoScrollButton";
 import LandingNav from "@/components/LandingNav";
+import { PublicFooter } from "@/components/SiteFooter";
 import StickyMobileCTA from "@/components/StickyMobileCTA";
 import BuyProButton from "@/components/BuyProButton";
 import FadeUp from "@/components/FadeUp";
@@ -1160,29 +1161,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <footer className="py-8 relative overflow-hidden" style={{ background: "#111827", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-        {/* Continuation of the CTA glow — soft brand-tinted radial above the footer */}
-        <div className="absolute inset-0 opacity-30 pointer-events-none" aria-hidden
-          style={{ background: "radial-gradient(ellipse at 50% -30%, rgba(69,97,232,0.35) 0%, transparent 65%)" }} />
-        <div className="relative max-w-6xl mx-auto px-6 flex flex-col items-center gap-3 text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
-          <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
-            <span>{t("landing.footerRights")}</span>
-            <div className="flex gap-6">
-              <Link href="/privacy" className="transition-colors hover:text-white/70">{t("landing.footerPrivacy")}</Link>
-              <Link href="/terms" className="transition-colors hover:text-white/70">{t("landing.footerTerms")}</Link>
-            </div>
-          </div>
-          <a
-            href="https://pd.rkn.gov.ru/operators-registry/operators-list/?id=100271782"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[10px] tracking-wide opacity-60 hover:opacity-90 transition-opacity"
-            style={{ color: "rgba(255,255,255,0.45)" }}
-          >
-            {t("landing.footerRkn")}
-          </a>
-        </div>
-      </footer>
+      <PublicFooter />
       <StickyMobileCTA />
     </div>
   );

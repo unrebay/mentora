@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import Logo from "@/components/Logo";
 import LandingNav from "@/components/LandingNav";
+import { PublicFooter } from "@/components/SiteFooter";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -270,15 +271,7 @@ export default async function GuidePage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
 
-      <footer className="py-8 border-t" style={{ background: "var(--bg)", borderColor: "var(--border-light)" }}>
-        <div className="max-w-4xl mx-auto px-6 flex items-center justify-between text-xs" style={{ color: "var(--text-muted)" }}>
-          <span>© 2026 Mentora</span>
-          <div className="flex gap-6">
-            <Link href="/privacy" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.7 }}>{t("footerPrivacy")}</Link>
-            <Link href="/pricing" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.7 }}>{t("footerPricing")}</Link>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }
