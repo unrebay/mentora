@@ -104,12 +104,10 @@ export default function UserDropdown({
         aria-expanded={open}
         style={{
           width: 30, height: 30, borderRadius: "50%",
-          display: "inline-flex", alignItems: "center", justifyContent: "center",
-          // Nudge 2px down: pills next to the avatar have a heavier bottom
-          // shadow (0 -2 inset + 0 4 14 outer) that shifts their optical
-          // centre downward by ~2px. Without this offset, the avatar looks
-          // floating above the centerline of the row.
-          marginTop: 2,
+          // display:flex (not inline-flex) — inline-flex picks up the line-box
+          // baseline, which is what made the avatar sit higher than the
+          // Me/streak pills next to it. Block-level flex centres cleanly.
+          display: "flex", alignItems: "center", justifyContent: "center",
           border: open ? "1.5px solid rgba(124,58,237,0.55)" : "1px solid var(--border)",
           background: "var(--bg-secondary)", overflow: "hidden", cursor: "pointer",
           boxShadow: open
