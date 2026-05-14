@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { AppFooter } from "@/components/SiteFooter";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { SUBJECTS } from "@/lib/types";
@@ -246,6 +247,7 @@ export default async function AnalyticsPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-20">
         <AnalyticsShareCard initialInvites={invites ?? []} />
       </div>
+      <AppFooter />
     </>
   );
 }

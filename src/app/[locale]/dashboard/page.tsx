@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AppFooter } from "@/components/SiteFooter";
 import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -170,7 +171,8 @@ export default async function DashboardPage() {
   const daysLeft = 7 - currentStreak;
 
   return (
-    <main className="text-[var(--text)]" style={{ background: "var(--bg)" }}>
+    <>
+      <main className="text-[var(--text)]" style={{ background: "var(--bg)" }}>
       {/* Dark theme: 3D sphere blobs */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden dark:block hidden">
         <SphereBlobScene spheres={SUBTLE_SPHERES} intensity={0.5} />
@@ -644,6 +646,8 @@ export default async function DashboardPage() {
             page's terminator — no extra scroll past this. */}
         <div aria-hidden style={{ height: "clamp(56px, 12vw, 96px)" }} />
       </div>
-    </main>
+        </main>
+      <AppFooter />
+    </>
   );
 }

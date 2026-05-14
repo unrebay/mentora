@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { AppFooter } from "@/components/SiteFooter";
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 
@@ -914,6 +915,7 @@ export default function AboutPage() {
           Пригласить
         </div>
       </a>
+      <AppFooter />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import React from "react";
+import { AppFooter } from "@/components/SiteFooter";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -547,6 +548,7 @@ export default async function ProfilePage() {
         </div>
 
       </main>
+      <AppFooter />
     </div>
   );
 }
