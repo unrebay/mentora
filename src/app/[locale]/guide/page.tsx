@@ -116,7 +116,7 @@ export default async function GuidePage({ params }: { params: Promise<{ locale: 
             return (
               <h1
                 className="font-bold mb-3 leading-[1.05] tracking-tight"
-                style={{ color: "var(--text)", fontSize: "clamp(2.5rem, 6vw, 4rem)" }}
+                style={{ color: "var(--text)", fontSize: "clamp(2rem, 4.8vw, 3.2rem)" }}
               >
                 {rest}
                 {rest ? " " : null}
@@ -138,7 +138,7 @@ export default async function GuidePage({ params }: { params: Promise<{ locale: 
             style={{ color: "var(--text-muted)", fontSize: "clamp(1.25rem, 2.6vw, 1.875rem)" }}
           >
             <span>{t("heroTitle")}</span>
-            <Logo href="" fontSize="clamp(1.5rem, 3vw, 2.25rem)" />
+            <Logo href="" fontSize="clamp(1.25rem, 2.6vw, 1.875rem)" />
           </div>
           <p
             className="leading-relaxed mx-auto whitespace-normal md:whitespace-nowrap"
