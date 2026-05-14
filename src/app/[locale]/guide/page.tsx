@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Logo from "@/components/Logo";
+import LandingNav from "@/components/LandingNav";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -68,52 +69,51 @@ const TIP_META = [
 
 const TIP_KEYS = ["tip1","tip2","tip3","tip4","tip5","tip6","tip7"] as const;
 
-export default async function GuidePage() {
+export default async function GuidePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const t = await getTranslations("guide");
+  const isEn = locale === "en";
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
 
-      {/* NAV — theme-aware glass */}
-      <nav
-        className="sticky top-0 z-50 border-b backdrop-blur-md"
-        style={{ background: "var(--bg-nav)", borderColor: "var(--border-light)" }}
-      >
-        <div className="max-w-4xl mx-auto flex items-center justify-between px-6 py-4">
-          <Logo size="sm" fontSize="1.44rem" />
-          <div className="flex items-center gap-3">
-            <Link href="/auth" className="btn-glow inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl text-white">
-              {t("startFreeBtn")}
-              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      {/* Унифицированный лендинг-навбар (glass pill, как на главной) */}
+      <LandingNav alwaysLight />
 
-      <main className="max-w-4xl mx-auto px-6 py-16">
+      <main className="max-w-4xl mx-auto px-6 pt-4 pb-16">
 
-        {/* ── Hero ─────────────────────────────────────────── */}
-        <div className="mb-16 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6 text-xs font-bold tracking-widest uppercase"
+        {/* ── Back button — отдельная, не часть hero ─────────── */}
+        <div className="mb-8 mt-2">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm font-medium rounded-full px-3.5 py-1.5 transition-colors"
             style={{
-              background: "rgba(69,97,232,0.10)",
-              color: "#4561E8",
-              border: "1px solid rgba(69,97,232,0.25)",
-            }}>
-            <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor">
-              <circle cx="6" cy="6" r="2.5" />
-              <circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+              color: "var(--text-muted)",
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-light)",
+            }}
+          >
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
-            {t("badge")}
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight tracking-tight inline-flex flex-wrap items-baseline gap-x-3 justify-center" style={{ color: "var(--text)" }}>
+            {isEn ? "Back" : "Назад"}
+          </Link>
+        </div>
+
+        {/* ── Hero — пилла убрана; Mentora крупнее; подзаголовок в одну строку на desktop ── */}
+        <div className="mb-16 text-center">
+          <h1
+            className="font-bold mb-5 leading-[1.05] tracking-tight inline-flex flex-wrap items-baseline gap-x-3 sm:gap-x-4 justify-center"
+            style={{ color: "var(--text)", fontSize: "clamp(2.25rem, 5.5vw, 3.75rem)" }}
+          >
             <span>{t("heroTitle")}</span>
-            {/* Use the canonical Logo component so the Mentora wordmark
-                always matches the brand shape (M upright + italic blue e
-                + ntora upright). href="" disables the Link wrapper. */}
-            <Logo size="lg" href="" />
+            {/* Mentora — увеличили относительно остального заголовка. Logo сохраняет M+курсив-e+ntora. */}
+            <Logo href="" fontSize="clamp(2.6rem, 6.5vw, 4.5rem)" />
           </h1>
-          <p className="text-lg max-w-xl mx-auto leading-relaxed" style={{ color: "var(--text-muted)" }}>
+          <p
+            className="leading-relaxed mx-auto whitespace-normal md:whitespace-nowrap"
+            style={{ color: "var(--text-muted)", fontSize: "clamp(0.95rem, 1.6vw, 1.125rem)" }}
+          >
             {t("heroSubtitle")}
           </p>
         </div>
@@ -208,18 +208,14 @@ export default async function GuidePage() {
         </div>
       </main>
 
-      {/* ── Footer CTA — clean section. No decorative halo (looked broken).
-            Thin gradient divider line + a very subtle top tint that fades
-            into the page background give intentional separation. ────── */}
+      {/* ── Footer CTA ────────────────────────────────────── */}
       <section className="relative overflow-hidden py-20 px-6 text-center"
         style={{ background: "var(--bg)" }}>
-        {/* Subtle top tint — fades from a 4% blue wash to fully transparent over 200px */}
         <div className="absolute top-0 left-0 right-0 pointer-events-none"
           style={{
             height: "220px",
             background: "linear-gradient(180deg, rgba(69,97,232,0.05) 0%, rgba(69,97,232,0.02) 50%, transparent 100%)",
           }} />
-        {/* Top accent line — soft fade on both ends */}
         <div className="absolute top-0 left-0 right-0 h-px pointer-events-none"
           style={{
             background: "linear-gradient(90deg, transparent 0%, rgba(69,97,232,0.20) 35%, rgba(69,97,232,0.30) 50%, rgba(69,97,232,0.20) 65%, transparent 100%)",
@@ -231,8 +227,16 @@ export default async function GuidePage() {
           <p className="mb-8 max-w-sm mx-auto" style={{ color: "var(--text-muted)" }}>
             {t("footerCtaDesc")}
           </p>
-          <Link href="/auth" className="btn-glow inline-flex items-center justify-center px-8 py-4 rounded-xl text-base font-semibold text-white">
+          <Link
+            href="/auth"
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-base font-semibold text-white transition-transform hover:-translate-y-0.5"
+            style={{
+              background: "linear-gradient(135deg, #5575FF 0%, #4561E8 50%, #6B4FF0 100%)",
+              boxShadow: "0 8px 28px rgba(69,97,232,0.45), 0 1px 0 rgba(255,255,255,0.25) inset, 0 0 0 1px rgba(255,255,255,0.08) inset",
+            }}
+          >
             {t("ctaShortBtn")}
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </Link>
         </div>
       </section>
