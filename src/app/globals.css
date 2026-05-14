@@ -109,7 +109,12 @@
     color: var(--text);
     @apply antialiased;
     transition: background-color 0.2s ease, color 0.2s ease;
+    /* min-height: 100dvh accounts for iOS Safari URL bar shrink (100vh
+       is the LARGE viewport, leaving content shorter than visible area
+       on first paint until URL bar collapses). Fallback 100vh for older
+       Safari that doesn't know dvh. */
     min-height: 100vh;
+    min-height: 100dvh;
     /* Defensive — ensure no UA-derived offsets */
     position: relative;
     left: 0;

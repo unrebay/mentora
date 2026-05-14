@@ -69,7 +69,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         The paddingTop compensates so actual content starts at the right visual position.
         background: var(--bg) fills the 76px strip that shows through the nav.
       */}
-      <div style={{ marginTop: "-76px", paddingTop: "76px", background: "var(--bg)" }}>
+      <div style={{ marginTop: "-76px", paddingTop: "76px", background: "var(--bg)", minHeight: "100dvh" }}>
         {children}
       </div>
       <OnboardingTour />
