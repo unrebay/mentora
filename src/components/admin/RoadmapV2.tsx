@@ -172,6 +172,10 @@ const SEED: RoadmapTaskV2[] = [
   { id: "note_b2b",         title: "B2B-лендинг для школ — после 100 первых публичных пользователей",
     bucket: "notes", category: "marketing", state: "planned",
     createdAt: new Date().toISOString() },
+  { id: "note_q4_voice_visuals", title: "Q4 2026 — Голос + визуализации в чате",
+    bucket: "notes", category: "product", state: "planned",
+    notes: "Обе фичи реалистичны для Q4 2026:\n• Голос — Anthropic уже даёт voice API, технически делаемо.\n• Визуализации — рендеринг диаграмм/графиков/схем прямо в чате (SVG/canvas). Демо очень эффектно для инвесторов.",
+    createdAt: new Date().toISOString() },
 ];
 
 // ── Storage ──────────────────────────────────────────────────────────────────

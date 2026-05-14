@@ -35,6 +35,11 @@ export default function Logo({
         fontFamily: "var(--font-playfair), Georgia, serif",
         fontSize,
         fontWeight: 700,
+        // CRITICAL: explicitly set fontStyle:normal on the wrapper. Without
+        // it, when Playfair Display loads both Italic and Regular @font-face
+        // variants, some browsers (Safari especially) sometimes pick Italic
+        // for unspecified style. The inner blue "e" overrides to italic.
+        fontStyle: "normal",
         letterSpacing: "-0.01em",
         lineHeight: 1,
         color: textColor ?? "var(--text)",
