@@ -111,6 +111,7 @@ export default async function GuidePage() {
             <span style={{
               fontFamily: "var(--font-playfair), Georgia, serif",
               fontWeight: 700,
+              fontStyle: "normal",
               letterSpacing: "-0.01em",
               color: "var(--text)",
             }}>
