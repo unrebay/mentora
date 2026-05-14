@@ -461,27 +461,25 @@ export default async function PricingPage() {
 
         {/* COMPARISON TABLE — Russian only. Useful for both marketing and logged-in manage views. */}
         {locale === "ru" && (
-          <div className="mt-8 overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0" style={{
+          <div className="mt-8 overflow-x-auto md:px-0" style={{
             scrollbarWidth: "thin",
             WebkitOverflowScrolling: "touch",
           }}>
-            <div className="rounded-2xl overflow-hidden" style={isLoggedIn ? {
+            <div className="rounded-2xl overflow-hidden md:min-w-[540px]" style={isLoggedIn ? {
               border: "1px solid var(--border)",
               background: "var(--bg-card)",
-              minWidth: 540,
             } : {
               border: "1px solid rgba(255,255,255,0.08)",
               background: "rgba(255,255,255,0.03)",
               backdropFilter: "blur(16px)",
-              minWidth: 540,
             }}>
               {/* Table header */}
-              <div className="grid grid-cols-5 px-5 py-3 text-xs font-bold tracking-widest uppercase"
+              <div className="grid grid-cols-[1.7fr_0.5fr_0.5fr_0.5fr] md:grid-cols-5 px-3 sm:px-5 py-3 text-[10px] sm:text-xs font-bold tracking-widest uppercase"
                 style={isLoggedIn
                   ? { borderBottom: "1px solid var(--border)", color: "var(--text-muted)" }
                   : { borderBottom: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.35)" }
                 }>
-                <div className="col-span-2">Возможности</div>
+                <div className="md:col-span-2">Возможности</div>
                 <div className="text-center">Free</div>
                 <div className="text-center">Pro</div>
                 <div className="text-center">Ultra</div>
@@ -496,7 +494,7 @@ export default async function PricingPage() {
                 { label: "Генерация презентаций", free: false, pro: false, ultra: true  },
                 { label: "Ранний доступ к фичам", free: false, pro: false, ultra: true  },
               ].map((row, i) => (
-                <div key={row.label} className="grid grid-cols-5 px-5 py-3 text-sm items-center"
+                <div key={row.label} className="grid grid-cols-[1.7fr_0.5fr_0.5fr_0.5fr] md:grid-cols-5 px-3 sm:px-5 py-2.5 sm:py-3 text-[13px] sm:text-sm items-center"
                   style={isLoggedIn ? {
                     borderBottom: i < 7 ? "1px solid var(--border)" : "none",
                     background: i % 2 === 0 ? "transparent" : "var(--bg-secondary)",
@@ -504,7 +502,7 @@ export default async function PricingPage() {
                     borderBottom: i < 7 ? "1px solid rgba(255,255,255,0.05)" : "none",
                     background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
                   }}>
-                  <div className="col-span-2" style={{ color: isLoggedIn ? "var(--text-secondary)" : "rgba(255,255,255,0.6)" }}>{row.label}</div>
+                  <div className="md:col-span-2 pr-2" style={{ color: isLoggedIn ? "var(--text-secondary)" : "rgba(255,255,255,0.6)" }}>{row.label}</div>
                   <div className="text-center">
                     {row.free
                       ? <svg className="w-4 h-4 inline" viewBox="0 0 16 16" fill="none">
