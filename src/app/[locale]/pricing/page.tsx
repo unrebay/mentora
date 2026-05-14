@@ -679,6 +679,29 @@ export default async function PricingPage() {
             </p>
             <h2 className="text-3xl font-bold tracking-tight text-white">{t("pricing.faqTitle")}</h2>
           </div>
+          {/* FAQPage JSON-LD — те же 5 вопросов, что отрисованы в <PricingFAQ />.
+              Делаем SERP rich snippets: Google и Яндекс выведут вопросы прямо в выдаче.
+              Эмиттится только для ru + !isLoggedIn — это и есть страница, которую видят краулеры. */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                mainEntity: [
+                  { q: t("faq.q1"), a: t("faq.a1") },
+                  { q: t("faq.q2"), a: t("faq.a2") },
+                  { q: t("faq.q3"), a: t("faq.a3") },
+                  { q: t("faq.q4"), a: t("faq.a4") },
+                  { q: t("faq.q5"), a: t("faq.a5") },
+                ].map(({ q, a }) => ({
+                  "@type": "Question",
+                  name: q,
+                  acceptedAnswer: { "@type": "Answer", text: a },
+                })),
+              }),
+            }}
+          />
           <PricingFAQ />
           <div className="mt-12 flex flex-col items-center gap-3">
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>{t("pricing.supportQuestion")}</p>
