@@ -115,7 +115,7 @@ export default async function GuidePage() {
               letterSpacing: "-0.01em",
               color: "var(--text)",
             }}>
-              M<span style={{ color: "#4561E8", fontStyle: "italic", marginRight: "0.05em" }}>e</span>ntora
+<span style={{ fontStyle: "normal" }}>M</span><span style={{ color: "#4561E8", fontStyle: "italic", marginRight: "0.05em" }}>e</span><span style={{ fontStyle: "normal" }}>ntora</span>
             </span>
           </h1>
           <p className="text-lg max-w-xl mx-auto leading-relaxed" style={{ color: "var(--text-muted)" }}>
