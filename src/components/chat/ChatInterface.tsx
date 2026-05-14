@@ -903,8 +903,14 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             {/* Native hint */}
             {subject==="english" && showNativeHint && (
               <div className="mb-2 mx-auto max-w-xs rounded-2xl px-4 py-3 flex items-start gap-2" style={{
-                background:"linear-gradient(135deg,rgba(59,130,246,0.10) 0%,rgba(29,78,216,0.07) 100%)",
-                border:"1px solid rgba(59,130,246,0.22)",
+                // Matte glass over a tinted page bg layer — was 0.10/0.07
+                // alpha which let the messages behind bleed through. Now uses
+                // the standard 66% --bg-card surface + thin blue tint + blur.
+                background:"linear-gradient(135deg,rgba(59,130,246,0.18) 0%,rgba(29,78,216,0.10) 100%), color-mix(in srgb, var(--bg-card) 92%, transparent)",
+                backdropFilter: "blur(20px) saturate(1.6)",
+                WebkitBackdropFilter: "blur(20px) saturate(1.6)",
+                border:"1px solid rgba(59,130,246,0.32)",
+                boxShadow: "0 4px 20px rgba(59,130,246,0.12), 0 0 0 1px rgba(255,255,255,0.04) inset",
                 opacity: hintFading ? 0 : 1, transition:"opacity 0.4s ease",
               }}>
                 <div className="flex-1 min-w-0">
