@@ -176,6 +176,10 @@ const SEED: RoadmapTaskV2[] = [
     bucket: "notes", category: "product", state: "planned",
     notes: "Обе фичи реалистичны для Q4 2026:\n• Голос — Anthropic уже даёт voice API, технически делаемо.\n• Визуализации — рендеринг диаграмм/графиков/схем прямо в чате (SVG/canvas). Демо очень эффектно для инвесторов.",
     createdAt: new Date().toISOString() },
+  { id: "note_tg_mini_app", title: "Telegram Mini App — после Q3 native mobile",
+    bucket: "notes", category: "product", state: "planned",
+    notes: "ИДЕЯ, к которой вернёмся после native mobile (Q3) + B2B-пилота. Mini App = Mentora внутри Telegram-чата с авто-логином через Telegram identity (без регистрации) и push через бот. Сильный канал для B2B: «учитель отправил ссылку → ученик решил урок без выхода из Telegram».\n\nНЕ делать до 1 июня: 18 дней до запуска, веб уже работает в Telegram in-app браузере. SEO/маркетинг трафик идёт на mentora.su — Mini App уведёт его. Стоит делать когда есть PMF (200+ платящих) и native mobile в проде.",
+    createdAt: new Date().toISOString() },
 ];
 
 // ── Storage ──────────────────────────────────────────────────────────────────
