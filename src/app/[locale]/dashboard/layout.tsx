@@ -49,6 +49,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <>
+      {/* Scope: disable iOS rubber-band overscroll on dashboard pages only.
+          The page is a finite list (subjects + referral + support), it has a
+          deliberate end-cap below the support block. Allowing rubber-band
+          past it reveals the html bg and looks broken on mobile. */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        html, body { overscroll-behavior-y: none; }
+      ` }} />
       <DashboardNav
         isPro={isPro}
         isUltima={isUltima}
@@ -69,7 +76,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         The paddingTop compensates so actual content starts at the right visual position.
         background: var(--bg) fills the 76px strip that shows through the nav.
       */}
-      <div style={{ marginTop: "-76px", paddingTop: "76px", background: "var(--bg)", minHeight: "100dvh" }}>
+      <div style={{ marginTop: "-76px", paddingTop: "76px", background: "var(--bg)", minHeight: "100dvh", overscrollBehaviorY: "none" }}>
         {children}
       </div>
       <OnboardingTour />

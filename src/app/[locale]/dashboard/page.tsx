@@ -631,13 +631,18 @@ export default async function DashboardPage() {
 
         {/* ── Support ──────────────────────────────────────── */}
         <FadeUp delay={0.15} fade>
-        <div className="mt-4 mb-8 sm:mt-6 sm:mb-12 flex flex-col items-center gap-2 text-center">
+        <div className="mt-4 sm:mt-6 flex flex-col items-center gap-2 text-center">
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>{t("needHelp")}</p>
           <div className="flex gap-2 flex-wrap justify-center items-start">
             <TelegramSupportButton size="sm" label={t("support")} />
           </div>
         </div>
         </FadeUp>
+        {/* White end-cap: mirrors the gap above the support block so it sits
+            visually centred between Referral and the page edge. Combined with
+            overscroll-behavior:none on the dashboard wrapper, this is the
+            page's terminator — no extra scroll past this. */}
+        <div aria-hidden style={{ height: "clamp(56px, 12vw, 96px)" }} />
       </div>
     </main>
   );
