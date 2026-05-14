@@ -847,8 +847,12 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             The science-color hint stays as the bubble's left accent. */}
         {loading && (
           <div className="flex justify-start gap-2">
-            <div className="w-7 h-7 rounded-2xl flex items-center justify-center shrink-0 mt-auto" style={{ background:"linear-gradient(135deg,rgba(69,97,232,0.14),rgba(69,97,232,0.06))", border:"1.5px solid rgba(69,97,232,0.22)" }}>
-              <MeLogo height={13} colorM="var(--text)" colorE="#4561E8" />
+            <div className="w-7 h-7 rounded-2xl flex items-center justify-center shrink-0 mt-auto mb-0.5" style={{
+              background: "#ffffff",
+              border: "1.5px solid rgba(0,0,0,0.08)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+            }}>
+              <MeLogo height={13} colorM="#111111" colorE="#4561E8" />
             </div>
             <div className="px-5 py-4" style={{ background:"var(--chat-msg-bg)", backdropFilter:"blur(16px)", border:`1px solid var(--chat-msg-border)`, borderLeft:`2.5px solid ${subjColor}55`, borderRadius:"20px 20px 20px 4px" }}>
               <div className="flex gap-1.5 items-end h-4">
