@@ -100,16 +100,45 @@ export default async function GuidePage({ params }: { params: Promise<{ locale: 
           </Link>
         </div>
 
-        {/* ── Hero — пилла убрана; Mentora крупнее; подзаголовок в одну строку на desktop ── */}
+        {/* ── Hero ─────────────────────────────────────────
+            H1: «Как [учиться]» — last word painted in the brand
+            gradient blue. The whole title is built from the existing
+            translation key `guide.badge` (used to live in the AI-style
+            pill we just removed).
+            H2: «Гайд по Mentora» — `heroTitle` + Logo, smaller than H1.
+            P:  «7 приёмов…» description. */}
         <div className="mb-16 text-center">
-          <h1
-            className="font-bold mb-5 leading-[1.05] tracking-tight inline-flex flex-wrap items-baseline gap-x-3 sm:gap-x-4 justify-center"
-            style={{ color: "var(--text)", fontSize: "clamp(2.25rem, 5.5vw, 3.75rem)" }}
+          {(() => {
+            const words = t("badge").split(" ");
+            const last = words.pop() ?? "";
+            const rest = words.join(" ");
+            return (
+              <h1
+                className="font-bold mb-3 leading-[1.05] tracking-tight"
+                style={{ color: "var(--text)", fontSize: "clamp(2.5rem, 6vw, 4rem)" }}
+              >
+                {rest}
+                {rest ? " " : null}
+                <span
+                  style={{
+                    background: "linear-gradient(135deg, #5575FF 0%, #4561E8 50%, #6B4FF0 100%)",
+                    WebkitBackgroundClip: "text",
+                    backgroundClip: "text",
+                    color: "transparent",
+                  }}
+                >
+                  {last}
+                </span>
+              </h1>
+            );
+          })()}
+          <div
+            className="font-semibold inline-flex flex-wrap items-baseline gap-x-2 justify-center mb-5"
+            style={{ color: "var(--text-muted)", fontSize: "clamp(1.25rem, 2.6vw, 1.875rem)" }}
           >
             <span>{t("heroTitle")}</span>
-            {/* Mentora — увеличили относительно остального заголовка. Logo сохраняет M+курсив-e+ntora. */}
-            <Logo href="" fontSize="clamp(2.6rem, 6.5vw, 4.5rem)" />
-          </h1>
+            <Logo href="" fontSize="clamp(1.5rem, 3vw, 2.25rem)" />
+          </div>
           <p
             className="leading-relaxed mx-auto whitespace-normal md:whitespace-nowrap"
             style={{ color: "var(--text-muted)", fontSize: "clamp(0.95rem, 1.6vw, 1.125rem)" }}
