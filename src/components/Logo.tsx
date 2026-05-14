@@ -7,6 +7,8 @@ interface LogoProps {
   className?: string;
   /** Force a specific text colour (e.g. "white" for permanently-dark backgrounds) */
   textColor?: string;
+  /** Hide the «beta» badge for compact contexts (e.g. inline subtitle lines) */
+  hideBeta?: boolean;
 }
 
 const sizes = {
@@ -25,6 +27,7 @@ export default function Logo({
   href = "/",
   className = "",
   textColor,
+  hideBeta,
 }: LogoProps) {
   const fontSize = fontSizeOverride ?? sizes[size].fontSize;
 
@@ -52,7 +55,7 @@ export default function Logo({
         marginRight: "0.05em",
       }}>e</span>
       ntora
-      {showBeta() && (
+      {!hideBeta && showBeta() && (
         <span
           style={{
             position: "absolute",
