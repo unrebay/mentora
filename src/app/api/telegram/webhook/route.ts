@@ -492,15 +492,47 @@ async function handleUpdate(update: Record<string, unknown>) {
   }
 
   // ── Successful payment ────────────────────────────────────────────────
+  // Persist the charge_id to Supabase so we can later call refundStarPayment
+  // via the Bot API if the user asks for a refund. Without storing it, refunds
+  // are impossible (Telegram does not expose the id retroactively).
   const payment = message.successful_payment as Record<string, unknown> | undefined;
   if (payment) {
+    const chargeId  = typeof payment.telegram_payment_charge_id === "string" ? payment.telegram_payment_charge_id : null;
+    const provId    = typeof payment.provider_payment_charge_id === "string" ? payment.provider_payment_charge_id : null;
+    const amount    = typeof payment.total_amount === "number" ? payment.total_amount : 0;
+    const currency  = typeof payment.currency === "string" ? payment.currency : "XTR";
+    const payload   = typeof payment.invoice_payload === "string" ? payment.invoice_payload : null;
+    const supabaseUrl    = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (supabaseUrl && serviceRoleKey && chargeId) {
+      try {
+        const sb = createSupabaseAdmin(supabaseUrl, serviceRoleKey);
+        const rawFrom = message.from as Record<string, unknown> | undefined;
+        await sb.from("telegram_donations").insert({
+          tg_user_id:                 fromId,
+          tg_chat_id:                 chatId,
+          tg_username:                rawFrom?.username ?? null,
+          tg_first_name:              rawFrom?.first_name ?? null,
+          telegram_payment_charge_id: chargeId,
+          provider_payment_charge_id: provId,
+          amount,
+          currency,
+          invoice_payload:            payload,
+        });
+      } catch (err) {
+        console.error("[telegram] donations insert failed:", err);
+      }
+    }
     await sendMessage(chatId,
-      `💙 Огромное спасибо! Получили <b>${payment.total_amount} Stars</b>.\n` +
+      `💙 Огромное спасибо! Получили <b>${amount} Stars</b>.\n` +
       "Это очень помогает развитию Mentora!"
     );
     if (ADMIN_CHAT_ID) {
+      // Include charge_id so admin can refund by replying or via /refund_donation
+      const idLine = chargeId ? `\n🆔 charge: <code>${chargeId}</code>` : "";
       await sendMessage(ADMIN_CHAT_ID,
-        `⭐ Донат: ${payment.total_amount} Stars от ${fromName} (${fromUsername}, ID: ${fromId})`
+        `⭐ Донат: <b>${amount} Stars</b> от ${fromName} (${fromUsername}, TG: <code>${fromId}</code>)${idLine}\n\n` +
+        `Для возврата ответь на это сообщение командой /refund_donation`
       );
     }
     return;
@@ -641,6 +673,94 @@ async function handleUpdate(update: Record<string, unknown>) {
           metadata: { length: reply.length, preview: reply.slice(0, 80) },
         });
       } catch { /* fire-and-forget */ }
+    }
+    return;
+  }
+
+  // ── /refund_donation — ADMIN only. Reply to a donation notification
+  //  (which contains charge: <code>) to refund those Stars to the user. ───
+  if (text === "/refund_donation" && String(chatId) === String(ADMIN_CHAT_ID)) {
+    const replyTo = message.reply_to_message as Record<string, unknown> | undefined;
+    const replyText = typeof replyTo?.text === "string" ? replyTo.text : "";
+    // Charge id format includes alnums + underscore; extract from "charge: XXXX"
+    const m  = replyText.match(/charge:\s*([\w-]+)/i);
+    const tg = replyText.match(/TG:\s*(\d+)/);
+    if (!m || !tg) {
+      await sendMessage(ADMIN_CHAT_ID,
+        "❌ Для возврата нужно ответить (Reply) на сообщение с уведомлением о донате — оно содержит TG id и charge id."
+      );
+      return;
+    }
+    const chargeId  = m[1];
+    const targetTg  = tg[1];
+    const supabaseUrl    = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    try {
+      // Call refundStarPayment Bot API.
+      const r = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/refundStarPayment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: Number(targetTg), telegram_payment_charge_id: chargeId }),
+      });
+      const data = await r.json();
+      if (!data.ok) {
+        await sendMessage(ADMIN_CHAT_ID, `❌ Возврат не прошёл: <code>${data.description ?? "unknown"}</code>`);
+        return;
+      }
+      // Mark as refunded in DB
+      if (supabaseUrl && serviceRoleKey) {
+        try {
+          const sb = createSupabaseAdmin(supabaseUrl, serviceRoleKey);
+          await sb.from("telegram_donations")
+            .update({ refunded_at: new Date().toISOString(), refunded_by_admin: "unrebay@gmail.com" })
+            .eq("telegram_payment_charge_id", chargeId);
+        } catch { /* non-fatal */ }
+      }
+      await sendMessage(ADMIN_CHAT_ID, `✅ Возврат выполнен. <code>${chargeId}</code> → пользователю <code>${targetTg}</code>.`);
+      // Notify the user
+      await sendMessage(targetTg,
+        "💸 <b>Возврат Stars выполнен</b>\n\n" +
+        "Stars вернулись в твой Telegram-кошелёк. Спасибо, что поддерживал Mentora — ты всегда можешь снова, если решишь."
+      );
+    } catch (err) {
+      await sendMessage(ADMIN_CHAT_ID, `❌ Ошибка при возврате: ${String(err)}`);
+    }
+    return;
+  }
+
+  // ── /donations — ADMIN only. Show recent donations from Supabase. ────
+  if (text === "/donations" && String(chatId) === String(ADMIN_CHAT_ID)) {
+    const supabaseUrl    = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !serviceRoleKey) {
+      await sendMessage(ADMIN_CHAT_ID, "❌ Supabase env не настроен.");
+      return;
+    }
+    try {
+      const sb = createSupabaseAdmin(supabaseUrl, serviceRoleKey);
+      const { data, error } = await sb
+        .from("telegram_donations")
+        .select("tg_user_id, tg_username, tg_first_name, amount, currency, refunded_at, created_at, telegram_payment_charge_id")
+        .order("created_at", { ascending: false })
+        .limit(20) as { data: Array<{ tg_user_id: number; tg_username: string | null; tg_first_name: string | null; amount: number; currency: string; refunded_at: string | null; created_at: string; telegram_payment_charge_id: string }> | null; error: { message: string } | null };
+      if (error) { await sendMessage(ADMIN_CHAT_ID, `❌ ${error.message}`); return; }
+      const rows = data ?? [];
+      const total = rows.filter(r => !r.refunded_at).reduce((sum, r) => sum + r.amount, 0);
+      const refundedCount = rows.filter(r => r.refunded_at).length;
+      const lines = rows.slice(0, 15).map(r => {
+        const date = new Date(r.created_at).toISOString().slice(0, 10);
+        const who  = r.tg_username ? `@${r.tg_username}` : (r.tg_first_name ?? `id${r.tg_user_id}`);
+        const status = r.refunded_at ? " ↩️ возврат" : "";
+        return `• ${date} — <b>${r.amount}</b> ⭐ от ${who}${status}`;
+      }).join("\n");
+      await sendMessage(ADMIN_CHAT_ID,
+        `📊 <b>Донаты (последние 20)</b>\n\n${lines || "Пока пусто."}\n\n` +
+        `Итого получено: <b>${total}</b> ⭐\n` +
+        `Возвратов: ${refundedCount}\n\n` +
+        `<i>Для возврата конкретного доната — Reply на уведомление о нём + /refund_donation</i>`
+      );
+    } catch (err) {
+      await sendMessage(ADMIN_CHAT_ID, `❌ ${String(err)}`);
     }
     return;
   }
