@@ -898,7 +898,7 @@ export default async function HomePage() {
               <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-600/20 text-brand-400 text-xs font-bold rounded-full mb-5 tracking-widest uppercase">
-                    Скоро — июнь 2026
+                    Скоро — осень 2026
                   </div>
                   <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
                     Режим подготовки<br />
@@ -921,7 +921,7 @@ export default async function HomePage() {
                     <div className="h-2 rounded-full bg-white/10 overflow-hidden">
                       <div className="h-full rounded-full bg-brand-500" style={{ width: "60%" }} />
                     </div>
-                    <div className="text-xs text-gray-500 mt-2">До экзамена: 40 дней · История России · ЕГЭ 2026</div>
+                    <div className="text-xs text-gray-500 mt-2">До экзамена: 40 дней · История России · ЕГЭ 2027</div>
                   </div>
                   <Link href="/auth" className="block text-center py-3 px-6 bg-brand-600 text-white font-semibold rounded-full hover:bg-brand-700 transition-colors text-sm">
                     Начать готовиться уже сейчас

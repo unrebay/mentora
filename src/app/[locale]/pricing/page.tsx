@@ -6,6 +6,7 @@ import BuyProButton from "@/components/BuyProButton";
 import { ActivePlanSection, PaymentInfoSection, type PaymentItem } from "@/components/ManageSubscription";
 import PricingFAQ from "@/components/PricingFAQ";
 import { PublicFooter } from "@/components/SiteFooter";
+import SwitchToFreeButton from "@/components/SwitchToFreeButton";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
@@ -266,21 +267,25 @@ export default async function PricingPage() {
               </div>
               <p className="text-sm mt-2" style={{ color: isLoggedIn ? "var(--text-muted)" : "rgba(255,255,255,0.4)" }}>{t("pricing.freeDesc")}</p>
             </div>
-            <Link
-              href={isLoggedIn ? "/dashboard" : "/auth"}
-              className="block text-center py-3 px-5 font-semibold rounded-xl transition-all duration-200 mb-8 text-sm"
-              style={isLoggedIn ? {
-                color: "var(--text-secondary)",
-                border: "1px solid var(--border)",
-                background: "var(--bg-card)",
-              } : {
-                color: "rgba(255,255,255,0.6)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                background: "rgba(255,255,255,0.05)",
-              }}
-            >
-              {isLoggedIn ? (locale === "en" ? "Current free tier" : "Текущий бесплатный план") : t("pricing.free.cta")}
-            </Link>
+            {isLoggedIn ? (
+              <SwitchToFreeButton
+                currentPlan={isUltima ? "ultra" : isPro ? "pro" : "free"}
+                locale={locale === "en" ? "en" : "ru"}
+                isLight={true}
+              />
+            ) : (
+              <Link
+                href="/auth"
+                className="block text-center py-3 px-5 font-semibold rounded-xl transition-all duration-200 mb-8 text-sm"
+                style={{
+                  color: "rgba(255,255,255,0.6)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  background: "rgba(255,255,255,0.05)",
+                }}
+              >
+                {t("pricing.free.cta")}
+              </Link>
+            )}
             <ul className="space-y-3 flex-1">
               {freeFeatures.map((f: string) => (
                 <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: isLoggedIn ? "var(--text-secondary)" : "rgba(255,255,255,0.55)" }}>
