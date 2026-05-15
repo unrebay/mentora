@@ -117,6 +117,9 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
             <Link href="/#how" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.9 }}>
               {t("how")}
             </Link>
+            <Link href="/repetitor" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.9 }}>
+              {t("repetitor")}
+            </Link>
             <Link
               href="/#pricing"
               className="hover:opacity-100 transition-opacity"
@@ -222,8 +225,7 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
             maxHeight: mobileOpen ? 360 : 0,
             opacity: mobileOpen ? 1 : 0,
             pointerEvents: mobileOpen ? "all" : "none",
-            // Dropdown is more matte than the nav pill itself (which stays transparent).
-            background: isDark ? "rgba(20,22,40,0.94)" : "rgba(255,255,255,0.94)",
+            background: navBg,
             backdropFilter: navBlur,
             WebkitBackdropFilter: navBlur,
             borderRadius: 24,
@@ -253,6 +255,12 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
               onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
               onClick={() => setMobileOpen(false)}>{t("how")}</Link>
+            <Link href="/repetitor"
+              className="text-sm font-medium px-3 py-3 rounded-xl transition-all"
+              style={{ color: linkColor, background: "transparent" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
+              onClick={() => setMobileOpen(false)}>{t("repetitor")}</Link>
             <Link href="/#pricing"
               className="text-sm font-medium px-3 py-3 rounded-xl transition-all"
               style={{
