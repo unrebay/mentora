@@ -44,7 +44,7 @@ export default function DemoChatModal({
       role="dialog"
       aria-modal="true"
       aria-label={ctaLabel ?? "Demo chat"}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-3"
+      className="fixed inset-0 z-[100] flex items-start sm:items-center justify-center p-3 pt-20 sm:pt-3"
       style={{
         pointerEvents: open ? "auto" : "none",
         opacity: open ? 1 : 0,
@@ -68,7 +68,7 @@ export default function DemoChatModal({
       <div
         className="relative z-[1] w-full max-w-md mx-auto rounded-3xl overflow-hidden flex flex-col"
         style={{
-          height: "min(720px, 85vh)",
+          height: "min(720px, calc(100vh - 100px))",
           background: "rgba(8,10,24,0.94)",
           border: "1px solid rgba(255,255,255,0.10)",
           boxShadow:
@@ -95,8 +95,8 @@ export default function DemoChatModal({
           </svg>
         </button>
 
-        {/* Chat content — fills the card */}
-        <div className="flex-1 overflow-hidden">
+        {/* Chat content — fills the card with breathing room (поля) */}
+        <div className="flex-1 overflow-hidden p-4 sm:p-6 pt-12 sm:pt-12">
           <DemoChat />
         </div>
       </div>

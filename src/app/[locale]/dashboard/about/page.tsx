@@ -342,7 +342,7 @@ export default function AboutPage() {
               <thead>
                 <tr>
                   {compHeaders.map((h, i) => (
-                    <th key={h} className={i === 2 || i === 3 ? "hidden md:table-cell" : undefined} style={{
+                    <th key={h} className={i === 0 ? undefined : "compThVertical"} style={{
                       padding: "10px 14px",
                       fontSize: 12, fontWeight: 700, textAlign: "left" as const,
                       color: i === 1 ? "#4561E8" : "var(--text-muted)",
@@ -399,14 +399,14 @@ export default function AboutPage() {
                   });
                   return (
                     <tr key={row.criterion}>
-                      <td style={cellStyle(0, "")}>
+                      <td className="compCritCol" style={cellStyle(0, "")}>
                         <div style={{ color: "var(--text)", fontWeight: 600, fontSize: 13 }}>{row.criterion}</div>
                         {row.note && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2, lineHeight: 1.4 }}>{row.note}</div>}
                       </td>
-                      <td style={cellStyle(1, row.mentora)}>{row.mentora}</td>
-                      <td className="hidden md:table-cell" style={cellStyle(2, row.search)}>{row.search}</td>
-                      <td className="hidden md:table-cell" style={cellStyle(3, row.ai)}>{row.ai}</td>
-                      <td style={cellStyle(4, row.tutor)}>{row.tutor}</td>
+                      <td className="compTdNarrow" style={cellStyle(1, row.mentora)}>{row.mentora}</td>
+                      <td className="compTdNarrow" style={cellStyle(2, row.search)}>{row.search}</td>
+                      <td className="compTdNarrow" style={cellStyle(3, row.ai)}>{row.ai}</td>
+                      <td className="compTdNarrow" style={cellStyle(4, row.tutor)}>{row.tutor}</td>
                     </tr>
                   );
                 })}

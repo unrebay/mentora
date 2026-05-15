@@ -5,6 +5,7 @@ import { PostHogProvider } from "@/components/PostHogProvider";
 import { SplashScreen } from "@/components/SplashScreen";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import TiltProvider from "@/components/TiltProvider";
+import NavigationProgress from "@/components/NavigationProgress";
 
 const golos = Golos_Text({
   subsets: ["latin", "cyrillic"],
@@ -186,6 +187,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <PostHogProvider>
             <SplashScreen />
             <TiltProvider />
+            <NavigationProgress />
             {children}
           </PostHogProvider>
         </ThemeProvider>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import LandingNav from "@/components/LandingNav";
 import { PublicFooter } from "@/components/SiteFooter";
+import EgeWaitlistForm from "@/components/EgeWaitlistForm";
 import { getLocale } from "next-intl/server";
 
 // SEO: piggyback страница под высокочастотный сезонный запрос
@@ -131,6 +132,18 @@ export default async function PodgotovkaKEgePage() {
 
       {/* ── Hero ────────────────────────────────────────────── */}
       <section className="max-w-4xl mx-auto px-6 pt-12 pb-16 text-center">
+        {/* Honest notice — ЕГЭ-режим не готов, но не теряем поисковый трафик: запись в wait-list. */}
+        <div
+          className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 mb-6 text-xs font-semibold"
+          style={{
+            background: "linear-gradient(135deg, rgba(255,180,0,0.12), rgba(255,140,0,0.06))",
+            border: "1px solid rgba(255,180,0,0.35)",
+            color: "#B47200",
+          }}
+        >
+          <span style={{ fontSize: 14 }}>🎓</span>
+          {isEn ? "ЕГЭ-mode launches autumn 2026" : "ЕГЭ-режим запускается осенью 2026"}
+        </div>
         <h1
           className="font-bold leading-[1.05] tracking-tight mb-6"
           style={{ color: "var(--text)", fontSize: "clamp(2rem, 5.2vw, 3.6rem)" }}
@@ -149,35 +162,35 @@ export default async function PodgotovkaKEgePage() {
           </span>
         </h1>
         <p
-          className="leading-relaxed mx-auto max-w-2xl mb-8"
+          className="leading-relaxed mx-auto max-w-2xl mb-4"
           style={{ color: "var(--text-muted)", fontSize: "clamp(1rem, 1.8vw, 1.2rem)" }}
         >
           {t.sub}
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <p
+          className="leading-relaxed mx-auto max-w-xl mb-8 text-sm"
+          style={{ color: "var(--text-muted)" }}
+        >
+          {isEn
+            ? "Full ЕГЭ-mode (timed practice, official problem bank, score predictor) opens with the new academic year. Get on the wait-list — we\u2019ll ping you on day 1."
+            : "Полный ЕГЭ-режим (тренажёр по ФИПИ, прогноз балла, тайминг) запускаем к новому учебному году. Запишись — напишем в день старта."}
+        </p>
+
+        {/* Wait-list capture — preserves SEO traffic instead of losing it to a fake CTA */}
+        <EgeWaitlistForm locale={locale} />
+
+        {/* Secondary: try the general AI-mentor now */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/auth"
-            className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-base font-semibold text-white transition-transform hover:-translate-y-0.5"
-            style={{
-              background: "linear-gradient(135deg, #5575FF 0%, #4561E8 50%, #6B4FF0 100%)",
-              boxShadow: "0 8px 28px rgba(69,97,232,0.45), 0 1px 0 rgba(255,255,255,0.25) inset",
-            }}
-          >
-            {t.ctaPrimary}
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </Link>
-          <Link
-            href="/pricing"
-            className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl text-base font-semibold transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
             style={{
               color: "var(--text)",
               background: "var(--bg-card)",
               border: "1px solid var(--border-light)",
             }}
           >
-            {t.ctaSecondary}
+            {isEn ? "Try the general AI-mentor for free →" : "Пока — попробуй обычный ИИ-ментор бесплатно →"}
           </Link>
         </div>
       </section>

@@ -172,6 +172,32 @@
 
 
 
+
+  /* ── Comparison table mobile — vertical column headers so 4 columns fit ──
+     Headers 1-4 (Mentora, Поиск, ИИ, Репетитор) rotate to vertical-rl on
+     mobile. Criterion column (0) stays horizontal. */
+  @media (max-width: 640px) {
+    .compThVertical {
+      writing-mode: vertical-rl !important;
+      transform: rotate(180deg);
+      text-align: center !important;
+      padding: 14px 4px !important;
+      white-space: nowrap !important;
+      height: 130px;
+      vertical-align: bottom !important;
+      font-size: 11px !important;
+    }
+    .compTdNarrow {
+      padding: 10px 6px !important;
+      font-size: 12px !important;
+      text-align: center !important;
+    }
+    .compCritCol {
+      padding: 10px 8px !important;
+      font-size: 12px !important;
+    }
+  }
+
   /* All direct page wrappers should never exceed viewport */
   body > div, body > main, body > nav {
     max-width: 100%;
