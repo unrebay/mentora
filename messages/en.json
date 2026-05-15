@@ -585,7 +585,12 @@
       "defaultQ3": "Give me a study plan"
     },
     "softBannerCta": "Sign up — 10 per 8 hrs free",
-    "disclaimer": "10 messages / 8 hours · no card linking · free"
+    "disclaimer": "10 messages / 8 hours · no card linking · free",
+    "copy": "Copy",
+    "copied": "Copied",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel"
   },
   "subjectsSection": {
     "title": "Sciences",

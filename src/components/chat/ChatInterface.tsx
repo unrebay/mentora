@@ -443,6 +443,10 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const [levelUpFading, setLevelUpFading] = useState(false);
   const levelUpTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [exportingPdf, setExportingPdf] = useState(false);
+  // ── Edit/copy actions per message ──────────────────────────────────
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState("");
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -522,6 +526,60 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       if(data.messagesRemaining!==undefined)setMessagesRemaining(data.messagesRemaining);
     } catch {setMessages(prev=>[...prev,{role:"assistant",content:tChat("errorNoInternet"),isError:true}]);}
     finally{setLoading(false);}
+  }
+
+  // ── Copy message handler — клик «копировать» под любым сообщением ──
+  async function handleCopy(content: string, idx: number) {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedIndex(idx);
+      setTimeout(() => setCopiedIndex(c => (c === idx ? null : c)), 1500);
+    } catch {}
+  }
+
+  // ── Edit user message + regenerate AI reply ────────────────────────
+  function startEdit(idx: number, content: string) {
+    setEditingIndex(idx);
+    setEditingText(content);
+  }
+  function cancelEdit() {
+    setEditingIndex(null);
+    setEditingText("");
+  }
+  async function saveEdit(idx: number) {
+    const newText = editingText.trim();
+    if (!newText || loading) return;
+    // Build truncated history up to (not including) the edited message
+    const history = messages.slice(0, idx).filter(m => !m.isError).slice(-10);
+    // Drop everything after the edited user message + replace its content
+    setMessages(prev => [
+      ...prev.slice(0, idx),
+      { ...prev[idx], content: newText },
+    ]);
+    setEditingIndex(null);
+    setEditingText("");
+    setLastUserMsg(newText);
+    setLoading(true);
+    posthog.capture("message_edited", { subject });
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: newText, subject, history, locale }),
+      });
+      const data = await res.json();
+      if (res.status === 429) { setMessagesRemaining(0); return; }
+      if (!res.ok || !data.message) {
+        setMessages(prev => [...prev, { role: "assistant", content: data.error ?? tChat("errorGeneric"), isError: true }]);
+        return;
+      }
+      setMessages(prev => [...prev, { role: "assistant", content: data.message, imageUrl: data.imageUrl ?? undefined }]);
+      if (data.messagesRemaining !== undefined) setMessagesRemaining(data.messagesRemaining);
+    } catch {
+      setMessages(prev => [...prev, { role: "assistant", content: tChat("errorNoInternet"), isError: true }]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   const isLimited = messagesRemaining !== null;
@@ -785,62 +843,165 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           </div>
         )}
 
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role==="user" ? "justify-end" : "justify-start"} gap-2`}>
+        {messages.map((msg, i) => {
+          const isEditing = editingIndex === i;
+          const canEdit   = msg.role === "user" && !msg.isError && !loading;
+          const canCopy   = !msg.isError && msg.content.length > 0;
+          return (
+            <div key={i} className={`flex ${msg.role==="user" ? "justify-end" : "justify-start"} gap-2`}>
 
-            {/* Assistant avatar */}
-            {msg.role === "assistant" && (
-              <div className="w-7 h-7 rounded-2xl flex items-center justify-center shrink-0 mt-auto mb-0.5" style={{
-                background: "#ffffff",
-                border: "1.5px solid rgba(0,0,0,0.08)",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
-              }}>
-                <MeLogo height={13} colorM="#111111" colorE="#4561E8" />
-              </div>
-            )}
+              {/* Assistant avatar */}
+              {msg.role === "assistant" && (
+                <div className="w-7 h-7 rounded-2xl flex items-center justify-center shrink-0 mt-auto mb-0.5" style={{
+                  background: "#ffffff",
+                  border: "1.5px solid rgba(0,0,0,0.08)",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+                }}>
+                  <MeLogo height={13} colorM="#111111" colorE="#4561E8" />
+                </div>
+              )}
 
-            {/* Bubble — Telegram/iOS 26 style */}
-            <div
-              className="max-w-[80%] px-4 py-3"
-              style={
-                msg.role === "user"
-                  ? {
-                      background: "linear-gradient(135deg,#4561E8,#6B8FFF)",
-                      color: "white", fontSize:"15px", lineHeight:"1.65",
-                      boxShadow: "0 2px 12px rgba(69,97,232,0.35), 0 1px 0 rgba(255,255,255,0.15) inset",
-                      borderRadius: "20px 20px 4px 20px",
-                    }
-                  : msg.isError
-                    ? { background:"rgba(239,68,68,0.07)", border:"1px solid rgba(239,68,68,0.22)", color:"#dc2626", borderRadius:"20px 20px 20px 4px" }
-                    : {
-                        background: "var(--chat-msg-bg)",
-                        backdropFilter: "blur(16px)",
-                        WebkitBackdropFilter: "blur(16px)",
-                        border: `1px solid var(--chat-msg-border)`,
-                        borderLeft: `2.5px solid ${subjColor}55`,
-                        color: "var(--text)",
-                        boxShadow: `var(--chat-msg-shadow), 0 0 0 1px ${subjColor}08`,
-                        borderRadius: "20px 20px 20px 4px",
-                      }
-              }
-            >
-              {msg.role === "assistant" ? (
-                <>
-                  <MarkdownMessage content={msg.content} subject={subject} />
-                  {msg.imageUrl && (
-                    <div className="mt-3">
-                      <img src={msg.imageUrl} alt={tChat("imageAlt")} className="rounded-xl w-full max-w-sm object-cover" style={{ border:"1px solid var(--chat-msg-border)" }} loading="lazy" />
-                      <p className="text-[10px] mt-1" style={{ color:"var(--text-muted)" }}>{tChat("imageCaption")}</p>
+              {/* Bubble + actions column */}
+              <div className={`group flex flex-col gap-1 max-w-[80%] ${msg.role==="user" ? "items-end" : "items-start"}`}>
+
+                {isEditing ? (
+                  /* ── Inline edit form for user message ─────────────── */
+                  <div className="w-full rounded-2xl p-3" style={{
+                    background: "var(--bg-card)",
+                    border: "1px solid rgba(69,97,232,0.35)",
+                    boxShadow: "0 4px 16px rgba(69,97,232,0.15)",
+                  }}>
+                    <textarea
+                      value={editingText}
+                      onChange={(e) => setEditingText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); saveEdit(i); }
+                        if (e.key === "Escape") { e.preventDefault(); cancelEdit(); }
+                      }}
+                      autoFocus
+                      rows={Math.min(8, Math.max(2, editingText.split("\n").length))}
+                      className="w-full resize-none bg-transparent outline-none text-sm leading-relaxed"
+                      style={{ color: "var(--text)", fontSize: "15px", lineHeight: "1.55" }}
+                    />
+                    <div className="flex items-center justify-end gap-2 mt-2 pt-2" style={{ borderTop: "1px solid var(--border-light)" }}>
+                      <button
+                        type="button"
+                        onClick={cancelEdit}
+                        className="text-xs px-3 py-1.5 rounded-full transition-colors"
+                        style={{ color: "var(--text-muted)", background: "transparent" }}
+                      >
+                        {tChat("cancel")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => saveEdit(i)}
+                        disabled={!editingText.trim() || loading}
+                        className="text-xs px-4 py-1.5 rounded-full font-semibold text-white transition-all disabled:opacity-50"
+                        style={{ background: "linear-gradient(135deg,#5575FF 0%,#4561E8 50%,#6B4FF0 100%)" }}
+                      >
+                        {tChat("save")}
+                      </button>
                     </div>
-                  )}
-                  {msg.isError && (
-                    <button onClick={(e) => sendMessage(e as unknown as React.FormEvent, lastUserMsg)} className="mt-2 text-xs underline hover:opacity-80" style={{ color:"#dc2626" }}>{tChat("retry")}</button>
-                  )}
-                </>
-              ) : msg.content}
+                  </div>
+                ) : (
+                  <>
+                    {/* Bubble — Telegram/iOS 26 style */}
+                    <div
+                      className="px-4 py-3"
+                      style={
+                        msg.role === "user"
+                          ? {
+                              background: "linear-gradient(135deg,#4561E8,#6B8FFF)",
+                              color: "white", fontSize:"15px", lineHeight:"1.65",
+                              boxShadow: "0 2px 12px rgba(69,97,232,0.35), 0 1px 0 rgba(255,255,255,0.15) inset",
+                              borderRadius: "20px 20px 4px 20px",
+                            }
+                          : msg.isError
+                            ? { background:"rgba(239,68,68,0.07)", border:"1px solid rgba(239,68,68,0.22)", color:"#dc2626", borderRadius:"20px 20px 20px 4px" }
+                            : {
+                                background: "var(--chat-msg-bg)",
+                                backdropFilter: "blur(16px)",
+                                WebkitBackdropFilter: "blur(16px)",
+                                border: `1px solid var(--chat-msg-border)`,
+                                borderLeft: `2.5px solid ${subjColor}55`,
+                                color: "var(--text)",
+                                boxShadow: `var(--chat-msg-shadow), 0 0 0 1px ${subjColor}08`,
+                                borderRadius: "20px 20px 20px 4px",
+                              }
+                      }
+                    >
+                      {msg.role === "assistant" ? (
+                        <>
+                          <MarkdownMessage content={msg.content} subject={subject} />
+                          {msg.imageUrl && (
+                            <div className="mt-3">
+                              <img src={msg.imageUrl} alt={tChat("imageAlt")} className="rounded-xl w-full max-w-sm object-cover" style={{ border:"1px solid var(--chat-msg-border)" }} loading="lazy" />
+                              <p className="text-[10px] mt-1" style={{ color:"var(--text-muted)" }}>{tChat("imageCaption")}</p>
+                            </div>
+                          )}
+                          {msg.isError && (
+                            <button onClick={(e) => sendMessage(e as unknown as React.FormEvent, lastUserMsg)} className="mt-2 text-xs underline hover:opacity-80" style={{ color:"#dc2626" }}>{tChat("retry")}</button>
+                          )}
+                        </>
+                      ) : msg.content}
+                    </div>
+
+                    {/* ── Actions row — copy (always) + edit (user only) ──
+                        Mobile: always visible (touch). Desktop: visible on hover. */}
+                    {(canCopy || canEdit) && (
+                      <div
+                        className={`flex items-center gap-1 text-[11px] opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-150 ${msg.role==="user" ? "flex-row-reverse" : ""}`}
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        {canCopy && (
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(msg.content, i)}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md transition-colors hover:bg-[var(--bg-card)] active:scale-[0.97]"
+                            aria-label={tChat("copy")}
+                            title={tChat("copy")}
+                          >
+                            {copiedIndex === i ? (
+                              <>
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                                <span>{tChat("copied")}</span>
+                              </>
+                            ) : (
+                              <>
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                </svg>
+                                <span>{tChat("copy")}</span>
+                              </>
+                            )}
+                          </button>
+                        )}
+                        {canEdit && (
+                          <button
+                            type="button"
+                            onClick={() => startEdit(i, msg.content)}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md transition-colors hover:bg-[var(--bg-card)] active:scale-[0.97]"
+                            aria-label={tChat("edit")}
+                            title={tChat("edit")}
+                          >
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M12 20h9"/>
+                              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                            </svg>
+                            <span>{tChat("edit")}</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* Typing indicator — avatar uses the brand color (not subjColor) so
             it doesn't fake science tinting while Mentora is still "thinking".
