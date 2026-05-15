@@ -97,7 +97,7 @@ export default async function SubjectRepetitorPage({ params }: Props) {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
-      <LandingNav alwaysLight />
+      <LandingNav />
 
       {/* Breadcrumb + back chip */}
       <div className="max-w-4xl mx-auto px-6 pt-4 flex items-center gap-3 flex-wrap">

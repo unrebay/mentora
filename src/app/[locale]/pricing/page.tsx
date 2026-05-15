@@ -140,8 +140,8 @@ export default async function PricingPage() {
         }} />
       </div>
 
-      {/* NAV — z-40 so dropdown overlays hero (which is z-10) */}
-      <div className="relative z-40">
+      {/* NAV — sticky top + z-50 (axiom: navbar pinned on every page) */}
+      <div className="sticky top-0 z-50">
         {isLoggedIn ? (
         <DashboardNav
           isPro={isPro}
@@ -745,7 +745,7 @@ export default async function PricingPage() {
       </section>
 
       )}
-      <PublicFooter />
+      <PublicFooter dark={!isLoggedIn} />
     </div>
   );
 }

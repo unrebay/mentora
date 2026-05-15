@@ -110,7 +110,7 @@ export default async function PodgotovkaKEgePage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
-      <LandingNav alwaysLight />
+      <LandingNav />
 
       <div className="max-w-4xl mx-auto px-6 pt-4">
         <Link

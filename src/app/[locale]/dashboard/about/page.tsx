@@ -342,7 +342,7 @@ export default function AboutPage() {
               <thead>
                 <tr>
                   {compHeaders.map((h, i) => (
-                    <th key={h} style={{
+                    <th key={h} className={i === 2 || i === 3 ? "hidden md:table-cell" : undefined} style={{
                       padding: "10px 14px",
                       fontSize: 12, fontWeight: 700, textAlign: "left" as const,
                       color: i === 1 ? "#4561E8" : "var(--text-muted)",
@@ -404,8 +404,8 @@ export default function AboutPage() {
                         {row.note && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2, lineHeight: 1.4 }}>{row.note}</div>}
                       </td>
                       <td style={cellStyle(1, row.mentora)}>{row.mentora}</td>
-                      <td style={cellStyle(2, row.search)}>{row.search}</td>
-                      <td style={cellStyle(3, row.ai)}>{row.ai}</td>
+                      <td className="hidden md:table-cell" style={cellStyle(2, row.search)}>{row.search}</td>
+                      <td className="hidden md:table-cell" style={cellStyle(3, row.ai)}>{row.ai}</td>
                       <td style={cellStyle(4, row.tutor)}>{row.tutor}</td>
                     </tr>
                   );
@@ -832,7 +832,7 @@ export default function AboutPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
-                        display: "inline-flex", alignItems: "center", gap: 6,
+                        display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
                         fontSize: 12, fontWeight: 600,
                         padding: "8px 14px", borderRadius: 10,
                         background: "#f97316", color: "#fff",
@@ -849,7 +849,7 @@ export default function AboutPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
-                        display: "inline-flex", alignItems: "center", gap: 6,
+                        display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
                         fontSize: 12, fontWeight: 600,
                         padding: "8px 14px", borderRadius: 10,
                         background: "#29ABE0", color: "#fff",
@@ -866,7 +866,7 @@ export default function AboutPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
-                        display: "inline-flex", alignItems: "center", gap: 6,
+                        display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
                         fontSize: 12, fontWeight: 600,
                         padding: "8px 14px", borderRadius: 10,
                         background: "linear-gradient(135deg, #2AABEE, #229ED9)",
@@ -893,7 +893,7 @@ export default function AboutPage() {
                   <a
                     href="mailto:hello@mentora.su?subject=Инвестиции / партнёрство"
                     style={{
-                      display: "inline-flex", alignItems: "center", gap: 6,
+                      display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
                       fontSize: 12, fontWeight: 600,
                       padding: "8px 14px", borderRadius: 10,
                       background: "linear-gradient(135deg, #4561E8, #7C3AED)",

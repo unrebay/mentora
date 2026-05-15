@@ -31,7 +31,9 @@ export default function LandingNav({ alwaysLight, isLoggedIn, activePage }: Land
     if (isDarkTheme) { setIsDark(true); return; }
     function update() {
       const subjects = document.getElementById("subjects");
-      if (!subjects) { setIsDark(true); return; }
+      // No #subjects on the page (e.g. /repetitor, /privacy, /terms, /guide) →
+      // follow current theme: light theme → light navbar, dark theme → already handled above.
+      if (!subjects) { setIsDark(isDarkTheme); return; }
       setIsDark(subjects.getBoundingClientRect().top > 72);
     }
     update();
