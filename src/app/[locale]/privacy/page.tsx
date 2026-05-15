@@ -9,10 +9,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const isEn = locale === "en";
   const url = isEn ? "https://mentora.su/en/privacy" : "https://mentora.su/ru/privacy";
   return {
-    title: isEn ? "Privacy policy" : "Политика конфиденциальности",
+    title: isEn ? "Privacy — Mentora" : "Конфиденциальность — Mentora",
     description: isEn
-      ? "Privacy policy of the Mentora educational platform"
-      : "Политика конфиденциальности образовательной платформы Mentora",
+      ? "How Mentora processes personal data. Roskomnadzor registry #100271782, 152-FZ, A+ security. No ads. No data selling."
+      : "Как Mentora обрабатывает персональные данные. Реестр Роскомнадзора №100271782, 152-ФЗ, безопасность A+. Никакой рекламы. Никакой продажи данных.",
     alternates: {
       canonical: url,
       languages: { ru: "https://mentora.su/ru/privacy", en: "https://mentora.su/en/privacy", "x-default": "https://mentora.su/ru/privacy" },

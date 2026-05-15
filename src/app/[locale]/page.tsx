@@ -36,12 +36,12 @@ const META = {
     ogTitle: "Mentora — новый вид образования. 17 наук с AI-ментором",
     ogDescription:
       "История, математика, физика, химия, биология, психология, философия и ещё 10 наук. Живой диалог вместо учебника — персонально, для любого возраста, бесплатно.",
-    twTitle: "Mentora — 17 наук с AI-ментором",
+    twTitle: "Mentora — ИИ-ментор по 17 наукам",
     twDescription: "Живой диалог вместо учебника. Персонально, для любого возраста, бесплатно.",
     ogAlt: "Mentora AI-репетитор",
   },
   en: {
-    title: "Mentora — a new kind of education | 17 sciences with an AI mentor",
+    title: "Mentora — your AI mentor across 17 sciences",
     description:
       "A personal AI mentor for all ages. 17 sciences: history, math, physics, chemistry, biology, psychology, philosophy and more. A living dialog instead of a textbook. Start free — no card needed.",
     ogTitle: "Mentora — a new kind of education. 17 sciences with an AI mentor",
@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     description: m.description,
     keywords: isEn
       ? ["AI mentor", "AI tutor", "personal mentor", "AI education", "learn history with AI", "online math", "online physics", "online chemistry", "online biology", "lifelong learning", "mentora", "mentora.su"]
-      : ["AI ментор", "ИИ ментор", "персональный ментор", "AI репетитор", "ИИ образование", "учить историю с ИИ", "история России онлайн", "математика онлайн", "физика онлайн", "химия онлайн", "биология онлайн", "английский с AI", "образование для взрослых", "lifelong learning", "mentora", "mentora.su"],
+      : ["нейросеть для учёбы", "нейросеть для учебы бесплатно", "ИИ репетитор", "ИИ ментор", "AI ментор", "репетитор онлайн", "подготовка к ЕГЭ онлайн", "репетитор по математике онлайн", "репетитор английского онлайн", "ИИ помощник для учёбы", "нейросеть для школьников", "образование для взрослых", "mentora", "mentora.su"],
     alternates: {
       canonical: url,
       languages: { "ru": "https://mentora.su/ru", "en": "https://mentora.su/en", "x-default": "https://mentora.su/ru" },

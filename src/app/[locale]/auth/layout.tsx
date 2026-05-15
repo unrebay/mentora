@@ -5,10 +5,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const isEn = locale === "en";
   const url = isEn ? "https://mentora.su/en/auth" : "https://mentora.su/ru/auth";
   return {
-    title: isEn ? "Sign in — Mentora" : "Войти — Mentora",
+    title: isEn ? "Sign in to Mentora — AI learning" : "Войти в Mentora — нейросеть для учёбы",
     description: isEn
-      ? "Sign in or create a Mentora account — your personal AI tutor across 17 sciences. Free. No card required."
-      : "Войдите или создайте аккаунт Mentora — персональный AI-репетитор по 17 наукам. Бесплатно. Без карты.",
+      ? "Sign in via Google, Telegram or email — passwordless. 17 sciences with an AI mentor. Free forever."
+      : "Войди через Google, Telegram или email — без пароля. 17 наук с ИИ-ментором, нейросеть для учёбы. Бесплатно навсегда.",
     robots: { index: false, follow: false },
     alternates: {
       canonical: url,

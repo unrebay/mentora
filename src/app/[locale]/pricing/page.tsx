@@ -15,28 +15,28 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const isEn = locale === "en";
   const url = isEn ? "https://mentora.su/en/pricing" : "https://mentora.su/ru/pricing";
   return {
-    title: isEn ? "Pricing — Mentora AI tutor" : "Тарифы — Mentora AI-репетитор",
+    title: isEn ? "Mentora pricing — AI tutor from $0" : "Тарифы Mentora — нейросеть для учёбы от 0 ₽",
     description: isEn
-      ? "Start free — 10 messages per 8 hours, no card. Pro for ~$5/mo unlocks all 17 sciences with no limit. Ultra adds PDF summaries, priority, and extended memory."
-      : "Начни бесплатно — 10 сообщений за 8 часов без карты. Pro за 499 ₽/мес открывает все 17 наук без лимита. Ultra добавляет PDF-конспекты, приоритет и расширенную память.",
+      ? "Free — 10 messages every 8 hours, forever. Pro $5/mo — unlimited across 17 sciences. Ultra $9/mo — photo problems, slides, PDF notes. No hidden fees."
+      : "Free — 10 сообщений / 8 часов навсегда. Pro 499 ₽/мес — безлимит на 17 наук. Ultra 799 ₽/мес — фото задач, презентации, PDF. Без скрытых платежей.",
     keywords: isEn
-      ? ["AI tutor pricing", "online tutor cost", "Mentora Pro", "Ultra", "AI education price"]
-      : ["тарифы AI репетитора", "стоимость репетитора онлайн", "Pro план Mentora", "Ultra", "AI обучение цена"],
+      ? ["AI tutor pricing", "online tutor cost", "Mentora Pro", "Ultra", "AI education price", "neural network learning"]
+      : ["тарифы ИИ репетитора", "стоимость репетитора онлайн", "нейросеть для учёбы цена", "Pro план Mentora", "Ultra", "ИИ ментор тариф", "бесплатный репетитор"],
     alternates: {
       canonical: url,
       languages: { ru: "https://mentora.su/ru/pricing", en: "https://mentora.su/en/pricing", "x-default": "https://mentora.su/ru/pricing" },
     },
     openGraph: {
-      title: isEn ? "Mentora pricing — from $0" : "Тарифы Mentora — от 0 ₽",
+      title: isEn ? "Mentora — AI tutor from $0" : "Mentora — нейросеть для учёбы от 0 ₽",
       description: isEn
-        ? "Free, Pro $5/mo or Ultra $9/mo. No contracts — cancel anytime."
-        : "Бесплатно, Pro 499 ₽/мес или Ultra 799 ₽/мес. Без договоров — отмени в любой момент.",
+        ? "Free forever, Pro $5/mo or Ultra $9/mo. AI mentor across 17 sciences. Cancel in one click."
+        : "Бесплатно навсегда, Pro 499 ₽/мес или Ultra 799 ₽/мес. ИИ-ментор по 17 наукам. Отмена в 1 клик.",
       url,
       images: [{ url: "/icon-512.png", width: 512, height: 512 }],
     },
     twitter: {
       card: "summary_large_image" as const,
-      title: isEn ? "Mentora pricing — from $0" : "Тарифы Mentora — от 0 ₽",
+      title: isEn ? "Mentora — AI tutor from $0" : "Mentora — нейросеть для учёбы от 0 ₽",
       description: isEn
         ? "AI tutor across 17 sciences. Free / Pro / Ultra. Start without a card."
         : "AI-репетитор по 17 наукам. Free / Pro / Ultra. Начни без карты.",
