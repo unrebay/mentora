@@ -4,13 +4,12 @@ import { Link } from "@/i18n/navigation";
 import LandingNav from "@/components/LandingNav";
 import { PublicFooter } from "@/components/SiteFooter";
 import { getLocale } from "next-intl/server";
-import { findSubject, SUBJECT_LANDINGS } from "../_subjects";
+import { findSubject, SUBJECT_LANDINGS } from "@/lib/repetitor-subjects";
 
 type Props = { params: Promise<{ locale: string; subject: string }> };
 
-export async function generateStaticParams() {
-  return SUBJECT_LANDINGS.map((s) => ({ subject: s.url }));
-}
+// SSR on each request — generateStaticParams in nested dynamic routes was crashing prod
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, subject } = await params;

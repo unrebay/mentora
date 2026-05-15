@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next";
-import { SUBJECT_LANDINGS } from "@/app/[locale]/repetitor/_subjects";
+import { SUBJECT_LANDINGS } from "@/lib/repetitor-subjects";
 
 /**
  * SEO-оптимизированный sitemap.
