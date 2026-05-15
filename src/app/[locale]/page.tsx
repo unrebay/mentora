@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getTranslations, getLocale, getMessages } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import DemoChat from "@/components/DemoChat";
+import DemoChatModalTrigger from "@/components/DemoChatModalTrigger";
 import { createClient } from "@/lib/supabase/server";
 import SubjectGrid from "@/components/SubjectGrid";
 import SubjectCarousel from "@/components/SubjectCarousel";
@@ -370,16 +371,22 @@ export default async function HomePage() {
               first viewport stays text + buttons + galaxy. The user scrolls
               one tap to discover the live demo, signposted by the bouncing
               arrow above. ───────────────────────────────────────────────── */}
-        <div className="md:hidden relative z-10 max-w-2xl mx-auto px-5 pb-10 -mt-2" id="demo-mobile">
-          <FadeUp delay={0.05} className="flex flex-col gap-3">
-            <div className="flex items-center justify-center gap-2 mb-2">
+        {/* ── Mobile demo trigger button — opens fullscreen <DemoChatModal />.
+              Replaces the embedded mobile DemoChat block: the demo now opens
+              as a focused overlay on top of everything, with blurred backdrop.
+              Desktop landing keeps the embedded chat in the hero column. */}
+        <div className="md:hidden relative z-10 max-w-2xl mx-auto px-5 pb-10 -mt-2 flex flex-col items-center" id="demo-mobile">
+          <FadeUp delay={0.05} className="flex flex-col gap-3 items-center w-full">
+            <div className="flex items-center justify-center gap-2 mb-1">
               <span className="h-px w-10" style={{ background: "rgba(255,255,255,0.18)" }} />
               <span className="text-xs uppercase tracking-[0.2em] font-semibold" style={{ color: "rgba(255,255,255,0.65)" }}>
                 {locale === "en" ? "Live demo" : "Живое демо"}
               </span>
               <span className="h-px w-10" style={{ background: "rgba(255,255,255,0.18)" }} />
             </div>
-            <DemoChat />
+            <DemoChatModalTrigger
+              label={locale === "en" ? "Try the live demo →" : "Открыть живое демо →"}
+            />
             <p className="text-sm text-gray-500 text-center leading-relaxed mt-1">
               {locale === "en" ? (
                 <>Ask the question you couldn&apos;t{" "}
