@@ -16,7 +16,7 @@ import { MetadataRoute } from "next";
 const BASE = "https://mentora.su";
 
 type Page = {
-  path: "" | "/about" | "/pricing" | "/guide" | "/privacy" | "/terms";
+  path: "" | "/about" | "/repetitor" | "/pricing" | "/guide" | "/privacy" | "/terms";
   lastModified: string;
   changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
   priority: number;
@@ -25,6 +25,7 @@ type Page = {
 const PAGES: Page[] = [
   { path: "",         lastModified: "2026-05-14", changeFrequency: "weekly",  priority: 1.0 },
   { path: "/about",   lastModified: "2026-05-12", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/repetitor", lastModified: "2026-05-14", changeFrequency: "weekly",  priority: 0.95 },
   { path: "/pricing", lastModified: "2026-05-13", changeFrequency: "monthly", priority: 0.9 },
   { path: "/guide",   lastModified: "2026-05-13", changeFrequency: "monthly", priority: 0.7 },
   { path: "/privacy", lastModified: "2026-05-03", changeFrequency: "yearly",  priority: 0.2 },
