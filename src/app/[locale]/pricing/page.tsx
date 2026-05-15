@@ -174,7 +174,7 @@ export default async function PricingPage() {
         }} />
         {isLoggedIn ? (
           <>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-[1.1] relative z-10" style={{ color: "var(--text)" }}>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-[1.25] relative z-10 pb-1" style={{ color: "var(--text)" }}>
               {locale === "en" ? "Manage your " : "Управление "}
               <span style={{
                 background: "linear-gradient(120deg, #6B8FFF 0%, #4561E8 50%, #9F7AFF 100%)",
@@ -182,6 +182,10 @@ export default async function PricingPage() {
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
                 fontStyle: "italic",
+                display: "inline-block",
+                paddingTop: "0.15em",
+                paddingBottom: "0.1em",
+                lineHeight: 1.3,
               }}>
                 {locale === "en" ? "subscription" : "подпиской"}
               </span>
