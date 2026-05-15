@@ -3,12 +3,14 @@ import { useEffect, useState } from "react";
 import DemoChat from "@/components/DemoChat";
 
 /**
- * DemoChatModal — fullscreen overlay with blur backdrop, wraps <DemoChat />.
- * Used on mobile landing so the demo opens "on top of everything", focused,
- * instead of being a static section below the hero.
+ * DemoChatModal — centered card with blurred backdrop. Wraps <DemoChat />.
  *
- * Desktop landing keeps the embedded <DemoChat /> in the hero column — no
- * modal needed there because the demo already lives in the user's first view.
+ * Layout: a single centered card (max-w-md, ≤85vh) on top of a fully blurred,
+ * darkened backdrop — NOT a full-screen takeover. This keeps the demo focused
+ * and centered both horizontally and vertically regardless of viewport size.
+ *
+ * Used on mobile landing (via the «Открыть живое демо» trigger) and from the
+ * desktop hero (via the «развернуть» button on the embedded DemoChat).
  */
 export default function DemoChatModal({
   open,
@@ -21,15 +23,12 @@ export default function DemoChatModal({
 }) {
   const [mounted, setMounted] = useState(false);
 
-  // Lock body scroll when modal is open + close on ESC
   useEffect(() => {
     if (!open) return;
     setMounted(true);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prev;
@@ -45,63 +44,58 @@ export default function DemoChatModal({
       role="dialog"
       aria-modal="true"
       aria-label={ctaLabel ?? "Demo chat"}
-      className="fixed inset-0 z-[100] flex flex-col"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3"
       style={{
-        // Pointer events off when closed (so the modal is invisible AND not clickable)
         pointerEvents: open ? "auto" : "none",
         opacity: open ? 1 : 0,
         transition: "opacity 220ms cubic-bezier(0.22, 1, 0.36, 1)",
       }}
-      onClick={(e) => {
-        // Click on backdrop closes modal; click inside chat shell doesn't bubble out
-        if (e.target === e.currentTarget) onClose();
-      }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      {/* ── Blurred dimmed backdrop ──────────────────────────────────── */}
+      {/* Blurred dimmed backdrop — covers the whole viewport */}
       <div
         aria-hidden
         className="absolute inset-0"
         style={{
-          background: "rgba(4,6,15,0.72)",
-          backdropFilter: "blur(20px) saturate(1.4)",
-          WebkitBackdropFilter: "blur(20px) saturate(1.4)",
+          background: "rgba(4,6,15,0.82)",
+          backdropFilter: "blur(24px) saturate(1.4)",
+          WebkitBackdropFilter: "blur(24px) saturate(1.4)",
         }}
         onClick={onClose}
       />
 
-      {/* ── Close button ─────────────────────────────────────────────── */}
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label="Закрыть демо-чат"
-        className="absolute z-10 flex items-center justify-center rounded-full transition-all hover:scale-105 active:scale-95"
-        style={{
-          top: "max(env(safe-area-inset-top, 0px) + 14px, 18px)",
-          right: 16,
-          width: 36,
-          height: 36,
-          background: "rgba(255,255,255,0.10)",
-          border: "1px solid rgba(255,255,255,0.18)",
-          backdropFilter: "blur(10px)",
-          WebkitBackdropFilter: "blur(10px)",
-          color: "white",
-        }}
-      >
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M18 6L6 18M6 6l12 12" />
-        </svg>
-      </button>
-
-      {/* ── Chat shell ────────────────────────────────────────────────── */}
+      {/* Centered card */}
       <div
-        className="relative z-[1] flex-1 flex flex-col overflow-hidden"
+        className="relative z-[1] w-full max-w-md mx-auto rounded-3xl overflow-hidden flex flex-col"
         style={{
-          paddingTop: "max(env(safe-area-inset-top, 0px) + 66px, 70px)",
-          paddingBottom: "max(env(safe-area-inset-bottom, 0px) + 16px, 16px)",
-          paddingLeft: 12,
-          paddingRight: 12,
+          height: "min(720px, 85vh)",
+          background: "rgba(8,10,24,0.94)",
+          border: "1px solid rgba(255,255,255,0.10)",
+          boxShadow:
+            "0 24px 80px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.10) inset, 0 0 0 1px rgba(69,97,232,0.08)",
         }}
+        onClick={(e) => e.stopPropagation()}
       >
+        {/* Close button — top-right inside the card */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Закрыть демо-чат"
+          className="absolute top-3 right-3 z-10 flex items-center justify-center rounded-full transition-all hover:scale-105 active:scale-95"
+          style={{
+            width: 32,
+            height: 32,
+            background: "rgba(255,255,255,0.10)",
+            border: "1px solid rgba(255,255,255,0.18)",
+            color: "white",
+          }}
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+
+        {/* Chat content — fills the card */}
         <div className="flex-1 overflow-hidden">
           <DemoChat />
         </div>

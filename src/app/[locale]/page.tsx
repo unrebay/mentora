@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getTranslations, getLocale, getMessages } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import DemoChat from "@/components/DemoChat";
+import DemoChatWithExpand from "@/components/DemoChatWithExpand";
 import DemoChatModalTrigger from "@/components/DemoChatModalTrigger";
 import { createClient } from "@/lib/supabase/server";
 import SubjectGrid from "@/components/SubjectGrid";
@@ -349,7 +350,7 @@ export default async function HomePage() {
 
             {/* Chat — DESKTOP ONLY. On mobile we render a dedicated section below the hero. */}
             <FadeUp delay={0.18} className="hidden md:flex flex-col gap-4 flex-shrink-0" id="demo">
-              <DemoChat />
+              <DemoChatWithExpand />
               <FadeUp delay={0.28} fade>
               <p className="text-sm text-gray-500 text-center leading-relaxed">
                 {locale === "en" ? (
