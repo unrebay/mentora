@@ -1354,7 +1354,32 @@
     "techItem3Title": "Supabase + RLS",
     "techItem3Body": "The database is locked down with Row-Level Security. Your chats and XP are visible only to you — neither Mentora admin nor any other user can read them without your explicit consent.",
     "techItem4Title": "Minimum data",
-    "techItem4Body": "We store your email and progress — nothing else. No telemetry. No Google Analytics. We delete your full account within 24 hours on request."
+    "techItem4Body": "We store your email and progress — nothing else. No telemetry. No Google Analytics. We delete your full account within 24 hours on request.",
+    "uniqueTag": "What makes us different",
+    "uniqueTitle": "Mentora isn't a tutor or a chatbot. It's your mentor.",
+    "uniqueSubtitle": "Five decisions we made differently.",
+    "unique": [
+      {
+        "title": "A real conversation about anything",
+        "desc": "Not tied to a school syllabus. Ask about ancient philosophy, a recent science breakthrough, or how economics works — Mentora answers as a mentor, not as an exam-prep robot."
+      },
+      {
+        "title": "17 sciences in one chat",
+        "desc": "No separate app for math, one for history, another for English. All 17 sciences live in a single conversation — switch between them with a sentence."
+      },
+      {
+        "title": "Web, any device, no apps",
+        "desc": "Mentora needs no install and doesn't lock you into one company's ecosystem. Open it in any browser — phone, laptop, your parents' tablet — and pick up where you left off."
+      },
+      {
+        "title": "Free — no trial, no card",
+        "desc": "10 messages every 8 hours, forever, no strings. Not «try for 7 days then forget to cancel». No card, no obligation, no hidden fees."
+      },
+      {
+        "title": "Adapts to you, message by message",
+        "desc": "Mentora remembers how you talked before, what explanation style works, where you are now. No need to re-introduce yourself each session — the mentor knows the context."
+      }
+    ]
   },
   "knowledge": {
     "metaTitle": "Knowledge Galaxy — 17 sciences in Mentora",
