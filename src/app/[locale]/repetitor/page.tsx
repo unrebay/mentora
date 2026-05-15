@@ -50,7 +50,7 @@ export default async function RepetitorPage() {
     ? {
         backLink: "Back",
         h1Lead: "Online tutor —",
-        h1Accent: "or AI mentor that's free?",
+        h1Accent: "or an AI mentor?",
         sub: "Mentora answers 24/7 across 17 sciences. No schedule, no card. Try it before booking a tutor for $30/hour.",
         ctaPrimary: "Try Mentora free",
         ctaSecondary: "See pricing",
@@ -58,23 +58,23 @@ export default async function RepetitorPage() {
         comparisonSub: "Side-by-side, no marketing fluff",
         examplesTitle: "Three real conversations",
         examplesSub: "Mentora doesn't lecture. It explains the way that works for you.",
-        ex1Title: "«Explain quadratic equations like I'm 12»",
-        ex1User: "I don't get quadratic equations. Explain like I'm 12.",
-        ex1Bot: "OK. Imagine you have a square garden and you want to find its side. If its area is 49, what's the side? Right — 7. That's the simplest «quadratic equation»: x² = 49. The full version (ax² + bx + c = 0) just adds two more knobs…",
-        ex2Title: "«Help me prep for the SAT-equivalent exam»",
-        ex2User: "I'm stuck on derivatives. Can you make a 5-question quiz?",
-        ex2Bot: "Sure. Question 1: Find f'(x) for f(x) = 3x² - 5x + 2. Answer when you're ready, I'll check and explain any miss.",
+        ex1Title: "«English — chat with a native speaker»",
+        ex1User: "Hi! Can you talk to me only in English today? I want to practice my speaking.",
+        ex1Bot: "Sure thing — let's go English-only today. What did you do this weekend? Tell me in 3-4 sentences and I'll help you sound more natural.",
+        ex2Title: "«Explain recursion with code»",
+        ex2User: "Explain recursion using factorial.",
+        ex2Bot: "Sure. Here's Python:\n\n```python\ndef factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n```\n\nThe function calls itself until n=1 (the «base case»). Want to trace it by hand for n=4?",
         ex3Title: "«Tell me a story about Napoleon»",
         ex3User: "Tell me about Napoleon like a story, not a textbook.",
         ex3Bot: "1769, Corsica. A short kid with a sharp eye for maps is born to a struggling lawyer. Twenty years later he commands an army. Thirty — he rewrites European law. Want me to focus on his rise, his fall, or both?",
-        finalCtaH: "Stop scheduling lessons. Start learning.",
+        finalCtaH: "Stop scheduling. Start learning.",
         finalCtaSub: "Free forever — 10 messages every 8 hours. No card.",
-        finalCtaBtn: "Try Mentora now →",
+        finalCtaBtn: "Try Mentora",
       }
     : {
         backLink: "Назад",
         h1Lead: "Репетитор онлайн —",
-        h1Accent: "или ИИ-ментор, который бесплатно?",
+        h1Accent: "или ИИ-ментор?",
         sub: "Mentora отвечает 24/7 по 17 наукам, без расписания и привязки карты. Попробуй до того как платить 2000 ₽/час репетитору.",
         ctaPrimary: "Попробовать бесплатно",
         ctaSecondary: "Посмотреть тарифы",
@@ -82,38 +82,38 @@ export default async function RepetitorPage() {
         comparisonSub: "Без маркетинговых сказок — как есть",
         examplesTitle: "Три реальных диалога",
         examplesSub: "Mentora не читает лекций — объясняет так, как тебе понятно.",
-        ex1Title: "«Объясни квадратное уравнение как 12-летнему»",
-        ex1User: "Не понимаю квадратные уравнения. Объясни как 12-летнему.",
-        ex1Bot: "Окей. Представь квадратный участок, надо найти сторону. Площадь = 49. Какая сторона? Правильно — 7. Это и есть простейшее квадратное уравнение: x² = 49. Полная версия (ax² + bx + c = 0) — это просто две дополнительные «крутилки»…",
-        ex2Title: "«Помоги подготовиться к ЕГЭ»",
-        ex2User: "Застрял на производных. Сделай мне квиз из 5 вопросов.",
-        ex2Bot: "Окей. Вопрос 1: найди f'(x), если f(x) = 3x² - 5x + 2. Ответь — проверю и разберу любую ошибку.",
+        ex1Title: "«Английский — разговор как с носителем»",
+        ex1User: "Hi! Can you talk to me only in English today? Я хочу прокачать speaking.",
+        ex1Bot: "Sure thing! Let's chat in English only today. What did you do this weekend? Tell me in 3-4 sentences and I'll help you sound more natural.",
+        ex2Title: "«Объясни рекурсию через код»",
+        ex2User: "Объясни рекурсию через факториал.",
+        ex2Bot: "Окей. Вот пример на Python:\n\n```python\ndef factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n```\n\nФункция вызывает саму себя пока не дойдёт до n=1 (это «база рекурсии»). Прогоним вручную для n=4?",
         ex3Title: "«Расскажи про Наполеона как историю»",
         ex3User: "Расскажи про Наполеона как историю, не учебником.",
         ex3Bot: "1769 год, Корсика. У небогатого юриста рождается невысокий мальчик с острым взглядом на карты. Через двадцать лет он командует армией. Через тридцать — переписывает законы Европы. Сосредоточиться на восхождении, падении или всём целиком?",
-        finalCtaH: "Хватит подстраиваться под расписание репетитора. Начни учиться.",
+        finalCtaH: "Хватит расписаний. Начни учиться.",
         finalCtaSub: "Бесплатно навсегда — 10 сообщений каждые 8 часов. Без карты.",
-        finalCtaBtn: "Попробовать Mentora →",
+        finalCtaBtn: "Попробовать Mentora",
       };
 
   const rows: Row[] = isEn
     ? [
-        { criterion: "Price",          tutor: "From $30/hour",       mentora: "Free forever (Pro from $5/mo)",   mentoraWin: true },
+        { criterion: "Price",          tutor: "From $30/hour",       mentora: "Free forever\n(Pro from $5/mo)",   mentoraWin: true },
         { criterion: "Availability",   tutor: "1-2 lessons / week",  mentora: "24/7, instant reply",              mentoraWin: true },
         { criterion: "Subjects",       tutor: "One per tutor",       mentora: "17 in one chat",                    mentoraWin: true },
         { criterion: "Age",            tutor: "Mostly students",     mentora: "Any age, kids to adults",           mentoraWin: true },
         { criterion: "Personalization",tutor: "Slow, weeks to settle", mentora: "Adapts every message",            mentoraWin: true },
-        { criterion: "Emotional contact", tutor: "Real human",       mentora: "Patient AI, no judgment",            mentoraWin: false },
-        { criterion: "Hands-on practice", tutor: "Real-time feedback", mentora: "Quizzes, photo problems (Ultra)",   mentoraWin: false },
+        { criterion: "Emotional contact", tutor: "Real human",       mentora: "Patient AI, no judgment",            mentoraWin: true  },
+        { criterion: "Hands-on practice", tutor: "Real-time feedback", mentora: "Quizzes, photo problems (Ultra)",   mentoraWin: true  },
       ]
     : [
-        { criterion: "Цена",            tutor: "От 2000 ₽/час",       mentora: "Бесплатно навсегда (Pro от 499 ₽/мес)", mentoraWin: true },
+        { criterion: "Цена",            tutor: "От 2000 ₽/час",       mentora: "Бесплатно навсегда\n(Pro от 499 ₽/мес)", mentoraWin: true },
         { criterion: "Доступность",     tutor: "1-2 урока/неделя",    mentora: "24/7, ответ мгновенно",              mentoraWin: true },
         { criterion: "Предметы",        tutor: "Один на репетитора",  mentora: "17 в одном чате",                     mentoraWin: true },
         { criterion: "Возраст",         tutor: "В основном школьники",mentora: "Любой возраст — от детей до взрослых",mentoraWin: true },
         { criterion: "Персонализация",  tutor: "Медленная, недели на адаптацию", mentora: "Адаптируется с каждым сообщением", mentoraWin: true },
-        { criterion: "Эмоциональный контакт", tutor: "Живой человек",  mentora: "Терпеливый ИИ без осуждения",          mentoraWin: false },
-        { criterion: "Практика руками", tutor: "Реал-тайм обратная связь", mentora: "Квизы, фото задач (Ultra)",        mentoraWin: false },
+        { criterion: "Эмоциональный контакт", tutor: "Живой человек",  mentora: "Терпеливый ИИ без осуждения",          mentoraWin: true  },
+        { criterion: "Практика руками", tutor: "Реал-тайм обратная связь", mentora: "Квизы, фото задач (Ultra)",        mentoraWin: true  },
       ];
 
   return (
@@ -142,7 +142,7 @@ export default async function RepetitorPage() {
       <section className="max-w-4xl mx-auto px-6 pt-12 pb-16 text-center">
         <h1
           className="font-bold leading-[1.05] tracking-tight mb-6"
-          style={{ color: "var(--text)", fontSize: "clamp(2rem, 5.2vw, 3.6rem)" }}
+          style={{ color: "var(--text)", fontSize: "clamp(1.7rem, 4.2vw, 2.8rem)", letterSpacing: "-0.02em" }}
         >
           <span>{t.h1Lead}</span>
           <br />
@@ -239,7 +239,7 @@ export default async function RepetitorPage() {
               </div>
               <div
                 className="text-center font-semibold"
-                style={{ color: r.mentoraWin ? "#4561E8" : "var(--text-secondary)" }}
+                style={{ color: r.mentoraWin ? "#4561E8" : "var(--text-secondary)", whiteSpace: "pre-line" }}
               >
                 {r.mentora}
               </div>
@@ -294,7 +294,7 @@ export default async function RepetitorPage() {
                 </div>
               </div>
 
-              {/* Bot bubble */}
+              {/* Bot bubble — supports ```code blocks``` */}
               <div className="flex justify-start">
                 <div
                   className="rounded-2xl rounded-tl-md px-4 py-2.5 text-sm max-w-[85%] leading-relaxed"
@@ -303,7 +303,25 @@ export default async function RepetitorPage() {
                     color: "var(--text-secondary)",
                   }}
                 >
-                  {ex.bot}
+                  {ex.bot.split("```").map((chunk, i) => {
+                    const isCode = i % 2 === 1;
+                    if (isCode) {
+                      const firstNl = chunk.indexOf("\n");
+                      const code = firstNl >= 0 ? chunk.slice(firstNl + 1) : chunk;
+                      return (
+                        <pre key={i} className="my-2 rounded-lg overflow-x-auto" style={{
+                          background: "rgba(0,0,0,0.06)",
+                          border: "1px solid var(--border-light)",
+                          padding: "10px 12px",
+                          fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                          fontSize: "12.5px",
+                          lineHeight: 1.5,
+                          color: "var(--text)",
+                        }}><code>{code.trim()}</code></pre>
+                      );
+                    }
+                    return <span key={i} style={{ whiteSpace: "pre-wrap" }}>{chunk}</span>;
+                  })}
                 </div>
               </div>
             </div>
