@@ -1161,7 +1161,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <PublicFooter />
+      <PublicFooter dark />
       <StickyMobileCTA />
     </div>
   );
