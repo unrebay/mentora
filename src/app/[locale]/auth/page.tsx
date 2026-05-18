@@ -1,4 +1,5 @@
 "use client";
+import type * as THREE from "three";
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";

@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
 
     // Sanitize history: only valid role/content pairs, cap at 6 turns
     const safeHistory = (Array.isArray(history) ? history : [])
-      .filter((m): m is { role: string; content: string } =>
+      .filter((m): m is { role: "user" | "assistant"; content: string } =>
         m && (m.role === "user" || m.role === "assistant") &&
         typeof m.content === "string" && m.content.length <= 2000
       )

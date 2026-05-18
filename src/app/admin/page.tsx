@@ -829,7 +829,7 @@ function loadLegal(): Set<string> {
   try { const arr: string[] = JSON.parse(localStorage.getItem(LEGAL_CHECKLIST_KEY) ?? "[]"); return new Set(arr); }
   catch { return new Set(); }
 }
-function saveLegal(s: Set<string>) { localStorage.setItem(LEGAL_CHECKLIST_KEY, JSON.stringify([...s])); }
+function saveLegal(s: Set<string>) { localStorage.setItem(LEGAL_CHECKLIST_KEY, JSON.stringify(Array.from(s))); }
 
 function LegalTab({ annualRev }: { annualRev: number }) {
   const { BOR, TEXT, MUTED, CARD, isDark } = useTok();

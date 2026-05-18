@@ -57,8 +57,10 @@ export async function POST(req: NextRequest) {
     action,
   });
 
-  // Trim history beyond 100 entries per admin
-  await sb.rpc("admin_roadmap_state_history_trim", { p_admin_email: adminEmail, p_keep: 100 }).catch(() => {});
+  // Trim history beyond 100 entries per admin (non-fatal)
+  try {
+    await sb.rpc("admin_roadmap_state_history_trim", { p_admin_email: adminEmail, p_keep: 100 });
+  } catch { /* non-fatal */ }
 
   if (upsertErr) {
     return NextResponse.json({ ok: false, error: upsertErr.message }, { status: 200 });

@@ -1,4 +1,5 @@
 "use client";
+import type * as THREE from "three";
 /**
  * GalaxyCanvas — reusable Three.js knowledge galaxy background.
  *

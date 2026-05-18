@@ -1,6 +1,6 @@
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const handleI18nRouting = createIntlMiddleware(routing);
@@ -26,7 +26,7 @@ export async function middleware(request: NextRequest) {
       {
         cookies: {
           getAll: () => request.cookies.getAll(),
-          setAll: (cs) => {
+          setAll: (cs: { name: string; value: string; options: CookieOptions }[]) => {
             cs.forEach(({ name, value }) => request.cookies.set(name, value));
             response = NextResponse.next({ request: { headers: request.headers } });
             cs.forEach(({ name, value, options }) => response.cookies.set(name, value, options));

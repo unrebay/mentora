@@ -33,7 +33,7 @@ export async function GET() {
   for (const r of chatUsers ?? []) {
     userMsgCount.set(r.user_id, (userMsgCount.get(r.user_id) ?? 0) + 1);
   }
-  const usersWith3PlusMessages = [...userMsgCount.values()].filter((v) => v >= 3).length;
+  const usersWith3PlusMessages = Array.from(userMsgCount.values()).filter((v) => v >= 3).length;
 
   // 5) Upgraded — plan in (pro, ultima) OR active trial
   const { count: paidUsers } = await sb
