@@ -11,6 +11,7 @@ import SystemStatusGrid from "@/components/admin/SystemStatusGrid";
 import FunnelWidget from "@/components/admin/FunnelWidget";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import RoadmapV2Tab from "@/components/admin/RoadmapV2";
+import TabErrorBoundary from "@/components/admin/TabErrorBoundary";
 import AuditLogTab from "@/components/admin/AuditLogTab";
 
 // ── Pricing ───────────────────────────────────────────────────────────────────
@@ -1474,12 +1475,12 @@ export default function AdminPanel() {
           </>}
 
           {/* ── KNOWLEDGE ────────────────────────────────────────────────────── */}
-          {tab === "activity"  && <AnalyticsDashboard TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} isDark={isDark} />}
-          {tab === "audit"     && <AuditLogTab TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} />}
-          {tab === "knowledge" && <KnowledgeTab />}
-          {tab === "team"      && <TeamTab />}
-          {tab === "roadmap" && <RoadmapV2Tab />}
-          {tab === "legal"     && <LegalTab annualRev={arr} />}
+          {tab === "activity"  && <TabErrorBoundary tabName="Активность"><AnalyticsDashboard TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} isDark={isDark} /></TabErrorBoundary>}
+          {tab === "audit"     && <TabErrorBoundary tabName="Аудит"><AuditLogTab TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} /></TabErrorBoundary>}
+          {tab === "knowledge" && <TabErrorBoundary tabName="База знаний"><KnowledgeTab /></TabErrorBoundary>}
+          {tab === "team"      && <TabErrorBoundary tabName="Команда"><TeamTab /></TabErrorBoundary>}
+          {tab === "roadmap" && <TabErrorBoundary tabName="Роадмап"><RoadmapV2Tab /></TabErrorBoundary>}
+          {tab === "legal"     && <TabErrorBoundary tabName="Юридические"><LegalTab annualRev={arr} /></TabErrorBoundary>}
         </main>
       </div> {/* end flex row */}
     </TokCtx.Provider>

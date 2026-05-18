@@ -1111,10 +1111,28 @@ export default function RoadmapV2Tab() {
         const d = await r.json();
         if (cancelled) return;
         if (d.ok && Array.isArray(d.state) && d.state.length > 0) {
-          // Server wins. Mirror to localStorage as offline backup.
-          setTasks(d.state);
-          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d.state)); } catch {}
-          console.log(`[Roadmap] Loaded ${d.state.length} tasks from server (saved ${d.updatedAt})`);
+          // Server wins. Sanitize against legacy/malformed entries before render
+          // (any task missing required fields would crash downstream sorting/filtering).
+          const sanitized = d.state.filter((t: unknown): t is RoadmapTaskV2 => {
+            const x = t as Record<string, unknown> | null;
+            return !!x
+              && typeof x.id === "string"
+              && typeof x.title === "string"
+              && typeof x.bucket === "string"
+              && typeof x.category === "string"
+              && typeof x.state === "string";
+          }).map((t: RoadmapTaskV2) => ({
+            ...t,
+            createdAt: typeof t.createdAt === "string" ? t.createdAt : new Date().toISOString(),
+            subtasks: Array.isArray(t.subtasks) ? t.subtasks : undefined,
+          }));
+          if (sanitized.length !== d.state.length) {
+            console.warn(`[Roadmap] dropped ${d.state.length - sanitized.length} malformed task(s)`);
+          }
+          // Mirror to localStorage as offline backup.
+          setTasks(sanitized);
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized)); } catch {}
+          console.log(`[Roadmap] Loaded ${sanitized.length} tasks from server (saved ${d.updatedAt})`);
           return;
         }
       } catch (err) {
