@@ -4,6 +4,18 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import crypto from "crypto";
 
+// Best-effort admin notification on auth failures — fire-and-forget
+function notifyAdmin(text: string) {
+  const BOT_TOKEN = process.env.TELEGRAM_SUPPORT_BOT_TOKEN;
+  const ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID;
+  if (!BOT_TOKEN || !ADMIN_CHAT_ID) return;
+  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text, parse_mode: "HTML" }),
+  }).catch(() => {});
+}
+
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
@@ -33,6 +45,7 @@ export async function POST(req: NextRequest) {
         received_hash_tail: typeof hash === "string" ? hash.slice(-8) : "(none)",
         computed_hash_tail: expectedHash.slice(-8),
       });
+      notifyAdmin(`🚨 <b>/api/auth/telegram</b> hash mismatch\nbot_id: ${botToken.split(":")[0]}\nThis means TELEGRAM_BOT_TOKEN doesn't match the widget's data-telegram-login bot.`);
       return NextResponse.json({ error: "Invalid hash" }, { status: 401 });
     }
 
@@ -111,6 +124,7 @@ export async function POST(req: NextRequest) {
         status: verifyError.status,
         code: verifyError.code,
       });
+      notifyAdmin(`🚨 <b>/api/auth/telegram</b> verifyOtp failed\nemail: ${telegramEmail}\nerr: ${verifyError.message}`);
       return NextResponse.json(
         { error: `verify_failed: ${verifyError.message}` },
         { status: 500 }

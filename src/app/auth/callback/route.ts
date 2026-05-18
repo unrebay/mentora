@@ -2,6 +2,18 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
+// Best-effort admin notification on auth failures — fire-and-forget
+function notifyAdmin(text: string) {
+  const BOT_TOKEN = process.env.TELEGRAM_SUPPORT_BOT_TOKEN;
+  const ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID;
+  if (!BOT_TOKEN || !ADMIN_CHAT_ID) return;
+  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text, parse_mode: "HTML" }),
+  }).catch(() => {});
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
@@ -49,8 +61,11 @@ export async function GET(request: NextRequest) {
       console.error("[auth-callback] verifyOtp failed", {
         code: verifyError.code, name: verifyError.name, message: verifyError.message, status: verifyError.status,
       });
+      notifyAdmin(`🚨 <b>/auth/callback</b> verifyOtp failed (telegram path)\nerr: ${verifyError.message}`);
     } catch (e) {
-      console.error("[auth-callback] verifyOtp threw", e instanceof Error ? e.message : String(e));
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[auth-callback] verifyOtp threw", msg);
+      notifyAdmin(`🚨 <b>/auth/callback</b> verifyOtp threw\nerr: ${msg}`);
     }
     return NextResponse.redirect(`${origin}/auth?error=telegram_callback`);
   }
@@ -65,6 +80,7 @@ export async function GET(request: NextRequest) {
         console.error("[auth-callback] exchangeCodeForSession error", {
           name: exchangeError.name, message: exchangeError.message, status: exchangeError.status,
         });
+        notifyAdmin(`🚨 <b>/auth/callback</b> OAuth exchange failed\nerr: ${exchangeError.message}`);
         // Surface the actual error to the URL so we can debug what's broken
         // without server-log access. Truncate to keep URL short.
         // Diagnostic: which cookie NAMES did the server actually receive?
@@ -93,6 +109,7 @@ export async function GET(request: NextRequest) {
     } catch (e) {
       const msg = (e instanceof Error ? e.message : String(e)).slice(0, 100);
       console.error("[auth-callback] exchangeCodeForSession threw", msg);
+      notifyAdmin(`🚨 <b>/auth/callback</b> OAuth threw\nerr: ${msg}`);
       return NextResponse.redirect(
         `${origin}/auth?error=oauth_callback&reason=${encodeURIComponent(msg)}&stage=throw`
       );

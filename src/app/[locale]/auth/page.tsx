@@ -562,8 +562,9 @@ function AuthPageContent() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setLoading(true); setError(null);
     if (mode === "signup") {
-      // Use server-side /api/signup which bypasses Supabase captcha protection
-      // (we have rate-limit + format guard). After successful create — sign in.
+      // Server-side /api/signup creates the user AND sets session cookies in
+      // one request (via admin.generateLink + verifyOtp). No client-side
+      // signInWithPassword needed — that path is blocked by Supabase captcha.
       const refCode = searchParams.get("ref");
       try {
         const res = await fetch("/api/signup", {
@@ -575,15 +576,10 @@ function AuthPageContent() {
         if (!res.ok) {
           setError(json?.error ?? t("errorEmailExists"));
         } else {
-          // Account created — now log in (this gets a session cookie)
-          const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-          if (signInError) {
-            // Fallback: account exists, just confirm via email-sent screen
-            setEmailSent(email);
-          } else {
-            router.push("/onboarding");
-            router.refresh();
-          }
+          // Session cookies were set on the response. Just route forward.
+          const next: string = typeof json?.next === "string" ? json.next : "/onboarding";
+          router.push(next);
+          router.refresh();
         }
       } catch (e) {
         setError(String(e));
