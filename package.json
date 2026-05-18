@@ -10,7 +10,8 @@
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:report": "playwright show-report",
-    "update-bot-knowledge": "node scripts/update-bot-knowledge.js"
+    "update-bot-knowledge": "node scripts/update-bot-knowledge.js",
+    "rag:backfill": "tsx scripts/backfill-sparse-rag.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
@@ -42,6 +43,7 @@
     "eslint-config-next": "14.2.29",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "tsx": "^4.7.0"
   }
 }
