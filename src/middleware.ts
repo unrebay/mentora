@@ -69,17 +69,10 @@ export async function middleware(request: NextRequest) {
   const nonce = generateNonce();
   const csp = buildCsp(nonce);
 
-  // Mutate request headers so server components see x-nonce AND Next.js framework
-  // auto-applies nonce to its own hydration/runtime scripts.
-  //
-  // CRITICAL: Next.js reads Content-Security-Policy from REQUEST headers (not response)
-  // to discover the nonce token and propagate it to framework scripts. Setting CSP only
-  // on response causes framework inline scripts to lack nonce → blocked by 'strict-dynamic'
-  // → hydration errors #418/#423/#425. Setting on BOTH request (for Next.js) and response
-  // (for browser) is correct.
+  // Mutate request headers so server components see x-nonce (and the new CSP if they need it).
+  // Every NextResponse.next() that wants the layout to see the nonce must pass these forward.
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
-  requestHeaders.set("Content-Security-Policy", csp);
 
   // Pass through public analytics share-link pages: skip i18n routing entirely.
   if (pathname.startsWith("/analytics/invite/")) {
