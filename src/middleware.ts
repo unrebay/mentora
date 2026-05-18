@@ -5,87 +5,21 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const handleI18nRouting = createIntlMiddleware(routing);
 
-/**
- * Build a per-request Content-Security-Policy with a nonce.
- *
- * Why nonce instead of static 'unsafe-inline':
- *   - 'unsafe-inline' lets ANY inline script run — securityheaders.com penalty (B grade max).
- *   - nonce-based + 'strict-dynamic' restricts inline scripts to ones explicitly marked
- *     with the per-request nonce attribute. → A+ on securityheaders.com.
- *   - 'strict-dynamic' lets nonced scripts load further scripts they need, so we don't
- *     have to maintain a whitelist of CDN hosts.
- *
- * 'unsafe-eval' stays in script-src for now: Spline 3D and some Three.js shader paths
- *  rely on it. Removing would break /knowledge galaxy and landing hero. Acceptable
- *  trade-off — securityheaders.com still gives A+ if nonce + strict-dynamic + no
- *  'unsafe-inline' are present.
- *
- * style-src keeps 'unsafe-inline' because Tailwind/styled-jsx generate inline styles
- * that are computationally expensive to nonce per-render. Inline styles are far lower
- * risk than inline scripts and don't block A+ rating.
- */
-function buildCsp(nonce: string): string {
-  const directives: Record<string, string[]> = {
-    "default-src": ["'self'"],
-    "script-src": [
-      "'self'",
-      `'nonce-${nonce}'`,
-      "'strict-dynamic'",
-      "'unsafe-eval'",
-      "https:",
-    ],
-    "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-    "font-src": ["'self'", "data:", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net"],
-    "img-src": ["'self'", "data:", "blob:", "https:"],
-    "connect-src": [
-      "'self'",
-      "https://*.supabase.co", "wss://*.supabase.co",
-      "https://api.anthropic.com", "https://api.telegram.org",
-      "https://*.posthog.com", "https://us.i.posthog.com", "https://us-assets.i.posthog.com",
-      "https://www.google-analytics.com",
-    ],
-    "frame-src": ["'self'", "https://oauth.telegram.org", "https://telegram.org"],
-    "worker-src": ["'self'", "blob:"],
-    "object-src": ["'none'"],
-    "base-uri": ["'self'"],
-    "form-action": ["'self'"],
-    "frame-ancestors": ["'none'"],
-  };
-  const parts = Object.entries(directives).map(([k, v]) => `${k} ${v.join(" ")}`);
-  parts.push("upgrade-insecure-requests");
-  return parts.join("; ");
-}
-
-function generateNonce(): string {
-  // crypto.randomUUID is available in Edge runtime (Next 14)
-  return btoa(crypto.randomUUID()).replace(/=+$/, "");
-}
-
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Per-request nonce — passed to layout via x-nonce request header.
-  // Layout reads via headers().get('x-nonce') and applies to inline <script> tags.
-  const nonce = generateNonce();
-  const csp = buildCsp(nonce);
-
-  // Mutate request headers so server components see x-nonce (and the new CSP if they need it).
-  // Every NextResponse.next() that wants the layout to see the nonce must pass these forward.
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-nonce", nonce);
-
-  // Pass through public analytics share-link pages: skip i18n routing entirely.
+  // Pass through public analytics share-link pages and their API: skip i18n routing entirely.
+  // /analytics/invite/[token] is a static (locale-less) page; if next-intl runs, it 404s.
   if (pathname.startsWith("/analytics/invite/")) {
-    const r = NextResponse.next({ request: { headers: requestHeaders } });
-    r.headers.set("Content-Security-Policy", csp);
-    return r;
+    return NextResponse.next();
   }
 
   // /admin paths: do session refresh but skip i18n routing entirely.
+  // Admin is a static route (app/admin/) — no locale context needed.
   const isAdminPath = pathname === "/admin" || pathname.startsWith("/admin/");
   if (isAdminPath) {
     // Create a mutable response so Supabase can write refreshed tokens to cookies
-    let response = NextResponse.next({ request: { headers: requestHeaders } });
+    let response = NextResponse.next({ request: { headers: request.headers } });
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -94,7 +28,7 @@ export async function middleware(request: NextRequest) {
           getAll: () => request.cookies.getAll(),
           setAll: (cs) => {
             cs.forEach(({ name, value }) => request.cookies.set(name, value));
-            response = NextResponse.next({ request: { headers: requestHeaders } });
+            response = NextResponse.next({ request: { headers: request.headers } });
             cs.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
           },
         },
@@ -114,7 +48,6 @@ export async function middleware(request: NextRequest) {
     }
 
     response.headers.set("x-pathname", pathname);
-    response.headers.set("Content-Security-Policy", csp);
     return response;
   }
 
@@ -198,7 +131,6 @@ export async function middleware(request: NextRequest) {
   }
 
   response.headers.set("x-pathname", pathname);
-  response.headers.set("Content-Security-Policy", csp);
   return response;
 }
 

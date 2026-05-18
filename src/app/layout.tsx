@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Golos_Text, Playfair_Display } from "next/font/google";
-import { headers } from "next/headers";
 import "./globals.css";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import { SplashScreen } from "@/components/SplashScreen";
@@ -103,14 +102,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const h = await headers();
-  const nonce = h.get("x-nonce") ?? undefined;
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru" suppressHydrationWarning>
       <head>
         {/* Prevent flash of wrong theme */}
-        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: `
+        <script dangerouslySetInnerHTML={{ __html: `
           try {
             var t = localStorage.getItem('mentora-theme');
             if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -119,7 +116,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         ` }} />
         {/* KaTeX for math rendering in chat */}
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossOrigin="anonymous" />
-        <script defer nonce={nonce} src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossOrigin="anonymous" />
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossOrigin="anonymous" />
         <meta name="yandex-verification" content="673fbfbebc45f7aa" />
         <meta name="theme-color" content="#4561E8" />
         <meta name="msapplication-TileColor" content="#4561E8" />
@@ -134,7 +131,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             Single @graph keeps payload small; SERP rich snippets и Knowledge Panel читают эти типы. */}
         <script
           type="application/ld+json"
-          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
