@@ -246,14 +246,16 @@ export async function POST(req: NextRequest) {
     }
 
     // Parallel: fetch user memory + RAG embeddings simultaneously
-    const [memoryResult, ragContext] = await Promise.all([
+    type Citation = { id: number; topic: string; source: string | null; snippet: string };
+
+    const [memoryResult, ragData] = await Promise.all([
       supabase
         .from("user_memory")
         .select("memory_json")
         .eq("user_id", user.id)
         .eq("subject", subject)
         .single(),
-      (async (): Promise<string> => {
+      (async (): Promise<{ contextText: string; citations: Citation[] }> => {
         try {
           const embedResp = await fetch(
             `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/embed`,
@@ -275,20 +277,31 @@ export async function POST(req: NextRequest) {
             match_count: 5,
           });
           if (chunks?.length) {
-            return chunks
-              .map((c: { content: string; topic: string; source?: string }) => {
+            const citations: Citation[] = chunks.map(
+              (c: { content: string; topic: string; source?: string }, i: number) => ({
+                id: i + 1,
+                topic: c.topic,
+                source: c.source ?? null,
+                snippet: c.content.slice(0, 220),
+              })
+            );
+            const contextText = chunks
+              .map((c: { content: string; topic: string; source?: string }, i: number) => {
                 const src = c.source ? ` (источник: ${c.source})` : "";
-                return `[${c.topic}]${src}\n${c.content}`;
+                return `[${i + 1}] [${c.topic}]${src}\n${c.content}`;
               })
               .join("\n\n");
+            return { contextText, citations };
           }
         } catch (ragErr) {
           console.error("RAG error (non-blocking):", ragErr);
         }
-        return "База знаний пока пуста. Отвечай на основе своих знаний.";
+        return { contextText: "База знаний пока пуста. Отвечай на основе своих знаний.", citations: [] };
       })(),
     ]);
 
+    const ragContext = ragData.contextText;
+    const citations = ragData.citations;
     const memory = memoryResult.data;
 
     // Build personalized system prompt
@@ -416,7 +429,8 @@ RULES:
 4. Length: 3–5 paragraphs (for practice style — shorter, focused on tasks). If the topic requires more — wrap up neatly and add: "That covers the essentials — let me know if you want to go deeper." Never cut off mid-sentence.
 5. End with one engaging question to consolidate (except practice style, which has the question built in)
 6. If the knowledge base is empty — answer from your own knowledge without mentioning it
-7. ILLUSTRATIONS: if a visual diagram would genuinely help understand — add on a separate line: [IMG: <description, max 50 words>]. Only when truly needed. Description in English, style: "educational illustration, clean vector style".
+7. CITATIONS: When you state a fact taken from the KNOWLEDGE BASE (entries above are numbered [1] [2] [3] [4] [5]), add the marker [^N] at the end of the relevant sentence — e.g. "Москва основана в 1147 году[^2]." Only cite when the chunk genuinely supports the fact. Do NOT invent citation numbers. Multiple markers allowed: [^1][^3].
+8. ILLUSTRATIONS: if a visual diagram would genuinely help understand — add on a separate line: [IMG: <description, max 50 words>]. Only when truly needed. Description in English, style: "educational illustration, clean vector style".
 
 COMPLEXITY DYNAMICS:
 — Student is confused, says "I don't understand", answers incorrectly twice in a row → simplify: reduce length, give everyday analogy, break into steps. Without announcing it — just do it.
@@ -465,11 +479,12 @@ ${ragContext}
 4. Объём: 3–5 абзацев (для practice-стиля — короче, с упором на задание). Технический лимит ответа — около 2000 токенов (~1500 слов). Если тема требует больше — заверши мысль в удобном месте и добавь в конце: «Это основное — дай знать, если хочешь продолжение или есть вопросы». Никогда не обрывай на полуслове.
 5. В конце — один цепляющий вопрос для закрепления (кроме practice, где вопрос-задание встроен)
 6. Если база знаний пуста — отвечай по своим знаниям, не упоминая об этом явно
-7. Пиши по-русски (кроме английского языка — там примеры на английском)
-8. Если не уверена в точной второстепенной дате или малоизвестной детали — скажи об этом легко, вплетая в ответ: «точную дату лучше сверь в учебнике — ориентировочно это [год/период]». Без акцента и извинений — как честный собеседник
-9. Речь: грамотная, тёплая, уважительная. Исключены: сленг, молодёжные клише, разговорные вставки («без напряга», «погнали», «классно», «чётко», «вот так», «ну и т.д.»). Живость — через точные образы и интересные примеры, не через имитацию молодёжного общения
-10. ИЛЛЮСТРАЦИИ: если визуальная схема, диаграмма или картинка реально поможет понять тему — добавь на отдельной строке маркер [IMG: <english description, max 50 words>]. Только когда действительно нужна — не к каждому ответу. Описание строго на английском, стиль: "educational illustration, clean vector style".
-11. ТОЧНОСТЬ СЛОВ: подбирай слова грамотно и в соответствии с русской нормой. Глаголы — в правильной валентности и виде. Примеры:
+7. ЦИТИРОВАНИЕ: Если факт взят из БАЗЫ ЗНАНИЙ (источники выше пронумерованы [1] [2] [3] [4] [5]), поставь маркер [^N] в конце предложения. Например: «Москва основана в 1147 году[^2].». Цитируй только когда чанк действительно подтверждает факт; не выдумывай номера; можно ставить несколько: [^1][^3]
+8. Пиши по-русски (кроме английского языка — там примеры на английском)
+9. Если не уверена в точной второстепенной дате или малоизвестной детали — скажи об этом легко, вплетая в ответ: «точную дату лучше сверь в учебнике — ориентировочно это [год/период]». Без акцента и извинений — как честный собеседник
+10. Речь: грамотная, тёплая, уважительная. Исключены: сленг, молодёжные клише, разговорные вставки («без напряга», «погнали», «классно», «чётко», «вот так», «ну и т.д.»). Живость — через точные образы и интересные примеры, не через имитацию молодёжного общения
+11. ИЛЛЮСТРАЦИИ: если визуальная схема, диаграмма или картинка реально поможет понять тему — добавь на отдельной строке маркер [IMG: <english description, max 50 words>]. Только когда действительно нужна — не к каждому ответу. Описание строго на английском, стиль: "educational illustration, clean vector style".
+12. ТОЧНОСТЬ СЛОВ: подбирай слова грамотно и в соответствии с русской нормой. Глаголы — в правильной валентности и виде. Примеры:
     — НЕ «компания горела миллионы» (горит само что-то), а «компания сжигала миллионы» / «компания тратила миллионы»
     — НЕ «приземлять примеры» (калька с английского), а «приводить примеры из жизни»
     — НЕ «риск вывихивает шею» (странный образ), а «риск огромен» / «риск зашкаливает»
@@ -691,6 +706,7 @@ ${PLATFORM_BLOCK}`;
       resetAt: windowResetAt,
       trialExpiresAt: profile?.trial_expires_at ?? null,
       rewardExpiresAt: profile?.reward_expires_at ?? null,
+      ...(citations.length ? { citations } : {}),
       ...(levelUp ? { levelUp } : {}),
       ...(imageUrl ? { imageUrl } : {}),
       ...(streakRewardEarned ? { streakRewardEarned: true } : {}),

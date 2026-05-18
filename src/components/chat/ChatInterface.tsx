@@ -1,3 +1,4 @@
+import React from "react";
 "use client"
 import posthog from "posthog-js";
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -12,7 +13,8 @@ import TelegramSupportButton from "@/components/TelegramSupportButton";
 
 const DAILY_LIMIT = 10;
 
-interface Message { role: MessageRole; content: string; isError?: boolean; imageUrl?: string }
+export type Citation = { id: number; topic: string; source: string | null; snippet: string };
+interface Message { role: MessageRole; content: string; isError?: boolean; imageUrl?: string; citations?: Citation[] }
 interface Props { subject: string; subjectTitle: string; initialHistory: { role: string; content: string }[]; initialMessagesRemaining: number | null; initialResetAt?: string | null; initialTopic?: string; isUltima?: boolean; isPro?: boolean }
 
 // ─── Countdown helpers ────────────────────────────────────────────────────
@@ -182,6 +184,90 @@ function CodeBlock({ lang, code }: { lang: string; code: string }) {
   );
 }
 
+// ─── Citation chip: superscript [N] with hover-tooltip showing source/topic/snippet
+function CitationChip({ n, citation }: { n: number; citation?: Citation }) {
+  const [open, setOpen] = useState(false);
+  if (!citation) {
+    return <sup style={{ color: "var(--text-muted)", fontSize: "0.7em", margin: "0 1px" }}>[{n}]</sup>;
+  }
+  return (
+    <span
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onFocus={() => setOpen(true)}
+      onBlur={() => setOpen(false)}
+      onClick={() => setOpen(o => !o)}
+      tabIndex={0}
+      role="button"
+      aria-label={`Источник ${n}: ${citation.topic}`}
+      className="inline-flex relative cursor-help select-none align-super"
+      style={{
+        margin: "0 1px", fontSize: "0.72em", fontWeight: 600,
+        color: "#4561E8",
+      }}
+    >
+      <span style={{
+        padding: "0 4px", lineHeight: 1.4, borderRadius: 6,
+        background: "rgba(69,97,232,0.10)",
+        border: "1px solid rgba(69,97,232,0.25)",
+      }}>{n}</span>
+      {open && (
+        <span role="tooltip"
+          className="absolute bottom-full left-1/2 -translate-x-1/2 z-50 w-[280px] mb-2"
+          style={{
+            background: "var(--bg-card)",
+            border: "1px solid var(--border-light)",
+            borderRadius: 12,
+            padding: "10px 12px",
+            boxShadow: "0 8px 28px rgba(0,0,0,0.18)",
+            fontSize: 12, lineHeight: 1.45,
+            fontWeight: 400,
+            color: "var(--text)",
+            textAlign: "left",
+            whiteSpace: "normal",
+            verticalAlign: "baseline",
+          }}>
+          <span style={{ display: "block", fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>
+            {citation.topic}
+          </span>
+          {citation.source && (
+            <span style={{ display: "block", fontSize: 11, color: "var(--brand)", marginBottom: 4, wordBreak: "break-all" }}>
+              {citation.source}
+            </span>
+          )}
+          <span style={{ display: "block", color: "var(--text-muted)" }}>
+            {citation.snippet}{citation.snippet.length >= 220 ? "…" : ""}
+          </span>
+        </span>
+      )}
+    </span>
+  );
+}
+
+// Split a line by [^N] markers and interleave CitationChip nodes between text segments.
+// Each text segment is parsed via parseInline (preserves bold/italic/math/code).
+function parseInlineWithCitations(
+  text: string,
+  allowInlineCode: boolean,
+  citations?: Citation[]
+): React.ReactNode {
+  if (!citations || citations.length === 0 || !text.includes("[^")) {
+    return parseInline(text, allowInlineCode);
+  }
+  const parts = text.split(/\[\^(\d+)\]/g);
+  const byId = new Map(citations.map(c => [c.id, c]));
+  const nodes: React.ReactNode[] = [];
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
+      if (parts[i]) nodes.push(<React.Fragment key={`t-${i}`}>{parseInline(parts[i], allowInlineCode)}</React.Fragment>);
+    } else {
+      const n = Number(parts[i]);
+      nodes.push(<CitationChip key={`c-${i}`} n={n} citation={byId.get(n)} />);
+    }
+  }
+  return <>{nodes}</>;
+}
+
 // ─── Inline parser: **bold**, *italic*, `code`, $math$, $$math$$ ──────────
 function parseInline(text: string, allowInlineCode = true): React.ReactNode {
   const parts = text.split(/(\$\$[^$]+\$\$|\$[^$\n]+\$|\*\*[^*]+\*\*|\*[^*\n]+\*|`[^`]+`)/g);
@@ -236,7 +322,7 @@ function splitByCodeBlocks(content: string): Seg[] {
 }
 
 // ─── Text block renderer (lines → React nodes) ────────────────────────────
-function TextBlock({ content, subject }: { content: string; subject?: string }) {
+function TextBlock({ content, subject, citations }: { content: string; subject?: string; citations?: Citation[] }) {
   const allowInlineCode = subject ? CODE_SUBJECTS.has(subject) : true;
   const lines = content.split("\n");
   const elements: React.ReactNode[] = [];
@@ -253,7 +339,7 @@ function TextBlock({ content, subject }: { content: string; subject?: string }) 
           {listBuffer.map((item, i) => (
             <li key={i} className="flex gap-2 items-start">
               <span className="mt-[7px] w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--brand)", opacity: 0.8 }} />
-              <span className="flex-1">{parseInline(item, allowInlineCode)}</span>
+              <span className="flex-1">{parseInlineWithCitations(item, allowInlineCode, citations)}</span>
             </li>
           ))}
         </ul>
@@ -266,7 +352,7 @@ function TextBlock({ content, subject }: { content: string; subject?: string }) 
           {orderedBuffer.map((item, i) => (
             <li key={i} className="flex gap-2 items-start">
               <span className="shrink-0 font-semibold text-sm min-w-[20px]" style={{ color: "var(--brand)" }}>{i+1}.</span>
-              <span className="flex-1">{parseInline(item, allowInlineCode)}</span>
+              <span className="flex-1">{parseInlineWithCitations(item, allowInlineCode, citations)}</span>
             </li>
           ))}
         </ol>
@@ -298,7 +384,7 @@ function TextBlock({ content, subject }: { content: string; subject?: string }) 
         <blockquote key={keyIdx++} className="pl-3 my-1.5 italic text-sm leading-relaxed" style={{
           borderLeft: "2.5px solid var(--brand)", color: "var(--text-muted)",
         }}>
-          {parseInline(line.slice(2), allowInlineCode)}
+          {parseInlineWithCitations(line.slice(2), allowInlineCode, citations)}
         </blockquote>
       );
       continue;
@@ -328,11 +414,11 @@ function TextBlock({ content, subject }: { content: string; subject?: string }) 
     flushLists();
 
     // Headings
-    const h1 = line.match(/^# (.+)/);   if (h1) { elements.push(<h2 key={keyIdx++} className="font-bold mt-4 mb-2 leading-snug" style={{ fontSize:"1.1rem", color:"var(--text)" }}>{parseInline(h1[1], allowInlineCode)}</h2>); continue; }
-    const h2 = line.match(/^## (.+)/);  if (h2) { elements.push(<h3 key={keyIdx++} className="font-semibold mt-3 mb-1.5 leading-snug" style={{ fontSize:"1rem", color:"var(--text)" }}>{parseInline(h2[1], allowInlineCode)}</h3>); continue; }
-    const h3 = line.match(/^### (.+)/); if (h3) { elements.push(<p  key={keyIdx++} className="font-semibold mt-2 mb-1" style={{ color:"var(--text)" }}>{parseInline(h3[1], allowInlineCode)}</p>); continue; }
+    const h1 = line.match(/^# (.+)/);   if (h1) { elements.push(<h2 key={keyIdx++} className="font-bold mt-4 mb-2 leading-snug" style={{ fontSize:"1.1rem", color:"var(--text)" }}>{parseInlineWithCitations(h1[1], allowInlineCode, citations)}</h2>); continue; }
+    const h2 = line.match(/^## (.+)/);  if (h2) { elements.push(<h3 key={keyIdx++} className="font-semibold mt-3 mb-1.5 leading-snug" style={{ fontSize:"1rem", color:"var(--text)" }}>{parseInlineWithCitations(h2[1], allowInlineCode, citations)}</h3>); continue; }
+    const h3 = line.match(/^### (.+)/); if (h3) { elements.push(<p  key={keyIdx++} className="font-semibold mt-2 mb-1" style={{ color:"var(--text)" }}>{parseInlineWithCitations(h3[1], allowInlineCode, citations)}</p>); continue; }
 
-    elements.push(<p key={keyIdx++} className="leading-relaxed">{parseInline(line, allowInlineCode)}</p>);
+    elements.push(<p key={keyIdx++} className="leading-relaxed">{parseInlineWithCitations(line, allowInlineCode, citations)}</p>);
   }
   flushLists();
   return <>{elements}</>;
@@ -363,7 +449,7 @@ function EmphasisBlock({ code }: { code: string }) {
 const CODE_SUBJECTS = new Set(["computer-science", "mathematics", "physics", "chemistry"]);
 
 // ─── Full markdown message ────────────────────────────────────────────────
-function MarkdownMessage({ content, subject }: { content: string; subject?: string }) {
+function MarkdownMessage({ content, subject, citations }: { content: string; subject?: string; citations?: Citation[] }) {
   const segs = splitByCodeBlocks(content);
   const allowCode = subject ? CODE_SUBJECTS.has(subject) : true;
   return (
@@ -373,7 +459,7 @@ function MarkdownMessage({ content, subject }: { content: string; subject?: stri
           ? (allowCode
               ? <CodeBlock key={i} lang={seg.lang} code={seg.code} />
               : <EmphasisBlock key={i} code={seg.code} />)
-          : <TextBlock key={i} content={seg.content} subject={subject} />
+          : <TextBlock key={i} content={seg.content} subject={subject} citations={citations} />
       )}
     </div>
   );
@@ -522,7 +608,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       const data = await res.json();
       if (res.status===429){setMessagesRemaining(0);setMessages(prev=>prev.filter(m=>!(m.role==="user"&&m.content===text)));return;}
       if (!res.ok||!data.message){setMessages(prev=>[...prev,{role:"assistant",content:data.error??tChat("errorGeneric"),isError:true}]);return;}
-      setMessages(prev=>[...prev,{role:"assistant",content:data.message,imageUrl:data.imageUrl??undefined}]);
+      setMessages(prev=>[...prev,{role:"assistant",content:data.message,imageUrl:data.imageUrl??undefined,citations:Array.isArray(data.citations)?data.citations:undefined}]);
       if(data.messagesRemaining!==undefined)setMessagesRemaining(data.messagesRemaining);
     } catch {setMessages(prev=>[...prev,{role:"assistant",content:tChat("errorNoInternet"),isError:true}]);}
     finally{setLoading(false);}
@@ -573,7 +659,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         setMessages(prev => [...prev, { role: "assistant", content: data.error ?? tChat("errorGeneric"), isError: true }]);
         return;
       }
-      setMessages(prev => [...prev, { role: "assistant", content: data.message, imageUrl: data.imageUrl ?? undefined }]);
+      setMessages(prev => [...prev, { role: "assistant", content: data.message, imageUrl: data.imageUrl ?? undefined, citations: Array.isArray(data.citations) ? data.citations : undefined }]);
       if (data.messagesRemaining !== undefined) setMessagesRemaining(data.messagesRemaining);
     } catch {
       setMessages(prev => [...prev, { role: "assistant", content: tChat("errorNoInternet"), isError: true }]);
@@ -612,7 +698,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         setMessages(prev=>[...prev,{role:"assistant",content:errText,isError:true}]);
         posthog.capture("chat_error",{subject,status:res.status,error:data.error});return;
       }
-      setMessages(prev=>[...prev,{role:"assistant",content:data.message,imageUrl:data.imageUrl??undefined}]);
+      setMessages(prev=>[...prev,{role:"assistant",content:data.message,imageUrl:data.imageUrl??undefined,citations:Array.isArray(data.citations)?data.citations:undefined}]);
       if(data.messagesRemaining!==undefined)setMessagesRemaining(data.messagesRemaining);
       if(data.resetAt)setResetAt(data.resetAt);
       if(data.levelUp){
@@ -932,7 +1018,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                     >
                       {msg.role === "assistant" ? (
                         <>
-                          <MarkdownMessage content={msg.content} subject={subject} />
+                          <MarkdownMessage content={msg.content} subject={subject} citations={msg.citations} />
                           {msg.imageUrl && (
                             <div className="mt-3">
                               <img src={msg.imageUrl} alt={tChat("imageAlt")} className="rounded-xl w-full max-w-sm object-cover" style={{ border:"1px solid var(--chat-msg-border)" }} loading="lazy" />
