@@ -58,6 +58,17 @@ const CAT_META: Record<Category, { label: string; color: string }> = {
   ops:       { label: "Ops",        color: "#94a3b8" },
 };
 
+// Safe meta accessors — never throw on unknown keys (defense in depth)
+function catMeta(c: Category | string) {
+  return CAT_META[c as Category] ?? { label: String(c), color: "#94a3b8" };
+}
+function stateMeta(s: TaskState | string) {
+  return STATE_META[s as TaskState] ?? { label: String(s), color: "#94a3b8", icon: "○" };
+}
+function bucketMeta(b: Bucket | string) {
+  return BUCKET_META[b as Bucket] ?? { label: String(b), subtitle: "", color: "#94a3b8" };
+}
+
 const STATE_META: Record<TaskState, { label: string; color: string; icon: string }> = {
   planned:     { label: "В плане",   color: "#94a3b8", icon: "○" },
   in_progress: { label: "В работе",  color: "#FF7A00", icon: "◐" },
@@ -1113,19 +1124,50 @@ export default function RoadmapV2Tab() {
         if (d.ok && Array.isArray(d.state) && d.state.length > 0) {
           // Server wins. Sanitize against legacy/malformed entries before render
           // (any task missing required fields would crash downstream sorting/filtering).
-          const sanitized = d.state.filter((t: unknown): t is RoadmapTaskV2 => {
+          // Strict validation: type-check AND enum-check. Common typos get auto-repaired
+          // (e.g. state:"pending" → "planned"). Unknown enum values fall back to safe defaults
+          // instead of getting dropped — we'd rather show all tasks even if a few have wrong
+          // category/state than silently lose data.
+          const VALID_BUCKETS = new Set(["now", "soon", "ideas", "notes"]);
+          const VALID_CATS = new Set(["tech", "marketing", "design", "content", "product", "ops"]);
+          const VALID_STATES = new Set(["planned", "in_progress", "done", "blocked"]);
+          const STATE_REPAIR: Record<string, string> = {
+            pending: "planned",
+            todo: "planned",
+            doing: "in_progress",
+            wip: "in_progress",
+            inprogress: "in_progress",
+            completed: "done",
+            finished: "done",
+            cancelled: "blocked",
+          };
+          const sanitized = d.state.filter((t: unknown): t is Record<string, unknown> => {
             const x = t as Record<string, unknown> | null;
             return !!x
               && typeof x.id === "string"
-              && typeof x.title === "string"
-              && typeof x.bucket === "string"
-              && typeof x.category === "string"
-              && typeof x.state === "string";
-          }).map((t: RoadmapTaskV2) => ({
-            ...t,
-            createdAt: typeof t.createdAt === "string" ? t.createdAt : new Date().toISOString(),
-            subtasks: Array.isArray(t.subtasks) ? t.subtasks : undefined,
-          }));
+              && typeof x.title === "string";
+          }).map((raw: Record<string, unknown>): RoadmapTaskV2 => {
+            const bucket = typeof raw.bucket === "string" && VALID_BUCKETS.has(raw.bucket)
+              ? raw.bucket as Bucket : "ideas";
+            const category = typeof raw.category === "string" && VALID_CATS.has(raw.category)
+              ? raw.category as Category : "tech";
+            const rawState = typeof raw.state === "string" ? raw.state.toLowerCase() : "";
+            const state = (VALID_STATES.has(rawState)
+              ? rawState
+              : (STATE_REPAIR[rawState] ?? "planned")) as TaskState;
+            return {
+              id: String(raw.id),
+              title: String(raw.title),
+              notes: typeof raw.notes === "string" ? raw.notes : undefined,
+              subtasks: Array.isArray(raw.subtasks) ? raw.subtasks as SubTask[] : undefined,
+              bucket,
+              category,
+              state,
+              isMilestone: typeof raw.isMilestone === "boolean" ? raw.isMilestone : false,
+              due: typeof raw.due === "string" ? raw.due : undefined,
+              createdAt: typeof raw.createdAt === "string" ? raw.createdAt : new Date().toISOString(),
+            };
+          });
           if (sanitized.length !== d.state.length) {
             console.warn(`[Roadmap] dropped ${d.state.length - sanitized.length} malformed task(s)`);
           }
