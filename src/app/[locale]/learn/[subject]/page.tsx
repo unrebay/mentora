@@ -124,15 +124,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function LearnSubjectPage({ params, searchParams }: Props) {
-  const { subject } = await params;
+  const { subject, locale } = await params;
   const { topic } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) redirect("/auth");
+  if (!user) redirect({ href: "/auth", locale });
 
   const subjectData = SUBJECTS.find((s) => s.id === subject);
-  if (!subjectData || !subjectData.available) redirect("/dashboard");
+  if (!subjectData || !subjectData.available) redirect({ href: "/dashboard", locale });
 
   // Load LAST 50 messages (newest first) and reverse to chronological order.
   // The old query was .order("created_at", { ascending: true }).limit(20) —
@@ -144,7 +144,7 @@ export default async function LearnSubjectPage({ params, searchParams }: Props) 
   const { data: historyDesc } = await supabase
     .from("chat_messages")
     .select("role, content, created_at")
-    .eq("user_id", user.id)
+    .eq("user_id", user!.id)
     .eq("subject", subject)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -154,7 +154,7 @@ export default async function LearnSubjectPage({ params, searchParams }: Props) 
   const { data: profile } = await supabase
     .from("users")
     .select("plan, trial_expires_at, messages_today, messages_window_start")
-    .eq("id", user.id)
+    .eq("id", user!.id)
     .single();
 
   const isUltima = profile?.plan === "ultima";
@@ -181,7 +181,7 @@ export default async function LearnSubjectPage({ params, searchParams }: Props) 
   return (
     <ChatInterface
       subject={subject}
-      subjectTitle={subjectData.title}
+      subjectTitle={subjectData!.title}
       initialHistory={history ?? []}
       initialMessagesRemaining={initialMessagesRemaining}
       initialResetAt={initialResetAt}

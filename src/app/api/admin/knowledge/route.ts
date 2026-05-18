@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin, createAdminSupabase, getEmbedding } from "@/lib/admin";
+import { requireAdmin, createAdminSupabase, getEmbedding, logAudit } from "@/lib/admin";
 
 export const maxDuration = 30; // Extend timeout for OpenAI embedding calls
 

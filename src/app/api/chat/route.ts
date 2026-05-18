@@ -565,7 +565,7 @@ ${PLATFORM_BLOCK}`;
           quality: "standard",
           style: "vivid",
         });
-        imageUrl = imgRes.data[0]?.url ?? null;
+        imageUrl = imgRes.data?.[0]?.url ?? null;
       } catch (imgErr) {
         console.error("Image generation failed (non-blocking):", imgErr);
         // Continue without image — don't fail the whole request
