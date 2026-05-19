@@ -120,9 +120,48 @@ function ActivePlanCard({ locale, isPro, isUltima, trialExpiresAt, planExpiresAt
   );
 }
 
-/* ── 2. Payment method ───────────────────────────────────────────────────── */
+/* ── 2. Payment method — saved card display + "Отвязать карту" (ЮKassa-required UI) */
 function PaymentMethodCard({ locale, isPro, cardLast4 }: Pick<Props, "locale" | "isPro" | "cardLast4">) {
+  const [confirming, setConfirming] = useState(false);
+  const [removing, setRemoving] = useState(false);
+  const [removed, setRemoved] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   if (!isPro) return null;
+
+  async function removeCard() {
+    if (removing) return;
+    setRemoving(true);
+    setErrorMsg(null);
+    try {
+      const res = await fetch("/api/payments/delete-payment-method", { method: "POST" });
+      if (!res.ok) {
+        setErrorMsg(locale === "en" ? "Couldn\u2019t remove. Try again." : "Не удалось отвязать карту. Попробуй ещё раз.");
+        setRemoving(false);
+        return;
+      }
+      setRemoved(true);
+      setConfirming(false);
+    } catch {
+      setErrorMsg(locale === "en" ? "Network error" : "Сетевая ошибка");
+      setRemoving(false);
+    }
+  }
+
+  if (removed) {
+    return (
+      <Card>
+        <div className="text-[10px] font-bold uppercase tracking-[0.18em] mb-2" style={{ color: "var(--text-muted)" }}>
+          {locale === "en" ? "Payment method" : "Способ оплаты"}
+        </div>
+        <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
+          {locale === "en"
+            ? "Card unlinked. We won\u2019t charge it again. Your current paid period is unaffected."
+            : "Карта отвязана. Списаний больше не будет. Текущий оплаченный период сохраняется до конца."}
+        </p>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -130,31 +169,61 @@ function PaymentMethodCard({ locale, isPro, cardLast4 }: Pick<Props, "locale" | 
         {locale === "en" ? "Payment method" : "Способ оплаты"}
       </div>
       {cardLast4 ? (
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-2">
-            <svg viewBox="0 0 24 16" width="36" height="24" fill="none" aria-hidden>
-              <rect width="24" height="16" rx="2" fill="var(--bg-secondary)" stroke="var(--border)" />
-              <rect x="2" y="11" width="20" height="2" fill="var(--border)" />
-            </svg>
-            <span className="text-sm font-semibold" style={{ color: "var(--text)" }}>•••• {cardLast4}</span>
+        <>
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <svg viewBox="0 0 24 16" width="36" height="24" fill="none" aria-hidden>
+                <rect width="24" height="16" rx="2" fill="var(--bg-secondary)" stroke="var(--border)" />
+                <rect x="2" y="11" width="20" height="2" fill="var(--border)" />
+              </svg>
+              <span className="text-sm font-semibold" style={{ color: "var(--text)" }}>•••• {cardLast4}</span>
+            </div>
+            {confirming ? (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirming(false)}
+                  disabled={removing}
+                  className="inline-flex items-center justify-center px-3 py-2 rounded-xl text-xs font-semibold transition-colors"
+                  style={{ background: "var(--bg-secondary)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
+                >
+                  {locale === "en" ? "Cancel" : "Отмена"}
+                </button>
+                <button
+                  type="button"
+                  onClick={removeCard}
+                  disabled={removing}
+                  className="inline-flex items-center justify-center px-3 py-2 rounded-xl text-xs font-semibold text-white transition-colors disabled:opacity-60"
+                  style={{ background: "#ef4444", border: "1px solid #dc2626" }}
+                >
+                  {removing ? (locale === "en" ? "Removing…" : "Отвязываем…") : (locale === "en" ? "Yes, remove" : "Да, отвязать")}
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirming(true)}
+                className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-xs font-semibold transition-colors hover:opacity-90"
+                style={{ background: "rgba(239,68,68,0.08)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.25)" }}
+              >
+                {locale === "en" ? "Remove card" : "Отвязать карту"}
+              </button>
+            )}
           </div>
-          <button
-            type="button"
-            disabled
-            title={locale === "en" ? "Coming soon" : "Скоро"}
-            className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-xs font-semibold opacity-50 cursor-not-allowed"
-            style={{ background: "var(--bg-secondary)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
-          >
-            {locale === "en" ? "Change" : "Изменить"}
-          </button>
-        </div>
+          {confirming && (
+            <p className="text-xs leading-relaxed mt-3" style={{ color: "var(--text-muted)" }}>
+              {locale === "en"
+                ? "Removing the card disables auto-renewal. Your current paid period stays active until its end."
+                : "После отвязки автопродление отключится. Текущий оплаченный период сохранится до конца."}
+            </p>
+          )}
+          {errorMsg && <p className="text-xs leading-relaxed mt-3" style={{ color: "#ef4444" }}>{errorMsg}</p>}
+        </>
       ) : (
-        // No saved card yet — billing is currently one-shot Checkout. Will populate
-        // once the recurring-billing milestone lands (save_payment_method=true).
         <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
           {locale === "en"
-            ? "Payments go through ЮKassa as one-time checkouts — no card is stored. Auto-renewal with saved card lands before launch (June 1)."
-            : "Платежи проходят через ЮKassa разовыми чекаутами — карта не сохраняется. Автопродление с сохранением карты появится до запуска (1 июня)."}
+            ? "No saved card yet. Your card will be saved on first payment — then you can remove it any time."
+            : "Сохранённой карты ещё нет. Карта сохранится при первой оплате — потом её можно отвязать в любой момент."}
         </p>
       )}
     </Card>
@@ -381,3 +450,4 @@ export default function ManageSubscription(props: Props) {
     </div>
   );
 }
+
