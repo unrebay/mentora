@@ -187,7 +187,7 @@ export default function SubjectCarousel({ subjects }: { subjects: Subject[] }) {
   return (
     <>
       {/* Inject keyframes once — avoids SSR mismatch issues with style tags */}
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes mentora-carousel-rtl {
           0%   { transform: translateX(0); }
           100% { transform: translateX(-20%); }
@@ -219,7 +219,7 @@ export default function SubjectCarousel({ subjects }: { subjects: Subject[] }) {
             transform: none !important;
           }
         }
-      `}</style>
+      ` }} />
 
       {/* Outer container: perspective gives 3-D depth */}
       <div
