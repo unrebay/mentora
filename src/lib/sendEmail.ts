@@ -25,9 +25,12 @@ type SendOpts = {
 };
 
 async function sendEmail(opts: SendOpts): Promise<{ ok: boolean; id?: string; error?: string }> {
-  const key = process.env.RESEND_API_KEY;
+  // Read RESEND2_API_KEY (Andy named this secret with "2" suffix to distinguish
+  // from the Resend key used for Supabase auth SMTP — two separate keys, two
+  // separate rotation cycles).
+  const key = process.env.RESEND2_API_KEY;
   if (!key) {
-    console.warn("[email] RESEND_API_KEY missing — skipping send to", opts.to);
+    console.warn("[email] RESEND2_API_KEY missing — skipping send to", opts.to);
     return { ok: false, error: "missing_api_key" };
   }
   try {
