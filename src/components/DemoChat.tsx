@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import MeLogo from "@/components/MeLogo";
 
 interface Message {
@@ -24,6 +24,44 @@ const GLASS_SHADOW =
 const TEXT = "rgba(255,255,255,0.92)";
 const TEXT_MUTED = "rgba(255,255,255,0.55)";
 
+/**
+ * Demo scenarios — клиент-только ротация после mount, чтобы каждое новое
+ * посещение увидело другую науку. SSR всегда показывает i18n-дефолт (история),
+ * после hydration на RU подменяем на случайный из массива ниже.
+ */
+const SCENARIOS: { greeting: string; suggestions: string[] }[] = [
+  {
+    greeting:
+      "Привет! Я Mentora — твой персональный AI-ментор по биологии. Спроси про клетку, ДНК, эволюцию или любой организм.",
+    suggestions: ["Как работает ДНК?", "Митоз и мейоз", "Эволюция Дарвина", "Что делает иммунитет?"],
+  },
+  {
+    greeting:
+      "Привет! Я Mentora — твой персональный AI-ментор по физике. Объясню законы природы простым языком — от Ньютона до квантов.",
+    suggestions: ["Второй закон Ньютона", "Теория относительности", "Что такое квант?", "Как работают волны?"],
+  },
+  {
+    greeting:
+      "Привет! Я Mentora — твой персональный AI-ментор по математике. Спроси про теоремы, задачи или почему 0! = 1.",
+    suggestions: ["Теорема Пифагора", "Что такое производная?", "Зачем интегралы?", "Что такое предел?"],
+  },
+  {
+    greeting:
+      "Привет! Я Mentora — твой персональный AI-ментор по философии. Поговорим про идеи, которые меняли мир.",
+    suggestions: ["Платон и мир идей", "Категорический императив Канта", "Что такое экзистенциализм?", "Свобода воли существует?"],
+  },
+  {
+    greeting:
+      "Привет! Я Mentora — твой персональный AI-ментор по астрономии. От Солнечной системы до края наблюдаемой Вселенной.",
+    suggestions: ["Чёрные дыры", "Жизнь звезды", "Что такое тёмная материя?", "Большой взрыв"],
+  },
+  {
+    greeting:
+      "Привет! Я Mentora — твой персональный AI-ментор по химии. Расскажу про атомы, реакции и почему вода такая особенная.",
+    suggestions: ["Из чего состоит атом?", "Что такое pH?", "Как идёт фотосинтез?", "Что такое моль?"],
+  },
+];
+
 function renderMarkdown(text: string): string {
   return text
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
@@ -33,6 +71,7 @@ function renderMarkdown(text: string): string {
 
 export default function DemoChat() {
   const t = useTranslations("demo");
+  const locale = useLocale();
   const INITIAL_MESSAGE: Message = { role: "assistant", content: t("initialMessage") };
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
@@ -40,8 +79,20 @@ export default function DemoChat() {
   const [used, setUsed] = useState(0);
   const [limitReached, setLimitReached] = useState(false);
   const [softBannerDismissed, setSoftBannerDismissed] = useState(false);
+  // Active scenario index: -1 = i18n default (история). Подменяется после mount только для RU.
+  const [scenarioIdx, setScenarioIdx] = useState<number>(-1);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Rotate demo scenario on first mount (RU only) — даёт разные «науки» новым посетителям
+  // без hydration mismatch (на SSR scenarioIdx=-1, после mount уходим в random).
+  useEffect(() => {
+    if (locale !== "ru") return;
+    const i = Math.floor(Math.random() * SCENARIOS.length);
+    setScenarioIdx(i);
+    setMessages((curr) => (curr.length === 1 ? [{ role: "assistant", content: SCENARIOS[i].greeting }] : curr));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if ((messages.length > 1 || loading) && messagesContainerRef.current) {
@@ -92,7 +143,7 @@ export default function DemoChat() {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   }
 
-  const suggestions = t.raw("suggestions") as string[];
+  const suggestions: string[] = scenarioIdx >= 0 ? SCENARIOS[scenarioIdx].suggestions : (t.raw("suggestions") as string[]);
   const showSoftBanner = used >= SOFT_LIMIT && !softBannerDismissed && !limitReached;
   const remaining = DEMO_LIMIT - used;
   const canSend = !!input.trim() && !loading && !limitReached;
