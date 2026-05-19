@@ -12,6 +12,35 @@
  *   SUPABASE_SERVICE_ROLE_KEY
  */
 import { createClient } from "@supabase/supabase-js";
+import fs from "node:fs";
+import path from "node:path";
+
+// Auto-load .env.local from cwd (tsx/Node don't do it like Next.js does).
+// Parses KEY=VALUE lines, handles quotes, ignores comments. Zero-dep.
+function loadDotEnv(file: string) {
+  try {
+    if (!fs.existsSync(file)) return;
+    const txt = fs.readFileSync(file, "utf-8");
+    for (const raw of txt.split(/\r?\n/)) {
+      const line = raw.trim();
+      if (!line || line.startsWith("#")) continue;
+      const eq = line.indexOf("=");
+      if (eq < 0) continue;
+      const key = line.slice(0, eq).trim();
+      let val = line.slice(eq + 1).trim();
+      // Strip surrounding quotes
+      if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+        val = val.slice(1, -1);
+      }
+      if (!(key in process.env)) process.env[key] = val;
+    }
+  } catch {
+    // silent — env may not exist, that's user's problem to fix
+  }
+}
+loadDotEnv(path.join(process.cwd(), ".env.local"));
+loadDotEnv(path.join(process.cwd(), ".env"));
+
 
 type Chunk = { subject: string; topic: string; content: string; source: string };
 
