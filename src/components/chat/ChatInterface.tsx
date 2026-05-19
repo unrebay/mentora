@@ -1,5 +1,6 @@
+"use client";
+
 import React from "react";
-"use client"
 import posthog from "posthog-js";
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
