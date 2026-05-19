@@ -611,80 +611,6 @@ export default async function HomePage() {
         <SubjectCarousel subjects={subjects} />
       </section>
 
-      {/* HOW TO LEARN */}
-      <section className="max-w-6xl mx-auto px-6 py-16">
-        <FadeUp>
-        <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-3xl p-5 sm:p-8 md:p-10">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div>
-              <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">{t("landing.howLearnTitle")}</div>
-              <h2 className="text-3xl font-bold mb-4 leading-tight">
-                {locale === "en" ? (
-                  <>3 techniques that make<br /><span className="text-brand-600 dark:text-brand-500 italic">learning effective</span></>
-                ) : (
-                  <>3 приёма, которые делают<br /><span className="text-brand-600 dark:text-brand-500 italic">учёбу эффективной</span></>
-                )}
-              </h2>
-              <Link
-                href="/guide"
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 hover:scale-[1.04] active:scale-95"
-                style={{
-                  background: "rgba(69,97,232,0.13)",
-                  border: "1px solid rgba(69,97,232,0.38)",
-                  color: "#5575FF",
-                  backdropFilter: "blur(12px)",
-                  WebkitBackdropFilter: "blur(12px)",
-                  boxShadow: [
-                    "0 2px 12px rgba(69,97,232,0.18)",
-                    "inset 0 1px 0 rgba(255,255,255,0.55)",
-                    "inset 0 -1px 0 rgba(69,97,232,0.12)",
-                  ].join(", "),
-                }}
-              >
-                {t("landing.howLearnGuide")}
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </Link>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-start gap-4">
-                <span className="w-8 h-8 flex-shrink-0 bg-brand-50 dark:bg-brand-900/20 rounded-lg flex items-center justify-center">
-                  <svg viewBox="0 0 16 16" className="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path strokeLinecap="round" d="M2 8a6 6 0 1 0 12 0A6 6 0 0 0 2 8zm3.5-1.5L8 9l2.5-2.5"/>
-                  </svg>
-                </span>
-                <div>
-                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">{t("landing.tip1Title")}</div>
-                  <div className="text-xs text-[var(--text-secondary)]">{t("landing.tip1Desc")}</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <span className="w-8 h-8 flex-shrink-0 bg-green-50 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-                  <svg viewBox="0 0 16 16" className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path strokeLinecap="round" d="M13 4H3a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zM3 7h10"/>
-                  </svg>
-                </span>
-                <div>
-                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">{t("landing.tip2Title")}</div>
-                  <div className="text-xs text-[var(--text-secondary)]">{t("landing.tip2Desc")}</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <span className="w-8 h-8 flex-shrink-0 bg-amber-50 dark:bg-amber-900/20 rounded-lg flex items-center justify-center">
-                  <svg viewBox="0 0 16 16" className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path strokeLinecap="round" d="M8 2v4M8 10v4M2 8h4M10 8h4"/>
-                  </svg>
-                </span>
-                <div>
-                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">{t("landing.tip3Title")}</div>
-                  <div className="text-xs text-[var(--text-secondary)]">{t("landing.tip3Desc")}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        </FadeUp>
-      </section>
-
       {/* ── PRICING ─────────────────────────────────────────────────── */}
       <section id="pricing" className="max-w-6xl mx-auto px-6 py-16 scroll-mt-24">
         {/* Section header */}
@@ -872,6 +798,81 @@ export default async function HomePage() {
         </p>
         </FadeUp>
       </section>
+
+      {/* HOW TO LEARN */}
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <FadeUp>
+        <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-3xl p-5 sm:p-8 md:p-10">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <div className="mb-3 text-xs font-semibold text-[var(--text-muted)] tracking-widest uppercase">{t("landing.howLearnTitle")}</div>
+              <h2 className="text-3xl font-bold mb-4 leading-tight">
+                {locale === "en" ? (
+                  <>3 techniques that make<br /><span className="text-brand-600 dark:text-brand-500 italic">learning effective</span></>
+                ) : (
+                  <>3 приёма, которые делают<br /><span className="text-brand-600 dark:text-brand-500 italic">учёбу эффективной</span></>
+                )}
+              </h2>
+              <Link
+                href="/guide"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 hover:scale-[1.04] active:scale-95"
+                style={{
+                  background: "rgba(69,97,232,0.13)",
+                  border: "1px solid rgba(69,97,232,0.38)",
+                  color: "#5575FF",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  boxShadow: [
+                    "0 2px 12px rgba(69,97,232,0.18)",
+                    "inset 0 1px 0 rgba(255,255,255,0.55)",
+                    "inset 0 -1px 0 rgba(69,97,232,0.12)",
+                  ].join(", "),
+                }}
+              >
+                {t("landing.howLearnGuide")}
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </Link>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-start gap-4">
+                <span className="w-8 h-8 flex-shrink-0 bg-brand-50 dark:bg-brand-900/20 rounded-lg flex items-center justify-center">
+                  <svg viewBox="0 0 16 16" className="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path strokeLinecap="round" d="M2 8a6 6 0 1 0 12 0A6 6 0 0 0 2 8zm3.5-1.5L8 9l2.5-2.5"/>
+                  </svg>
+                </span>
+                <div>
+                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">{t("landing.tip1Title")}</div>
+                  <div className="text-xs text-[var(--text-secondary)]">{t("landing.tip1Desc")}</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <span className="w-8 h-8 flex-shrink-0 bg-green-50 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                  <svg viewBox="0 0 16 16" className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path strokeLinecap="round" d="M13 4H3a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zM3 7h10"/>
+                  </svg>
+                </span>
+                <div>
+                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">{t("landing.tip2Title")}</div>
+                  <div className="text-xs text-[var(--text-secondary)]">{t("landing.tip2Desc")}</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <span className="w-8 h-8 flex-shrink-0 bg-amber-50 dark:bg-amber-900/20 rounded-lg flex items-center justify-center">
+                  <svg viewBox="0 0 16 16" className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path strokeLinecap="round" d="M8 2v4M8 10v4M2 8h4M10 8h4"/>
+                  </svg>
+                </span>
+                <div>
+                  <div className="font-semibold text-sm text-[var(--text)] mb-0.5">{t("landing.tip3Title")}</div>
+                  <div className="text-xs text-[var(--text-secondary)]">{t("landing.tip3Desc")}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </FadeUp>
+      </section>
+
 
       {/* ЕГЭ/ОГЭ COMING SOON — Russian only */}
       {locale === "ru" && (
