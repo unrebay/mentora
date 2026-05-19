@@ -52,8 +52,31 @@ export async function POST(req: NextRequest) {
       expires_at: expiresAt.toISOString(),
     }, { onConflict: "yookassa_payment_id" });
 
-    await supabase.from("users").update({ plan: userPlan }).eq("id", userId);
-    console.log(`✅ ${userPlan} (${planKey}, ${days}d) activated: user ${userId}`);
+    // Recurring billing: if ЮKassa tokenised the card on this payment
+    // (save_payment_method:true on create), persist the token + card meta on users
+    // so cron /api/payments/charge-recurring can charge headlessly next month.
+    // We always sync plan_expires_at + reset failed-attempts counter.
+    type UserUpdate = {
+      plan: string;
+      plan_expires_at: string;
+      recurring_failed_attempts: number;
+      payment_method_id?: string;
+      card_last4?: string;
+      card_type?: string;
+    };
+    const userUpdate: UserUpdate = {
+      plan: userPlan,
+      plan_expires_at: expiresAt.toISOString(),
+      recurring_failed_attempts: 0,
+    };
+    const pm = payment.payment_method;
+    if (pm?.saved && pm.id) {
+      userUpdate.payment_method_id = pm.id;
+      if (pm.card?.last4) userUpdate.card_last4 = pm.card.last4;
+      if (pm.card?.card_type) userUpdate.card_type = String(pm.card.card_type).toLowerCase();
+    }
+    await supabase.from("users").update(userUpdate).eq("id", userId);
+    console.log(`✅ ${userPlan} (${planKey}, ${days}d) activated: user ${userId}${pm?.saved ? ` [card saved: ${pm.card?.last4 ?? "?"}]` : ""}`);
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Webhook error:", error);

@@ -47,6 +47,12 @@ export async function POST(req: NextRequest) {
         confirmation: { type: "redirect", return_url: `${BASE_URL}/dashboard?payment=success` },
         capture: true,
         description: plan.label,
+        // save_payment_method: true tokenises the card on first charge so
+        // subsequent monthly renewals can run headlessly via the saved
+        // payment_method.id (see /api/payments/charge-recurring cron).
+        // Webhook reads payment.payment_method.{id,card.last4,card.card_type}
+        // and writes them into users.
+        save_payment_method: true,
         metadata: { user_id: user.id, plan: planKey },
       }),
     });
