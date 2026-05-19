@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { sendWelcomeEmail } from "@/lib/sendEmail";
 
 /**
  * Server-side signup endpoint that bypasses Supabase captcha enforcement
@@ -115,6 +116,10 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = created?.user?.id;
+
+    // Fire-and-forget welcome email. Не блокируем signup даже если Resend упал —
+    // юзер всё равно попадёт в /onboarding. Письмо догонит если Resend живой.
+    sendWelcomeEmail(email).catch((e) => console.warn("[signup] welcome email failed:", e));
     if (!userId) {
       console.error("[signup] createUser succeeded but no userId", { email, ip });
       notifyAdmin(`🚨 <b>/api/signup</b> created user without id\nemail: ${email}`);
