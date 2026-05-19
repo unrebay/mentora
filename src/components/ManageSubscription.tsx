@@ -262,28 +262,86 @@ function PaymentHistoryCard({ locale, payments }: Pick<Props, "locale" | "paymen
   );
 }
 
-/* ── 4. Cancel subscription — info-text + (future) action button ─────────── */
+/* ── 4. Auto-renewal toggle — wired to /api/payments/{enable,cancel}-recurring ─ */
 function CancelCard({ locale, isPro, autoRenew, planExpiresAt }: Pick<Props, "locale" | "isPro" | "autoRenew" | "planExpiresAt">) {
+  // Local optimistic state — server-truth seed from props, then we patch through API.
+  const [current, setCurrent] = useState<boolean | null>(autoRenew ?? false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [gateInfo, setGateInfo] = useState<{ required: number; have: number } | null>(null);
+
   if (!isPro) return null;
 
-  // For the milestone-pre-recurring state we just show an informational note.
-  // After recurring lands, this becomes an action button with a confirm modal.
+  async function toggle(target: boolean) {
+    if (loading) return;
+    setLoading(true);
+    setErrorMsg(null);
+    setGateInfo(null);
+    try {
+      const url = target ? "/api/payments/enable-recurring" : "/api/payments/cancel-recurring";
+      const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (data.error === "level_gate") {
+          setGateInfo({ required: data.required_xp ?? 100, have: data.current_xp ?? 0 });
+        } else if (data.error === "no_payment_method") {
+          setErrorMsg(locale === "en"
+            ? "No saved card yet. Buy a plan first — your card gets saved on first payment."
+            : "Сохранённой карты ещё нет. Купи план — карта сохранится при первой оплате.");
+        } else {
+          setErrorMsg(locale === "en" ? "Couldn\u2019t update. Try again." : "Не удалось обновить. Попробуй ещё раз.");
+        }
+        return;
+      }
+      setCurrent(target);
+    } catch {
+      setErrorMsg(locale === "en" ? "Network error" : "Сетевая ошибка");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const isOn = current === true;
+
   return (
     <Card>
-      <div className="text-[10px] font-bold uppercase tracking-[0.18em] mb-2" style={{ color: "var(--text-muted)" }}>
-        {locale === "en" ? "Cancel subscription" : "Отмена подписки"}
+      <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
+        <div className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: "var(--text-muted)" }}>
+          {locale === "en" ? "Auto-renewal" : "Автопродление"}
+        </div>
+        <button
+          type="button"
+          onClick={() => toggle(!isOn)}
+          disabled={loading}
+          aria-pressed={isOn}
+          className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 disabled:opacity-60"
+          style={{ background: isOn ? "#10b981" : "var(--bg-secondary)", border: "1px solid var(--border)" }}
+        >
+          <span
+            className="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform duration-200"
+            style={{ transform: isOn ? "translateX(22px)" : "translateX(4px)" }}
+          />
+        </button>
       </div>
-      {autoRenew === false ? (
+      {gateInfo ? (
         <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
           {locale === "en"
-            ? `Auto-renewal is off. Your access ${planExpiresAt ? `runs until ${formatDate(planExpiresAt, locale)}, then` : ""} will return to Free.`
-            : `Автопродление выключено. Доступ ${planExpiresAt ? `действует до ${formatDate(planExpiresAt, locale)}, потом` : ""} вернётся на Free.`}
+            ? `Auto-renewal unlocks at level 2 (${gateInfo.required} ments). You have ${gateInfo.have} so far — keep going!`
+            : `Автопродление разблокируется на 2 уровне (${gateInfo.required} ментов). Сейчас ${gateInfo.have} — поднажми!`}
+        </p>
+      ) : errorMsg ? (
+        <p className="text-xs leading-relaxed" style={{ color: "#ef4444" }}>{errorMsg}</p>
+      ) : isOn ? (
+        <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
+          {locale === "en"
+            ? `Saved card will be charged ${planExpiresAt ? `on ${formatDate(planExpiresAt, locale)}` : "each period"}. Cancel anytime.`
+            : `Спишем с сохранённой карты ${planExpiresAt ? formatDate(planExpiresAt, locale) : "к концу периода"}. Можно отключить в любой момент.`}
         </p>
       ) : (
         <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
           {locale === "en"
-            ? "Right now payments are one-time — your subscription does not auto-renew. You won’t be charged again unless you buy another plan. Auto-renewal will be unlocked starting from level 2."
-            : "Сейчас платежи разовые — подписка не продлевается автоматически. С тебя не спишут повторно, пока не купишь новый тариф. Возможность автопродления подписки будет разблокирована со второго уровня."}
+            ? `Auto-renewal is off. Your access ${planExpiresAt ? `runs until ${formatDate(planExpiresAt, locale)}, then` : ""} will return to Free. Auto-renewal unlocks at level 2.`
+            : `Автопродление выключено. Доступ ${planExpiresAt ? `действует до ${formatDate(planExpiresAt, locale)}, потом` : ""} вернётся на Free. Автопродление разблокируется на 2 уровне.`}
         </p>
       )}
     </Card>

@@ -61,10 +61,13 @@ export default async function PricingPage() {
   let currentStreak = 0;
   let bestStreak = 0;
   let trialExpiresAt: string | null = null;
+  let planExpiresAt: string | null = null;
+  let autoRenew: boolean | null = null;
+  let cardLast4: string | null = null;
   let payments: PaymentItem[] = [];
   if (user) {
     const [profileRes, progressRes, paymentsRes] = await Promise.all([
-      supabase.from("users").select("plan, trial_expires_at").eq("id", user.id).single(),
+      supabase.from("users").select("plan, trial_expires_at, plan_expires_at, auto_renew, payment_method_id, card_last4, card_type").eq("id", user.id).single(),
       supabase.from("user_progress").select("xp_total, streak_days, best_streak").eq("user_id", user.id),
       supabase
         .from("subscriptions")
@@ -76,6 +79,9 @@ export default async function PricingPage() {
     const profile = profileRes.data;
     const progressData = progressRes.data;
     trialExpiresAt = profile?.trial_expires_at ?? null;
+    planExpiresAt = profile?.plan_expires_at ?? null;
+    autoRenew = profile?.auto_renew ?? null;
+    cardLast4 = profile?.card_last4 ?? null;
     const isTrialActive = trialExpiresAt ? new Date(trialExpiresAt) > new Date() : false;
     isUltima = profile?.plan === "ultima";
     isPro = isUltima || profile?.plan === "pro" || isTrialActive;
@@ -238,9 +244,9 @@ export default async function PricingPage() {
             isPro={isPro}
             isUltima={isUltima}
             trialExpiresAt={trialExpiresAt}
-            planExpiresAt={null}
-            autoRenew={null}
-            cardLast4={null}
+            planExpiresAt={planExpiresAt}
+            autoRenew={autoRenew}
+            cardLast4={cardLast4}
             payments={payments}
           />
         </section>
@@ -669,9 +675,9 @@ export default async function PricingPage() {
             isPro={isPro}
             isUltima={isUltima}
             trialExpiresAt={trialExpiresAt}
-            planExpiresAt={null}
-            autoRenew={null}
-            cardLast4={null}
+            planExpiresAt={planExpiresAt}
+            autoRenew={autoRenew}
+            cardLast4={cardLast4}
             payments={payments}
           />
         </section>
