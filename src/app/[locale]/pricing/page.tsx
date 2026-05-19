@@ -225,13 +225,11 @@ export default async function PricingPage() {
       {isLoggedIn && (
         <section id="subscription" className="relative z-10 max-w-5xl mx-auto px-6 pb-6 scroll-mt-24">
           <h2 className="text-xs font-bold tracking-[0.18em] uppercase mb-3 flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
-            {/* Non-money icon: subscription = personal badge / membership crown */}
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 9l3.5-6h11L21 9l-9 12L3 9z" />
-              <path d="M3 9h18" />
-              <path d="M8 9l4 12 4-12" />
-              <path d="M8 9l3.5-6" />
-              <path d="M16 9l-3.5-6" />
+            {/* Crown — premium membership badge (clearer signal than diamond gem) */}
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M3 7l4 4 5-7 5 7 4-4-2 12H5L3 7z" />
+              <path d="M5 20h14" />
+              <circle cx="12" cy="14" r="0.9" fill="currentColor" stroke="none" />
             </svg>
             {locale === "en" ? "Subscription" : "Подписка"}
           </h2>
