@@ -47,7 +47,7 @@ export async function PublicFooter({ dark }: { dark?: boolean } = {}) {
 
   return (
     <footer
-      className="border-t mt-8"
+      className={"border-t" + (dark ? "" : " mt-8")}
       style={{
         borderColor,
         background: bg,
