@@ -6,6 +6,7 @@ import { SplashScreen } from "@/components/SplashScreen";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import TiltProvider from "@/components/TiltProvider";
 import NavigationProgress from "@/components/NavigationProgress";
+import { headers } from "next/headers";
 
 const golos = Golos_Text({
   subsets: ["latin", "cyrillic"],
@@ -103,11 +104,15 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // Per-request nonce from middleware — needed under 'strict-dynamic' CSP so
+  // our inline/external scripts (theme-flash, KaTeX, JSON-LD) are still allowed.
+  // Returns undefined in dev where middleware doesn't run (e.g. static build).
+  const nonce = headers().get("x-nonce") ?? undefined;
   return (
     <html lang="ru" suppressHydrationWarning>
       <head>
         {/* Prevent flash of wrong theme */}
-        <script dangerouslySetInnerHTML={{ __html: `
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: `
           try {
             var t = localStorage.getItem('mentora-theme');
             if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -116,7 +121,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         ` }} />
         {/* KaTeX for math rendering in chat */}
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossOrigin="anonymous" />
-        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossOrigin="anonymous" />
+        <script nonce={nonce} defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossOrigin="anonymous" />
         <meta name="yandex-verification" content="673fbfbebc45f7aa" />
         <meta name="theme-color" content="#4561E8" />
         <meta name="msapplication-TileColor" content="#4561E8" />
@@ -130,6 +135,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* JSON-LD structured data — Organization + EducationalOrganization + WebSite (sitelinks searchbox).
             Single @graph keeps payload small; SERP rich snippets и Knowledge Panel читают эти типы. */}
         <script
+          nonce={nonce}
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
