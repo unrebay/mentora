@@ -22,8 +22,10 @@ const securityHeaders = [
   },
   // Basic XSS filter for older browsers (modern browsers use CSP instead)
   { key: "X-XSS-Protection", value: "1; mode=block" },
-  // Content Security Policy — restricts resource loading to trusted origins
-  { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.spline.design https://prod.spline.design https://cdnjs.cloudflare.com https://us-assets.i.posthog.com https://app.posthog.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://api.telegram.org https://*.posthog.com https://us.i.posthog.com https://us-assets.i.posthog.com https://www.google-analytics.com; frame-src 'self' https://oauth.telegram.org; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests" },
+  // Content-Security-Policy is set per-request in src/middleware.ts (Nonce-CSP)
+  // — having two CSP headers makes the browser apply the MOST restrictive,
+  //   and the static one without nonce would block ALL scripts under
+  //   'strict-dynamic'. Keep only non-CSP security headers here.
 ];
 
 const nextConfig = {

@@ -5,8 +5,58 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const handleI18nRouting = createIntlMiddleware(routing);
 
+/**
+ * Build a per-request Content-Security-Policy using a nonce.
+ *
+ * Why nonce + 'strict-dynamic':
+ *  - 'strict-dynamic' = any script trusted via nonce can load further scripts.
+ *    Modern browsers therefore IGNORE the host allow-list (spline.design, posthog,
+ *    GA, GTM) as long as their entry-point script is nonce-trusted (Next.js
+ *    auto-nonces its hydration bundle when middleware sets `x-nonce` on the
+ *    request headers). Legacy browsers fall back to the host list (https:).
+ *  - This lets us drop 'unsafe-inline' on script-src → A+ rating.
+ *
+ * Style-src keeps 'unsafe-inline' because:
+ *  - We rely on inline styles for theme tokens (CSS-in-JS via style attribute)
+ *  - Removing it would require ~hundreds of inline-style refactors and likely
+ *    break the dark/light theme system. Style-src 'unsafe-inline' alone does
+ *    NOT block A+; only script-src 'unsafe-inline' does.
+ */
+function buildCsp(nonce: string): string {
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval' https:`,
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' data: https://fonts.gstatic.com",
+    "img-src 'self' data: blob: https:",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://api.telegram.org https://*.posthog.com https://us.i.posthog.com https://us-assets.i.posthog.com https://www.google-analytics.com",
+    "frame-src 'self' https://oauth.telegram.org https://*.spline.design",
+    "worker-src 'self' blob:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "upgrade-insecure-requests",
+  ].join("; ");
+}
+
+function applyCsp(
+  response: NextResponse,
+  nonce: string
+): NextResponse {
+  response.headers.set("Content-Security-Policy", buildCsp(nonce));
+  return response;
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Per-request nonce (base64 of a random UUID — Edge-runtime safe via globalThis.crypto)
+  const nonce = btoa(crypto.randomUUID());
+  // Forward nonce on request headers so Next.js App Router can inject it
+  // into its own inline scripts (hydration, flight payload). Without this,
+  // those inline scripts would be blocked by `'strict-dynamic'` policy.
+  request.headers.set("x-nonce", nonce);
 
   // Pass through public analytics share-link pages and their API: skip i18n routing entirely.
   // /analytics/invite/[token] is a static (locale-less) page; if next-intl runs, it 404s.
@@ -48,7 +98,7 @@ export async function middleware(request: NextRequest) {
     }
 
     response.headers.set("x-pathname", pathname);
-    return response;
+    return applyCsp(response, nonce);
   }
 
   // Detect internally-rewritten Russian locale paths.
@@ -88,19 +138,19 @@ export async function middleware(request: NextRequest) {
   // Locale-aware redirects (use /en prefix for English paths; no prefix for Russian)
   const localePrefix = pathname.startsWith("/en") ? "/en" : "";
   if (!user && isProtected) {
-    return NextResponse.redirect(new URL(`${localePrefix}/auth`, origin));
+    return applyCsp(NextResponse.redirect(new URL(`${localePrefix}/auth`, origin)), nonce);
   }
   if (user && isAuthPage) {
-    return NextResponse.redirect(new URL(`${localePrefix}/dashboard`, origin));
+    return applyCsp(NextResponse.redirect(new URL(`${localePrefix}/dashboard`, origin)), nonce);
   }
 
   // For internally-rewritten /ru/* paths: pass through without calling handleI18nRouting.
   // The locale context (x-next-intl-locale: ru) was already set by the FIRST middleware run
   // (for the canonical "/" or "/pricing" etc. path) and is forwarded in the request headers.
   if (isRuLocalePath) {
-    const response = NextResponse.next();
+    const response = NextResponse.next({ request: { headers: request.headers } });
     response.headers.set("x-pathname", pathname);
-    return response;
+    return applyCsp(response, nonce);
   }
 
   // Let next-intl handle locale routing (prefix, detection, rewrite)
@@ -131,7 +181,7 @@ export async function middleware(request: NextRequest) {
   }
 
   response.headers.set("x-pathname", pathname);
-  return response;
+  return applyCsp(response, nonce);
 }
 
 export const config = {
