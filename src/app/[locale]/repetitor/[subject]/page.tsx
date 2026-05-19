@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import LandingNav from "@/components/LandingNav";
 import { PublicFooter } from "@/components/SiteFooter";
 import { getLocale } from "next-intl/server";
+import { headers } from "next/headers";
 import { findSubject, SUBJECT_LANDINGS } from "@/lib/repetitor-subjects";
 
 type Props = { params: Promise<{ locale: string; subject: string }> };
@@ -95,9 +96,64 @@ export default async function SubjectRepetitorPage({ params }: Props) {
         breadcrumbRepetitor: "Репетиторы",
       };
 
+  const nonce = headers().get("x-nonce") ?? undefined;
+  const subjectUrl = isEn
+    ? `https://mentora.su/en/repetitor/${s.url}`
+    : `https://mentora.su/repetitor/${s.url}`;
+  const repetitorListUrl = isEn ? "https://mentora.su/en/repetitor" : "https://mentora.su/repetitor";
+  const homeUrl = isEn ? "https://mentora.su/en" : "https://mentora.su";
+
+  // JSON-LD: BreadcrumbList + Course — даёт rich snippets в Google/Yandex
+  // и подсаживает SERP-карточку «Course» на subject-страницы (тёплый трафик
+  // «репетитор по математике онлайн» и т.п.)
+  const ld = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: t.breadcrumbHome, item: homeUrl },
+          { "@type": "ListItem", position: 2, name: t.breadcrumbRepetitor, item: repetitorListUrl },
+          { "@type": "ListItem", position: 3, name: d.title, item: subjectUrl },
+        ],
+      },
+      {
+        "@type": "Course",
+        name: isEn ? `${d.title} with AI mentor` : `${d.title} с ИИ-ментором`,
+        description: isEn
+          ? `Free AI tutor for ${d.title.toLowerCase()}. ${d.topics}. 24/7, no schedule.`
+          : `Бесплатный ИИ-репетитор по ${d.title.toLowerCase()}. ${d.topics}. 24/7, без расписания.`,
+        provider: {
+          "@type": "Organization",
+          name: "Mentora",
+          sameAs: "https://mentora.su",
+        },
+        inLanguage: isEn ? "en" : "ru-RU",
+        isAccessibleForFree: true,
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: isEn ? "USD" : "RUB",
+          category: "Free",
+        },
+        hasCourseInstance: {
+          "@type": "CourseInstance",
+          courseMode: "online",
+          inLanguage: isEn ? "en" : "ru-RU",
+        },
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
       <LandingNav />
+
+      <script
+        nonce={nonce}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
+      />
 
       {/* Breadcrumb + back chip */}
       <div className="max-w-4xl mx-auto px-6 pt-4 flex items-center gap-3 flex-wrap">

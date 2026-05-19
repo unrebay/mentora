@@ -4,6 +4,8 @@ import Logo from "@/components/Logo";
 import LandingNav from "@/components/LandingNav";
 import { PublicFooter } from "@/components/SiteFooter";
 import { getLocale } from "next-intl/server";
+import { headers } from "next/headers";
+import { SUBJECT_LANDINGS } from "@/lib/repetitor-subjects";
 
 // SEO: piggyback страница под высокочастотный запрос «репетитор онлайн»
 // (Wordstat: 48 489/мес РФ + CIS). Конвертирует трафик в AI-ментора.
@@ -116,9 +118,52 @@ export default async function RepetitorPage() {
         { criterion: "Практика руками", tutor: "Реал-тайм обратная связь", mentora: "Квизы, фото задач (Ultra)",        mentoraWin: true  },
       ];
 
+  const nonce = headers().get("x-nonce") ?? undefined;
+  const baseUrl = isEn ? "https://mentora.su/en" : "https://mentora.su";
+  const repetitorUrl = `${baseUrl}/repetitor`;
+  // JSON-LD: CollectionPage + BreadcrumbList + ItemList со всеми 17 subjects
+  // даёт SERP-карточку и rich-snippet ссылок на конкретные предметы.
+  const ld = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: isEn ? "Home" : "Главная", item: baseUrl },
+          { "@type": "ListItem", position: 2, name: isEn ? "Tutors" : "Репетиторы", item: repetitorUrl },
+        ],
+      },
+      {
+        "@type": "CollectionPage",
+        name: isEn ? "AI tutors at Mentora — 17 subjects" : "ИИ-репетиторы Mentora — 17 предметов",
+        description: isEn
+          ? "Free AI tutor instead of a traditional tutor: 17 school and university subjects, 24/7, no schedule."
+          : "Бесплатный ИИ-репетитор вместо обычного: 17 школьных и университетских предметов, 24/7, без расписания.",
+        url: repetitorUrl,
+        inLanguage: isEn ? "en" : "ru-RU",
+      },
+      {
+        "@type": "ItemList",
+        name: isEn ? "Subjects with AI tutor" : "Предметы с ИИ-репетитором",
+        itemListElement: SUBJECT_LANDINGS.map((s, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: isEn ? s.en.title : s.ru.title,
+          url: `${baseUrl}/repetitor/${s.url}`,
+        })),
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
       <LandingNav />
+
+      <script
+        nonce={nonce}
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
+      />
 
       {/* Кнопка «Назад» */}
       <div className="max-w-4xl mx-auto px-6 pt-4">
