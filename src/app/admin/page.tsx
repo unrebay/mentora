@@ -60,7 +60,7 @@ const darkTok: Tok = {
   SHADOW: "none",
   GLASS:  "blur(0px)",
   isDark: true,
-  inp: { padding: "9px 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, color: "#e2e8f0", fontSize: 13, outline: "none", width: "100%", boxSizing: "border-box" as const },
+  inp: { padding: "9px 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, color: "#e2e8f0", fontSize: 16, outline: "none", width: "100%", boxSizing: "border-box" as const },
 };
 
 const lightTok: Tok = {
@@ -73,7 +73,7 @@ const lightTok: Tok = {
   SHADOW: "0 2px 16px rgba(69,97,232,0.08), 0 1px 4px rgba(69,97,232,0.06)",
   GLASS:  "blur(16px) saturate(1.6)",
   isDark: false,
-  inp: { padding: "9px 12px", background: "rgba(255,255,255,0.7)", border: "1px solid rgba(69,97,232,0.18)", borderRadius: 10, color: "#1a2340", fontSize: 13, outline: "none", width: "100%", boxSizing: "border-box" as const },
+  inp: { padding: "9px 12px", background: "rgba(255,255,255,0.7)", border: "1px solid rgba(69,97,232,0.18)", borderRadius: 10, color: "#1a2340", fontSize: 16, outline: "none", width: "100%", boxSizing: "border-box" as const },
 };
 
 // ── Token context ─────────────────────────────────────────────────────────────
@@ -541,7 +541,7 @@ function TeamTab() {
               maxWidth: "78%", padding: "10px 14px", borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
               background: msgBg(m.role),
               border: `1px solid ${m.role === "user" ? BRAND + "33" : BOR}`,
-              fontSize: 13.5, lineHeight: 1.6, color: TEXT,
+              fontSize: 16, lineHeight: 1.6, color: TEXT,
               whiteSpace: "pre-wrap", wordBreak: "break-word",
             }}>
               {m.content ? renderMd(m.content) : (streaming && i === messages.length - 1
@@ -722,7 +722,7 @@ function RevenueCalculator() {
         </div>
 
         {/* Secondary sliders */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 16 }}>
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
               <span style={{ fontSize: 12, color: MUTED }}>Pro / Ultra</span>
@@ -1252,26 +1252,26 @@ export default function AdminPanel() {
 
           {/* ── OVERVIEW ─────────────────────────────────────────────────────── */}
           {tab === "overview" && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 16 }}>
               <SystemStatusGrid isDark={isDark} TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} />
               <FunnelWidget isDark={isDark} TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} />
             </div>
           )}
           {!loading && stats && tab === "overview" && <>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16, marginBottom: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 16 }}>
               <Metric label="Пользователей"     value={stats.users.total}       sub={`+${stats.users.newToday} сегодня`} />
               <Metric label="Активны сегодня"   value={stats.users.activeToday} sub={`неделя: ${N(stats.users.activeWeek)}`} color={GREEN} />
               <Metric label="Сообщений сегодня" value={stats.chat.messagesToday} sub={`всего: ${N(stats.chat.totalMessages)}`} />
               <Metric label="MRR (оценка)"      value={R(mrr)} sub={`Pro×${pro} + Ultra×${ult}`} color="#a78bfa" />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginBottom: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 12, marginBottom: 16 }}>
               <Metric label="Pro"    value={stats.users.pro}    sub={`≈${R(mrrPro)}/мес`} color="#60a5fa" />
               <Metric label="Ultra" value={stats.users.ultima} sub={`≈${R(mrrUlt)}/мес`} color="#a78bfa" />
               <Metric label="Free"   value={stats.users.free}   sub={`Пробный истёк: ${stats.users.trialExpired}`} />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 16 }}>
               <Card ch={<>
                 <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>AI за 7 дней</p>
                 {[
@@ -1397,13 +1397,13 @@ export default function AdminPanel() {
 
           {/* ── REVENUE ──────────────────────────────────────────────────────── */}
           {!loading && stats && tab === "revenue" && <>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginBottom: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 12, marginBottom: 16 }}>
               <Metric label="MRR (оценка)" value={R(mrr)} sub="Monthly Recurring Revenue" color={GREEN} />
               <Metric label="ARR (оценка)" value={R(arr)} sub="Annual Run Rate" color={GREEN} />
               <Metric label="Платящих"     value={pro + ult} sub={`из ${N(stats.users.total)} пользователей`} color="#f472b6" />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 16 }}>
               <Card ch={<>
                 <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 20 }}>Разбивка по тарифам</p>
                 {[
