@@ -28,7 +28,6 @@ const securityHeaders = [
 
 const nextConfig = {
   output: "standalone",
-  productionBrowserSourceMaps: true,
   typescript: {
     ignoreBuildErrors: true,
   },
