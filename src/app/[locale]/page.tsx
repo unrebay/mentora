@@ -991,7 +991,7 @@ export default async function HomePage() {
 
 
       {/* ── MISSION / VISION ─────────────────────────────────────── */}
-      <section className="relative px-6 py-28 overflow-hidden" style={{ background: "var(--bg)" }}>
+      <section className="relative px-6 py-16 md:py-28 overflow-hidden" style={{ background: "var(--bg)" }}>
         {/* Ambient glow background */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
@@ -1022,7 +1022,7 @@ export default async function HomePage() {
 
           {/* Manifesto paragraph */}
           <FadeUp delay={0.14}>
-            <p className="text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-16"
+            <p className="text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-10 md:mb-16"
               style={{ color: "var(--text-secondary)" }}>
               {locale === "ru"
                 ? "Мы тренируем тело — почему не мозг? Знание — не обязанность перед экзаменом, а часть здоровой жизни. Mentora делает живой диалог с ментором доступным каждому, кто хочет глубже понимать мир."
@@ -1031,7 +1031,7 @@ export default async function HomePage() {
           </FadeUp>
 
           {/* Three belief pillars */}
-          <div className="grid sm:grid-cols-3 gap-10 md:gap-14 mb-20 text-left">
+          <div className="grid sm:grid-cols-3 gap-8 md:gap-14 mb-12 md:mb-20 text-left">
             {[
               {
                 icon: (
@@ -1122,7 +1122,7 @@ export default async function HomePage() {
       </div>
 
       {/* CTA */}
-      <section style={{ background: "#111827" }} className="text-white px-6 py-24 text-center relative overflow-hidden">
+      <section style={{ background: "#111827" }} className="text-white px-6 py-16 sm:py-24 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-30" aria-hidden>
           <div className="absolute inset-0"
             style={{ background: "radial-gradient(ellipse at 50% 120%, #4561E840 0%, transparent 70%)" }} />
