@@ -123,7 +123,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossOrigin="anonymous" />
         <script nonce={nonce} defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossOrigin="anonymous" />
         <meta name="yandex-verification" content="673fbfbebc45f7aa" />
-        <meta name="theme-color" content="#4561E8" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#06060F" media="(prefers-color-scheme: dark)" />
         <meta name="msapplication-TileColor" content="#4561E8" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
