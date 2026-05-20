@@ -120,20 +120,22 @@ function PopupCard({ pop, onClose }: { pop: PopupState; onClose: () => void }) {
   const ph = 260;
   const cw = typeof window !== "undefined" ? window.innerWidth  : 1200;
   const ch = typeof window !== "undefined" ? window.innerHeight : 800;
+  // Navbar fixed на top ~64px + safe-area ~24px = 88px на iPhone.
+  // Popup НЕ должен залезать под него (без navbar поверх + текст становится
+  // некликабельным под прозрачным навбаром).
+  const NAVBAR_OFFSET = 96;
   // Position: fixed (viewport coords) — sciScr.x/y are viewport coords too.
-  // Prefer placing the card ABOVE the clicked star (top = sy - ph - 24).
-  // If there's not enough room above, flip BELOW (top = sy + 24). If neither
-  // fits, just clamp to the viewport so the whole card stays on screen.
   const left = Math.min(Math.max(pop.sx - pw / 2, 12), cw - pw - 12);
   const aboveTop = pop.sy - ph - 24;
   const belowTop = pop.sy + 24;
   let top: number;
-  if (aboveTop >= 12) {
-    top = aboveTop;                                          // fits above
+  if (aboveTop >= NAVBAR_OFFSET) {
+    top = aboveTop;                                          // fits above (с учётом navbar)
   } else if (belowTop + ph + 12 <= ch) {
     top = belowTop;                                          // flip to below
   } else {
-    top = Math.min(Math.max(12, aboveTop), ch - ph - 12);    // best-effort clamp
+    // best-effort clamp: всё равно НЕ заходим под navbar
+    top = Math.min(Math.max(NAVBAR_OFFSET, aboveTop), ch - ph - 12);
   }
   const color = hexToCSS(pop.hex);
   const pct   = Math.min(100, Math.round(pop.xp / 5));

@@ -381,8 +381,10 @@ export default function AboutPage() {
                 {compRows.map((row, ri) => {
                   const isLast = ri === compRows.length - 1;
                   const cellStyle = (i: number, val: string): React.CSSProperties => ({
-                    padding: "11px 14px",
+                    padding: "12px 14px",
                     fontSize: 13,
+                    textAlign: i === 0 ? "left" : "center",
+                    verticalAlign: "middle",
                     color: val === "✓" ? "#10B981"
                       : val === "✗" ? "var(--text-muted)"
                       : i === 1 ? "#4561E8"
@@ -399,16 +401,20 @@ export default function AboutPage() {
                     WebkitBackdropFilter: i === 1 ? "blur(8px) saturate(1.3)" : undefined,
                     lineHeight: 1.4,
                   });
+                  // Render check/cross with larger icon-style glyph; pass text values through as-is
+                  const renderVal = (v: string) => v === "✓" || v === "✗"
+                    ? <span style={{ fontSize: 18, display: "inline-block", lineHeight: 1 }}>{v}</span>
+                    : v;
                   return (
                     <tr key={row.criterion}>
                       <td className="compCritCol" style={cellStyle(0, "")}>
                         <div style={{ color: "var(--text)", fontWeight: 600, fontSize: 13 }}>{row.criterion}</div>
-                        {row.note && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2, lineHeight: 1.4 }}>{row.note}</div>}
+                        {row.note && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 3, lineHeight: 1.45 }}>{row.note}</div>}
                       </td>
-                      <td className="compTdNarrow" style={cellStyle(1, row.mentora)}>{row.mentora}</td>
-                      <td className="compTdNarrow" style={cellStyle(2, row.search)}>{row.search}</td>
-                      <td className="compTdNarrow" style={cellStyle(3, row.ai)}>{row.ai}</td>
-                      <td className="compTdNarrow" style={cellStyle(4, row.tutor)}>{row.tutor}</td>
+                      <td className="compTdNarrow" style={cellStyle(1, row.mentora)}>{renderVal(row.mentora)}</td>
+                      <td className="compTdNarrow" style={cellStyle(2, row.search)}>{renderVal(row.search)}</td>
+                      <td className="compTdNarrow" style={cellStyle(3, row.ai)}>{renderVal(row.ai)}</td>
+                      <td className="compTdNarrow" style={cellStyle(4, row.tutor)}>{renderVal(row.tutor)}</td>
                     </tr>
                   );
                 })}

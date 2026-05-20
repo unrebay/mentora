@@ -68,15 +68,17 @@ function TourHintBubble({ forceDark }: { forceDark: boolean }) {
           style={{
             position: "absolute",
             top: "calc(100% + 10px)",
-            left: "50%",
-            transform: "translateX(-50%)",
+            // Прижимаем tooltip ПРАВЫМ краем к правому краю якоря (TourButton).
+            // На mobile TourButton находится близко к правому краю экрана — если
+            // центрировать tooltip translateX(-50%), он вылазит за viewport.
+            right: 0,
             zIndex: 9999,
             cursor: "pointer",
             userSelect: "none",
           }}
         >
           <div style={{
-            position: "absolute", top: -5, left: "50%", transform: "translateX(-50%)",
+            position: "absolute", top: -5, right: 14,
             width: 10, height: 5, overflow: "hidden",
           }}>
             <div style={{
@@ -87,7 +89,8 @@ function TourHintBubble({ forceDark }: { forceDark: boolean }) {
             }} />
           </div>
           <div style={{
-            whiteSpace: "nowrap", padding: "6px 11px", borderRadius: 10,
+            whiteSpace: "normal", maxWidth: 200, textAlign: "center",
+            padding: "7px 12px", borderRadius: 10,
             fontSize: 11.5, fontWeight: 600, lineHeight: 1.4,
             background: forceDark ? "rgba(18,18,38,0.95)" : "rgba(255,255,255,0.97)",
             border: `1px solid ${forceDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.10)"}`,
