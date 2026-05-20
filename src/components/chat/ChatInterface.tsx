@@ -517,6 +517,14 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const [input, setInput] = useState(initialTopic ? `${topicPrefix}${initialTopic}` : "");
   const [loading, setLoading] = useState(false);
   const [messagesRemaining, setMessagesRemaining] = useState<number | null>(initialMessagesRemaining);
+  // Authoritative limit-reached signal from the API. Once API returns 429
+  // we trust it and lock UI regardless of local message count.
+  // This fixes the case where the page loaded with no local history
+  // (SSR race, RLS) but messages_today=10 — first user action gets 429,
+  // and previously messages.length was 0 so the lock screen never showed.
+  const [limitConfirmedByApi, setLimitConfirmedByApi] = useState<boolean>(initialMessagesRemaining === 0);
+  // Tooltip state — pill above input that teaches whole-sentence chatting
+  const [showWritingTip, setShowWritingTip] = useState<boolean>(false);
   const [, setResetAt] = useState<string | null>(initialResetAt ?? null);
   const [countdown, setCountdown] = useState<string>(() => formatCountdown(msUntilNextMidnightUTC()));
   const [lastUserMsg, setLastUserMsg] = useState("");
@@ -607,10 +615,10 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     try {
       const res = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:text,subject,history:messages.filter(m=>!m.isError).slice(-10),locale})});
       const data = await res.json();
-      if (res.status===429){setMessagesRemaining(0);setMessages(prev=>prev.filter(m=>!(m.role==="user"&&m.content===text)));return;}
+      if (res.status===429){setMessagesRemaining(0);setLimitConfirmedByApi(true);setMessages(prev=>prev.filter(m=>!(m.role==="user"&&m.content===text)));return;}
       if (!res.ok||!data.message){setMessages(prev=>[...prev,{role:"assistant",content:data.error??tChat("errorGeneric"),isError:true}]);return;}
       setMessages(prev=>[...prev,{role:"assistant",content:data.message,imageUrl:data.imageUrl??undefined,citations:Array.isArray(data.citations)?data.citations:undefined}]);
-      if(data.messagesRemaining!==undefined)setMessagesRemaining(data.messagesRemaining);
+      if(data.messagesRemaining!==undefined){setMessagesRemaining(data.messagesRemaining);if(data.messagesRemaining<=0)setLimitConfirmedByApi(true);}
     } catch {setMessages(prev=>[...prev,{role:"assistant",content:tChat("errorNoInternet"),isError:true}]);}
     finally{setLoading(false);}
   }
@@ -655,13 +663,13 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         body: JSON.stringify({ message: newText, subject, history, locale }),
       });
       const data = await res.json();
-      if (res.status === 429) { setMessagesRemaining(0); return; }
+      if (res.status === 429) { setMessagesRemaining(0); setLimitConfirmedByApi(true); return; }
       if (!res.ok || !data.message) {
         setMessages(prev => [...prev, { role: "assistant", content: data.error ?? tChat("errorGeneric"), isError: true }]);
         return;
       }
       setMessages(prev => [...prev, { role: "assistant", content: data.message, imageUrl: data.imageUrl ?? undefined, citations: Array.isArray(data.citations) ? data.citations : undefined }]);
-      if (data.messagesRemaining !== undefined) setMessagesRemaining(data.messagesRemaining);
+      if (data.messagesRemaining !== undefined) { setMessagesRemaining(data.messagesRemaining); if (data.messagesRemaining <= 0) setLimitConfirmedByApi(true); }
     } catch {
       setMessages(prev => [...prev, { role: "assistant", content: tChat("errorNoInternet"), isError: true }]);
     } finally {
@@ -670,10 +678,13 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   }
 
   const isLimited = messagesRemaining !== null;
-  // Защита: даже если remaining=0 пришёл из-за SSR-race / RLS-фейла,
-  // у юзера с пустым чатом никогда не должен показываться таймер «лимит исчерпан».
-  // Реальный исчерпанный лимит всегда сопровождается ≥1 сообщением в истории.
-  const limitReached = isLimited && messagesRemaining !== null && messagesRemaining <= 0 && messages.length > 0;
+  // limitReached = (API explicitly said 429) OR (remaining=0 AND user already
+  // posted in this session). Either is authoritative. The previous logic
+  // required messages.length > 0 strictly — that hid the lock screen for
+  // returning users with messages_today=10 but no local history loaded.
+  const limitReached =
+    limitConfirmedByApi ||
+    (isLimited && messagesRemaining !== null && messagesRemaining <= 0 && messages.length > 0);
   const showCounter = isLimited && messagesRemaining !== null && messagesRemaining <= 5 && !limitReached;
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages]);
@@ -696,14 +707,14 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       const res = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:userMessage,subject,history:messages.filter(m=>!m.isError).slice(-10),locale,...(pendingImage?{imageData:pendingImage.data,imageMimeType:pendingImage.mimeType}:{})})});
       setPendingImage(null);
       const data = await res.json();
-      if (res.status===429){setMessagesRemaining(0);setMessages(prev=>prev.filter(m=>m.content!==userMessage||m.role!=="user"));setInput(userMessage);return;}
+      if (res.status===429){setMessagesRemaining(0);setLimitConfirmedByApi(true);setMessages(prev=>prev.filter(m=>m.content!==userMessage||m.role!=="user"));setInput(userMessage);return;}
       if (!res.ok||!data.message){
         const errText=data.error==="Internal server error"?tChat("errorServer"):(data.error??tChat("errorGeneric"));
         setMessages(prev=>[...prev,{role:"assistant",content:errText,isError:true}]);
         posthog.capture("chat_error",{subject,status:res.status,error:data.error});return;
       }
       setMessages(prev=>[...prev,{role:"assistant",content:data.message,imageUrl:data.imageUrl??undefined,citations:Array.isArray(data.citations)?data.citations:undefined}]);
-      if(data.messagesRemaining!==undefined)setMessagesRemaining(data.messagesRemaining);
+      if(data.messagesRemaining!==undefined){setMessagesRemaining(data.messagesRemaining);if(data.messagesRemaining<=0)setLimitConfirmedByApi(true);}
       if(data.resetAt)setResetAt(data.resetAt);
       if(data.levelUp){
         setLevelUpData(data.levelUp);setLevelUpFading(true);setShowLevelUp(true);
@@ -1202,6 +1213,62 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                 <img src={pendingImage.preview} alt={tChat("imagePhotoAlt")} className="w-12 h-12 rounded-lg object-cover shrink-0" />
                 <span className="text-xs flex-1" style={{ color:"var(--text-secondary)" }}>{tChat("imageAttached")}</span>
                 <button type="button" onClick={() => setPendingImage(null)} className="text-lg leading-none px-1" style={{ color:"var(--text-muted)" }}>×</button>
+              </div>
+            )}
+
+            {/* Writing tip — minimal pill above input, like the "copy" button under messages.
+                  Tap → popover with a soft, positive message about full-sentence formulation.
+                  Goal: nudge users (esp. teenagers from reels traffic) toward writing whole thoughts
+                  instead of one-word fragments. */}
+            {!limitReached && (
+              <div className="mb-2 relative" style={{ zIndex: 5 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowWritingTip(v => !v)}
+                  aria-expanded={showWritingTip}
+                  className="inline-flex items-center gap-1.5 text-xs transition-opacity hover:opacity-100"
+                  style={{
+                    color: "var(--text-muted)",
+                    opacity: showWritingTip ? 1 : 0.7,
+                    padding: "4px 10px",
+                    borderRadius: 999,
+                    background: "var(--bg-card)",
+                    border: "1px solid var(--border-light)",
+                  }}
+                >
+                  <span>{tChat("writingTipLabel")}</span>
+                </button>
+                {showWritingTip && (
+                  <div
+                    className="absolute left-0 bottom-full mb-2 animate-fade-in-up"
+                    style={{
+                      maxWidth: 320,
+                      padding: "14px 16px",
+                      borderRadius: 16,
+                      background: "var(--bg-card)",
+                      border: "1px solid var(--border-light)",
+                      boxShadow: "0 12px 36px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.04) inset",
+                      backdropFilter: "blur(16px) saturate(1.6)",
+                      WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+                    }}
+                    role="dialog"
+                  >
+                    <p className="text-sm font-semibold mb-1.5" style={{ color: "var(--text)" }}>
+                      {tChat("writingTipTitle")}
+                    </p>
+                    <p className="text-xs leading-relaxed mb-3" style={{ color: "var(--text-secondary)" }}>
+                      {tChat("writingTipBody")}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowWritingTip(false)}
+                      className="text-xs font-medium hover:opacity-80"
+                      style={{ color: "#4561E8" }}
+                    >
+                      {tChat("writingTipClose")} →
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
