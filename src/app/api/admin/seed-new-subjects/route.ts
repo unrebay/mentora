@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const ADMIN_TOKEN = process.env.ADMIN_SECRET ?? "mentora-seed-2026";
+const ADMIN_TOKEN = process.env.ADMIN_SECRET;
 
 // ── Knowledge chunks for Psychology, Economics, Philosophy ────────────────
 const CHUNKS: { subject: string; topic: string; content: string; source: string }[] = [
@@ -388,6 +388,9 @@ const CHUNKS: { subject: string; topic: string; content: string; source: string 
 ];
 
 export async function POST(req: NextRequest) {
+  if (!ADMIN_TOKEN) {
+    return NextResponse.json({ error: "ADMIN_SECRET not configured" }, { status: 500 });
+  }
   const auth = req.headers.get("x-admin-token");
   if (auth !== ADMIN_TOKEN) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

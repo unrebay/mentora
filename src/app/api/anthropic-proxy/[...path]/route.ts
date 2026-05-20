@@ -9,12 +9,22 @@ export async function POST(
   // Auth: VPS sends x-vercel-protection-bypass (already in defaultHeaders of Anthropic client)
   // This is the same secret Vercel uses for deployment protection bypass.
   const bypass = req.headers.get("x-vercel-protection-bypass");
-  if (!bypass || bypass !== process.env.VERCEL_BYPASS_SECRET) {
+  // Block undefined-secret exploit + timing-leak via plain !== comparison.
+  const expectedBypass = process.env.VERCEL_BYPASS_SECRET;
+  if (!expectedBypass) {
+    return new NextResponse("Misconfigured", { status: 500 });
+  }
+  if (!bypass || bypass.length !== expectedBypass.length || bypass !== expectedBypass) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
   const { path } = await params;
   const pathStr = path.join("/");
+  // Whitelist allowed upstream paths. Prevents catch-all abuse if VERCEL_BYPASS_SECRET leaks.
+  const ALLOWED_PATHS = new Set(["v1/messages"]);
+  if (!ALLOWED_PATHS.has(pathStr)) {
+    return new NextResponse("Not Found", { status: 404 });
+  }
   const body = await req.text();
 
   const headers: Record<string, string> = {

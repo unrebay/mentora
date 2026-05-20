@@ -29,11 +29,13 @@ const WINDOW_MS = 10 * 60 * 1000;
 const MAX_PER_WINDOW = 5;
 
 function ipFromReq(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
+  // Trust nginx's `x-real-ip` first — attacker cannot override (nginx ignores
+  // client-supplied X-Real-IP). Then fall back to LAST entry of XFF chain
+  // (the closest hop). Never trust the FIRST XFF entry — that's attacker-controlled.
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp) return realIp.trim();
+  const xff = req.headers.get("x-forwarded-for")?.split(",").map((s) => s.trim()).filter(Boolean) ?? [];
+  return xff[xff.length - 1] ?? "unknown";
 }
 
 function rateLimited(ip: string): boolean {
@@ -177,7 +179,11 @@ export async function POST(req: NextRequest) {
         const refUrl = new URL("/api/referral", req.url);
         await fetch(refUrl, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            // Internal-only call (see api/referral). Bypasses anti-abuse gate.
+            ...(process.env.INTERNAL_API_SECRET ? { "x-internal-secret": process.env.INTERNAL_API_SECRET } : {}),
+          },
           body: JSON.stringify({ code: refCode, newUserId: userId }),
         });
       } catch { /* non-critical */ }

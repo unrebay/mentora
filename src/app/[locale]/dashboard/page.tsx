@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AppFooter } from "@/components/SiteFooter";
 import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
+import { computeFreeLimit, FREE_WINDOW_LIMIT } from "@/lib/free-limit";
 import { redirect } from "next/navigation";
 import { SUBJECTS } from "@/lib/types";
 import Link from "next/link";
@@ -22,7 +23,7 @@ import FadeUp from "@/components/FadeUp";
 import dynamic from "next/dynamic";
 const StreakRewardCelebration = dynamic(() => import("@/components/StreakRewardCelebration"), { ssr: false });
 
-const DAILY_LIMIT = 20;
+// Free-limit: single source of truth lives in src/lib/free-limit.ts
 
 function pluralDaysRu(n: number): string {
   const m10 = n % 10, m100 = n % 100;
@@ -97,11 +98,7 @@ export default async function DashboardPage() {
     ? new Date(profile.trial_expires_at).toLocaleDateString(locale === "en" ? "en-US" : "ru-RU", { day: "numeric", month: "long" })
     : null;
 
-  const WINDOW_HOURS = 24;
-  const windowStart = profile?.messages_window_start ? new Date(profile.messages_window_start) : null;
-  const windowExpired = !windowStart || Date.now() - windowStart.getTime() > WINDOW_HOURS * 3_600_000;
-  const usedInWindow = windowExpired ? 0 : (profile?.messages_today ?? 0);
-  const messagesRemaining = isPro ? null : Math.max(0, DAILY_LIMIT - usedInWindow);
+  const { messagesRemaining } = computeFreeLimit(profile, isPro);
 
   const { data: progressData } = await supabase.from("user_progress").select("*").eq("user_id", user.id);
 
@@ -380,7 +377,7 @@ export default async function DashboardPage() {
                   <span className="font-semibold" style={{
                     color: messagesRemaining === 0 ? "#ef4444" : messagesRemaining !== null && messagesRemaining <= 5 ? "#f97316" : "var(--text)",
                   }}>
-                    {messagesRemaining} / {DAILY_LIMIT}
+                    {messagesRemaining} / {FREE_WINDOW_LIMIT}
                   </span>
                 </span>
               </div>

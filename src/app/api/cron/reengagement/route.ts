@@ -5,6 +5,11 @@ import { sendEmail, reengagementEmailHtml } from "@/lib/email";
 // Vercel cron calls this every day at 10:00 UTC
 // Protected by CRON_SECRET env var
 export async function GET(req: NextRequest) {
+  // Block Bearer-undefined exploit: if CRON_SECRET is missing, refuse the call.
+  // Otherwise an unset env makes `Bearer undefined` a valid auth string.
+  if (!process.env.CRON_SECRET) {
+    return NextResponse.json({ error: "CRON_SECRET not configured" }, { status: 500 });
+  }
   const secret = req.headers.get("authorization");
   if (secret !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

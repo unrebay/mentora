@@ -48,6 +48,17 @@ export async function GET() {
 // NOTE: No session cookie required — signup happens before email confirmation,
 // so there is no active session yet. We verify the user via the admin client instead.
 export async function POST(req: NextRequest) {
+  // Internal-only endpoint: gate on shared secret so attackers can't farm referrals
+  // by sending arbitrary `newUserId`. Called from /api/signup after a confirmed
+  // server-side signup with the cookie session newly issued.
+  const expectedInternal = process.env.INTERNAL_API_SECRET;
+  if (!expectedInternal) {
+    return NextResponse.json({ error: "INTERNAL_API_SECRET not configured" }, { status: 500 });
+  }
+  const internalHeader = req.headers.get("x-internal-secret");
+  if (internalHeader !== expectedInternal) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
   const { code, newUserId } = await req.json();
   if (!code || !newUserId) return NextResponse.json({ error: "Missing params" }, { status: 400 });
 

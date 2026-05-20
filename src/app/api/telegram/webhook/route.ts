@@ -824,6 +824,18 @@ async function handleUpdate(update: Record<string, unknown>) {
 // processes the AI response in background via waitUntil.
 
 export async function POST(req: NextRequest) {
+  // Spoof-protection: verify Telegram-sent secret header. When TELEGRAM_WEBHOOK_SECRET
+  // is set in env, Telegram sends X-Telegram-Bot-Api-Secret-Token on every call.
+  // Without this check ANYONE can POST fake updates and burn Anthropic budget +
+  // probe support codes against the user-lookup function.
+  // See: https://core.telegram.org/bots/api#setwebhook (secret_token parameter)
+  const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
+  if (expectedSecret) {
+    const got = req.headers.get("x-telegram-bot-api-secret-token");
+    if (got !== expectedSecret) {
+      return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+    }
+  }
   try {
     const update = await req.json();
     // On VPS (pm2 / long-running process) we can just fire-and-forget without waitUntil.

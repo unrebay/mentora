@@ -1,4 +1,5 @@
 import React from "react";
+import { computeFreeLimit, FREE_WINDOW_LIMIT } from "@/lib/free-limit";
 import { AppFooter } from "@/components/SiteFooter";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
@@ -214,17 +215,11 @@ export default async function ProfilePage() {
   const isTrialActive = profile?.trial_expires_at ? new Date(profile.trial_expires_at) > new Date() : false;
   const isPro = isUltima || profile?.plan === "pro" || isTrialActive;
 
-  // Rolling 8-hour window counter for free users (starts from first message sent)
-  const FREE_LIMIT = 10;
-  const WINDOW_HOURS = 8;
-  const windowStart = profile?.messages_window_start ? new Date(profile.messages_window_start) : null;
-  const windowExpired = !windowStart || (Date.now() - windowStart.getTime()) >= WINDOW_HOURS * 3600_000;
-  const usedToday = windowExpired ? 0 : (profile?.messages_today ?? 0);
-  const remainingToday = Math.max(0, FREE_LIMIT - usedToday);
-  // Pass reset time to client pill only when window is active and has used messages
-  const windowResetAt = (!windowExpired && windowStart && usedToday > 0)
-    ? new Date(windowStart.getTime() + WINDOW_HOURS * 3600_000).toISOString()
-    : null;
+  // Rolling 8-hour window counter for free users (starts from first message sent).
+  // Single source of truth — see src/lib/free-limit.ts.
+  const _free = computeFreeLimit(profile, isPro || isUltima);
+  const remainingToday = _free.messagesRemaining ?? FREE_WINDOW_LIMIT;
+  const windowResetAt = _free.resetAt;
 
   const joinedDaysAgo = profile?.created_at
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 86400000)
@@ -307,7 +302,7 @@ export default async function ProfilePage() {
               ) : (
                 <FreeWindowPill
                   remaining={remainingToday}
-                  limit={FREE_LIMIT}
+                  limit={FREE_WINDOW_LIMIT}
                   windowResetAt={windowResetAt}
                 />
               )}

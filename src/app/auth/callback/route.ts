@@ -19,7 +19,10 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type");
-  const next = searchParams.get("next") ?? "/dashboard";
+  const rawNext = searchParams.get("next") ?? "/dashboard";
+  // Open-redirect guard: must be same-origin path, never protocol-relative or
+  // backslash-prefixed (some browsers normalize `\evil.com` to `//evil.com`).
+  const next = (rawNext.startsWith("/") && !rawNext.startsWith("//") && !rawNext.startsWith("/\\")) ? rawNext : "/dashboard";
   const error = searchParams.get("error");
 
   // Always use canonical production URL first — prevents localhost redirect bug when

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { computeFreeLimit, FREE_WINDOW_LIMIT } from "@/lib/free-limit";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "@/i18n/navigation";
 import { SUBJECTS } from "@/lib/types";
@@ -16,7 +17,6 @@ export const viewport: Viewport = {
   ],
 };
 
-const WINDOW_LIMIT = 10; // rolling 8h window, matches /api/chat WINDOW_LIMIT
 
 interface Props {
   params: Promise<{ locale: string; subject: string }>;
@@ -167,17 +167,12 @@ export default async function LearnSubjectPage({ params, searchParams }: Props) 
   let initialResetAt: string | null = null;
 
   if (!isPaidOrTrial) {
-    // Defensive: if profile select silently failed (RLS edge-case, race с
-    // signup → создан, но row не виден), profile=null. Раньше код всё равно
-    // считал windowExpired=true → usedToday=0 → remaining=WINDOW_LIMIT, что
-    // правильно. Оставляем эту цепочку.
-    const windowStart = profile?.messages_window_start ? new Date(profile.messages_window_start) : null;
-    const todayUtc = new Date(); todayUtc.setUTCHours(0, 0, 0, 0);
-    const windowExpired = !windowStart || windowStart < todayUtc;
-    const usedToday = windowExpired ? 0 : (profile?.messages_today ?? 0);
-    initialMessagesRemaining = Math.max(0, WINDOW_LIMIT - usedToday);
-    const nextMidnight = new Date(); nextMidnight.setUTCHours(24, 0, 0, 0);
-    initialResetAt = nextMidnight.toISOString();
+    // Single source of truth — see src/lib/free-limit.ts.
+    // If profile select silently failed (RLS edge-case, race с signup), profile=null →
+    // helper returns full limit (windowExpired=true, usedInWindow=0).
+    const _free = computeFreeLimit(profile, false);
+    initialMessagesRemaining = _free.messagesRemaining ?? FREE_WINDOW_LIMIT;
+    initialResetAt = _free.resetAt;
   }
 
   const initialTopic = topic ? decodeURIComponent(topic) : undefined;
