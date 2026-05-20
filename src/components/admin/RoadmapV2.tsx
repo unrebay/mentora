@@ -1109,6 +1109,8 @@ export default function RoadmapV2Tab() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"kanban" | "calendar">("kanban");
   const [filterCat, setFilterCat] = useState<Category | null>(null);
+  /** Milestone filter: null = all, true = only milestone, false = only regular */
+  const [filterMilestone, setFilterMilestone] = useState<boolean | null>(null);
 
   useEffect(() => {
     // Hybrid load:
@@ -1271,19 +1273,36 @@ export default function RoadmapV2Tab() {
     persist([...tasks, t], `add:${t.title.slice(0, 30)}`);
   };
 
+  // Normalize for searching: lowercase, ё→е (RU users mix them), strip dashes
+  // so 'next.js' matches 'nextjs', 'pre-launch' matches 'prelaunch' etc.
+  const normalize = (str: string) =>
+    str.toLowerCase().replace(/ё/g, "е").replace(/[-_.]/g, "");
+
   const filtered = useMemo(() => {
     let result = tasks;
     if (filterCat) result = result.filter(t => t.category === filterCat);
+    if (filterMilestone !== null) result = result.filter(t => Boolean(t.isMilestone) === filterMilestone);
     if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      result = result.filter(t =>
-        t.title.toLowerCase().includes(q) ||
-        (t.notes ?? "").toLowerCase().includes(q) ||
-        (t.subtasks ?? []).some(s => s.text.toLowerCase().includes(q))
-      );
+      // Multi-token AND search: каждое слово должно встретиться где-то в task.
+      // Поиск идёт по title + notes + subtasks + category label + bucket + state +
+      // due date. Token подсветка через normalize: 'мобайл лендинг' → ['мобайл', 'лендинг'].
+      const tokens = normalize(searchQuery.trim()).split(/\s+/).filter(Boolean);
+      result = result.filter(t => {
+        const haystack = normalize([
+          t.title,
+          t.notes ?? "",
+          (t.subtasks ?? []).map(s => s.text).join(" "),
+          CAT_META[t.category]?.label ?? t.category,
+          t.bucket,
+          t.state,
+          t.due ?? "",
+          t.isMilestone ? "milestone веха" : "",
+        ].join(" "));
+        return tokens.every(tk => haystack.includes(tk));
+      });
     }
     return result;
-  }, [tasks, filterCat, searchQuery]);
+  }, [tasks, filterCat, filterMilestone, searchQuery]);
 
   return (
     <div>
@@ -1299,7 +1318,7 @@ export default function RoadmapV2Tab() {
         onRestore={(t) => persist(t, "restore-history")}
       />
 
-      {/* Category filter chips */}
+      {/* Category filter chips + milestone filter */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12, alignItems: "center" }}>
         <CategoryChip active={filterCat === null} label="Все" color="#94a3b8" onClick={() => setFilterCat(null)} count={tasks.length} />
         {(Object.keys(CAT_META) as Category[]).map(c => (
@@ -1308,6 +1327,26 @@ export default function RoadmapV2Tab() {
             count={tasks.filter(t => t.category === c).length}
             onClick={() => setFilterCat(filterCat === c ? null : c)} />
         ))}
+        {/* Separator */}
+        <span style={{ width: 1, height: 24, background: "var(--border-light)", margin: "0 4px" }} />
+        {/* Milestone filter — tri-state (null → only-milestone → only-regular → null) */}
+        <CategoryChip
+          active={filterMilestone === true}
+          label={filterMilestone === false ? "Не milestone" : "★ Milestone"}
+          color={filterMilestone === false ? "#94a3b8" : "#FFB300"}
+          count={
+            filterMilestone === false
+              ? tasks.filter(t => !t.isMilestone).length
+              : tasks.filter(t => t.isMilestone).length
+          }
+          onClick={() =>
+            setFilterMilestone(
+              filterMilestone === null ? true
+                : filterMilestone === true ? false
+                : null
+            )
+          }
+        />
       </div>
 
       {/* View — Kanban (4-bucket grid) or Calendar (by deadline) */}

@@ -540,7 +540,7 @@ export default function AboutPage() {
           <Tag color="#4561E8">{t("guideTag")}</Tag>
           <h2 style={{ fontSize: 26, fontWeight: 900, color: "var(--text)", margin: "16px 0 6px", letterSpacing: "-0.5px" }}>
             {t("guideTitle")}{" "}
-            <span style={{ fontStyle: "italic", fontFamily: "var(--font-playfair), Georgia, serif" }}>
+            <span style={{ fontFamily: "var(--font-playfair), Georgia, serif", fontStyle: "normal" }}>
               M<span style={{ color: "#4561E8", fontStyle: "italic", marginRight: "0.02em" }}>e</span>ntora
             </span>
           </h2>
