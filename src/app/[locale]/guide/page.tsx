@@ -79,7 +79,7 @@ export default async function GuidePage({ params }: { params: Promise<{ locale: 
     <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
 
       {/* Унифицированный лендинг-навбар (glass pill, как на главной) */}
-      <LandingNav alwaysLight />
+      <LandingNav />
 
       <main className="max-w-4xl mx-auto px-6 pt-4 pb-16">
 

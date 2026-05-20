@@ -377,7 +377,7 @@ export default async function PrivacyPage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
 
-      <LandingNav alwaysLight />
+      <LandingNav />
 
       <div className="max-w-3xl mx-auto px-6 pt-4">
         <Link
