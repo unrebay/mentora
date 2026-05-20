@@ -44,6 +44,10 @@ export async function POST(req: NextRequest) {
     .select("id, email, created_at")
     .eq("welcome_sent", false)
     .not("email", "is", null)
+    // Skip Telegram pseudo-emails (tg_<chatId>@mentora.su) — those users have
+    // no real inbox; welcome flow for them lives in the bot itself. Sending
+    // would bounce or land in our own MX.
+    .not("email", "like", "tg_%@mentora.su")
     .order("created_at", { ascending: false })
     .limit(limit);
 
