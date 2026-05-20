@@ -10,7 +10,8 @@
     "langSwitch": "RU",
     "closeMenu": "Close menu",
     "openMenu": "Open menu",
-    "repetitor": "Tutor"
+    "repetitor": "Tutor",
+    "guide": "Guide"
   },
   "landing": {
     "badge": "Next-generation AI education",
