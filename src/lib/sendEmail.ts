@@ -79,8 +79,8 @@ export async function sendWelcomeEmail(email: string): Promise<void> {
 <body style="margin:0; padding:0; background:#f7f8fb; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;">
   <div style="max-width:520px; margin:0 auto; padding:48px 24px; text-align:center; color:#1a2340; line-height:1.6;">
 
-    <div style="font-family:'Golos Text', -apple-system, system-ui, sans-serif; font-size:36px; font-weight:700; letter-spacing:-0.02em; margin:0 auto 36px; color:#1a2340;">
-      M<span style="font-family:'Playfair Display', Georgia, serif; font-style:italic; font-weight:700; color:#4561E8;">e</span>ntora
+    <div style="margin:0 auto 36px;">
+      <img src="https://mentora.su/logo-white.png" alt="Mentora" width="200" style="display:block;margin:0 auto;width:200px;height:auto;background:#06060F;padding:22px 28px;border-radius:16px;">
     </div>
 
     <h1 style="font-size:24px; font-weight:700; margin:0 0 12px; color:#1a2340;">Добро пожаловать!</h1>

@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Logo from "@/components/Logo";
 import SubjectIcon from "@/components/SubjectIcon";
 import SphereBlobScene from "@/components/SphereBlobScene";
 import { useTranslations } from "next-intl";
@@ -113,19 +112,26 @@ export default function OnboardingPage() {
 
   return (
     <main
-      className="relative min-h-screen flex flex-col items-center justify-center px-4 py-12 overflow-hidden"
+      className="relative min-h-[100dvh] flex flex-col items-center justify-center px-4 py-6 overflow-hidden"
       style={{ background: "#04060f" }}
     >
       {/* Sphere background */}
       <SphereBlobScene spheres={ONBOARDING_SPHERES} intensity={0.9} />
 
       {/* Logo */}
-      <div className="relative z-10 mb-8">
-        <Logo size="md" />
+      <div className="relative z-10 mb-5">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logo-white.png"
+          alt="Mentora"
+          width={160}
+          height={75}
+          style={{ width: 160, height: "auto", display: "block" }}
+        />
       </div>
 
       {/* Progress pills */}
-      <div className="relative z-10 flex gap-2 mb-8">
+      <div className="relative z-10 flex gap-2 mb-5">
         {STEPS.map((_, i) => (
           <div
             key={i}
@@ -143,7 +149,7 @@ export default function OnboardingPage() {
       {/* Glass card */}
       <div
         className="relative z-10 w-full glass animate-fade-in-up"
-        style={{ maxWidth: isSubjectStep ? "560px" : "440px", borderRadius: "24px", padding: "32px" }}
+        style={{ maxWidth: isSubjectStep ? "560px" : "440px", borderRadius: "24px", padding: "24px" }}
       >
         {/* Step indicator */}
         <p
@@ -158,10 +164,10 @@ export default function OnboardingPage() {
           {t("step", { step: step.step, total: STEPS.length })}
         </p>
         <h1 className="text-2xl font-bold text-white mb-1 leading-snug">{step.title}</h1>
-        <p className="text-sm mb-7" style={{ color: "rgba(255,255,255,0.5)" }}>{step.subtitle}</p>
+        <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.5)" }}>{step.subtitle}</p>
 
         {/* Options */}
-        <div className={`mb-7 ${isSubjectStep ? "grid grid-cols-2 gap-2.5" : "space-y-2.5"}`}>
+        <div className={`mb-5 ${isSubjectStep ? "grid grid-cols-2 gap-2.5" : "space-y-2.5"}`}>
           {step.options.map((opt) => {
             const isSelected = selected === opt.value;
             return (
@@ -170,7 +176,7 @@ export default function OnboardingPage() {
                 onClick={() => setSelected(opt.value)}
                 className="w-full text-left transition-all duration-200"
                 style={{
-                  padding: isSubjectStep ? "14px 16px" : "14px 16px",
+                  padding: "12px 14px",
                   borderRadius: "16px",
                   border: isSelected
                     ? "1.5px solid rgba(107,143,255,0.8)"
@@ -238,7 +244,7 @@ export default function OnboardingPage() {
         <button
           onClick={handleNext}
           disabled={!selected || saving}
-          className="btn-glow w-full py-3.5 rounded-2xl font-semibold text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          className="btn-glow w-full py-3 rounded-2xl font-semibold text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
         >
           {saving ? t("saving") : isLast ? t("start") : t("next")}
         </button>
@@ -248,7 +254,7 @@ export default function OnboardingPage() {
       <button
         onClick={handleSkip}
         disabled={saving}
-        className="relative z-10 mt-5 text-sm transition-colors disabled:opacity-50"
+        className="relative z-10 mt-3 text-sm transition-colors disabled:opacity-50"
         style={{ color: "rgba(255,255,255,0.25)" }}
         onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.5)")}
         onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.25)")}

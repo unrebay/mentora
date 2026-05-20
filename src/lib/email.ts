@@ -53,9 +53,7 @@ export function welcomeEmailHtml(email: string): string {
 
         <!-- Logo -->
         <tr><td align="center" style="padding-bottom:32px;">
-          <span style="font-size:24px;font-weight:700;color:#111827;letter-spacing:-0.5px;font-family:Georgia,serif;">
-            M<span style="color:#4561E8;font-style:italic;">e</span>ntora
-          </span>
+          <img src="https://mentora.su/logo-white.png" alt="Mentora" width="180" style="display:block;margin:0 auto;width:180px;height:auto;background:#06060F;padding:20px 24px;border-radius:14px;">
         </td></tr>
 
         <!-- Card -->
@@ -138,12 +136,7 @@ export function reengagementEmailHtml(): string {
 
         <!-- Logo -->
         <tr><td align="center" style="padding-bottom:32px;">
-          <table cellpadding="0" cellspacing="0"><tr>
-            <td style="background:linear-gradient(135deg,#4f6ef7,#3b5bdb);border-radius:12px;width:44px;height:44px;text-align:center;vertical-align:middle;">
-              <span style="color:white;font-size:26px;font-weight:800;line-height:44px;">M</span>
-            </td>
-            <td style="padding-left:10px;font-size:22px;font-weight:700;color:#111827;letter-spacing:-0.5px;">entora</td>
-          </tr></table>
+          <img src="https://mentora.su/logo-white.png" alt="Mentora" width="180" style="display:block;margin:0 auto;width:180px;height:auto;background:#06060F;padding:20px 24px;border-radius:14px;">
         </td></tr>
 
         <!-- Card -->
