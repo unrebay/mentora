@@ -316,7 +316,7 @@ function loadHistory(empId: string): Msg[] {
 function saveHistory(empId: string, msgs: Msg[]) {
   // Keep last 200 messages to avoid localStorage bloat
   const trimmed = msgs.slice(-200);
-  localStorage.setItem(chatKey(empId), JSON.stringify(trimmed));
+  try { localStorage.setItem(chatKey(empId), JSON.stringify(trimmed)); } catch { /* iOS private mode / quota — skip */ }
 }
 
 const THINKING: Record<string, string[]> = {
@@ -818,7 +818,7 @@ function loadConvHistory(): ConvSnapshot[] {
   catch { return []; }
 }
 function saveConvHistory(arr: ConvSnapshot[]) {
-  localStorage.setItem(CONV_HIST_KEY, JSON.stringify(arr.slice(-90)));
+  try { localStorage.setItem(CONV_HIST_KEY, JSON.stringify(arr.slice(-90))); } catch { /* iOS private mode / quota — skip */ }
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -829,7 +829,7 @@ function loadLegal(): Set<string> {
   try { const arr: string[] = JSON.parse(localStorage.getItem(LEGAL_CHECKLIST_KEY) ?? "[]"); return new Set(arr); }
   catch { return new Set(); }
 }
-function saveLegal(s: Set<string>) { localStorage.setItem(LEGAL_CHECKLIST_KEY, JSON.stringify(Array.from(s))); }
+function saveLegal(s: Set<string>) { try { localStorage.setItem(LEGAL_CHECKLIST_KEY, JSON.stringify(Array.from(s))); } catch { /* iOS private mode / quota — skip */ } }
 
 function LegalTab({ annualRev }: { annualRev: number }) {
   const { BOR, TEXT, MUTED, CARD, isDark } = useTok();

@@ -1,5 +1,4 @@
 import { Link } from "@/i18n/navigation";
-import Logo from "@/components/Logo";
 import LandingNav from "@/components/LandingNav";
 import { PublicFooter } from "@/components/SiteFooter";
 import { getLocale } from "next-intl/server";
