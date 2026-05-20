@@ -6,6 +6,8 @@ import { SplashScreen } from "@/components/SplashScreen";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import TiltProvider from "@/components/TiltProvider";
 import NavigationProgress from "@/components/NavigationProgress";
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import InstallPrompt from "@/components/InstallPrompt";
 import { headers } from "next/headers";
 
 const golos = Golos_Text({
@@ -195,6 +197,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <SplashScreen />
             <TiltProvider />
             <NavigationProgress />
+            <ServiceWorkerRegistration />
+            <InstallPrompt />
             {children}
           </PostHogProvider>
         </ThemeProvider>

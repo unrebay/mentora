@@ -1,24 +1,19 @@
 {
-  "name": "Mentora — AI-ментор по истории",
+  "name": "Mentora — твой персональный AI-ментор",
   "short_name": "Mentora",
-  "description": "AI-ментор, который знает твой уровень и объясняет историю как умный друг",
+  "description": "AI-ментор по 17 наукам. От истории до квантов — спрашивай как у умного друга.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#3b5bdb",
   "orientation": "portrait-primary",
+  "background_color": "#06060F",
+  "theme_color": "#06060F",
+  "lang": "ru",
+  "categories": ["education", "productivity"],
   "icons": [
-    {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
