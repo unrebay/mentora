@@ -24,7 +24,11 @@ export async function GET() {
     ...rows.map((r) => headers.map((h) => {
       const v = (r as Record<string, unknown>)[h];
       if (v === null || v === undefined) return "";
-      const s = String(v).replace(/"/g, '""');
+      let s = String(v).replace(/"/g, '""');
+      // CSV-injection guard: prefix dangerous leading chars with single quote
+      // so Excel/Numbers/Sheets treat the cell as text, not formula.
+      // Ref: OWASP CSV Injection.
+      if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
       return /[,"\n]/.test(s) ? `"${s}"` : s;
     }).join(",")),
   ].join("\n");

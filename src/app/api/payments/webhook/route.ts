@@ -80,6 +80,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Webhook error:", error);
-    return NextResponse.json({ ok: true });
+    // Return 500 on actual exceptions so YooKassa retries on transient failures
+    // (brief DB outage, ANTHROPIC proxy hiccup). 2xx tells them "done, don't retry".
+    return NextResponse.json({ ok: false, error: "internal" }, { status: 500 });
   }
 }

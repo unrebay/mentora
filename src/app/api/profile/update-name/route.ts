@@ -13,6 +13,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Никнейм: только строчные a–z и 0–9, от 3 до 20 символов" }, { status: 400 });
     if (age !== undefined && (typeof age !== "number" || age < 1 || age > 119))
       return NextResponse.json({ error: "Возраст: число от 1 до 119" }, { status: 400 });
+    if (fullName !== undefined && (typeof fullName !== "string" || fullName.length > 100))
+      return NextResponse.json({ error: "Полное имя: до 100 символов" }, { status: 400 });
+    if (phone !== undefined && (typeof phone !== "string" || phone.length > 40))
+      return NextResponse.json({ error: "Телефон: до 40 символов" }, { status: 400 });
     const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
