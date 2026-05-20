@@ -10,7 +10,7 @@ import ReferralWidget from "@/components/ReferralWidget";
 import GiftProBanner from "@/components/GiftProBanner";
 import MeLogo from "@/components/MeLogo";
 import DashboardNav from "@/components/DashboardNav";
-import StatCard, { MentIcon, FlameIcon, MessageIcon, StarIcon } from "@/components/StatCard";
+import StatCard, { MentIcon, FlameIcon, MessageIcon, StarIcon, TrophyIcon } from "@/components/StatCard";
 import AvatarGrid from "@/components/AvatarGrid";
 import LevelAvatar, { unlockedLevel as unlockedLevelFn } from "@/components/LevelAvatar";
 import SupportCodeCopy from "@/components/SupportCodeCopy";
@@ -344,14 +344,8 @@ export default async function ProfilePage({ params }: PageProps) {
                 : "Место"
             }
             value={(rankRow as { rank?: number | string | null } | null)?.rank ? Number((rankRow as { rank: number | string }).rank) : 0}
-            icon={
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <path d="M6 4h12v3a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V4z" />
-                <path d="M4 4h2v3a2 2 0 0 1-2 2 2 2 0 0 1 0-4V4zM18 4h2v1a2 2 0 0 1 0 4 2 2 0 0 1-2-2V4z" />
-                <path d="M9 17h6l-1 4h-4l-1-4z" />
-              </svg>
-            }
-            accent="#7C3AED"
+            icon={<TrophyIcon />}
+            accent="#FBBF24"
           />
         </div>
 
