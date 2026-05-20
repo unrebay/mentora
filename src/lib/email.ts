@@ -1,5 +1,5 @@
 // Email templates for Mentora
-// Uses Resend (resend.com) — add RESEND_API_KEY to Vercel env vars
+// Uses Resend (resend.com) — add RESEND2_API_KEY to Vercel/runner env
 
 const FROM = "Mentora <hello@mentora.su>";
 
@@ -10,9 +10,9 @@ export interface SendEmailOptions {
 }
 
 export async function sendEmail({ to, subject, html }: SendEmailOptions): Promise<boolean> {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env.RESEND2_API_KEY;
   if (!apiKey) {
-    console.warn("[email] RESEND_API_KEY not set — skipping email to", to);
+    console.warn("[email] RESEND2_API_KEY not set — skipping email to", to);
     return false;
   }
 
