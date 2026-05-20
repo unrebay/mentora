@@ -70,7 +70,13 @@ async function pollOnce() {
     // Forward to local webhook handler — fire and forget, don't block polling.
     fetch(LOCAL_WEBHOOK, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        // Pass-through TELEGRAM_WEBHOOK_SECRET so the handler's spoof-guard accepts us.
+        // Telegram itself can't reach our VPS (geo-block), so polling-forwarder
+        // is the only legitimate caller of this endpoint.
+        ...(process.env.TELEGRAM_WEBHOOK_SECRET ? { "X-Telegram-Bot-Api-Secret-Token": process.env.TELEGRAM_WEBHOOK_SECRET } : {}),
+      },
       body: JSON.stringify(update),
     }).catch((e) => console.error("[poller] forward error:", e.message));
   }
