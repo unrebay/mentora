@@ -670,7 +670,10 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   }
 
   const isLimited = messagesRemaining !== null;
-  const limitReached = isLimited && messagesRemaining !== null && messagesRemaining <= 0;
+  // Защита: даже если remaining=0 пришёл из-за SSR-race / RLS-фейла,
+  // у юзера с пустым чатом никогда не должен показываться таймер «лимит исчерпан».
+  // Реальный исчерпанный лимит всегда сопровождается ≥1 сообщением в истории.
+  const limitReached = isLimited && messagesRemaining !== null && messagesRemaining <= 0 && messages.length > 0;
   const showCounter = isLimited && messagesRemaining !== null && messagesRemaining <= 5 && !limitReached;
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages]);

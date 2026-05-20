@@ -16,7 +16,7 @@ export const viewport: Viewport = {
   ],
 };
 
-const WINDOW_LIMIT = 20; // rolling 24h window, matches api/chat/route.ts
+const WINDOW_LIMIT = 10; // rolling 8h window, matches /api/chat WINDOW_LIMIT
 
 interface Props {
   params: Promise<{ locale: string; subject: string }>;
@@ -167,6 +167,10 @@ export default async function LearnSubjectPage({ params, searchParams }: Props) 
   let initialResetAt: string | null = null;
 
   if (!isPaidOrTrial) {
+    // Defensive: if profile select silently failed (RLS edge-case, race с
+    // signup → создан, но row не виден), profile=null. Раньше код всё равно
+    // считал windowExpired=true → usedToday=0 → remaining=WINDOW_LIMIT, что
+    // правильно. Оставляем эту цепочку.
     const windowStart = profile?.messages_window_start ? new Date(profile.messages_window_start) : null;
     const todayUtc = new Date(); todayUtc.setUTCHours(0, 0, 0, 0);
     const windowExpired = !windowStart || windowStart < todayUtc;
