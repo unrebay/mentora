@@ -1,11 +1,10 @@
 import { getTranslations, getLocale, getMessages } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import LandingNav from "@/components/LandingNav";
 import DashboardNav from "@/components/DashboardNav";
 import BuyProButton from "@/components/BuyProButton";
 import { ActivePlanSection, PaymentInfoSection, type PaymentItem } from "@/components/ManageSubscription";
 import PricingFAQ from "@/components/PricingFAQ";
-import { PublicFooter } from "@/components/SiteFooter";
+import { ConditionalNav, ConditionalFooter } from "@/components/ConditionalShell";
 import SwitchToFreeButton from "@/components/SwitchToFreeButton";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
 import { createServerClient } from "@supabase/ssr";
@@ -159,7 +158,7 @@ export default async function PricingPage() {
           logoutAction={handleLogout}
         />
       ) : (
-        <LandingNav isLoggedIn={isLoggedIn} activePage="pricing" />
+        <ConditionalNav guestActivePage="pricing" />
       )}
       </div>
 
@@ -758,7 +757,7 @@ export default async function PricingPage() {
       </section>
 
       )}
-      <PublicFooter dark={!isLoggedIn} />
+      <ConditionalFooter publicFooterDark={!isLoggedIn} />
     </div>
   );
 }

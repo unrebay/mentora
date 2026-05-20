@@ -1,6 +1,5 @@
 import { Link } from "@/i18n/navigation";
-import LandingNav from "@/components/LandingNav";
-import { PublicFooter } from "@/components/SiteFooter";
+import { ConditionalNav, ConditionalFooter } from "@/components/ConditionalShell";
 import { getLocale } from "next-intl/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -377,7 +376,7 @@ export default async function PrivacyPage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
 
-      <LandingNav />
+      <ConditionalNav />
 
       <div className="max-w-3xl mx-auto px-6 pt-4">
         <Link
@@ -419,7 +418,7 @@ export default async function PrivacyPage() {
 
       </main>
 
-      <PublicFooter />
+      <ConditionalFooter />
     </div>
   );
 }

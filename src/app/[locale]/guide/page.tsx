@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import Logo from "@/components/Logo";
-import LandingNav from "@/components/LandingNav";
-import { PublicFooter } from "@/components/SiteFooter";
+import { ConditionalNav, ConditionalFooter } from "@/components/ConditionalShell";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -79,7 +78,7 @@ export default async function GuidePage({ params }: { params: Promise<{ locale: 
     <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
 
       {/* Унифицированный лендинг-навбар (glass pill, как на главной) */}
-      <LandingNav />
+      <ConditionalNav />
 
       <main className="max-w-4xl mx-auto px-6 pt-4 pb-16">
 
@@ -271,7 +270,7 @@ export default async function GuidePage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
 
-      <PublicFooter />
+      <ConditionalFooter />
     </div>
   );
 }

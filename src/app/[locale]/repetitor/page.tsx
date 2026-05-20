@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
-import LandingNav from "@/components/LandingNav";
-import { PublicFooter } from "@/components/SiteFooter";
+import { ConditionalNav, ConditionalFooter } from "@/components/ConditionalShell";
 import { getLocale } from "next-intl/server";
 import { headers } from "next/headers";
 import { SUBJECT_LANDINGS } from "@/lib/repetitor-subjects";
@@ -156,7 +155,7 @@ export default async function RepetitorPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
-      <LandingNav />
+      <ConditionalNav />
 
       <script
         nonce={nonce}
@@ -417,7 +416,7 @@ export default async function RepetitorPage() {
         </div>
       </section>
 
-      <PublicFooter />
+      <ConditionalFooter />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
-import LandingNav from "@/components/LandingNav";
-import { PublicFooter } from "@/components/SiteFooter";
+import { ConditionalNav, ConditionalFooter } from "@/components/ConditionalShell";
 import EgeWaitlistForm from "@/components/EgeWaitlistForm";
 import { getLocale } from "next-intl/server";
 
@@ -111,7 +110,7 @@ export default async function PodgotovkaKEgePage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--bg)", color: "var(--text)" }}>
-      <LandingNav />
+      <ConditionalNav />
 
       <div className="max-w-4xl mx-auto px-6 pt-4">
         <Link
@@ -295,7 +294,7 @@ export default async function PodgotovkaKEgePage() {
         </div>
       </section>
 
-      <PublicFooter />
+      <ConditionalFooter />
     </div>
   );
 }
