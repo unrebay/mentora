@@ -23,7 +23,7 @@ interface Props {
   searchParams: Promise<{ topic?: string }>;
 }
 
-const SUBJECT_META: Record<string, { title: string; description: string; keywords: string[] }> = {
+const SUBJECT_META_RU: Record<string, { title: string; description: string; keywords: string[] }> = {
   "russian-history": {
     title: "История России — ИИ-репетитор Mentora",
     description: "Учи историю России с ИИ-ментором: от Древней Руси до современности. Подготовка к ЕГЭ и ОГЭ, разборы событий, дат и личностей в формате живого диалога.",
@@ -105,20 +105,113 @@ const SUBJECT_META: Record<string, { title: string; description: string; keyword
     keywords: ["философия онлайн", "репетитор философия", "этика", "изучить философию"],
   },
 };
+const SUBJECT_META_EN: Record<string, { title: string; description: string; keywords: string[] }> = {
+  "russian-history": {
+    title: "Russian History — AI tutor Mentora",
+    description: "Learn Russian history with an AI mentor: from Ancient Rus to modern times. Dialogue-style explanations of events, dates, and figures.",
+    keywords: ["Russian history", "history tutor online", "AI history tutor", "learn history online"],
+  },
+  "world-history": {
+    title: "World History — AI tutor Mentora",
+    description: "Study world history with Mentora: civilizations, wars, revolutions, key milestones. Conversational format that works for students of any level.",
+    keywords: ["world history", "history of civilizations", "AI history tutor"],
+  },
+  "mathematics": {
+    title: "Mathematics — AI tutor Mentora",
+    description: "Solve math problems with an AI tutor. Algebra, geometry, trigonometry — step-by-step walkthroughs and exam prep.",
+    keywords: ["math tutor", "algebra online", "geometry problems", "AI math tutor"],
+  },
+  "physics": {
+    title: "Physics — AI tutor Mentora",
+    description: "Master physics with Mentora: mechanics, thermodynamics, electricity, optics. Clear explanations of laws and formulas plus problem solving.",
+    keywords: ["physics tutor", "physics online", "physics problems", "AI physics tutor"],
+  },
+  "chemistry": {
+    title: "Chemistry — AI tutor Mentora",
+    description: "Learn chemistry through dialogue: reactions, formulas, organic and inorganic chemistry. Step-by-step examples for school and self-study.",
+    keywords: ["chemistry tutor", "chemistry online", "organic chemistry"],
+  },
+  "biology": {
+    title: "Biology — AI tutor Mentora",
+    description: "Study biology with an AI mentor: cells, genetics, ecology, anatomy. Clear explanations for school and exam prep.",
+    keywords: ["biology tutor", "biology online", "genetics problems"],
+  },
+  "english": {
+    title: "English — AI tutor Mentora",
+    description: "Learn English with Mentora: grammar, vocabulary, conversation. Practice in dialogue with an AI mentor.",
+    keywords: ["English tutor", "English online", "English grammar", "AI English tutor"],
+  },
+  "russian-language": {
+    title: "Russian Language — AI tutor Mentora",
+    description: "Russian as a second language with Mentora: grammar, vocabulary, conversation, plus exam prep for native speakers.",
+    keywords: ["Russian language tutor", "learn Russian online", "Russian grammar"],
+  },
+  "literature": {
+    title: "Literature — AI tutor Mentora",
+    description: "Discuss Russian and world literature with an AI mentor. Themes, characters, analysis, and essay prep.",
+    keywords: ["literature tutor", "literary analysis", "essay prep"],
+  },
+  "social-studies": {
+    title: "Social Studies — AI tutor Mentora",
+    description: "Learn social studies with Mentora: law, economics, political science, sociology. Clear explanations for any level.",
+    keywords: ["social studies tutor", "law online", "social studies online"],
+  },
+  "geography": {
+    title: "Geography — AI tutor Mentora",
+    description: "Study geography with Mentora: countries, climate, terrain, economic and physical geography. Exam prep and school topics.",
+    keywords: ["geography tutor", "physical geography", "economic geography"],
+  },
+  "computer-science": {
+    title: "Computer Science — AI tutor Mentora",
+    description: "Learn computer science with Mentora: algorithms, programming, logic, exam prep. Problem walkthroughs with code examples.",
+    keywords: ["CS tutor", "programming school", "algorithm problems"],
+  },
+  "discovery": {
+    title: "Discovery — AI guide to knowledge",
+    description: "Surprising facts from science, history, nature, and world cultures.",
+    keywords: ["fun facts", "broaden horizons", "amazing facts"],
+  },
+  "economics": {
+    title: "Economics — AI tutor Mentora",
+    description: "Study economics with Mentora: micro- and macroeconomics, market mechanisms, finance. For students and school.",
+    keywords: ["economics tutor", "economics online", "microeconomics", "macroeconomics"],
+  },
+  "psychology": {
+    title: "Psychology — AI tutor Mentora",
+    description: "Learn psychology with an AI mentor: cognitive processes, personality, emotions, social psychology. Clear explanations for any level.",
+    keywords: ["psychology online", "psychology tutor", "cognitive psychology"],
+  },
+  "philosophy": {
+    title: "Philosophy — AI tutor Mentora",
+    description: "Study philosophy with Mentora: thinkers, ethics, logic, metaphysics. Clear explanations of complex ideas through dialogue.",
+    keywords: ["philosophy online", "philosophy tutor", "ethics"],
+  },
+};
+
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { subject } = await params;
-  const meta = SUBJECT_META[subject];
+  const { subject, locale } = await params;
+  const isEn = locale === "en";
+  const dict = isEn ? SUBJECT_META_EN : SUBJECT_META_RU;
+  const meta = dict[subject];
   if (!meta) return { robots: { index: false, follow: false } };
+  const canonical = `https://mentora.su/${locale}/learn/${subject}`;
   return {
     title: meta.title,
     description: meta.description,
     keywords: meta.keywords,
-    alternates: { canonical: `https://mentora.su/learn/${subject}` },
+    alternates: {
+      canonical,
+      languages: {
+        ru: `https://mentora.su/ru/learn/${subject}`,
+        en: `https://mentora.su/en/learn/${subject}`,
+      },
+    },
     openGraph: {
       title: meta.title,
       description: meta.description,
-      url: `https://mentora.su/learn/${subject}`,
+      url: canonical,
+      locale: isEn ? "en_US" : "ru_RU",
     },
   };
 }

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { AppFooter } from "@/components/SiteFooter";
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 /* ── Static non-localizable data ──────────────────────────────── */
 const VALUE_META: { icon: string; color: string; custom?: "handsFlower" }[] = [
@@ -15,6 +15,8 @@ const VALUE_META: { icon: string; color: string; custom?: "handsFlower" }[] = [
 const TIP_ACCENTS = ["#4561E8", "#7C3AED", "#0EA5E9", "#10B981", "#F59E0B", "#FF7A00", "#9F7AFF"];
 const HOW_COLORS = ["#4561E8", "#A78BFA", "#10B981", "#F59E0B"];
 export default function AboutPage() {
+  const locale = useLocale();
+  const isEn = locale === "en";
   const t = useTranslations("about");
 
   /* ── June 1 countdown ─────────────────────────────────────────── */
@@ -941,11 +943,13 @@ export default function AboutPage() {
 
       {/* Floating "Пригласить" CTA */}
       <a
-        href="https://t.me/share/url?url=https://mentora.su/ru&text=Mentora — новый вид образования. 17 наук с AI-ментором, доступно каждому."
+        href={isEn
+          ? "https://t.me/share/url?url=https://mentora.su/en&text=Mentora — a new kind of learning. 17 sciences with an AI mentor, accessible to everyone."
+          : "https://t.me/share/url?url=https://mentora.su/ru&text=Mentora — новый вид образования. 17 наук с AI-ментором, доступно каждому."}
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-40 group"
-        aria-label="Пригласить друга"
+        aria-label={isEn ? "Invite a friend" : "Пригласить друга"}
         style={{ pointerEvents: "auto" }}
       >
         <div

@@ -23,14 +23,25 @@ function makeSupportCode(userId: string): string {
   return hex.slice(0, 5) + "-" + hex.slice(5, 10);
 }
 
-export const metadata = { title: "Профиль — Mentora" };
+import type { Metadata } from "next";
+
+interface PageProps { params: Promise<{ locale: string }> }
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const isEn = locale === "en";
+  return {
+    title: isEn ? "Profile — Mentora" : "Профиль — Mentora",
+    alternates: { canonical: `https://mentora.su/${locale}/profile` },
+  };
+}
 
 const XP_LEVELS = [
-  { name: "Новичок",        minXP: 0,    maxXP: 100,      color: "#9ca3af", grad: ["#9ca3af", "#6b7280"] },
-  { name: "Исследователь",  minXP: 100,  maxXP: 300,      color: "#3b82f6", grad: ["#60a5fa", "#3b82f6"] },
-  { name: "Знаток",         minXP: 300,  maxXP: 600,      color: "#6366f1", grad: ["#818cf8", "#6366f1"] },
-  { name: "Историк",        minXP: 600,  maxXP: 1000,     color: "#8b5cf6", grad: ["#a78bfa", "#8b5cf6"] },
-  { name: "Эксперт",        minXP: 1000, maxXP: 99999,    color: "#f59e0b", grad: ["#fcd34d", "#f59e0b"] },
+  { name: "Новичок",        nameEn: "Beginner",   minXP: 0,    maxXP: 100,      color: "#9ca3af", grad: ["#9ca3af", "#6b7280"] },
+  { name: "Исследователь",  nameEn: "Explorer",   minXP: 100,  maxXP: 300,      color: "#3b82f6", grad: ["#60a5fa", "#3b82f6"] },
+  { name: "Знаток",         nameEn: "Adept",      minXP: 300,  maxXP: 600,      color: "#6366f1", grad: ["#818cf8", "#6366f1"] },
+  { name: "Историк",        nameEn: "Scholar",    minXP: 600,  maxXP: 1000,     color: "#8b5cf6", grad: ["#a78bfa", "#8b5cf6"] },
+  { name: "Эксперт",        nameEn: "Expert",     minXP: 1000, maxXP: 99999,    color: "#f59e0b", grad: ["#fcd34d", "#f59e0b"] },
 ];
 
 function getLevel(xp: number) {
@@ -185,7 +196,9 @@ const TIER_CONFIG: Record<string, { color: string; label: string }> = {
   special:{ color: "#8b5cf6", label: "Особый" },
 };
 
-export default async function ProfilePage() {
+export default async function ProfilePage({ params }: PageProps) {
+  const { locale } = await params;
+  const isEn = locale === "en";
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -229,7 +242,7 @@ export default async function ProfilePage() {
   const stats: Stats = { totalXP, bestStreak, totalMessages, isPro, isUltima, joinedDaysAgo, joinedBefore };
   const lvl = getLevel(totalXP);
   const changesLeft = Math.max(0, 2 - (profile?.name_changes_count ?? 0));
-  const name = profile?.full_name ?? profile?.display_name ?? user.email?.split("@")[0] ?? "Пользователь";
+  const name = profile?.full_name ?? profile?.display_name ?? user.email?.split("@")[0] ?? (isEn ? "User" : "Пользователь");
 
   const earned = BADGES.filter(b => b.check(stats));
   const locked = BADGES.filter(b => !b.check(stats));
@@ -292,7 +305,7 @@ export default async function ProfilePage() {
               <p className="text-xl font-bold truncate" style={{ color: "var(--text)" }}>{name}</p>
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full"
                 style={{ background: `${lvl.color}18`, color: lvl.color }}>
-                {lvl.name}
+                {isEn ? lvl.nameEn : lvl.name}
               </span>
               {isPro ? (
                 <span className="text-xs font-bold px-2.5 py-0.5 rounded-full text-white"
@@ -399,7 +412,7 @@ export default async function ProfilePage() {
           style={{ background: "var(--bg-card)", borderColor: "var(--border)", animationDelay: "180ms", opacity: 0 }}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <span className="font-semibold" style={{ color: "var(--text)" }}>{lvl.name}</span>
+              <span className="font-semibold" style={{ color: "var(--text)" }}>{isEn ? lvl.nameEn : lvl.name}</span>
               <span className="text-xs font-bold px-2 py-0.5 rounded-full"
                 style={{ background: `${lvl.color}15`, color: lvl.color }}>
                 {lvl.progress}%
@@ -415,7 +428,7 @@ export default async function ProfilePage() {
           </div>
           {/* Bar with avatar at start (current) and at end (next, dimmed) */}
           <div className="flex items-center gap-2.5">
-            <span className="flex-shrink-0" title={lvl.name} style={{
+            <span className="flex-shrink-0" title={isEn ? lvl.nameEn : lvl.name} style={{
               width: 36, height: 36, borderRadius: "50%",
               border: "1px solid var(--border)", overflow: "hidden",
               display: "inline-flex", alignItems: "center", justifyContent: "center",
