@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 const LEVEL_2_XP_GATE = 100;
@@ -55,7 +56,12 @@ export async function POST() {
       return NextResponse.json({ error: "no_payment_method" }, { status: 409 });
     }
 
-    const { error } = await supabase
+    // Use service-role client to write protected billing columns.
+    const admin = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    const { error } = await admin
       .from("users")
       .update({ auto_renew: true, cancel_reason: null })
       .eq("id", user.id);

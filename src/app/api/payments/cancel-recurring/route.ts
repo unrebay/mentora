@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 /**
@@ -27,7 +28,13 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { error } = await supabase
+    // Use service-role client to write protected billing columns
+    // (BEFORE UPDATE trigger blocks authenticated role from changing auto_renew).
+    const admin = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    const { error } = await admin
       .from("users")
       .update({ auto_renew: false, cancel_reason: reason })
       .eq("id", user.id);
