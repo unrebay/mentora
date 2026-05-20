@@ -357,7 +357,7 @@ export default function OnboardingTour() {
     setReady(true);
 
     // Auto-open on first visit or ?tour=1
-    const forceOpen = searchParams.get("tour") === "1";
+    const forceOpen = searchParams?.get("tour") === "1";
     if (!localStorage.getItem(TOUR_KEY) || forceOpen) {
       const timer = setTimeout(() => {
         // Mark as seen immediately on auto-open (not just on close)

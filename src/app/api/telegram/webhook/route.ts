@@ -115,21 +115,93 @@ async function refreshUserContext(fromId: number, code: string): Promise<UserCon
  *  Also strips markdown headers (# ##) since Telegram has no h-tags. */
 function markdownToTelegramHtml(text: string): string {
   let s = text;
-  // Code fence (```) → <pre>
-  s = s.replace(/```([\s\S]*?)```/g, (_, c) => `<pre>${c.trim()}</pre>`);
+
+  // STEP 1: Strip any raw HTML <a>/<a/> the LLM emitted — we never trust raw HTML
+  // from the model output. Pattern: <a ...>...</a> → keep inner text only.
+  // Also strip stray open or close <a> tags without a partner.
+  s = s.replace(/<a\b[^>]*>([\s\S]*?)<\/a>/gi, "$1");
+  s = s.replace(/<\/?a\b[^>]*>/gi, "");
+
+  // STEP 2: Code fence (```) → <pre>
+  s = s.replace(/```([\s\S]*?)```/g, (_, c) => `<pre>${escapeHtml(c.trim())}</pre>`);
   // Inline code (`) → <code>
-  s = s.replace(/`([^`\n]+)`/g, "<code>$1</code>");
-  // Bold **text** → <b>text</b>
+  s = s.replace(/`([^`\n]+)`/g, (_, c) => `<code>${escapeHtml(c)}</code>`);
+
+  // STEP 3: Markdown link [label](url) → <a href="url">label</a>
+  // URL must start with http/https. Escape both label and url attribute.
+  s = s.replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, label, url) => {
+    const safeUrl = url.replace(/"/g, "%22").replace(/</g, "%3C").replace(/>/g, "%3E");
+    return `<a href="${safeUrl}">${escapeHtmlInline(label)}</a>`;
+  });
+
+  // STEP 4: Bold **text** → <b>text</b>
   s = s.replace(/\*\*([^*\n]+?)\*\*/g, "<b>$1</b>");
-  // Bold __text__ → <b>text</b> (only if not within a word like file_name_)
+  // Bold __text__ → <b>text</b>
   s = s.replace(/(^|\s)__([^_\n]+?)__(\s|$|[.,!?;:])/g, "$1<b>$2</b>$3");
-  // Italic *text* (single, not **) — careful not to break math like 2*3
+  // Italic *text* (single, not **)
   s = s.replace(/(^|[\s(])\*([^*\n]+?)\*($|[\s).,!?;:])/g, "$1<i>$2</i>$3");
   // Italic _text_ (single)
   s = s.replace(/(^|\s)_([^_\n]+?)_(\s|$|[.,!?;:])/g, "$1<i>$2</i>$3");
   // Markdown headers (# Title) → <b>Title</b>
   s = s.replace(/^#{1,6}\s+(.+)$/gm, "<b>$1</b>");
+
+  // STEP 5: Final safety — strip any unmatched tags. Walk the string and
+  // verify each tag has a partner; drop the orphans.
+  s = balanceTags(s);
+
   return s;
+}
+
+/** Escape HTML inside a text node — drop control chars too. */
+function escapeHtml(t: string): string {
+  return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+/** Escape HTML inside an inline tag content (preserves spaces). */
+function escapeHtmlInline(t: string): string {
+  return escapeHtml(t);
+}
+/** Remove unmatched <b>/<i>/<u>/<s>/<a>/<code>/<pre> tags so Telegram doesn't reject the message. */
+function balanceTags(s: string): string {
+  const allowed = new Set(["b", "i", "u", "s", "code", "pre", "a"]);
+  const tagRe = /<(\/?)([a-z]+)\b[^>]*>/gi;
+  type Match = { idx: number; len: number; close: boolean; name: string };
+  const matches: Match[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = tagRe.exec(s)) !== null) {
+    const name = m[2].toLowerCase();
+    if (!allowed.has(name)) continue;
+    matches.push({ idx: m.index, len: m[0].length, close: m[1] === "/", name });
+  }
+  // Pair up: stack-based. Orphans are flagged for removal.
+  const stack: Match[] = [];
+  const drop = new Set<number>();
+  for (const tag of matches) {
+    if (!tag.close) {
+      stack.push(tag);
+    } else {
+      // close — find latest opening with same name
+      const top = stack[stack.length - 1];
+      if (top && top.name === tag.name) {
+        stack.pop();
+      } else {
+        // orphan close
+        drop.add(tag.idx);
+      }
+    }
+  }
+  // remaining stack = orphan opens
+  for (const t of stack) drop.add(t.idx);
+  if (drop.size === 0) return s;
+  // Rebuild string skipping dropped ranges
+  const sorted = matches.filter(t => drop.has(t.idx)).sort((a, b) => a.idx - b.idx);
+  let out = "";
+  let cursor = 0;
+  for (const t of sorted) {
+    out += s.slice(cursor, t.idx);
+    cursor = t.idx + t.len;
+  }
+  out += s.slice(cursor);
+  return out;
 }
 
 async function sendMessage(

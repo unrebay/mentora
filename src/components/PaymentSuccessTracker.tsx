@@ -13,10 +13,10 @@ export default function PaymentSuccessTracker() {
   const params = useSearchParams();
 
   useEffect(() => {
-    if (params.get("payment") !== "success") return;
+    if (params?.get("payment") !== "success") return;
 
-    const plan        = params.get("plan") ?? "monthly";
-    const tier        = params.get("tier") ?? "pro"; // pro | ultima
+    const plan        = params?.get("plan") ?? "monthly";
+    const tier        = params?.get("tier") ?? "pro"; // pro | ultima
     const isAnnual    = plan === "annual";
     const PRICE_TABLE: Record<string, Record<string, number>> = {
       pro:    { monthly: 499,  annual: 2990 },

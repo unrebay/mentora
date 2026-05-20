@@ -14,9 +14,9 @@ export function ProActivationBanner({ plan }: { plan: string }) {
   const isUltima = plan === "ultima";
 
   useEffect(() => {
-    if (searchParams.get("payment") === "success") {
+    if (searchParams?.get("payment") === "success") {
       setVisible(true);
-      const billingPlan = searchParams.get("plan") || "monthly";
+      const billingPlan = searchParams?.get("plan") || "monthly";
       posthog.capture("payment_completed", {
         plan: isUltima ? "ultima" : "pro",
         billing_plan: billingPlan,

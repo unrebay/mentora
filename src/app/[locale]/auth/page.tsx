@@ -487,7 +487,7 @@ function AuthPageContent() {
   const locale = useLocale();
 
   useEffect(() => {
-    const oauthError = searchParams.get("error");
+    const oauthError = searchParams?.get("error");
     if (oauthError) {
       // Show specific error code in addition to localized message — helps debug
       // edge cases like telegram_callback / oauth_callback / Supabase URL allowlist issues.
@@ -496,7 +496,7 @@ function AuthPageContent() {
     // Save referral code from ?ref=XYZ — ReferralProcessor (in dashboard layout)
     // will pick it up and POST /api/referral once the user is authenticated.
     // This covers ALL signup paths (email, Google, Telegram), not just email.
-    const refCode = searchParams.get("ref");
+    const refCode = searchParams?.get("ref");
     if (refCode) {
       try { localStorage.setItem("mentora_ref_pending", refCode); } catch {}
     }
@@ -566,7 +566,7 @@ function AuthPageContent() {
       // Server-side /api/signup creates the user AND sets session cookies in
       // one request (via admin.generateLink + verifyOtp). No client-side
       // signInWithPassword needed — that path is blocked by Supabase captcha.
-      const refCode = searchParams.get("ref");
+      const refCode = searchParams?.get("ref");
       try {
         const res = await fetch("/api/signup", {
           method: "POST",

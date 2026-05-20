@@ -41,7 +41,7 @@ export default function StreakRewardCelebration() {
   }, []);
 
   useEffect(() => {
-    if (searchParams.get("streak_reward") !== "1") return;
+    if (searchParams?.get("streak_reward") !== "1") return;
 
     // Clean the URL immediately without remounting
     router.replace("/dashboard", { scroll: false });
