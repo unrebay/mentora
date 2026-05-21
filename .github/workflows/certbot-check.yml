@@ -1,0 +1,34 @@
+name: Certbot dry-run check
+
+on:
+  workflow_dispatch:
+
+jobs:
+  certbot-check:
+    name: Check certbot auto-renewal on VPS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run certbot dry-run on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 3m
+          script: |
+            echo "=== SSL cert status ==="
+            sudo certbot certificates 2>&1
+
+            echo ""
+            echo "=== certbot renew --dry-run ==="
+            sudo certbot renew --dry-run 2>&1
+
+            echo ""
+            echo "=== certbot systemd timer ==="
+            systemctl status certbot.timer 2>&1 || echo "(no systemd timer)"
+            systemctl status snap.certbot.renew.timer 2>&1 || echo "(no snap timer)"
+
+            echo ""
+            echo "=== certbot cron ==="
+            crontab -l 2>&1 | grep -i certbot || echo "(no cron entry)"
+            cat /etc/cron.d/certbot 2>&1 || echo "(no /etc/cron.d/certbot)"
