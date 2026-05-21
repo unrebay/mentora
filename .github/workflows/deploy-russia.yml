@@ -126,7 +126,7 @@ jobs:
             EOF
 
             echo "==> pm2 start server.js"
-            pm2 start server.js --name mentora --update-env
+            pm2 start server.js --name mentora --instances max --exec_mode cluster --update-env
 
             echo "==> pm2 (re)start telegram-poller (long-polling, выходит наружу из VPS)"
             pm2 delete telegram-poller 2>/dev/null || true
