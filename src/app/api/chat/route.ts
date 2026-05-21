@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
     // Get user profile (no messages_today/window — handled atomically below)
     const { data: profile } = await supabase
       .from("users")
-      .select("onboarding_style, onboarding_level, onboarding_goal, plan, plan_expires_at, trial_expires_at, streak_reward_claimed, reward_plan, reward_expires_at")
+      .select("onboarding_style, onboarding_level, onboarding_goal, plan, plan_expires_at, trial_expires_at, streak_reward_claimed, reward_plan, reward_expires_at, display_name")
       .eq("id", user.id)
       .single();
 
@@ -304,6 +304,23 @@ export async function POST(req: NextRequest) {
     const citations = ragData.citations;
     const memory = memoryResult.data;
 
+    // ── Adaptive learning signals ─────────────────────────────────────────
+    const mem = (memory?.memory_json ?? {}) as Record<string, unknown>;
+    const userName = profile?.display_name ? (profile.display_name as string).split(" ")[0] : null;
+    const lastTopic = (mem.last_topic as string | undefined) ?? null;
+    const masteredTopics: string[] = Array.isArray(mem.mastered_topics) ? (mem.mastered_topics as string[]).slice(0, 8) : [];
+    const difficultyAreas: string[] = Array.isArray(mem.difficulty_areas) ? (mem.difficulty_areas as string[]).slice(0, 5) : [];
+    const interests: string[] = Array.isArray(mem.interests) ? (mem.interests as string[]).slice(0, 5) : [];
+    const learningPace: string = (mem.learning_pace as string) ?? "medium";
+    const preferredDepth: string = (mem.preferred_depth as string) ?? "standard";
+    const sessionCount: number = ((mem.session_count as number) ?? 0) + 1;
+    const lastSeen: string | null = (mem.last_seen as string) ?? null;
+    const daysSinceLastSeen: number | null = lastSeen
+      ? Math.floor((Date.now() - new Date(lastSeen).getTime()) / 86400000)
+      : null;
+    const isReturning = sessionCount > 1 && !!lastTopic;
+    const today = new Date().toISOString().split("T")[0];
+
     // Build personalized system prompt
     const style = profile?.onboarding_style ?? "storytelling";
     const level = profile?.onboarding_level ?? "adult";
@@ -316,6 +333,41 @@ export async function POST(req: NextRequest) {
       : isPro
       ? "Pro"
       : "Free";
+
+    // ── Adaptive context blocks from user memory ────────────────────────────
+    const buildAdaptiveBlock = (lang: "ru" | "en"): string => {
+      const lines: string[] = [];
+      if (lang === "ru") {
+        if (userName) lines.push(`ИМЯ ПОЛЬЗОВАТЕЛЯ: ${userName}. Обращайся по имени 1–2 раза за сессию — в начале первого ответа и изредка при похвале. Не злоупотребляй.`);
+        if (isReturning && lastTopic) {
+          const dayStr = daysSinceLastSeen === 0 ? "сегодня" : daysSinceLastSeen === 1 ? "вчера" : `${daysSinceLastSeen} дн. назад`;
+          lines.push(`КОНТЕКСТ ВОЗВРАТА: Пользователь возвращается (был ${dayStr}), последняя тема — «${lastTopic}». На первое сообщение этой сессии (history пустая или ≤2 сообщ.) — кратко и тепло восстанови контекст: предложи «Продолжим с ${lastTopic}?» или сделай мостик. Если пользователь сам задаёт новый вопрос — адаптируйся естественно.`);
+        }
+        if (masteredTopics.length > 0) lines.push(`ОСВОИЛ ХОРОШО: ${masteredTopics.join(", ")} — не объясняй с нуля, переходи к нюансам.`);
+        if (difficultyAreas.length > 0) lines.push(`ТРУДНОСТИ: ${difficultyAreas.join(", ")} — будь терпелива, используй аналогии, разбивай на шаги.`);
+        if (interests.length > 0) lines.push(`ИНТЕРЕСЫ: ${interests.join(", ")} — при возможности приводи примеры из этих областей.`);
+        const paceRu: Record<string, string> = { fast: "быстрый — плотная подача, без долгих вступлений", slow: "медленный — больше примеров и повторений", medium: "средний" };
+        lines.push(`ТЕМП: ${paceRu[learningPace] ?? paceRu.medium}.`);
+        const depthRu: Record<string, string> = { deep: "любит детали — можно идти вглубь и давать академический контекст", surface: "предпочитает краткость — сжатые ответы с главным", standard: "баланс полноты и краткости" };
+        lines.push(`ГЛУБИНА: ${depthRu[preferredDepth] ?? depthRu.standard}.`);
+      } else {
+        if (userName) lines.push(`USER NAME: ${userName}. Use it 1–2 times per session — opening and occasionally when praising. Natural, not repetitive.`);
+        if (isReturning && lastTopic) {
+          const dayStr = daysSinceLastSeen === 0 ? "today" : daysSinceLastSeen === 1 ? "yesterday" : `${daysSinceLastSeen} days ago`;
+          lines.push(`RETURN CONTEXT: User is back (last here ${dayStr}), last topic was "${lastTopic}". On first message this session (history empty or ≤2 msgs) — warmly reconnect: "Want to continue with ${lastTopic}?" or bridge naturally. If they ask something new — adapt, don't force a callback.`);
+        }
+        if (masteredTopics.length > 0) lines.push(`MASTERED: ${masteredTopics.join(", ")} — skip basics, go to nuance.`);
+        if (difficultyAreas.length > 0) lines.push(`STRUGGLES: ${difficultyAreas.join(", ")} — extra patient: analogies, small steps.`);
+        if (interests.length > 0) lines.push(`INTERESTS: ${interests.join(", ")} — use these for examples.`);
+        const paceEn: Record<string, string> = { fast: "fast — dense info, skip preambles", slow: "slow — more examples and repetition", medium: "medium" };
+        lines.push(`PACE: ${paceEn[learningPace] ?? paceEn.medium}.`);
+        const depthEn: Record<string, string> = { deep: "loves details — go deep, add academic context", surface: "prefers brevity — concise key-point answers only", standard: "balance completeness with conciseness" };
+        lines.push(`DEPTH: ${depthEn[preferredDepth] ?? depthEn.standard}.`);
+      }
+      return lines.length > 0 ? `\nАДАПТИВНЫЙ ПРОФИЛЬ:\n${lines.join("\n")}` : "";
+    };
+    const ADAPTIVE_BLOCK_RU = buildAdaptiveBlock("ru");
+    const ADAPTIVE_BLOCK_EN = buildAdaptiveBlock("en");
 
     // ── English platform block ─────────────────────────────────────────────────
     const PLATFORM_BLOCK_EN = `
@@ -417,7 +469,7 @@ STUDENT PROFILE:
 - Goal: ${GOAL_GUIDE_EN[goal]}
 
 STUDENT MEMORY:
-${JSON.stringify(memory?.memory_json ?? {})}
+${JSON.stringify(mem)}${ADAPTIVE_BLOCK_EN}
 
 KNOWLEDGE BASE (use as primary source — prioritize over general knowledge):
 ${ragContext}
@@ -476,7 +528,7 @@ ${PLATFORM_BLOCK}`
 - Цель: ${GOAL_GUIDE[goal]}
 
 ПАМЯТЬ О ПОЛЬЗОВАТЕЛЕ:
-${JSON.stringify(memory?.memory_json ?? {})}
+${JSON.stringify(mem)}${ADAPTIVE_BLOCK_RU}
 
 БАЗА ЗНАНИЙ (используй как основу — приоритет над общими знаниями):
 ${ragContext}
@@ -611,7 +663,17 @@ ${PLATFORM_BLOCK}`;
           system: "Extract student learning facts as compact JSON. Return ONLY valid JSON object with no markdown, no explanation.",
           messages: [{
             role: "user",
-            content: `Subject: ${subjectLabel}\nStudent: ${message}\nMentor: ${assistantMessage.slice(0, 400)}\nExisting memory: ${JSON.stringify(memory?.memory_json ?? {})}\n\nReturn updated JSON: {"topics_covered": string[], "difficulty_areas": string[], "interests": string[], "last_seen": "${new Date().toISOString().split("T")[0]}"}. Merge with existing, max 15 items per array.`,
+            content: `Subject: ${subjectLabel}
+Student: ${message.slice(0, 300)}
+Mentor: ${assistantMessage.slice(0, 400)}
+History snapshot: ${JSON.stringify((history ?? []).slice(-4).map((m: {role: string; content: string}) => ({ r: m.role[0], c: (m.content as string).slice(0, 100) })))}
+Existing memory: ${JSON.stringify(mem)}
+Session #: ${sessionCount}
+Today: ${today}
+
+Return ONLY valid JSON (no markdown). Merge arrays with existing, max 12 items, de-duplicated:
+{"topics_covered":[],"mastered_topics":[],"difficulty_areas":[],"interests":[],"last_seen":"${today}","last_topic":"<topic of THIS exchange, short phrase>","session_count":${sessionCount},"learning_pace":"<fast|medium|slow>","preferred_depth":"<deep|standard|surface>"}
+Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/errors/re-explain; learning_pace from question depth+topic switching speed; preferred_depth from follow-up patterns.`,
           }],
         });
         const rawText = extractResp.content[0].type === "text" ? extractResp.content[0].text.trim() : "{}";
