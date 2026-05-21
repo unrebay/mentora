@@ -9,6 +9,7 @@ export type PlanTier = "free" | "pro" | "ultima";
 
 export interface PlanFields {
   plan?: string | null;
+  plan_expires_at?: string | null;
   trial_expires_at?: string | null;
   reward_plan?: string | null;
   reward_expires_at?: string | null;
@@ -16,7 +17,11 @@ export interface PlanFields {
 
 export function getEffectivePlan(user: PlanFields): PlanTier {
   const now = new Date();
-  const base = (user.plan ?? "free") as PlanTier;
+  // plan_expires_at = NULL → permanent (manual/admin grant). Set date → check expiry.
+  const paidExpired = user.plan_expires_at
+    ? new Date(user.plan_expires_at) <= now
+    : false;
+  const base: PlanTier = paidExpired ? "free" : ((user.plan ?? "free") as PlanTier);
 
   // Trial / gift Pro (streak reward, June 1 gift, etc.)
   const trialActive = user.trial_expires_at

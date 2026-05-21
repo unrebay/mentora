@@ -22,7 +22,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     { data: profileRow },
     { data: rankRow }
   ] = await Promise.all([
-    supabase.from("users").select("plan, trial_expires_at, display_name, full_name").eq("id", user.id).single(),
+    supabase.from("users").select("plan, plan_expires_at, trial_expires_at, display_name, full_name").eq("id", user.id).single(),
     supabase.from("user_progress").select("xp_total, streak_days, best_streak").eq("user_id", user.id),
     supabase.from("user_profiles").select("selected_avatar, serial_id").eq("user_id", user.id).maybeSingle(),
     supabase.rpc("get_user_global_rank", { p_user_id: user.id }).maybeSingle(),

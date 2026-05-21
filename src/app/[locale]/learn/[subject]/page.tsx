@@ -246,7 +246,7 @@ export default async function LearnSubjectPage({ params, searchParams }: Props) 
   // Calculate remaining messages for today
   const { data: profile } = await supabase
     .from("users")
-    .select("plan, trial_expires_at, messages_today, messages_window_start")
+    .select("plan, plan_expires_at, trial_expires_at, messages_today, messages_window_start")
     .eq("id", user!.id)
     .single();
 

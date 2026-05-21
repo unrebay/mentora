@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
     // Get user profile (no messages_today/window — handled atomically below)
     const { data: profile } = await supabase
       .from("users")
-      .select("onboarding_style, onboarding_level, onboarding_goal, plan, trial_expires_at, streak_reward_claimed, reward_plan, reward_expires_at")
+      .select("onboarding_style, onboarding_level, onboarding_goal, plan, plan_expires_at, trial_expires_at, streak_reward_claimed, reward_plan, reward_expires_at")
       .eq("id", user.id)
       .single();
 

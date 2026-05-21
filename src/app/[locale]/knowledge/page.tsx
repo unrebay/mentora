@@ -38,7 +38,7 @@ export default async function KnowledgePage({ params }: { params: Promise<{ loca
   // skip personalized progress data; the galaxy still renders for marketing.
   const [profileRes, progressRes] = user
     ? await Promise.all([
-        supabase.from("users").select("plan, trial_expires_at").eq("id", user.id).single(),
+        supabase.from("users").select("plan, plan_expires_at, trial_expires_at").eq("id", user.id).single(),
         supabase.from("user_progress").select("xp_total, streak_days, best_streak, subject").eq("user_id", user.id),
       ])
     : [{ data: null }, { data: null }];
