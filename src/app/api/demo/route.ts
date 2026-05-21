@@ -99,6 +99,17 @@ export async function POST(req: NextRequest) {
     return res;
   } catch (err) {
     console.error("Demo API error:", err);
+    // Surface Anthropic rate-limit as 429 (not opaque 500)
+    if (
+      err instanceof Error &&
+      ("status" in err) &&
+      (err as { status: number }).status === 429
+    ) {
+      return NextResponse.json(
+        { error: "rate_limited", message: "Mentora перегружена — попробуй через несколько секунд" },
+        { status: 429 }
+      );
+    }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

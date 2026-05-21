@@ -794,6 +794,17 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
     console.error("Chat API error:", errMsg);
+    // Surface Anthropic rate-limit as 429 (not opaque 500)
+    if (
+      err instanceof Error &&
+      ("status" in err) &&
+      (err as { status: number }).status === 429
+    ) {
+      return NextResponse.json(
+        { error: "rate_limited", message: "Mentora перегружена — попробуй через несколько секунд" },
+        { status: 429 }
+      );
+    }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
