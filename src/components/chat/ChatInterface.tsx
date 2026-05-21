@@ -537,6 +537,16 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [levelUpFading, setLevelUpFading] = useState(false);
   const levelUpTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // ── UX session state ───────────────────────────────────────────────────
+  const [sessionStarted, setSessionStarted] = useState(false);
+  const [sessionMessageCount, setSessionMessageCount] = useState(0);
+  const [hasUsedModeThisSession, setHasUsedModeThisSession] = useState(false);
+  const [showMicroVictory, setShowMicroVictory] = useState(false);
+  const [microVictoryFading, setMicroVictoryFading] = useState(false);
+  const microVictoryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [showModeHint, setShowModeHint] = useState(false);
+  const [modeHintFading, setModeHintFading] = useState(false);
+  const modeHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [exportingPdf, setExportingPdf] = useState(false);
   // ── Edit/copy actions per message ──────────────────────────────────
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -588,6 +598,16 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     setLevelUpFading(true); setTimeout(() => { setShowLevelUp(false); setLevelUpData(null); }, 700);
   }, []);
 
+  const dismissMicroVictory = useCallback(() => {
+    if (microVictoryTimerRef.current) clearTimeout(microVictoryTimerRef.current);
+    setMicroVictoryFading(true); setTimeout(() => setShowMicroVictory(false), 500);
+  }, []);
+
+  const dismissModeHint = useCallback(() => {
+    if (modeHintTimerRef.current) clearTimeout(modeHintTimerRef.current);
+    setModeHintFading(true); setTimeout(() => setShowModeHint(false), 400);
+  }, []);
+
   const handleExportPdf = async () => {
     if (exportingPdf || messages.filter(m => !m.isError).length < 2) return;
     setExportingPdf(true);
@@ -612,6 +632,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     if (loading || limitReached) return;
     setMessages(prev => [...prev.filter(m=>!m.isError), { role:"user", content:text }]);
     setLastUserMsg(text); setLoading(true); posthog.capture("message_sent",{subject});
+    setSessionStarted(true); setSessionMessageCount(prev => prev + 1);
     try {
       const res = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:text,subject,history:messages.filter(m=>!m.isError).slice(-10),locale})});
       const data = await res.json();
@@ -703,6 +724,24 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     const isFirst = messages.filter(m=>m.role==="user"&&!m.isError).length===0;
     if (isFirst) posthog.capture("first_message_sent",{subject});
     posthog.capture("message_sent",{subject});
+    // ── Session UX tracking ─────────────────────────────────────────────
+    setSessionStarted(true);
+    const newSessCount = sessionMessageCount + 1;
+    setSessionMessageCount(newSessCount);
+    const modeKws = ["объясни мне","проверь, как я понял","как с тобой учиться","лайфхаки","как задавать вопросы","как тебя использовать","explain it to me","let me explain","how to learn with you","learning tips","lifehacks"];
+    if (modeKws.some(kw => userMessage.toLowerCase().includes(kw))) setHasUsedModeThisSession(true);
+    if (newSessCount === 10) {
+      setMicroVictoryFading(true); setShowMicroVictory(true);
+      requestAnimationFrame(()=>requestAnimationFrame(()=>setMicroVictoryFading(false)));
+      if(microVictoryTimerRef.current)clearTimeout(microVictoryTimerRef.current);
+      microVictoryTimerRef.current=setTimeout(()=>{setMicroVictoryFading(true);setTimeout(()=>setShowMicroVictory(false),500);},6000);
+    }
+    if (newSessCount === 6 && !hasUsedModeThisSession) {
+      setModeHintFading(true); setShowModeHint(true);
+      requestAnimationFrame(()=>requestAnimationFrame(()=>setModeHintFading(false)));
+      if(modeHintTimerRef.current)clearTimeout(modeHintTimerRef.current);
+      modeHintTimerRef.current=setTimeout(()=>{setModeHintFading(true);setTimeout(()=>setShowModeHint(false),400);},8000);
+    }
     try {
       const res = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:userMessage,subject,history:messages.filter(m=>!m.isError).slice(-10),locale,...(pendingImage?{imageData:pendingImage.data,imageMimeType:pendingImage.mimeType}:{})})});
       setPendingImage(null);
@@ -944,6 +983,17 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           </div>
         )}
 
+        {/* ── Session divider — показывается когда есть история из прошлого сеанса ── */}
+        {initialHistory.length > 0 && (
+          <div className="flex items-center gap-3 py-2">
+            <div className="flex-1 h-px" style={{ background: "var(--border-light)", opacity: 0.6 }} />
+            <span className="text-[10px] tracking-wide px-2" style={{ color: "var(--text-muted)", opacity: 0.7 }}>
+              {locale === "ru" ? "Продолжаем с прошлого раза" : "Continuing from last time"}
+            </span>
+            <div className="flex-1 h-px" style={{ background: "var(--border-light)", opacity: 0.6 }} />
+          </div>
+        )}
+
         {messages.map((msg, i) => {
           const isEditing = editingIndex === i;
           const canEdit   = msg.role === "user" && !msg.isError && !loading;
@@ -1166,6 +1216,81 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           </div>
         ) : (
           <div style={{ pointerEvents:"all" }}>
+            {/* ── Starter chips for returning users ────────────────────────── */}
+            {!isEmpty && !sessionStarted && (
+              <div className="mb-2 flex flex-wrap gap-1.5 justify-center">
+                {subjectQuickQ.map(q => (
+                  <button
+                    key={q} onClick={() => { setInput(q); setSessionStarted(true); }}
+                    className="px-3 py-1.5 rounded-full text-xs transition-all duration-200"
+                    style={{ background:"var(--chat-msg-bg)", backdropFilter:"blur(12px)", border:`1px solid var(--chat-msg-border)`, color:"var(--text-secondary)" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor=subjColor; (e.currentTarget as HTMLElement).style.color=subjColor; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor="var(--chat-msg-border)"; (e.currentTarget as HTMLElement).style.color="var(--text-secondary)"; }}
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* ── Limit warning when ≤3 messages remain ───────────────────────── */}
+            {isLimited && messagesRemaining !== null && messagesRemaining <= 3 && messagesRemaining > 0 && (
+              <div className="mb-2 rounded-2xl px-4 py-2.5 flex items-center gap-3" style={{
+                background: "rgba(251,191,36,0.08)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "1px solid rgba(251,191,36,0.28)",
+              }}>
+                <span className="text-sm shrink-0">⚡</span>
+                <p className="text-xs font-medium flex-1 leading-snug" style={{ color: "#d97706" }}>
+                  {locale === "ru"
+                    ? `Осталось ${messagesRemaining} сообщ. в бесплатном плане`
+                    : `${messagesRemaining} message${messagesRemaining === 1 ? "" : "s"} left on free plan`}
+                </p>
+                <Link href="/pricing"
+                  className="text-xs font-semibold px-3 py-1.5 rounded-full shrink-0 transition-all hover:opacity-80"
+                  style={{ background:"linear-gradient(135deg,#4561E8,#6B8FFF)", color:"white" }}
+                >
+                  Pro
+                </Link>
+              </div>
+            )}
+
+            {/* ── Mode suggestions hint — appears after 6 messages ───────────── */}
+            {showModeHint && (
+              <div className="mb-2 rounded-2xl px-4 py-3 flex items-start gap-2" style={{
+                background: "linear-gradient(135deg,rgba(69,97,232,0.10) 0%,rgba(107,143,255,0.07) 100%), color-mix(in srgb, var(--bg-card) 88%, transparent)",
+                backdropFilter: "blur(20px) saturate(1.6)",
+                WebkitBackdropFilter: "blur(20px) saturate(1.6)",
+                border: "1px solid rgba(69,97,232,0.25)",
+                boxShadow: "0 4px 20px rgba(69,97,232,0.08), 0 0 0 1px rgba(255,255,255,0.04) inset",
+                opacity: modeHintFading ? 0 : 1,
+                transition: "opacity 0.4s ease",
+              }}>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold mb-1.5" style={{ color: "#4561E8" }}>
+                    {locale === "ru" ? "💡 Попробуй особые режимы" : "💡 Try special modes"}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(locale === "ru"
+                      ? [["Объясни мне", "объясни мне"], ["Лайфхаки", "лайфхаки"], ["Проверь как понял", "проверь, как я понял"]]
+                      : [["Explain to me", "explain it to me"], ["Learning tips", "learning tips"], ["Test my knowledge", "test my knowledge"]]
+                    ).map(([label, cmd]) => (
+                      <button key={label}
+                        onClick={() => { setInput(cmd); dismissModeHint(); setHasUsedModeThisSession(true); }}
+                        className="px-2.5 py-1 rounded-full text-[11px] font-medium transition-all hover:opacity-80"
+                        style={{ background:"rgba(69,97,232,0.12)", color:"#4561E8", border:"1px solid rgba(69,97,232,0.2)" }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <button onClick={dismissModeHint} className="shrink-0 rounded-lg p-1 transition-colors" style={{ color:"var(--text-muted)" }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+            )}
+
             {/* Native hint */}
             {subject==="english" && showNativeHint && (
               <div className="mb-2 mx-auto max-w-xs rounded-2xl px-4 py-3 flex items-start gap-2" style={{
@@ -1398,6 +1523,36 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             <p className="text-[10px] font-bold tracking-[0.2em] uppercase mb-1" style={{ color:"rgba(255,255,255,0.7)" }}>{tChat("levelUp.label")}</p>
             <p className="text-2xl font-bold text-white mb-2">{levelUpData.newLevel} ✦</p>
             <p className="text-sm leading-relaxed" style={{ color:"rgba(255,255,255,0.88)" }}>{levelUpData.message}</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Micro-victory toast — 10 сообщений в сессии ─────────────────── */}
+      {showMicroVictory && (
+        <div
+          className="fixed left-1/2 z-[9997]"
+          style={{
+            bottom: "calc(env(safe-area-inset-bottom) + 96px)",
+            transform: `translateX(-50%) translateY(${microVictoryFading ? "8px" : "0"})`,
+            opacity: microVictoryFading ? 0 : 1,
+            transition: "opacity 0.5s ease, transform 0.5s ease",
+            pointerEvents: "all",
+          }}
+        >
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-full shadow-lg whitespace-nowrap" style={{
+            background: "var(--bg-nav)",
+            backdropFilter: "blur(20px) saturate(1.8)",
+            WebkitBackdropFilter: "blur(20px) saturate(1.8)",
+            border: "1px solid rgba(69,97,232,0.28)",
+            boxShadow: "0 4px 20px rgba(69,97,232,0.18), 0 0 0 1px rgba(255,255,255,0.06) inset",
+          }}>
+            <span>🔥</span>
+            <span className="text-sm font-medium" style={{ color: "var(--text)" }}>
+              {locale === "ru" ? "10 сообщений — ты в потоке!" : "10 messages — you’re on a roll!"}
+            </span>
+            <button onClick={dismissMicroVictory} className="ml-0.5 rounded-full p-0.5 transition-colors hover:opacity-70" style={{ color: "var(--text-muted)" }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
           </div>
         </div>
       )}
