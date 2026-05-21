@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { withAnthropicQueue } from "@/lib/anthropic-queue";
 import { NextRequest, NextResponse } from "next/server";
 
 const anthropic = new Anthropic({
@@ -65,7 +66,7 @@ export async function POST(req: NextRequest) {
       .slice(-6);
 
     // Get AI response
-    const response = await anthropic.messages.create({
+    const response = await withAnthropicQueue(() => anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 800,
       system: SYSTEM_PROMPT,
@@ -73,7 +74,7 @@ export async function POST(req: NextRequest) {
         ...safeHistory,
         { role: "user", content: message },
       ],
-    });
+    }));
 
     const assistantMessage =
       response.content[0].type === "text" ? response.content[0].text : "";
@@ -107,6 +108,18 @@ export async function POST(req: NextRequest) {
     ) {
       return NextResponse.json(
         { error: "rate_limited", message: "Mentora перегружена — попробуй через несколько секунд" },
+        { status: 429 }
+      );
+    }
+    // Request queue full or timed out
+    if (
+      err instanceof Error &&
+      ("code" in err) &&
+      ((err as NodeJS.ErrnoException).code === "QUEUE_FULL" ||
+       (err as NodeJS.ErrnoException).code === "QUEUE_TIMEOUT")
+    ) {
+      return NextResponse.json(
+        { error: "rate_limited", message: "Mentora сейчас занята — попробуй через пару секунд" },
         { status: 429 }
       );
     }

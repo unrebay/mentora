@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import Anthropic from "@anthropic-ai/sdk";
+import { withAnthropicQueue } from "@/lib/anthropic-queue";
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 import { getEffectivePlan, LEVEL_REWARDS, computeNewReward } from "@/lib/plan";
@@ -601,7 +602,7 @@ ${PLATFORM_BLOCK}`;
         ]
       : message;
 
-    const response = await anthropic.messages.create({
+    const response = await withAnthropicQueue(() => anthropic.messages.create({
       model: hasImage ? "claude-sonnet-4-6" : "claude-haiku-4-5-20251001",
       max_tokens: hasImage ? 4096 : 2048,
       system: systemPrompt,
@@ -609,7 +610,7 @@ ${PLATFORM_BLOCK}`;
         ...((history ?? []).filter((m: {role: string}) => m.role === "user" || m.role === "assistant").slice(-10)),
         { role: "user", content: userTurnContent },
       ],
-    });
+    }));
 
     const firstContent = response.content[0];
     if (firstContent.type !== "text") throw new Error("Unexpected response type: " + firstContent.type);
@@ -802,6 +803,18 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
     ) {
       return NextResponse.json(
         { error: "rate_limited", message: "Mentora перегружена — попробуй через несколько секунд" },
+        { status: 429 }
+      );
+    }
+    // Request queue full or timed out — tell client to retry
+    if (
+      err instanceof Error &&
+      ("code" in err) &&
+      ((err as NodeJS.ErrnoException).code === "QUEUE_FULL" ||
+       (err as NodeJS.ErrnoException).code === "QUEUE_TIMEOUT")
+    ) {
+      return NextResponse.json(
+        { error: "rate_limited", message: "Mentora сейчас занята — попробуй через пару секунд" },
         { status: 429 }
       );
     }
