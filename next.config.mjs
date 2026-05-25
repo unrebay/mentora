@@ -30,6 +30,7 @@ const securityHeaders = [
 
 const nextConfig = {
   output: "standalone",
+  poweredByHeader: false,
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -51,3 +52,4 @@ const nextConfig = {
 };
 
 export default withNextIntl(nextConfig);
+
