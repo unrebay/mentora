@@ -782,11 +782,15 @@ function AuthPageContent() {
 
               <div className="mb-1">
                 <h2 className="text-xl font-bold text-white">
-                  {isSignup ? t("createFreeAccount") : t("welcomeBack")}
+                  {isForgot
+                    ? (locale === "en" ? "Reset password" : "Сброс пароля")
+                    : isSignup ? t("createFreeAccount") : t("welcomeBack")}
                 </h2>
-                <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.45)" }}>
-                  {isSignup ? t("noCard") : t("continueLearn")}
-                </p>
+                {!isForgot && (
+                  <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.45)" }}>
+                    {isSignup ? t("noCard") : t("continueLearn")}
+                  </p>
+                )}
               </div>
 
               {/* Google OAuth — hidden in forgot mode */}
@@ -807,7 +811,7 @@ function AuthPageContent() {
                 <div className="flex-1 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }} />
                 <span className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>{t("orEmail")}</span>
                 <div className="flex-1 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }} />
-              </div>
+              </div>}
 
               {/* Forgot password flow — replaces the sign-in form */}
               {isForgot && (

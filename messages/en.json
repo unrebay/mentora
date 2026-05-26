@@ -1046,6 +1046,26 @@
       "discovery": {
         "label": "Discovery",
         "desc": "Any question — science & the world"
+      },
+      "literature": {
+        "label": "Literature",
+        "desc": "Russian and world classics"
+      },
+      "psychology": {
+        "label": "Psychology",
+        "desc": "How the mind and behaviour work"
+      },
+      "astronomy": {
+        "label": "Astronomy",
+        "desc": "Stars, galaxies, the cosmos"
+      },
+      "economics": {
+        "label": "Economics",
+        "desc": "Money, markets, decisions"
+      },
+      "computer-science": {
+        "label": "Computer Science",
+        "desc": "Algorithms, programming, IT"
       }
     }
   },
