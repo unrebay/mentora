@@ -215,29 +215,34 @@ export async function POST(req: NextRequest) {
     let windowResetAt: string | null = null;
 
     if (!isPro) {
-      const { data: windowRows } = await supabase.rpc("increment_messages_window", {
+      const { data: windowRows, error: windowError } = await supabase.rpc("increment_messages_window", {
         p_user_id: user.id,
         p_window_hours: WINDOW_HOURS,
         p_window_limit: WINDOW_LIMIT,
       });
-      const w = windowRows?.[0];
+      if (windowError || !windowRows?.[0]) {
+        // RPC failed — do NOT false-positive 429. Let caller retry.
+        console.error("increment_messages_window error:", windowError?.message ?? "empty result");
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+      }
+      const w = windowRows[0];
       // Window resets WINDOW_HOURS after it started — compute from window_start returned by RPC
       const windowResetISO = (() => {
-        if (w?.window_start) {
-          const d = new Date(w.window_start);
+        if (w.messages_window_start) {
+          const d = new Date(w.messages_window_start);
           d.setTime(d.getTime() + WINDOW_HOURS * 3600_000);
           return d.toISOString();
         }
         // Fallback: WINDOW_HOURS from now
         return new Date(Date.now() + WINDOW_HOURS * 3600_000).toISOString();
       })();
-      if (!w?.allowed) {
+      if (!w.allowed) {
         return NextResponse.json(
           { error: "limit_reached", messagesRemaining: 0, resetAt: windowResetISO },
           { status: 429 }
         );
       }
-      messagesRemaining = Math.max(0, WINDOW_LIMIT - (w?.messages_today ?? 1));
+      messagesRemaining = Math.max(0, WINDOW_LIMIT - (w.messages_today ?? 1));
       windowResetAt = windowResetISO;
       // Free: also update last_active_at so admin "active today" count is accurate
       supabase.from("users").update({ last_active_at: new Date().toISOString() }).eq("id", user.id);

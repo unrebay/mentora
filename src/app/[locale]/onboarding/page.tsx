@@ -47,7 +47,7 @@ const STEP_FIELDS = [
   { step: 1, field: "style",         values: ["storytelling", "facts", "practice"] },
   { step: 2, field: "level",         values: ["school", "student", "adult", "expert"] },
   { step: 3, field: "goal",          values: ["exam", "general", "professional", "curiosity"] },
-  { step: 4, field: "first_subject", values: ["russian-history", "world-history", "mathematics", "physics", "english", "russian-language", "biology", "discovery"] },
+  { step: 4, field: "first_subject", values: ["russian-history", "discovery", "biology", "literature", "psychology", "astronomy", "economics", "computer-science"] },
 ];
 
 export default function OnboardingPage() {
@@ -108,6 +108,15 @@ export default function OnboardingPage() {
     });
     if (ok) { window.location.href = "/learn/russian-history"; }
     else { setError(t("errorSkip")); setSaving(false); }
+  }
+
+  async function handleViewAll() {
+    if (!selected || saving) return;
+    setSaving(true); setError(null);
+    const newAnswers = { ...answers, [step.field]: selected };
+    const ok = await completeOnboarding(newAnswers);
+    if (ok) { window.location.href = "/dashboard"; }
+    else { setError(t("errorSave")); setSaving(false); }
   }
 
   return (
@@ -248,6 +257,27 @@ export default function OnboardingPage() {
         >
           {saving ? t("saving") : isLast ? t("start") : t("next")}
         </button>
+
+        {/* Glass "View all sciences" button — last step only */}
+        {isLast && (
+          <button
+            onClick={handleViewAll}
+            disabled={!selected || saving}
+            className="w-full mt-2.5 py-2.5 rounded-2xl font-medium text-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              color: "rgba(255,255,255,0.75)",
+              boxShadow: "0 1px 0 rgba(255,255,255,0.06) inset",
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.10)"; (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.95)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.06)"; (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.75)"; }}
+          >
+            Смотреть все науки →
+          </button>
+        )}
       </div>
 
       {/* Skip */}

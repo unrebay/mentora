@@ -182,6 +182,30 @@ export default function DemoChat({ inModal = false }: { inModal?: boolean } = {}
         </div>
       </div>
 
+      {/* ── 1b. Demo subject badge ─────────────────────────────────────── */}
+      <div className="flex items-center justify-center gap-1.5 flex-wrap">
+        <span
+          className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full"
+          style={{
+            background: "rgba(69,97,232,0.14)",
+            border: "1px solid rgba(107,143,255,0.25)",
+            color: "rgba(255,255,255,0.6)",
+          }}
+        >
+          <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+            <path d="M8 2a6 6 0 100 12A6 6 0 008 2zM8 5v3.5l2 1.2" />
+          </svg>
+          Демо: история
+        </span>
+        <Link
+          href="/auth"
+          className="inline-flex items-center gap-1 text-[11px] font-medium transition-colors hover:underline"
+          style={{ color: "#9DB1FF" }}
+        >
+          Все науки — бесплатно →
+        </Link>
+      </div>
+
       {/* ── 2. Messages — each bubble is its own glass element, no wrapper ─ */}
       <div
         ref={messagesContainerRef}
