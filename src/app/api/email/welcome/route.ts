@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createAdmin } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { sendEmail, welcomeEmailHtml } from "@/lib/email";
@@ -33,10 +34,16 @@ export async function POST() {
     });
 
     if (sent) {
-      await supabase
+      // welcome_sent is a protected column — must use service-role client
+      const admin = createAdmin(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      );
+      const { error: flagErr } = await admin
         .from("users")
         .update({ welcome_sent: true })
         .eq("id", user.id);
+      if (flagErr) console.error("welcome_sent flag error:", flagErr.message);
     }
 
     return NextResponse.json({ ok: true, sent });
