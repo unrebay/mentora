@@ -13,10 +13,13 @@ export default function AuthConfirm() {
 
     if (token_hash && type) {
       supabase.auth
-        .verifyOtp({ token_hash, type: type as "magiclink" | "email" })
+        .verifyOtp({ token_hash, type: type as "magiclink" | "email" | "recovery" })
         .then(({ error }) => {
           if (error) {
             window.location.href = "/auth?error=verify_failed";
+          } else if (type === "recovery") {
+            // Password-reset flow: session is now set, go to new-password form
+            window.location.href = "/auth/reset-password";
           } else {
             window.location.href = "/dashboard";
           }

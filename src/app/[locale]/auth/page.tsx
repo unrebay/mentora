@@ -472,12 +472,13 @@ function AuthPageContent() {
   const [password, setPassword]         = useState("");
   const [tgLoading, setTgLoading]       = useState(false);
   const [tgAvailable, setTgAvailable]   = useState<null | boolean>(null);
-  const [mode, setMode]                 = useState<"signin" | "signup">("signin");
+  const [mode, setMode]                 = useState<"signin" | "signup" | "forgot">("signin");
   const [loading, setLoading]           = useState(false);
   const [oauthLoading, setOauthLoading] = useState<"google" | null>(null);
   const [error, setError]               = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [emailSent, setEmailSent]       = useState<string | null>(null);
+  const [forgotEmailSent, setForgotEmailSent] = useState(false);
 
   const router       = useRouter();
   const searchParams = useSearchParams();
@@ -593,8 +594,19 @@ function AuthPageContent() {
     setLoading(false);
   }
 
-  function switchMode(next: "signin" | "signup") { setMode(next); setError(null); }
+  async function handleForgotPassword(e: React.FormEvent) {
+    e.preventDefault(); setLoading(true); setError(null);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/confirm`,
+    });
+    setLoading(false);
+    if (error) setError(locale === "en" ? "Failed to send reset email. Please try again." : "Не удалось отправить письмо. Попробуй позже.");
+    else setForgotEmailSent(true);
+  }
+
+  function switchMode(next: "signin" | "signup") { setMode(next); setError(null); setForgotEmailSent(false); }
   const isSignup = mode === "signup";
+  const isForgot = mode === "forgot";
 
   // ── Email confirmation screen ─────────────────────────────────────────────
   if (emailSent) {
@@ -777,8 +789,8 @@ function AuthPageContent() {
                 </p>
               </div>
 
-              {/* Google OAuth */}
-              <button
+              {/* Google OAuth — hidden in forgot mode */}
+              {!isForgot && <button
                 type="button"
                 onClick={() => handleOAuth("google")}
                 disabled={oauthLoading !== null}
@@ -789,16 +801,99 @@ function AuthPageContent() {
                   ? <span className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(255,255,255,0.2)", borderTopColor: "rgba(255,255,255,0.7)" }} />
                   : <GoogleIcon />}
                 {t("continueGoogle")}
-              </button>
+              </button>}
 
-              <div className="relative flex items-center gap-3 py-1">
+              {!isForgot && <div className="relative flex items-center gap-3 py-1">
                 <div className="flex-1 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }} />
                 <span className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>{t("orEmail")}</span>
                 <div className="flex-1 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }} />
               </div>
 
+              {/* Forgot password flow — replaces the sign-in form */}
+              {isForgot && (
+                <div className="space-y-3">
+                  {forgotEmailSent ? (
+                    <div className="text-center space-y-4 py-2">
+                      <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto"
+                        style={{ background: "rgba(69,97,232,0.18)", border: "1px solid rgba(107,143,255,0.25)" }}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6B8FFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="2" y="4" width="20" height="16" rx="2"/>
+                          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-white mb-1">
+                          {locale === "en" ? "Check your email" : "Проверь почту"}
+                        </p>
+                        <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+                          {locale === "en"
+                            ? `We sent a password reset link to `
+                            : `Мы отправили ссылку для сброса пароля на `}
+                          <span className="text-white font-medium">{email}</span>
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => { setMode("signin"); setForgotEmailSent(false); setError(null); setEmail(""); }}
+                        className="text-xs hover:underline"
+                        style={{ color: "rgba(107,143,255,0.75)" }}
+                      >
+                        {locale === "en" ? "← Back to sign in" : "← Вернуться к входу"}
+                      </button>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleForgotPassword} className="space-y-3">
+                      <div>
+                        <p className="text-sm mb-3" style={{ color: "rgba(255,255,255,0.50)" }}>
+                          {locale === "en"
+                            ? "Enter your email and we'll send a reset link."
+                            : "Введи email — пришлём ссылку для сброса пароля."}
+                        </p>
+                        <label className="block text-xs font-semibold mb-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>Email</label>
+                        <input
+                          type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                          required autoComplete="email"
+                          className="w-full px-4 py-3 rounded-xl text-sm transition focus:outline-none focus:ring-2 focus:ring-[#4561E8] placeholder:text-white/25"
+                          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.9)" }}
+                          placeholder="you@example.com"
+                        />
+                      </div>
+                      {error && (
+                        <div className="flex items-start gap-2 rounded-xl px-3 py-2.5 text-xs"
+                          style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#f87171" }}>
+                          <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 mt-0.5 shrink-0" fill="currentColor">
+                            <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4zm0 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                          </svg>
+                          {error}
+                        </div>
+                      )}
+                      <button type="submit" disabled={loading}
+                        className="btn-glow w-full py-3.5 rounded-2xl font-semibold text-sm disabled:opacity-50 disabled:transform-none">
+                        {loading
+                          ? <span className="flex items-center justify-center gap-2">
+                              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              {t("loading")}
+                            </span>
+                          : (locale === "en" ? "Send reset link" : "Отправить ссылку")
+                        }
+                      </button>
+                      <div className="text-center">
+                        <button
+                          type="button"
+                          onClick={() => { setMode("signin"); setError(null); }}
+                          className="text-xs hover:underline"
+                          style={{ color: "rgba(107,143,255,0.65)" }}
+                        >
+                          {locale === "en" ? "← Back to sign in" : "← Вернуться к входу"}
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              )}
+
               {/* Email / Password form */}
-              <form onSubmit={handleSubmit} className="space-y-3">
+              {!isForgot && <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
                   <label className="block text-xs font-semibold mb-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>Email</label>
                   <input
@@ -810,7 +905,19 @@ function AuthPageContent() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>{t("password")}</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-semibold" style={{ color: "rgba(255,255,255,0.45)" }}>{t("password")}</label>
+                    {mode === "signin" && (
+                      <button
+                        type="button"
+                        onClick={() => { setMode("forgot"); setError(null); setForgotEmailSent(false); }}
+                        className="text-xs hover:underline transition-opacity"
+                        style={{ color: "rgba(107,143,255,0.70)" }}
+                      >
+                        {locale === "en" ? "Forgot password?" : "Забыли пароль?"}
+                      </button>
+                    )}
+                  </div>
                   <input
                     type="password" value={password} onChange={(e) => setPassword(e.target.value)}
                     required minLength={6} autoComplete={isSignup ? "new-password" : "current-password"}
@@ -853,7 +960,7 @@ function AuthPageContent() {
                       </span>
                   }
                 </button>
-              </form>
+              </form>}
 
               <div id="telegram-login-widget" style={{ position:"absolute", opacity:0, width:1, height:1, overflow:"hidden", pointerEvents:"none" }} />
 
@@ -861,7 +968,7 @@ function AuthPageContent() {
                   Primary path: telegram-widget.js loaded → Telegram.Login.auth() popup.
                   Fallback (RU без VPN): open the bot directly via t.me deep link;
                   bot's /start handler triggers an auth flow on the Mentora side. */}
-              <div>
+              {!isForgot && <div>
                 <button
                   type="button"
                   disabled={tgLoading}
@@ -889,7 +996,7 @@ function AuthPageContent() {
                       </svg>{t("signInTelegram")}</>
                   )}
                 </button>
-              </div>
+              </div>}
 
             </div>{/* /glass card */}
           </div>
