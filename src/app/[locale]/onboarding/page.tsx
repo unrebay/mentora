@@ -2,7 +2,7 @@
 import { useState } from "react";
 import SubjectIcon from "@/components/SubjectIcon";
 import SphereBlobScene from "@/components/SphereBlobScene";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 async function completeOnboarding(answers: Record<string, string>): Promise<boolean> {
   try {
@@ -52,6 +52,7 @@ const STEP_FIELDS = [
 
 export default function OnboardingPage() {
   const t = useTranslations("onboarding");
+  const locale = useLocale();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [selected, setSelected] = useState<string | null>(null);
@@ -88,7 +89,7 @@ export default function OnboardingPage() {
       const ok = await completeOnboarding(newAnswers);
       if (ok) {
         fetch("/api/email/welcome", { method: "POST" }).catch(() => {});
-        window.location.href = `/learn/${firstSubject}`;
+        window.location.href = `${locale === "en" ? "/en" : ""}/learn/${firstSubject}`;
       } else {
         setError(t("errorSave")); setSaving(false);
       }
@@ -106,7 +107,7 @@ export default function OnboardingPage() {
       goal: answers.goal ?? "general",
       first_subject: "russian-history",
     });
-    if (ok) { window.location.href = "/learn/russian-history"; }
+    if (ok) { window.location.href = `${locale === "en" ? "/en" : ""}/learn/russian-history`; }
     else { setError(t("errorSkip")); setSaving(false); }
   }
 
@@ -115,7 +116,7 @@ export default function OnboardingPage() {
     setSaving(true); setError(null);
     const newAnswers = { ...answers, [step.field]: selected };
     const ok = await completeOnboarding(newAnswers);
-    if (ok) { window.location.href = "/dashboard"; }
+    if (ok) { window.location.href = `${locale === "en" ? "/en" : ""}/dashboard`; }
     else { setError(t("errorSave")); setSaving(false); }
   }
 

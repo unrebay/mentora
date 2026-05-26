@@ -12,7 +12,6 @@ import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
 import MeLogo from "@/components/MeLogo";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
 
-const DAILY_LIMIT = 10;
 
 export type Citation = { id: number; topic: string; source: string | null; snippet: string };
 interface Message { role: MessageRole; content: string; isError?: boolean; imageUrl?: string; citations?: Citation[] }
@@ -525,8 +524,8 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const [limitConfirmedByApi, setLimitConfirmedByApi] = useState<boolean>(initialMessagesRemaining === 0);
   // Tooltip state — pill above input that teaches whole-sentence chatting
   const [showWritingTip, setShowWritingTip] = useState<boolean>(false);
-  const [, setResetAt] = useState<string | null>(initialResetAt ?? null);
-  const [countdown, setCountdown] = useState<string>(() => formatCountdown(msUntilNextMidnightUTC()));
+  const [resetAt, setResetAt] = useState<string | null>(initialResetAt ?? null);
+  const [countdown, setCountdown] = useState<string>(() => formatCountdown(initialResetAt ? new Date(initialResetAt).getTime() - Date.now() : msUntilNextMidnightUTC()));
   const [lastUserMsg, setLastUserMsg] = useState("");
   const [pendingImage, setPendingImage] = useState<{ data: string; mimeType: string; preview: string } | null>(null);
   const [nativeModeActive, setNativeModeActive] = useState(false);
@@ -583,9 +582,10 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   }, []);
 
   useEffect(() => {
-    const tick = () => setCountdown(formatCountdown(msUntilNextMidnightUTC()));
+    const tick = () => setCountdown(formatCountdown(resetAt ? new Date(resetAt).getTime() - Date.now() : msUntilNextMidnightUTC()));
     tick(); const id = setInterval(tick, 1000); return () => clearInterval(id);
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetAt]);
 
   const dismissNativeHint = useCallback(() => {
     if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
@@ -703,9 +703,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   // posted in this session). Either is authoritative. The previous logic
   // required messages.length > 0 strictly — that hid the lock screen for
   // returning users with messages_today=10 but no local history loaded.
+  // messages.length > 0 guard removed: if SSR says 0 remaining (used on another device),
+  // show lock immediately — do not hide it because local history is empty
   const limitReached =
     limitConfirmedByApi ||
-    (isLimited && messagesRemaining !== null && messagesRemaining <= 0 && messages.length > 0);
+    (isLimited && messagesRemaining !== null && messagesRemaining <= 0);
   const showCounter = isLimited && messagesRemaining !== null && messagesRemaining <= 5 && !limitReached;
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages]);

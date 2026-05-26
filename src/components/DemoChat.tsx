@@ -63,6 +63,12 @@ const SCENARIOS: { greeting: string; suggestions: string[] }[] = [
 ];
 
 function renderMarkdown(text: string): string {
+  // Escape HTML entities first to prevent XSS from AI-generated content
+  text = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
   return text
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
