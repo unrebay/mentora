@@ -32,33 +32,33 @@ const TEXT_MUTED = "rgba(255,255,255,0.55)";
 const SCENARIOS: { greeting: string; suggestions: string[] }[] = [
   {
     greeting:
-      "Привет! Я Mentora — твой персональный AI-ментор по биологии. Спроси про клетку, ДНК, эволюцию или любой организм.",
-    suggestions: ["Как работает ДНК?", "Митоз и мейоз", "Эволюция Дарвина", "Что делает иммунитет?"],
+      "Привет! Я Mentora — твой персональный AI-ментор по истории. Давай разберёмся с историей России — от Рюрика до наших дней.",
+    suggestions: ["Как возникла Русь?", "Реформы Петра I", "Революция 1917 года", "Распад СССР"],
   },
   {
     greeting:
-      "Привет! Я Mentora — твой персональный AI-ментор по физике. Объясню законы природы простым языком — от Ньютона до квантов.",
-    suggestions: ["Второй закон Ньютона", "Теория относительности", "Что такое квант?", "Как работают волны?"],
+      "Привет! Я Mentora — твой персональный AI-ментор по истории. Погрузимся в Античность — Греция, Рим, великие завоевания.",
+    suggestions: ["Чем знаменита Греция?", "Как пал Рим?", "Александр Македонский", "Что такое полис?"],
   },
   {
     greeting:
-      "Привет! Я Mentora — твой персональный AI-ментор по математике. Спроси про теоремы, задачи или почему 0! = 1.",
-    suggestions: ["Теорема Пифагора", "Что такое производная?", "Зачем интегралы?", "Что такое предел?"],
+      "Привет! Я Mentora — твой персональный AI-ментор по истории. Поговорим о XX веке — войнах, революциях и холодной войне.",
+    suggestions: ["Причины Первой мировой", "Как началась Вторая мировая?", "Холодная война", "Куба 1962"],
   },
   {
     greeting:
-      "Привет! Я Mentora — твой персональный AI-ментор по философии. Поговорим про идеи, которые меняли мир.",
-    suggestions: ["Платон и мир идей", "Категорический императив Канта", "Что такое экзистенциализм?", "Свобода воли существует?"],
+      "Привет! Я Mentora — твой персональный AI-ментор по истории. Исследуем историю Востока — Китай, Японию, Монголию и арабский мир.",
+    suggestions: ["Чингисхан и монголы", "Как работала Османская империя?", "Япония эпохи самураев", "Великий шёлковый путь"],
   },
   {
     greeting:
-      "Привет! Я Mentora — твой персональный AI-ментор по астрономии. От Солнечной системы до края наблюдаемой Вселенной.",
-    suggestions: ["Чёрные дыры", "Жизнь звезды", "Что такое тёмная материя?", "Большой взрыв"],
+      "Привет! Я Mentora — твой персональный AI-ментор по истории. Отправимся в Эпоху великих открытий — Колумб, Магеллан, конкистадоры.",
+    suggestions: ["Кто открыл Америку?", "Кругосветное путешествие Магеллана", "Почему пали ацтеки?", "Торговля пряностями"],
   },
   {
     greeting:
-      "Привет! Я Mentora — твой персональный AI-ментор по химии. Расскажу про атомы, реакции и почему вода такая особенная.",
-    suggestions: ["Из чего состоит атом?", "Что такое pH?", "Как идёт фотосинтез?", "Что такое моль?"],
+      "Привет! Я Mentora — твой персональный AI-ментор по истории. Разберём эпоху революций — от Французской до Американской.",
+    suggestions: ["Французская революция — причины", "Декларация независимости США", "Наполеон: взлёт и падение", "Что такое якобинцы?"],
   },
 ];
 
@@ -69,7 +69,7 @@ function renderMarkdown(text: string): string {
     .replace(/`(.*?)`/g, "<code>$1</code>");
 }
 
-export default function DemoChat() {
+export default function DemoChat({ inModal = false }: { inModal?: boolean } = {}) {
   const t = useTranslations("demo");
   const locale = useLocale();
   const INITIAL_MESSAGE: Message = { role: "assistant", content: t("initialMessage") };
@@ -149,7 +149,7 @@ export default function DemoChat() {
   const canSend = !!input.trim() && !loading && !limitReached;
 
   return (
-    <div className="flex flex-col gap-3" style={{ maxWidth: 560 }}>
+    <div className={inModal ? "flex flex-col gap-3 h-full min-h-0" : "flex flex-col gap-3"} style={inModal ? {} : { maxWidth: 560 }}>
 
       {/* ── 1. Floating header pill (separate glass) ────────────────────── */}
       <div className="self-center flex items-center gap-2.5"
@@ -185,8 +185,8 @@ export default function DemoChat() {
       {/* ── 2. Messages — each bubble is its own glass element, no wrapper ─ */}
       <div
         ref={messagesContainerRef}
-        className="flex flex-col gap-2.5 overflow-y-auto"
-        style={{ maxHeight: 360, paddingRight: 4 }}
+        className={inModal ? "flex flex-col gap-2.5 overflow-y-auto flex-1 min-h-0" : "flex flex-col gap-2.5 overflow-y-auto"}
+        style={inModal ? { paddingRight: 4 } : { maxHeight: 360, paddingRight: 4 }}
       >
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"} gap-2`}>

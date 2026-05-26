@@ -96,8 +96,8 @@ export default function DemoChatModal({
         </button>
 
         {/* Chat content — fills the card with breathing room (поля) */}
-        <div className="flex-1 overflow-hidden p-4 sm:p-6 pt-12 sm:pt-12">
-          <DemoChat />
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0 p-4 sm:p-6 pt-12 sm:pt-12">
+          <DemoChat inModal />
         </div>
       </div>
     </div>

@@ -237,7 +237,7 @@ export async function POST(req: NextRequest) {
           { status: 429 }
         );
       }
-      messagesRemaining = Math.max(0, WINDOW_LIMIT - (w?.messages_today ?? WINDOW_LIMIT));
+      messagesRemaining = Math.max(0, WINDOW_LIMIT - (w?.messages_today ?? 1));
       windowResetAt = windowResetISO;
       // Free: also update last_active_at so admin "active today" count is accurate
       supabase.from("users").update({ last_active_at: new Date().toISOString() }).eq("id", user.id);
