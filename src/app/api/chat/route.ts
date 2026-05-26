@@ -245,10 +245,10 @@ export async function POST(req: NextRequest) {
       messagesRemaining = Math.max(0, WINDOW_LIMIT - (w.messages_today ?? 1));
       windowResetAt = windowResetISO;
       // Free: also update last_active_at so admin "active today" count is accurate
-      supabase.from("users").update({ last_active_at: new Date().toISOString() }).eq("id", user.id);
+      void supabase.from("users").update({ last_active_at: new Date().toISOString() }).eq("id", user.id).then(null, (e: unknown) => console.error("last_active_at update failed:", e));
     } else {
       // Pro/Ultra: fire-and-forget last_active_at update
-      supabase.from("users").update({ last_active_at: new Date().toISOString() }).eq("id", user.id);
+      void supabase.from("users").update({ last_active_at: new Date().toISOString() }).eq("id", user.id).then(null, (e: unknown) => console.error("last_active_at update failed:", e));
     }
 
     // Parallel: fetch user memory + RAG embeddings simultaneously

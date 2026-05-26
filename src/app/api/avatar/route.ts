@@ -16,7 +16,8 @@ export async function POST(req: Request) {
 
   const { data, error } = await sb.rpc("set_user_avatar", { p_user_id: user.id, p_level: level }).maybeSingle();
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    // DB/RPC errors are server-side — return 500, not 400 (client bad request)
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
   return NextResponse.json({ ok: true, level: data });
 }

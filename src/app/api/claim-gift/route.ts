@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -49,7 +50,13 @@ export async function POST() {
       updates.trial_expires_at = GIFT_EXPIRES_AT;
     }
 
-    const { error: updateErr } = await supabase
+    // Use service-role client: anon client is blocked by protect_users_columns_trigger
+    // for billing fields (plan, trial_expires_at)
+    const admin = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    const { error: updateErr } = await admin
       .from("users")
       .update(updates)
       .eq("id", user.id);

@@ -96,7 +96,13 @@ export async function POST(req: NextRequest) {
 
   // Helper: extend trial by N days for a user (skip if already on paid pro)
   async function extendTrial(userId: string, days: number) {
-    const { data: u } = await admin.from("users").select("trial_expires_at, plan").eq("id", userId).single();
+    // Retry once: new user DB row may not exist yet (auth.users trigger race)
+    let { data: u } = await admin.from("users").select("trial_expires_at, plan").eq("id", userId).single();
+    if (!u) {
+      await new Promise((r) => setTimeout(r, 600));
+      ({ data: u } = await admin.from("users").select("trial_expires_at, plan").eq("id", userId).single());
+      if (!u) { console.warn("extendTrial: user row still missing after retry for", userId); return; }
+    }
     if (u?.plan === "pro" || u?.plan === "ultima") return; // already paid — no need
     const base = u?.trial_expires_at && new Date(u.trial_expires_at) > new Date()
       ? new Date(u.trial_expires_at)

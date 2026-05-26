@@ -32,6 +32,10 @@ export async function GET(req: Request) {
   if (topRes.error) {
     return NextResponse.json({ error: topRes.error.message }, { status: 500 });
   }
+  // Log (non-fatal) errors from parallel queries — degrade gracefully
+  if (rankRes?.error)     console.error("leaderboard rank error:", rankRes.error.message);
+  if (progressRes?.error) console.error("leaderboard progress error:", progressRes.error.message);
+  if (neighborRes?.error) console.error("leaderboard neighbor error:", neighborRes.error.message);
 
   const progress = progressRes.data ?? [];
   const myXP      = progress.reduce((s, r) => s + (r.xp_total ?? 0), 0);

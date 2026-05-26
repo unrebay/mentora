@@ -8,8 +8,8 @@ export async function GET(req: NextRequest) {
   if (forbidden) return forbidden;
 
   const { searchParams } = new URL(req.url);
-  const page   = parseInt(searchParams.get("page")  ?? "1");
-  const limit  = parseInt(searchParams.get("limit") ?? "30");
+  const page   = Math.max(1, parseInt(searchParams.get("page")  ?? "1", 10) || 1);
+  const limit  = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") ?? "30", 10) || 30));
   const plan   = searchParams.get("plan")   ?? "";
   const search = searchParams.get("search") ?? "";
   const offset = (page - 1) * limit;

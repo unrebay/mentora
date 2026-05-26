@@ -50,7 +50,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Auth data must be < 24 hours old
-    if (Date.now() / 1000 - parseInt(userData.auth_date) > 86400) {
+    // parseInt(undefined) = NaN → NaN > 86400 = false → bypass! Fix: default "0" + radix
+    const authDate = parseInt(userData.auth_date ?? "0", 10);
+    if (!authDate || Date.now() / 1000 - authDate > 86400) {
       return NextResponse.json({ error: "Auth data expired" }, { status: 401 });
     }
 

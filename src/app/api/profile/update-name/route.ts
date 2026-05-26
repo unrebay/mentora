@@ -30,11 +30,17 @@ export async function POST(request: Request) {
     const admin = createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
     const updates: Record<string, unknown> = {};
     if (name !== undefined)     { updates.display_name = name; updates.name_changes_count = (profile?.name_changes_count ?? 0) + 1; }
+    // Atomic guard: if concurrent request already incremented, this update matches 0 rows
+    // (we .eq on the current count) and returns no error — second request is silently ignored
     if (fullName !== undefined) updates.full_name = fullName;
     if (age !== undefined)      updates.age = age;
     if (phone !== undefined)    updates.phone = phone;
     if (Object.keys(updates).length === 0) return NextResponse.json({ ok: true });
-    const { error: updateError } = await admin.from("users").update(updates).eq("id", user.id);
+    // If name is changing, add optimistic concurrency guard on name_changes_count
+    // to prevent TOCTOU race: concurrent requests that both read count=1 won't both succeed
+    let q = admin.from("users").update(updates).eq("id", user.id);
+    if (name !== undefined) q = q.eq("name_changes_count", profile?.name_changes_count ?? 0);
+    const { error: updateError } = await q;
     if (updateError) { console.error("update-profile error:", updateError); return NextResponse.json({ error: "Ошибка базы данных" }, { status: 500 }); }
     return NextResponse.json({ ok: true, name });
   } catch (err) {
