@@ -590,6 +590,8 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const inputAreaRef = useRef<HTMLDivElement>(null);
+  const [inputAreaHeight, setInputAreaHeight] = useState(80);
 
   const adjustTextareaHeight = useCallback(() => {
     const el = textareaRef.current; if (!el) return;
@@ -747,6 +749,17 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const showCounter = isLimited && messagesRemaining !== null && messagesRemaining <= 5 && !limitReached;
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages]);
+
+  // Track input area height so messages list padding stays above it
+  useEffect(() => {
+    const el = inputAreaRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      setInputAreaHeight(el.offsetHeight);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   async function sendMessage(e: React.FormEvent, retryMsg?: string) {
     e?.preventDefault();
@@ -988,7 +1001,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       </header>
 
       {/* ── Messages ─────────────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto px-4 space-y-4" style={{ scrollbarWidth:"thin", paddingTop:"80px", paddingBottom:"80px" }}>
+      <div className="flex-1 overflow-y-auto px-4 space-y-4" style={{ scrollbarWidth:"thin", paddingTop:"80px", paddingBottom: inputAreaHeight + 16 }}>
 
         {isEmpty && (
           <div className="relative text-center pt-10">
@@ -1219,6 +1232,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
 
       {/* ── Input area ── absolute overlay, glass levitates above chat ──── */}
       <div
+        ref={inputAreaRef}
         style={{
           position: "absolute",
           bottom: 0,
