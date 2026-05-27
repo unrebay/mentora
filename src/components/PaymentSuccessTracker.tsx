@@ -24,11 +24,10 @@ export default function PaymentSuccessTracker() {
     };
     const amount = PRICE_TABLE[tier]?.[plan] ?? PRICE_TABLE.pro.monthly;
 
-    posthog?.capture?.("payment_completed", {
-      tier,
-      billing_plan: plan,
+    posthog?.capture?.("subscription.started", {
+      plan: tier,
+      billing_cycle: plan,
       amount_rub: amount,
-      annual: isAnnual,
     });
 
     // Optional: also clear the URL so refresh doesn't re-trigger

@@ -1,0 +1,75 @@
+# Tracking Plan — Mentora
+# Version: 1 | Created: 2026-05-27
+# Naming: object.action | PII policy: traits_only | Destination: PostHog
+
+meta:
+  product: Mentora
+  version: 1
+  created: "2026-05-27"
+  destinations: [posthog]
+  naming_convention: object.action
+  pii_policy: traits_only
+
+entities:
+  user:
+    id_property: user_id
+    id_format: UUID (Supabase auth)
+    traits:
+      - { name: email, type: string, pii: true, required: true }
+      - { name: plan, type: string, enum: [free, pro, ultima], required: true }
+      - { name: plan_expires_at, type: datetime, required: false }
+      - { name: created_at, type: datetime, required: true }
+      - { name: activated_at, type: datetime, required: false, update_pattern: set_once_on_first_message }
+      - { name: total_messages, type: integer, required: false, update_pattern: scheduled_snapshot }
+      - { name: preferred_subject, type: string, required: false, update_pattern: scheduled_snapshot }
+
+events:
+  - name: user.signed_up
+    category: lifecycle
+    properties:
+      - { name: signup_method, type: string, enum: [email, telegram], required: true }
+      - { name: locale, type: string, enum: [ru, en], required: true }
+
+  - name: user.logged_in
+    category: lifecycle
+    properties:
+      - { name: login_method, type: string, enum: [email, telegram], required: true }
+
+  - name: user.activated
+    category: lifecycle
+    description: First ever message — the activation moment
+    properties:
+      - { name: subject, type: string, required: true }
+
+  - name: chat.message_sent
+    category: core_value
+    properties:
+      - { name: subject, type: string, required: true }
+      - { name: message_index, type: integer, required: true }
+
+  - name: chat.message_edited
+    category: core_value
+    properties:
+      - { name: subject, type: string, required: true }
+
+  - name: chat.error
+    category: diagnostic
+    properties:
+      - { name: subject, type: string, required: true }
+      - { name: status_code, type: integer, required: true }
+      - { name: error_message, type: string, required: false }
+
+  - name: subscription.started
+    category: billing
+    properties:
+      - { name: plan, type: string, enum: [pro, ultima], required: true }
+      - { name: billing_cycle, type: string, enum: [monthly, annual], required: true }
+      - { name: amount_rub, type: integer, required: true }
+
+auto_tracked:
+  - $pageview
+  - $pageleave
+
+# P1 post-launch additions (see delta.md):
+#   subject.selected, knowledge.viewed
+#   subscription.cancelled, subscription.expired, subscription.renewed

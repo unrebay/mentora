@@ -529,6 +529,12 @@ function AuthPageContent() {
         if (!res.ok) throw new Error(json.error);
         // New flow: server-side verifyOtp set the session cookies. Just navigate
         // to the destination decided by the API (dashboard / onboarding).
+        const isNewUser = (json.next ?? "/dashboard").includes("onboarding");
+        if (isNewUser) {
+          posthog.capture("user.signed_up", { signup_method: "telegram", locale });
+        } else {
+          posthog.capture("user.logged_in", { login_method: "telegram" });
+        }
         window.location.href = json.next ?? "/dashboard";
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : t("tryAgain");
@@ -580,6 +586,7 @@ function AuthPageContent() {
         } else {
           // Session cookies were set on the response. Just route forward.
           const next: string = typeof json?.next === "string" ? json.next : "/onboarding";
+          posthog.capture("user.signed_up", { signup_method: "email", locale });
           router.push(next);
           router.refresh();
         }
@@ -589,7 +596,10 @@ function AuthPageContent() {
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setError(t("errorCredentials"));
-      else { router.push("/dashboard"); router.refresh(); }
+      else {
+        posthog.capture("user.logged_in", { login_method: "email" });
+        router.push("/dashboard"); router.refresh();
+      }
     }
     setLoading(false);
   }

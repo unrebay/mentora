@@ -631,7 +631,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   async function quickSend(text: string) {
     if (loading || limitReached) return;
     setMessages(prev => [...prev.filter(m=>!m.isError), { role:"user", content:text }]);
-    setLastUserMsg(text); setLoading(true); posthog.capture("message_sent",{subject});
+    setLastUserMsg(text); setLoading(true);
     setSessionStarted(true); setSessionMessageCount(prev => prev + 1);
     try {
       const res = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:text,subject,history:messages.filter(m=>!m.isError).slice(-10),locale})});
@@ -676,7 +676,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     setEditingText("");
     setLastUserMsg(newText);
     setLoading(true);
-    posthog.capture("message_edited", { subject });
+    posthog.capture("chat.message_edited", { subject });
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -724,8 +724,9 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     setMessages((prev) => { const f=prev.filter(m=>!m.isError); return retryMsg ? f : [...f,{role:"user",content:userMessage}]; });
     setLoading(true);
     const isFirst = messages.filter(m=>m.role==="user"&&!m.isError).length===0;
-    if (isFirst) posthog.capture("first_message_sent",{subject});
-    posthog.capture("message_sent",{subject});
+    const messageIndex = messages.filter(m=>m.role==="user"&&!m.isError).length;
+    if (isFirst) posthog.capture("user.activated",{subject});
+    posthog.capture("chat.message_sent",{subject,message_index:messageIndex});
     // ── Session UX tracking ─────────────────────────────────────────────
     setSessionStarted(true);
     const newSessCount = sessionMessageCount + 1;
@@ -752,7 +753,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       if (!res.ok||!data.message){
         const errText=data.error==="Internal server error"?tChat("errorServer"):(data.error??tChat("errorGeneric"));
         setMessages(prev=>[...prev,{role:"assistant",content:errText,isError:true}]);
-        posthog.capture("chat_error",{subject,status:res.status,error:data.error});return;
+        posthog.capture("chat.error",{subject,status_code:res.status,error_message:data.error});return;
       }
       setMessages(prev=>[...prev,{role:"assistant",content:data.message,imageUrl:data.imageUrl??undefined,citations:Array.isArray(data.citations)?data.citations:undefined}]);
       if(data.messagesRemaining!==undefined){setMessagesRemaining(data.messagesRemaining);if(data.messagesRemaining<=0)setLimitConfirmedByApi(true);}

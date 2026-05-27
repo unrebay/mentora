@@ -5,6 +5,7 @@ import Link from "next/link";
 import LevelAvatar, { LEVEL_TIER_NAMES, unlockedLevel } from "@/components/LevelAvatar";
 import { useTheme } from "@/components/ThemeProvider";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import posthog from "posthog-js";
 
 interface Props {
   totalXP: number;
@@ -244,6 +245,7 @@ export default function UserDropdown({
               <form action={logoutAction}>
                 <button
                   type="submit"
+                  onClick={() => { try { posthog.reset(); } catch {} }}
                   style={{
                     width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                     padding: "9px 10px", fontSize: 12, fontWeight: 600,

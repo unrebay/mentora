@@ -1,0 +1,88 @@
+# Current State — Mentora Analytics Tracking
+# Scanned: 2026-05-27
+# SDK: posthog-js ^1.240.6 (browser only)
+
+sdk:
+  name: posthog-js
+  version: "^1.240.6"
+  host: https://eu.i.posthog.com
+  server_side: false
+
+events:
+  - name: $pageview
+    status: LIVE
+    trigger: automatic (capture_pageview: true)
+    location: src/components/PostHogProvider.tsx
+    properties: []
+
+  - name: $pageleave
+    status: LIVE
+    trigger: automatic (capture_pageleave: true)
+    location: src/components/PostHogProvider.tsx
+    properties: []
+
+  - name: user.signed_up
+    status: LIVE
+    trigger: successful registration (email or telegram)
+    location: src/app/[locale]/auth/page.tsx
+    properties: [signup_method, locale]
+
+  - name: user.logged_in
+    status: LIVE
+    trigger: successful login (email or telegram)
+    location: src/app/[locale]/auth/page.tsx
+    properties: [login_method]
+
+  - name: user.activated
+    status: LIVE
+    trigger: first ever message sent
+    location: src/components/chat/ChatInterface.tsx
+    properties: [subject]
+
+  - name: chat.message_sent
+    status: LIVE
+    trigger: user sends a message (every message, once per action)
+    location: src/components/chat/ChatInterface.tsx
+    properties: [subject, message_index]
+
+  - name: chat.message_edited
+    status: LIVE
+    trigger: user edits a previous message
+    location: src/components/chat/ChatInterface.tsx
+    properties: [subject]
+
+  - name: chat.error
+    status: LIVE
+    trigger: API response non-OK
+    location: src/components/chat/ChatInterface.tsx
+    properties: [subject, status_code, error_message]
+
+  - name: subscription.started
+    status: LIVE
+    trigger: YooKassa payment redirect with ?payment=success
+    location: src/components/PaymentSuccessTracker.tsx
+    properties: [plan, billing_cycle, amount_rub]
+    notes: fires once, then clears URL params
+
+identity:
+  identify_calls:
+    - status: LIVE
+      location: src/components/PostHogIdentify.tsx
+      trigger: dashboard page load
+      traits: [email, plan]
+    - status: LIVE
+      location: src/app/[locale]/auth/page.tsx
+      trigger: email registration success
+      traits: [email, plan, created_at]
+
+  reset_calls:
+    - status: LIVE
+      location: src/components/UserDropdown.tsx
+      trigger: user clicks logout button
+
+  group_calls: []
+
+patterns:
+  naming_style: object.action
+  centralized: false
+  server_side_tracking: false

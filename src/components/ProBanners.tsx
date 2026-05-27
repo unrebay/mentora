@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
-import posthog from "posthog-js";
 
 // ─── Activation Banner (shown after successful payment) ───────────────────────
 export function ProActivationBanner({ plan }: { plan: string }) {
@@ -16,12 +15,6 @@ export function ProActivationBanner({ plan }: { plan: string }) {
   useEffect(() => {
     if (searchParams?.get("payment") === "success") {
       setVisible(true);
-      const billingPlan = searchParams?.get("plan") || "monthly";
-      posthog.capture("payment_completed", {
-        plan: isUltima ? "ultima" : "pro",
-        billing_plan: billingPlan,
-        amount: billingPlan === "annual" ? 2990 : 499,
-      });
       const timer = setTimeout(() => dismiss(), 12000);
       return () => clearTimeout(timer);
     }
