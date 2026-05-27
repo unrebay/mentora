@@ -215,8 +215,8 @@ export default async function ProfilePage({ params }: PageProps) {
   ] = await Promise.all([
     supabase.from("users").select("plan, plan_expires_at, trial_expires_at, created_at, display_name, name_changes_count, full_name, age, phone, gift_pro_claimed, messages_today, messages_window_start").eq("id", user.id).single(),
     supabase.from("user_progress").select("xp_total, streak_days, best_streak").eq("user_id", user.id),
-    supabase.from("user_profiles").select("selected_avatar, serial_id").eq("user_id", user.id).maybeSingle(),
     supabase.from("chat_messages").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("role", "user"),
+    supabase.from("user_profiles").select("selected_avatar, serial_id").eq("user_id", user.id).maybeSingle(),
     supabase.rpc("get_user_global_rank", { p_user_id: user.id }).maybeSingle(),
   ]);
 
