@@ -72,7 +72,8 @@ export default async function AnalyticsPage() {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/auth");
+  const _locale = await getLocale();
+  if (!user) redirect(_locale === "en" ? "/en/auth" : "/auth");
 
   // Ensure the user has a serial_id (Telegram-style #N)
   await supabase.rpc("ensure_user_profile", { p_user_id: user.id });
