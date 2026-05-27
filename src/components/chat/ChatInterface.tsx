@@ -639,7 +639,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       if (res.status===429){setMessagesRemaining(0);setLimitConfirmedByApi(true);setMessages(prev=>prev.filter(m=>!(m.role==="user"&&m.content===text)));return;}
       if (!res.ok||!data.message){setMessages(prev=>[...prev,{role:"assistant",content:data.error??tChat("errorGeneric"),isError:true}]);return;}
       setMessages(prev=>[...prev,{role:"assistant",content:data.message,imageUrl:data.imageUrl??undefined,citations:Array.isArray(data.citations)?data.citations:undefined}]);
-      if(data.messagesRemaining!==undefined){setMessagesRemaining(data.messagesRemaining);if(data.messagesRemaining<=0)setLimitConfirmedByApi(true);}
+      if(data.messagesRemaining!==undefined){setMessagesRemaining(data.messagesRemaining);if(typeof data.messagesRemaining==='number'&&data.messagesRemaining<=0)setLimitConfirmedByApi(true);}
     } catch {setMessages(prev=>[...prev,{role:"assistant",content:tChat("errorNoInternet"),isError:true}]);}
     finally{setLoading(false);}
   }
@@ -690,7 +690,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         return;
       }
       setMessages(prev => [...prev, { role: "assistant", content: data.message, imageUrl: data.imageUrl ?? undefined, citations: Array.isArray(data.citations) ? data.citations : undefined }]);
-      if (data.messagesRemaining !== undefined) { setMessagesRemaining(data.messagesRemaining); if (data.messagesRemaining <= 0) setLimitConfirmedByApi(true); }
+      if (data.messagesRemaining !== undefined) { setMessagesRemaining(data.messagesRemaining); if (typeof data.messagesRemaining === 'number' && data.messagesRemaining <= 0) setLimitConfirmedByApi(true); }
     } catch {
       setMessages(prev => [...prev, { role: "assistant", content: tChat("errorNoInternet"), isError: true }]);
     } finally {
@@ -756,7 +756,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         posthog.capture("chat.error",{subject,status_code:res.status,error_message:data.error});return;
       }
       setMessages(prev=>[...prev,{role:"assistant",content:data.message,imageUrl:data.imageUrl??undefined,citations:Array.isArray(data.citations)?data.citations:undefined}]);
-      if(data.messagesRemaining!==undefined){setMessagesRemaining(data.messagesRemaining);if(data.messagesRemaining<=0)setLimitConfirmedByApi(true);}
+      if(data.messagesRemaining!==undefined){setMessagesRemaining(data.messagesRemaining);if(typeof data.messagesRemaining==='number'&&data.messagesRemaining<=0)setLimitConfirmedByApi(true);}
       if(data.resetAt)setResetAt(data.resetAt);
       if(data.levelUp){
         setLevelUpData(data.levelUp);setLevelUpFading(true);setShowLevelUp(true);

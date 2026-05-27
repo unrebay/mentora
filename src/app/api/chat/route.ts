@@ -788,7 +788,10 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
 
     return NextResponse.json({
       message: assistantMessage,
-      messagesRemaining,
+      // Only include messagesRemaining when it's an actual number (free users).
+      // For Pro/Ultra, messagesRemaining is null — omitting it entirely avoids
+      // the JS footgun null <= 0 === true on the client side.
+      ...(typeof messagesRemaining === 'number' ? { messagesRemaining } : {}),
       resetAt: windowResetAt,
       trialExpiresAt: profile?.trial_expires_at ?? null,
       rewardExpiresAt: profile?.reward_expires_at ?? null,
