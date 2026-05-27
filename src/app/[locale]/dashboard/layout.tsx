@@ -13,10 +13,11 @@ export const metadata: Metadata = {
 // Pages with a forced dark background — nav should always be dark on these
 const DARK_PAGES: string[] = [];
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardLayout({ children, params }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/auth");
+  if (!user) redirect(locale === "en" ? "/en/auth" : "/auth");
 
   const [{ data: profile }, { data: progressData },
     { data: profileRow },
@@ -44,7 +45,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     "use server";
     const supabase = await createClient();
     await supabase.auth.signOut();
-    redirect("/");
+    redirect(locale === "en" ? "/en" : "/");
   }
 
   return (
