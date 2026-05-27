@@ -480,6 +480,7 @@ function AuthPageContent() {
   const [emailSent, setEmailSent]       = useState<string | null>(null);
   const [forgotEmailSent, setForgotEmailSent] = useState(false);
   const [loginFailCount, setLoginFailCount]     = useState(0);
+  const [rememberMe, setRememberMe]             = useState(true);
 
   const router       = useRouter();
   const searchParams = useSearchParams();
@@ -595,6 +596,8 @@ function AuthPageContent() {
         setError(String(e));
       }
     } else {
+      // Persist user preference so server-side cookie setters use correct maxAge
+      document.cookie = `mentora-persist=${rememberMe ? "1" : "0"}; path=/; SameSite=Lax; max-age=${60 * 60 * 24 * 365}`;
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         // Ask server which provider this email uses — gives a helpful hint
@@ -983,6 +986,36 @@ function AuthPageContent() {
                       data-expired-callback="onMentoraCaptchaExpired"
                       data-theme="auto" />
                   </div>
+                )}
+
+                {/* "Remember me" — only on sign-in mode */}
+                {!isSignup && (
+                  <label className="flex items-center gap-2.5 cursor-pointer select-none w-fit">
+                    <span
+                      onClick={() => setRememberMe(v => !v)}
+                      className="relative flex-shrink-0 w-4 h-4 rounded flex items-center justify-center transition-all"
+                      style={{
+                        background: rememberMe ? "#6B8FFF" : "rgba(255,255,255,0.08)",
+                        border: `1.5px solid ${rememberMe ? "#6B8FFF" : "rgba(255,255,255,0.2)"}`,
+                      }}
+                    >
+                      {rememberMe && (
+                        <svg viewBox="0 0 10 8" className="w-2.5 h-2 text-white" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="1 4 3.5 6.5 9 1" />
+                        </svg>
+                      )}
+                    </span>
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={rememberMe}
+                      onChange={e => setRememberMe(e.target.checked)}
+                      tabIndex={-1}
+                    />
+                    <span className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
+                      {locale === "en" ? "Remember me" : "Запомнить меня"}
+                    </span>
+                  </label>
                 )}
 
                 {error && (

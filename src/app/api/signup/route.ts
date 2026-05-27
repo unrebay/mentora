@@ -149,13 +149,26 @@ export async function POST(req: NextRequest) {
       cookies: {
         getAll: () => cookieStore.getAll(),
         setAll: (list: { name: string; value: string; options: CookieOptions }[]) =>
-          list.forEach(({ name, value, options }) => cookieStore.set(name, value, options)),
+          // New signups always get persistent sessions (30 days).
+          // The mentora-persist=1 cookie is set below so that subsequent
+          // middleware refreshes also use the long maxAge.
+          list.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, { ...options, maxAge: 60 * 60 * 24 * 30 })
+          ),
       },
     });
 
     const { error: verifyError } = await supabaseSSR.auth.verifyOtp({
       token_hash: linkData.properties.hashed_token,
       type: "magiclink",
+    });
+
+    // Set the persist preference cookie so middleware keeps sessions alive (30 days)
+    cookieStore.set("mentora-persist", "1", {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365, // 1 year — this is just a preference flag
+      sameSite: "lax",
+      httpOnly: false, // readable by client JS (needed for auth page toggle)
     });
 
     if (verifyError) {

@@ -77,9 +77,11 @@ export async function middleware(request: NextRequest) {
         cookies: {
           getAll: () => request.cookies.getAll(),
           setAll: (cs: { name: string; value: string; options: CookieOptions }[]) => {
+            const persist = request.cookies.get("mentora-persist")?.value !== "0";
+            const extraOpts = persist ? { maxAge: 60 * 60 * 24 * 30 } : {};
             cs.forEach(({ name, value }) => request.cookies.set(name, value));
             response = NextResponse.next({ request: { headers: request.headers } });
-            cs.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+            cs.forEach(({ name, value, options }) => response.cookies.set(name, value, { ...options, ...extraOpts }));
           },
         },
       }
