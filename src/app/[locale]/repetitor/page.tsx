@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { ConditionalNav, ConditionalFooter } from "@/components/ConditionalShell";
 import { getLocale } from "next-intl/server";
-import { headers } from "next/headers";
 import { SUBJECT_LANDINGS } from "@/lib/repetitor-subjects";
+
+export const dynamic = "force-static";
 
 // SEO: piggyback страница под высокочастотный запрос «репетитор онлайн»
 // (Wordstat: 48 489/мес РФ + CIS). Конвертирует трафик в AI-ментора.
@@ -116,7 +117,6 @@ export default async function RepetitorPage() {
         { criterion: "Практика руками", tutor: "Реал-тайм обратная связь", mentora: "Квизы, фото задач (Ultra)",        mentoraWin: true  },
       ];
 
-  const nonce = headers().get("x-nonce") ?? undefined;
   const baseUrl = isEn ? "https://mentora.su/en" : "https://mentora.su";
   const repetitorUrl = `${baseUrl}/repetitor`;
   // JSON-LD: CollectionPage + BreadcrumbList + ItemList со всеми 17 subjects
@@ -158,7 +158,6 @@ export default async function RepetitorPage() {
       <ConditionalNav />
 
       <script
-        nonce={nonce}
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
       />

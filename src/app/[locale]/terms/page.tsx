@@ -2,6 +2,8 @@ import { Link } from "@/i18n/navigation";
 import { ConditionalNav, ConditionalFooter } from "@/components/ConditionalShell";
 import { getLocale } from "next-intl/server";
 
+export const dynamic = "force-static";
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const isEn = locale === "en";

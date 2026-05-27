@@ -4,6 +4,8 @@ import { ConditionalNav, ConditionalFooter } from "@/components/ConditionalShell
 import EgeWaitlistForm from "@/components/EgeWaitlistForm";
 import { getLocale } from "next-intl/server";
 
+export const dynamic = "force-static";
+
 // SEO: piggyback страница под высокочастотный сезонный запрос
 // «подготовка к егэ онлайн» (Wordstat: 13 934/мес РФ).
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {

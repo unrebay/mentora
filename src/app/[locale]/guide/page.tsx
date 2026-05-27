@@ -4,6 +4,8 @@ import Logo from "@/components/Logo";
 import { ConditionalNav, ConditionalFooter } from "@/components/ConditionalShell";
 import { getTranslations } from "next-intl/server";
 
+export const dynamic = "force-static";
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "guide" });
