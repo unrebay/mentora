@@ -643,12 +643,33 @@ function AuthPageContent() {
 
   async function handleForgotPassword(e: React.FormEvent) {
     e.preventDefault(); setLoading(true); setError(null);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/confirm`,
-    });
+
+    const redirectTo = `${window.location.origin}/auth/confirm`;
+
+    // Attempt 1: with custom redirectTo
+    let { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+
+    // Attempt 2: if redirectTo is not in Supabase allowlist, fall back to no redirectTo.
+    // In this case Supabase uses the configured Site URL — the user will land on the home
+    // page which middleware will redirect to /auth/confirm via the token in the URL.
+    if (error && (error.message?.toLowerCase().includes("redirect") || error.message?.toLowerCase().includes("allowlist") || error.status === 422)) {
+      const { error: err2 } = await supabase.auth.resetPasswordForEmail(email);
+      error = err2 ?? null;
+    }
+
     setLoading(false);
-    if (error) setError(locale === "en" ? "Failed to send reset email. Please try again." : "Не удалось отправить письмо. Попробуй позже.");
-    else setForgotEmailSent(true);
+    if (error) {
+      // Show specific error for known cases
+      const msg = error.message ?? "";
+      if (msg.toLowerCase().includes("rate limit") || msg.toLowerCase().includes("429")) {
+        setError(locale === "en" ? "Too many attempts. Please wait a few minutes." : "Слишком много попыток. Подожди несколько минут.");
+      } else {
+        setError(locale === "en" ? "Failed to send reset email. Please try again." : "Не удалось отправить письмо. Попробуй позже.");
+        console.error("[password-reset] Supabase error:", error.message, error.status);
+      }
+    } else {
+      setForgotEmailSent(true);
+    }
   }
 
   function switchMode(next: "signin" | "signup") { setMode(next); setError(null); setForgotEmailSent(false); setLoginFailCount(0); }

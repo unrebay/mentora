@@ -64,6 +64,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Recovery / email-change token redirect —————————————————————————————————
+  // When resetPasswordForEmail() is called WITHOUT a custom redirectTo, Supabase
+  // sends the user to the Site URL (https://mentora.su) with ?token_hash=XXX&type=recovery.
+  // Redirect them to /auth/confirm so the PKCE flow is handled correctly.
+  const tokenHash = request.nextUrl.searchParams.get("token_hash");
+  const tokenType = request.nextUrl.searchParams.get("type");
+  if (tokenHash && (tokenType === "recovery" || tokenType === "email" || tokenType === "invite")) {
+    const confirmUrl = request.nextUrl.clone();
+    confirmUrl.pathname = "/auth/confirm";
+    return NextResponse.redirect(confirmUrl);
+  }
+
   // /admin paths: do session refresh but skip i18n routing entirely.
   // Admin is a static route (app/admin/) — no locale context needed.
   const isAdminPath = pathname === "/admin" || pathname.startsWith("/admin/");
