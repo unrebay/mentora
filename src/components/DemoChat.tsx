@@ -201,14 +201,14 @@ export default function DemoChat({ inModal = false }: { inModal?: boolean } = {}
           <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
             <path d="M8 2a6 6 0 100 12A6 6 0 008 2zM8 5v3.5l2 1.2" />
           </svg>
-          Демо: история
+          {t("demoLabel")}
         </span>
         <Link
           href="/auth"
           className="inline-flex items-center gap-1 text-[11px] font-medium transition-colors hover:underline"
           style={{ color: "#9DB1FF" }}
         >
-          Все науки — бесплатно →
+          {t("allSciencesFree")}
         </Link>
       </div>
 

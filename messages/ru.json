@@ -674,7 +674,9 @@
     "hardLimitCta": "Продолжить бесплатно",
     "disclaimer": "20 сообщений в день · без привязки карты · бесплатно",
     "somethingWentWrong": "Что-то пошло не так. Попробуй ещё раз.",
-    "inputAriaClose": "Закрыть"
+    "inputAriaClose": "Закрыть",
+    "demoLabel": "Демо: история",
+    "allSciencesFree": "Все науки — бесплатно →"
   },
   "probanners": {
     "ultraActivated": "Ultra активирован!",

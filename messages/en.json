@@ -674,7 +674,9 @@
     "hardLimitCta": "Continue for free",
     "disclaimer": "20 messages per day · no card linking · free",
     "somethingWentWrong": "Something went wrong. Please try again.",
-    "inputAriaClose": "Close"
+    "inputAriaClose": "Close",
+    "demoLabel": "Demo: history",
+    "allSciencesFree": "All sciences — free →"
   },
   "probanners": {
     "ultraActivated": "Ultra activated!",
