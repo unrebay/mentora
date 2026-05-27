@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 interface Props {
   giftClaimed: boolean;
@@ -11,8 +11,17 @@ interface Props {
 
 const GIFT_FROM = new Date("2026-06-01T00:00:00+03:00").getTime();
 
+// Locale-aware display date matching GIFT_EXPIRES_AT = "2026-07-01"
+const GIFT_END_DATE: Record<string, string> = {
+  ru: "1 июля 2026",
+  en: "July 1, 2026",
+};
+
 export default function GiftProBanner({ giftClaimed: initialClaimed, isUltima, eligible }: Props) {
   const t = useTranslations("giftBanner");
+  const locale = useLocale();
+  const giftEndDate = GIFT_END_DATE[locale] ?? GIFT_END_DATE.ru;
+
   // Not eligible — registered after June 1
   if (!eligible) return null;
   const [claimed, setClaimed] = useState(initialClaimed);
@@ -76,7 +85,7 @@ export default function GiftProBanner({ giftClaimed: initialClaimed, isUltima, e
           <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
             {isUltima
               ? t("ultimaDesc")
-              : t("proDesc", { date: "1 января 2027" })}
+              : t("proDesc", { date: giftEndDate })}
           </div>
         </div>
       </div>
@@ -108,7 +117,7 @@ export default function GiftProBanner({ giftClaimed: initialClaimed, isUltima, e
         </div>
         <div style={{ flex: 1, minWidth: 180 }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>
-            {t("title", { date: "1 января 2027" })}
+            {t("title", { date: giftEndDate })}
           </div>
           <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
             {t("desc")}
@@ -163,7 +172,7 @@ export default function GiftProBanner({ giftClaimed: initialClaimed, isUltima, e
       </div>
       <div style={{ flex: 1 }}>
         <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>
-          {t("soonTitle", { date: "1 января 2027" })}
+          {t("soonTitle", { date: giftEndDate })}
         </div>
         <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
           {t("soonDesc")}{" "}
