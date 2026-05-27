@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { AppFooter } from "@/components/SiteFooter";
 import { useState, useEffect } from "react";
+import WhyMentoraWorks from "@/components/WhyMentoraWorks";
 import { useTranslations, useLocale } from "next-intl";
 
 /* ── Static non-localizable data ──────────────────────────────── */
@@ -329,7 +330,9 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ── COMPARISON TABLE ──────────────────────────────────── */}
+        {/* ── WHY MENTORA WORKS ──────────────────────────────────── */}
+        <WhyMentoraWorks locale={locale as "ru" | "en"} variant="about" />
+
         <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
           <Tag color="#10B981">{t("compTag")}</Tag>
           <h2 style={{ fontSize: 26, fontWeight: 900, color: "var(--text)", margin: "16px 0 6px", letterSpacing: "-0.5px" }}>

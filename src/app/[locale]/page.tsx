@@ -12,6 +12,7 @@ import { PublicFooter } from "@/components/SiteFooter";
 import StickyMobileCTA from "@/components/StickyMobileCTA";
 import BuyProButton from "@/components/BuyProButton";
 import FadeUp from "@/components/FadeUp";
+import WhyMentoraWorks from "@/components/WhyMentoraWorks";
 import nextDynamic from "next/dynamic";
 const GalaxyCanvas = nextDynamic(() => import("@/components/GalaxyCanvas"), {
   ssr: false,
@@ -987,6 +988,9 @@ export default async function HomePage() {
         </div>
       </section>
 
+
+      {/* ── WHY MENTORA WORKS ──────────────────────────────────── */}
+      <WhyMentoraWorks locale={locale as "ru" | "en"} variant="landing" />
 
       {/* ── MISSION / VISION ─────────────────────────────────────── */}
       <section className="relative px-6 py-16 md:py-28 overflow-hidden" style={{ background: "var(--bg)" }}>
