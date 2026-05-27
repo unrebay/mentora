@@ -185,59 +185,95 @@ function CodeBlock({ lang, code }: { lang: string; code: string }) {
 }
 
 // ─── Citation chip: superscript [N] with hover-tooltip showing source/topic/snippet
+const SNIPPET_PREVIEW = 160; // chars shown before "Показать ещё"
+
 function CitationChip({ n, citation }: { n: number; citation?: Citation }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen]         = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const closeTimer              = useRef<ReturnType<typeof setTimeout>>();
+
+  function scheduleClose() { closeTimer.current = setTimeout(() => setOpen(false), 180); }
+  function cancelClose()   { if (closeTimer.current) clearTimeout(closeTimer.current); }
+
   if (!citation) {
     return <sup style={{ color: "var(--text-muted)", fontSize: "0.7em", margin: "0 1px" }}>[{n}]</sup>;
   }
+
+  const isLong    = citation.snippet.length > SNIPPET_PREVIEW;
+  const displayed = expanded ? citation.snippet : citation.snippet.slice(0, SNIPPET_PREVIEW);
+
   return (
     <span
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onMouseEnter={() => { cancelClose(); setOpen(true); }}
+      onMouseLeave={scheduleClose}
       onFocus={() => setOpen(true)}
-      onBlur={() => setOpen(false)}
+      onBlur={scheduleClose}
       onClick={() => setOpen(o => !o)}
       tabIndex={0}
       role="button"
       aria-label={`Источник ${n}: ${citation.topic}`}
       className="inline-flex relative cursor-help select-none align-super"
-      style={{
-        margin: "0 1px", fontSize: "0.72em", fontWeight: 600,
-        color: "#4561E8",
-      }}
+      style={{ margin: "0 1px", fontSize: "0.72em", fontWeight: 600, color: "#4561E8" }}
     >
       <span style={{
         padding: "0 4px", lineHeight: 1.4, borderRadius: 6,
         background: "rgba(69,97,232,0.10)",
         border: "1px solid rgba(69,97,232,0.25)",
       }}>{n}</span>
+
       {open && (
-        <span role="tooltip"
-          className="absolute bottom-full left-1/2 -translate-x-1/2 z-50 w-[280px] mb-2"
+        <span
+          role="tooltip"
+          onMouseEnter={cancelClose}
+          onMouseLeave={scheduleClose}
+          onClick={e => e.stopPropagation()}
+          className="absolute bottom-full left-1/2 -translate-x-1/2 z-50 mb-2"
           style={{
+            width: expanded ? 340 : 280,
             background: "var(--bg-card)",
             border: "1px solid var(--border-light)",
             borderRadius: 12,
             padding: "10px 12px",
             boxShadow: "0 8px 28px rgba(0,0,0,0.18)",
-            fontSize: 12, lineHeight: 1.45,
+            fontSize: 12, lineHeight: 1.5,
             fontWeight: 400,
             color: "var(--text)",
             textAlign: "left",
             whiteSpace: "normal",
             verticalAlign: "baseline",
+            transition: "width 0.15s ease",
           }}>
+          {/* Topic */}
           <span style={{ display: "block", fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>
             {citation.topic}
           </span>
+          {/* Source */}
           {citation.source && (
             <span style={{ display: "block", fontSize: 11, color: "var(--brand)", marginBottom: 4, wordBreak: "break-all" }}>
               {citation.source}
             </span>
           )}
+          {/* Snippet with expand */}
           <span style={{ display: "block", color: "var(--text-muted)" }}>
-            {citation.snippet}{citation.snippet.length >= 220 ? "…" : ""}
+            {displayed}{!expanded && isLong ? "…" : ""}
           </span>
+          {isLong && (
+            <button
+              onClick={e => { e.stopPropagation(); setExpanded(v => !v); }}
+              style={{
+                marginTop: 6,
+                fontSize: 11,
+                color: "#4561E8",
+                background: "none",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                fontWeight: 600,
+              }}
+            >
+              {expanded ? "Свернуть ↑" : "Показать ещё ↓"}
+            </button>
+          )}
         </span>
       )}
     </span>
