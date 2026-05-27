@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
       plan: string;
       plan_expires_at: string;
       recurring_failed_attempts: number;
+      plan_interval?: "monthly" | "annual";
       payment_method_id?: string;
       card_last4?: string;
       card_type?: string;
@@ -68,6 +69,7 @@ export async function POST(req: NextRequest) {
       plan: userPlan,
       plan_expires_at: expiresAt.toISOString(),
       recurring_failed_attempts: 0,
+      plan_interval: isAnnual ? "annual" : "monthly",
     };
     const pm = payment.payment_method;
     if (pm?.saved && pm.id) {

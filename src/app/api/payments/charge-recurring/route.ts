@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
   const cutoff = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
   const { data: due, error: dueErr } = await supabase
     .from("users")
-    .select("id, plan, payment_method_id, recurring_failed_attempts, plan_expires_at")
+    .select("id, plan, plan_interval, payment_method_id, recurring_failed_attempts, plan_expires_at")
     .eq("auto_renew", true)
     .not("payment_method_id", "is", null)
     .lt("plan_expires_at", cutoff);
@@ -59,7 +59,8 @@ export async function POST(req: NextRequest) {
 
   for (const u of due) {
     // Pick a plan-key matching the user's current tier (default → monthly).
-    const planKey = u.plan === "ultima" ? "ultima_monthly" : "monthly";
+    const interval = (u.plan_interval ?? "monthly") as "monthly" | "annual";
+    const planKey = u.plan === "ultima" ? `ultima_${interval}` as const : interval;
     const plan = PLANS[planKey];
     try {
       const resp = await fetch("https://api.yookassa.ru/v3/payments", {
