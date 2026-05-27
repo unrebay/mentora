@@ -1,5 +1,5 @@
 "use client";
-import { useTok } from "@/hooks/useTok";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface Props {
   locale: "ru" | "en";
@@ -39,7 +39,7 @@ const CONTENT = {
         body: "После объяснения — конкретный вопрос на применение. Активное воспроизведение вместо пассивного чтения удваивает долгосрочное запоминание.",
       },
       {
-        icon: "🎡",
+        icon: "🎭",
         color: "#EC4899",
         title: "Адаптация к ученику",
         body: "Стиль, темп и примеры подстраиваются под вас — не под средний класс. Учиться становится в 5 раз эффективнее.",
@@ -78,7 +78,7 @@ const CONTENT = {
         body: "After every explanation — a specific application question. Active recall instead of passive reading doubles long-term retention.",
       },
       {
-        icon: "🎡",
+        icon: "🎭",
         color: "#EC4899",
         title: "Adapts to you",
         body: "Style, pace and examples adjust to you — not to an average class. Learning becomes up to 5x more effective.",
@@ -88,7 +88,8 @@ const CONTENT = {
 };
 
 export default function WhyMentoraWorks({ locale, variant = "landing" }: Props) {
-  const { isDark } = useTok();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const c = CONTENT[locale] ?? CONTENT.ru;
 
   const isLanding = variant === "landing";
