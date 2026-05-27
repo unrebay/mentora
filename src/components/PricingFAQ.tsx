@@ -13,6 +13,8 @@ export default function PricingFAQ({ dark = true }: { dark?: boolean }) {
     { q: t("q3"), a: t("a3") },
     { q: t("q4"), a: t("a4") },
     { q: t("q5"), a: t("a5") },
+    { q: t("q6"), a: t("a6") },
+    { q: t("q7"), a: t("a7") },
   ];
 
   const cardBg      = dark ? "rgba(255,255,255,0.04)"   : "var(--bg-card)";

@@ -648,12 +648,16 @@
     "a1": "Yes. The free plan requires no card linking — sign up and start right away. You can even try the demo chat on the homepage without an account.",
     "q2": "What does 'unlimited messages' mean?",
     "a2": "With Pro there's no limit on messages per day. Study as much as you want.",
-    "q3": "When will new sciences be added?",
-    "a3": "Psychology, Economics and Philosophy are next. Pro subscribers get access immediately upon release.",
+    "q3": "How many subjects are available?",
+    "a3": "From the public launch on June 1st — all 17 school subjects: math, physics, chemistry, biology, history, literature, Russian language, and more. All subjects are available on the free plan.",
     "q4": "How does Ultra work?",
     "a4": "Ultra adds three capabilities to Pro: photograph a task — Mentora will explain the solution (live now), create a presentation on any topic (coming soon), get an audio breakdown of a complex section (coming soon).",
     "q5": "How do I cancel my subscription?",
-    "a5": "Any time in your account settings — no calls, no explanations needed."
+    "a5": "Any time in your account settings — no calls, no explanations needed.",
+    "q6": "How does auto-renewal work?",
+    "a6": "Since May 2025, Pro renews automatically each month via YooKassa. You can disable it any time in Profile → Subscription — no calls or explanations needed.",
+    "q7": "What is the 'Early Adopter Gift'?",
+    "a7": "Everyone who registered before May 31st will automatically receive 1 free month of Pro on June 1st. It's our thank-you to everyone who was with us from the beginning."
   },
   "demo": {
     "initialMessage": "Hi! I'm Mentora — your personal AI tutor for history. Ask me about any era, person, or event — I'll explain it in a way you won't forget.",
