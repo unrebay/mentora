@@ -479,6 +479,7 @@ function AuthPageContent() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [emailSent, setEmailSent]       = useState<string | null>(null);
   const [forgotEmailSent, setForgotEmailSent] = useState(false);
+  const [loginFailCount, setLoginFailCount]     = useState(0);
 
   const router       = useRouter();
   const searchParams = useSearchParams();
@@ -595,7 +596,7 @@ function AuthPageContent() {
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setError(t("errorCredentials"));
+      if (error) { setError(t("errorCredentials")); setLoginFailCount(c => c + 1); }
       else {
         posthog.capture("user.logged_in", { login_method: "email" });
         router.push("/dashboard"); router.refresh();
@@ -614,7 +615,7 @@ function AuthPageContent() {
     else setForgotEmailSent(true);
   }
 
-  function switchMode(next: "signin" | "signup") { setMode(next); setError(null); setForgotEmailSent(false); }
+  function switchMode(next: "signin" | "signup") { setMode(next); setError(null); setForgotEmailSent(false); setLoginFailCount(0); }
   const isSignup = mode === "signup";
   const isForgot = mode === "forgot";
 
@@ -952,12 +953,24 @@ function AuthPageContent() {
                 )}
 
                 {error && (
-                  <div className="flex items-start gap-2 rounded-xl px-3 py-2.5 text-xs"
-                    style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#f87171" }}>
-                    <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 mt-0.5 shrink-0" fill="currentColor">
-                      <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4zm0 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                    </svg>
-                    {error}
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2 rounded-xl px-3 py-2.5 text-xs"
+                      style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#f87171" }}>
+                      <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 mt-0.5 shrink-0" fill="currentColor">
+                        <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4zm0 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                      </svg>
+                      {error}
+                    </div>
+                    {mode === "signin" && loginFailCount >= 1 && (
+                      <button
+                        type="button"
+                        onClick={() => { setMode("forgot"); setError(null); setLoginFailCount(0); setForgotEmailSent(false); }}
+                        className="w-full rounded-xl px-3 py-2.5 text-xs font-medium text-center transition-all"
+                        style={{ background: "rgba(107,143,255,0.10)", border: "1px solid rgba(107,143,255,0.25)", color: "#6B8FFF" }}
+                      >
+                        {locale === "en" ? "Forgot your password? Reset it →" : "Забыли пароль? Сбросить →"}
+                      </button>
+                    )}
                   </div>
                 )}
 
