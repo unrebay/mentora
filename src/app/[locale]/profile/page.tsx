@@ -214,14 +214,20 @@ export default async function ProfilePage({ params }: PageProps) {
     { data: rankRow }
   ] = await Promise.all([
     supabase.from("users").select("plan, plan_expires_at, trial_expires_at, created_at, display_name, name_changes_count, full_name, age, phone, gift_pro_claimed, messages_today, messages_window_start").eq("id", user.id).single(),
-    supabase.from("user_progress").select("xp_total, streak_days, best_streak").eq("user_id", user.id),
+    supabase.from("user_progress").select("xp_total, streak_days, best_streak, last_active_at").eq("user_id", user.id),
     supabase.from("chat_messages").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("role", "user"),
     supabase.from("user_profiles").select("selected_avatar, serial_id").eq("user_id", user.id).maybeSingle(),
     supabase.rpc("get_user_global_rank", { p_user_id: user.id }).maybeSingle(),
   ]);
 
   const totalXP = progressData?.reduce((s, p) => s + (p.xp_total ?? 0), 0) ?? 0;
-  const currentStreak = progressData?.reduce((m, p) => Math.max(m, p.streak_days ?? 0), 0) ?? 0;
+  const _todayStr  = new Date().toISOString().slice(0, 10);
+  const _yestStr   = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+  const _liveStreak = (p: { streak_days?: number | null; last_active_at?: string | null }) => {
+    const d = p.last_active_at?.slice(0, 10);
+    return (d === _todayStr || d === _yestStr) ? (p.streak_days ?? 0) : 0;
+  };
+  const currentStreak = progressData?.reduce((m, p) => Math.max(m, _liveStreak(p)), 0) ?? 0;
   const bestStreak = progressData?.reduce((m, p) => Math.max(m, p.best_streak ?? 0), 0) ?? 0;
   const totalMessages = msgCount ?? 0;
   const isUltima = profile?.plan === "ultima";

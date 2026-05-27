@@ -104,7 +104,13 @@ export default async function DashboardPage() {
   const { data: progressData } = await supabase.from("user_progress").select("*").eq("user_id", user.id);
 
   const totalXP = progressData?.reduce((sum, p) => sum + (p.xp_total ?? 0), 0) ?? 0;
-  const currentStreak = progressData?.reduce((max, p) => Math.max(max, p.streak_days ?? 0), 0) ?? 0;
+  const _todayStr  = new Date().toISOString().slice(0, 10);
+  const _yestStr   = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+  const _liveStreak = (p: { streak_days?: number | null; last_active_at?: string | null }) => {
+    const d = p.last_active_at?.slice(0, 10);
+    return (d === _todayStr || d === _yestStr) ? (p.streak_days ?? 0) : 0;
+  };
+  const currentStreak = progressData?.reduce((max, p) => Math.max(max, _liveStreak(p)), 0) ?? 0;
   const bestStreak = progressData?.reduce((max, p) => Math.max(max, p.best_streak ?? 0), 0) ?? 0;
 
   const { data: userSubjectRows } = await supabase
