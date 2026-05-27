@@ -1,0 +1,35 @@
+name: Daily billing cron — charge-recurring
+
+on:
+  schedule:
+    # 10:00 UTC = 13:00 Moscow time — runs daily
+    - cron: '0 10 * * *'
+  workflow_dispatch:  # manual trigger for testing
+
+jobs:
+  charge:
+    name: Trigger charge-recurring endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call charge-recurring API
+        id: charge
+        run: |
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST "https://mentora.su/api/payments/charge-recurring" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json")
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          
+          echo "HTTP status: $HTTP_CODE"
+          echo "Response: $BODY"
+          echo "http_code=$HTTP_CODE" >> $GITHUB_OUTPUT
+          echo "body=$BODY" >> $GITHUB_OUTPUT
+          
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ charge-recurring failed with status $HTTP_CODE"
+            exit 1
+          fi
+          
+          echo "✅ charge-recurring completed: $BODY"
