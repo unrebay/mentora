@@ -596,8 +596,41 @@ function AuthPageContent() {
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) { setError(t("errorCredentials")); setLoginFailCount(c => c + 1); }
-      else {
+      if (error) {
+        // Ask server which provider this email uses — gives a helpful hint
+        // e.g. "use Google" instead of generic "invalid credentials".
+        // Fire-and-forget: if it fails, fall back to generic message.
+        try {
+          const provRes = await fetch("/api/auth/check-provider", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          });
+          if (provRes.ok) {
+            const { providers } = await provRes.json().catch(() => ({ providers: [] }));
+            if (Array.isArray(providers) && providers.length > 0 && !providers.includes("email")) {
+              const providerLabel = providers.includes("google")
+                ? (locale === "en" ? "Google" : "Google")
+                : providers[0];
+              setError(
+                locale === "en"
+                  ? `This account was created with ${providerLabel}. Please use the "${providerLabel}" sign-in button.`
+                  : `Этот аккаунт был создан через ${providerLabel}. Используй кнопку «Войти через ${providerLabel}».`,
+              );
+              setLoginFailCount(0); // don't show "forgot password" for OAuth accounts
+            } else {
+              setError(t("errorCredentials"));
+              setLoginFailCount(c => c + 1);
+            }
+          } else {
+            setError(t("errorCredentials"));
+            setLoginFailCount(c => c + 1);
+          }
+        } catch {
+          setError(t("errorCredentials"));
+          setLoginFailCount(c => c + 1);
+        }
+      } else {
         posthog.capture("user.logged_in", { login_method: "email" });
         router.push("/dashboard"); router.refresh();
       }
