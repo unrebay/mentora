@@ -137,8 +137,8 @@ export async function middleware(request: NextRequest) {
   );
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Locale-aware redirects (use /en prefix for English paths; no prefix for Russian)
-  const localePrefix = pathname.startsWith("/en") ? "/en" : "";
+  // Locale-aware redirects (/en prefix for English, /ru for explicit Russian paths, "" for default Russian)
+  const localePrefix = pathname.startsWith("/en") ? "/en" : (isRuLocalePath ? "/ru" : "");
   if (!user && isProtected) {
     return applyCsp(NextResponse.redirect(new URL(`${localePrefix}/auth`, origin)), nonce);
   }
