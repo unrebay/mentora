@@ -1111,6 +1111,8 @@ export default function RoadmapV2Tab() {
   const [filterCat, setFilterCat] = useState<Category | null>(null);
   /** Milestone filter: null = all, true = only milestone, false = only regular */
   const [filterMilestone, setFilterMilestone] = useState<boolean | null>(null);
+  /** Hide completed (done) tasks */
+  const [hideCompleted, setHideCompleted] = useState(false);
 
   useEffect(() => {
     // Hybrid load:
@@ -1282,6 +1284,7 @@ export default function RoadmapV2Tab() {
     let result = tasks;
     if (filterCat) result = result.filter(t => t.category === filterCat);
     if (filterMilestone !== null) result = result.filter(t => Boolean(t.isMilestone) === filterMilestone);
+    if (hideCompleted) result = result.filter(t => t.state !== "done");
     if (searchQuery.trim()) {
       // Multi-token AND search: каждое слово должно встретиться где-то в task.
       // Поиск идёт по title + notes + subtasks + category label + bucket + state +
@@ -1302,7 +1305,7 @@ export default function RoadmapV2Tab() {
       });
     }
     return result;
-  }, [tasks, filterCat, filterMilestone, searchQuery]);
+  }, [tasks, filterCat, filterMilestone, hideCompleted, searchQuery]);
 
   return (
     <div>
@@ -1346,6 +1349,16 @@ export default function RoadmapV2Tab() {
                 : null
             )
           }
+        />
+        {/* Separator */}
+        <span style={{ width: 1, height: 24, background: "var(--border-light)", margin: "0 4px" }} />
+        {/* Hide completed toggle */}
+        <CategoryChip
+          active={hideCompleted}
+          label={hideCompleted ? "Скрыты done" : "Скрыть done"}
+          color={hideCompleted ? "#64748b" : "#94a3b8"}
+          count={tasks.filter(t => t.state === "done").length}
+          onClick={() => setHideCompleted(v => !v)}
         />
       </div>
 
