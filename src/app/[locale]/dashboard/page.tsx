@@ -10,6 +10,7 @@ import { PostHogIdentify } from "@/components/PostHogIdentify";
 import PaymentSuccessTracker from "@/components/PaymentSuccessTracker";
 import { Suspense } from "react";
 import { ProActivationBanner, ProExpiryBanner } from "@/components/ProBanners";
+import AdminMessageBanner from "@/components/AdminMessageBanner";
 import SubjectLibrarySection from "@/components/SubjectLibrarySection";
 import SubjectIcon, { subjectColor } from "@/components/SubjectIcon";
 import BadgesSection from "@/components/BadgesSection";
@@ -84,7 +85,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("onboarding_completed, plan, plan_expires_at, trial_expires_at, streak_reward_claimed, messages_today, messages_window_start")
+    .select("onboarding_completed, plan, plan_expires_at, trial_expires_at, streak_reward_claimed, messages_today, messages_window_start, admin_message")
     .eq("id", user.id)
     .single();
 
@@ -228,6 +229,9 @@ export default async function DashboardPage() {
       <PostHogIdentify userId={user.id} email={user.email ?? ""} />
       <Suspense fallback={null}><PaymentSuccessTracker /></Suspense>
       <div className="max-w-5xl mx-auto px-5 sm:px-6 pt-6 pb-0 sm:pt-10 sm:pb-10">
+
+        {/* ── Admin message banner (personal gift/notification) ─────── */}
+        {profile?.admin_message && <AdminMessageBanner message={profile.admin_message} />}
 
         {/* ── Pro activation banner (payment=success in URL) ────────── */}
         <ProActivationBanner plan={profile?.plan ?? "free"} />
