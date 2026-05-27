@@ -37,11 +37,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 const XP_LEVELS = [
-  { name: "Новичок",        nameEn: "Beginner",   minXP: 0,    maxXP: 100,      color: "#9ca3af", grad: ["#9ca3af", "#6b7280"] },
-  { name: "Исследователь",  nameEn: "Explorer",   minXP: 100,  maxXP: 300,      color: "#3b82f6", grad: ["#60a5fa", "#3b82f6"] },
-  { name: "Знаток",         nameEn: "Adept",      minXP: 300,  maxXP: 600,      color: "#6366f1", grad: ["#818cf8", "#6366f1"] },
-  { name: "Историк",        nameEn: "Scholar",    minXP: 600,  maxXP: 1000,     color: "#8b5cf6", grad: ["#a78bfa", "#8b5cf6"] },
-  { name: "Эксперт",        nameEn: "Expert",     minXP: 1000, maxXP: 99999,    color: "#f59e0b", grad: ["#fcd34d", "#f59e0b"] },
+  { name: "Новичок",  nameEn: "Beginner",    minXP: 0,     maxXP: 100,   color: "#9ca3af", grad: ["#9ca3af", "#6b7280"] },
+  { name: "Любитель", nameEn: "Enthusiast",  minXP: 100,   maxXP: 300,   color: "#3b82f6", grad: ["#60a5fa", "#3b82f6"] },
+  { name: "Знаток",   nameEn: "Scholar",     minXP: 300,   maxXP: 600,   color: "#6366f1", grad: ["#818cf8", "#6366f1"] },
+  { name: "Историк",  nameEn: "Historian",   minXP: 600,   maxXP: 1000,  color: "#8b5cf6", grad: ["#a78bfa", "#8b5cf6"] },
+  { name: "Эксперт",  nameEn: "Expert",      minXP: 1000,  maxXP: 2500,  color: "#f59e0b", grad: ["#fcd34d", "#f59e0b"] },
+  { name: "Магистр",  nameEn: "Master",      minXP: 2500,  maxXP: 5000,  color: "#f97316", grad: ["#fb923c", "#f97316"] },
+  { name: "Доктор",   nameEn: "Doctor",      minXP: 5000,  maxXP: 10000, color: "#ef4444", grad: ["#f87171", "#ef4444"] },
+  { name: "Учёный",   nameEn: "Scientist",   minXP: 10000, maxXP: 99999, color: "#fbbf24", grad: ["#fde68a", "#fbbf24"] },
 ];
 
 function getLevel(xp: number) {
