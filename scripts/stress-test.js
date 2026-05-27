@@ -53,7 +53,6 @@ const PAGES = [
   { path: "/ru",          name: "landing"  },
   { path: "/ru/pricing",  name: "pricing"  },
   { path: "/ru/auth",     name: "auth"     },
-  { path: "/ru/about",    name: "about"    },
 ];
 
 export default function () {
