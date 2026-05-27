@@ -3,7 +3,7 @@ import { AppFooter } from "@/components/SiteFooter";
 import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { computeFreeLimit, FREE_WINDOW_LIMIT } from "@/lib/free-limit";
-import { redirect } from "@/i18n/navigation";
+import { redirect } from "next/navigation";
 import { SUBJECTS } from "@/lib/types";
 import Link from "next/link";
 import { PostHogIdentify } from "@/components/PostHogIdentify";
@@ -81,7 +81,7 @@ export default async function DashboardPage() {
   const [locale, t] = await Promise.all([getLocale(), getTranslations("dashboard")]);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect({ href: "/auth", locale });
+  if (!user) redirect(locale === "en" ? "/en/auth" : "/auth");
 
   const { data: profile } = await supabase
     .from("users")
@@ -89,7 +89,7 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile?.onboarding_completed) redirect({ href: "/onboarding", locale });
+  if (!profile?.onboarding_completed) redirect(locale === "en" ? "/en/onboarding" : "/onboarding");
 
   const isTrialActive = profile?.trial_expires_at ? new Date(profile.trial_expires_at) > new Date() : false;
   const isUltima = profile?.plan === "ultima";
@@ -168,7 +168,7 @@ export default async function DashboardPage() {
     "use server";
     const supabase = await createClient();
     await supabase.auth.signOut();
-    redirect({ href: "/", locale });
+    redirect(locale === "en" ? "/en" : "/");
   }
 
   const streakPct = Math.round((currentStreak / 7) * 100);

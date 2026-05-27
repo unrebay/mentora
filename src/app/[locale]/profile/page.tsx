@@ -3,7 +3,7 @@ import { computeFreeLimit, FREE_WINDOW_LIMIT } from "@/lib/free-limit";
 import { AppFooter } from "@/components/SiteFooter";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { redirect } from "@/i18n/navigation";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ProfileNameEditor } from "@/components/ProfileNameEditor";
 import ReferralWidget from "@/components/ReferralWidget";
@@ -210,7 +210,7 @@ export default async function ProfilePage({ params }: PageProps) {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect({ href: "/auth", locale });
+  if (!user) redirect(locale === "en" ? "/en/auth" : "/auth");
 
   const [{ data: profile }, { data: progressData }, { count: msgCount },
     { data: profileRow },
@@ -261,7 +261,7 @@ export default async function ProfilePage({ params }: PageProps) {
     const { createClient } = await import("@/lib/supabase/server");
     const supabase = await createClient();
     await supabase.auth.signOut();
-    redirect({ href: "/", locale });
+    redirect(locale === "en" ? "/en" : "/");
   }
 
   return (
