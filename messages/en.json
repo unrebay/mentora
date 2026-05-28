@@ -967,11 +967,11 @@
       "subtitle": "We'll tailor the teaching style to you",
       "storytelling": {
         "label": "Through stories",
-        "desc": "Vivid narratives, imagery, historical details"
+        "desc": "Vivid narratives, imagery, real-world examples"
       },
       "facts": {
         "label": "Facts and timelines",
-        "desc": "Clear dates, events, cause-and-effect"
+        "desc": "Clear structure, facts, cause-and-effect"
       },
       "practice": {
         "label": "Questions and tasks",
@@ -1015,7 +1015,7 @@
       },
       "curiosity": {
         "label": "Just curious",
-        "desc": "I love the subject, I want to learn more"
+        "desc": "I love learning new things"
       }
     },
     "first_subject": {
