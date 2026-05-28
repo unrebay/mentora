@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { computeFreeLimit, FREE_WINDOW_LIMIT } from "@/lib/free-limit";
+import { getEffectivePlan } from "@/lib/plan";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "@/i18n/navigation";
 import { SUBJECTS } from "@/lib/types";
@@ -246,15 +247,13 @@ export default async function LearnSubjectPage({ params, searchParams }: Props) 
   // Calculate remaining messages for today
   const { data: profile } = await supabase
     .from("users")
-    .select("plan, plan_expires_at, trial_expires_at, messages_today, messages_window_start")
+    .select("plan, plan_expires_at, trial_expires_at, reward_plan, reward_expires_at, messages_today, messages_window_start")
     .eq("id", user!.id)
     .single();
 
-  const isUltima = profile?.plan === "ultima";
-  const isTrialActive = profile?.trial_expires_at
-    ? new Date(profile.trial_expires_at) > new Date()
-    : false;
-  const isPaidOrTrial = profile?.plan === "pro" || profile?.plan === "ultima" || isTrialActive;
+  const effectivePlan = getEffectivePlan(profile ?? {});
+  const isUltima = effectivePlan === "ultima";
+  const isPaidOrTrial = effectivePlan === "pro" || effectivePlan === "ultima";
 
   let initialMessagesRemaining: number | null = null;
   let initialResetAt: string | null = null;
