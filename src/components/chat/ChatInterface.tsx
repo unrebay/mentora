@@ -548,6 +548,8 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const [messages, setMessages] = useState<Message[]>(
     initialHistory.map((m) => ({ role: m.role as MessageRole, content: m.content }))
   );
+  // Ref that always holds current messages — used in async callbacks to avoid stale closure
+  const messagesRef = useRef<Message[]>(initialHistory.map(m => ({ role: m.role as MessageRole, content: m.content })));
   const topicPrefix = tChat("topicPrefix");
   const [input, setInput] = useState(initialTopic ? `${topicPrefix}${initialTopic}` : "");
   const [loading, setLoading] = useState(false);
@@ -587,6 +589,9 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingText, setEditingText] = useState("");
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  // ── Dynamic contextual suggestions (Haiku-powered) ──────────────────
+  const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>(subjectQuickQ);
+  const [suggestionsVisible, setSuggestionsVisible] = useState(true); // fade control
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -679,7 +684,28 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       setMessages(prev=>[...prev,{role:"assistant",content:data.message,imageUrl:data.imageUrl??undefined,citations:Array.isArray(data.citations)?data.citations:undefined}]);
       if(data.messagesRemaining!==undefined){setMessagesRemaining(data.messagesRemaining);if(typeof data.messagesRemaining==='number'&&data.messagesRemaining<=0)setLimitConfirmedByApi(true);}
     } catch {setMessages(prev=>[...prev,{role:"assistant",content:tChat("errorNoInternet"),isError:true}]);}
-    finally{setLoading(false);}
+    finally{setLoading(false);
+      // Fetch contextual suggestions in background — non-blocking, silent on fail
+      ;(async () => {
+        try {
+          const r = await fetch("/api/chat/suggestions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              subject,
+              subjectTitle,
+              history: messagesRef.current.filter(m => !m.isError).map(m => ({ role: m.role, content: m.content })),
+              locale,
+            }),
+          });
+          if (!r.ok) return;
+          const d = await r.json();
+          if (d?.suggestions?.length >= 2) {
+            setSuggestionsVisible(false);
+            setTimeout(() => { setDynamicSuggestions(d.suggestions); setSuggestionsVisible(true); }, 220);
+          }
+        } catch { /* keep previous suggestions */ }
+      })();}
   }
 
   // ── Copy message handler — клик «копировать» под любым сообщением ──
@@ -733,6 +759,28 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       setMessages(prev => [...prev, { role: "assistant", content: tChat("errorNoInternet"), isError: true }]);
     } finally {
       setLoading(false);
+
+// Fetch contextual suggestions in background — non-blocking, silent on fail
+      ;(async () => {
+        try {
+          const r = await fetch("/api/chat/suggestions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              subject,
+              subjectTitle,
+              history: messagesRef.current.filter(m => !m.isError).map(m => ({ role: m.role, content: m.content })),
+              locale,
+            }),
+          });
+          if (!r.ok) return;
+          const d = await r.json();
+          if (d?.suggestions?.length >= 2) {
+            setSuggestionsVisible(false);
+            setTimeout(() => { setDynamicSuggestions(d.suggestions); setSuggestionsVisible(true); }, 220);
+          }
+        } catch { /* keep previous suggestions */ }
+      })();
     }
   }
 
@@ -747,6 +795,9 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     limitConfirmedByApi ||
     (isLimited && messagesRemaining !== null && messagesRemaining <= 0);
   const showCounter = isLimited && messagesRemaining !== null && !limitReached; // show for all free users
+
+  // Keep messagesRef in sync with state for use in async callbacks
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages]);
 
@@ -821,7 +872,27 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       }
       if(data.streakRewardEarned){setTimeout(()=>{window.location.href="/dashboard?streak_reward=1";},1500);}
     } catch {setMessages(prev=>[...prev,{role:"assistant",content:tChat("errorNoInternet"),isError:true}]);}
-    finally{setLoading(false);}
+    finally{setLoading(false);
+      ;(async () => {
+        try {
+          const r = await fetch("/api/chat/suggestions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              subject,
+              subjectTitle,
+              history: messagesRef.current.filter(m => !m.isError).map(m => ({ role: m.role, content: m.content })),
+              locale,
+            }),
+          });
+          if (!r.ok) return;
+          const d = await r.json();
+          if (d?.suggestions?.length >= 2) {
+            setSuggestionsVisible(false);
+            setTimeout(() => { setDynamicSuggestions(d.suggestions); setSuggestionsVisible(true); }, 220);
+          }
+        } catch { /* keep previous suggestions */ }
+      })();}
   }
 
   const isEmpty = messages.length === 0;
@@ -1287,12 +1358,17 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           </div>
         ) : (
           <div style={{ pointerEvents:"all" }}>
-            {/* ── Starter chips for returning users ────────────────────────── */}
-            {!isEmpty && !sessionStarted && (
-              <div className="mb-2 flex flex-wrap gap-1.5 justify-center">
-                {subjectQuickQ.map(q => (
+            {/* ── Contextual suggestion chips ───────────────────────────────── */}
+            {/* Before first message: static subject Q's. After each AI reply: dynamic Haiku Q's */}
+            {!limitReached && messages.length > 0 && (
+              <div
+                className="mb-2 flex flex-wrap gap-1.5 justify-center"
+                style={{ opacity: suggestionsVisible ? 1 : 0, transition: "opacity 0.2s ease" }}
+              >
+                {dynamicSuggestions.map(q => (
                   <button
-                    key={q} onClick={() => { setInput(q); setSessionStarted(true); }}
+                    key={q}
+                    onClick={() => { setInput(q); }}
                     className="px-3 py-1.5 rounded-full text-xs transition-all duration-200"
                     style={{ background:"var(--chat-msg-bg)", backdropFilter:"blur(12px)", border:`1px solid var(--chat-msg-border)`, color:"var(--text-secondary)" }}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor=subjColor; (e.currentTarget as HTMLElement).style.color=subjColor; }}
