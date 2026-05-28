@@ -290,7 +290,7 @@ export async function POST(req: NextRequest) {
                 id: i + 1,
                 topic: c.topic,
                 source: c.source ?? null,
-                snippet: c.content.slice(0, 220),
+                snippet: c.content,
               })
             );
             const contextText = chunks

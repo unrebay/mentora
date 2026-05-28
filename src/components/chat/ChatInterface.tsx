@@ -746,7 +746,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const limitReached =
     limitConfirmedByApi ||
     (isLimited && messagesRemaining !== null && messagesRemaining <= 0);
-  const showCounter = isLimited && messagesRemaining !== null && messagesRemaining <= 5 && !limitReached;
+  const showCounter = isLimited && messagesRemaining !== null && !limitReached; // show for all free users
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages]);
 
@@ -910,11 +910,23 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
               background: "var(--bg-nav)",
               backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
               WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
-              border: "1px solid rgba(251,191,36,0.35)",
+              border: (messagesRemaining ?? 10) <= 2
+                ? "1px solid rgba(239,68,68,0.4)"
+                : (messagesRemaining ?? 10) <= 5
+                  ? "1px solid rgba(251,191,36,0.35)"
+                  : "1px solid var(--border-light)",
               boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
             }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-              <span className="text-xs font-medium whitespace-nowrap" style={{ color: "#d97706" }}>
+              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{
+                background: (messagesRemaining ?? 10) <= 2 ? "#ef4444"
+                  : (messagesRemaining ?? 10) <= 5 ? "#f59e0b"
+                  : "var(--text-muted)",
+              }} />
+              <span className="text-xs font-medium whitespace-nowrap" style={{
+                color: (messagesRemaining ?? 10) <= 2 ? "#ef4444"
+                  : (messagesRemaining ?? 10) <= 5 ? "#d97706"
+                  : "var(--text-secondary)",
+              }}>
                 {messagesRemaining ?? 0}
               </span>
             </div>
