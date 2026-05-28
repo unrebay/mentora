@@ -688,24 +688,9 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       if (!res.ok||!data.message){setMessages(prev=>[...prev,{role:"assistant",content:data.error??tChat("errorGeneric"),isError:true}]);return;}
       setMessages(prev=>[...prev,{role:"assistant",content:data.message,imageUrl:data.imageUrl??undefined,citations:Array.isArray(data.citations)?data.citations:undefined}]);
       if(data.messagesRemaining!==undefined){setMessagesRemaining(data.messagesRemaining);if(typeof data.messagesRemaining==='number'&&data.messagesRemaining<=0)setLimitConfirmedByApi(true);}
+      if(data.suggestions?.length>=1){setSuggestionsVisible(false);setTimeout(()=>{setDynamicSuggestions(data.suggestions);setSuggestionsVisible(true);},220);}
     } catch {setMessages(prev=>[...prev,{role:"assistant",content:tChat("errorNoInternet"),isError:true}]);}
-    finally{setLoading(false);
-      // Fetch contextual suggestions in background — non-blocking, silent on fail
-      ;(async () => {
-        try {
-          const r = await fetch("/api/chat/suggestions", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ subject, subjectTitle, history: suggSnap, locale }),
-          });
-          if (!r.ok) return;
-          const d = await r.json();
-          if (d?.suggestions?.length >= 1) {
-            setSuggestionsVisible(false);
-            setTimeout(() => { setDynamicSuggestions(d.suggestions); setSuggestionsVisible(true); }, 220);
-          }
-        } catch { /* keep previous suggestions */ }
-      })();}
+    finally{setLoading(false);}
   }
 
   // ── Copy message handler — клик «копировать» под любым сообщением ──
@@ -760,27 +745,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       }
       setMessages(prev => [...prev, { role: "assistant", content: data.message, imageUrl: data.imageUrl ?? undefined, citations: Array.isArray(data.citations) ? data.citations : undefined }]);
       if (data.messagesRemaining !== undefined) { setMessagesRemaining(data.messagesRemaining); if (typeof data.messagesRemaining === 'number' && data.messagesRemaining <= 0) setLimitConfirmedByApi(true); }
+      if(data.suggestions?.length>=1){setSuggestionsVisible(false);setTimeout(()=>{setDynamicSuggestions(data.suggestions);setSuggestionsVisible(true);},220);}
     } catch {
       setMessages(prev => [...prev, { role: "assistant", content: tChat("errorNoInternet"), isError: true }]);
     } finally {
       setLoading(false);
-
-// Fetch contextual suggestions in background — non-blocking, silent on fail
-      ;(async () => {
-        try {
-          const r = await fetch("/api/chat/suggestions", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ subject, subjectTitle, history: suggSnap, locale }),
-          });
-          if (!r.ok) return;
-          const d = await r.json();
-          if (d?.suggestions?.length >= 1) {
-            setSuggestionsVisible(false);
-            setTimeout(() => { setDynamicSuggestions(d.suggestions); setSuggestionsVisible(true); }, 220);
-          }
-        } catch { /* keep previous suggestions */ }
-      })();
     }
   }
 
@@ -876,23 +845,9 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         levelUpTimerRef.current=setTimeout(()=>{setLevelUpFading(true);setTimeout(()=>{setShowLevelUp(false);setLevelUpData(null);},700);},18000);
       }
       if(data.streakRewardEarned){setTimeout(()=>{window.location.href="/dashboard?streak_reward=1";},1500);}
+      if(data.suggestions?.length>=1){setSuggestionsVisible(false);setTimeout(()=>{setDynamicSuggestions(data.suggestions);setSuggestionsVisible(true);},220);}
     } catch {setMessages(prev=>[...prev,{role:"assistant",content:tChat("errorNoInternet"),isError:true}]);}
-    finally{setLoading(false);
-      ;(async () => {
-        try {
-          const r = await fetch("/api/chat/suggestions", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ subject, subjectTitle, history: suggSnap, locale }),
-          });
-          if (!r.ok) return;
-          const d = await r.json();
-          if (d?.suggestions?.length >= 1) {
-            setSuggestionsVisible(false);
-            setTimeout(() => { setDynamicSuggestions(d.suggestions); setSuggestionsVisible(true); }, 220);
-          }
-        } catch { /* keep previous suggestions */ }
-      })();}
+    finally{setLoading(false);}
   }
 
   const isEmpty = messages.length === 0;
@@ -1704,3 +1659,4 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     </div>
   );
 }
+
