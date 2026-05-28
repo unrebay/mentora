@@ -66,7 +66,7 @@ export default async function PricingPage() {
   let payments: PaymentItem[] = [];
   if (user) {
     const [profileRes, progressRes, paymentsRes] = await Promise.all([
-      supabase.from("users").select("plan, trial_expires_at, plan_expires_at, auto_renew, payment_method_id, card_last4, card_type").eq("id", user.id).single(),
+      supabase.from("users").select("plan, plan_expires_at, trial_expires_at, reward_plan, reward_expires_at, auto_renew, payment_method_id, card_last4, card_type").eq("id", user.id).single(),
       supabase.from("user_progress").select("xp_total, streak_days, best_streak").eq("user_id", user.id),
       supabase
         .from("subscriptions")
@@ -81,9 +81,10 @@ export default async function PricingPage() {
     planExpiresAt = profile?.plan_expires_at ?? null;
     autoRenew = profile?.auto_renew ?? null;
     cardLast4 = profile?.card_last4 ?? null;
-    const isTrialActive = trialExpiresAt ? new Date(trialExpiresAt) > new Date() : false;
-    isUltima = profile?.plan === "ultima";
-    isPro = isUltima || profile?.plan === "pro" || isTrialActive;
+    const effectivePlan = getEffectivePlan(profile ?? {});
+    const isTrialActive = !!(trialExpiresAt && new Date(trialExpiresAt) > new Date());
+    isUltima = effectivePlan === "ultima";
+    isPro = effectivePlan === "pro" || effectivePlan === "ultima";
     totalXP = progressData?.reduce((acc, p) => acc + (p.xp_total ?? 0), 0) ?? 0;
     currentStreak = progressData?.reduce((m, p) => Math.max(m, p.streak_days ?? 0), 0) ?? 0;
     bestStreak = progressData?.reduce((m, p) => Math.max(m, p.best_streak ?? 0), 0) ?? 0;
