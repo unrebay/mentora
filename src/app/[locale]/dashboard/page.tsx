@@ -381,8 +381,8 @@ export default async function DashboardPage() {
             {!isPro && (
               <div className="flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm border"
                 style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round">
-                  <path d="M7.5 8h4M7.5 11h3M2.5 9a5.5 5.5 0 1 0 9.8 3.4L14 14l-1.7-1.6" />
+                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 3h12a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H9.5l-3 2V12H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
                 </svg>
                 <span style={{ color: "var(--text-secondary)" }}>
                   {t("messages")}{" "}

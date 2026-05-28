@@ -9,6 +9,7 @@ import SwitchToFreeButton from "@/components/SwitchToFreeButton";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { getEffectivePlan } from "@/lib/plan";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

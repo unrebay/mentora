@@ -673,6 +673,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
 
   async function quickSend(text: string) {
     if (loading || limitReached) return;
+    // Capture history snapshot NOW (before stale closure in finally)
+    const suggSnap = [
+      ...messagesRef.current.filter(m => !m.isError).map(m => ({ role: m.role as string, content: m.content })),
+      { role: "user", content: text },
+    ];
     setMessages(prev => [...prev.filter(m=>!m.isError), { role:"user", content:text }]);
     setLastUserMsg(text); setLoading(true);
     setSessionStarted(true); setSessionMessageCount(prev => prev + 1);
@@ -691,16 +696,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           const r = await fetch("/api/chat/suggestions", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              subject,
-              subjectTitle,
-              history: messagesRef.current.filter(m => !m.isError).map(m => ({ role: m.role, content: m.content })),
-              locale,
-            }),
+            body: JSON.stringify({ subject, subjectTitle, history: suggSnap, locale }),
           });
           if (!r.ok) return;
           const d = await r.json();
-          if (d?.suggestions?.length >= 2) {
+          if (d?.suggestions?.length >= 1) {
             setSuggestionsVisible(false);
             setTimeout(() => { setDynamicSuggestions(d.suggestions); setSuggestionsVisible(true); }, 220);
           }
@@ -731,6 +731,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     if (!newText || loading) return;
     // Build truncated history up to (not including) the edited message
     const history = messages.slice(0, idx).filter(m => !m.isError).slice(-10);
+    // Capture suggestions snapshot: previous context + the new edited message
+    const suggSnap = [
+      ...history.map(m => ({ role: m.role as string, content: m.content })),
+      { role: "user", content: newText },
+    ];
     // Drop everything after the edited user message + replace its content
     setMessages(prev => [
       ...prev.slice(0, idx),
@@ -766,16 +771,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           const r = await fetch("/api/chat/suggestions", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              subject,
-              subjectTitle,
-              history: messagesRef.current.filter(m => !m.isError).map(m => ({ role: m.role, content: m.content })),
-              locale,
-            }),
+            body: JSON.stringify({ subject, subjectTitle, history: suggSnap, locale }),
           });
           if (!r.ok) return;
           const d = await r.json();
-          if (d?.suggestions?.length >= 2) {
+          if (d?.suggestions?.length >= 1) {
             setSuggestionsVisible(false);
             setTimeout(() => { setDynamicSuggestions(d.suggestions); setSuggestionsVisible(true); }, 220);
           }
@@ -827,6 +827,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     const messageIndex = messages.filter(m=>m.role==="user"&&!m.isError).length;
     if (isFirst) posthog.capture("user.activated",{subject});
     posthog.capture("chat.message_sent",{subject,message_index:messageIndex});
+    // Capture suggestions snapshot NOW — messagesRef is current before async starts
+    const suggSnap = [
+      ...messagesRef.current.filter(m => !m.isError).map(m => ({ role: m.role as string, content: m.content })),
+      { role: "user", content: userMessage },
+    ];
     // ── Session UX tracking ─────────────────────────────────────────────
     setSessionStarted(true);
     const newSessCount = sessionMessageCount + 1;
@@ -878,16 +883,11 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           const r = await fetch("/api/chat/suggestions", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              subject,
-              subjectTitle,
-              history: messagesRef.current.filter(m => !m.isError).map(m => ({ role: m.role, content: m.content })),
-              locale,
-            }),
+            body: JSON.stringify({ subject, subjectTitle, history: suggSnap, locale }),
           });
           if (!r.ok) return;
           const d = await r.json();
-          if (d?.suggestions?.length >= 2) {
+          if (d?.suggestions?.length >= 1) {
             setSuggestionsVisible(false);
             setTimeout(() => { setDynamicSuggestions(d.suggestions); setSuggestionsVisible(true); }, 220);
           }
@@ -977,7 +977,8 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
 
           {/* Counter badge */}
           {showCounter && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full" style={{
+            <div className="flex items-center justify-center transition-all hover:scale-[1.05]" style={{
+              width: 44, height: 44, borderRadius: "50%",
               background: "var(--bg-nav)",
               backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
               WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
@@ -987,13 +988,10 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                   ? "1px solid rgba(251,191,36,0.35)"
                   : "1px solid var(--border-light)",
               boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+              flexDirection: "column",
             }}>
-              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{
-                background: (messagesRemaining ?? 10) <= 2 ? "#ef4444"
-                  : (messagesRemaining ?? 10) <= 5 ? "#f59e0b"
-                  : "var(--text-muted)",
-              }} />
-              <span className="text-xs font-medium whitespace-nowrap" style={{
+              <span style={{
+                fontSize: 14, fontWeight: 700, lineHeight: 1,
                 color: (messagesRemaining ?? 10) <= 2 ? "#ef4444"
                   : (messagesRemaining ?? 10) <= 5 ? "#d97706"
                   : "var(--text-secondary)",

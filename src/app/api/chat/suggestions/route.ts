@@ -11,7 +11,7 @@ const anthropic = new Anthropic({
 export async function POST(req: NextRequest) {
   try {
     const { subject, subjectTitle, history, locale } = await req.json();
-    if (!subject || !Array.isArray(history) || history.length < 2) {
+    if (!subject || !Array.isArray(history) || history.length < 1) {
       return NextResponse.json({ suggestions: [] });
     }
 
