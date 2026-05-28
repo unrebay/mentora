@@ -38,6 +38,12 @@ export async function sendEmail({ to, subject, html }: SendEmailOptions): Promis
   }
 }
 
+// ── Shared text logo (no image, no dark background) ──────────────────────────
+const TEXT_LOGO = `
+  <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:30px;font-weight:800;color:#111827;letter-spacing:-1px;line-height:1;">
+    M<span style="color:#4561E8;">e</span>ntora<span style="font-size:17px;font-weight:600;color:#9ca3af;">.su</span>
+  </div>`;
+
 // ── Templates ────────────────────────────────────────────────
 
 export function welcomeEmailHtml(email: string): string {
@@ -53,7 +59,7 @@ export function welcomeEmailHtml(email: string): string {
 
         <!-- Logo -->
         <tr><td align="center" style="padding-bottom:32px;">
-          <img src="https://mentora.su/logo-white.png" alt="Mentora" width="180" style="display:block;margin:0 auto;width:180px;height:auto;background:#06060F;padding:20px 24px;border-radius:14px;">
+          ${TEXT_LOGO}
         </td></tr>
 
         <!-- Card -->
@@ -66,18 +72,22 @@ export function welcomeEmailHtml(email: string): string {
             Ментор готов к работе
           </h1>
           <p style="margin:0 0 20px;font-size:16px;color:#6b7280;line-height:1.6;">
-            Я — Mentora, твой персональный AI-ментор по истории. Я уже знаю твой стиль обучения и уровень — и готова объяснять так, как тебе удобно.
+            Я — Mentora, твой персональный AI-ментор по 17 наукам. Я уже знаю твой стиль обучения и уровень — и готова объяснять так, как тебе удобно.
           </p>
           <p style="margin:0 0 28px;font-size:16px;color:#6b7280;line-height:1.6;">
-            Тебе доступно <strong style="color:#111827;">20 бесплатных сообщений в сутки</strong>. Этого хватит, чтобы разобрать несколько тем — или задать все вопросы, которые давно копились.
+            Тебе доступно <strong style="color:#111827;">10 бесплатных сообщений каждые 8 часов</strong>. Этого хватит, чтобы разобрать несколько тем — или задать все вопросы, которые давно копились.
           </p>
 
-          <!-- CTA -->
-          <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
-            <tr><td style="background:#4561E8;border-radius:12px;">
-              <a href="https://mentora.su/learn/russian-history" style="display:inline-block;padding:14px 32px;color:white;font-weight:600;font-size:15px;text-decoration:none;letter-spacing:-0.2px;">
-                Начать первый урок &rarr;
-              </a>
+          <!-- CTA — centered -->
+          <table cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:32px;">
+            <tr><td align="center">
+              <table cellpadding="0" cellspacing="0">
+                <tr><td style="background:#4561E8;border-radius:12px;">
+                  <a href="https://mentora.su/dashboard" style="display:inline-block;padding:14px 36px;color:white;font-weight:600;font-size:15px;text-decoration:none;letter-spacing:-0.2px;">
+                    Начать первый урок &rarr;
+                  </a>
+                </td></tr>
+              </table>
             </td></tr>
           </table>
 
@@ -89,7 +99,7 @@ export function welcomeEmailHtml(email: string): string {
           <table cellpadding="0" cellspacing="0" width="100%">
             <tr>
               <td style="padding:6px 12px 6px 0;font-size:14px;color:#374151;vertical-align:top;">
-                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4561E8;margin-right:8px;vertical-align:middle;"></span>История России — 51 тема
+                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4561E8;margin-right:8px;vertical-align:middle;"></span>17 наук в одном чате
               </td>
               <td style="padding:6px 0;font-size:14px;color:#374151;vertical-align:top;">
                 <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10B981;margin-right:8px;vertical-align:middle;"></span>XP и уровни прогресса
@@ -97,7 +107,7 @@ export function welcomeEmailHtml(email: string): string {
             </tr>
             <tr>
               <td style="padding:6px 12px 6px 0;font-size:14px;color:#374151;vertical-align:top;">
-                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#6366F1;margin-right:8px;vertical-align:middle;"></span>История мира — скоро
+                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#6366F1;margin-right:8px;vertical-align:middle;"></span>Галактика знаний
               </td>
               <td style="padding:6px 0;font-size:14px;color:#374151;vertical-align:top;">
                 <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#FF7A00;margin-right:8px;vertical-align:middle;"></span>Стиль под тебя
@@ -136,7 +146,7 @@ export function reengagementEmailHtml(): string {
 
         <!-- Logo -->
         <tr><td align="center" style="padding-bottom:32px;">
-          <img src="https://mentora.su/logo-white.png" alt="Mentora" width="180" style="display:block;margin:0 auto;width:180px;height:auto;background:#06060F;padding:20px 24px;border-radius:14px;">
+          ${TEXT_LOGO}
         </td></tr>
 
         <!-- Card -->
@@ -145,23 +155,27 @@ export function reengagementEmailHtml(): string {
             Ментора ждёт
           </h1>
           <p style="margin:0 0 20px;font-size:16px;color:#6b7280;line-height:1.6;">
-            Прошло несколько дней с твоего последнего урока. История не ждёт — каждый день можно узнать что-то новое за 10 минут.
+            Прошло несколько дней с твоего последнего урока. Каждый день можно узнать что-то новое за 10 минут.
           </p>
           <p style="margin:0 0 28px;font-size:16px;color:#6b7280;line-height:1.6;">
-            Вернись и продолжи с того места, где остановился. Твои <strong>20 сообщений сегодня</strong> уже ждут.
+            Вернись и продолжи с того места, где остановился. <strong style="color:#111827;">10 сообщений каждые 8 часов</strong> уже ждут.
           </p>
 
-          <!-- CTA -->
-          <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-            <tr><td style="background:#3b5bdb;border-radius:12px;">
-              <a href="https://mentora.su/learn/russian-history" style="display:inline-block;padding:14px 28px;color:white;font-weight:600;font-size:15px;text-decoration:none;">
-                Продолжить учиться &rarr;
-              </a>
+          <!-- CTA — centered -->
+          <table cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:28px;">
+            <tr><td align="center">
+              <table cellpadding="0" cellspacing="0">
+                <tr><td style="background:#4561E8;border-radius:12px;">
+                  <a href="https://mentora.su/dashboard" style="display:inline-block;padding:14px 28px;color:white;font-weight:600;font-size:15px;text-decoration:none;">
+                    Продолжить учиться &rarr;
+                  </a>
+                </td></tr>
+              </table>
             </td></tr>
           </table>
 
           <p style="margin:0;font-size:13px;color:#9ca3af;">
-            Или выбери тему из <a href="https://mentora.su/dashboard" style="color:#3b5bdb;">карты знаний</a> — 51 тема по истории России.
+            Или выбери науку из <a href="https://mentora.su/dashboard" style="color:#4561E8;">галактики знаний</a> — математика, история, физика, английский и ещё 13 наук.
           </p>
         </td></tr>
 
