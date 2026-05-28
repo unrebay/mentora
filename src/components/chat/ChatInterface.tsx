@@ -933,8 +933,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
           {/* Counter badge — free users only */}
           {showCounter && (
             <div
-              className="flex items-center justify-center transition-all hover:scale-[1.05] cursor-default"
-              title={locale === "ru" ? `Осталось сообщений сегодня: ${messagesRemaining ?? 0}` : `Messages remaining today: ${messagesRemaining ?? 0}`}
+              className="flex items-center justify-center cursor-default"
               aria-label={locale === "ru" ? `Осталось сообщений: ${messagesRemaining ?? 0}` : `Messages remaining: ${messagesRemaining ?? 0}`}
               style={{
                 width: 44, height: 44, borderRadius: "50%",
