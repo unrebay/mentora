@@ -930,21 +930,25 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         {/* 3. Right actions */}
         <div className="shrink-0 flex items-center gap-2" style={{ pointerEvents: "all" }}>
 
-          {/* Counter badge */}
+          {/* Counter badge — free users only */}
           {showCounter && (
-            <div className="flex items-center justify-center transition-all hover:scale-[1.05]" style={{
-              width: 44, height: 44, borderRadius: "50%",
-              background: "var(--bg-nav)",
-              backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
-              WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
-              border: (messagesRemaining ?? 10) <= 2
-                ? "1px solid rgba(239,68,68,0.4)"
-                : (messagesRemaining ?? 10) <= 5
-                  ? "1px solid rgba(251,191,36,0.35)"
-                  : "1px solid var(--border-light)",
-              boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-              flexDirection: "column",
-            }}>
+            <div
+              className="flex items-center justify-center transition-all hover:scale-[1.05] cursor-default"
+              title={locale === "ru" ? `Осталось сообщений сегодня: ${messagesRemaining ?? 0}` : `Messages remaining today: ${messagesRemaining ?? 0}`}
+              aria-label={locale === "ru" ? `Осталось сообщений: ${messagesRemaining ?? 0}` : `Messages remaining: ${messagesRemaining ?? 0}`}
+              style={{
+                width: 44, height: 44, borderRadius: "50%",
+                background: "var(--bg-nav)",
+                backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                border: (messagesRemaining ?? 10) <= 2
+                  ? "1px solid rgba(239,68,68,0.4)"
+                  : (messagesRemaining ?? 10) <= 5
+                    ? "1px solid rgba(251,191,36,0.35)"
+                    : "1px solid var(--border-light)",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+                flexDirection: "column",
+              }}>
               <span style={{
                 fontSize: 14, fontWeight: 700, lineHeight: 1,
                 color: (messagesRemaining ?? 10) <= 2 ? "#ef4444"
@@ -1107,15 +1111,18 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
               )}
 
               {/* Bubble + actions column */}
-              <div className={`group flex flex-col gap-1 max-w-[80%] ${msg.role==="user" ? "items-end" : "items-start"}`}>
+              <div className={`group flex flex-col gap-1 ${isEditing ? "max-w-[92%] w-full" : "max-w-[80%]"} ${msg.role==="user" ? "items-end" : "items-start"}`}>
 
                 {isEditing ? (
                   /* ── Inline edit form for user message ─────────────── */
                   <div className="w-full rounded-2xl p-3" style={{
                     background: "var(--bg-card)",
                     border: "1px solid rgba(69,97,232,0.35)",
-                    boxShadow: "0 4px 16px rgba(69,97,232,0.15)",
+                    boxShadow: "0 4px 20px rgba(69,97,232,0.18)",
                   }}>
+                    <p className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>
+                      {locale === "ru" ? "✏️ Редактировать сообщение" : "✏️ Edit message"}
+                    </p>
                     <textarea
                       value={editingText}
                       onChange={(e) => setEditingText(e.target.value)}
@@ -1501,22 +1508,26 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
             <form onSubmit={sendMessage} className="flex gap-2 items-end" style={{ pointerEvents:"all" }}>
               {isUltima && <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />}
 
-              {/* 1. Camera — standalone glass circle (Ultra only) */}
-              {isUltima && (
+              {/* 1. Camera — Ultra: opens file picker. Pro: shows upgrade nudge. Hidden for free. */}
+              {(isUltima || isPro) && (
                 <button
                   type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  title={tChat("cameraTitle")}
+                  onClick={() => {
+                    if (isUltima) { fileInputRef.current?.click(); }
+                    else { alert(locale === "ru" ? "📸 Распознавание фото доступно в тарифе Ультра. Перейди на Ультра, чтобы загружать задачи фотографией." : "📸 Photo recognition is available in the Ultra plan. Upgrade to Ultra to send photos."); }
+                  }}
+                  title={isUltima ? tChat("cameraTitle") : (locale === "ru" ? "Загрузить фото задачи — тариф Ультра" : "Upload photo — Ultra plan")}
                   className="shrink-0 flex items-center justify-center transition-all hover:scale-[1.05] active:scale-95"
                   style={{
                     width: 48, height: 48, borderRadius: "50%",
                     background: "var(--bg-nav)",
                     backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
                     WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
-                    border: "1px solid var(--border-light)",
+                    border: isUltima ? "1px solid var(--border-light)" : "1px solid rgba(155,155,155,0.25)",
                     boxShadow: "0 2px 12px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.12) inset",
-                    color: "var(--text-muted)",
+                    color: isUltima ? "var(--text-muted)" : "var(--text-muted)",
                     alignSelf: "flex-end",
+                    opacity: isUltima ? 1 : 0.55,
                   }}
                 >
                   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
@@ -1659,4 +1670,5 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     </div>
   );
 }
+
 
