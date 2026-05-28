@@ -1,5 +1,6 @@
 import React from "react";
 import { computeFreeLimit, FREE_WINDOW_LIMIT } from "@/lib/free-limit";
+import { getEffectivePlan } from "@/lib/plan";
 import { AppFooter } from "@/components/SiteFooter";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
@@ -216,7 +217,7 @@ export default async function ProfilePage({ params }: PageProps) {
     { data: profileRow },
     { data: rankRow }
   ] = await Promise.all([
-    supabase.from("users").select("plan, plan_expires_at, trial_expires_at, created_at, display_name, name_changes_count, full_name, age, phone, gift_pro_claimed, messages_today, messages_window_start").eq("id", user.id).single(),
+    supabase.from("users").select("plan, plan_expires_at, trial_expires_at, reward_plan, reward_expires_at, created_at, display_name, name_changes_count, full_name, age, phone, gift_pro_claimed, messages_today, messages_window_start").eq("id", user.id).single(),
     supabase.from("user_progress").select("xp_total, streak_days, best_streak, last_active_at").eq("user_id", user.id),
     supabase.from("chat_messages").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("role", "user"),
     supabase.from("user_profiles").select("selected_avatar, serial_id").eq("user_id", user.id).maybeSingle(),
@@ -233,13 +234,13 @@ export default async function ProfilePage({ params }: PageProps) {
   const currentStreak = progressData?.reduce((m, p) => Math.max(m, _liveStreak(p)), 0) ?? 0;
   const bestStreak = progressData?.reduce((m, p) => Math.max(m, p.best_streak ?? 0), 0) ?? 0;
   const totalMessages = msgCount ?? 0;
-  const isUltima = profile?.plan === "ultima";
-  const isTrialActive = profile?.trial_expires_at ? new Date(profile.trial_expires_at) > new Date() : false;
-  const isPro = isUltima || profile?.plan === "pro" || isTrialActive;
+  const effectivePlan = getEffectivePlan(profile ?? {});
+  const isUltima = effectivePlan === "ultima";
+  const isPro = effectivePlan === "pro" || effectivePlan === "ultima";
 
   // Rolling 8-hour window counter for free users (starts from first message sent).
   // Single source of truth — see src/lib/free-limit.ts.
-  const _free = computeFreeLimit(profile, isPro || isUltima);
+  const _free = computeFreeLimit(profile, isPro);
   const remainingToday = _free.messagesRemaining ?? FREE_WINDOW_LIMIT;
   const windowResetAt = _free.resetAt;
 

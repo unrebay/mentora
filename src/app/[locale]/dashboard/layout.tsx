@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import DashboardNav from "@/components/DashboardNav";
+import { getEffectivePlan } from "@/lib/plan";
 import OnboardingTour from "@/components/OnboardingTour";
 import ReferralProcessor from "@/components/ReferralProcessor";
 
@@ -23,15 +24,15 @@ export default async function DashboardLayout({ children, params }: { children: 
     { data: profileRow },
     { data: rankRow }
   ] = await Promise.all([
-    supabase.from("users").select("plan, plan_expires_at, trial_expires_at, display_name, full_name").eq("id", user.id).single(),
+    supabase.from("users").select("plan, plan_expires_at, trial_expires_at, reward_plan, reward_expires_at, display_name, full_name").eq("id", user.id).single(),
     supabase.from("user_progress").select("xp_total, streak_days, best_streak, last_active_at").eq("user_id", user.id),
     supabase.from("user_profiles").select("selected_avatar, serial_id").eq("user_id", user.id).maybeSingle(),
     supabase.rpc("get_user_global_rank", { p_user_id: user.id }).maybeSingle(),
   ]);
 
-  const isTrialActive = profile?.trial_expires_at ? new Date(profile.trial_expires_at) > new Date() : false;
-  const isUltima = profile?.plan === "ultima";
-  const isPro = isUltima || profile?.plan === "pro" || isTrialActive;
+  const effectivePlan = getEffectivePlan(profile ?? {});
+  const isUltima = effectivePlan === "ultima";
+  const isPro = effectivePlan === "pro" || effectivePlan === "ultima";
   const totalXP = progressData?.reduce((s: number, p: { xp_total?: number }) => s + (p.xp_total ?? 0), 0) ?? 0;
   const _todayStr = new Date().toISOString().slice(0, 10);
   const _yestStr  = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);

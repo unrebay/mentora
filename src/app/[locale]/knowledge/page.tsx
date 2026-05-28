@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/server";
+import { getEffectivePlan } from "@/lib/plan";
 import DashboardNav from "@/components/DashboardNav";
 import LandingNav from "@/components/LandingNav";
 import BodyScrollLock from "@/components/BodyScrollLock";
@@ -38,16 +39,16 @@ export default async function KnowledgePage({ params }: { params: Promise<{ loca
   // skip personalized progress data; the galaxy still renders for marketing.
   const [profileRes, progressRes] = user
     ? await Promise.all([
-        supabase.from("users").select("plan, plan_expires_at, trial_expires_at").eq("id", user.id).single(),
+        supabase.from("users").select("plan, plan_expires_at, trial_expires_at, reward_plan, reward_expires_at").eq("id", user.id).single(),
         supabase.from("user_progress").select("xp_total, streak_days, best_streak, subject").eq("user_id", user.id),
       ])
     : [{ data: null }, { data: null }];
   const profile = profileRes.data;
   const progressData = progressRes.data;
 
-  const isTrialActive = profile?.trial_expires_at ? new Date(profile.trial_expires_at) > new Date() : false;
-  const isUltima = profile?.plan === "ultima";
-  const isPro = isUltima || profile?.plan === "pro" || isTrialActive;
+  const effectivePlan = getEffectivePlan(profile ?? {});
+  const isUltima = effectivePlan === "ultima";
+  const isPro = effectivePlan === "pro" || effectivePlan === "ultima";
   const totalXP = progressData?.reduce((s: number, p: { xp_total?: number }) => s + (p.xp_total ?? 0), 0) ?? 0;
   const currentStreak = progressData?.reduce((m: number, p: { streak_days?: number }) => Math.max(m, p.streak_days ?? 0), 0) ?? 0;
   const bestStreak = progressData?.reduce((m: number, p: { best_streak?: number }) => Math.max(m, p.best_streak ?? 0), 0) ?? 0;

@@ -14,6 +14,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { getEffectivePlan } from "@/lib/plan";
 import DashboardNav from "@/components/DashboardNav";
 import LandingNav from "@/components/LandingNav";
 import { PublicFooter, AppFooter } from "@/components/SiteFooter";
@@ -50,14 +51,14 @@ export async function ConditionalNav({ dashboardNavVariant, guestActivePage }: {
 
   // Fetch the minimum data DashboardNav needs (plan + xp + streak)
   const [profileRes, progressRes] = await Promise.all([
-    supabase.from("users").select("plan, trial_expires_at").eq("id", user.id).single(),
+    supabase.from("users").select("plan, plan_expires_at, trial_expires_at, reward_plan, reward_expires_at").eq("id", user.id).single(),
     supabase.from("user_progress").select("xp_total, streak_days, best_streak").eq("user_id", user.id),
   ]);
   const profile = profileRes.data;
   const progressData = progressRes.data;
-  const isTrialActive = profile?.trial_expires_at ? new Date(profile.trial_expires_at) > new Date() : false;
-  const isUltima = profile?.plan === "ultima";
-  const isPro = isUltima || profile?.plan === "pro" || isTrialActive;
+  const effectivePlan = getEffectivePlan(profile ?? {});
+  const isUltima = effectivePlan === "ultima";
+  const isPro = effectivePlan === "pro" || effectivePlan === "ultima";
   const totalXP = progressData?.reduce((s, p) => s + (p.xp_total ?? 0), 0) ?? 0;
   const currentStreak = progressData?.reduce((m, p) => Math.max(m, p.streak_days ?? 0), 0) ?? 0;
   const bestStreak = progressData?.reduce((m, p) => Math.max(m, p.best_streak ?? 0), 0) ?? 0;

@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import Anthropic from "@anthropic-ai/sdk";
+import { getEffectivePlan } from "@/lib/plan";
 import { NextRequest, NextResponse } from "next/server";
 
 const anthropic = new Anthropic({
@@ -28,14 +29,12 @@ export async function POST(req: NextRequest) {
     // Pro+ feature (includes Ultra and active trial)
     const { data: profile } = await supabase
       .from("users")
-      .select("plan, trial_expires_at")
+      .select("plan, plan_expires_at, trial_expires_at, reward_plan, reward_expires_at")
       .eq("id", user.id)
       .single();
 
-    const isTrialActive = profile?.trial_expires_at
-      ? new Date(profile.trial_expires_at) > new Date()
-      : false;
-    const hasPro = profile?.plan === "pro" || profile?.plan === "ultima" || isTrialActive;
+    const effectivePlan = getEffectivePlan(profile ?? {});
+    const hasPro = effectivePlan === "pro" || effectivePlan === "ultima";
 
     if (!hasPro) {
       return NextResponse.json({ error: "Pro plan required" }, { status: 403 });

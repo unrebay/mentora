@@ -3,6 +3,7 @@ import { AppFooter } from "@/components/SiteFooter";
 import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { computeFreeLimit, FREE_WINDOW_LIMIT } from "@/lib/free-limit";
+import { getEffectivePlan } from "@/lib/plan";
 import { redirect } from "next/navigation";
 import { SUBJECTS } from "@/lib/types";
 import Link from "next/link";
@@ -85,15 +86,16 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("onboarding_completed, plan, plan_expires_at, trial_expires_at, streak_reward_claimed, messages_today, messages_window_start, admin_message")
+    .select("onboarding_completed, plan, plan_expires_at, trial_expires_at, reward_plan, reward_expires_at, streak_reward_claimed, messages_today, messages_window_start, admin_message")
     .eq("id", user.id)
     .single();
 
   if (!profile?.onboarding_completed) redirect(locale === "en" ? "/en/onboarding" : "/onboarding");
 
-  const isTrialActive = profile?.trial_expires_at ? new Date(profile.trial_expires_at) > new Date() : false;
-  const isUltima = profile?.plan === "ultima";
-  const isPro = isUltima || profile?.plan === "pro" || isTrialActive;
+  const effectivePlan = getEffectivePlan(profile ?? {});
+  const isUltima = effectivePlan === "ultima";
+  const isPro = effectivePlan === "pro" || effectivePlan === "ultima";
+  const isTrialActive = !!(profile?.trial_expires_at && new Date(profile.trial_expires_at) > new Date());
 
   const trialExpiresDate = profile?.trial_expires_at
     ? new Date(profile.trial_expires_at).toLocaleDateString(locale === "en" ? "en-US" : "ru-RU", { day: "numeric", month: "long" })
