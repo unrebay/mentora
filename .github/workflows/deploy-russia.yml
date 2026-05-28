@@ -132,6 +132,11 @@ jobs:
             pm2 delete telegram-poller 2>/dev/null || true
             pm2 start scripts/telegram-poller.mjs --name telegram-poller --update-env --interpreter node
 
+            echo "==> pm2 (re)start mentora-monitor (uptime Telegram alerts)"
+            pm2 delete mentora-monitor 2>/dev/null || true
+            pm2 start scripts/monitor.mjs --name mentora-monitor \
+              --cron "*/2 * * * *" --no-autorestart --update-env --interpreter node
+
             pm2 save
             pm2 status
 
