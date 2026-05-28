@@ -202,5 +202,5 @@ export const config = {
   // Exclude: API, _next, static files, auth/callback
   // Note: /admin is NOT excluded — middleware runs for it to refresh Supabase sessions,
   // but the admin branch at the top of middleware() handles it and returns early (skipping i18n).
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|auth/callback|.*\\..*).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|auth/callback|notes|.*\\..*).*)"],
 };
