@@ -601,6 +601,29 @@ ${PLATFORM_BLOCK}`;
       content: message,
     });
 
+    // ── Suggestions: generate in parallel with main chat (non-blocking, silent on fail) ──
+    const _suggHistory = (history ?? [])
+      .filter((m: {role: string}) => m.role === "user" || m.role === "assistant")
+      .slice(-4)
+      .concat([{ role: "user", content: message }]);
+    const suggestionsPromise: Promise<string[]> = anthropic.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 160,
+      temperature: 0.7,
+      messages: [{
+        role: "user",
+        content: isEnLocale
+          ? `Subject: «${subjectLabel}». Student question: «${message.slice(0, 200)}». Suggest exactly 3 short follow-up questions (max 7 words each) the student is most likely to ask next. JSON array only, no commentary: ["q1","q2","q3"]`
+          : `Предмет: «${subjectLabel}». Вопрос ученика: «${message.slice(0, 200)}». Предложи ровно 3 коротких вопроса (не длиннее 7 слов каждый), которые ученик захочет спросить дальше. Только JSON-массив, без комментариев: ["вопрос 1","вопрос 2","вопрос 3"]`,
+      }],
+    }).then(r => {
+      const t = r.content[0]?.type === "text" ? r.content[0].text.trim() : "";
+      const m2 = t.match(/\[[\s\S]*?\]/);
+      if (!m2) return [];
+      const raw: unknown[] = JSON.parse(m2[0]);
+      return raw.filter((s): s is string => typeof s === "string" && s.trim().length > 0).slice(0, 3);
+    }).catch(() => []);
+
     // Get AI response — use vision model if Ultra user sends an image
     const hasImage = isUltima && imageData && imageMimeType && VALID_MIME_TYPES.includes(imageMimeType);
     const userTurnContent = hasImage
@@ -796,6 +819,8 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
       console.error("Streak reward failed (non-blocking):", rewardErr);
     }
 
+    const suggestions = await suggestionsPromise;
+
     return NextResponse.json({
       message: assistantMessage,
       // Only include messagesRemaining when it's an actual number (free users).
@@ -809,6 +834,7 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
       ...(levelUp ? { levelUp } : {}),
       ...(imageUrl ? { imageUrl } : {}),
       ...(streakRewardEarned ? { streakRewardEarned: true } : {}),
+      ...(suggestions.length ? { suggestions } : {}),
     });
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
@@ -839,3 +865,4 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+
