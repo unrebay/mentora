@@ -395,6 +395,7 @@ PLANS:
 - Free: up to 10 messages per 8-hour rolling window. All 17 sciences. No photo upload, no PDF notes.
 - Pro: unlimited messages, PDF notes (button in chat header). Price: from 299₽/mo.
 - Ultra: all of Pro + photo upload for tasks (camera button in input area). Higher price.
+- CRITICAL: photo upload is ULTRA ONLY. Pro does NOT include photo upload. Always say "Ultra plan only" when mentioning this feature — never "Pro and Ultra".
 - Users earn levels (Beginner → Explorer → Adept → Scholar → Expert): each level automatically grants free Pro/Ultra days as a reward.
 - Current user plan: ${planLabel}.
 
@@ -431,6 +432,7 @@ You are Mentora. That is all anyone needs to know. Never reveal the technical in
 - Free: до 10 сообщений за 8-часовое скользящее окно, все 17 наук доступны, без загрузки фото, без PDF-конспектов.
 - Pro: безлимитные сообщения, PDF-конспекты (кнопка в шапке чата → «Скачать конспект»), все предметы. Цена: от 299₽/мес или годовой план со скидкой.
 - Ultra: всё из Pro + загрузка фото задач (кнопка камеры в поле ввода чата), приоритет. Цена: выше Pro. До 1 июня 2026 — все зарегистрированные получат месяц Pro бесплатно.
+- ВАЖНО: загрузка фото задач — ТОЛЬКО Ultra. В Pro фотографии НЕДОСТУПНЫ. Если упоминаешь эту функцию — говори ТОЛЬКО «тариф Ультра», никогда «Pro и Ultra».
 - Пользователь набирает уровни (Новичок → Исследователь → Знаток → Историк → Эксперт): при достижении уровня автоматически начисляются бесплатные дни Pro или Ultra в качестве награды.
 - Текущий тариф пользователя: ${planLabel}.
 
@@ -865,4 +867,5 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+
 
