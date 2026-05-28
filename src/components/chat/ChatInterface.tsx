@@ -795,14 +795,20 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       modeHintTimerRef.current=setTimeout(()=>{setModeHintFading(true);setTimeout(()=>setShowModeHint(false),400);},8000);
     }
     try {
-      const res = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:userMessage,subject,history:messages.filter(m=>!m.isError).slice(-10),locale,...(pendingImage?{imageData:pendingImage.data,imageMimeType:pendingImage.mimeType}:{})})});
+      const reqBody = JSON.stringify({message:userMessage,subject,history:messages.filter(m=>!m.isError).slice(-10),locale,...(pendingImage?{imageData:pendingImage.data,imageMimeType:pendingImage.mimeType}:{})});
+      let res = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:reqBody});
+      // Auto-retry once on 500 (transient Anthropic/VPS issue) — wait 3s then try again silently
+      if (res.status===500){
+        await new Promise(r=>setTimeout(r,3000));
+        res = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:reqBody});
+      }
       setPendingImage(null);
       const data = await res.json();
       if (res.status===429){setMessagesRemaining(0);setLimitConfirmedByApi(true);setMessages(prev=>prev.filter(m=>m.content!==userMessage||m.role!=="user"));setInput(userMessage);return;}
       if (!res.ok||!data.message){
         const errText=data.error==="Internal server error"?tChat("errorServer"):(data.error??tChat("errorGeneric"));
         setMessages(prev=>[...prev,{role:"assistant",content:errText,isError:true}]);
-        posthog.capture("chat.error",{subject,status_code:res.status,error_message:data.error});return;
+        posthog.capture("chat.error",{subject,status_code:res.status,error_message:data.error,retried:true});return;
       }
       setMessages(prev=>[...prev,{role:"assistant",content:data.message,imageUrl:data.imageUrl??undefined,citations:Array.isArray(data.citations)?data.citations:undefined}]);
       if(data.messagesRemaining!==undefined){setMessagesRemaining(data.messagesRemaining);if(typeof data.messagesRemaining==='number'&&data.messagesRemaining<=0)setLimitConfirmedByApi(true);}

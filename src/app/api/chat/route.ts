@@ -9,6 +9,8 @@ import { getEffectivePlan, LEVEL_REWARDS, computeNewReward } from "@/lib/plan";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
+  timeout: 25_000,   // 25s — fail fast instead of hanging for minutes
+  maxRetries: 3,     // SDK-level retries on transient 503/network errors
   ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}),
   ...(process.env.VERCEL_BYPASS_SECRET ? { defaultHeaders: { "x-vercel-protection-bypass": process.env.VERCEL_BYPASS_SECRET } } : {}),
 });
