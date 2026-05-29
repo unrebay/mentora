@@ -21,7 +21,7 @@ import Logo from "@/components/Logo";
 import { getTranslations, getLocale } from "next-intl/server";
 import AppFooterClient from "@/components/AppFooterClient";
 
-const VERSION = "5.1.0";
+const VERSION = "6.0.0";
 
 export async function PublicFooter({ dark }: { dark?: boolean } = {}) {
   const t = await getTranslations("nav");

@@ -20,6 +20,7 @@
 | `Стрик` | Streak — серия дней подряд | DashboardStatsPills.tsx, i18n: streakLabel |
 | `Менты` | Разговорное название XP | Только в коде/переменных — не в UI пока |
 | `noreply@mentora.su` | Адрес отправителя писем | Supabase Auth SMTP, sendEmail.ts |
+| `VERSION` | `6.0.0` — версия в футере | SiteFooter.tsx (const VERSION) |
 
 ---
 ## 2. Навигация
