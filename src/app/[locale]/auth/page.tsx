@@ -647,13 +647,13 @@ function AuthPageContent() {
     const redirectTo = `${window.location.origin}/auth/confirm`;
 
     // Attempt 1: with custom redirectTo
-    let { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    let { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo, ...(captchaToken ? { captchaToken } : {}) });
 
     // Attempt 2: if redirectTo is not in Supabase allowlist, fall back to no redirectTo.
     // In this case Supabase uses the configured Site URL — the user will land on the home
     // page which middleware will redirect to /auth/confirm via the token in the URL.
     if (error && (error.message?.toLowerCase().includes("redirect") || error.message?.toLowerCase().includes("allowlist") || error.status === 422)) {
-      const { error: err2 } = await supabase.auth.resetPasswordForEmail(email);
+      const { error: err2 } = await supabase.auth.resetPasswordForEmail(email, { ...(captchaToken ? { captchaToken } : {}) });
       error = err2 ?? null;
     }
 
@@ -939,7 +939,16 @@ function AuthPageContent() {
                           {error}
                         </div>
                       )}
-                      <button type="submit" disabled={loading}
+                      {HCAPTCHA_SITE_KEY && (
+                        <div className="flex justify-center py-1">
+                          <div ref={captchaRef} className="h-captcha"
+                            data-sitekey={HCAPTCHA_SITE_KEY}
+                            data-callback="onMentoraCaptchaSuccess"
+                            data-expired-callback="onMentoraCaptchaExpired"
+                            data-theme="auto" />
+                        </div>
+                      )}
+                      <button type="submit" disabled={loading || (!!HCAPTCHA_SITE_KEY && !captchaToken)}
                         className="btn-glow w-full py-3.5 rounded-2xl font-semibold text-sm disabled:opacity-50 disabled:transform-none">
                         {loading
                           ? <span className="flex items-center justify-center gap-2">
