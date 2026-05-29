@@ -19,6 +19,7 @@ import MeLogo from "@/components/MeLogo";
 import WhatsNewBanner from "@/components/WhatsNewBanner";
 import LaunchBanner from "@/components/LaunchBanner";
 import FreeWindowPill from "@/components/FreeWindowPill";
+import DashboardStatsPills from "@/components/DashboardStatsPills";
 import ReferralWidget from "@/components/ReferralWidget";
 import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
@@ -377,130 +378,23 @@ export default async function DashboardPage() {
           {/* ── June 1st launch banner ─────────────────────────── */}
           <LaunchBanner />
 
-          {/* Stats pills — left: XP + streak / right: plan + messages */}
-          <div data-tour="stats-chips" className="flex items-center justify-between gap-3 flex-wrap">
-
-            {/* ── LEFT: Me XP + Streak ───────────────────────── */}
-            <div className="flex items-center gap-2 flex-wrap">
-              {totalXP > 0 && (
-                <div className="inline-flex items-center gap-2 select-none"
-                  style={{
-                    background: "var(--bg-nav)",
-                    backdropFilter: "blur(20px) saturate(1.8)",
-                    WebkitBackdropFilter: "blur(20px) saturate(1.8)",
-                    border: "1px solid var(--border-light)",
-                    borderRadius: 999,
-                    boxShadow: "0 2px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)",
-                    padding: "6px 14px",
-                    fontSize: 13,
-                    fontWeight: 700,
-                    color: "var(--text)",
-                  }}>
-                  <MeLogo height={14} />
-                  <span className="tabular-nums">{totalXP}</span>
-                </div>
-              )}
-              {currentStreak > 0 && (
-                <div className="inline-flex items-center gap-2 select-none"
-                  style={{
-                    background: "var(--bg-nav)",
-                    backdropFilter: "blur(20px) saturate(1.8)",
-                    WebkitBackdropFilter: "blur(20px) saturate(1.8)",
-                    border: "1px solid rgba(255,122,0,0.18)",
-                    borderRadius: 999,
-                    boxShadow: "0 2px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)",
-                    padding: "6px 14px",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: "var(--text-secondary)",
-                  }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-                    <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="#FF7A00" />
-                  </svg>
-                  {t("streakLabel")} <span style={{ color: "#FF7A00", fontWeight: 700 }}>{streakDaysLabel(currentStreak)}</span>
-                </div>
-              )}
-            </div>
-
-            {/* ── RIGHT: Plan + messages/limit ───────────────── */}
-            <div className="flex items-center gap-2 flex-wrap justify-end">
-              {/* Plan pill */}
-              {!isPro && (
-                <span style={{
-                  background: "var(--bg-nav)",
-                  backdropFilter: "blur(20px) saturate(1.8)",
-                  WebkitBackdropFilter: "blur(20px) saturate(1.8)",
-                  border: "1px solid var(--border-light)",
-                  borderRadius: 999,
-                  boxShadow: "0 2px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)",
-                  padding: "5px 14px",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  letterSpacing: "0.08em",
-                  color: "var(--text-muted)",
-                  textTransform: "uppercase",
-                }}>FREE</span>
-              )}
-              {isPro && (
-                <span style={isUltima
-                  ? { background: "linear-gradient(135deg,#FF7A00,#7C3AED)", color: "#fff", borderRadius: 999, padding: "5px 14px", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", boxShadow: "0 2px 12px rgba(124,58,237,0.35), inset 0 1px 0 rgba(255,255,255,0.15)", textTransform: "uppercase" as const }
-                  : { background: "linear-gradient(135deg,#4561E8,#6B8FFF)", color: "#fff", borderRadius: 999, padding: "5px 14px", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", boxShadow: "0 2px 12px rgba(69,97,232,0.35), inset 0 1px 0 rgba(255,255,255,0.15)", textTransform: "uppercase" as const }
-                }>
-                  {isUltima ? "ULTRA" : "PRO"}
-                </span>
-              )}
-              {/* Messages + timer (free only) */}
-              {!isPro && (
-                <FreeWindowPill
-                  remaining={messagesRemaining ?? FREE_WINDOW_LIMIT}
-                  limit={FREE_WINDOW_LIMIT}
-                  windowResetAt={resetAt}
-                />
-              )}
-              {/* Unlimited (pro only) */}
-              {isPro && (
-                <div className="inline-flex items-center gap-2"
-                  style={{
-                    background: "var(--bg-nav)",
-                    backdropFilter: "blur(20px) saturate(1.8)",
-                    WebkitBackdropFilter: "blur(20px) saturate(1.8)",
-                    border: "1px solid var(--border-light)",
-                    borderRadius: 999,
-                    boxShadow: "0 2px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)",
-                    padding: "6px 14px",
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: "var(--brand)",
-                  }}>
-                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round">
-                    <path d="M4.5 10c0-1.93 1.57-3.5 3.5-3.5S11.5 8.07 11.5 10s-1.57 3.5-3.5 3.5S4.5 11.93 4.5 10zm7 0c0-1.93 1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5" />
-                  </svg>
-                  {t("unlimitedMessages")}
-                </div>
-              )}
-              {/* Убрать лимит */}
-              {!isPro && (
-                <Link href="/pricing"
-                  className="inline-flex items-center gap-1.5 transition-all hover:scale-[1.02]"
-                  style={{
-                    background: "rgba(69,97,232,0.07)",
-                    backdropFilter: "blur(20px) saturate(1.8)",
-                    WebkitBackdropFilter: "blur(20px) saturate(1.8)",
-                    border: "1px solid rgba(69,97,232,0.18)",
-                    borderRadius: 999,
-                    boxShadow: "0 2px 16px rgba(69,97,232,0.08), inset 0 1px 0 rgba(255,255,255,0.06)",
-                    padding: "6px 14px",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: "var(--brand)",
-                  }}>
-                  <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M8 1l1.5 4.5H14l-3.75 2.72 1.43 4.38L8 10l-3.68 2.6 1.43-4.38L2 5.5h4.5L8 1z" />
-                  </svg>
-                  {t("removeLimit")}
-                </Link>
-              )}
-            </div>
+          {/* Stats pills */}
+          <div data-tour="stats-chips">
+            <DashboardStatsPills
+              totalXP={totalXP}
+              currentStreak={currentStreak}
+              bestStreak={bestStreak}
+              isPro={isPro}
+              isUltima={isUltima}
+              messagesRemaining={messagesRemaining ?? FREE_WINDOW_LIMIT}
+              limit={FREE_WINDOW_LIMIT}
+              resetAt={resetAt}
+              locale={locale}
+              streakDaysStr={streakDaysLabel(currentStreak)}
+              streakLabelStr={t("streakLabel")}
+              removeLimitStr={t("removeLimit")}
+              unlimitedStr={t("unlimitedMessages")}
+            />
           </div>
         </FadeUp>
 
