@@ -12,14 +12,10 @@ import posthog from "posthog-js";
 // ── Type augmentation ────────────────────────────────────────────────────────
 declare global {
   interface Window {
-    onMentoraCaptchaSuccess?: (token: string) => void;
-    onMentoraCaptchaExpired?: () => void;
     onTelegramAuth?: (user: Record<string, string>) => void;
     Telegram?: { Login?: { auth: (opts: Record<string, unknown>, cb: (u: Record<string, string> | null) => void) => void } };
   }
 }
-
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
 // ── Subject data (same as KnowledgeGraph3D) ──────────────────────────────────
 const SUBS = [
@@ -41,7 +37,6 @@ const SUBS = [
   { id: "economics",        label: "Экономика",          hex: 0x44cc88 },
   { id: "philosophy",       label: "Философия",          hex: 0xddaa44 },
 ];
-
 
 const GRAPH_EDGES: [string, string][] = [
   ["russian-history","world-history"],["russian-history","literature"],
@@ -476,7 +471,6 @@ function AuthPageContent() {
   const [loading, setLoading]           = useState(false);
   const [oauthLoading, setOauthLoading] = useState<"google" | null>(null);
   const [error, setError]               = useState<string | null>(null);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [emailSent, setEmailSent]       = useState<string | null>(null);
   const [forgotEmailSent, setForgotEmailSent] = useState(false);
   const [loginFailCount, setLoginFailCount]     = useState(0);
@@ -485,7 +479,6 @@ function AuthPageContent() {
   const router       = useRouter();
   const searchParams = useSearchParams();
   const supabase     = createClient();
-  const captchaRef   = useRef<HTMLDivElement>(null);
   const t = useTranslations("auth");
   const locale = useLocale();
 
@@ -504,23 +497,6 @@ function AuthPageContent() {
       try { localStorage.setItem("mentora_ref_pending", refCode); } catch {}
     }
   }, [searchParams]);
-
-  useEffect(() => {
-    window.onMentoraCaptchaSuccess = (token: string) => setCaptchaToken(token);
-    window.onMentoraCaptchaExpired = () => setCaptchaToken(null);
-    return () => { delete window.onMentoraCaptchaSuccess; delete window.onMentoraCaptchaExpired; };
-  }, []);
-
-  useEffect(() => {
-    if (!TURNSTILE_SITE_KEY) return;
-    if (document.getElementById("turnstile-script")) return;
-    const script = document.createElement("script");
-    script.id = "turnstile-script"; script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
-    script.async = true; script.defer = true;
-    document.head.appendChild(script);
-  }, []);
-
-  useEffect(() => { setCaptchaToken(null); }, [mode]);
 
   useEffect(() => {
     window.onTelegramAuth = async (user) => {
@@ -574,7 +550,6 @@ function AuthPageContent() {
     if (mode === "signup") {
       // Server-side /api/signup creates the user AND sets session cookies in
       // one request (via admin.generateLink + verifyOtp). No client-side
-      // signInWithPassword needed — that path is blocked by Supabase captcha.
       const refCode = searchParams?.get("ref");
       try {
         const res = await fetch("/api/signup", {
@@ -647,13 +622,13 @@ function AuthPageContent() {
     const redirectTo = `${window.location.origin}/auth/confirm`;
 
     // Attempt 1: with custom redirectTo
-    let { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo, ...(captchaToken ? { captchaToken } : {}) });
+    let { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
 
     // Attempt 2: if redirectTo is not in Supabase allowlist, fall back to no redirectTo.
     // In this case Supabase uses the configured Site URL — the user will land on the home
     // page which middleware will redirect to /auth/confirm via the token in the URL.
     if (error && (error.message?.toLowerCase().includes("redirect") || error.message?.toLowerCase().includes("allowlist") || error.status === 422)) {
-      const { error: err2 } = await supabase.auth.resetPasswordForEmail(email, { ...(captchaToken ? { captchaToken } : {}) });
+      const { error: err2 } = await supabase.auth.resetPasswordForEmail(email, {});
       error = err2 ?? null;
     }
 
@@ -939,16 +914,7 @@ function AuthPageContent() {
                           {error}
                         </div>
                       )}
-                      {TURNSTILE_SITE_KEY && (
-                        <div className="flex justify-center py-1">
-                          <div ref={captchaRef} className="cf-turnstile"
-                            data-sitekey={TURNSTILE_SITE_KEY}
-                            data-callback="onMentoraCaptchaSuccess"
-                            data-expired-callback="onMentoraCaptchaExpired"
-                            data-theme="auto" />
-                        </div>
-                      )}
-                      <button type="submit" disabled={loading || (!!TURNSTILE_SITE_KEY && !captchaToken)}
+                      <button type="submit" disabled={loading}
                         className="btn-glow w-full py-3.5 rounded-2xl font-semibold text-sm disabled:opacity-50 disabled:transform-none">
                         {loading
                           ? <span className="flex items-center justify-center gap-2">
@@ -1007,16 +973,6 @@ function AuthPageContent() {
                     placeholder={isSignup ? t("passwordPlaceholder") : t("passwordPlaceholderSignIn")}
                   />
                 </div>
-
-                {isSignup && TURNSTILE_SITE_KEY && (
-                  <div className="flex justify-center py-1">
-                    <div ref={captchaRef} className="cf-turnstile"
-                      data-sitekey={TURNSTILE_SITE_KEY}
-                      data-callback="onMentoraCaptchaSuccess"
-                      data-expired-callback="onMentoraCaptchaExpired"
-                      data-theme="auto" />
-                  </div>
-                )}
 
                 {/* "Remember me" — only on sign-in mode */}
                 {!isSignup && (
