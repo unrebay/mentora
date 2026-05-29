@@ -70,7 +70,7 @@ export async function middleware(request: NextRequest) {
   // Redirect them to /auth/confirm so the PKCE flow is handled correctly.
   const tokenHash = request.nextUrl.searchParams.get("token_hash");
   const tokenType = request.nextUrl.searchParams.get("type");
-  if (tokenHash && (tokenType === "recovery" || tokenType === "email" || tokenType === "invite")) {
+  if (tokenHash && (tokenType === "recovery" || tokenType === "email" || tokenType === "invite") && !pathname.startsWith("/auth/")) {
     const confirmUrl = request.nextUrl.clone();
     confirmUrl.pathname = "/auth/confirm";
     return NextResponse.redirect(confirmUrl);
@@ -202,5 +202,5 @@ export const config = {
   // Exclude: API, _next, static files, auth/callback
   // Note: /admin is NOT excluded — middleware runs for it to refresh Supabase sessions,
   // but the admin branch at the top of middleware() handles it and returns early (skipping i18n).
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|auth/callback|notes|.*\\..*).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|auth/callback|auth/confirm|auth/reset-password|notes|.*\\..*).*)"],
 };
