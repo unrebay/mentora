@@ -736,6 +736,73 @@ function TeamTab() {
   );
 }
 
+// ── Real P&L Summary (shown in Revenue tab) ──────────────────────────────────
+interface PnlTok { CARD: string; BOR: string; TEXT: string; MUTED: string; isDark: boolean; }
+interface PnlData { thisMonth: { gross: number; costs: number; pnl: number; count: number }; allTime: { gross: number; costs: number; pnl: number }; monthlyFixed: number; commissionRate: number; }
+function RealPnlSummary({ CARD, BOR, TEXT, MUTED, isDark }: PnlTok) {
+  const [d, setD] = useState<PnlData | null>(null);
+  const [err, setErr] = useState(false);
+  useEffect(() => {
+    fetch("/api/admin/finances")
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(setD)
+      .catch(() => setErr(true));
+  }, []);
+
+  const G = "#22c55e", R = "#ef4444", A = "#f59e0b";
+  const fmt = (n: number) => `${n.toLocaleString("ru-RU")} ₽`;
+  const sgn = (n: number) => (n >= 0 ? "+" : "−") + fmt(Math.abs(n));
+
+  if (err) return null;
+  if (!d) return (
+    <div style={{ padding: "14px 18px", borderRadius: 12, background: CARD, border: `1px solid ${BOR}`, marginBottom: 16, fontSize: 12, color: MUTED }}>
+      Загрузка реального P&L...
+    </div>
+  );
+
+  const { thisMonth: tm, allTime: at } = d;
+  const pnlColor = tm.pnl > 0 ? G : tm.pnl === 0 ? A : R;
+
+  return (
+    <div style={{ marginBottom: 20, borderRadius: 14, border: `1px solid ${BOR}`, overflow: "hidden",
+      background: isDark ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.7)",
+      backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+
+      {/* Header */}
+      <div style={{ padding: "12px 18px", borderBottom: `1px solid ${BOR}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: "0.10em" }}>Реальный P&L (из Финансов)</span>
+        <span style={{ fontSize: 10, color: MUTED, opacity: 0.6 }}>на основе фактических транзакций и расходов</span>
+      </div>
+
+      {/* Этот месяц */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", borderBottom: `1px solid ${BOR}` }}>
+        {[
+          { label: "Доход (факт)", value: fmt(tm.gross), sub: `${tm.count} платежей`, color: G },
+          { label: "Расходы (факт)", value: fmt(tm.costs), sub: `Фикс + комиссии`, color: R },
+          { label: "P&L этот месяц", value: sgn(tm.pnl), sub: tm.pnl >= 0 ? "В плюсе 🎉" : "Убыток", color: pnlColor },
+          { label: "P&L за всё время", value: sgn(at.pnl), sub: `Доход ${fmt(at.gross)}`, color: at.pnl >= 0 ? G : R },
+        ].map(({ label, value, sub, color }) => (
+          <div key={label} style={{ padding: "14px 18px", borderRight: `1px solid ${BOR}` }}>
+            <p style={{ margin: 0, fontSize: 10, color: MUTED, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>{label}</p>
+            <p style={{ margin: 0, fontSize: 20, fontWeight: 700, color, letterSpacing: "-0.02em" }}>{value}</p>
+            <p style={{ margin: "3px 0 0", fontSize: 11, color: MUTED }}>{sub}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Hint */}
+      <div style={{ padding: "8px 18px", display: "flex", alignItems: "center", gap: 6 }}>
+        <span style={{ fontSize: 11, color: MUTED }}>
+          Фиксированные расходы: <strong style={{ color: TEXT }}>{fmt(d.monthlyFixed)}/мес</strong>
+          {d.commissionRate > 0 && <> · Комиссия ЮKassa: <strong style={{ color: TEXT }}>{(d.commissionRate * 100).toFixed(1)}%</strong></>}
+        </span>
+        <span style={{ marginLeft: "auto", fontSize: 11, color: MUTED, opacity: 0.7 }}>Подробно → вкладка «Финансы»</span>
+      </div>
+    </div>
+  );
+}
+
+
 // ── Revenue Calculator ─────────────────────────────────────────────────────────
 const MAX_USERS = 1_000_000;
 function RevenueCalculator() {
@@ -1554,6 +1621,8 @@ export default function AdminPanel() {
 
           {/* ── REVENUE ──────────────────────────────────────────────────────── */}
           {!loading && stats && tab === "revenue" && <>
+            {/* Real P&L summary from finances API */}
+            <RealPnlSummary CARD={CARD} BOR={BOR} TEXT={TEXT} MUTED={MUTED} isDark={isDark} />
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 12, marginBottom: 16 }}>
               <Metric label="MRR (оценка)" value={R(mrr)} sub="Monthly Recurring Revenue" color={GREEN} />
               <Metric label="ARR (оценка)" value={R(arr)} sub="Annual Run Rate" color={GREEN} />
