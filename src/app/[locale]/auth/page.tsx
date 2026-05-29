@@ -19,7 +19,7 @@ declare global {
   }
 }
 
-const HCAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? "";
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
 // ── Subject data (same as KnowledgeGraph3D) ──────────────────────────────────
 const SUBS = [
@@ -512,10 +512,10 @@ function AuthPageContent() {
   }, []);
 
   useEffect(() => {
-    if (!HCAPTCHA_SITE_KEY) return;
-    if (document.getElementById("hcaptcha-script")) return;
+    if (!TURNSTILE_SITE_KEY) return;
+    if (document.getElementById("turnstile-script")) return;
     const script = document.createElement("script");
-    script.id = "hcaptcha-script"; script.src = "https://js.hcaptcha.com/1/api.js";
+    script.id = "turnstile-script"; script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
     script.async = true; script.defer = true;
     document.head.appendChild(script);
   }, []);
@@ -939,16 +939,16 @@ function AuthPageContent() {
                           {error}
                         </div>
                       )}
-                      {HCAPTCHA_SITE_KEY && (
+                      {TURNSTILE_SITE_KEY && (
                         <div className="flex justify-center py-1">
-                          <div ref={captchaRef} className="h-captcha"
-                            data-sitekey={HCAPTCHA_SITE_KEY}
+                          <div ref={captchaRef} className="cf-turnstile"
+                            data-sitekey={TURNSTILE_SITE_KEY}
                             data-callback="onMentoraCaptchaSuccess"
                             data-expired-callback="onMentoraCaptchaExpired"
                             data-theme="auto" />
                         </div>
                       )}
-                      <button type="submit" disabled={loading || (!!HCAPTCHA_SITE_KEY && !captchaToken)}
+                      <button type="submit" disabled={loading || (!!TURNSTILE_SITE_KEY && !captchaToken)}
                         className="btn-glow w-full py-3.5 rounded-2xl font-semibold text-sm disabled:opacity-50 disabled:transform-none">
                         {loading
                           ? <span className="flex items-center justify-center gap-2">
@@ -1008,10 +1008,10 @@ function AuthPageContent() {
                   />
                 </div>
 
-                {isSignup && HCAPTCHA_SITE_KEY && (
+                {isSignup && TURNSTILE_SITE_KEY && (
                   <div className="flex justify-center py-1">
-                    <div ref={captchaRef} className="h-captcha"
-                      data-sitekey={HCAPTCHA_SITE_KEY}
+                    <div ref={captchaRef} className="cf-turnstile"
+                      data-sitekey={TURNSTILE_SITE_KEY}
                       data-callback="onMentoraCaptchaSuccess"
                       data-expired-callback="onMentoraCaptchaExpired"
                       data-theme="auto" />
