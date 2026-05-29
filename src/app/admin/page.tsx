@@ -13,6 +13,7 @@ import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import RoadmapV2Tab from "@/components/admin/RoadmapV2";
 import TabErrorBoundary from "@/components/admin/TabErrorBoundary";
 import AuditLogTab from "@/components/admin/AuditLogTab";
+import FinancesWidget from "@/components/admin/FinancesWidget";
 
 // ── Pricing ───────────────────────────────────────────────────────────────────
 const PRO_M = 499, PRO_Y = 2990, ULT_M = 799, ULT_Y = 5990;
@@ -229,6 +230,7 @@ const IRoadmap  = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const ILegal    = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
 const IActivity = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>;
 const IAudit    = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="14" x2="15" y2="14"/><line x1="9" y1="18" x2="13" y2="18"/></svg>;
+const IFinances = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><line x1="2" y1="11" x2="22" y2="11"/></svg>;
 
 // ── Team Tab ──────────────────────────────────────────────────────────────────
 interface Employee {
@@ -1041,7 +1043,7 @@ function LegalTab({ annualRev }: { annualRev: number }) {
   );
 }
 
-type Tab = "overview" | "users" | "activity" | "audit" | "revenue" | "knowledge" | "team" | "roadmap" | "legal";
+type Tab = "overview" | "users" | "activity" | "audit" | "revenue" | "knowledge" | "team" | "roadmap" | "legal" | "finances";
 
 export default function AdminPanel() {
   const { theme } = useTheme();
@@ -1109,6 +1111,7 @@ export default function AdminPanel() {
     { id: "legal",     icon: ILegal,    label: "Право" },
     { id: "users",     icon: IUsers,    label: "Пользователи" },
     { id: "knowledge", icon: IKb,       label: "База знаний" },
+    { id: "finances",  icon: IFinances, label: "Финансы" },
   ];
 
   return (
@@ -1481,6 +1484,7 @@ export default function AdminPanel() {
           {tab === "team"      && <TabErrorBoundary tabName="Команда"><TeamTab /></TabErrorBoundary>}
           {tab === "roadmap" && <TabErrorBoundary tabName="Роадмап"><RoadmapV2Tab /></TabErrorBoundary>}
           {tab === "legal"     && <TabErrorBoundary tabName="Юридические"><LegalTab annualRev={arr} /></TabErrorBoundary>}
+          {tab === "finances"  && <TabErrorBoundary tabName="Финансы"><FinancesWidget TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} isDark={isDark} /></TabErrorBoundary>}
         </main>
       </div> {/* end flex row */}
     </TokCtx.Provider>
