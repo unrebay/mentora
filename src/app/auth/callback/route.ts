@@ -51,14 +51,16 @@ export async function GET(request: NextRequest) {
     }
   );
 
-  // Magic link flow (Telegram auth uses this)
+  // Magic link / OTP flow (Telegram auth + password reset token_hash fallback)
   if (token_hash && type) {
     try {
       const { error: verifyError } = await supabase.auth.verifyOtp({
         token_hash,
-        type: type as "magiclink" | "email",
+        type: type as "magiclink" | "email" | "recovery",
       });
       if (!verifyError) {
+        // Password reset via token_hash: go to reset form, skip onboarding
+        if (type === "recovery") return NextResponse.redirect(`${origin}/auth/reset-password`);
         return NextResponse.redirect(`${origin}${next}`);
       }
       console.error("[auth-callback] verifyOtp failed", {
@@ -104,7 +106,8 @@ export async function GET(request: NextRequest) {
           .select("onboarding_completed")
           .eq("id", user.id)
           .single();
-        if (!profile?.onboarding_completed) {
+        // Skip onboarding redirect when next is an /auth/ path (e.g. password reset)
+        if (!profile?.onboarding_completed && !next.startsWith("/auth/")) {
           return NextResponse.redirect(`${origin}/onboarding`);
         }
       }

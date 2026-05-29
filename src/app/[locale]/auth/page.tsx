@@ -619,16 +619,18 @@ function AuthPageContent() {
   async function handleForgotPassword(e: React.FormEvent) {
     e.preventDefault(); setLoading(true); setError(null);
 
-    const redirectTo = `${window.location.origin}/auth/confirm`;
+    // Use /auth/callback with next=/auth/reset-password so Supabase PKCE code-exchange
+    // (/auth/callback already handles exchangeCodeForSession) lands on the reset form.
+    // Fallback: /auth/confirm still handles legacy token_hash flow for older Supabase flows.
+    const redirectTo = `${window.location.origin}/auth/callback?next=/auth/reset-password`;
 
-    // Attempt 1: with custom redirectTo
+    // Attempt 1: with custom redirectTo (must be in Supabase allowed redirect URLs)
     let { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
 
-    // Attempt 2: if redirectTo is not in Supabase allowlist, fall back to no redirectTo.
-    // In this case Supabase uses the configured Site URL — the user will land on the home
-    // page which middleware will redirect to /auth/confirm via the token in the URL.
+    // Attempt 2: if redirectTo is not in Supabase allowlist, try /auth/confirm fallback.
     if (error && (error.message?.toLowerCase().includes("redirect") || error.message?.toLowerCase().includes("allowlist") || error.status === 422)) {
-      const { error: err2 } = await supabase.auth.resetPasswordForEmail(email, {});
+      const fallbackRedirect = `${window.location.origin}/auth/confirm`;
+      const { error: err2 } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: fallbackRedirect });
       error = err2 ?? null;
     }
 
