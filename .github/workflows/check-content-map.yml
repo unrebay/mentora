@@ -1,0 +1,74 @@
+name: UI Content Map Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-content-map:
+    name: Check UI Content Map is up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check if UI strings changed without updating content map
+        run: |
+          # Files that contain UI strings
+          UI_FILES=(
+            "messages/ru.json"
+            "messages/en.json"
+            "src/components/DashboardStatsPills.tsx"
+            "src/components/FreeWindowPill.tsx"
+            "src/components/ChatInterface.tsx"
+            "src/app/[locale]/pricing/page.tsx"
+            "src/app/[locale]/dashboard/page.tsx"
+          )
+
+          CONTENT_MAP="docs/UI_CONTENT_MAP.md"
+
+          # Get list of changed files in this push/PR
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || git diff --name-only origin/main HEAD)
+          else
+            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+          fi
+
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          # Check if any UI file changed
+          UI_CHANGED=false
+          for file in "${UI_FILES[@]}"; do
+            if echo "$CHANGED" | grep -q "^${file}$"; then
+              echo "⚠️  UI file changed: $file"
+              UI_CHANGED=true
+            fi
+          done
+
+          # Check if content map was also updated
+          MAP_CHANGED=false
+          if echo "$CHANGED" | grep -q "^${CONTENT_MAP}$"; then
+            MAP_CHANGED=true
+          fi
+
+          if [ "$UI_CHANGED" = "true" ] && [ "$MAP_CHANGED" = "false" ]; then
+            echo ""
+            echo "──────────────────────────────────────────────────"
+            echo "⚠️  WARNING: UI strings changed, but docs/UI_CONTENT_MAP.md was NOT updated."
+            echo "   If you added/renamed UI labels, please update the content map."
+            echo "   File: docs/UI_CONTENT_MAP.md"
+            echo "──────────────────────────────────────────────────"
+            echo ""
+            # Warning only — does not fail the build
+            exit 0
+          fi
+
+          if [ "$UI_CHANGED" = "true" ] && [ "$MAP_CHANGED" = "true" ]; then
+            echo "✅ UI strings changed and content map was updated. Good."
+          else
+            echo "✅ No UI string changes detected."
+          fi
