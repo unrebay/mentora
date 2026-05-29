@@ -575,6 +575,12 @@ function AuthPageContent() {
       document.cookie = `mentora-persist=${rememberMe ? "1" : "0"}; path=/; SameSite=Lax; max-age=${60 * 60 * 24 * 365}`;
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
+        // Fire-and-forget admin notification — rate-limited server-side (1/5 min per email)
+        fetch("/api/auth/report-error", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "login_fail", email, error: error.message }),
+        }).catch(() => {});
         // Ask server which provider this email uses — gives a helpful hint
         // e.g. "use Google" instead of generic "invalid credentials".
         // Fire-and-forget: if it fails, fall back to generic message.
@@ -643,6 +649,12 @@ function AuthPageContent() {
       } else {
         setError(locale === "en" ? "Failed to send reset email. Please try again." : "Не удалось отправить письмо. Попробуй позже.");
         console.error("[password-reset] Supabase error:", error.message, error.status);
+        // Fire-and-forget admin notification
+        fetch("/api/auth/report-error", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "password_reset_fail", email, error: error.message }),
+        }).catch(() => {});
       }
     } else {
       setForgotEmailSent(true);

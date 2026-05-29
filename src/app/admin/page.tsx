@@ -20,7 +20,7 @@ const PRO_M = 499, PRO_Y = 2990, ULT_M = 799, ULT_Y = 5990;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Stats {
-  users: { total: number; pro: number; ultima: number; free: number; newToday: number; activeToday: number; activeWeek: number; trialExpired: number };
+  users: { total: number; pro: number; ultima: number; free: number; newToday: number; activeToday: number; activeWeek: number; trialExpired: number; onlineNow: number };
   chat:  { totalMessages: number; messagesToday: number; userMessagesWeek: number; aiResponsesWeek: number; aiResponseRate: number; topSubjects: { subject: string; count: number }[] };
   billing: { activeSubscriptions: number };
   knowledge: { chunks: number };
@@ -1263,6 +1263,7 @@ export default function AdminPanel() {
           {!loading && stats && tab === "overview" && <>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 16 }}>
               <Metric label="Пользователей"     value={stats.users.total}       sub={`+${stats.users.newToday} сегодня`} />
+              <Metric label="Онлайн (5 мин)"    value={stats.users.onlineNow ?? 0} sub={`сегодня: ${N(stats.users.activeToday)}`} color="#22d3ee" />
               <Metric label="Активны сегодня"   value={stats.users.activeToday} sub={`неделя: ${N(stats.users.activeWeek)}`} color={GREEN} />
               <Metric label="Сообщений сегодня" value={stats.chat.messagesToday} sub={`всего: ${N(stats.chat.totalMessages)}`} />
               <Metric label="MRR (оценка)"      value={R(mrr)} sub={`Pro×${pro} + Ultra×${ult}`} color="#a78bfa" />

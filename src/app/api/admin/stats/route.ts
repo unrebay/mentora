@@ -13,10 +13,12 @@ export async function GET() {
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
+  const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+
   const [
     totalUsersRes, proUsersRes, ultimaUsersRes, newTodayRes, activeTodayRes, activeWeekRes,
     totalMsgsRes, msgsTodayRes, userMsgsWeekRes, aiMsgsWeekRes,
-    activeSubsRes, chunksRes, recentUsersRes, subjectMsgsRes, trialExpiredRes,
+    activeSubsRes, chunksRes, recentUsersRes, subjectMsgsRes, trialExpiredRes, onlineNowRes,
   ] = await Promise.all([
     sb.from("users").select("*", { count: "exact", head: true }),
     sb.from("users").select("*", { count: "exact", head: true }).eq("plan", "pro"),
@@ -33,6 +35,7 @@ export async function GET() {
     sb.from("users").select("id, email, plan, created_at, last_active_at").order("created_at", { ascending: false }).limit(10),
     sb.from("chat_messages").select("subject").eq("role", "user").gte("created_at", monthAgo),
     sb.from("users").select("*", { count: "exact", head: true }).not("trial_expires_at", "is", null).lt("trial_expires_at", now.toISOString()).eq("plan", "free"),
+    sb.from("users").select("*", { count: "exact", head: true }).gte("last_active_at", fiveMinAgo),
   ]);
 
   // Compute actual today's message count per recent user from chat_messages
@@ -66,7 +69,7 @@ export async function GET() {
   const aiMsgsWeek = aiMsgsWeekRes.count ?? 0;
 
   return NextResponse.json({
-    users: { total: totalUsers, pro: proUsers, ultima: ultimaUsers, free: totalUsers - proUsers - ultimaUsers, newToday: newTodayRes.count ?? 0, activeToday: activeTodayRes.count ?? 0, activeWeek: activeWeekRes.count ?? 0, trialExpired: trialExpiredRes.count ?? 0 },
+    users: { total: totalUsers, pro: proUsers, ultima: ultimaUsers, free: totalUsers - proUsers - ultimaUsers, newToday: newTodayRes.count ?? 0, activeToday: activeTodayRes.count ?? 0, activeWeek: activeWeekRes.count ?? 0, trialExpired: trialExpiredRes.count ?? 0, onlineNow: onlineNowRes.count ?? 0 },
     chat: { totalMessages: totalMsgsRes.count ?? 0, messagesToday: msgsTodayRes.count ?? 0, userMessagesWeek: userMsgsWeek, aiResponsesWeek: aiMsgsWeek, aiResponseRate: userMsgsWeek > 0 ? Math.round((aiMsgsWeek / userMsgsWeek) * 100) : 0, topSubjects },
     billing: { activeSubscriptions: activeSubsRes.count ?? 0 },
     knowledge: { chunks: chunksRes.count ?? 0 },
