@@ -14,19 +14,8 @@ declare global {
   interface Window {
     onTelegramAuth?: (user: Record<string, string>) => void;
     Telegram?: { Login?: { auth: (opts: Record<string, unknown>, cb: (u: Record<string, string> | null) => void) => void } };
-    turnstile?: {
-      render: (container: HTMLElement, options: {
-        sitekey: string;
-        callback?: (token: string) => void;
-        "expired-callback"?: () => void;
-        theme?: string;
-      }) => string;
-      remove: (widgetId: string) => void;
-    };
   }
 }
-
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
 // ── Subject data (same as KnowledgeGraph3D) ──────────────────────────────────
 const SUBS = [
@@ -486,9 +475,6 @@ function AuthPageContent() {
   const [forgotEmailSent, setForgotEmailSent] = useState(false);
   const [loginFailCount, setLoginFailCount]     = useState(0);
   const [rememberMe, setRememberMe]             = useState(true);
-  const [captchaToken, setCaptchaToken]         = useState<string | null>(null);
-  const captchaRef   = useRef<HTMLDivElement>(null);
-  const widgetIdRef  = useRef<string | null>(null);
 
   const router       = useRouter();
   const searchParams = useSearchParams();
@@ -511,54 +497,6 @@ function AuthPageContent() {
       try { localStorage.setItem("mentora_ref_pending", refCode); } catch {}
     }
   }, [searchParams]);
-
-  // ── Turnstile explicit rendering ──
-  useEffect(() => {
-    if (!TURNSTILE_SITE_KEY || mode === "signin") { setCaptchaToken(null); return; }
-
-    let widgetId: string | null = null;
-
-    function renderWidget() {
-      if (!captchaRef.current || !window.turnstile) return;
-      // Remove previous widget
-      if (widgetIdRef.current !== null) {
-        try { window.turnstile!.remove(widgetIdRef.current); } catch {}
-        widgetIdRef.current = null;
-      }
-      captchaRef.current.innerHTML = "";
-      widgetId = window.turnstile!.render(captchaRef.current, {
-        sitekey: TURNSTILE_SITE_KEY,
-        callback: (token: string) => setCaptchaToken(token),
-        "expired-callback": () => setCaptchaToken(null),
-        theme: "dark",
-      });
-      widgetIdRef.current = widgetId;
-    }
-
-    setCaptchaToken(null);
-
-    if (!document.getElementById("turnstile-script")) {
-      const script = document.createElement("script");
-      script.id = "turnstile-script";
-      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-      script.async = true; script.defer = true;
-      script.onload = () => setTimeout(renderWidget, 80);
-      document.head.appendChild(script);
-    } else if (window.turnstile) {
-      setTimeout(renderWidget, 80);
-    } else {
-      const iv = setInterval(() => { if (window.turnstile) { clearInterval(iv); renderWidget(); } }, 120);
-      return () => clearInterval(iv);
-    }
-
-    return () => {
-      if (widgetIdRef.current !== null) {
-        try { window.turnstile?.remove(widgetIdRef.current); } catch {}
-        widgetIdRef.current = null;
-      }
-      setCaptchaToken(null);
-    };
-  }, [mode]);
 
   useEffect(() => {
     window.onTelegramAuth = async (user) => {
@@ -684,7 +622,7 @@ function AuthPageContent() {
     const redirectTo = `${window.location.origin}/auth/confirm`;
 
     // Attempt 1: with custom redirectTo
-    let { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo, ...(captchaToken ? { captchaToken } : {}) });
+    let { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
 
     // Attempt 2: if redirectTo is not in Supabase allowlist, fall back to no redirectTo.
     // In this case Supabase uses the configured Site URL — the user will land on the home
@@ -976,12 +914,7 @@ function AuthPageContent() {
                           {error}
                         </div>
                       )}
-                      {TURNSTILE_SITE_KEY && (
-                        <div className="flex justify-center py-1">
-                          <div ref={captchaRef} />
-                        </div>
-                      )}
-                      <button type="submit" disabled={loading || (!!TURNSTILE_SITE_KEY && !captchaToken)}
+                      <button type="submit" disabled={loading}
                         className="btn-glow w-full py-3.5 rounded-2xl font-semibold text-sm disabled:opacity-50 disabled:transform-none">
                         {loading
                           ? <span className="flex items-center justify-center gap-2">
@@ -1093,12 +1026,7 @@ function AuthPageContent() {
                   </div>
                 )}
 
-                {isSignup && TURNSTILE_SITE_KEY && (
-                  <div className="flex justify-center py-1">
-                    <div ref={captchaRef} />
-                  </div>
-                )}
-                <button type="submit" disabled={loading || oauthLoading !== null || (isSignup && !!TURNSTILE_SITE_KEY && !captchaToken)}
+                <button type="submit" disabled={loading || oauthLoading !== null}
                   className="btn-glow w-full py-3.5 rounded-2xl font-semibold text-sm disabled:opacity-50 disabled:transform-none">
                   {loading
                     ? <span className="flex items-center justify-center gap-2">
