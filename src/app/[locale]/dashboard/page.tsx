@@ -18,6 +18,7 @@ import BadgesSection from "@/components/BadgesSection";
 import MeLogo from "@/components/MeLogo";
 import WhatsNewBanner from "@/components/WhatsNewBanner";
 import LaunchBanner from "@/components/LaunchBanner";
+import FreeWindowPill from "@/components/FreeWindowPill";
 import ReferralWidget from "@/components/ReferralWidget";
 import SphereBlobScene, { SUBTLE_SPHERES } from "@/components/SphereBlobScene";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
@@ -101,7 +102,7 @@ export default async function DashboardPage() {
     ? new Date(profile.trial_expires_at).toLocaleDateString(locale === "en" ? "en-US" : "ru-RU", { day: "numeric", month: "long" })
     : null;
 
-  const { messagesRemaining } = computeFreeLimit(profile, isPro);
+  const { messagesRemaining, resetAt } = computeFreeLimit(profile, isPro);
 
   const { data: progressData } = await supabase.from("user_progress").select("*").eq("user_id", user.id);
 
@@ -379,20 +380,11 @@ export default async function DashboardPage() {
           {/* Stats pills */}
           <div data-tour="stats-chips" className="flex flex-wrap gap-2 items-center">
             {!isPro && (
-              <div className="flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm border"
-                style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M2 3h12a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H9.5l-3 2V12H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
-                </svg>
-                <span style={{ color: "var(--text-secondary)" }}>
-                  {t("messages")}{" "}
-                  <span className="font-semibold" style={{
-                    color: messagesRemaining === 0 ? "#ef4444" : messagesRemaining !== null && messagesRemaining <= 5 ? "#f97316" : "var(--text)",
-                  }}>
-                    {messagesRemaining} / {FREE_WINDOW_LIMIT}
-                  </span>
-                </span>
-              </div>
+              <FreeWindowPill
+                remaining={messagesRemaining ?? FREE_WINDOW_LIMIT}
+                limit={FREE_WINDOW_LIMIT}
+                windowResetAt={resetAt}
+              />
             )}
 
             {isPro && (
