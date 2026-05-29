@@ -853,6 +853,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const isEmpty = messages.length === 0;
   const subjColor = subjectColor(subject);
   const [showHelp, setShowHelp] = useState(false);
+  const [showLimitInfo, setShowLimitInfo] = useState(false);
 
   return (
     <div className="flex flex-col" style={{ position:"fixed", inset:0, background:"var(--chat-bg)", overflow:"hidden", overscrollBehavior:"none" }}>
@@ -932,30 +933,78 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
 
           {/* Counter badge — free users only */}
           {showCounter && (
-            <div
-              className="flex items-center justify-center cursor-default"
-              aria-label={locale === "ru" ? `Осталось сообщений: ${messagesRemaining ?? 0}` : `Messages remaining: ${messagesRemaining ?? 0}`}
-              style={{
-                width: 44, height: 44, borderRadius: "50%",
-                background: "var(--bg-nav)",
-                backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
-                WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
-                border: (messagesRemaining ?? 10) <= 2
-                  ? "1px solid rgba(239,68,68,0.4)"
-                  : (messagesRemaining ?? 10) <= 5
-                    ? "1px solid rgba(251,191,36,0.35)"
-                    : "1px solid var(--border-light)",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-                flexDirection: "column",
-              }}>
-              <span style={{
-                fontSize: 14, fontWeight: 700, lineHeight: 1,
-                color: (messagesRemaining ?? 10) <= 2 ? "#ef4444"
-                  : (messagesRemaining ?? 10) <= 5 ? "#d97706"
-                  : "var(--text-secondary)",
-              }}>
-                {messagesRemaining ?? 0}
-              </span>
+            <div style={{ position: "relative" }}>
+              <button
+                type="button"
+                onClick={() => setShowLimitInfo(v => !v)}
+                aria-label={locale === "ru" ? `Осталось сообщений: ${messagesRemaining ?? 0}` : `Messages remaining: ${messagesRemaining ?? 0}`}
+                className="flex items-center justify-center transition-all hover:scale-[1.05] active:scale-95"
+                style={{
+                  width: 44, height: 44, borderRadius: "50%",
+                  background: showLimitInfo ? "var(--bg-nav)" : "var(--bg-nav)",
+                  backdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                  WebkitBackdropFilter: "blur(16px) saturate(1.6) brightness(1.02)",
+                  border: (messagesRemaining ?? 10) <= 2
+                    ? "1px solid rgba(239,68,68,0.4)"
+                    : (messagesRemaining ?? 10) <= 5
+                      ? "1px solid rgba(251,191,36,0.35)"
+                      : "1px solid var(--border-light)",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+                  flexDirection: "column",
+                  cursor: "pointer",
+                }}>
+                <span style={{
+                  fontSize: 14, fontWeight: 700, lineHeight: 1,
+                  color: (messagesRemaining ?? 10) <= 2 ? "#ef4444"
+                    : (messagesRemaining ?? 10) <= 5 ? "#d97706"
+                    : "var(--text-secondary)",
+                }}>
+                  {messagesRemaining ?? 0}
+                </span>
+              </button>
+
+              {/* Limit info popup */}
+              {showLimitInfo && (
+                <div
+                  className="absolute right-0"
+                  style={{
+                    top: "calc(100% + 10px)",
+                    width: 240,
+                    background: "var(--bg-nav)",
+                    backdropFilter: "blur(20px) saturate(1.8) brightness(1.04)",
+                    WebkitBackdropFilter: "blur(20px) saturate(1.8) brightness(1.04)",
+                    border: "1px solid var(--border-light)",
+                    borderRadius: 20,
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.16), 0 1px 0 rgba(255,255,255,0.08) inset",
+                    padding: "16px 16px 12px",
+                    zIndex: 30,
+                  }}
+                >
+                  <p className="text-xs font-bold mb-2 tracking-wide uppercase" style={{ color: subjColor }}>
+                    {locale === "ru" ? "Сообщения" : "Messages"}
+                  </p>
+                  <p className="text-xs leading-relaxed mb-3" style={{ color: "var(--text-secondary)" }}>
+                    {locale === "ru"
+                      ? <>Бесплатный план — <strong>10 сообщений в день</strong>. Осталось: <strong style={{ color: (messagesRemaining ?? 10) <= 2 ? "#ef4444" : (messagesRemaining ?? 10) <= 5 ? "#d97706" : "var(--text-primary)" }}>{messagesRemaining ?? 0}</strong>. Счётчик обновляется в 00:00 UTC.</>
+                      : <>Free plan — <strong>10 messages per day</strong>. Remaining: <strong style={{ color: (messagesRemaining ?? 10) <= 2 ? "#ef4444" : (messagesRemaining ?? 10) <= 5 ? "#d97706" : "var(--text-primary)" }}>{messagesRemaining ?? 0}</strong>. Resets at 00:00 UTC.</>
+                    }
+                  </p>
+                  {!isPro && (
+                    <a
+                      href={locale === "ru" ? "/ru/dashboard/profile" : "/en/dashboard/profile"}
+                      onClick={() => setShowLimitInfo(false)}
+                      className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-xs font-semibold transition-all hover:opacity-80"
+                      style={{
+                        background: `linear-gradient(135deg,${subjColor}22,${subjColor}11)`,
+                        border: `1px solid ${subjColor}30`,
+                        color: subjColor,
+                      }}
+                    >
+                      {locale === "ru" ? "Перейти на Pro →" : "Upgrade to Pro →"}
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
