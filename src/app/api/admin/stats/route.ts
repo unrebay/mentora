@@ -28,6 +28,7 @@ export async function GET() {
     totalMsgsRes, msgsTodayRes, userMsgsWeekRes, aiMsgsWeekRes,
     activeSubsRes, chunksRes, recentUsersRes, subjectMsgsRes, trialExpiredRes, onlineNowRes,
     d7CohortRes, d7ActiveRes, newPayingThisMonthRes, newPayingLastMonthRes,
+    authErrors24hRes, revenueTodayRes, churnRiskCountRes,
   ] = await Promise.all([
     sb.from("users").select("*", { count: "exact", head: true }),
     sb.from("users").select("*", { count: "exact", head: true }).eq("plan", "pro"),

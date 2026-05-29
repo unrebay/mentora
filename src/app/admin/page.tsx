@@ -1273,7 +1273,7 @@ function LegalTab({ annualRev }: { annualRev: number }) {
   );
 }
 
-type Tab = "overview" | "users" | "activity" | "audit" | "revenue" | "knowledge" | "team" | "roadmap" | "legal" | "finances";
+type Tab = "overview" | "users" | "activity" | "audit" | "knowledge" | "team" | "roadmap" | "legal" | "finances";
 
 // ── Insights: Power Users, Churn Risk, Cohort Retention ─────────────────
 function InsightsSection({ TEXT, MUTED, CARD, BOR, isDark }: { TEXT: string; MUTED: string; CARD: string; BOR: string; isDark: boolean }) {
@@ -1544,14 +1544,14 @@ export default function AdminPanel() {
 
   const TABS: { id: Tab; icon: React.ReactNode; label: string }[] = [
     { id: "overview",  icon: IGrid,     label: "Обзор" },
+    { id: "users",     icon: IUsers,    label: "Пользователи" },
+    { id: "finances",  icon: IFinances, label: "Финансы" },
     { id: "activity",  icon: IActivity, label: "Активность" },
     { id: "roadmap",   icon: IRoadmap,  label: "Роадмап" },
-    { id: "team",      icon: ITeam,     label: "Команда" },
-    { id: "revenue",   icon: IRevenue,  label: "Доходы" },
-    { id: "legal",     icon: ILegal,    label: "Право" },
-    { id: "users",     icon: IUsers,    label: "Пользователи" },
     { id: "knowledge", icon: IKb,       label: "База знаний" },
-    { id: "finances",  icon: IFinances, label: "Финансы" },
+    { id: "team",      icon: ITeam,     label: "Команда" },
+    { id: "audit",     icon: IAudit,    label: "Аудит" },
+    { id: "legal",     icon: ILegal,    label: "Право" },
   ];
 
   return (
@@ -1852,27 +1852,46 @@ export default function AdminPanel() {
           {/* ── USERS ────────────────────────────────────────────────────────── */}
           {tab === "users" && <UsersTab />}
 
-          {/* ── REVENUE ──────────────────────────────────────────────────────── */}
-          {!loading && stats && tab === "revenue" && <>
-            {/* Real P&L summary from finances API */}
-            <RealPnlSummary CARD={CARD} BOR={BOR} TEXT={TEXT} MUTED={MUTED} isDark={isDark} />
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 12, marginBottom: 16 }}>
-              <Metric label="MRR (оценка)" value={R(mrr)} sub="Monthly Recurring Revenue" color={GREEN} />
-              <Metric label="ARR (оценка)" value={R(arr)} sub="Annual Run Rate" color={GREEN} />
-              <Metric label="Платящих"     value={pro + ult} sub={`из ${N(stats.users.total)} пользователей`} color="#f472b6" />
+
+
+          {/* ── KNOWLEDGE ────────────────────────────────────────────────────── */}
+          {tab === "activity"  && <TabErrorBoundary tabName="Активность"><AnalyticsDashboard TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} isDark={isDark} /></TabErrorBoundary>}
+          {tab === "audit"     && <TabErrorBoundary tabName="Аудит"><AuditLogTab TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} /></TabErrorBoundary>}
+          {tab === "knowledge" && <TabErrorBoundary tabName="База знаний"><KnowledgeTab /></TabErrorBoundary>}
+          {tab === "team"      && <TabErrorBoundary tabName="Команда"><TeamTab /></TabErrorBoundary>}
+          {tab === "roadmap" && <TabErrorBoundary tabName="Роадмап"><RoadmapV2Tab /></TabErrorBoundary>}
+          {tab === "legal"     && <TabErrorBoundary tabName="Юридические"><LegalTab annualRev={arr} /></TabErrorBoundary>}
+          {/* ── ФИНАНСЫ (5.0 — объединено: Доходы + P&L + Калькулятор) ─── */}
+          {tab === "finances" && !loading && stats && <>
+            {/* KPI строка */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 12, marginBottom: 20 }}>
+              <Metric label="MRR (оценка)"   value={R(mrr)} sub="Monthly Recurring Revenue" color={GREEN} />
+              <Metric label="ARR (оценка)"   value={R(arr)} sub="Annual Run Rate"           color={GREEN} />
+              {stats.billing.revenueToday != null && (
+                <Metric label="Доход сегодня" value={R(Math.round(stats.billing.revenueToday / 100))} sub="реальные платежи ЮKassa" color="#22d3ee" />
+              )}
+              <Metric label="Платящих"       value={pro + ult} sub={`Pro ${pro} + Ultra ${ult}`}      color="#f472b6" />
+              <Metric label="Активных подписок" value={stats.billing.activeSubscriptions} sub="статус active в ЮKassa" color={BRAND} />
             </div>
 
+            {/* Real P&L from finances API */}
+            <RealPnlSummary CARD={CARD} BOR={BOR} TEXT={TEXT} MUTED={MUTED} isDark={isDark} />
+
+            {/* Plan breakdown + Growth scenarios */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 16 }}>
               <Card ch={<>
                 <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 20 }}>Разбивка по тарифам</p>
                 {[
-                  { l: "Pro ежемес. (499₽)",    n: Math.round(pro * .7), mrr: Math.round(pro * .7 * PRO_M), c: "#60a5fa" },
-                  { l: "Pro годовой (249₽/мес)", n: Math.round(pro * .3), mrr: Math.round(pro * .3 * PRO_Y/12), c: "#60a5fa88" },
-                  { l: "Ultra ежемес. (799₽)",  n: Math.round(ult * .7), mrr: Math.round(ult * .7 * ULT_M), c: "#a78bfa" },
-                  { l: "Ultra годовой (499₽)",  n: Math.round(ult * .3), mrr: Math.round(ult * .3 * ULT_Y/12), c: "#a78bfa88" },
+                  { l: "Pro ежемес. (499₽)",     n: Math.round(pro * .7), mrr: Math.round(pro * .7 * PRO_M), c: "#60a5fa" },
+                  { l: "Pro годовой (249₽/мес)",  n: Math.round(pro * .3), mrr: Math.round(pro * .3 * PRO_Y/12), c: "#60a5fa88" },
+                  { l: "Ultra ежемес. (799₽)",   n: Math.round(ult * .7), mrr: Math.round(ult * .7 * ULT_M), c: "#a78bfa" },
+                  { l: "Ultra годовой (499₽/мес)",n: Math.round(ult * .3), mrr: Math.round(ult * .3 * ULT_Y/12), c: "#a78bfa88" },
                 ].map(r => (
                   <div key={r.l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${BOR}` }}>
-                    <div><p style={{ fontSize: 13, color: r.c, fontWeight: 500, margin: 0 }}>{r.l}</p><p style={{ fontSize: 11, color: MUTED, margin: "2px 0 0" }}>~{N(r.n)} пользователей</p></div>
+                    <div>
+                      <p style={{ fontSize: 13, color: r.c, fontWeight: 500, margin: 0 }}>{r.l}</p>
+                      <p style={{ fontSize: 11, color: MUTED, margin: "2px 0 0" }}>~{N(r.n)} польз.</p>
+                    </div>
                     <p style={{ fontSize: 18, fontWeight: 700, color: TEXT, margin: 0 }}>{R(r.mrr)}</p>
                   </div>
                 ))}
@@ -1905,42 +1924,40 @@ export default function AdminPanel() {
               </>} />
             </div>
 
+            {/* Conversion stats */}
             <Card ch={<>
               <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Конверсия</p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: 16 }}>
                 {[
-                  ["Всего платящих",  stats.users.total ? ((pro+ult)/stats.users.total*100).toFixed(1)+"%" : "—"],
-                  ["Free → Pro",      stats.users.total ? (pro/stats.users.total*100).toFixed(1)+"%" : "—"],
-                  ["Free → Ultra",   stats.users.total ? (ult/stats.users.total*100).toFixed(1)+"%" : "—"],
-                  ["Активных/неделю", stats.users.total ? (stats.users.activeWeek/stats.users.total*100).toFixed(0)+"%" : "—"],
+                  ["Всего платящих",   stats.users.total ? ((pro+ult)/stats.users.total*100).toFixed(1)+"%" : "—"],
+                  ["Free → Pro",       stats.users.total ? (pro/stats.users.total*100).toFixed(1)+"%" : "—"],
+                  ["Free → Ultra",    stats.users.total ? (ult/stats.users.total*100).toFixed(1)+"%" : "—"],
+                  ["Активных/неделю",  stats.users.total ? (stats.users.activeWeek/stats.users.total*100).toFixed(0)+"%" : "—"],
+                  ["Новых платящих/мес", stats.users.newPayingThisMonth.toString()],
                 ].map(([l, v]) => (
                   <div key={l} style={{ textAlign: "center" }}>
-                    <p style={{ fontSize: 26, fontWeight: 700, color: GREEN, margin: 0 }}>{v}</p>
-                    <p style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>{l}</p>
+                    <p style={{ fontSize: 24, fontWeight: 700, color: GREEN, margin: 0 }}>{v}</p>
+                    <p style={{ fontSize: 11, color: MUTED, marginTop: 4 }}>{l}</p>
                   </div>
                 ))}
               </div>
-            </>} />
+            </>} style={{ marginBottom: 16 }} />
+
+            {/* FinancesWidget — P&L, expenses */}
+            <TabErrorBoundary tabName="Финансы P&L">
+              <FinancesWidget TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} isDark={isDark} />
+            </TabErrorBoundary>
+
+            {/* Revenue Calculator */}
+            <div style={{ marginTop: 20 }}>
+              <RevenueCalculator />
+            </div>
 
             <div style={{ marginTop: 16, padding: "14px 18px", borderRadius: 12, background: "rgba(239,68,68,0.05)", border: `1px solid rgba(239,68,68,0.15)` }}>
               <p style={{ fontSize: 12, color: RED, fontWeight: 600, margin: "0 0 4px" }}>⚠️ Оценка</p>
-              <p style={{ fontSize: 13, color: MUTED, margin: 0, lineHeight: 1.6 }}>MRR рассчитан с допущением 70% месячных / 30% годовых подписок. Для точных данных смотри транзакции в YooKassa.</p>
-            </div>
-
-            {/* Revenue Calculator — перенесён из Роадмапа */}
-            <div style={{ marginTop: 16 }}>
-              <RevenueCalculator />
+              <p style={{ fontSize: 13, color: MUTED, margin: 0, lineHeight: 1.6 }}>MRR рассчитан с допущением 70% месячных / 30% годовых подписок. Для точных данных смотри транзакции в ЮKassa.</p>
             </div>
           </>}
-
-          {/* ── KNOWLEDGE ────────────────────────────────────────────────────── */}
-          {tab === "activity"  && <TabErrorBoundary tabName="Активность"><AnalyticsDashboard TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} isDark={isDark} /></TabErrorBoundary>}
-          {tab === "audit"     && <TabErrorBoundary tabName="Аудит"><AuditLogTab TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} /></TabErrorBoundary>}
-          {tab === "knowledge" && <TabErrorBoundary tabName="База знаний"><KnowledgeTab /></TabErrorBoundary>}
-          {tab === "team"      && <TabErrorBoundary tabName="Команда"><TeamTab /></TabErrorBoundary>}
-          {tab === "roadmap" && <TabErrorBoundary tabName="Роадмап"><RoadmapV2Tab /></TabErrorBoundary>}
-          {tab === "legal"     && <TabErrorBoundary tabName="Юридические"><LegalTab annualRev={arr} /></TabErrorBoundary>}
-          {tab === "finances"  && <TabErrorBoundary tabName="Финансы"><FinancesWidget TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} isDark={isDark} /></TabErrorBoundary>}
         </main>
       </div> {/* end flex row */}
     </TokCtx.Provider>
