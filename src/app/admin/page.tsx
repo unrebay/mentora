@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, createContext, useContext, useRef } from "react";
+import React, { useEffect, useState, useCallback, createContext, useContext, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
@@ -26,11 +26,23 @@ interface Stats {
     trialExpired: number; onlineNow: number;
     d7Retention: number | null;
     newPayingThisMonth: number; newPayingLastMonth: number;
+    churnRiskCount?: number;
   };
   chat:  { totalMessages: number; messagesToday: number; userMessagesWeek: number; aiResponsesWeek: number; aiResponseRate: number; topSubjects: { subject: string; count: number }[] };
-  billing: { activeSubscriptions: number };
+  billing: { activeSubscriptions: number; revenueToday?: number };
+  monitoring?: { authErrors24h: number; churnRiskCount: number };
   knowledge: { chunks: number };
   recentUsers: UserRow[];
+  generatedAt: string;
+}
+interface InsightsData {
+  powerUsers: { id: string; email: string; plan: string; messages: number; last_active_at: string | null }[];
+  churnRiskUsers: { id: string; email: string; plan: string; last_active_at: string | null; created_at: string }[];
+  cohortRetention: { W1: { total: number; active: number; pct: number | null }; W2: { total: number; active: number; pct: number | null }; W4: { total: number; active: number; pct: number | null } };
+  trialToPaid: number;
+  aiCost: { msgsToday: number; msgsMonth: number; costTodayRub: number; costMonthRub: number };
+  heatmap: number[][];
+  heatmapDays: string[];
   generatedAt: string;
 }
 interface UserRow {
@@ -1263,6 +1275,206 @@ function LegalTab({ annualRev }: { annualRev: number }) {
 
 type Tab = "overview" | "users" | "activity" | "audit" | "revenue" | "knowledge" | "team" | "roadmap" | "legal" | "finances";
 
+// ── Insights: Power Users, Churn Risk, Cohort Retention ─────────────────
+function InsightsSection({ TEXT, MUTED, CARD, BOR, isDark }: { TEXT: string; MUTED: string; CARD: string; BOR: string; isDark: boolean }) {
+  const [data, setData] = useState<InsightsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    fetch("/api/admin/insights")
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(setData)
+      .catch(() => setData(null))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return (
+    <div style={{ padding: "20px 0", color: MUTED, fontSize: 13, textAlign: "center" }}>
+      Загрузка аналитики...
+    </div>
+  );
+  if (!data) return null;
+
+  const pctColor = (pct: number | null) =>
+    pct == null ? MUTED : pct >= 30 ? GREEN : pct >= 15 ? AMBER : RED;
+
+  const heatmapMax = Math.max(1, ...data.heatmap.flat());
+
+  return (
+    <>
+      {/* ── Power Users + Churn Risk ──────────────── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 16 }}>
+        {/* Power Users */}
+        <div style={{ background: CARD, borderRadius: 16, padding: 20, border: `1px solid ${BOR}` }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16, margin: "0 0 16px" }}>🏆 Power Users (30 дн)</p>
+          {data.powerUsers.length === 0 ? (
+            <p style={{ fontSize: 13, color: MUTED }}>Нет данных</p>
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead><tr>
+                <th style={{ textAlign: "left", color: MUTED, fontWeight: 600, fontSize: 11, paddingBottom: 8, borderBottom: `1px solid ${BOR}` }}>#</th>
+                <th style={{ textAlign: "left", color: MUTED, fontWeight: 600, fontSize: 11, paddingBottom: 8, borderBottom: `1px solid ${BOR}` }}>Email</th>
+                <th style={{ textAlign: "left", color: MUTED, fontWeight: 600, fontSize: 11, paddingBottom: 8, borderBottom: `1px solid ${BOR}` }}>Тариф</th>
+                <th style={{ textAlign: "right", color: MUTED, fontWeight: 600, fontSize: 11, paddingBottom: 8, borderBottom: `1px solid ${BOR}` }}>Сообщ.</th>
+              </tr></thead>
+              <tbody>
+                {data.powerUsers.map((u, i) => {
+                  const pm = planMeta(u.plan);
+                  return (
+                    <tr key={u.id} style={{ borderBottom: `1px solid ${BOR}` }}>
+                      <td style={{ padding: "7px 6px 7px 0", color: i < 3 ? "#f59e0b" : MUTED, fontWeight: 700, fontSize: 12 }}>{i + 1}</td>
+                      <td style={{ padding: "7px 6px", color: TEXT, fontSize: 12, maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.email}</td>
+                      <td style={{ padding: "7px 6px" }}><span style={{ fontSize: 11, fontWeight: 700, color: pm.c }}>{pm.l}</span></td>
+                      <td style={{ padding: "7px 0 7px 6px", textAlign: "right", color: TEXT, fontWeight: 700, fontSize: 13 }}>{u.messages}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {/* Churn Risk */}
+        <div style={{ background: CARD, borderRadius: 16, padding: 20, border: `1px solid ${BOR}` }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 16px" }}>⚠️ Риск оттока</p>
+          <p style={{ fontSize: 11, color: MUTED, marginBottom: 12 }}>Платящие, неактивны 5+ дней</p>
+          {data.churnRiskUsers.length === 0 ? (
+            <p style={{ fontSize: 13, color: GREEN }}>✓ Все активны — отток под контролем</p>
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <thead><tr>
+                <th style={{ textAlign: "left", color: MUTED, fontWeight: 600, fontSize: 11, paddingBottom: 8, borderBottom: `1px solid ${BOR}` }}>Email</th>
+                <th style={{ textAlign: "left", color: MUTED, fontWeight: 600, fontSize: 11, paddingBottom: 8, borderBottom: `1px solid ${BOR}` }}>Тариф</th>
+                <th style={{ textAlign: "right", color: MUTED, fontWeight: 600, fontSize: 11, paddingBottom: 8, borderBottom: `1px solid ${BOR}` }}>Последний визит</th>
+              </tr></thead>
+              <tbody>
+                {data.churnRiskUsers.map(u => {
+                  const pm = planMeta(u.plan);
+                  const daysInactive = u.last_active_at
+                    ? Math.floor((Date.now() - new Date(u.last_active_at).getTime()) / 86400000)
+                    : null;
+                  return (
+                    <tr key={u.id} style={{ borderBottom: `1px solid ${BOR}` }}>
+                      <td style={{ padding: "7px 6px 7px 0", color: TEXT, fontSize: 12, maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.email}</td>
+                      <td style={{ padding: "7px 6px" }}><span style={{ fontSize: 11, fontWeight: 700, color: pm.c }}>{pm.l}</span></td>
+                      <td style={{ padding: "7px 0 7px 6px", textAlign: "right", color: daysInactive && daysInactive > 14 ? RED : AMBER, fontSize: 12, fontWeight: 600 }}>
+                        {daysInactive != null ? `${daysInactive}д назад` : "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+
+      {/* ── Cohort Retention W1/W2/W4 + AI Cost + Trial→Paid ─────────── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 16 }}>
+        {/* Cohort Retention */}
+        <div style={{ background: CARD, borderRadius: 16, padding: 20, border: `1px solid ${BOR}` }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 16px" }}>Когортный Retention</p>
+          {(["W1", "W2", "W4"] as const).map(w => {
+            const c = data.cohortRetention[w];
+            const label = w === "W1" ? "Неделя 1 (д7–14)" : w === "W2" ? "Неделя 2 (д14–21)" : "Неделя 4 (д28–35)";
+            const pct = c.pct;
+            const col = pctColor(pct);
+            return (
+              <div key={w} style={{ padding: "10px 0", borderBottom: `1px solid ${BOR}` }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+                  <div>
+                    <span style={{ fontSize: 13, color: TEXT }}>{label}</span>
+                    <span style={{ fontSize: 11, color: MUTED, marginLeft: 8 }}>когорта: {c.total}</span>
+                  </div>
+                  <span style={{ fontSize: 18, fontWeight: 700, color: col }}>
+                    {pct != null ? `${pct}%` : "—"}
+                  </span>
+                </div>
+                <div style={{ height: 4, borderRadius: 99, background: BOR }}>
+                  <div style={{ height: "100%", width: pct != null ? `${Math.min(pct, 100)}%` : "0%", borderRadius: 99, background: col, transition: "width .5s" }} />
+                </div>
+              </div>
+            );
+          })}
+          <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", fontSize: 11, color: MUTED }}>
+            <span style={{ color: GREEN }}>≥30% = отлично</span>
+            <span style={{ color: AMBER }}>15–29% = норма</span>
+            <span style={{ color: RED }}>&lt;15% = риск</span>
+          </div>
+        </div>
+
+        {/* Trial → Paid + AI Cost */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ background: CARD, borderRadius: 16, padding: 20, border: `1px solid ${BOR}` }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 12px" }}>Trial → Paid</p>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+              <span style={{ fontSize: 32, fontWeight: 800, color: GREEN }}>{data.trialToPaid}</span>
+              <span style={{ fontSize: 13, color: MUTED }}>конвертировались с пробного</span>
+            </div>
+          </div>
+          <div style={{ background: CARD, borderRadius: 16, padding: 20, border: `1px solid ${BOR}` }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 12px" }}>💸 AI Costs</p>
+            {[
+              ["Запросов сегодня", data.aiCost.msgsToday, `~${data.aiCost.costTodayRub}₽`],
+              ["Запросов в месяц", data.aiCost.msgsMonth, `~${data.aiCost.costMonthRub}₽`],
+            ].map(([l, v, c]) => (
+              <div key={String(l)} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: `1px solid ${BOR}` }}>
+                <span style={{ fontSize: 12, color: MUTED }}>{l}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{v} <span style={{ color: AMBER, fontWeight: 500 }}>{c}</span></span>
+              </div>
+            ))}
+            <p style={{ fontSize: 10, color: MUTED, marginTop: 8 }}>Оценка: ~0.23₽/сообщение (Claude Haiku 3.5)</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Message Heatmap ───────────────────────────────────────────── */}
+      <div style={{ background: CARD, borderRadius: 16, padding: 20, border: `1px solid ${BOR}`, marginBottom: 16, overflowX: "auto" }}>
+        <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 16px" }}>🗓 Активность по дням / часам (МСК, 30 дн)</p>
+        <div style={{ display: "grid", gridTemplateColumns: "32px repeat(24, 1fr)", gap: 2, minWidth: 560 }}>
+          {/* Header row: hours */}
+          <div />
+          {Array.from({ length: 24 }, (_, h) => (
+            <div key={h} style={{ textAlign: "center", fontSize: 8.5, color: MUTED, paddingBottom: 4 }}>
+              {h % 4 === 0 ? `${h}` : ""}
+            </div>
+          ))}
+          {/* Data rows */}
+          {data.heatmapDays.map((dayLabel, dayIdx) => (
+            <React.Fragment key={dayIdx}>
+              <div style={{ fontSize: 10, color: MUTED, display: "flex", alignItems: "center", justifyContent: "flex-end", paddingRight: 4 }}>{dayLabel}</div>
+              {data.heatmap[dayIdx].map((count, hourIdx) => {
+                const intensity = count / heatmapMax;
+                const alpha = isDark
+                  ? 0.08 + intensity * 0.85
+                  : 0.05 + intensity * 0.85;
+                return (
+                  <div
+                    key={hourIdx}
+                    title={`${dayLabel} ${hourIdx}:00 — ${count} сообщ.`}
+                    style={{
+                      height: 16, borderRadius: 3,
+                      background: count === 0
+                        ? (isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)")
+                        : `rgba(69,97,232,${alpha})`,
+                    }}
+                  />
+                );
+              })}
+            </React.Fragment>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 6, marginTop: 10, alignItems: "center" }}>
+          <span style={{ fontSize: 10, color: MUTED }}>Меньше</span>
+          {[0.1, 0.3, 0.5, 0.7, 0.9].map(a => (
+            <div key={a} style={{ width: 12, height: 12, borderRadius: 2, background: `rgba(69,97,232,${a})` }} />
+          ))}
+          <span style={{ fontSize: 10, color: MUTED }}>Больше</span>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function AdminPanel() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -1301,6 +1513,16 @@ export default function AdminPanel() {
   }, [router]);
 
   useEffect(() => { reload(); }, [reload]);
+  // Silent 30s auto-refresh — updates stats without showing loading spinner
+  useEffect(() => {
+    const id = setInterval(() => {
+      fetch("/api/admin/stats")
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d) setStats(d); })
+        .catch(() => {});
+    }, 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   // Record conversion rate snapshot to localStorage (one per day)
   useEffect(() => {
@@ -1487,6 +1709,15 @@ export default function AdminPanel() {
               <Metric label="Сообщений сегодня" value={stats.chat.messagesToday} sub={`всего: ${N(stats.chat.totalMessages)}`} />
               <Metric label="MRR (оценка)"      value={R(mrr)} sub={`Pro×${pro} + Ultra×${ult}`} color="#a78bfa" />
               <Metric label="Новых платящих"    value={stats.users.newPayingThisMonth} sub={(() => { const diff = stats.users.newPayingThisMonth - stats.users.newPayingLastMonth; return diff > 0 ? `+${diff} vs прош.мес` : diff < 0 ? `${diff} vs прош.мес` : "как в прош.мес"; })()} color={stats.users.newPayingThisMonth > stats.users.newPayingLastMonth ? GREEN : MUTED} />
+              {stats.billing.revenueToday != null && (
+                <Metric label="Доход сегодня" value={R(Math.round(stats.billing.revenueToday / 100))} sub="реальные платежи" color={GREEN} />
+              )}
+              {stats.monitoring != null && (
+                <Metric label="Auth ошибки (24ч)" value={stats.monitoring.authErrors24h} sub={stats.monitoring.authErrors24h > 10 ? "⚠️ повышенный уровень" : "норма"} color={stats.monitoring.authErrors24h > 10 ? RED : stats.monitoring.authErrors24h > 3 ? AMBER : MUTED} />
+              )}
+              {stats.monitoring != null && stats.monitoring.churnRiskCount > 0 && (
+                <Metric label="Риск оттока" value={stats.monitoring.churnRiskCount} sub="платящих, неактивны 5+ дн" color={stats.monitoring.churnRiskCount > 5 ? RED : AMBER} />
+              )}
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 12, marginBottom: 16 }}>
@@ -1598,6 +1829,8 @@ export default function AdminPanel() {
                 </>} style={{ marginBottom: 16 }} />
               );
             })()}
+
+            <InsightsSection TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} isDark={isDark} />
 
             <Card ch={<>
               <p style={{ fontSize: 11, fontWeight: 600, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>Последние регистрации</p>

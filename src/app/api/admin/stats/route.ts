@@ -20,6 +20,8 @@ export async function GET() {
   const sixtyDaysAgo  = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
   const monthStart    = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const fiveDaysAgo        = new Date(Date.now() - 5  * 24 * 60 * 60 * 1000).toISOString();
 
   const [
     totalUsersRes, proUsersRes, ultimaUsersRes, newTodayRes, activeTodayRes, activeWeekRes,
@@ -49,6 +51,12 @@ export async function GET() {
     // MoM revenue: new paying users this month vs last month
     sb.from("users").select("*", { count: "exact", head: true }).in("plan", ["pro", "ultima"]).gte("created_at", monthStart),
     sb.from("users").select("*", { count: "exact", head: true }).in("plan", ["pro", "ultima"]).gte("created_at", lastMonthStart).lt("created_at", monthStart),
+    // Auth errors 24h
+    sb.from("admin_audit_log").select("*", { count: "exact", head: true }).gte("created_at", twentyFourHoursAgo).ilike("action", "auth_error%"),
+    // Revenue today: sum amounts from subscriptions started today
+    sb.from("subscriptions").select("amount").gte("started_at", todayStart),
+    // Churn risk: paid users inactive 5+ days
+    sb.from("users").select("*", { count: "exact", head: true }).in("plan", ["pro", "ultima"]).lt("last_active_at", fiveDaysAgo),
   ]);
 
   // Compute actual today's message count per recent user from chat_messages
@@ -75,6 +83,7 @@ export async function GET() {
     .sort((a, b) => b[1] - a[1]).slice(0, 5)
     .map(([subject, count]) => ({ subject, count }));
 
+  const revenueToday = (revenueTodayRes.data ?? []).reduce((sum, s) => sum + (s.amount ?? 0), 0);
   const totalUsers = totalUsersRes.count ?? 0;
   const proUsers = proUsersRes.count ?? 0;
   const ultimaUsers = ultimaUsersRes.count ?? 0;
@@ -99,7 +108,8 @@ export async function GET() {
       newPayingLastMonth: newPayingLastMonthRes.count ?? 0,
     },
     chat: { totalMessages: totalMsgsRes.count ?? 0, messagesToday: msgsTodayRes.count ?? 0, userMessagesWeek: userMsgsWeek, aiResponsesWeek: aiMsgsWeek, aiResponseRate: userMsgsWeek > 0 ? Math.round((aiMsgsWeek / userMsgsWeek) * 100) : 0, topSubjects },
-    billing: { activeSubscriptions: activeSubsRes.count ?? 0 },
+    billing: { activeSubscriptions: activeSubsRes.count ?? 0, revenueToday },
+    monitoring: { authErrors24h: authErrors24hRes.count ?? 0, churnRiskCount: churnRiskCountRes.count ?? 0 },
     knowledge: { chunks: chunksRes.count ?? 0 },
     recentUsers: (recentUsersRes.data ?? []).map(u => ({
       ...u,

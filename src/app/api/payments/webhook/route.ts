@@ -1,3 +1,4 @@
+import { notifyAdmin, mskNow } from "@/lib/notifyAdmin";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
@@ -18,13 +19,20 @@ export async function POST(req: NextRequest) {
       },
     });
     if (!verifyResp.ok) {
-      console.error("Webhook: YooKassa re-fetch failed", verifyResp.status);
+      notifyAdmin(`⚠️ <b>ЮKassa API недоступен</b>\nstatus: ${verifyResp.status}\npaymentId: <code>${notifiedPaymentId}</code>\n<i>${mskNow()} МСК</i>`);
       return NextResponse.json({ ok: true });
     }
 
     // Use the verified payment object, not the webhook body
     const payment = await verifyResp.json();
-    if (payment.status !== "succeeded") return NextResponse.json({ ok: true });
+    if (payment.status !== "succeeded") {
+      if (payment.status === "canceled") {
+        const amt = payment.amount?.value ?? "?";
+        const plan = payment.metadata?.plan ?? "?";
+        notifyAdmin(`❌ <b>Платёж отменён</b>\nid: <code>${payment.id}</code>\nsumma: ${amt}₽\nplan: ${plan}\nuser: <code>${payment.metadata?.user_id ?? "?"}</code>\n<i>${mskNow()} МСК</i>`);
+      }
+      return NextResponse.json({ ok: true });
+    }
 
     const userId = payment.metadata?.user_id;
     if (!userId) { console.error("Webhook: no user_id", payment.id); return NextResponse.json({ ok: true }); }
@@ -81,6 +89,7 @@ export async function POST(req: NextRequest) {
     console.log(`✅ ${userPlan} (${planKey}, ${days}d) activated: user ${userId}${pm?.saved ? ` [card saved: ${pm.card?.last4 ?? "?"}]` : ""}`);
     return NextResponse.json({ ok: true });
   } catch (error) {
+    notifyAdmin(`🔴 <b>Webhook 500 Exception</b>\nerr: ${String(error).slice(0, 300).replace(/</g, "&lt;")}\n<i>${mskNow()} МСК</i>`);
     console.error("Webhook error:", error);
     // Return 500 on actual exceptions so YooKassa retries on transient failures
     // (brief DB outage, ANTHROPIC proxy hiccup). 2xx tells them "done, don't retry".

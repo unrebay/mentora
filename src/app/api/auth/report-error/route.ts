@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { notifyAdmin, mskNow } from "@/lib/notifyAdmin";
 
 // Minimal dedup: ignore exact same (type+email+error) within 10 seconds
-// to prevent double-fire on React StrictMode double-invocations.
 const recentDedup = new Map<string, number>();
 const DEDUP_MS = 10_000;
 
@@ -24,17 +24,6 @@ function maskEmail(email: string): string {
     ? "*".repeat(local.length)
     : local[0] + "*".repeat(local.length - 2) + local[local.length - 1];
   return `${masked}@${domain}`;
-}
-
-function notifyAdmin(text: string) {
-  const BOT_TOKEN = process.env.TELEGRAM_SUPPORT_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
-  const ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID;
-  if (!BOT_TOKEN || !ADMIN_CHAT_ID) return;
-  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text, parse_mode: "HTML" }),
-  }).catch(() => {});
 }
 
 function logToAudit(type: string, safeEmail: string, errMsg: string) {
@@ -67,7 +56,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, skipped: true });
     }
 
-    // Persist to audit log (fire-and-forget)
     logToAudit(type, safeEmail, errMsg);
 
     const icons: Record<string, string> = {
@@ -83,15 +71,13 @@ export async function POST(req: NextRequest) {
 
     const icon  = icons[type]  ?? "⚠️";
     const label = labels[type] ?? type;
-    const now = new Date().toLocaleString("ru-RU", { timeZone: "Europe/Moscow" });
 
-    const text =
+    notifyAdmin(
       `${icon} <b>${label}</b>\n` +
       `email: <code>${safeEmail}</code>\n` +
       `err: ${String(errMsg).slice(0, 200).replace(/</g, "&lt;")}\n` +
-      `<i>${now} МСК</i>`;
-
-    notifyAdmin(text);
+      `<i>${mskNow()} МСК</i>`
+    );
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ ok: false }, { status: 500 });
