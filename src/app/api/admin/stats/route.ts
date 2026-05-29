@@ -13,12 +13,19 @@ export async function GET() {
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-  const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+  const fiveMinAgo  = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+  const sevenDaysAgo  = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const sixtyDaysAgo  = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
+  const monthStart    = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
 
   const [
     totalUsersRes, proUsersRes, ultimaUsersRes, newTodayRes, activeTodayRes, activeWeekRes,
     totalMsgsRes, msgsTodayRes, userMsgsWeekRes, aiMsgsWeekRes,
     activeSubsRes, chunksRes, recentUsersRes, subjectMsgsRes, trialExpiredRes, onlineNowRes,
+    d7CohortRes, d7ActiveRes, newPayingThisMonthRes, newPayingLastMonthRes,
   ] = await Promise.all([
     sb.from("users").select("*", { count: "exact", head: true }),
     sb.from("users").select("*", { count: "exact", head: true }).eq("plan", "pro"),
@@ -36,6 +43,12 @@ export async function GET() {
     sb.from("chat_messages").select("subject").eq("role", "user").gte("created_at", monthAgo),
     sb.from("users").select("*", { count: "exact", head: true }).not("trial_expires_at", "is", null).lt("trial_expires_at", now.toISOString()).eq("plan", "free"),
     sb.from("users").select("*", { count: "exact", head: true }).gte("last_active_at", fiveMinAgo),
+    // D7 retention: cohort of users registered 8-14 days ago
+    sb.from("users").select("*", { count: "exact", head: true }).gte("created_at", fourteenDaysAgo).lt("created_at", sevenDaysAgo),
+    sb.from("users").select("*", { count: "exact", head: true }).gte("created_at", fourteenDaysAgo).lt("created_at", sevenDaysAgo).gte("last_active_at", sevenDaysAgo),
+    // MoM revenue: new paying users this month vs last month
+    sb.from("users").select("*", { count: "exact", head: true }).in("plan", ["pro", "ultima"]).gte("created_at", monthStart),
+    sb.from("users").select("*", { count: "exact", head: true }).in("plan", ["pro", "ultima"]).gte("created_at", lastMonthStart).lt("created_at", monthStart),
   ]);
 
   // Compute actual today's message count per recent user from chat_messages
@@ -69,7 +82,22 @@ export async function GET() {
   const aiMsgsWeek = aiMsgsWeekRes.count ?? 0;
 
   return NextResponse.json({
-    users: { total: totalUsers, pro: proUsers, ultima: ultimaUsers, free: totalUsers - proUsers - ultimaUsers, newToday: newTodayRes.count ?? 0, activeToday: activeTodayRes.count ?? 0, activeWeek: activeWeekRes.count ?? 0, trialExpired: trialExpiredRes.count ?? 0, onlineNow: onlineNowRes.count ?? 0 },
+    users: {
+      total: totalUsers, pro: proUsers, ultima: ultimaUsers,
+      free: totalUsers - proUsers - ultimaUsers,
+      newToday: newTodayRes.count ?? 0,
+      activeToday: activeTodayRes.count ?? 0,
+      activeWeek: activeWeekRes.count ?? 0,
+      trialExpired: trialExpiredRes.count ?? 0,
+      onlineNow: onlineNowRes.count ?? 0,
+      d7Retention: (() => {
+        const cohort = d7CohortRes.count ?? 0;
+        const active = d7ActiveRes.count ?? 0;
+        return cohort > 0 ? Math.round((active / cohort) * 100) : null;
+      })(),
+      newPayingThisMonth: newPayingThisMonthRes.count ?? 0,
+      newPayingLastMonth: newPayingLastMonthRes.count ?? 0,
+    },
     chat: { totalMessages: totalMsgsRes.count ?? 0, messagesToday: msgsTodayRes.count ?? 0, userMessagesWeek: userMsgsWeek, aiResponsesWeek: aiMsgsWeek, aiResponseRate: userMsgsWeek > 0 ? Math.round((aiMsgsWeek / userMsgsWeek) * 100) : 0, topSubjects },
     billing: { activeSubscriptions: activeSubsRes.count ?? 0 },
     knowledge: { chunks: chunksRes.count ?? 0 },

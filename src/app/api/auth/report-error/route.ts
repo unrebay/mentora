@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
-// In-memory rate limit: max 1 notification per (email+type) per 5 minutes
-// Keeps noisy "wrong password" spam out of the admin feed while still surfacing
-// repeated failures that indicate a real problem.
-const lastNotified = new Map<string, number>();
-const NOTIFY_COOLDOWN_MS = 5 * 60 * 1000; // 5 min
+// Minimal dedup: ignore exact same (type+email+error) within 10 seconds
+// to prevent double-fire on React StrictMode double-invocations.
+const recentDedup = new Map<string, number>();
+const DEDUP_MS = 10_000;
 
-function shouldNotify(key: string): boolean {
-  const last = lastNotified.get(key) ?? 0;
-  if (Date.now() - last > NOTIFY_COOLDOWN_MS) {
-    lastNotified.set(key, Date.now());
-    return true;
+function isDuplicate(key: string): boolean {
+  const last = recentDedup.get(key) ?? 0;
+  if (Date.now() - last < DEDUP_MS) return true;
+  recentDedup.set(key, Date.now());
+  if (recentDedup.size > 500) {
+    const cutoff = Date.now() - DEDUP_MS;
+    for (const [k, v] of recentDedup) if (v < cutoff) recentDedup.delete(k);
   }
   return false;
 }
@@ -35,6 +37,19 @@ function notifyAdmin(text: string) {
   }).catch(() => {});
 }
 
+function logToAudit(type: string, safeEmail: string, errMsg: string) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return;
+  const sb = createClient(url, key);
+  sb.from("admin_audit_log").insert({
+    admin_email: "system",
+    action: `auth_error:${type}`,
+    target: safeEmail,
+    metadata: { error: errMsg.slice(0, 300), type, ts: new Date().toISOString() },
+  }).then(null, () => {});
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { type, email, error: errMsg } = await req.json().catch(() => ({}));
@@ -47,10 +62,13 @@ export async function POST(req: NextRequest) {
       ? maskEmail(email)
       : "unknown";
 
-    const key = `${type}:${typeof email === "string" ? email.toLowerCase() : ""}`;
-    if (!shouldNotify(key)) {
+    const key = `${type}:${typeof email === "string" ? email.toLowerCase() : ""}:${errMsg}`;
+    if (isDuplicate(key)) {
       return NextResponse.json({ ok: true, skipped: true });
     }
+
+    // Persist to audit log (fire-and-forget)
+    logToAudit(type, safeEmail, errMsg);
 
     const icons: Record<string, string> = {
       login_fail:          "🔐",
@@ -65,11 +83,13 @@ export async function POST(req: NextRequest) {
 
     const icon  = icons[type]  ?? "⚠️";
     const label = labels[type] ?? type;
+    const now = new Date().toLocaleString("ru-RU", { timeZone: "Europe/Moscow" });
 
     const text =
       `${icon} <b>${label}</b>\n` +
       `email: <code>${safeEmail}</code>\n` +
-      `err: ${String(errMsg).slice(0, 200).replace(/</g, "&lt;")}`;
+      `err: ${String(errMsg).slice(0, 200).replace(/</g, "&lt;")}\n` +
+      `<i>${now} МСК</i>`;
 
     notifyAdmin(text);
     return NextResponse.json({ ok: true });

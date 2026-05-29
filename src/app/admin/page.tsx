@@ -20,7 +20,13 @@ const PRO_M = 499, PRO_Y = 2990, ULT_M = 799, ULT_Y = 5990;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Stats {
-  users: { total: number; pro: number; ultima: number; free: number; newToday: number; activeToday: number; activeWeek: number; trialExpired: number; onlineNow: number };
+  users: {
+    total: number; pro: number; ultima: number; free: number;
+    newToday: number; activeToday: number; activeWeek: number;
+    trialExpired: number; onlineNow: number;
+    d7Retention: number | null;
+    newPayingThisMonth: number; newPayingLastMonth: number;
+  };
   chat:  { totalMessages: number; messagesToday: number; userMessagesWeek: number; aiResponsesWeek: number; aiResponseRate: number; topSubjects: { subject: string; count: number }[] };
   billing: { activeSubscriptions: number };
   knowledge: { chunks: number };
@@ -241,12 +247,24 @@ interface Employee {
   color: string;
   available: boolean;
   avatar: string; // initials
+  group?: string; // org group label
 }
 
+// Org structure: grouped for visual clarity, displayed as flat grid
 const EMPLOYEES: Employee[] = [
-  { id: "marketing", name: "Ника",  role: "Маркетолог",    desc: "Telegram, контент, тренды, рилсы", color: "#e8458a", available: true,  avatar: "Н" },
-  { id: "analytics", name: "Миша",  role: "Аналитик",      desc: "PostHog, воронки, когорты, метрики", color: "#4561E8", available: true,  avatar: "М" },
-  { id: "growth",    name: "Саша",  role: "Growth Hacker",  desc: "Конверсии, виральность, эксперименты", color: "#10b981", available: true, avatar: "С" },
+  // ── Рост и маркетинг ─────────────────────────────────────
+  { id: "marketing", name: "Ника",   role: "Маркетолог",            desc: "SMM, контент, рилсы, тренды — делает @mentora_su аккаунтом которым делятся", color: "#e8458a", available: true,  avatar: "Н", group: "Рост и маркетинг" },
+  { id: "growth",    name: "Саша",   role: "Growth Hacker",          desc: "Конверсии, виральность, реферальные механики, A/B эксперименты", color: "#f97316", available: true,  avatar: "С", group: "Рост и маркетинг" },
+  { id: "analytics", name: "Миша",   role: "Аналитик",               desc: "PostHog, воронки, когорты, SQL — переводит данные в решения", color: "#4561E8", available: true,  avatar: "М", group: "Рост и маркетинг" },
+  // ── Продукт и технологии ─────────────────────────────────
+  { id: "product",   name: "Кира",   role: "Директор по продукту",   desc: "UX, роадмап, приоритизация — следит чтобы каждая фича решала реальную боль", color: "#8b5cf6", available: true,  avatar: "К", group: "Продукт и технологии" },
+  { id: "tech",      name: "Игорь",  role: "Старший разработчик",    desc: "Next.js, Supabase, деплой, баги, архитектура — знает каждую строку кода", color: "#06b6d4", available: true,  avatar: "И", group: "Продукт и технологии" },
+  // ── Контент и обучение ────────────────────────────────────
+  { id: "mentor",    name: "Антон",  role: "Наставник-куратор",      desc: "Педагогическая методология, качество AI-объяснений, учебные траектории", color: "#10b981", available: true,  avatar: "А", group: "Контент и обучение" },
+  { id: "content",   name: "Лена",   role: "Директор по контенту",   desc: "Учебный контент по 14 предметам, RAG-база знаний, фактическая точность", color: "#84cc16", available: true,  avatar: "Л", group: "Контент и обучение" },
+  // ── Бизнес ────────────────────────────────────────────────
+  { id: "bizdev",    name: "Дима",   role: "Директор по развитию",   desc: "B2B партнёрства, школы и вузы, корпоративный рынок, гранты", color: "#eab308", available: true,  avatar: "Д", group: "Бизнес" },
+  { id: "finance",   name: "Виктор", role: "Финансовый директор",    desc: "P&L, unit economics, ценообразование, путь к прибыльности", color: "#64748b", available: true,  avatar: "В", group: "Бизнес" },
 ];
 
 interface Msg { role: "user" | "assistant"; content: string; ts?: number; thinking?: string }
@@ -347,6 +365,55 @@ const THINKING: Record<string, string[]> = {
     "проверяю гипотезу...",
     "придумываю A/B тест...",
   ],
+  mentor: [
+    "читаю Выготского...",
+    "проверяю методологию...",
+    "строю учебную траекторию...",
+    "думаю про зону ближайшего развития...",
+    "ищу пробел в знаниях...",
+    "проверяю качество объяснения...",
+  ],
+  tech: [
+    "смотрю логи...",
+    "пишу миграцию...",
+    "оптимизирую запрос...",
+    "чиню баг...",
+    "проверяю деплой...",
+    "читаю stack trace...",
+    "пишу тест...",
+  ],
+  bizdev: [
+    "изучаю рынок...",
+    "строю воронку партнёрств...",
+    "думаю про B2B...",
+    "ищу точку входа...",
+    "считаю потенциал сделки...",
+    "готовлю питч...",
+  ],
+  product: [
+    "рисую юзер-флоу...",
+    "изучаю онбординг...",
+    "приоритизирую бэклог...",
+    "смотрю сессии пользователей...",
+    "думаю про UX...",
+    "проверяю метрики активации...",
+  ],
+  content: [
+    "пишу объяснение...",
+    "проверяю факты...",
+    "улучшаю RAG базу...",
+    "редактирую контент...",
+    "думаю про учебный план...",
+    "ищу частую ошибку учеников...",
+  ],
+  finance: [
+    "строю финмодель...",
+    "считаю unit economics...",
+    "проверяю P&L...",
+    "думаю про монетизацию...",
+    "анализирую churn...",
+    "считаю LTV...",
+  ],
 };
 
 function pickThinking(empId: string): string {
@@ -437,52 +504,73 @@ function TeamTab() {
     setStreaming(false);
   };
 
-  // Employee list view
+  // Employee list view — grouped by department
   if (!selected) {
+    // Build groups
+    const groups: { label: string; members: Employee[] }[] = [];
+    const groupOrder = ["Рост и маркетинг", "Продукт и технологии", "Контент и обучение", "Бизнес"];
+    for (const label of groupOrder) {
+      const members = EMPLOYEES.filter(e => e.group === label);
+      if (members.length) groups.push({ label, members });
+    }
+    // Any ungrouped at the end
+    const ungrouped = EMPLOYEES.filter(e => !e.group);
+    if (ungrouped.length) groups.push({ label: "Остальные", members: ungrouped });
+
+    const EmpCard = ({ emp }: { emp: Employee }) => (
+      <div
+        key={emp.id}
+        onClick={() => emp.available && openChat(emp)}
+        style={{
+          background: CARD, border: `1px solid ${BOR}`, borderRadius: 16,
+          padding: "20px 22px", cursor: emp.available ? "pointer" : "default",
+          backdropFilter: GLASS, WebkitBackdropFilter: GLASS, boxShadow: SHADOW,
+          opacity: emp.available ? 1 : 0.5,
+          transition: "transform 0.15s, box-shadow 0.15s",
+          position: "relative", overflow: "hidden",
+        }}
+        onMouseEnter={e => { if (emp.available) { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; }}}
+        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "none"; }}
+      >
+        {/* Colour accent line */}
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: emp.color, opacity: 0.8 }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
+          <div style={{
+            width: 46, height: 46, borderRadius: 14, flexShrink: 0,
+            background: emp.color + "22", border: `1.5px solid ${emp.color}55`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 18, fontWeight: 700, color: emp.color,
+          }}>{emp.avatar}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: TEXT }}>{emp.name}</p>
+            <p style={{ margin: "2px 0 0", fontSize: 11, color: emp.color, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>{emp.role}</p>
+          </div>
+          {!emp.available && (
+            <span style={{ flexShrink: 0, fontSize: 10, padding: "3px 8px", borderRadius: 99, background: MUTED + "22", color: MUTED, fontWeight: 600 }}>Скоро</span>
+          )}
+        </div>
+        <p style={{ margin: 0, fontSize: 12.5, color: MUTED, lineHeight: 1.55 }}>{emp.desc}</p>
+        {emp.available && <EmpCardFooter emp={emp} color={emp.color} muted={MUTED} />}
+      </div>
+    );
+
     return (
       <div>
-        <p style={{ fontSize: 13, color: MUTED, marginBottom: 24 }}>
-          Выбери сотрудника — откроется чат с ним. Каждый знает свою роль и контекст Mentora.
+        <p style={{ fontSize: 13, color: MUTED, marginBottom: 28 }}>
+          Выбери сотрудника — откроется чат с ним. Каждый знает свою роль и полный контекст Mentora.
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
-          {EMPLOYEES.map(emp => (
-            <div
-              key={emp.id}
-              onClick={() => emp.available && openChat(emp)}
-              style={{
-                background: CARD, border: `1px solid ${BOR}`, borderRadius: 16,
-                padding: "20px 22px", cursor: emp.available ? "pointer" : "default",
-                backdropFilter: GLASS, WebkitBackdropFilter: GLASS, boxShadow: SHADOW,
-                opacity: emp.available ? 1 : 0.5,
-                transition: "transform 0.15s, box-shadow 0.15s",
-                position: "relative", overflow: "hidden",
-              }}
-              onMouseEnter={e => { if (emp.available) { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; }}}
-              onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "none"; }}
-            >
-              {/* Colour accent line */}
-              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: emp.color, opacity: 0.7 }} />
-              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-                {/* Avatar */}
-                <div style={{
-                  width: 44, height: 44, borderRadius: 14, flexShrink: 0,
-                  background: emp.color + "22", border: `1px solid ${emp.color}44`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 18, fontWeight: 700, color: emp.color,
-                }}>{emp.avatar}</div>
-                <div>
-                  <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: TEXT }}>{emp.name}</p>
-                  <p style={{ margin: 0, fontSize: 11, color: emp.color, fontWeight: 600, letterSpacing: "0.04em" }}>{emp.role}</p>
-                </div>
-                {!emp.available && (
-                  <span style={{ marginLeft: "auto", fontSize: 10, padding: "3px 8px", borderRadius: 99, background: MUTED + "22", color: MUTED, fontWeight: 600 }}>Скоро</span>
-                )}
-              </div>
-              <p style={{ margin: 0, fontSize: 12.5, color: MUTED, lineHeight: 1.5 }}>{emp.desc}</p>
-              {emp.available && <EmpCardFooter emp={emp} color={emp.color} muted={MUTED} />}
+        {groups.map(({ label, members }) => (
+          <div key={label} style={{ marginBottom: 32 }}>
+            <p style={{
+              fontSize: 10, fontWeight: 700, color: MUTED, textTransform: "uppercase",
+              letterSpacing: "0.12em", marginBottom: 14,
+              paddingBottom: 8, borderBottom: `1px solid ${BOR}`,
+            }}>{label}</p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
+              {members.map(emp => <EmpCard key={emp.id} emp={emp} />)}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     );
   }
@@ -1265,8 +1353,10 @@ export default function AdminPanel() {
               <Metric label="Пользователей"     value={stats.users.total}       sub={`+${stats.users.newToday} сегодня`} />
               <Metric label="Онлайн (5 мин)"    value={stats.users.onlineNow ?? 0} sub={`сегодня: ${N(stats.users.activeToday)}`} color="#22d3ee" />
               <Metric label="Активны сегодня"   value={stats.users.activeToday} sub={`неделя: ${N(stats.users.activeWeek)}`} color={GREEN} />
+              <Metric label="D7 Retention"       value={stats.users.d7Retention != null ? stats.users.d7Retention + "%" : "—"} sub="вернулись через 7 дн." color={stats.users.d7Retention != null ? (stats.users.d7Retention >= 30 ? GREEN : stats.users.d7Retention >= 15 ? "#f59e0b" : "#ef4444") : MUTED} />
               <Metric label="Сообщений сегодня" value={stats.chat.messagesToday} sub={`всего: ${N(stats.chat.totalMessages)}`} />
               <Metric label="MRR (оценка)"      value={R(mrr)} sub={`Pro×${pro} + Ultra×${ult}`} color="#a78bfa" />
+              <Metric label="Новых платящих"    value={stats.users.newPayingThisMonth} sub={(() => { const diff = stats.users.newPayingThisMonth - stats.users.newPayingLastMonth; return diff > 0 ? `+${diff} vs прош.мес` : diff < 0 ? `${diff} vs прош.мес` : "как в прош.мес"; })()} color={stats.users.newPayingThisMonth > stats.users.newPayingLastMonth ? GREEN : MUTED} />
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 12, marginBottom: 16 }}>
