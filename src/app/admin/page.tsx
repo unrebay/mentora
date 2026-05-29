@@ -249,6 +249,7 @@ const ILegal    = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const IActivity = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>;
 const IAudit    = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="14" x2="15" y2="14"/><line x1="9" y1="18" x2="13" y2="18"/></svg>;
 const IFinances = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><line x1="2" y1="11" x2="22" y2="11"/></svg>;
+const IStrategy = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>;
 
 // ── Team Tab ──────────────────────────────────────────────────────────────────
 interface Employee {
@@ -1273,7 +1274,7 @@ function LegalTab({ annualRev }: { annualRev: number }) {
   );
 }
 
-type Tab = "overview" | "users" | "activity" | "audit" | "knowledge" | "team" | "roadmap" | "legal" | "finances";
+type Tab = "overview" | "users" | "activity" | "audit" | "knowledge" | "team" | "roadmap" | "legal" | "finances" | "strategy";
 
 // ── Insights: Power Users, Churn Risk, Cohort Retention ─────────────────
 function InsightsSection({ TEXT, MUTED, CARD, BOR, isDark }: { TEXT: string; MUTED: string; CARD: string; BOR: string; isDark: boolean }) {
@@ -1475,6 +1476,338 @@ function InsightsSection({ TEXT, MUTED, CARD, BOR, isDark }: { TEXT: string; MUT
   );
 }
 
+
+// ── Strategy Tab ─────────────────────────────────────────────────────────────
+function StrategyTab({ mrr, arr, pro, ult, stats }: { mrr: number; arr: number; pro: number; ult: number; stats: Stats | null }) {
+  const { CARD, BOR, TEXT, MUTED, isDark } = useTok();
+  const GREEN = "#22c55e", AMBER = "#f59e0b", RED = "#ef4444", BRAND = "#4561E8";
+
+  // Burn rate estimate — loaded from finances API
+  const [monthlyFixed, setMonthlyFixed] = React.useState<number | null>(null);
+  React.useEffect(() => {
+    fetch("/api/admin/finances")
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setMonthlyFixed(d.monthlyFixed ?? null); })
+      .catch(() => {});
+  }, []);
+
+  const burnRate  = monthlyFixed ?? 0;
+  const netMonthly = mrr - burnRate;
+  const runwayMos  = burnRate > mrr && burnRate > 0
+    ? "∞ расход > доход"
+    : "самоокупаемы ✓";
+  const beNeeded   = burnRate > 0 ? Math.ceil(burnRate / (mrr > 0 ? mrr / (pro + ult || 1) : 499)) : 0;
+
+  const sectionTitle = (t: string) => (
+    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: MUTED, margin: "0 0 16px", borderBottom: `1px solid ${BOR}`, paddingBottom: 8 }}>{t}</p>
+  );
+
+  const Row = ({ l, v, c }: { l: string; v: string; c?: string }) => (
+    <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: `1px solid ${BOR}` }}>
+      <span style={{ fontSize: 13, color: MUTED }}>{l}</span>
+      <span style={{ fontSize: 13, fontWeight: 600, color: c ?? TEXT }}>{v}</span>
+    </div>
+  );
+
+  return (
+    <>
+      {/* ── Шапка: миссия ─────────────────────────────────────────── */}
+      <div style={{ marginBottom: 24, padding: "22px 28px", borderRadius: 18,
+        background: isDark
+          ? "linear-gradient(135deg, rgba(69,97,232,0.14), rgba(124,58,237,0.10))"
+          : "linear-gradient(135deg, rgba(69,97,232,0.08), rgba(124,58,237,0.06))",
+        border: `1px solid ${isDark ? "rgba(124,58,237,0.25)" : "rgba(69,97,232,0.15)"}`,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
+          <span style={{ fontSize: 28 }}>🌍</span>
+          <div>
+            <p style={{ fontSize: 18, fontWeight: 800, color: TEXT, margin: 0, letterSpacing: "-0.3px" }}>
+              Mentora — AI-ментор без границ
+            </p>
+            <p style={{ fontSize: 13, color: MUTED, margin: "4px 0 0" }}>
+              Персональное AI-образование для каждого школьника и студента в мире
+            </p>
+          </div>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
+          {[
+            { l: "Рынок РФ (EdTech)",  v: "≈ 100 млрд ₽/год", c: BRAND },
+            { l: "Рынок СНГ",          v: "≈ 350 млрд ₽/год", c: BRAND },
+            { l: "Мировой EdTech",     v: "≈ $400 млрд/год",  c: "#a78bfa" },
+            { l: "Целевая доля (3 л)", v: "0.5–1% SAM",       c: GREEN },
+          ].map(({ l, v, c }) => (
+            <div key={l} style={{ padding: "10px 14px", borderRadius: 10,
+              background: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.55)",
+              border: `1px solid ${BOR}` }}>
+              <p style={{ fontSize: 10, color: MUTED, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.08em" }}>{l}</p>
+              <p style={{ fontSize: 16, fontWeight: 700, color: c, margin: 0 }}>{v}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20, marginBottom: 20 }}>
+
+        {/* ── TAM / SAM / SOM ───────────────────────────────────── */}
+        <div style={{ background: CARD, borderRadius: 16, padding: "20px 24px", border: `1px solid ${BOR}` }}>
+          {sectionTitle("📊 TAM · SAM · SOM")}
+          {[
+            { label: "TAM — весь российский EdTech",     value: "100 млрд ₽/год", bar: 100, color: "#64748b" },
+            { label: "SAM — AI-тьюторинг (школа+вуз)",  value: "15 млрд ₽/год",  bar: 15,  color: BRAND },
+            { label: "SOM — Mentora (3 года)",           value: "500–800 млн ₽",  bar: 5,   color: GREEN },
+            { label: "SAM СНГ (КЗ, БЕЛ, УЗ, UA...)",   value: "50 млрд ₽/год",  bar: 50,  color: "#f97316" },
+            { label: "Мировой AI EdTech (2027)",         value: "$50 млрд",        bar: 12,  color: "#a78bfa" },
+          ].map(({ label, value, bar, color }) => (
+            <div key={label} style={{ marginBottom: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                <span style={{ fontSize: 12, color: MUTED }}>{label}</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color }}>{value}</span>
+              </div>
+              <div style={{ height: 4, borderRadius: 99, background: BOR }}>
+                <div style={{ height: "100%", width: `${Math.min(bar, 100)}%`, borderRadius: 99, background: color }} />
+              </div>
+            </div>
+          ))}
+          <p style={{ fontSize: 11, color: MUTED, marginTop: 14, fontStyle: "italic" }}>
+            *Оценка Tiburon Research 2024, Edtech Digest, собственный анализ
+          </p>
+        </div>
+
+        {/* ── Инвестиционные раунды ─────────────────────────────── */}
+        <div style={{ background: CARD, borderRadius: 16, padding: "20px 24px", border: `1px solid ${BOR}` }}>
+          {sectionTitle("💼 Инвестиционные раунды")}
+          {[
+            {
+              name: "Bootstrap",
+              status: "current",
+              range: "0 — сейчас",
+              target: "ARR < 5 млн ₽",
+              note: "Самофинансирование. Proof of concept, первые платящие.",
+              color: GREEN,
+            },
+            {
+              name: "Pre-Seed",
+              status: "planned",
+              range: "5–15 млн ₽",
+              target: "ARR 5–30 млн ₽",
+              note: "Маркетинг, первый контент-менеджер, рост до 500+ платящих.",
+              color: AMBER,
+            },
+            {
+              name: "Seed",
+              status: "future",
+              range: "50–100 млн ₽",
+              target: "ARR 100+ млн ₽",
+              note: "Команда продукта, B2B-направление, выход в СНГ.",
+              color: BRAND,
+            },
+            {
+              name: "Series A",
+              status: "future",
+              range: "500+ млн ₽",
+              target: "ARR 1+ млрд ₽",
+              note: "Международная экспансия, мультиязычность, агрессивный рост.",
+              color: "#a78bfa",
+            },
+          ].map((r, i) => (
+            <div key={r.name} style={{ display: "flex", gap: 14, paddingBottom: 14,
+              borderBottom: i < 3 ? `1px solid ${BOR}` : "none", marginBottom: i < 3 ? 14 : 0 }}>
+              {/* Timeline dot */}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+                <div style={{ width: 12, height: 12, borderRadius: "50%", marginTop: 3,
+                  background: r.status === "current" ? r.color : BOR,
+                  border: `2px solid ${r.color}`,
+                  boxShadow: r.status === "current" ? `0 0 0 3px ${r.color}30` : "none",
+                }} />
+                {i < 3 && <div style={{ width: 2, flex: 1, marginTop: 4, background: BOR }} />}
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: r.color }}>{r.name}</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 99,
+                    background: r.status === "current" ? r.color + "20" : BOR,
+                    color: r.status === "current" ? r.color : MUTED,
+                    border: `1px solid ${r.status === "current" ? r.color + "40" : BOR}` }}>
+                    {r.status === "current" ? "● текущий" : r.status === "planned" ? "следующий" : "будущий"}
+                  </span>
+                </div>
+                <p style={{ fontSize: 12, fontWeight: 600, color: TEXT, margin: "0 0 2px" }}>{r.range}</p>
+                <p style={{ fontSize: 11, color: MUTED, margin: "0 0 3px" }}>Цель: {r.target}</p>
+                <p style={{ fontSize: 11, color: MUTED, margin: 0, opacity: 0.75 }}>{r.note}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20, marginBottom: 20 }}>
+
+        {/* ── Runway & финансовая модель ────────────────────────── */}
+        <div style={{ background: CARD, borderRadius: 16, padding: "20px 24px", border: `1px solid ${BOR}` }}>
+          {sectionTitle("⚡ Runway & финансовая модель")}
+          {stats && <>
+            <Row l="MRR (оценка)"       v={`${mrr.toLocaleString("ru-RU")} ₽`}     c={GREEN} />
+            <Row l="ARR (оценка)"       v={`${arr.toLocaleString("ru-RU")} ₽`}     c={GREEN} />
+            <Row l="Платящих"           v={`${pro + ult}`}                           />
+            {burnRate > 0 && <>
+              <Row l="Расходы/мес (фикс.)" v={`${burnRate.toLocaleString("ru-RU")} ₽`}  c={AMBER} />
+              <Row l="Чистая прибыль/мес"  v={`${netMonthly.toLocaleString("ru-RU")} ₽`} c={netMonthly >= 0 ? GREEN : RED} />
+            </>}
+            <div style={{ marginTop: 14, padding: "12px 16px", borderRadius: 10,
+              background: mrr >= burnRate ? "rgba(34,197,94,0.07)" : "rgba(239,68,68,0.07)",
+              border: `1px solid ${mrr >= burnRate ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)"}` }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: mrr >= burnRate ? GREEN : RED, margin: "0 0 4px" }}>
+                {mrr >= burnRate ? "✓ Самоокупаемость" : "⚠️ Расходы превышают выручку"}
+              </p>
+              <p style={{ fontSize: 12, color: MUTED, margin: 0 }}>
+                {mrr >= burnRate
+                  ? `Бизнес прибылен. До безубыточности — пройдено.`
+                  : `Требуется ${beNeeded} платящих для безубыточности при текущих расходах.`}
+              </p>
+            </div>
+          </>}
+          <div style={{ marginTop: 16 }}>
+            {sectionTitle("📈 Ключевые вехи (ARR)")}
+            {[
+              { l: "1 млн ₽/год",    sub: "~84 Pro",  done: arr >= 1_000_000,    c: GREEN  },
+              { l: "5 млн ₽/год",    sub: "~420 Pro", done: arr >= 5_000_000,    c: GREEN  },
+              { l: "10 млн ₽/год",   sub: "~840 Pro", done: arr >= 10_000_000,   c: AMBER  },
+              { l: "50 млн ₽/год",   sub: "Pre-seed", done: arr >= 50_000_000,   c: BRAND  },
+              { l: "100 млн ₽/год",  sub: "Seed",     done: arr >= 100_000_000,  c: "#a78bfa" },
+              { l: "1 млрд ₽/год",   sub: "Series A", done: arr >= 1_000_000_000,c: "#ec4899" },
+            ].map(({ l, sub, done, c }) => (
+              <div key={l} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 0",
+                borderBottom: `1px solid ${BOR}` }}>
+                <div style={{ width: 18, height: 18, borderRadius: "50%", flexShrink: 0,
+                  background: done ? c : BOR, border: `2px solid ${done ? c : BOR}`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: done ? `0 0 6px ${c}50` : "none" }}>
+                  {done && <svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1,5 3.5,7.5 8,2" stroke="white" strokeWidth="1.8" fill="none" strokeLinecap="round"/></svg>}
+                </div>
+                <span style={{ fontSize: 13, color: done ? TEXT : MUTED, fontWeight: done ? 600 : 400 }}>{l}</span>
+                <span style={{ fontSize: 11, color: MUTED, marginLeft: "auto" }}>{sub}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Международная экспансия ───────────────────────────── */}
+        <div style={{ background: CARD, borderRadius: 16, padding: "20px 24px", border: `1px solid ${BOR}` }}>
+          {sectionTitle("🌐 Международная экспансия")}
+          {[
+            {
+              phase: "Фаза 1 — РФ",
+              flag: "🇷🇺",
+              trigger: "Текущая фаза",
+              desc: "Полная локализация под ЕГЭ/ОГЭ, ФГОС. Рост до 1 000 платящих. Органика + Telegram.",
+              arget: "ARR ≥ 5 млн ₽",
+              done: arr >= 5_000_000,
+              color: GREEN,
+            },
+            {
+              phase: "Фаза 2 — СНГ",
+              flag: "🇰🇿🇧🇾🇺🇿",
+              trigger: "ARR 10–30 млн ₽",
+              desc: "Казахстан, Беларусь, Узбекистан. Адаптация учебных программ, локальные платёжки (Kaspi, ERIP).",
+              arget: "ARR ≥ 30 млн ₽",
+              done: arr >= 30_000_000,
+              color: AMBER,
+            },
+            {
+              phase: "Фаза 3 — MENA",
+              flag: "🇦🇪🇸🇦🇪🇬",
+              trigger: "ARR 100+ млн ₽ / Seed",
+              desc: "ОАЭ, Саудовская Аравия, Египет. Арабский язык, исламская педагогика, Vision 2030.",
+              arget: "ARR ≥ 100 млн ₽",
+              done: arr >= 100_000_000,
+              color: BRAND,
+            },
+            {
+              phase: "Фаза 4 — Global",
+              flag: "🌍",
+              trigger: "Series A",
+              desc: "Английский, испанский, португальский (Латинская Америка). Конкуренция с Khan Academy, Duolingo.",
+              arget: "ARR ≥ 1 млрд ₽",
+              done: arr >= 1_000_000_000,
+              color: "#a78bfa",
+            },
+          ].map((ph, i) => (
+            <div key={ph.phase} style={{ display: "flex", gap: 14,
+              paddingBottom: i < 3 ? 16 : 0, marginBottom: i < 3 ? 16 : 0,
+              borderBottom: i < 3 ? `1px solid ${BOR}` : "none" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, paddingTop: 2 }}>
+                <div style={{ width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                  background: ph.done ? ph.color + "20" : BOR,
+                  border: `2px solid ${ph.done ? ph.color : BOR}`,
+                  fontSize: 14 }}>
+                  {ph.done ? "✓" : ph.flag.slice(0,2)}
+                </div>
+                {i < 3 && <div style={{ width: 2, flex: 1, marginTop: 6, background: BOR }} />}
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: ph.done ? ph.color : TEXT }}>{ph.phase}</span>
+                  <span style={{ fontSize: 10, color: MUTED }}>{ph.flag}</span>
+                  <span style={{ marginLeft: "auto", fontSize: 10, padding: "2px 8px", borderRadius: 99,
+                    background: ph.done ? ph.color + "15" : BOR,
+                    color: ph.done ? ph.color : MUTED, fontWeight: 600 }}>
+                    {ph.done ? "✓ выполнено" : ph.trigger}
+                  </span>
+                </div>
+                <p style={{ fontSize: 12, color: MUTED, margin: "5px 0 0", lineHeight: 1.5 }}>{ph.desc}</p>
+              </div>
+            </div>
+          ))}
+
+          {/* Конкуренты */}
+          <div style={{ marginTop: 16, padding: "12px 16px", borderRadius: 10,
+            background: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+            border: `1px solid ${BOR}` }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 10px" }}>Позиция vs конкуренты</p>
+            {[
+              { name: "Khan Academy",    advantage: "AI-персонализация, рус. локализация", color: "#f97316" },
+              { name: "Яндекс.Репетитор",advantage: "Нет ограничений по предметам, чат-формат", color: "#f97316" },
+              { name: "Skysmart",        advantage: "AI в основе, не шаблонные задания",   color: "#f59e0b" },
+              { name: "Duolingo",        advantage: "Не только языки — все школьные предметы", color: "#22c55e" },
+            ].map(({ name, advantage, color }) => (
+              <div key={name} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start",
+                padding: "6px 0", borderBottom: `1px solid ${BOR}` }}>
+                <span style={{ fontSize: 12, color: MUTED, flexShrink: 0, width: 130 }}>{name}</span>
+                <span style={{ fontSize: 11, color, textAlign: "right", lineHeight: 1.4 }}>{advantage}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Инвесторская сводка ──────────────────────────────────────── */}
+      <div style={{ background: CARD, borderRadius: 16, padding: "20px 24px", border: `1px solid ${BOR}` }}>
+        {sectionTitle("📋 Инвесторская сводка (elevator pitch)")}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
+          {[
+            { icon: "🎯", title: "Проблема",    body: "80% школьников РФ не могут позволить репетитора. Средний репетитор стоит 1 500–3 000 ₽/час. Mentora = 499 ₽/месяц за безлимитного AI-ментора по любому предмету." },
+            { icon: "🚀", title: "Решение",     body: "AI-ментор на базе Claude, знающий школьную программу РФ. Адаптивный стиль, RAG база знаний, персонализация. Работает 24/7 без выгорания." },
+            { icon: "💰", title: "Бизнес-модель",body: "B2C SaaS: Free (20 сообщ/день) + Pro 499₽/мес + Ultra 799₽/мес. B2B (школы/вузы) — Phase 2. Gross margin ~85%." },
+            { icon: "📊", title: "Тракшн",      body: `MRR ≈ ${mrr.toLocaleString("ru-RU")} ₽. Платящих: ${pro + ult}. Растём органически через Telegram + сарафан. NPS не измерен — следующий шаг.` },
+            { icon: "🏆", title: "Команда",     body: "Solo founder. AI-команда из 9 специалистов (Claude). Игорь (CTO), Кира (PM), Лена (контент). Основатель — продукт + технологии + стратегия." },
+            { icon: "🎁", title: "Запрашиваем", body: "Pre-Seed: 5–15 млн ₽. На 12 месяцев: paid acquisition (50%), команда (30%), инфраструктура (20%). Цель: 500 платящих, ARR 30 млн ₽." },
+          ].map(({ icon, title, body }) => (
+            <div key={title} style={{ padding: "14px 16px", borderRadius: 12,
+              background: isDark ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.55)",
+              border: `1px solid ${BOR}` }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <span style={{ fontSize: 18 }}>{icon}</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>{title}</span>
+              </div>
+              <p style={{ fontSize: 12, color: MUTED, margin: 0, lineHeight: 1.6 }}>{body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function AdminPanel() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -1546,6 +1879,7 @@ export default function AdminPanel() {
     { id: "overview",  icon: IGrid,     label: "Обзор" },
     { id: "users",     icon: IUsers,    label: "Пользователи" },
     { id: "finances",  icon: IFinances, label: "Финансы" },
+    { id: "strategy",  icon: IStrategy, label: "Стратегия" },
     { id: "activity",  icon: IActivity, label: "Активность" },
     { id: "roadmap",   icon: IRoadmap,  label: "Роадмап" },
     { id: "knowledge", icon: IKb,       label: "База знаний" },
@@ -1861,6 +2195,7 @@ export default function AdminPanel() {
           {tab === "team"      && <TabErrorBoundary tabName="Команда"><TeamTab /></TabErrorBoundary>}
           {tab === "roadmap" && <TabErrorBoundary tabName="Роадмап"><RoadmapV2Tab /></TabErrorBoundary>}
           {tab === "legal"     && <TabErrorBoundary tabName="Юридические"><LegalTab annualRev={arr} /></TabErrorBoundary>}
+          {tab === "strategy"  && <TabErrorBoundary tabName="Стратегия"><StrategyTab mrr={mrr} arr={arr} pro={pro} ult={ult} stats={stats} /></TabErrorBoundary>}
           {/* ── ФИНАНСЫ (5.0 — объединено: Доходы + P&L + Калькулятор) ─── */}
           {tab === "finances" && !loading && stats && <>
             {/* KPI строка */}
