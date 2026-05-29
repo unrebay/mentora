@@ -17,6 +17,12 @@ function formatCountdown(ms: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+const glass = {
+  backdropFilter: "blur(20px) saturate(1.8)",
+  WebkitBackdropFilter: "blur(20px) saturate(1.8)",
+  boxShadow: "0 2px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)",
+} as const;
+
 export default function FreeWindowPill({ remaining, limit, windowResetAt }: Props) {
   const [msLeft, setMsLeft] = useState<number | null>(
     windowResetAt ? Math.max(0, new Date(windowResetAt).getTime() - Date.now()) : null
@@ -27,7 +33,6 @@ export default function FreeWindowPill({ remaining, limit, windowResetAt }: Prop
     const tick = () => {
       const ms = Math.max(0, new Date(windowResetAt).getTime() - Date.now());
       setMsLeft(ms);
-      if (ms === 0) clearInterval(id);
     };
     tick();
     const id = setInterval(tick, 1000);
@@ -35,62 +40,40 @@ export default function FreeWindowPill({ remaining, limit, windowResetAt }: Prop
   }, [windowResetAt]);
 
   const isLow = remaining <= 3;
-  const isExhausted = remaining === 0;
   const showTimer = windowResetAt !== null && msLeft !== null && msLeft > 0;
 
   return (
-    <div className="inline-flex items-center gap-1.5 flex-wrap">
-      {/* FREE counter pill */}
-      <span
-        className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-[3px] rounded-full transition-colors"
-        style={{
-          background: "rgba(100,116,139,0.10)",
-          color: "var(--text-muted)",
-          border: "1px solid rgba(100,116,139,0.18)",
-        }}
-      >
-        FREE
-        <span
-          className="font-bold tabular-nums"
-          style={{ color: isLow ? "#f59e0b" : "var(--text-secondary)" }}
-        >
-          · {remaining}/{limit}
-        </span>
+    <span
+      className="inline-flex items-center gap-2 select-none"
+      style={{
+        ...glass,
+        background: isLow ? "rgba(245,158,11,0.07)" : "var(--bg-nav)",
+        border: `1px solid ${isLow ? "rgba(245,158,11,0.30)" : "var(--border-light)"}`,
+        borderRadius: 999,
+        padding: "6px 14px",
+        fontSize: 13,
+        fontWeight: 600,
+        color: isLow ? "#f59e0b" : "var(--text-secondary)",
+      }}
+    >
+      <span className="tabular-nums" style={{ color: isLow ? "#f59e0b" : "var(--text)", fontWeight: 700 }}>
+        {remaining}/{limit}
       </span>
-
-      {/* Timer pill — iOS 26 liquid glass */}
       {showTimer && (
-        <span
-          className="inline-flex items-center gap-[5px] text-xs font-mono font-semibold px-2.5 py-[3px] rounded-full select-none"
-          style={{
-            background: isExhausted
-              ? "rgba(245,158,11,0.07)"
-              : "rgba(69,97,232,0.05)",
-            backdropFilter: "blur(28px) saturate(180%)",
-            WebkitBackdropFilter: "blur(28px) saturate(180%)",
-            border: isExhausted
-              ? "1px solid rgba(245,158,11,0.28)"
-              : "1px solid rgba(120,140,255,0.22)",
-            color: isExhausted ? "#f59e0b" : "#7c9cff",
-            boxShadow: isExhausted
-              ? "0 2px 16px rgba(245,158,11,0.10), inset 0 1px 0 rgba(255,255,255,0.10)"
-              : "0 2px 16px rgba(69,97,232,0.08), inset 0 1px 0 rgba(255,255,255,0.10)",
-            letterSpacing: "0.02em",
-          }}
-        >
-          {/* Clock SVG */}
-          <svg
-            width="11" height="11" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" strokeWidth="2.2"
-            strokeLinecap="round" strokeLinejoin="round"
-            style={{ opacity: 0.85, flexShrink: 0 }}
+        <>
+          <span style={{ opacity: 0.25, fontWeight: 300 }}>·</span>
+          <span
+            className="inline-flex items-center gap-1 tabular-nums font-mono"
+            style={{ fontSize: 12, color: isLow ? "#f59e0b" : "#7c9cff" }}
           >
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-          </svg>
-          <span className="tabular-nums">{formatCountdown(msLeft!)}</span>
-        </span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
+              <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+            </svg>
+            {formatCountdown(msLeft!)}
+          </span>
+        </>
       )}
-    </div>
+    </span>
   );
 }
