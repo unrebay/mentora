@@ -1,7 +1,6 @@
 "use client";
 import BodyScrollLock from "@/components/BodyScrollLock";
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { useTranslations } from "next-intl";
 
 interface Props {
@@ -23,13 +22,16 @@ export default function SubjectSuggestionModal({ open, onClose, userId }: Props)
     if (!name.trim()) return;
     setStatus("loading");
     try {
-      const supabase = createClient();
-      const { error } = await supabase.from("subject_suggestions").insert({
-        subject_name: name.trim(),
-        comment: comment.trim() || null,
-        user_id: userId ?? null,
+      const res = await fetch("/api/suggest-subject", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject_name: name.trim(),
+          comment: comment.trim() || null,
+          user_id: userId ?? null,
+        }),
       });
-      if (error) throw error;
+      if (!res.ok) throw new Error("request failed");
       setStatus("success");
       setTimeout(() => { onClose(); setName(""); setComment(""); setStatus("idle"); }, 1800);
     } catch {
