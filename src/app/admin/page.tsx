@@ -302,6 +302,23 @@ function renderMd(text: string): React.ReactNode {
 
 function chatKey(empId: string) { return `mentora_admin_chat_${empId}`; }
 
+function CompactEmpFooter({ emp, color, muted }: { emp: Employee; color: string; muted: string }) {
+  const [hist, setHist] = useState<Msg[]>([]);
+  useEffect(() => { setHist(loadHistory(emp.id)); }, [emp.id]);
+  const lastDate = hist.length > 0 && hist[hist.length - 1].ts
+    ? new Date(hist[hist.length - 1].ts!).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })
+    : null;
+  return (
+    <div style={{ paddingLeft: 19, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color, fontWeight: 600 }}>
+        <div style={{ width: 5, height: 5, borderRadius: "50%", background: color }} />
+        {hist.length > 0 ? `${hist.length} сообщ.` : "Открыть чат"} →
+      </div>
+      {lastDate && <span style={{ fontSize: 10, color: muted }}>{lastDate}</span>}
+    </div>
+  );
+}
+
 function EmpCardFooter({ emp, color, muted }: { emp: Employee; color: string; muted: string }) {
   const [hist, setHist] = useState<Msg[]>([]);
   useEffect(() => { setHist(loadHistory(emp.id)); }, [emp.id]);
@@ -504,73 +521,119 @@ function TeamTab() {
     setStreaming(false);
   };
 
-  // Employee list view — grouped by department
+  // Employee list view — vertical department columns with glass cards
   if (!selected) {
-    // Build groups
-    const groups: { label: string; members: Employee[] }[] = [];
     const groupOrder = ["Рост и маркетинг", "Продукт и технологии", "Контент и обучение", "Бизнес"];
-    for (const label of groupOrder) {
-      const members = EMPLOYEES.filter(e => e.group === label);
-      if (members.length) groups.push({ label, members });
-    }
-    // Any ungrouped at the end
+    const groups = groupOrder.map(label => ({
+      label,
+      members: EMPLOYEES.filter(e => e.group === label),
+    })).filter(g => g.members.length > 0);
     const ungrouped = EMPLOYEES.filter(e => !e.group);
     if (ungrouped.length) groups.push({ label: "Остальные", members: ungrouped });
 
+    // Glass compact card
     const EmpCard = ({ emp }: { emp: Employee }) => (
       <div
-        key={emp.id}
         onClick={() => emp.available && openChat(emp)}
         style={{
-          background: CARD, border: `1px solid ${BOR}`, borderRadius: 16,
-          padding: "20px 22px", cursor: emp.available ? "pointer" : "default",
-          backdropFilter: GLASS, WebkitBackdropFilter: GLASS, boxShadow: SHADOW,
-          opacity: emp.available ? 1 : 0.5,
-          transition: "transform 0.15s, box-shadow 0.15s",
           position: "relative", overflow: "hidden",
+          borderRadius: 14,
+          border: `1px solid ${emp.color}28`,
+          background: isDark
+            ? `linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)`
+            : `linear-gradient(145deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.55) 100%)`,
+          backdropFilter: "blur(16px) saturate(1.5)",
+          WebkitBackdropFilter: "blur(16px) saturate(1.5)",
+          boxShadow: isDark
+            ? `0 2px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)`
+            : `0 2px 12px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)`,
+          padding: "14px 15px 13px",
+          cursor: emp.available ? "pointer" : "default",
+          opacity: emp.available ? 1 : 0.45,
+          transition: "transform 0.14s, box-shadow 0.14s, border-color 0.14s",
         }}
-        onMouseEnter={e => { if (emp.available) { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; }}}
-        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "none"; }}
+        onMouseEnter={e => {
+          if (!emp.available) return;
+          const el = e.currentTarget as HTMLDivElement;
+          el.style.transform = "translateY(-2px)";
+          el.style.borderColor = emp.color + "55";
+          el.style.boxShadow = isDark
+            ? `0 6px 24px rgba(0,0,0,0.35), 0 0 0 1px ${emp.color}30, inset 0 1px 0 rgba(255,255,255,0.08)`
+            : `0 6px 20px rgba(0,0,0,0.10), 0 0 0 1px ${emp.color}35, inset 0 1px 0 rgba(255,255,255,1)`;
+        }}
+        onMouseLeave={e => {
+          const el = e.currentTarget as HTMLDivElement;
+          el.style.transform = "none";
+          el.style.borderColor = emp.color + "28";
+          el.style.boxShadow = isDark
+            ? "0 2px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)"
+            : "0 2px 12px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)";
+        }}
       >
-        {/* Colour accent line */}
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: emp.color, opacity: 0.8 }} />
-        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
+        {/* Left colour stripe */}
+        <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 3, background: `linear-gradient(180deg, ${emp.color}, ${emp.color}66)`, borderRadius: "14px 0 0 14px" }} />
+        {/* Subtle glow spot */}
+        <div style={{ position: "absolute", top: -20, right: -10, width: 80, height: 80, borderRadius: "50%", background: emp.color + "12", filter: "blur(18px)", pointerEvents: "none" }} />
+
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, paddingLeft: 8 }}>
           <div style={{
-            width: 46, height: 46, borderRadius: 14, flexShrink: 0,
-            background: emp.color + "22", border: `1.5px solid ${emp.color}55`,
+            width: 34, height: 34, borderRadius: 10, flexShrink: 0,
+            background: emp.color + "1a",
+            border: `1.5px solid ${emp.color}40`,
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 18, fontWeight: 700, color: emp.color,
+            fontSize: 14, fontWeight: 800, color: emp.color,
           }}>{emp.avatar}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: TEXT }}>{emp.name}</p>
-            <p style={{ margin: "2px 0 0", fontSize: 11, color: emp.color, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>{emp.role}</p>
+            <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: TEXT, letterSpacing: "-0.01em" }}>{emp.name}</p>
+            <p style={{ margin: "1px 0 0", fontSize: 10, color: emp.color, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>{emp.role}</p>
           </div>
-          {!emp.available && (
-            <span style={{ flexShrink: 0, fontSize: 10, padding: "3px 8px", borderRadius: 99, background: MUTED + "22", color: MUTED, fontWeight: 600 }}>Скоро</span>
-          )}
         </div>
-        <p style={{ margin: 0, fontSize: 12.5, color: MUTED, lineHeight: 1.55 }}>{emp.desc}</p>
-        {emp.available && <EmpCardFooter emp={emp} color={emp.color} muted={MUTED} />}
+
+        <p style={{ margin: "0 0 10px 11px", fontSize: 11.5, color: MUTED, lineHeight: 1.5, paddingLeft: 8, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{emp.desc}</p>
+
+        {emp.available && (
+          <CompactEmpFooter emp={emp} color={emp.color} muted={MUTED} />
+        )}
+        {!emp.available && (
+          <div style={{ paddingLeft: 19 }}>
+            <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 99, background: MUTED + "18", color: MUTED, fontWeight: 600 }}>Скоро</span>
+          </div>
+        )}
       </div>
     );
 
     return (
       <div>
-        <p style={{ fontSize: 13, color: MUTED, marginBottom: 28 }}>
+        <p style={{ fontSize: 13, color: MUTED, marginBottom: 20 }}>
           Выбери сотрудника — откроется чат с ним. Каждый знает свою роль и полный контекст Mentora.
         </p>
-        {groups.map(({ label, members }) => (
-          <div key={label} style={{ marginBottom: 32 }}>
-            <p style={{
-              fontSize: 10, fontWeight: 700, color: MUTED, textTransform: "uppercase",
-              letterSpacing: "0.12em", marginBottom: 14,
-              paddingBottom: 8, borderBottom: `1px solid ${BOR}`,
-            }}>{label}</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
-              {members.map(emp => <EmpCard key={emp.id} emp={emp} />)}
+        {/* Vertical columns layout — one column per department */}
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${groups.length}, 1fr)`, gap: 16, alignItems: "start" }}>
+          {groups.map(({ label, members }) => (
+            <div key={label}>
+              {/* Column header */}
+              <div style={{
+                marginBottom: 10, paddingBottom: 8,
+                borderBottom: `1px solid ${BOR}`,
+                display: "flex", alignItems: "center", gap: 6,
+              }}>
+                <span style={{
+                  fontSize: 9.5, fontWeight: 800, color: MUTED,
+                  textTransform: "uppercase", letterSpacing: "0.12em",
+                }}>{label}</span>
+                <span style={{
+                  fontSize: 9, fontWeight: 700, color: MUTED,
+                  background: BOR, borderRadius: 99,
+                  padding: "1px 6px", opacity: 0.7,
+                }}>{members.length}</span>
+              </div>
+              {/* Cards in column */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {members.map(emp => <EmpCard key={emp.id} emp={emp} />)}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     );
   }

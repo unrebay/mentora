@@ -16,7 +16,7 @@ function isDuplicate(key: string): boolean {
 }
 
 function notifyAdmin(text: string) {
-  const BOT_TOKEN = process.env.TELEGRAM_SUPPORT_BOT_TOKEN;
+  const BOT_TOKEN = process.env.TELEGRAM_SUPPORT_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
   const ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID;
   if (!BOT_TOKEN || !ADMIN_CHAT_ID) return;
   fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
