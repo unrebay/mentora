@@ -985,8 +985,8 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                   </p>
                   <p className="text-xs leading-relaxed mb-3" style={{ color: "var(--text-secondary)" }}>
                     {locale === "ru"
-                      ? <>Бесплатный план — <strong>10 сообщений в день</strong>. Осталось: <strong style={{ color: (messagesRemaining ?? 10) <= 2 ? "#ef4444" : (messagesRemaining ?? 10) <= 5 ? "#d97706" : "var(--text-primary)" }}>{messagesRemaining ?? 0}</strong>. Счётчик обновляется в 00:00 UTC.</>
-                      : <>Free plan — <strong>10 messages per day</strong>. Remaining: <strong style={{ color: (messagesRemaining ?? 10) <= 2 ? "#ef4444" : (messagesRemaining ?? 10) <= 5 ? "#d97706" : "var(--text-primary)" }}>{messagesRemaining ?? 0}</strong>. Resets at 00:00 UTC.</>
+                      ? <>Бесплатный план — <strong>10 сообщений за 8 часов</strong>. Осталось: <strong style={{ color: (messagesRemaining ?? 10) <= 2 ? "#ef4444" : (messagesRemaining ?? 10) <= 5 ? "#d97706" : "var(--text-primary)" }}>{messagesRemaining ?? 0}</strong>.{resetAt ? <> Сброс через <strong>{countdown}</strong>.</> : <> Начни чат, чтобы запустить счётчик.</>}</>
+                      : <>Free plan — <strong>10 messages per 8 hours</strong>. Remaining: <strong style={{ color: (messagesRemaining ?? 10) <= 2 ? "#ef4444" : (messagesRemaining ?? 10) <= 5 ? "#d97706" : "var(--text-primary)" }}>{messagesRemaining ?? 0}</strong>.{resetAt ? <> Resets in <strong>{countdown}</strong>.</> : <> Send a message to start the timer.</>}</>
                     }
                   </p>
                   {!isPro && (
@@ -1000,7 +1000,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
                         color: subjColor,
                       }}
                     >
-                      {locale === "ru" ? "Перейти на Pro →" : "Upgrade to Pro →"}
+                      {locale === "ru" ? "Улучшить тариф →" : "Upgrade plan →"}
                     </a>
                   )}
                 </div>
