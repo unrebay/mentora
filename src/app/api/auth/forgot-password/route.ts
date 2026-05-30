@@ -94,10 +94,10 @@ function buildResetEmail(confirmUrl: string): string {
         <!-- Card -->
         <tr><td style="background:#ffffff;border-radius:16px;padding:40px 36px 36px;box-shadow:0 1px 6px rgba(0,0,0,0.07);">
 
-          <p style="margin:0 0 8px;font-size:19px;font-weight:600;color:#1c1c1e;line-height:1.3;letter-spacing:-0.3px;">
+          <p style="margin:0 0 8px;font-size:19px;font-weight:600;color:#1c1c1e;line-height:1.3;letter-spacing:-0.3px;text-align:center;">
             Сброс пароля
           </p>
-          <p style="margin:0 0 28px;font-size:14px;color:#8e8e93;line-height:1.6;">
+          <p style="margin:0 0 28px;font-size:14px;color:#8e8e93;line-height:1.6;text-align:center;">
             Нажми кнопку ниже, чтобы задать новый пароль.<br>Ссылка действительна 1 час.
           </p>
 
