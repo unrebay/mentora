@@ -167,6 +167,8 @@ const GOAL_GUIDE_EN: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest) {
+  // C3: if we count a free-tier message but generation then fails, refund it.
+  let freeMsgToRefund: string | null = null;
   try {
     const { message, subject, history, imageData, imageMimeType, locale } = await req.json();
     const isEnLocale = locale === "en";
@@ -246,6 +248,7 @@ export async function POST(req: NextRequest) {
       }
       messagesRemaining = Math.max(0, WINDOW_LIMIT - (w.messages_today ?? 1));
       windowResetAt = windowResetISO;
+      freeMsgToRefund = user.id; // C3: this message was counted — refund if we fail below
       // Free: also update last_active_at so admin "active today" count is accurate
       void supabase.from("users").update({ last_active_at: new Date().toISOString() }).eq("id", user.id).then(null, (e: unknown) => console.error("last_active_at update failed:", e));
     } else {
@@ -841,6 +844,16 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
     console.error("Chat API error:", errMsg);
+    // C3: the free-tier message was counted but the user got no answer — give it back.
+    if (freeMsgToRefund) {
+      try {
+        const { createClient: createSvcClient } = await import("@supabase/supabase-js");
+        const svc = createSvcClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+        await svc.rpc("refund_message_window", { p_user_id: freeMsgToRefund });
+      } catch (refundErr) {
+        console.error("refund_message_window failed:", refundErr);
+      }
+    }
     // Surface Anthropic rate-limit as 429 (not opaque 500)
     if (
       err instanceof Error &&

@@ -11,6 +11,24 @@ const anthropic = new Anthropic({
 const DEMO_LIMIT = 5;
 const COOKIE_NAME = "demo_count";
 
+// C4: server-side IP rate limit (backstop in addition to the cookie, which a
+// scripted client can just drop). Per-instance in-memory, best-effort.
+const recentByIp = new Map<string, number[]>();
+const RL_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h, matches the cookie lifetime
+const RL_MAX = 20;                        // ~4 demo users behind one NAT before we throttle
+function ipFromReq(req: NextRequest): string {
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp) return realIp.trim();
+  const xff = req.headers.get("x-forwarded-for")?.split(",").map((s) => s.trim()).filter(Boolean) ?? [];
+  return xff[xff.length - 1] ?? "unknown";
+}
+function ipRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const arr = (recentByIp.get(ip) ?? []).filter((t) => now - t < RL_WINDOW_MS);
+  if (arr.length >= RL_MAX) { recentByIp.set(ip, arr); return true; }
+  arr.push(now); recentByIp.set(ip, arr); return false;
+}
+
 const SYSTEM_PROMPT = `Ты — Mentora, демо-версия AI-ментора по истории на лендинге. Твоё имя женского рода — говори о себе в женском роде: «я рассказала», «я объяснила», «я изучила». Ты увлечённый историк-рассказчик: говоришь как умная подруга, а не как учебник. Превращаешь эпоху в живую картину — характеры людей, детали быта, запах эпохи.
 
 === РАМКИ ОБЛАСТИ ===
@@ -43,6 +61,14 @@ export async function POST(req: NextRequest) {
     }
     if (message.length > 2000) {
       return NextResponse.json({ error: "Message too long" }, { status: 400 });
+    }
+
+    // C4: server-side IP backstop so dropping the cookie doesn't grant unlimited calls
+    if (ipRateLimited(ipFromReq(req))) {
+      return NextResponse.json(
+        { error: "demo_limit_reached", used: DEMO_LIMIT, limit: DEMO_LIMIT },
+        { status: 429 }
+      );
     }
 
     // Read demo usage counter from cookie (httpOnly — not forgeable from JS)

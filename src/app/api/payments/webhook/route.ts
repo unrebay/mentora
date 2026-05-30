@@ -49,6 +49,20 @@ export async function POST(req: NextRequest) {
 
     const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
+    // C1: idempotency guard — if this exact payment was already applied, do NOT
+    // extend the plan again. YooKassa retries notifications, and a user who knows
+    // their own payment.id could otherwise replay it to keep extending for free.
+    // (subscriptions.yookassa_payment_id is unique; a row here means "already processed".)
+    const { data: alreadyApplied } = await supabase
+      .from("subscriptions")
+      .select("yookassa_payment_id")
+      .eq("yookassa_payment_id", payment.id)
+      .maybeSingle();
+    if (alreadyApplied) {
+      console.log(`Webhook replay ignored for payment ${payment.id} (already applied)`);
+      return NextResponse.json({ ok: true });
+    }
+
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + days);
 

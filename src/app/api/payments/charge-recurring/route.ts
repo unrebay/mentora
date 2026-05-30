@@ -67,7 +67,10 @@ export async function POST(req: NextRequest) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Idempotence-Key": randomUUID(),
+          // C2: deterministic key — same user + same billing period => same key,
+          // so a duplicate/overlapping cron run is de-duplicated by YooKassa
+          // instead of charging the card twice. Changes after the plan renews.
+          "Idempotence-Key": `recurring-${u.id}-${(u.plan_expires_at ?? "").slice(0, 10)}`,
           Authorization:
             "Basic " +
             Buffer.from(

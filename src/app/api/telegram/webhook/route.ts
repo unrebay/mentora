@@ -924,8 +924,15 @@ export async function POST(req: NextRequest) {
   // Without this check ANYONE can POST fake updates and burn Anthropic budget +
   // probe support codes against the user-lookup function.
   // See: https://core.telegram.org/bots/api#setwebhook (secret_token parameter)
+  // C5: fail CLOSED. If the secret is not configured, reject instead of letting
+  // anyone POST fake updates. Requires TELEGRAM_WEBHOOK_SECRET to be set in prod
+  // AND registered with Telegram via setWebhook(secret_token).
   const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
-  if (expectedSecret) {
+  if (!expectedSecret) {
+    console.error("TELEGRAM_WEBHOOK_SECRET not set — rejecting webhook (fail-closed)");
+    return NextResponse.json({ ok: false, error: "misconfigured" }, { status: 503 });
+  }
+  {
     const got = req.headers.get("x-telegram-bot-api-secret-token");
     if (got !== expectedSecret) {
       return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
