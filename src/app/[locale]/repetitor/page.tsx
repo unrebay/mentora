@@ -371,6 +371,29 @@ export default async function RepetitorPage() {
         </div>
       </section>
 
+      {/* ─── Все предметы (внутренняя перелинковка SEO) ─────── */}
+      <section className="max-w-4xl mx-auto px-6 pb-16">
+        <h2 className="text-3xl md:text-4xl font-bold mb-3 tracking-tight text-center" style={{ color: "var(--text)" }}>
+          {isEn ? "Tutor for every subject" : "Репетитор по каждому предмету"}
+        </h2>
+        <p className="text-center text-sm mb-8" style={{ color: "var(--text-muted)" }}>
+          {isEn ? "17 sciences — pick yours and try free" : "17 наук — выбери свою и попробуй бесплатно"}
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {SUBJECT_LANDINGS.map((s) => (
+            <Link
+              key={s.url}
+              prefetch={false}
+              href={`/repetitor/${s.url}`}
+              className="px-4 py-3 rounded-xl border text-sm font-medium transition-colors hover:border-[var(--brand)]"
+              style={{ borderColor: "var(--border)", color: "var(--text)" }}
+            >
+              {isEn ? s.en.title : s.ru.title}
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* ─── Final CTA ─────────────────────────────────────── */}
       <section
         className="relative overflow-hidden py-20 px-6 text-center"

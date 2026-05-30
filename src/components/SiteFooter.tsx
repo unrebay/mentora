@@ -63,6 +63,12 @@ export async function PublicFooter({ dark }: { dark?: boolean } = {}) {
 
         {/* Правый блок: 4 ссылки */}
         <nav className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <Link href="/repetitor" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.7, color: linkColor }}>
+            {labels.repetitor}
+          </Link>
+          <Link href="/podgotovka-k-ege" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.7, color: linkColor }}>
+            {labels.podgotovka}
+          </Link>
           <Link href="/pricing" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.7, color: linkColor }}>
             {labels.pricing}
           </Link>

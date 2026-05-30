@@ -63,7 +63,7 @@ export const metadata: Metadata = {
       "Живой диалог вместо учебника. 17 наук — история, математика, физика, химия, психология, философия и др. Для любого возраста. Бесплатно.",
     images: [
       {
-        url: "/opengraph-image.png",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "Mentora — новый вид образования — 17 наук с AI-ментором",
@@ -75,7 +75,7 @@ export const metadata: Metadata = {
     title: "Mentora — новый вид образования — 17 наук с AI-ментором",
     description:
       "Живой диалог вместо учебника. 17 наук — история, математика, физика, химия, психология и др. Для любого возраста. Бесплатно.",
-    images: ["/opengraph-image.png"],
+    images: ["/og-image.png"],
   },
   icons: {
     icon: [
