@@ -2,6 +2,12 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+// Supabase can operate in two modes:
+// 1. PKCE (modern): email contains token_hash → verifyOtp({ token_hash, type })
+// 2. Implicit/legacy: email contains token + user email → verifyOtp({ email, token, type })
+// Both modes send a link to this page. For type=recovery we NEVER auto-verify on mount
+// because Apple Mail / iCloud pre-fetches all email links as plain HTTP GET requests,
+// which would consume the one-time token before the user ever clicks "Reset password".
 type State = "loading" | "ready_recovery" | "verifying" | "error_token_used" | "error_generic";
 
 const BG = (
@@ -32,47 +38,59 @@ const Spinner = () => (
 
 export default function AuthConfirm() {
   const [state, setState] = useState<State>("loading");
+  // PKCE mode
   const [tokenHash, setTokenHash] = useState("");
-  const [tokenType, setTokenType] = useState("");
+  // Legacy OTP mode
+  const [otpToken, setOtpToken] = useState("");
+  const [otpEmail, setOtpEmail] = useState("");
+  // Shared
+  const [tokenType, setTokenType] = useState("recovery");
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const th   = searchParams.get("token_hash");
-    const type = searchParams.get("type");
+    const sp = new URLSearchParams(window.location.search);
+    const th    = sp.get("token_hash") ?? "";
+    const token = sp.get("token")      ?? "";
+    const email = sp.get("email")      ?? "";
+    const type  = sp.get("type")       ?? "";
 
-    // Supabase redirects here with ?error=... when a link is already used or expired.
-    // This happens when email clients (Apple Mail iCloud) pre-fetch links and consume
-    // the one-time token before the user actually clicks.
-    const supaError = searchParams.get("error");
+    // Supabase redirects here with ?error=... when link is expired/already used
+    const supaError = sp.get("error");
     if (supaError) {
       setState("error_token_used");
       return;
     }
 
-    // Modern token_hash flow (PKCE-compatible) ——————————————————————————
+    // PKCE mode: token_hash present
     if (th && type) {
       if (type === "recovery") {
-        // ⚠️ Do NOT auto-call verifyOtp here.
-        // Apple Mail / iCloud pre-fetches all email links as plain HTTP GET requests.
-        // If we called verifyOtp on page-load, the pre-fetch would consume the one-time
-        // token before the user ever clicks "Reset password".
-        // Solution: store params and show a confirmation button instead.
         setTokenHash(th);
         setTokenType(type);
         setState("ready_recovery");
         return;
       }
-      // For email confirmation & magic-link: pre-fetch doesn't run JS → safe to auto-verify
-      doVerifyOtp(th, type);
+      doVerifyHash(th, type);
       return;
     }
 
-    // Legacy implicit flow: Supabase server redirected here with tokens in URL hash
-    const hash = window.location.hash.substring(1);
-    const hashParams = new URLSearchParams(hash);
-    const access_token  = hashParams.get("access_token");
-    const refresh_token = hashParams.get("refresh_token");
-    const hashType      = hashParams.get("type");
+    // Legacy OTP mode: token + email present
+    if (token && email && type) {
+      if (type === "recovery") {
+        setOtpToken(token);
+        setOtpEmail(email);
+        setTokenType(type);
+        setState("ready_recovery");
+        return;
+      }
+      doVerifyOtp(token, email, type);
+      return;
+    }
+
+    // Legacy implicit flow: tokens in URL hash
+    const hash          = window.location.hash.substring(1);
+    const hp            = new URLSearchParams(hash);
+    const access_token  = hp.get("access_token");
+    const refresh_token = hp.get("refresh_token");
+    const hashType      = hp.get("type");
 
     if (access_token && refresh_token) {
       const supabase = createClient();
@@ -82,7 +100,6 @@ export default function AuthConfirm() {
           if (error) {
             window.location.href = "/auth?error=session_failed";
           } else if (hashType === "recovery") {
-            // Password reset via legacy hash flow → go to the reset form
             window.location.href = "/auth/reset-password";
           } else {
             window.location.href = "/dashboard";
@@ -95,12 +112,14 @@ export default function AuthConfirm() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function doVerifyOtp(th: string, type: string) {
+  // PKCE verification via token_hash
+  async function doVerifyHash(th: string, type: string) {
     setState("verifying");
     const supabase = createClient();
     const { error } = await supabase.auth.verifyOtp({
       token_hash: th,
-      type: type as "magiclink" | "email" | "recovery",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      type: type as any,
     });
     if (error) {
       setState(type === "recovery" ? "error_token_used" : "error_generic");
@@ -111,7 +130,37 @@ export default function AuthConfirm() {
     }
   }
 
-  // ── Recovery confirmation screen ──────────────────────────────────────────
+  // Legacy OTP verification via email + token
+  async function doVerifyOtp(token: string, email: string, type: string) {
+    setState("verifying");
+    const supabase = createClient();
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      type: type as any,
+    });
+    if (error) {
+      setState(type === "recovery" ? "error_token_used" : "error_generic");
+    } else if (type === "recovery") {
+      window.location.href = "/auth/reset-password";
+    } else {
+      window.location.href = "/dashboard";
+    }
+  }
+
+  // Triggered by the confirmation button for recovery type
+  async function handleConfirmReset() {
+    if (tokenHash) {
+      await doVerifyHash(tokenHash, tokenType);
+    } else if (otpToken && otpEmail) {
+      await doVerifyOtp(otpToken, otpEmail, tokenType);
+    } else {
+      setState("error_token_used");
+    }
+  }
+
+  // Recovery confirmation screen
   if (state === "ready_recovery") {
     return (
       <main className="min-h-screen bg-[#06060f] flex items-center justify-center relative overflow-hidden">
@@ -132,7 +181,7 @@ export default function AuthConfirm() {
             </p>
           </div>
           <button
-            onClick={() => doVerifyOtp(tokenHash, tokenType)}
+            onClick={handleConfirmReset}
             className="w-full py-3.5 rounded-2xl font-semibold text-sm text-white"
             style={{ background: "linear-gradient(135deg, #4561E8, #6B8FFF)", boxShadow: "0 0 20px rgba(69,97,232,0.4)" }}
           >
@@ -146,7 +195,7 @@ export default function AuthConfirm() {
     );
   }
 
-  // ── Token-used / expired error ────────────────────────────────────────────
+  // Token-used / expired error
   if (state === "error_token_used" || state === "error_generic") {
     return (
       <main className="min-h-screen bg-[#06060f] flex items-center justify-center relative overflow-hidden">
@@ -189,7 +238,7 @@ export default function AuthConfirm() {
     );
   }
 
-  // ── Loading / verifying ───────────────────────────────────────────────────
+  // Loading / verifying
   return (
     <main className="min-h-screen bg-[#06060f] flex items-center justify-center relative overflow-hidden">
       {BG}
