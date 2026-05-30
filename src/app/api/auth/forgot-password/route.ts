@@ -80,46 +80,45 @@ function buildResetEmail(confirmUrl: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
 </head>
-<body style="margin:0;padding:0;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f7;padding:48px 16px;">
+<body style="margin:0;padding:0;background:#f2f2f7;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2f7;padding:44px 16px;">
     <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:440px;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:420px;">
 
-        <!-- Logo — Playfair Display 700, italic e, matches Logo.tsx exactly -->
-        <tr><td align="center" style="padding-bottom:28px;">
-          <span style="font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:26px;font-weight:700;font-style:normal;color:#1d1d1f;letter-spacing:-0.02em;line-height:1;">M<span style="color:#4561E8;font-style:italic;">e</span>ntora</span>
+        <!-- Logo -->
+        <tr><td align="center" style="padding-bottom:24px;">
+          <span style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:24px;font-weight:700;font-style:normal;color:#1c1c1e;letter-spacing:-0.5px;line-height:1;">M<span style="color:#4561E8;font-style:italic;">e</span>ntora</span>
         </td></tr>
 
         <!-- Card -->
-        <tr><td style="background:#ffffff;border-radius:18px;padding:44px 40px 40px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+        <tr><td style="background:#ffffff;border-radius:16px;padding:40px 36px 36px;box-shadow:0 1px 6px rgba(0,0,0,0.07);">
 
-          <p style="margin:0 0 10px;font-size:20px;font-weight:600;color:#1d1d1f;line-height:1.3;">
+          <p style="margin:0 0 8px;font-size:19px;font-weight:600;color:#1c1c1e;line-height:1.3;letter-spacing:-0.3px;">
             Сброс пароля
           </p>
-          <p style="margin:0 0 32px;font-size:15px;color:#6e6e73;line-height:1.6;">
-            Нажми кнопку ниже, чтобы задать новый пароль. Ссылка действительна 1 час.
+          <p style="margin:0 0 28px;font-size:14px;color:#8e8e93;line-height:1.6;">
+            Нажми кнопку ниже, чтобы задать новый пароль.<br>Ссылка действительна 1 час.
           </p>
 
           <table cellpadding="0" cellspacing="0" width="100%">
             <tr><td align="center">
               <a href="${safeUrl}"
-                style="display:inline-block;background:#4561E8;color:#ffffff;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;font-weight:500;padding:13px 32px;border-radius:10px;letter-spacing:-0.1px;">
+                style="display:inline-block;background:#4561E8;color:#ffffff;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;letter-spacing:-0.1px;">
                 Задать новый пароль
               </a>
             </td></tr>
           </table>
 
-          <p style="margin:32px 0 0;font-size:13px;color:#aeaeb2;line-height:1.6;text-align:center;">
+          <p style="margin:28px 0 0;font-size:12px;color:#c7c7cc;line-height:1.6;text-align:center;">
             Если ты не запрашивал(а) сброс — просто проигнорируй это письмо.
           </p>
 
         </td></tr>
 
         <!-- Footer -->
-        <tr><td align="center" style="padding-top:24px;">
-          <span style="font-size:12px;color:#aeaeb2;">mentora.su</span>
+        <tr><td align="center" style="padding-top:20px;">
+          <span style="font-size:11px;color:#c7c7cc;letter-spacing:0.2px;">mentora.su</span>
         </td></tr>
 
       </table>
