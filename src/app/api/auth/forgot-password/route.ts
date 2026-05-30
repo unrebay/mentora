@@ -80,15 +80,16 @@ function buildResetEmail(confirmUrl: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
 </head>
 <body style="margin:0;padding:0;background:#f2f2f7;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Helvetica,Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2f7;padding:44px 16px;">
     <tr><td align="center">
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:420px;">
 
-        <!-- Logo -->
+        <!-- Logo — Playfair Display 700, italic blue e -->
         <tr><td align="center" style="padding-bottom:24px;">
-          <span style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:24px;font-weight:700;font-style:normal;color:#1c1c1e;letter-spacing:-0.5px;line-height:1;">M<span style="color:#4561E8;font-style:italic;">e</span>ntora</span>
+          <span style="font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:26px;font-weight:700;font-style:normal;color:#1d1d1f;letter-spacing:-0.02em;line-height:1;">M<span style="color:#4561E8;font-style:italic;">e</span>ntora</span>
         </td></tr>
 
         <!-- Card -->
