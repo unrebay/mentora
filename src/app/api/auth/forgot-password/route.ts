@@ -80,21 +80,20 @@ function buildResetEmail(confirmUrl: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
 </head>
 <body style="margin:0;padding:0;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f7;padding:48px 16px;">
     <tr><td align="center">
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:440px;">
 
-        <!-- Logo -->
+        <!-- Logo — Playfair Display 700, italic e, matches Logo.tsx exactly -->
         <tr><td align="center" style="padding-bottom:28px;">
-          <span style="font-size:22px;font-weight:500;color:#1d1d1f;letter-spacing:-0.3px;">
-            M<span style="color:#4561E8;">e</span>ntora
-          </span>
+          <span style="font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:26px;font-weight:700;font-style:normal;color:#1d1d1f;letter-spacing:-0.02em;line-height:1;">M<span style="color:#4561E8;font-style:italic;">e</span>ntora</span>
         </td></tr>
 
         <!-- Card -->
-        <tr><td style="background:#ffffff;border-radius:18px;padding:44px 40px 40px;box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+        <tr><td style="background:#ffffff;border-radius:18px;padding:44px 40px 40px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
 
           <p style="margin:0 0 10px;font-size:20px;font-weight:600;color:#1d1d1f;line-height:1.3;">
             Сброс пароля
@@ -106,14 +105,14 @@ function buildResetEmail(confirmUrl: string): string {
           <table cellpadding="0" cellspacing="0" width="100%">
             <tr><td align="center">
               <a href="${safeUrl}"
-                style="display:inline-block;background:#4561E8;color:#ffffff;text-decoration:none;font-size:15px;font-weight:500;padding:13px 32px;border-radius:10px;letter-spacing:-0.1px;">
+                style="display:inline-block;background:#4561E8;color:#ffffff;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;font-weight:500;padding:13px 32px;border-radius:10px;letter-spacing:-0.1px;">
                 Задать новый пароль
               </a>
             </td></tr>
           </table>
 
           <p style="margin:32px 0 0;font-size:13px;color:#aeaeb2;line-height:1.6;text-align:center;">
-            Если ты не запрашивал(а) сброс — просто проигнори это письмо.
+            Если ты не запрашивал(а) сброс — просто проигнорируй это письмо.
           </p>
 
         </td></tr>
