@@ -625,39 +625,30 @@ function AuthPageContent() {
   async function handleForgotPassword(e: React.FormEvent) {
     e.preventDefault(); setLoading(true); setError(null);
 
-    // Use /auth/callback with next=/auth/reset-password so Supabase PKCE code-exchange
-    // (/auth/callback already handles exchangeCodeForSession) lands on the reset form.
-    // Fallback: /auth/confirm still handles legacy token_hash flow for older Supabase flows.
-    const redirectTo = `${window.location.origin}/auth/callback?next=/auth/reset-password`;
-
-    // Attempt 1: with custom redirectTo (must be in Supabase allowed redirect URLs)
-    let { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
-
-    // Attempt 2: if redirectTo is not in Supabase allowlist, try /auth/confirm fallback.
-    if (error && (error.message?.toLowerCase().includes("redirect") || error.message?.toLowerCase().includes("allowlist") || error.status === 422)) {
-      const fallbackRedirect = `${window.location.origin}/auth/confirm`;
-      const { error: err2 } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: fallbackRedirect });
-      error = err2 ?? null;
-    }
-
-    setLoading(false);
-    if (error) {
-      // Show specific error for known cases
-      const msg = error.message ?? "";
-      if (msg.toLowerCase().includes("rate limit") || msg.toLowerCase().includes("429")) {
-        setError(locale === "en" ? "Too many attempts. Please wait a few minutes." : "Слишком много попыток. Подожди несколько минут.");
+    // Our own server-side API: generates link via Supabase Admin API,
+    // sends email via Resend with a guaranteed token_hash URL pointing to /auth/confirm.
+    // Bypasses Supabase email templates entirely — immune to Apple Mail pre-fetch issues.
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const json = await res.json().catch(() => ({}));
+      setLoading(false);
+      if (!res.ok) {
+        const msg = (json?.error ?? "") as string;
+        if (msg.toLowerCase().includes("rate limit") || msg.toLowerCase().includes("429")) {
+          setError(locale === "en" ? "Too many attempts. Please wait a few minutes." : "Слишком много попыток. Подожди несколько минут.");
+        } else {
+          setError(locale === "en" ? "Failed to send reset email. Please try again." : "Не удалось отправить письмо. Попробуй позже.");
+        }
       } else {
-        setError(locale === "en" ? "Failed to send reset email. Please try again." : "Не удалось отправить письмо. Попробуй позже.");
-        console.error("[password-reset] Supabase error:", error.message, error.status);
-        // Fire-and-forget admin notification
-        fetch("/api/auth/report-error", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type: "password_reset_fail", email, error: error.message }),
-        }).catch(() => {});
+        setForgotEmailSent(true);
       }
-    } else {
-      setForgotEmailSent(true);
+    } catch {
+      setLoading(false);
+      setError(locale === "en" ? "Network error. Please try again." : "Ошибка сети. Попробуй ещё раз.");
     }
   }
 
