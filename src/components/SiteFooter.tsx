@@ -30,6 +30,8 @@ export async function PublicFooter({ dark }: { dark?: boolean } = {}) {
 
   // Подписи ссылок: пытаемся брать из nav, если ключа нет — fallback по локали.
   const labels = {
+    repetitor:  isEn ? "Tutor"        : "Репетитор",
+    podgotovka: isEn ? "Exam prep"    : "Подготовка к ЕГЭ",
     pricing:  safe(() => t("pricing"),  isEn ? "Pricing" : "Тарифы"),
     guide:    safe(() => t("guide"),    isEn ? "Guide"   : "Гайд"),
     privacy:  isEn ? "Privacy"  : "Конфиденциальность",
