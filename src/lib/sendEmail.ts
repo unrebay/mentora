@@ -1,21 +1,15 @@
 /**
  * Resend transactional email — direct API (not Supabase SMTP).
  *
- * Why direct API and not Supabase: this is for OUR app-level emails
- * (welcome, billing receipts, mass announcements). Supabase SMTP is for
- * auth-flow emails only (confirm signup / magic link / reset). The two are
- * intentionally separate so we don't accidentally rate-limit auth behind
- * marketing sends.
- *
- * Auth: RESEND_API_KEY in env. Same Resend key as the one used for Supabase
- * SMTP password — works for both because the key has Sending access.
- *
- * Fire-and-forget pattern — callers should `.catch(() => {})` so a Resend
- * outage never breaks the primary user flow.
+ * Auth: RESEND2_API_KEY in env.
+ * Design standard: Playfair Display logo + system fonts (approved 2026-05-30).
  */
 
 const RESEND_API = "https://api.resend.com/emails";
 const FROM = "Mentora <noreply@mentora.su>";
+const BODY_FONT = `-apple-system,BlinkMacSystemFont,'Helvetica Neue',Helvetica,Arial,sans-serif`;
+const FONT_LINK = `<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">`;
+const LOGO_HTML = `<span style="font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:26px;font-weight:700;font-style:normal;color:#1d1d1f;letter-spacing:-0.02em;line-height:1;">M<em style="color:#4561E8;font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-weight:700;font-style:italic;">e</em>ntora</span>`;
 
 type SendOpts = {
   to: string;
@@ -25,9 +19,6 @@ type SendOpts = {
 };
 
 async function sendEmail(opts: SendOpts): Promise<{ ok: boolean; id?: string; error?: string }> {
-  // Read RESEND2_API_KEY (Andy named this secret with "2" suffix to distinguish
-  // from the Resend key used for Supabase auth SMTP — two separate keys, two
-  // separate rotation cycles).
   const key = process.env.RESEND2_API_KEY;
   if (!key) {
     console.warn("[email] RESEND2_API_KEY missing — skipping send to", opts.to);
@@ -61,59 +52,70 @@ async function sendEmail(opts: SendOpts): Promise<{ ok: boolean; id?: string; er
   }
 }
 
-/* ── Welcome email — fired after a successful signup. ──────────────────────
- *
- * Goal: confirm sign-up succeeded (no scary "we don't have your email"),
- * surface 3 concrete first-conversation ideas (reduce blank-page anxiety),
- * give a direct CTA back to /dashboard.
- *
- * Sender same as auth emails (noreply@mentora.su) → user inbox groups them.
- */
-export async function sendWelcomeEmail(email: string): Promise<void> {
-  const html = `<!DOCTYPE html>
-<html>
+function emailShell(cardContent: string): string {
+  return `<!DOCTYPE html>
+<html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  ${FONT_LINK}
 </head>
-<body style="margin:0; padding:0; background:#f7f8fb; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;">
-  <div style="max-width:520px; margin:0 auto; padding:48px 24px; text-align:center; color:#1a2340; line-height:1.6;">
+<body style="margin:0;padding:0;background:#f2f2f7;font-family:${BODY_FONT};">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2f7;padding:44px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:420px;">
 
-    <div style="margin:0 auto 36px;">
-      <img src="https://mentora.su/logo-white.png" alt="Mentora" width="200" style="display:block;margin:0 auto;width:200px;height:auto;background:#06060F;padding:22px 28px;border-radius:16px;">
-    </div>
+        <tr><td align="center" style="padding-bottom:24px;">${LOGO_HTML}</td></tr>
 
-    <h1 style="font-size:24px; font-weight:700; margin:0 0 12px; color:#1a2340;">Добро пожаловать!</h1>
-    <p style="margin:0 0 28px; color:#5a6478; font-size:15px;">
-      Ты только что получил доступ к своему AI-ментору по 17 наукам. Можно сразу спрашивать о чём угодно.
-    </p>
+        <tr><td style="background:#ffffff;border-radius:16px;padding:40px 36px 36px;box-shadow:0 1px 6px rgba(0,0,0,0.07);">
+          ${cardContent}
+        </td></tr>
 
-    <div style="background:#ffffff; border:1px solid #e5e9f0; border-radius:16px; padding:20px 24px; margin:0 0 28px; text-align:left;">
-      <p style="margin:0 0 12px; font-size:13px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#4561E8;">
-        С чего начать
-      </p>
-      <ul style="margin:0; padding:0 0 0 18px; color:#1a2340; font-size:14px;">
-        <li style="margin-bottom:8px;">«Объясни теорему Пифагора так, чтобы я запомнил навсегда»</li>
-        <li style="margin-bottom:8px;">«Почему в 1941 году началась война именно тогда?»</li>
-        <li style="margin-bottom:0;">«Что такое квант простыми словами?»</li>
-      </ul>
-    </div>
+        <tr><td align="center" style="padding-top:20px;">
+          <span style="font-size:11px;color:#c7c7cc;letter-spacing:0.2px;">mentora.su</span>
+        </td></tr>
 
-    <a href="https://mentora.su/dashboard"
-       style="display:inline-block; background:linear-gradient(135deg,#5575FF 0%,#4561E8 50%,#6B4FF0 100%); color:#ffffff; text-decoration:none; padding:14px 36px; border-radius:999px; font-weight:600; font-size:15px;">
-      Открыть Mentora
-    </a>
-
-    <p style="margin:36px 0 0; font-size:13px; color:#8a94a6;">
-      Вопросы? Просто ответь на это письмо — мы читаем каждое.
-    </p>
-    <p style="margin:16px 0 0; font-size:11px; color:#b0b9c8;">
-      © 2026 Mentora · <a href="https://mentora.su" style="color:#4561E8; text-decoration:none;">mentora.su</a>
-    </p>
-
-  </div>
+      </table>
+    </td></tr>
+  </table>
 </body>
 </html>`;
+}
+
+export async function sendWelcomeEmail(email: string): Promise<void> {
+  const html = emailShell(`
+    <p style="margin:0 0 8px;font-size:19px;font-weight:600;color:#1c1c1e;line-height:1.3;letter-spacing:-0.3px;text-align:center;">
+      Добро пожаловать!
+    </p>
+    <p style="margin:0 0 28px;font-size:14px;color:#8e8e93;line-height:1.6;text-align:center;">
+      Твой AI-ментор по 17 наукам готов к работе.<br>
+      Тебе доступно <strong style="color:#1c1c1e;">10 бесплатных сообщений каждые 8 часов</strong>.
+    </p>
+
+    <table cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:28px;">
+      <tr><td align="center">
+        <a href="https://mentora.su/dashboard"
+          style="display:inline-block;background:#4561E8;color:#ffffff;text-decoration:none;font-family:${BODY_FONT};font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;letter-spacing:-0.1px;">
+          Начать первый урок
+        </a>
+      </td></tr>
+    </table>
+
+    <table cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:20px;">
+      <tr>
+        <td style="font-size:13px;color:#8e8e93;padding:4px 8px 4px 0;">17 наук в одном чате</td>
+        <td style="font-size:13px;color:#8e8e93;padding:4px 0;">XP и уровни прогресса</td>
+      </tr>
+      <tr>
+        <td style="font-size:13px;color:#8e8e93;padding:4px 8px 4px 0;">Галактика знаний</td>
+        <td style="font-size:13px;color:#8e8e93;padding:4px 0;">Стиль объяснений под тебя</td>
+      </tr>
+    </table>
+
+    <p style="margin:0;font-size:12px;color:#c7c7cc;line-height:1.6;text-align:center;">
+      Есть вопросы? Просто ответь на это письмо — мы читаем каждое.
+    </p>
+  `);
 
   await sendEmail({
     to: email,
