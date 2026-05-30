@@ -89,7 +89,7 @@ function buildResetEmail(confirmUrl: string): string {
 
         <!-- Logo — Playfair Display 700, italic blue e -->
         <tr><td align="center" style="padding-bottom:24px;">
-          <span style="font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:26px;font-weight:700;font-style:normal;color:#1d1d1f;letter-spacing:-0.02em;line-height:1;">M<span style="color:#4561E8;font-style:italic;">e</span>ntora</span>
+          <span style="font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-size:26px;font-weight:700;font-style:normal;color:#1d1d1f;letter-spacing:-0.02em;line-height:1;">M<em style="color:#4561E8;font-family:'Playfair Display',Georgia,'Times New Roman',serif;font-weight:700;font-style:italic;">e</em>ntora</span>
         </td></tr>
 
         <!-- Card -->
