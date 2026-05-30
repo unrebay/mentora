@@ -40,7 +40,7 @@ export async function sendEmail({ to, subject, html }: SendEmailOptions): Promis
 
 // ── Shared text logo (no image, no dark background) ──────────────────────────
 const TEXT_LOGO = `
-  <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:30px;font-weight:800;color:#111827;letter-spacing:-1px;line-height:1;">
+  <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:30px;font-weight:500;color:#111827;letter-spacing:-1px;line-height:1;">
     M<span style="color:#4561E8;">e</span>ntora<span style="font-size:17px;font-weight:600;color:#9ca3af;">.su</span>
   </div>`;
 
@@ -68,7 +68,7 @@ export function welcomeEmailHtml(email: string): string {
           <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#4561E8;letter-spacing:0.05em;text-transform:uppercase;">
             Добро пожаловать
           </p>
-          <h1 style="margin:0 0 16px;font-size:28px;font-weight:800;color:#111827;letter-spacing:-0.5px;line-height:1.2;">
+          <h1 style="margin:0 0 16px;font-size:28px;font-weight:700;color:#111827;letter-spacing:-0.5px;line-height:1.2;">
             Ментор готов к работе
           </h1>
           <p style="margin:0 0 20px;font-size:16px;color:#6b7280;line-height:1.6;">
@@ -151,7 +151,7 @@ export function reengagementEmailHtml(): string {
 
         <!-- Card -->
         <tr><td style="background:white;border-radius:20px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-          <h1 style="margin:0 0 12px;font-size:26px;font-weight:800;color:#111827;letter-spacing:-0.5px;">
+          <h1 style="margin:0 0 12px;font-size:26px;font-weight:600;color:#111827;letter-spacing:-0.5px;">
             Ментора ждёт
           </h1>
           <p style="margin:0 0 20px;font-size:16px;color:#6b7280;line-height:1.6;">
