@@ -35,52 +35,35 @@ export async function POST(req: NextRequest) {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    // ── 1. Generate recovery link via Admin API ───────────────────────────
-    // Using admin.generateLink() — never calls Supabase email templates.
-    // Returns hashed_token guaranteed non-empty (unlike {{ .TokenHash }} in templates).
     const { data, error: genErr } = await supabaseAdmin.auth.admin.generateLink({
       type: "recovery",
       email,
     });
 
     if (genErr || !data?.properties?.hashed_token) {
-      // User may not exist — don't reveal; return success silently.
       console.warn("[forgot-password] generateLink returned no token:", genErr?.message ?? "no hashed_token");
       return NextResponse.json({ ok: true });
     }
 
     const { hashed_token } = data.properties;
     const baseUrl    = (process.env.NEXT_PUBLIC_BASE_URL ?? "https://mentora.su").replace(/\/$/, "");
-
-    // Link goes directly to /auth/confirm — a "use client" page (JS-only).
-    // Apple Mail pre-fetches ALL email links as plain HTTP GET → would burn
-    // a Supabase /verify token in <1 s. Our page is JS-only so pre-fetch gets
-    // only an HTML shell; token is never consumed until the user actually clicks
-    // the "Set new password" button.
     const confirmUrl = `${baseUrl}/auth/confirm?token_hash=${encodeURIComponent(hashed_token)}&email=${encodeURIComponent(email)}&type=recovery`;
 
-    // ── 2. Send email via Resend ──────────────────────────────────────────
     const sent = await sendEmail({
       to: email,
-      subject: "Сброс пароля Mentora",
+      subject: "Сброс пароля — Mentora",
       html: buildResetEmail(confirmUrl),
     });
 
-    // Mask email for Telegram log: andy_lighter@icloud.com → an***@icloud.com
     const masked = email.replace(/^(.{2})(.*)(@.+)$/, (_, a, _b, c) => `${a}***${c}`);
 
     if (!sent) {
-      // Email delivery failed (RESEND2_API_KEY missing or Resend API error).
-      // Log visibly so admin can investigate; still return ok to user (privacy).
       console.error(`[forgot-password] sendEmail FAILED for ${masked}`);
       notifyAdmin(`🚨 <b>forgot-password</b>: sendEmail FAILED\nrecipient: <code>${masked}</code>\nCheck RESEND2_API_KEY on VPS`);
-      // Return ok so we don't reveal user existence via error pattern
       return NextResponse.json({ ok: true });
     }
 
-    // All good — notify admin for observability during early launch
     notifyAdmin(`🔑 <b>Password reset</b> sent → <code>${masked}</code>`);
-
     return NextResponse.json({ ok: true });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -91,50 +74,53 @@ export async function POST(req: NextRequest) {
 }
 
 function buildResetEmail(confirmUrl: string): string {
-  // NOTE: & in href attributes should be &amp; per HTML spec.
-  // Most email clients handle bare & correctly, but we use &amp; to be safe
-  // and prevent any link-scanner / strict HTML parser from mangling the URL.
   const safeUrl = confirmUrl.replace(/&/g, "&amp;");
   return `<!DOCTYPE html>
 <html lang="ru">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:32px 16px;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body style="margin:0;padding:0;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f7;padding:48px 16px;">
     <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:440px;">
 
-        <tr><td style="padding:0 0 24px 0;text-align:center;">
-          <span style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:28px;font-weight:500;color:#111827;letter-spacing:-0.5px;">
-            M<span style="color:#4561E8;">e</span>ntora<span style="font-size:16px;font-weight:500;color:#9ca3af;">.su</span>
+        <!-- Logo -->
+        <tr><td align="center" style="padding-bottom:28px;">
+          <span style="font-size:22px;font-weight:500;color:#1d1d1f;letter-spacing:-0.3px;">
+            M<span style="color:#4561E8;">e</span>ntora
           </span>
         </td></tr>
 
-        <tr><td style="background:#ffffff;border-radius:16px;padding:40px 36px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-          <p style="margin:0 0 8px 0;font-size:22px;font-weight:700;color:#111827;line-height:1.3;">Сброс пароля</p>
-          <p style="margin:0 0 28px 0;font-size:15px;color:#6b7280;line-height:1.6;">
-            Мы получили запрос на сброс пароля.<br>
-            Нажми кнопку ниже, чтобы задать новый пароль.
+        <!-- Card -->
+        <tr><td style="background:#ffffff;border-radius:18px;padding:44px 40px 40px;box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+
+          <p style="margin:0 0 10px;font-size:20px;font-weight:600;color:#1d1d1f;line-height:1.3;">
+            Сброс пароля
+          </p>
+          <p style="margin:0 0 32px;font-size:15px;color:#6e6e73;line-height:1.6;">
+            Нажми кнопку ниже, чтобы задать новый пароль. Ссылка действительна 1 час.
           </p>
 
-          <table width="100%" cellpadding="0" cellspacing="0">
-            <tr><td align="center" style="padding:4px 0 28px 0;">
-              <a href="${safeUrl}" style="display:inline-block;background:linear-gradient(135deg,#4561E8,#6B8FFF);color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 36px;border-radius:12px;">
-                Задать новый пароль &#8594;
+          <table cellpadding="0" cellspacing="0" width="100%">
+            <tr><td align="center">
+              <a href="${safeUrl}"
+                style="display:inline-block;background:#4561E8;color:#ffffff;text-decoration:none;font-size:15px;font-weight:500;padding:13px 32px;border-radius:10px;letter-spacing:-0.1px;">
+                Задать новый пароль
               </a>
             </td></tr>
           </table>
 
-          <p style="margin:0 0 8px 0;font-size:13px;color:#9ca3af;">Кнопка не работает? Скопируй ссылку:</p>
-          <p style="margin:0 0 24px 0;font-size:12px;color:#6b7280;word-break:break-all;background:#f9fafb;padding:10px 12px;border-radius:8px;border:1px solid #e5e7eb;">${confirmUrl}</p>
-
-          <hr style="border:none;border-top:1px solid #f3f4f6;margin:0 0 20px 0;">
-          <p style="margin:0;font-size:12px;color:#d1d5db;line-height:1.6;">
-            Если ты не запрашивал(а) сброс — просто проигнори это письмо. Ссылка действительна 1 час.
+          <p style="margin:32px 0 0;font-size:13px;color:#aeaeb2;line-height:1.6;text-align:center;">
+            Если ты не запрашивал(а) сброс — просто проигнори это письмо.
           </p>
+
         </td></tr>
 
-        <tr><td style="padding:20px 0 0 0;text-align:center;">
-          <p style="margin:0;font-size:12px;color:#9ca3af;">mentora.su — Персональный AI-ментор</p>
+        <!-- Footer -->
+        <tr><td align="center" style="padding-top:24px;">
+          <span style="font-size:12px;color:#aeaeb2;">mentora.su</span>
         </td></tr>
 
       </table>
