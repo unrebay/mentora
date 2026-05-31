@@ -8,6 +8,7 @@ import TiltProvider from "@/components/TiltProvider";
 import NavigationProgress from "@/components/NavigationProgress";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import InstallPrompt from "@/components/InstallPrompt";
+import YandexMetrika from "@/components/YandexMetrika";
 import { headers } from "next/headers";
 
 const golos = Golos_Text({
@@ -201,6 +202,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <InstallPrompt />
             {children}
           </PostHogProvider>
+          <YandexMetrika nonce={nonce} />
         </ThemeProvider>
       </body>
     </html>

@@ -29,7 +29,7 @@ function buildCsp(nonce: string): string {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' data: https://fonts.gstatic.com",
     "img-src 'self' data: blob: https:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://api.telegram.org https://*.posthog.com https://us.i.posthog.com https://us-assets.i.posthog.com https://eu.i.posthog.com https://eu-assets.i.posthog.com https://www.google-analytics.com",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://api.telegram.org https://*.posthog.com https://us.i.posthog.com https://us-assets.i.posthog.com https://eu.i.posthog.com https://eu-assets.i.posthog.com https://www.google-analytics.com https://mc.yandex.ru https://mc.webvisor.org",
     "frame-src 'self' https://oauth.telegram.org https://*.spline.design",
     "worker-src 'self' blob:",
     "object-src 'none'",
