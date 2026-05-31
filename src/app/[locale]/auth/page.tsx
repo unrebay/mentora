@@ -616,7 +616,9 @@ function AuthPageContent() {
         }
       } else {
         posthog.capture("user.logged_in", { login_method: "email" });
-        router.push("/dashboard"); router.refresh();
+        // Hard redirect (matches working signup flow). router.push+refresh raced
+        // with the @supabase/ssr session-cookie write → login only worked on 2nd click.
+        window.location.href = "/dashboard";
       }
     }
     setLoading(false);

@@ -196,7 +196,7 @@ function CitationChip({ n, citation }: { n: number; citation?: Citation }) {
   function cancelClose()   { if (closeTimer.current) clearTimeout(closeTimer.current); }
 
   if (!citation) {
-    return <sup style={{ color: "var(--text-muted)", fontSize: "0.7em", margin: "0 1px" }}>[{n}]</sup>;
+    return <sup style={{ color: "var(--text-muted)", fontSize: "0.7em", margin: "0 1px" }}>?</sup>;
   }
 
   const isLong    = citation.snippet.length > SNIPPET_PREVIEW;
@@ -219,7 +219,7 @@ function CitationChip({ n, citation }: { n: number; citation?: Citation }) {
         padding: "0 4px", lineHeight: 1.4, borderRadius: 6,
         background: "rgba(69,97,232,0.10)",
         border: "1px solid rgba(69,97,232,0.25)",
-      }}>{n}</span>
+      }}>?</span>
 
       {open && (
         <span
