@@ -271,11 +271,13 @@ export async function POST(req: NextRequest) {
         // RAG-gate: skip embed+search for short or command-style messages where the
         // knowledge base is irrelevant (greetings, "quiz", "summary", "explain again",
         // mode triggers). Saves an OpenAI embed call + a vector search + latency.
-        const msgLower = message.trim().toLowerCase();
-        const COMMAND_KWS = ["квиз", "тест", "проверь меня", "итог", "что я узнал", "объясни по-другому", "объясни мне", "проверь как я понял", "как с тобой учиться", "лайфхаки", "как задавать вопросы", "режим носителя", "quiz", "test me", "summarize", "what did i learn", "explain differently", "let me explain", "learning tips", "lifehacks", "native mode", "спасибо", "thanks", "thank you", "ещё", "еще", "продолжи", "more", "ok", "ок", "понял", "понятно"];
-        const isShort = msgLower.length < 12;
-        const isCommand = COMMAND_KWS.some((kw) => msgLower === kw || msgLower.startsWith(kw));
-        if ((isShort || isCommand) && !imageData) {
+        // Conservative gate: skip RAG ONLY for exact command/acknowledgement phrases
+        // where the knowledge base is provably irrelevant. We do NOT gate by length —
+        // short factual questions ("Дата ВОВ?") still need RAG. Knowledge base IS
+        // populated (e.g. russian-history ~200 chunks), so false-skips would drop citations.
+        const msgLower = message.trim().toLowerCase().replace(/[!?.…\s]+$/, "");
+        const SKIP_EXACT = new Set(["спасибо", "спс", "thanks", "thank you", "ок", "ok", "окей", "понял", "понятно", "ясно", "got it", "ещё", "еще", "more", "продолжи", "continue", "квиз", "quiz", "тест", "test me", "итог", "summarize", "what did i learn", "что я узнал"]);
+        if (SKIP_EXACT.has(msgLower) && !imageData) {
           return { contextText: "База знаний пока пуста. Отвечай на основе своих знаний.", citations: [] };
         }
         try {
