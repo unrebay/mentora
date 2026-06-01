@@ -6,6 +6,7 @@ import { withAnthropicQueue } from "@/lib/anthropic-queue";
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 import { getEffectivePlan, LEVEL_REWARDS, computeNewReward } from "@/lib/plan";
+import { notifyAdmin, mskNow } from "@/lib/notifyAdmin";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -843,7 +844,16 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
     });
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
-    console.error("Chat API error:", errMsg);
+    const errStatus = (err && typeof err === "object" && "status" in err) ? (err as { status?: unknown }).status : undefined;
+    const errName = err instanceof Error ? err.name : typeof err;
+    console.error("Chat API error:", errName, errStatus, errMsg);
+    // Make chat failures VISIBLE (they were pm2-only before). Diagnoses the
+    // "2nd message fails" report. Fire-and-forget; notifyAdmin is rate-safe.
+    const errCode = (err && typeof err === "object" && "code" in err) ? (err as { code?: unknown }).code : undefined;
+    const isExpectedLoad = errStatus === 429 || errCode === "QUEUE_FULL" || errCode === "QUEUE_TIMEOUT";
+    if (!isExpectedLoad) {
+      notifyAdmin(`\u26a0\ufe0f <b>Chat API error</b>\nname: ${errName}\nstatus: ${errStatus ?? "-"}\nmsg: ${String(errMsg).slice(0, 400).replace(/</g, "&lt;")}\n<i>${mskNow()} \u041c\u0421\u041a</i>`);
+    }
     // C3: the free-tier message was counted but the user got no answer — give it back.
     if (freeMsgToRefund) {
       try {
