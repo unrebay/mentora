@@ -268,6 +268,16 @@ export async function POST(req: NextRequest) {
         .eq("subject", subject)
         .single(),
       (async (): Promise<{ contextText: string; citations: Citation[] }> => {
+        // RAG-gate: skip embed+search for short or command-style messages where the
+        // knowledge base is irrelevant (greetings, "quiz", "summary", "explain again",
+        // mode triggers). Saves an OpenAI embed call + a vector search + latency.
+        const msgLower = message.trim().toLowerCase();
+        const COMMAND_KWS = ["квиз", "тест", "проверь меня", "итог", "что я узнал", "объясни по-другому", "объясни мне", "проверь как я понял", "как с тобой учиться", "лайфхаки", "как задавать вопросы", "режим носителя", "quiz", "test me", "summarize", "what did i learn", "explain differently", "let me explain", "learning tips", "lifehacks", "native mode", "спасибо", "thanks", "thank you", "ещё", "еще", "продолжи", "more", "ok", "ок", "понял", "понятно"];
+        const isShort = msgLower.length < 12;
+        const isCommand = COMMAND_KWS.some((kw) => msgLower === kw || msgLower.startsWith(kw));
+        if ((isShort || isCommand) && !imageData) {
+          return { contextText: "База знаний пока пуста. Отвечай на основе своих знаний.", citations: [] };
+        }
         try {
           const embedResp = await fetch(
             `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/embed`,
@@ -737,8 +747,28 @@ ${PLATFORM_BLOCK}`;
     }).then(null, (e: unknown) => console.error("assistant message insert failed:", e));
 
     // ── Non-blocking memory write-back (all users, all plans) ────────────────
+    // Cost optimization: full AI fact-extraction (~300 output tokens, a 3rd
+    // Anthropic call per message) runs only every 3rd message in a conversation.
+    // On skipped turns we still cheaply refresh last_seen/last_topic/session_count
+    // LOCALLY (no AI call) so the "welcome back" greeting stays accurate.
+    const turnIndex = (history ?? []).filter((m: {role: string}) => m.role === "user").length; // 0-based: this is the (turnIndex+1)-th user message
+    const doFullExtract = turnIndex % 3 === 0; // messages 1, 4, 7, ... → full AI extract
     void (async () => {
       try {
+        if (!doFullExtract) {
+          // Cheap local refresh — keep memory fresh without an AI call.
+          const lightMem = {
+            ...mem,
+            last_seen: today,
+            last_topic: message.slice(0, 60),
+            session_count: sessionCount,
+          };
+          await supabase.from("user_memory").upsert(
+            { user_id: user.id, subject, memory_json: lightMem },
+            { onConflict: "user_id,subject" }
+          );
+          return;
+        }
         const extractResp = await anthropic.messages.create({
           model: "claude-haiku-4-5-20251001",
           max_tokens: 300,
@@ -862,7 +892,13 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
       console.error("Streak reward failed (non-blocking):", rewardErr);
     }
 
-    const suggestions = await suggestionsPromise;
+    // Don't let suggestions delay the answer: race against a short timeout. If they
+    // aren't ready in time, return without them (they'll appear on the next turn).
+    // The main answer is what matters; suggestions are a nice-to-have.
+    const suggestions = await Promise.race([
+      suggestionsPromise,
+      new Promise<string[]>((resolve) => setTimeout(() => resolve([]), 1200)),
+    ]);
 
     return NextResponse.json({
       message: assistantMessage,
