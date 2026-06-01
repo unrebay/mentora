@@ -668,7 +668,10 @@ ${PLATFORM_BLOCK}`;
     // ── Image generation: detect [IMG: ...] marker ────────────────────────────
     let imageUrl: string | null = null;
     const imgMatch = assistantMessage.match(/\[IMG:\s*([^\]]{5,300})\]/i);
-    if (imgMatch && isPro && process.env.OPENAI_API_KEY) {
+    // Image GENERATION (DALL-E) restricted to Ultra — was isPro, the single
+    // uncontrolled cost item (~$0.04/image, model-decided). Aligns with Ultra
+    // premium-visual positioning. (Photo RECOGNITION/vision is already Ultra-only.)
+    if (imgMatch && isUltima && process.env.OPENAI_API_KEY) {
       const imgDescription = imgMatch[1].trim();
       // Strip the marker from the message
       assistantMessage = assistantMessage.replace(/\[IMG:\s*[^\]]{5,300}\]/gi, "").replace(/\n{3,}/g, "\n\n").trim();
