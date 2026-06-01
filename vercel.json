@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/reengagement",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/streak-saver",
+      "schedule": "0 17 * * *"
     }
   ]
 }

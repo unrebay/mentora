@@ -852,6 +852,9 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
         p_user_id: user.id,
         p_subject: subject,
         p_amount: 10,
+        // Ultra perk: auto-freeze streak on a single missed day (Duolingo-style).
+        // Backward-compatible param (defaults to false in SQL) — Free/Pro unaffected.
+        p_freeze_enabled: isUltima,
       });
     } catch (xpErr) {
       console.error("XP update failed (non-blocking):", xpErr);

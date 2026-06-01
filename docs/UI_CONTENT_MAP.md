@@ -18,6 +18,8 @@
 | `ultima` | DB-значение плана Ultra (НЕ менять!) | Supabase: users.plan, все API routes |
 | `Me [XP]` | Единица опыта (отображение XP) | DashboardStatsPills.tsx, leaderboard |
 | `Стрик` | Streak — серия дней подряд | DashboardStatsPills.tsx, i18n: streakLabel |
+| `Защита стрика` | Ultra-перк: авто-заморозка стрика при пропуске 1 дня | i18n: pricing.ultra.features; increment_xp(p_freeze_enabled); chat/route.ts |
+| `Стрик-сейвер` | Вечерний email-нудж при риске потери стрика (+ апселл Ultra для Free/Pro) | api/cron/streak-saver, email.ts: streakSaverEmailHtml |
 | `Менты` | Разговорное название XP | Только в коде/переменных — не в UI пока |
 | `noreply@mentora.su` | Адрес отправителя писем | Supabase Auth SMTP, sendEmail.ts |
 | `VERSION` | `6.0.0` — версия в футере | SiteFooter.tsx (const VERSION) |

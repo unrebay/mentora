@@ -140,3 +140,33 @@ export function reengagementEmailHtml(): string {
     </p>
   `);
 }
+
+// Streak-saver nudge — sent in the evening when a user's streak is at risk.
+// For Free/Pro it doubles as an Ultra upsell (auto-freeze is an Ultra perk).
+export function streakSaverEmailHtml(streak: number): string {
+  return emailShell(`
+    <p style="margin:0 0 6px;font-size:34px;line-height:1;text-align:center;">🔥</p>
+    <p style="margin:0 0 8px;font-size:19px;font-weight:600;color:#1c1c1e;line-height:1.3;letter-spacing:-0.3px;text-align:center;">
+      Твой стрик ${streak} ${streak === 1 ? "день" : (streak >= 2 && streak <= 4) ? "дня" : "дней"} под угрозой
+    </p>
+    <p style="margin:0 0 24px;font-size:14px;color:#8e8e93;line-height:1.6;text-align:center;">
+      Ты не занимался сегодня. Одно сообщение Менторе сейчас —<br>
+      и стрик сохранится. Не теряй прогресс.
+    </p>
+
+    <table cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:24px;">
+      <tr><td align="center">
+        <a href="https://mentora.su/dashboard"
+          style="display:inline-block;background:#FF7A00;color:#ffffff;text-decoration:none;font-family:${BODY_FONT};font-size:14px;font-weight:600;padding:12px 28px;border-radius:10px;letter-spacing:-0.1px;">
+          Сохранить стрик
+        </a>
+      </td></tr>
+    </table>
+
+    <p style="margin:0;font-size:12px;color:#c7c7cc;line-height:1.6;text-align:center;">
+      Надоело следить за стриком? <strong style="color:#8e8e93;">Ultra</strong> замораживает его автоматически,
+      если пропустишь день — прогресс не сгорает.
+      <a href="https://mentora.su/pricing" style="color:#4561E8;text-decoration:none;">Узнать про Ultra →</a>
+    </p>
+  `);
+}
