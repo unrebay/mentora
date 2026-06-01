@@ -8,6 +8,7 @@ import { useRouter, Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Logo from "@/components/Logo";
 import posthog from "posthog-js";
+import { ymGoal } from "@/components/YandexMetrika";
 
 // ── Type augmentation ────────────────────────────────────────────────────────
 declare global {
@@ -510,6 +511,7 @@ function AuthPageContent() {
         const isNewUser = (json.next ?? "/dashboard").includes("onboarding");
         if (isNewUser) {
           posthog.capture("user.signed_up", { signup_method: "telegram", locale });
+          ymGoal("signup");
         } else {
           posthog.capture("user.logged_in", { login_method: "telegram" });
         }
@@ -564,6 +566,7 @@ function AuthPageContent() {
           // Session cookies were set on the response. Just route forward.
           const next: string = typeof json?.next === "string" ? json.next : "/onboarding";
           posthog.capture("user.signed_up", { signup_method: "email", locale });
+          ymGoal("signup");
           router.push(next);
           router.refresh();
         }

@@ -6,6 +6,13 @@ import { Suspense, useEffect } from "react";
 
 export const YM_ID = 109541532;
 
+/** Fire a Yandex.Metrika goal (conversion). Safe no-op if ym not loaded. */
+export function ymGoal(goal: string, params?: Record<string, unknown>) {
+  if (typeof window !== "undefined" && window.ym) {
+    window.ym(YM_ID, "reachGoal", goal, params);
+  }
+}
+
 declare global {
   interface Window {
     ym?: (id: number, action: string, ...args: unknown[]) => void;

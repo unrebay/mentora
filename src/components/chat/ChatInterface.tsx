@@ -2,6 +2,7 @@
 
 import React from "react";
 import posthog from "posthog-js";
+import { ymGoal } from "@/components/YandexMetrika";
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
@@ -795,6 +796,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     const isFirst = messages.filter(m=>m.role==="user"&&!m.isError).length===0;
     const messageIndex = messages.filter(m=>m.role==="user"&&!m.isError).length;
     if (isFirst) posthog.capture("user.activated",{subject});
+    if (isFirst) ymGoal("first_message",{subject});
     posthog.capture("chat.message_sent",{subject,message_index:messageIndex});
     // Capture suggestions snapshot NOW — messagesRef is current before async starts
     const suggSnap = [

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import posthog from "posthog-js";
+import { ymGoal } from "@/components/YandexMetrika";
 
 /**
  * Mounted on /dashboard. When YooKassa/payment provider redirects back with
@@ -29,6 +30,8 @@ export default function PaymentSuccessTracker() {
       billing_cycle: plan,
       amount_rub: amount,
     });
+
+    ymGoal("purchase", { plan: tier, billing_cycle: plan, amount_rub: amount });
 
     // Optional: also clear the URL so refresh doesn't re-trigger
     if (typeof window !== "undefined") {
