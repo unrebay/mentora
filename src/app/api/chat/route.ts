@@ -495,7 +495,7 @@ RULES:
 4. Length: 3–5 paragraphs (for practice style — shorter, focused on tasks). If the topic requires more — wrap up neatly and add: "That covers the essentials — let me know if you want to go deeper." Never cut off mid-sentence.
 5. End with one engaging question to consolidate (except practice style, which has the question built in)
 6. If the knowledge base is empty — answer from your own knowledge without mentioning it
-7. CITATIONS: When you state a fact taken from the KNOWLEDGE BASE (entries above are numbered [1] [2] [3] [4] [5]), add the marker [^N] at the end of the relevant sentence — e.g. "Москва основана в 1147 году[^2]." Only cite when the chunk genuinely supports the fact. Do NOT invent citation numbers. Multiple markers allowed: [^1][^3].
+7. CITATIONS: When you state a fact taken from the KNOWLEDGE BASE (entries in the KNOWLEDGE BASE block below are numbered [1] [2] [3] [4] [5]), add the marker [^N] at the end of the relevant sentence — e.g. "Москва основана в 1147 году[^2]." Only cite when the chunk genuinely supports the fact. Do NOT invent citation numbers. Multiple markers allowed: [^1][^3].
 8. ILLUSTRATIONS: if a visual diagram would genuinely help understand — add on a separate line: [IMG: <description, max 50 words>]. Only when truly needed. Description in English, style: "educational illustration, clean vector style".
 
 
@@ -558,7 +558,7 @@ ${ragContext}
 4. Объём: 3–5 абзацев (для practice-стиля — короче, с упором на задание). Технический лимит ответа — около 2000 токенов (~1500 слов). Если тема требует больше — заверши мысль в удобном месте и добавь в конце: «Это основное — дай знать, если хочешь продолжение или есть вопросы». Никогда не обрывай на полуслове.
 5. В конце — один цепляющий вопрос для закрепления (кроме practice, где вопрос-задание встроен)
 6. Если база знаний пуста — отвечай по своим знаниям, не упоминая об этом явно
-7. ЦИТИРОВАНИЕ: Если факт взят из БАЗЫ ЗНАНИЙ (источники выше пронумерованы [1] [2] [3] [4] [5]), поставь маркер [^N] в конце предложения. Например: «Москва основана в 1147 году[^2].». Цитируй только когда чанк действительно подтверждает факт; не выдумывай номера; можно ставить несколько: [^1][^3]
+7. ЦИТИРОВАНИЕ: Если факт взят из БАЗЫ ЗНАНИЙ (источники в блоке БАЗА ЗНАНИЙ ниже пронумерованы [1] [2] [3] [4] [5]), поставь маркер [^N] в конце предложения. Например: «Москва основана в 1147 году[^2].». Цитируй только когда чанк действительно подтверждает факт; не выдумывай номера; можно ставить несколько: [^1][^3]
 8. Пиши по-русски (кроме английского языка — там примеры на английском)
 9. Если не уверена в точной второстепенной дате или малоизвестной детали — скажи об этом легко, вплетая в ответ: «точную дату лучше сверь в учебнике — ориентировочно это [год/период]». Без акцента и извинений — как честный собеседник
 10. Речь: грамотная, тёплая, уважительная. Исключены: сленг, молодёжные клише, разговорные вставки («без напряга», «погнали», «классно», «чётко», «вот так», «ну и т.д.»). Живость — через точные образы и интересные примеры, не через имитацию молодёжного общения
@@ -647,10 +647,42 @@ ${PLATFORM_BLOCK}`;
         ]
       : message;
 
+    // ── Prompt caching ────────────────────────────────────────────────────────
+    // The system prompt is ~4k tokens, ~80% of which is STATIC (rules, pedagogy,
+    // modes, platform). Sending it uncached on every message is the main API cost.
+    // We reorder into [STATIC prefix (cached) | DYNAMIC suffix] so Anthropic caches
+    // the large stable part (~90% input-token discount after the first call within
+    // the 5-min ephemeral window). Dynamic = student MEMORY + KNOWLEDGE BASE, which
+    // change every message, so they go LAST (uncached). The citation rule already
+    // says the KB block is "below", matching this order.
+    //
+    // Safety: we split by stable markers and assert head+dynamic+tail === original
+    // (byte-identical) before caching. If markers move or assertion fails, we fall
+    // back to the original single uncached block — zero behaviour change.
+    const memMarker  = isEnLocale ? "STUDENT MEMORY:" : "ПАМЯТЬ О ПОЛЬЗОВАТЕЛЕ:";
+    const ruleMarker = isEnLocale ? "RULES:\n1. Follow the" : "ПРАВИЛА:\n1. Следуй стилю";
+    const mi = systemPrompt.indexOf(memMarker);
+    const ri = systemPrompt.indexOf(ruleMarker);
+    let systemParam: string | Array<{ type: "text"; text: string; cache_control?: { type: "ephemeral" } }> = systemPrompt;
+    if (!isDiscovery && mi > 0 && ri > mi) {
+      const head   = systemPrompt.slice(0, mi);   // preamble + scope + profile (static)
+      const middle = systemPrompt.slice(mi, ri);  // MEMORY + KNOWLEDGE BASE (dynamic)
+      const tail   = systemPrompt.slice(ri);      // RULES + pedagogy + modes + platform (static)
+      const staticPrefix = head + tail;           // all static text, order-preserved within each part
+      // Integrity: the three slices must cover the whole prompt with no loss.
+      // (We then deliberately reorder to [static head+tail] + [dynamic middle].)
+      if (head + middle + tail === systemPrompt && staticPrefix.length > 0 && middle.length > 0) {
+        systemParam = [
+          { type: "text", text: staticPrefix, cache_control: { type: "ephemeral" } },
+          { type: "text", text: middle },
+        ];
+      }
+    }
+
     const response = await withAnthropicQueue(() => anthropic.messages.create({
       model: hasImage ? "claude-sonnet-4-6" : "claude-haiku-4-5-20251001",
       max_tokens: hasImage ? 4096 : 2048,
-      system: systemPrompt,
+      system: systemParam,
       messages: [
         ...((history ?? []).filter((m: {role: string}) => m.role === "user" || m.role === "assistant").slice(-10).map((m: {role: string; content: string}) => ({ role: m.role, content: m.content }))),
         { role: "user", content: userTurnContent },
