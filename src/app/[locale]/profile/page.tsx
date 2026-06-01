@@ -218,7 +218,7 @@ export default async function ProfilePage({ params }: PageProps) {
     { data: profileRow },
     { data: rankRow }
   ] = await Promise.all([
-    supabase.from("users").select("plan, plan_expires_at, trial_expires_at, reward_plan, reward_expires_at, created_at, display_name, name_changes_count, full_name, age, phone, gift_pro_claimed, messages_today, messages_window_start").eq("id", user.id).single(),
+    supabase.from("users").select("plan, plan_expires_at, trial_expires_at, reward_plan, reward_expires_at, created_at, display_name, name_changes_count, full_name, age, gift_pro_claimed, messages_today, messages_window_start").eq("id", user.id).single(),
     supabase.from("user_progress").select("xp_total, streak_days, best_streak, last_active_at").eq("user_id", user.id),
     supabase.from("chat_messages").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("role", "user"),
     supabase.from("user_profiles").select("selected_avatar, serial_id").eq("user_id", user.id).maybeSingle(),
@@ -336,7 +336,7 @@ export default async function ProfilePage({ params }: PageProps) {
               changesLeft={changesLeft}
               currentFullName={profile?.full_name ?? null}
               currentAge={profile?.age ?? null}
-              currentPhone={profile?.phone ?? null}
+              currentPhone={null}
             />
           </div>
         </div>

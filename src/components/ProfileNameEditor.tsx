@@ -81,17 +81,6 @@ export function ProfileNameEditor({ currentNickname, changesLeft, currentFullNam
   const [nickname, setNickname]   = useState(currentNickname ?? "");
   const [age, setAge]             = useState(currentAge?.toString() ?? "");
 
-  const { cc: initCc, num: initNum } = splitPhone(currentPhone);
-  const [countryCode, setCountryCode] = useState(initCc);
-  const [phoneNum, setPhoneNum]       = useState(initNum);
-
-  // Auto-detect country code on first open
-  useEffect(() => {
-    if (!currentPhone) {
-      setCountryCode(detectCountryCode());
-    }
-  }, [currentPhone]);
-
   const nickChanged = nickname !== (savedNick ?? "");
 
   const handleSave = async () => {
@@ -102,12 +91,10 @@ export function ProfileNameEditor({ currentNickname, changesLeft, currentFullNam
     const ageNum = age ? Number(age) : undefined;
     if (ageNum !== undefined && (isNaN(ageNum) || ageNum < 1 || ageNum > 119)) { setError("Возраст: число от 1 до 119"); return; }
 
-    const fullPhone = phoneNum.trim() ? `${countryCode}${phoneNum.trim()}` : undefined;
-
     setLoading(true); setError("");
     const res = await fetch("/api/profile/update-name", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: nickname || undefined, fullName: fullName || undefined, age: ageNum, phone: fullPhone }),
+      body: JSON.stringify({ name: nickname || undefined, fullName: fullName || undefined, age: ageNum }),
     });
     const data = await res.json();
     setLoading(false);
@@ -150,31 +137,6 @@ export function ProfileNameEditor({ currentNickname, changesLeft, currentFullNam
             <label className="text-[11px] font-medium t-secondary uppercase tracking-wide mb-1 block">Возраст</label>
             <input value={age} onChange={e => { setAge(e.target.value); setError(""); }} type="number" min={1} max={119} placeholder="25"
               className={`${inputCls} w-24`} />
-          </div>
-          <div>
-            <label className="text-[11px] font-medium t-secondary uppercase tracking-wide mb-1 block">
-              Телефон <span className="normal-case font-normal t-muted">(необязательно)</span>
-            </label>
-            <div className="flex items-center gap-1 w-full max-w-xs">
-              <select
-                value={countryCode}
-                onChange={e => setCountryCode(e.target.value)}
-                className="text-sm border b-default rounded-xl pl-2 pr-1 py-2 focus:outline-none focus:border-brand-400 s-input focus:bg-white dark:focus:bg-gray-800 transition-colors shrink-0"
-                style={{ width: "5.5rem" }}
-              >
-                {COUNTRY_CODES.map(c => (
-                  <option key={c.code} value={c.code}>{c.flag} {c.code}</option>
-                ))}
-              </select>
-              <input
-                value={phoneNum}
-                onChange={e => setPhoneNum(e.target.value.replace(/[^\d\s\-()]/g, ""))}
-                placeholder="900 000 00 00"
-                maxLength={16}
-                type="tel"
-                className={`${inputCls} flex-1 min-w-0`}
-              />
-            </div>
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-2 pt-1">

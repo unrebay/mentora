@@ -8,15 +8,13 @@ const NICK_RE = /^[a-z0-9]{3,20}$/;
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, fullName, age, phone } = body as { name?: string; fullName?: string; age?: number; phone?: string };
+    const { name, fullName, age } = body as { name?: string; fullName?: string; age?: number };
     if (name !== undefined && !NICK_RE.test(name))
       return NextResponse.json({ error: "Никнейм: только строчные a–z и 0–9, от 3 до 20 символов" }, { status: 400 });
     if (age !== undefined && (typeof age !== "number" || age < 1 || age > 119))
       return NextResponse.json({ error: "Возраст: число от 1 до 119" }, { status: 400 });
     if (fullName !== undefined && (typeof fullName !== "string" || fullName.length > 100))
       return NextResponse.json({ error: "Полное имя: до 100 символов" }, { status: 400 });
-    if (phone !== undefined && (typeof phone !== "string" || phone.length > 40))
-      return NextResponse.json({ error: "Телефон: до 40 символов" }, { status: 400 });
     const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -34,7 +32,6 @@ export async function POST(request: Request) {
     // (we .eq on the current count) and returns no error — second request is silently ignored
     if (fullName !== undefined) updates.full_name = fullName;
     if (age !== undefined)      updates.age = age;
-    if (phone !== undefined)    updates.phone = phone;
     if (Object.keys(updates).length === 0) return NextResponse.json({ ok: true });
     // If name is changing, add optimistic concurrency guard on name_changes_count
     // to prevent TOCTOU race: concurrent requests that both read count=1 won't both succeed
