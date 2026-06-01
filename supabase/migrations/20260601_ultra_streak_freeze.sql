@@ -107,3 +107,7 @@ $function$;
 REVOKE ALL ON FUNCTION public.increment_xp(uuid, text, integer, boolean) FROM public;
 GRANT EXECUTE ON FUNCTION public.increment_xp(uuid, text, integer, boolean) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.increment_xp(uuid, text, integer, boolean) TO service_role;
+-- Restore original hardening: anon must NOT call this (Supabase default-privileges
+-- auto-grants EXECUTE to anon on new functions; revoke it so unauth clients can't
+-- inflate XP/streak for arbitrary user_ids).
+REVOKE EXECUTE ON FUNCTION public.increment_xp(uuid, text, integer, boolean) FROM anon;
