@@ -22,6 +22,7 @@
 | `Стрик-сейвер` | Вечерний email-нудж при риске потери стрика (+ апселл Ultra для Free/Pro) | api/cron/streak-saver, email.ts: streakSaverEmailHtml |
 | `Вход по passkey` | Passkey/WebAuthn вход (auth.passkeySignIn) | auth/page.tsx; i18n auth.passkeySignIn/passkeyError; lib/supabase/client (experimental flag) |
 | `Passkey (профиль)` | Добавить/удалить passkey (namespace passkey.*) | components/PasskeyManager.tsx; profile/page.tsx; supabase.auth.registerPasskey/passkey.* |
+| `Промо годового плана` | Баннер «+3 месяца» + начисление бонуса; дата в lib/promo.ts | pricing/page.tsx (annualPromoActive/annualPromoDateLabelRu); api/payments/webhook (ANNUAL_PROMO_BONUS_DAYS) |
 | `Менты` | Разговорное название XP | Только в коде/переменных — не в UI пока |
 | `noreply@mentora.su` | Адрес отправителя писем | Supabase Auth SMTP, sendEmail.ts |
 | `VERSION` | `6.0.0` — версия в футере | SiteFooter.tsx (const VERSION) |

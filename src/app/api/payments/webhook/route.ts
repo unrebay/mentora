@@ -1,6 +1,7 @@
 import { notifyAdmin, mskNow } from "@/lib/notifyAdmin";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { annualPromoActive, ANNUAL_PROMO_BONUS_DAYS } from "@/lib/promo";
 
 export async function POST(req: NextRequest) {
   try {
@@ -44,7 +45,10 @@ export async function POST(req: NextRequest) {
 
     const isUltima = planKey.startsWith("ultima");
     const isAnnual = planKey.endsWith("annual");
-    const days = isAnnual ? 365 : 30;
+    // Annual launch promo: +bonus days while the promo is active (see src/lib/promo.ts).
+    // Renewals a year later fall outside the window, so they get no bonus automatically.
+    const promoBonus = isAnnual && annualPromoActive() ? ANNUAL_PROMO_BONUS_DAYS : 0;
+    const days = (isAnnual ? 365 : 30) + promoBonus;
     const userPlan = isUltima ? "ultima" : "pro";
 
     const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);

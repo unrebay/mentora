@@ -10,6 +10,7 @@ import TelegramSupportButton from "@/components/TelegramSupportButton";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { getEffectivePlan } from "@/lib/plan";
+import { annualPromoActive, annualPromoDateLabelRu } from "@/lib/promo";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -615,8 +616,8 @@ export default async function PricingPage() {
 
       </section>
 
-      {/* PROMO BANNER — Russian only */}
-      {locale === "ru" && (
+      {/* PROMO BANNER — Russian only, only while annual promo is active */}
+      {locale === "ru" && annualPromoActive() && (
         <section className="relative z-10 max-w-5xl mx-auto px-6 pb-6">
           <div className="relative overflow-hidden rounded-2xl px-5 py-4 flex flex-wrap items-center gap-3"
             style={isLoggedIn ? {
@@ -636,7 +637,7 @@ export default async function PricingPage() {
               </svg>
             </div>
             <div className="relative z-10 flex-1 min-w-0">
-              <span className="font-bold text-sm" style={{ color: isLoggedIn ? "var(--text)" : "#fff" }}>Только до 1 июня —</span>{" "}
+              <span className="font-bold text-sm" style={{ color: isLoggedIn ? "var(--text)" : "#fff" }}>Только до {annualPromoDateLabelRu()} —</span>{" "}
               <span className="text-sm" style={{ color: isLoggedIn ? "var(--text-secondary)" : "rgba(255,255,255,0.55)" }}>
                 при покупке годового плана <strong style={{ color: isLoggedIn ? "#4561E8" : "#9BB4FF" }}>+3 месяца в подарок</strong>.
                 Платишь за 12 месяцев — пользуешься 15.
@@ -652,7 +653,7 @@ export default async function PricingPage() {
                   <circle cx="6" cy="6" r="2.5" />
                   <circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5" />
                 </svg>
-                Успей до 1 июня
+                Успей до {annualPromoDateLabelRu()}
               </span>
             </div>
           </div>
