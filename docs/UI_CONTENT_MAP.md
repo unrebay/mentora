@@ -20,6 +20,8 @@
 | `Стрик` | Streak — серия дней подряд | DashboardStatsPills.tsx, i18n: streakLabel |
 | `Защита стрика` | Ultra-перк: авто-заморозка стрика при пропуске 1 дня | i18n: pricing.ultra.features; increment_xp(p_freeze_enabled); chat/route.ts |
 | `Стрик-сейвер` | Вечерний email-нудж при риске потери стрика (+ апселл Ultra для Free/Pro) | api/cron/streak-saver, email.ts: streakSaverEmailHtml |
+| `Вход по passkey` | Passkey/WebAuthn вход (auth.passkeySignIn) | auth/page.tsx; i18n auth.passkeySignIn/passkeyError; lib/supabase/client (experimental flag) |
+| `Passkey (профиль)` | Добавить/удалить passkey (namespace passkey.*) | components/PasskeyManager.tsx; profile/page.tsx; supabase.auth.registerPasskey/passkey.* |
 | `Менты` | Разговорное название XP | Только в коде/переменных — не в UI пока |
 | `noreply@mentora.su` | Адрес отправителя писем | Supabase Auth SMTP, sendEmail.ts |
 | `VERSION` | `6.0.0` — версия в футере | SiteFooter.tsx (const VERSION) |

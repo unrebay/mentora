@@ -305,6 +305,16 @@
     "footerCtaSub2": "10 сообщений / 8 часов — бесплатно навсегда.",
     "footerCtaBtn": "Создать аккаунт бесплатно"
   },
+  "passkey": {
+    "title": "Вход по passkey",
+    "description": "Быстрый и безопасный вход по биометрии или ключу — без пароля. Добавь passkey на этом устройстве.",
+    "add": "Добавить passkey",
+    "added": "Passkey добавлен",
+    "addError": "Не удалось добавить passkey",
+    "delete": "Удалить",
+    "deleteError": "Не удалось удалить",
+    "genericName": "Passkey"
+  },
   "auth": {
     "signIn": "Войти",
     "signUp": "Зарегистрироваться",
@@ -315,6 +325,8 @@
     "passwordPlaceholder": "Минимум 6 символов",
     "passwordPlaceholderSignIn": "••••••••",
     "continueGoogle": "Продолжить через Google",
+    "passkeySignIn": "Войти по passkey",
+    "passkeyError": "Не удалось войти по passkey. Убедись, что passkey добавлен в профиле.",
     "orEmail": "или через email",
     "switchToSignUp": "Нет аккаунта? Зарегистрироваться",
     "switchToSignIn": "Уже есть аккаунт? Войти",

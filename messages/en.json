@@ -305,6 +305,16 @@
     "footerCtaSub2": "20 messages per day — free forever.",
     "footerCtaBtn": "Create free account"
   },
+  "passkey": {
+    "title": "Passkey sign-in",
+    "description": "Fast, secure passwordless sign-in with biometrics or a security key. Add a passkey on this device.",
+    "add": "Add passkey",
+    "added": "Passkey added",
+    "addError": "Could not add passkey",
+    "delete": "Delete",
+    "deleteError": "Could not delete",
+    "genericName": "Passkey"
+  },
   "auth": {
     "signIn": "Sign in",
     "signUp": "Create account",
@@ -315,6 +325,8 @@
     "passwordPlaceholder": "At least 6 characters",
     "passwordPlaceholderSignIn": "••••••••",
     "continueGoogle": "Continue with Google",
+    "passkeySignIn": "Sign in with passkey",
+    "passkeyError": "Passkey sign-in failed. Make sure you added a passkey in your profile.",
     "orEmail": "or with email",
     "switchToSignUp": "No account? Sign up",
     "switchToSignIn": "Already have an account? Sign in",

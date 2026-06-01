@@ -13,6 +13,7 @@ import MeLogo from "@/components/MeLogo";
 import DashboardNav from "@/components/DashboardNav";
 import StatCard, { MentIcon, FlameIcon, MessageIcon, StarIcon, TrophyIcon } from "@/components/StatCard";
 import AvatarGrid from "@/components/AvatarGrid";
+import PasskeyManager from "@/components/PasskeyManager";
 import LevelAvatar, { unlockedLevel as unlockedLevelFn } from "@/components/LevelAvatar";
 import SupportCodeCopy from "@/components/SupportCodeCopy";
 import TelegramSupportButton from "@/components/TelegramSupportButton";
@@ -408,6 +409,11 @@ export default async function ProfilePage({ params }: PageProps) {
         {/* ── Avatar grid ──────────────────────────────────── */}
         <div className="animate-fade-in-up" style={{ animationDelay: "120ms", opacity: 0 }}>
           <AvatarGrid totalXP={totalXP} initialSelected={(profileRow as { selected_avatar?: number | null } | null)?.selected_avatar ?? null} />
+        </div>
+
+        {/* ── Passkey (WebAuthn) ───────────────────────────── */}
+        <div className="animate-fade-in-up" style={{ animationDelay: "140ms", opacity: 0 }}>
+          <PasskeyManager />
         </div>
 
         {/* ── XP Progress bar ──────────────────────────────── */}

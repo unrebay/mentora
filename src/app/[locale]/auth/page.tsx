@@ -471,6 +471,7 @@ function AuthPageContent() {
   const [mode, setMode]                 = useState<"signin" | "signup" | "forgot">("signin");
   const [loading, setLoading]           = useState(false);
   const [oauthLoading, setOauthLoading] = useState<"google" | null>(null);
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [error, setError]               = useState<string | null>(null);
   const [emailSent, setEmailSent]       = useState<string | null>(null);
   const [forgotEmailSent, setForgotEmailSent] = useState(false);
@@ -545,6 +546,22 @@ function AuthPageContent() {
       options: { redirectTo: `${window.location.origin}/auth/callback`, queryParams: provider === "google" ? { access_type: "offline", prompt: "consent" } : undefined },
     });
     if (error) { setError(t("errorConnect")); setOauthLoading(null); }
+  }
+
+  // Passkey (WebAuthn) sign-in — discoverable credentials, no email needed.
+  // Requires the user to have previously registered a passkey (see /profile)
+  // and passkey auth enabled in the Supabase dashboard.
+  async function handlePasskeySignIn() {
+    setPasskeyLoading(true); setError(null);
+    try {
+      const { error } = await supabase.auth.signInWithPasskey();
+      if (error) { setError(t("passkeyError")); setPasskeyLoading(false); return; }
+      posthog.capture("user.signed_in", { method: "passkey", locale });
+      router.push("/dashboard");
+      router.refresh();
+    } catch {
+      setError(t("passkeyError")); setPasskeyLoading(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -858,6 +875,20 @@ function AuthPageContent() {
                   ? <span className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(255,255,255,0.2)", borderTopColor: "rgba(255,255,255,0.7)" }} />
                   : <GoogleIcon />}
                 {t("continueGoogle")}
+              </button>}
+
+              {/* Passkey (WebAuthn) sign-in — only in signin mode */}
+              {mode === "signin" && <button
+                type="button"
+                onClick={handlePasskeySignIn}
+                disabled={passkeyLoading}
+                className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-60"
+                style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.75)" }}
+              >
+                {passkeyLoading
+                  ? <span className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(255,255,255,0.2)", borderTopColor: "rgba(255,255,255,0.7)" }} />
+                  : <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="10" cy="8" r="5"/><path d="M2 21a8 8 0 0 1 10.434-7.62"/><circle cx="18" cy="16" r="3"/><path d="M18 19v3M21 16h-1.5M16.5 16H15"/></svg>}
+                {t("passkeySignIn")}
               </button>}
 
               {!isForgot && <div className="relative flex items-center gap-3 py-1">
