@@ -1,76 +1,16 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface Props {
   currentNickname: string | null;
   changesLeft: number;
   currentFullName: string | null;
   currentAge: number | null;
-  currentPhone: string | null;
 }
 
 const NICK_RE = /^[a-z0-9]{3,20}$/;
 
-const COUNTRY_CODES = [
-  { code: "+7",   flag: "🇷🇺", name: "Россия / Казахстан" },
-  { code: "+1",   flag: "🇺🇸", name: "США / Канада" },
-  { code: "+380", flag: "🇺🇦", name: "Украина" },
-  { code: "+375", flag: "🇧🇾", name: "Беларусь" },
-  { code: "+374", flag: "🇦🇲", name: "Армения" },
-  { code: "+994", flag: "🇦🇿", name: "Азербайджан" },
-  { code: "+995", flag: "🇬🇪", name: "Грузия" },
-  { code: "+996", flag: "🇰🇬", name: "Кыргызстан" },
-  { code: "+998", flag: "🇺🇿", name: "Узбекистан" },
-  { code: "+992", flag: "🇹🇯", name: "Таджикистан" },
-  { code: "+993", flag: "🇹🇲", name: "Туркменистан" },
-  { code: "+49",  flag: "🇩🇪", name: "Германия" },
-  { code: "+44",  flag: "🇬🇧", name: "Великобритания" },
-  { code: "+33",  flag: "🇫🇷", name: "Франция" },
-  { code: "+86",  flag: "🇨🇳", name: "Китай" },
-  { code: "+91",  flag: "🇮🇳", name: "Индия" },
-  { code: "+90",  flag: "🇹🇷", name: "Турция" },
-  { code: "+971", flag: "🇦🇪", name: "ОАЭ" },
-  { code: "+972", flag: "🇮🇱", name: "Израиль" },
-];
-
-function detectCountryCode(): string {
-  try {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone ?? "";
-    const lang = navigator.language ?? "";
-    if (tz.startsWith("Europe/Moscow") || tz.startsWith("Asia/Novosibirsk") ||
-        tz.startsWith("Asia/Yekaterinburg") || tz.startsWith("Asia/Krasnoyarsk") ||
-        tz.startsWith("Asia/Irkutsk") || tz.startsWith("Asia/Vladivostok") ||
-        lang.startsWith("ru")) return "+7";
-    if (tz.startsWith("Europe/Kiev") || tz.startsWith("Europe/Kyiv")) return "+380";
-    if (tz.startsWith("Europe/Minsk")) return "+375";
-    if (tz.startsWith("Asia/Tbilisi")) return "+995";
-    if (tz.startsWith("Asia/Yerevan")) return "+374";
-    if (tz.startsWith("Asia/Baku")) return "+994";
-    if (tz.startsWith("Asia/Tashkent")) return "+998";
-    if (tz.startsWith("Asia/Almaty") || tz.startsWith("Asia/Qyzylorda")) return "+7";
-    if (tz.startsWith("Europe/Berlin")) return "+49";
-    if (tz.startsWith("Europe/London")) return "+44";
-    if (tz.startsWith("Europe/Paris")) return "+33";
-    if (tz.startsWith("Asia/Shanghai") || tz.startsWith("Asia/Chongqing")) return "+86";
-    if (tz.startsWith("Asia/Kolkata")) return "+91";
-    if (tz.startsWith("Europe/Istanbul")) return "+90";
-    if (tz.startsWith("Asia/Dubai")) return "+971";
-    if (lang.startsWith("uk")) return "+380";
-    if (lang.startsWith("be")) return "+375";
-    if (lang.startsWith("de")) return "+49";
-    if (lang.startsWith("tr")) return "+90";
-  } catch {}
-  return "+7";
-}
-
-function splitPhone(full: string | null): { cc: string; num: string } {
-  if (!full) return { cc: "+7", num: "" };
-  const matched = COUNTRY_CODES.find(c => full.startsWith(c.code));
-  if (matched) return { cc: matched.code, num: full.slice(matched.code.length).trim() };
-  return { cc: "+7", num: full };
-}
-
-export function ProfileNameEditor({ currentNickname, changesLeft, currentFullName, currentAge, currentPhone }: Props) {
+export function ProfileNameEditor({ currentNickname, changesLeft, currentFullName, currentAge }: Props) {
   const [editing, setEditing]     = useState(false);
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState("");

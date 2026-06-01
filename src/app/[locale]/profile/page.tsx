@@ -336,7 +336,6 @@ export default async function ProfilePage({ params }: PageProps) {
               changesLeft={changesLeft}
               currentFullName={profile?.full_name ?? null}
               currentAge={profile?.age ?? null}
-              currentPhone={null}
             />
           </div>
         </div>
