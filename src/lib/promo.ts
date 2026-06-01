@@ -7,9 +7,10 @@
 //    When the date passes, the banner hides itself and the webhook stops adding
 //    the bonus automatically — no other changes needed.
 
-// Cutoff (inclusive until this instant). Placeholder = 1 July 2026, 23:59 MSK.
-// CHANGE THIS to the real promo end date.
-export const ANNUAL_PROMO_UNTIL = new Date("2026-07-01T20:59:59Z");
+// Cutoff (inclusive until this instant). Launch promo: 1 month from the
+// 1 June 2026 launch → through 30 June 2026, 23:59 MSK.
+// To extend/end the promo later, just change this date.
+export const ANNUAL_PROMO_UNTIL = new Date("2026-06-30T20:59:59Z");
 
 // Bonus added to the annual 365 days during the promo (+3 months ≈ 90 days).
 export const ANNUAL_PROMO_BONUS_DAYS = 90;
