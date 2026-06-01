@@ -206,7 +206,7 @@
   "features": {
     "security": {
       "title": "Ask without fear",
-      "desc": "Conversations are encrypted with AES-256 — the same standard used by banks and Apple Pay. Data is never shared with third parties or used for advertising. Ask the question you wouldn't type into Google.",
+      "desc": "Your conversations are never shared with third parties or used for advertising. AES-256 encryption — like banks. Ask anything.",
       "tag": "AES-256"
     },
     "memory": {
