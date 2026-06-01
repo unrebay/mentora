@@ -599,13 +599,14 @@ ${PLATFORM_BLOCK}`;
 
     const systemPrompt = isEnLocale ? systemPromptEn : systemPromptRu;
 
-    // Save user message
-    await supabase.from("chat_messages").insert({
+    // Save user message (fire-and-forget: write-only, row id unused, off the
+    // critical path so it doesn't delay the AI response)
+    void supabase.from("chat_messages").insert({
       user_id: user.id,
       subject,
       role: "user",
       content: message,
-    });
+    }).then(null, (e: unknown) => console.error("user message insert failed:", e));
 
     // ── Suggestions: generate in parallel with main chat (non-blocking, silent on fail) ──
     const _suggHistory = (history ?? [])
@@ -726,14 +727,14 @@ ${PLATFORM_BLOCK}`;
       assistantMessage = assistantMessage.replace(/\[IMG:\s*[^\]]{5,300}\]/gi, "").replace(/\n{3,}/g, "\n\n").trim();
     }
 
-    // Save assistant response
-    await supabase.from("chat_messages").insert({
+    // Save assistant response (fire-and-forget: off the critical path)
+    void supabase.from("chat_messages").insert({
       user_id: user.id,
       subject,
       role: "assistant",
       content: assistantMessage,
       tokens_used: response.usage.input_tokens + response.usage.output_tokens,
-    });
+    }).then(null, (e: unknown) => console.error("assistant message insert failed:", e));
 
     // ── Non-blocking memory write-back (all users, all plans) ────────────────
     void (async () => {
