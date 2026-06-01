@@ -1,0 +1,27 @@
+name: Reengagement cron — 3-7 day inactive nudge
+
+on:
+  schedule:
+    # 09:00 UTC = 12:00 Moscow (midday). Was only in vercel.json (dead on VPS) — now actually fires.
+    - cron: '0 9 * * *'
+  workflow_dispatch:  # manual trigger for testing
+
+jobs:
+  reengage:
+    name: Trigger reengagement endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call reengagement API
+        run: |
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X GET "https://mentora.su/api/cron/reengagement" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          echo "HTTP status: $HTTP_CODE"
+          echo "Response: $BODY"
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ reengagement failed with status $HTTP_CODE"
+            exit 1
+          fi
+          echo "✅ reengagement completed: $BODY"

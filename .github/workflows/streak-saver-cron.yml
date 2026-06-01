@@ -1,0 +1,27 @@
+name: Streak-saver cron — evening nudge
+
+on:
+  schedule:
+    # 17:00 UTC = 20:00 Moscow — evening, before the UTC-midnight streak reset
+    - cron: '0 17 * * *'
+  workflow_dispatch:  # manual trigger for testing
+
+jobs:
+  nudge:
+    name: Trigger streak-saver endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call streak-saver API
+        run: |
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X GET "https://mentora.su/api/cron/streak-saver" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          echo "HTTP status: $HTTP_CODE"
+          echo "Response: $BODY"
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ streak-saver failed with status $HTTP_CODE"
+            exit 1
+          fi
+          echo "✅ streak-saver completed: $BODY"
