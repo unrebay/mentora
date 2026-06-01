@@ -611,6 +611,7 @@ ${PLATFORM_BLOCK}`;
     const _suggHistory = (history ?? [])
       .filter((m: {role: string}) => m.role === "user" || m.role === "assistant")
       .slice(-4)
+      .map((m: {role: string; content: string}) => ({ role: m.role, content: m.content }))
       .concat([{ role: "user", content: message }]);
     const suggestionsPromise: Promise<string[]> = anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
@@ -651,7 +652,7 @@ ${PLATFORM_BLOCK}`;
       max_tokens: hasImage ? 4096 : 2048,
       system: systemPrompt,
       messages: [
-        ...((history ?? []).filter((m: {role: string}) => m.role === "user" || m.role === "assistant").slice(-10)),
+        ...((history ?? []).filter((m: {role: string}) => m.role === "user" || m.role === "assistant").slice(-10).map((m: {role: string; content: string}) => ({ role: m.role, content: m.content }))),
         { role: "user", content: userTurnContent },
       ],
     }));
