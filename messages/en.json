@@ -712,6 +712,7 @@
     "proActive": "✓ Subscription active",
     "loading": "Redirecting to checkout...",
     "getUltraAnnual": "Get Ultra annual",
+    "autoRenewConsent": "Auto-renews: we charge at the end of each period. Cancel anytime in your profile.",
     "getAnnual": "Get annual plan",
     "getUltra": "Get Ultra",
     "getPro": "Try Pro",

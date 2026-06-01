@@ -20,6 +20,9 @@ interface Props {
 export default function BuyProButton({ isLoggedIn, isPro, isUltima = false, plan, manageHref }: Props) {
   const t = useTranslations("buyPro");
   const [loading, setLoading] = useState(false);
+  // Recurring consent — checked by default; user can opt out before paying.
+  // Captured here and passed to /api/payments/create → webhook sets users.auto_renew.
+  const [autoRenew, setAutoRenew] = useState(true);
   const router = useRouter();
 
   const isUltimaPlan = plan.startsWith("ultima");
@@ -53,7 +56,7 @@ export default function BuyProButton({ isLoggedIn, isPro, isUltima = false, plan
       const res = await fetch("/api/payments/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan, autoRenew }),
       });
       const data = await res.json();
       if (data.confirmation_url) {
@@ -80,12 +83,23 @@ export default function BuyProButton({ isLoggedIn, isPro, isUltima = false, plan
       : "bg-brand-600 text-white hover:bg-brand-700";
 
   return (
-    <button
-      onClick={handleClick}
-      disabled={loading}
-      className={`block w-full text-center py-2.5 px-5 font-semibold rounded-xl transition-colors disabled:opacity-60 disabled:cursor-not-allowed text-sm ${buttonStyle}`}
-    >
-      {label}
-    </button>
+    <div className="space-y-2">
+      <button
+        onClick={handleClick}
+        disabled={loading}
+        className={`block w-full text-center py-2.5 px-5 font-semibold rounded-xl transition-colors disabled:opacity-60 disabled:cursor-not-allowed text-sm ${buttonStyle}`}
+      >
+        {label}
+      </button>
+      <label className="flex items-start gap-2 text-[11px] leading-snug cursor-pointer select-none" style={{ color: isUltimaPlan ? "rgba(255,255,255,0.6)" : "var(--text-muted)" }}>
+        <input
+          type="checkbox"
+          checked={autoRenew}
+          onChange={(e) => setAutoRenew(e.target.checked)}
+          className="mt-0.5 flex-shrink-0 accent-current"
+        />
+        <span>{t("autoRenewConsent")}</span>
+      </label>
+    </div>
   );
 }

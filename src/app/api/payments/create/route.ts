@@ -20,6 +20,9 @@ export async function POST(req: NextRequest) {
     type PlanKey = "monthly" | "annual" | "ultima_monthly" | "ultima_annual";
     const validPlans: PlanKey[] = ["monthly", "annual", "ultima_monthly", "ultima_annual"];
     const planKey: PlanKey = validPlans.includes(body.plan) ? body.plan as PlanKey : "monthly";
+    // Recurring consent from checkout (default true). Stored in YooKassa metadata,
+    // read by the webhook to set users.auto_renew.
+    const autoRenew = body.autoRenew !== false;
     const plan = PLANS[planKey];
 
     const cookieStore = await cookies();
@@ -53,7 +56,7 @@ export async function POST(req: NextRequest) {
         // Webhook reads payment.payment_method.{id,card.last4,card.card_type}
         // and writes them into users.
         save_payment_method: true,
-        metadata: { user_id: user.id, plan: planKey },
+        metadata: { user_id: user.id, plan: planKey, auto_renew: String(autoRenew) },
       }),
     });
 
