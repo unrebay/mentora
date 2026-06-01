@@ -51,6 +51,9 @@ jobs:
       - name: Install dependencies (npm ci)
         run: npm ci
 
+      - name: Typecheck (tsc --noEmit) — fail deploy on type errors
+        run: npx tsc --noEmit
+
       - name: Build (next build → standalone)
         run: npm run build
 
