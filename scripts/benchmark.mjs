@@ -9,11 +9,27 @@ import { writeFileSync } from "fs";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+// Retry transient Anthropic errors (529 overloaded / 429 / 5xx) so flaky infra
+// doesn't get scored as a wrong answer (was counting `overloaded_error` as wrong).
+async function callClaude(params, attempts = 4) {
+  let lastErr;
+  for (let i = 0; i < attempts; i++) {
+    try { return await client.messages.create(params); }
+    catch (e) {
+      lastErr = e;
+      const transient = e?.status === 529 || e?.status === 429 || e?.status >= 500 || /overloaded|rate|timeout/i.test(e?.message || "");
+      if (i < attempts - 1) { await new Promise(r => setTimeout(r, transient ? 2000 * (i + 1) : 800)); continue; }
+    }
+  }
+  throw lastErr;
+}
+
 // ── System prompt (Mentora Russian, subject-generic) ──────────────────────
 const MENTORA_SYSTEM = `Ты — Mentora, AI-ментор образовательной платформы mentora.su. Ты женского рода.
 Твоя задача — точно и ясно отвечать на вопросы по школьным предметам.
 ПРАВИЛА:
-- Отвечай фактически точно. Если не уверена в деталях — скажи об этом.
+- В ПЕРВОМ предложении дай точный канонический ответ: конкретное значение, формулу или ПОЛНОЕ определение со всеми обязательными признаками (для определений укажи род понятия и ключевые свойства — например «синонимы — слова ОДНОЙ ЧАСТИ РЕЧИ, близкие по значению»; «ВВП — стоимость КОНЕЧНЫХ товаров и услуг»). Затем при необходимости кратко поясни.
+- Отвечай фактически точно. Точный краткий ответ лучше расплывчатого длинного.
 - Начинай сразу с сути, без «Конечно!» и «Отличный вопрос!»
 - Ответ: 1-3 абзаца. Чёткий и конкретный.
 - Пиши по-русски.`;
@@ -153,11 +169,13 @@ function judgePrompt(question, expectedAnswer, actualAnswer) {
 ЭТАЛОННЫЙ ОТВЕТ: ${expectedAnswer}
 ОТВЕТ AI: ${actualAnswer}
 
-Оцени фактическую точность ответа AI по трёхбалльной шкале:
-- "correct" — ответ фактически правильный, ключевые факты совпадают с эталоном
-- "partial" — ответ частично правильный: есть верная суть, но не хватает важных деталей или есть небольшая неточность
-- "wrong" — ответ фактически неверный или вводит в заблуждение
+Шкала:
+- "correct" — ответ содержит правильный ключевой факт/значение/формулу из эталона. Дополнительные ВЕРНЫЕ детали, иная формулировка, развёрнутое пояснение или форматирование НЕ снижают оценку. Если главный факт верен — это correct, даже если сказано больше эталона.
+- "partial" — суть верна, но пропущен важный ОБЯЗАТЕЛЬНЫЙ признак ответа ИЛИ есть небольшая фактическая неточность в деталях.
+- "wrong" — главный факт неверен/отсутствует, либо ответ является технической ошибкой (например «[ERROR ...]»).
 
+Не штрафуй за стиль, длину или лишние верные факты — оценивай только фактическую корректность сути.
+Эталон — это ОРИЕНТИР по смыслу, а не дословный шаблон.
 Отвечай ТОЛЬКО одним словом: correct, partial или wrong.`;
 }
 
@@ -174,7 +192,7 @@ async function runBenchmark() {
     // Step 1: Ask Mentora (Claude Haiku 4.5)
     let answer = "";
     try {
-      const resp = await client.messages.create({
+      const resp = await callClaude({
         model: "claude-haiku-4-5-20251001",
         max_tokens: 512,
         system: MENTORA_SYSTEM,
@@ -188,7 +206,7 @@ async function runBenchmark() {
     // Step 2: Judge (Claude Sonnet 4.6)
     let grade = "wrong";
     try {
-      const judgeResp = await client.messages.create({
+      const judgeResp = await callClaude({
         model: "claude-sonnet-4-6",
         max_tokens: 10,
         messages: [{ role: "user", content: judgePrompt(item.q, item.ans, answer) }],
