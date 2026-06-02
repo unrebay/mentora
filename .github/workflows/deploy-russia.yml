@@ -51,6 +51,9 @@ jobs:
       - name: Install dependencies (npm ci)
         run: npm ci
 
+      - name: Stamp service worker cache version (per-deploy cache-bust)
+        run: sed -i "s/__BUILD_ID__/${GITHUB_SHA:0:12}/g" public/sw.js
+
       - name: Typecheck (tsc --noEmit) — fail deploy on type errors
         run: npx tsc --noEmit
 

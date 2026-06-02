@@ -13,7 +13,12 @@
  * получит свежий код на следующем визите без ручного очищения cache.
  */
 
-const CACHE_VERSION = "mentora-v1-2026-05-20";
+// CACHE_VERSION is stamped at deploy time: deploy-russia.yml replaces __BUILD_ID__
+// with the git SHA, so EVERY deploy gets a fresh cache namespace and the `activate`
+// handler purges all stale assets. Without this, returning users keep serving
+// cache-first _next/static chunks from an old build → ChunkLoadError / blank page.
+// (If the placeholder isn't replaced — local dev/build-check — it's just a constant.)
+const CACHE_VERSION = "mentora-__BUILD_ID__";
 const OFFLINE_URL = "/offline.html";
 
 // Базовый набор, который дёргаем при install — чтобы offline работал сразу.
