@@ -3,7 +3,8 @@ name: Factual Accuracy Benchmark
 on:
   workflow_dispatch:
   push:
-    paths:
+    branches: ['**']          # branch pushes only — NOT tag pushes (was spamming
+    paths:                    # the benchmark + false "failed" emails on every safe-tag)
       - 'scripts/benchmark.mjs'
 
 jobs:
