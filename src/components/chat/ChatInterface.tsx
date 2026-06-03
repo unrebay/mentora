@@ -672,6 +672,46 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     reader.readAsDataURL(file); e.target.value = "";
   };
 
+  // ── Streaming helpers (shared by quickSend / edit-resend / sendMessage) ──
+  // Server streams answer text, then a trailing METADATA sentinel + JSON.
+  const CHAT_META = "\u001e__MENTORA_META__\u001e";
+  const readChatStream = async (res: Response, onText: (t: string) => void): Promise<Record<string, unknown>> => {
+    const reader = res.body!.getReader();
+    const dec = new TextDecoder();
+    let buf = "";
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      onText(buf.split("\u001e")[0]); // text before the record-separator
+    }
+    const i = buf.indexOf(CHAT_META);
+    if (i === -1) return { message: buf };
+    let meta: Record<string, unknown> = {};
+    try { meta = JSON.parse(buf.slice(i + CHAT_META.length)); } catch { /* keep streamed text */ }
+    if (typeof meta.message !== "string") meta.message = buf.slice(0, i);
+    return meta;
+  };
+  const setLastAssistant = (content: string, extra?: { imageUrl?: unknown; citations?: unknown }) => {
+    setMessages(prev => {
+      const copy = prev.slice();
+      for (let i = copy.length - 1; i >= 0; i--) {
+        if (copy[i].role === "assistant") {
+          copy[i] = {
+            ...copy[i],
+            content,
+            ...(extra ? {
+              imageUrl: typeof extra.imageUrl === "string" ? extra.imageUrl : undefined,
+              citations: Array.isArray(extra.citations) ? (extra.citations as Message["citations"]) : undefined,
+            } : {}),
+          };
+          break;
+        }
+      }
+      return copy;
+    });
+  };
+
   async function quickSend(text: string) {
     if (loading || limitReached) return;
     // Capture history snapshot NOW (before stale closure in finally)
@@ -684,12 +724,15 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
     setSessionStarted(true); setSessionMessageCount(prev => prev + 1);
     try {
       const res = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:text,subject,history:messages.filter(m=>!m.isError).slice(-10),locale})});
-      const data = await res.json();
       if (res.status===429){setMessagesRemaining(0);setLimitConfirmedByApi(true);setMessages(prev=>prev.filter(m=>!(m.role==="user"&&m.content===text)));return;}
-      if (!res.ok||!data.message){setMessages(prev=>[...prev,{role:"assistant",content:data.error??tChat("errorGeneric"),isError:true}]);return;}
-      setMessages(prev=>[...prev,{role:"assistant",content:data.message,imageUrl:data.imageUrl??undefined,citations:Array.isArray(data.citations)?data.citations:undefined}]);
-      if(data.messagesRemaining!==undefined){setMessagesRemaining(data.messagesRemaining);if(typeof data.messagesRemaining==='number'&&data.messagesRemaining<=0)setLimitConfirmedByApi(true);}
-      if(data.suggestions?.length>=1){setSuggestionsVisible(false);setTimeout(()=>{setDynamicSuggestions(data.suggestions);setSuggestionsVisible(true);},220);}
+      const ct = res.headers.get("content-type")||"";
+      if (!res.ok||!ct.includes("text/plain")||!res.body){const d=await res.json().catch(()=>({} as {error?:string}));setMessages(prev=>[...prev,{role:"assistant",content:(d as {error?:string}).error??tChat("errorGeneric"),isError:true}]);return;}
+      setMessages(prev=>[...prev,{role:"assistant",content:""}]);
+      const meta=await readChatStream(res,(t)=>setLastAssistant(t));
+      if((meta as {error?:string}).error){setLastAssistant(tChat("errorGeneric"));return;}
+      setLastAssistant(meta.message as string,{imageUrl:meta.imageUrl,citations:meta.citations});
+      const mr=meta.messagesRemaining;if(mr!==undefined){setMessagesRemaining(mr as number);if(typeof mr==='number'&&mr<=0)setLimitConfirmedByApi(true);}
+      const sg=meta.suggestions as unknown[]|undefined;if(sg&&sg.length>=1){setSuggestionsVisible(false);setTimeout(()=>{setDynamicSuggestions(sg as string[]);setSuggestionsVisible(true);},220);}
     } catch {setMessages(prev=>[...prev,{role:"assistant",content:tChat("errorNoInternet"),isError:true}]);}
     finally{setLoading(false);}
   }
@@ -738,15 +781,19 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: newText, subject, history, locale }),
       });
-      const data = await res.json();
       if (res.status === 429) { setMessagesRemaining(0); setLimitConfirmedByApi(true); return; }
-      if (!res.ok || !data.message) {
-        setMessages(prev => [...prev, { role: "assistant", content: data.error ?? tChat("errorGeneric"), isError: true }]);
+      const ct = res.headers.get("content-type")||"";
+      if (!res.ok || !ct.includes("text/plain") || !res.body) {
+        const d=await res.json().catch(()=>({} as {error?:string}));
+        setMessages(prev => [...prev, { role: "assistant", content: (d as {error?:string}).error ?? tChat("errorGeneric"), isError: true }]);
         return;
       }
-      setMessages(prev => [...prev, { role: "assistant", content: data.message, imageUrl: data.imageUrl ?? undefined, citations: Array.isArray(data.citations) ? data.citations : undefined }]);
-      if (data.messagesRemaining !== undefined) { setMessagesRemaining(data.messagesRemaining); if (typeof data.messagesRemaining === 'number' && data.messagesRemaining <= 0) setLimitConfirmedByApi(true); }
-      if(data.suggestions?.length>=1){setSuggestionsVisible(false);setTimeout(()=>{setDynamicSuggestions(data.suggestions);setSuggestionsVisible(true);},220);}
+      setMessages(prev => [...prev, { role: "assistant", content: "" }]);
+      const meta=await readChatStream(res,(t)=>setLastAssistant(t));
+      if((meta as {error?:string}).error){setLastAssistant(tChat("errorGeneric"));return;}
+      setLastAssistant(meta.message as string,{imageUrl:meta.imageUrl,citations:meta.citations});
+      const mr=meta.messagesRemaining;if(mr!==undefined){setMessagesRemaining(mr as number);if(typeof mr==='number'&&mr<=0)setLimitConfirmedByApi(true);}
+      const sg=meta.suggestions as unknown[]|undefined;if(sg&&sg.length>=1){setSuggestionsVisible(false);setTimeout(()=>{setDynamicSuggestions(sg as string[]);setSuggestionsVisible(true);},220);}
     } catch {
       setMessages(prev => [...prev, { role: "assistant", content: tChat("errorNoInternet"), isError: true }]);
     } finally {
@@ -830,24 +877,32 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         res = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:reqBody});
       }
       setPendingImage(null);
-      const data = await res.json();
       if (res.status===429){setMessagesRemaining(0);setLimitConfirmedByApi(true);setMessages(prev=>prev.filter(m=>m.content!==userMessage||m.role!=="user"));setInput(userMessage);return;}
-      if (!res.ok||!data.message){
-        const errText=data.error==="Internal server error"?tChat("errorServer"):(data.error??tChat("errorGeneric"));
+      const ct = res.headers.get("content-type")||"";
+      if (!res.ok||!ct.includes("text/plain")||!res.body){
+        const d=await res.json().catch(()=>({} as {error?:string}));
+        const de=(d as {error?:string}).error;
+        const errText=de==="Internal server error"?tChat("errorServer"):(de??tChat("errorGeneric"));
         setMessages(prev=>[...prev,{role:"assistant",content:errText,isError:true}]);
-        posthog.capture("chat.error",{subject,status_code:res.status,error_message:data.error,retried:true});return;
+        posthog.capture("chat.error",{subject,status_code:res.status,error_message:de,retried:true});return;
       }
-      setMessages(prev=>[...prev,{role:"assistant",content:data.message,imageUrl:data.imageUrl??undefined,citations:Array.isArray(data.citations)?data.citations:undefined}]);
-      if(data.messagesRemaining!==undefined){setMessagesRemaining(data.messagesRemaining);if(typeof data.messagesRemaining==='number'&&data.messagesRemaining<=0)setLimitConfirmedByApi(true);}
-      if(data.resetAt)setResetAt(data.resetAt);
-      if(data.levelUp){
-        setLevelUpData(data.levelUp);setLevelUpFading(true);setShowLevelUp(true);
+      setMessages(prev=>[...prev,{role:"assistant",content:""}]);
+      const meta=await readChatStream(res,(t)=>setLastAssistant(t));
+      if((meta as {error?:string}).error){
+        setLastAssistant(tChat("errorServer"));
+        posthog.capture("chat.error",{subject,status_code:200,error_message:(meta as {error?:string}).error,retried:true});return;
+      }
+      setLastAssistant(meta.message as string,{imageUrl:meta.imageUrl,citations:meta.citations});
+      const mr=meta.messagesRemaining;if(mr!==undefined){setMessagesRemaining(mr as number);if(typeof mr==='number'&&mr<=0)setLimitConfirmedByApi(true);}
+      if(meta.resetAt)setResetAt(meta.resetAt as string);
+      if(meta.levelUp){
+        setLevelUpData(meta.levelUp as Parameters<typeof setLevelUpData>[0]);setLevelUpFading(true);setShowLevelUp(true);
         requestAnimationFrame(()=>requestAnimationFrame(()=>setLevelUpFading(false)));
         if(levelUpTimerRef.current)clearTimeout(levelUpTimerRef.current);
         levelUpTimerRef.current=setTimeout(()=>{setLevelUpFading(true);setTimeout(()=>{setShowLevelUp(false);setLevelUpData(null);},700);},18000);
       }
-      if(data.streakRewardEarned){setTimeout(()=>{window.location.href="/dashboard?streak_reward=1";},1500);}
-      if(data.suggestions?.length>=1){setSuggestionsVisible(false);setTimeout(()=>{setDynamicSuggestions(data.suggestions);setSuggestionsVisible(true);},220);}
+      if(meta.streakRewardEarned){setTimeout(()=>{window.location.href="/dashboard?streak_reward=1";},1500);}
+      const sg=meta.suggestions as unknown[]|undefined;if(sg&&sg.length>=1){setSuggestionsVisible(false);setTimeout(()=>{setDynamicSuggestions(sg as string[]);setSuggestionsVisible(true);},220);}
     } catch {setMessages(prev=>[...prev,{role:"assistant",content:tChat("errorNoInternet"),isError:true}]);}
     finally{setLoading(false);}
   }

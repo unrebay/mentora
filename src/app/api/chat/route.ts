@@ -692,7 +692,11 @@ ${PLATFORM_BLOCK}`;
       }
     }
 
-    const response = await withAnthropicQueue(() => anthropic.messages.create({
+    // ── Streamed response ───────────────────────────────────────────────────
+    // We stream the answer token-by-token (perceived latency ~1s to first words),
+    // then run all post-processing (image, citations, XP, streak, suggestions) and
+    // send a final META event with metadata. Client renders text live + applies META.
+    const __msgParams = {
       model: hasImage ? "claude-sonnet-4-6" : "claude-haiku-4-5-20251001",
       max_tokens: hasImage ? 4096 : 2048,
       system: systemParam,
@@ -700,15 +704,27 @@ ${PLATFORM_BLOCK}`;
         ...((history ?? []).filter((m: {role: string}) => m.role === "user" || m.role === "assistant").slice(-10).map((m: {role: string; content: string}) => ({ role: m.role, content: m.content }))),
         { role: "user", content: userTurnContent },
       ],
-    }));
+    } as Parameters<typeof anthropic.messages.create>[0];
 
-    const firstContent = response.content[0];
-    if (firstContent.type !== "text") throw new Error("Unexpected response type: " + firstContent.type);
-    let assistantMessage = firstContent.text;
-    // Guard: never save an empty response to DB
-    if (!assistantMessage.trim()) {
-      throw new Error("Empty assistant response");
-    }
+    const __enc = new TextEncoder();
+    const __META = "\u001e__MENTORA_META__\u001e";
+    const __streamBody = new ReadableStream<Uint8Array>({
+      async start(controller) {
+       try {
+        const __ms = anthropic.messages.stream(__msgParams);
+        for await (const ev of __ms) {
+          if (ev.type === "content_block_delta" && ev.delta.type === "text_delta") {
+            controller.enqueue(__enc.encode(ev.delta.text));
+          }
+        }
+        const response = await __ms.finalMessage();
+        const firstContent = response.content[0];
+        if (firstContent.type !== "text") throw new Error("Unexpected response type: " + firstContent.type);
+        let assistantMessage = firstContent.text;
+        // Guard: never save an empty response to DB
+        if (!assistantMessage.trim()) {
+          throw new Error("Empty assistant response");
+        }
 
     // ── Image generation: detect [IMG: ...] marker ────────────────────────────
     let imageUrl: string | null = null;
@@ -905,20 +921,35 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
       new Promise<string[]>((resolve) => setTimeout(() => resolve([]), 1200)),
     ]);
 
-    return NextResponse.json({
-      message: assistantMessage,
-      // Only include messagesRemaining when it's an actual number (free users).
-      // For Pro/Ultra, messagesRemaining is null — omitting it entirely avoids
-      // the JS footgun null <= 0 === true on the client side.
-      ...(typeof messagesRemaining === 'number' ? { messagesRemaining } : {}),
-      resetAt: windowResetAt,
-      trialExpiresAt: profile?.trial_expires_at ?? null,
-      rewardExpiresAt: profile?.reward_expires_at ?? null,
-      ...(citations.length ? { citations } : {}),
-      ...(levelUp ? { levelUp } : {}),
-      ...(imageUrl ? { imageUrl } : {}),
-      ...(streakRewardEarned ? { streakRewardEarned: true } : {}),
-      ...(suggestions.length ? { suggestions } : {}),
+        const __meta: Record<string, unknown> = {
+          message: assistantMessage,
+          ...(typeof messagesRemaining === 'number' ? { messagesRemaining } : {}),
+          resetAt: windowResetAt,
+          trialExpiresAt: profile?.trial_expires_at ?? null,
+          rewardExpiresAt: profile?.reward_expires_at ?? null,
+          ...(citations.length ? { citations } : {}),
+          ...(levelUp ? { levelUp } : {}),
+          ...(imageUrl ? { imageUrl } : {}),
+          ...(streakRewardEarned ? { streakRewardEarned: true } : {}),
+          ...(suggestions.length ? { suggestions } : {}),
+        };
+        controller.enqueue(__enc.encode(__META + JSON.stringify(__meta)));
+        controller.close();
+       } catch (streamErr) {
+        const m = streamErr instanceof Error ? streamErr.message : String(streamErr);
+        console.error("Chat stream error:", m);
+        try { controller.enqueue(__enc.encode(__META + JSON.stringify({ error: "stream_failed" }))); } catch { /* client gone */ }
+        controller.close();
+       }
+      },
+    });
+
+    return new Response(__streamBody, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache, no-transform",
+        "X-Accel-Buffering": "no",
+      },
     });
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
