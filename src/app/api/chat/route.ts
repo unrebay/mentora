@@ -711,6 +711,10 @@ ${PLATFORM_BLOCK}`;
     const __streamBody = new ReadableStream<Uint8Array>({
       async start(controller) {
        try {
+        // Immediate flush: send a zero-width space before the (slow) Anthropic call.
+        // Forces the first byte out so any buffering hop (nginx/proxy) starts flushing
+        // and the client paints the assistant bubble instantly. Stripped client-side.
+        controller.enqueue(__enc.encode("\u200b"));
         const __ms = anthropic.messages.stream(__msgParams);
         for await (const ev of __ms) {
           if (ev.type === "content_block_delta" && ev.delta.type === "text_delta") {

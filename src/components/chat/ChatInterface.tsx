@@ -683,7 +683,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
       const { done, value } = await reader.read();
       if (done) break;
       buf += dec.decode(value, { stream: true });
-      onText(buf.split("\u001e")[0]); // text before the record-separator
+      onText(buf.split("\u001e")[0].replace(/\u200b/g, "")); // text before separator; strip keep-alive zero-width space
     }
     const i = buf.indexOf(CHAT_META);
     if (i === -1) return { message: buf };
