@@ -154,7 +154,11 @@ export async function middleware(request: NextRequest) {
   if (!user && isProtected) {
     return applyCsp(NextResponse.redirect(new URL(`${localePrefix}/auth`, origin)), nonce);
   }
-  if (user && isAuthPage) {
+  if (user && (isAuthPage || localelessPath === "/")) {
+    // Landing redirect moved here from page.tsx so the homepage can be STATICALLY
+    // rendered (no per-request getUser() in the page). Logged-in users skip the
+    // marketing landing and go straight to the dashboard. Reuses the getUser()
+    // call middleware already makes — no extra round-trip.
     return applyCsp(NextResponse.redirect(new URL(`${localePrefix}/dashboard`, origin)), nonce);
   }
 

@@ -1,10 +1,8 @@
-import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { getTranslations, getLocale, getMessages } from "next-intl/server";
+import { getTranslations, getMessages, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import DemoChat from "@/components/DemoChat";
 import DemoChatWithExpand from "@/components/DemoChatWithExpand";
-import { createClient } from "@/lib/supabase/server";
 import SubjectCarousel from "@/components/SubjectCarousel";
 import DemoScrollButton from "@/components/DemoScrollButton";
 import LandingNav from "@/components/LandingNav";
@@ -26,8 +24,6 @@ const KnowledgeGraph3D = nextDynamic(() => import("@/components/KnowledgeGraph3D
   ssr: false,
   loading: () => null,
 });
-
-export const dynamic = "force-dynamic";
 
 const META = {
   ru: {
@@ -150,12 +146,9 @@ const TESTIMONIAL_META = [
   { avatarBg: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" },
 ];
 
-export default async function HomePage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) redirect("/dashboard");
-
-  const locale = await getLocale();
+export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
