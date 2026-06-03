@@ -36,15 +36,28 @@ export async function POST(
   const beta = req.headers.get("anthropic-beta");
   if (beta) headers["anthropic-beta"] = beta;
 
+  // Forward anthropic-beta + accept so SSE streaming negotiates correctly.
+  const accept = req.headers.get("accept");
+  if (accept) headers["accept"] = accept;
+
   const upstream = await fetch(`https://api.anthropic.com/${pathStr}`, {
     method: "POST",
     headers,
     body,
   });
 
-  const responseBody = await upstream.text();
-  return new NextResponse(responseBody, {
+  // Pass the upstream response straight through WITHOUT buffering. For streaming
+  // requests (stream:true → SSE) this preserves token-by-token delivery; for
+  // normal calls it is the same JSON bytes. Using .text() here would collect the
+  // whole answer first and kill streaming.
+  return new NextResponse(upstream.body, {
     status: upstream.status,
-    headers: { "content-type": upstream.headers.get("content-type") ?? "application/json" },
+    headers: {
+      "content-type": upstream.headers.get("content-type") ?? "application/json",
+      "cache-control": "no-cache, no-transform",
+    },
   });
 }
+
+// Allow long-running streamed responses through the proxy.
+export const maxDuration = 60;
