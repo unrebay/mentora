@@ -93,21 +93,26 @@ jobs:
           script: |
             set -e
             APP_DIR=/var/www/mentora
-            mkdir -p "$APP_DIR"
-            cd "$APP_DIR"
+            # NOTE: do not mkdir/cd APP_DIR here — it may be (or become) a symlink;
+            # all extraction now happens in a fresh release dir under /var/www/mentora-releases.
 
-            echo "==> Stopping pm2 process (path may have changed)"
-            pm2 delete mentora 2>/dev/null || true
+            # ── Zero-downtime release switch ────────────────────────────────
+            # Old flow was: pm2 delete → wipe dir → extract → start. The site was
+            # DOWN for the whole extraction (tens of seconds) on EVERY deploy —
+            # users mid-login/mid-chat hit a dead upstream (e.g. the Google OAuth
+            # callback failing right after a deploy, "State has already been used").
+            # New flow: extract the new release into its own dir FIRST, then swap
+            # the /var/www/mentora symlink and pm2 reload (rolling, zero-downtime).
+            RELEASES=/var/www/mentora-releases
+            REL="$RELEASES/r$(date +%Y%m%d%H%M%S)"
+            mkdir -p "$REL"
 
-            echo "==> Wipe app dir"
-            find . -mindepth 1 -maxdepth 1 -exec rm -rf {} +
-
-            echo "==> Extract new standalone bundle"
-            tar -xzf /tmp/bundle.tar.gz
+            echo "==> Extract new standalone bundle into $REL"
+            tar -xzf /tmp/bundle.tar.gz -C "$REL"
             rm -f /tmp/bundle.tar.gz
 
             echo "==> Write fresh .env.local"
-            cat > .env.local <<EOF
+            cat > "$REL/.env.local" <<EOF
             TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN
             TELEGRAM_SUPPORT_BOT_TOKEN=$TELEGRAM_SUPPORT_BOT_TOKEN
             TELEGRAM_ADMIN_CHAT_ID=$TELEGRAM_ADMIN_CHAT_ID
@@ -131,8 +136,28 @@ jobs:
             ADMIN_SECRET=$ADMIN_SECRET
             EOF
 
-            echo "==> pm2 start server.js"
-            pm2 start server.js --name mentora -i max --update-env
+            # One-time migration: /var/www/mentora used to be a real dir; turn it
+            # into a symlink (this single deploy still has a brief stop window).
+            if [ -e "$APP_DIR" ] && [ ! -L "$APP_DIR" ]; then
+              echo "==> One-time migration: real dir -> symlink"
+              pm2 delete mentora 2>/dev/null || true
+              rm -rf "$APP_DIR"
+            fi
+
+            echo "==> Switch release symlink"
+            ln -sfn "$REL" "$APP_DIR"
+            cd "$APP_DIR"
+
+            if pm2 describe mentora >/dev/null 2>&1; then
+              echo "==> pm2 reload (zero-downtime rolling restart)"
+              pm2 reload mentora --update-env
+            else
+              echo "==> pm2 start server.js"
+              pm2 start server.js --name mentora -i max --update-env
+            fi
+
+            echo "==> Prune old releases (keep newest 2)"
+            ls -dt "$RELEASES"/r* 2>/dev/null | tail -n +3 | xargs rm -rf 2>/dev/null || true
 
             echo "==> pm2 (re)start telegram-poller (long-polling, выходит наружу из VPS)"
             pm2 delete telegram-poller 2>/dev/null || true
