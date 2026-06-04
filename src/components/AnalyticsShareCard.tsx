@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
-interface Invite { id: string; label: string | null; created_at: string; expires_at: string | null; revoked_at: string | null }
+interface Invite { id: string; token: string; label: string | null; created_at: string; expires_at: string | null; revoked_at: string | null }
 
 export default function AnalyticsShareCard({ initialInvites }: { initialInvites: Invite[] }) {
   const t = useTranslations("analyticsShare");
@@ -96,7 +96,9 @@ export default function AnalyticsShareCard({ initialInvites }: { initialInvites:
       {invites.length > 0 && (
         <div className="px-6 pb-5 space-y-2">
           {invites.map(inv => {
-            const token = inv.id;
+            // BUG FIX: links were built from inv.id (row UUID) — the share page
+            // looks rows up by the `token` column, so every copied link 404'd.
+            const token = inv.token;
             const url = `${baseUrl}/analytics/invite/${token}`;
             return (
               <div key={inv.id}
