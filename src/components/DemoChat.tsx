@@ -245,6 +245,7 @@ export default function DemoChat({ inModal = false }: { inModal?: boolean } = {}
         style={inModal ? { paddingRight: 4 } : { maxHeight: 360, paddingRight: 4 }}
       >
         {messages.map((m, i) => (
+          m.role === "assistant" && !m.content ? null :
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"} gap-2`}>
             {m.role === "assistant" && (
               <div
@@ -284,8 +285,8 @@ export default function DemoChat({ inModal = false }: { inModal?: boolean } = {}
           </div>
         ))}
 
-        {/* Typing indicator */}
-        {loading && (
+        {/* Typing indicator — hidden once the streamed answer starts rendering */}
+        {loading && !(messages[messages.length - 1]?.role === "assistant" && !!messages[messages.length - 1]?.content) && (
           <div className="flex justify-start gap-2">
             <div
               className="w-7 h-7 rounded-2xl flex items-center justify-center shrink-0 mt-auto mb-0.5"

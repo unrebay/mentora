@@ -1227,6 +1227,9 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         )}
 
         {messages.map((msg, i) => {
+          // Streaming placeholder: skip the empty assistant bubble (typing dots
+          // below cover the "waiting" state until the first token arrives).
+          if (msg.role === "assistant" && !msg.content && !msg.isError) return null;
           const isEditing = editingIndex === i;
           const canEdit   = msg.role === "user" && !msg.isError && !loading;
           const canCopy   = !msg.isError && msg.content.length > 0;
@@ -1392,7 +1395,7 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
         {/* Typing indicator — avatar uses the brand color (not subjColor) so
             it doesn't fake science tinting while Mentora is still "thinking".
             The science-color hint stays as the bubble's left accent. */}
-        {loading && (
+        {loading && !(messages[messages.length - 1]?.role === "assistant" && !!messages[messages.length - 1]?.content) && (
           <div className="flex justify-start gap-2">
             <div className="w-7 h-7 rounded-2xl flex items-center justify-center shrink-0 mt-auto mb-0.5" style={{
               background: "#ffffff",
