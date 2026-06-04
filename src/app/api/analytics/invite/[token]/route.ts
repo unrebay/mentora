@@ -1,9 +1,15 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
-  const supabase = await createClient()
+  // Service-role client: this is a PUBLIC-BY-TOKEN endpoint. The unguessable
+  // token is the capability; revoked_at/expires_at are enforced below. With the
+  // session/anon client, RLS broke every viewer class: authenticated non-owners
+  // (мама/жена with their own accounts) couldn't even SELECT the invite
+  // ("Ссылка недействительна"), and anonymous guests got empty progress/messages
+  // (owner-only policies on user_progress/chat_messages).
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
   const { data: invite, error } = await supabase
     .from('analytics_invites').select('*').eq('token', token).is('revoked_at', null).single()
   if (error || !invite) return NextResponse.json({ error: 'Ссылка недействительна или была отозвана' }, { status: 404 })
