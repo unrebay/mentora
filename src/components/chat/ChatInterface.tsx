@@ -667,9 +667,38 @@ export default function ChatInterface({ subject, subjectTitle, initialHistory, i
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]; if (!file) return;
     if (!file.type.startsWith("image/")) return;
-    const reader = new FileReader();
-    reader.onload = () => { const dataUrl = reader.result as string; setPendingImage({ data: dataUrl.split(",")[1], mimeType: file.type, preview: dataUrl }); };
-    reader.readAsDataURL(file); e.target.value = "";
+    e.target.value = "";
+    // Compress via canvas (max 1600px, JPEG q0.85): raw phone photos are 3-8MB
+    // base64 and hit proxy body limits (edge 4MB). ~1600px is plenty for vision
+    // OCR/diagrams and uploads become fast. Falls back to raw file on any error.
+    const fallback = () => {
+      const reader = new FileReader();
+      reader.onload = () => { const dataUrl = reader.result as string; setPendingImage({ data: dataUrl.split(",")[1], mimeType: file.type, preview: dataUrl }); };
+      reader.readAsDataURL(file);
+    };
+    try {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const maxDim = 1600;
+          const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(img.width * scale));
+          canvas.height = Math.max(1, Math.round(img.height * scale));
+          const ctx = canvas.getContext("2d");
+          if (!ctx) { fallback(); return; }
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+          // Sanity: canvas produced something real (>1KB), else fall back
+          if (dataUrl.length < 1000) { fallback(); return; }
+          setPendingImage({ data: dataUrl.split(",")[1], mimeType: "image/jpeg", preview: dataUrl });
+        } catch { fallback(); }
+        finally { URL.revokeObjectURL(url); }
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); fallback(); };
+      img.src = url;
+    } catch { fallback(); }
   };
 
   // ── Streaming helpers (shared by quickSend / edit-resend / sendMessage) ──

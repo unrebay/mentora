@@ -59,5 +59,10 @@ export async function POST(
   });
 }
 
-// Allow long-running streamed responses through the proxy.
-export const maxDuration = 60;
+// Edge runtime — REQUIRED for streaming. Verified by diag workflow: direct
+// Anthropic SSE = 9 chunks (first at 0.66s), but via the Node serverless proxy
+// the same answer arrived as 1 chunk at the end (Lambda buffers piped bodies).
+// Edge functions stream natively → token-by-token chat delivery works.
+// Trade-off: edge request body limit is 4MB (Node was 4.5MB) — mitigated by
+// client-side image compression in ChatInterface (photos now ~<1MB base64).
+export const runtime = "edge";
