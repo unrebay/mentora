@@ -471,6 +471,16 @@ function AuthPageContent() {
   const [mode, setMode]                 = useState<"signin" | "signup" | "forgot">("signin");
   const [loading, setLoading]           = useState(false);
   const [oauthLoading, setOauthLoading] = useState<"google" | null>(null);
+
+  // Self-heal: if we landed on /auth (e.g. with an OAuth error after a
+  // duplicated callback consumed the code) but a session actually exists,
+  // go straight to the dashboard instead of asking the user to sign in again.
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) window.location.replace("/dashboard");
+    }).catch(() => { /* stay on /auth */ });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [error, setError]               = useState<string | null>(null);
   const [emailSent, setEmailSent]       = useState<string | null>(null);

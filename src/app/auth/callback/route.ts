@@ -82,6 +82,15 @@ export async function GET(request: NextRequest) {
     try {
       const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
       if (exchangeError) {
+        // Self-heal duplicated callbacks: browser prefetchers / AV link-scanners
+        // sometimes double-hit the OAuth redirect chain, so the state/code is
+        // already consumed ("State has already been used" seen in auth logs,
+        // 2026-06-04). If a parallel hit already established a session in this
+        // browser, continue into the app instead of bouncing to the login form.
+        const { data: { user: healedUser } } = await supabase.auth.getUser();
+        if (healedUser) {
+          return NextResponse.redirect(`${origin}${next}`);
+        }
         console.error("[auth-callback] exchangeCodeForSession error", {
           name: exchangeError.name, message: exchangeError.message, status: exchangeError.status,
         });
