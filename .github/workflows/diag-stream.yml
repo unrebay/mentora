@@ -60,7 +60,7 @@ jobs:
           print("looks_immutable_deploy_url:", bool(re.search(r"-[a-z0-9]{8,}-", label)))
           print("matches_current_prod_label:", label == "mentora-ls7a52gn9-mentorasu")
 
-          print("=== D) FRESH DEPLOYMENT URL (edge proxy, 6c07f6e) ===")
-          probe("fresh", "https://mentora-ls7a52gn9-mentorasu.vercel.app/api/anthropic-proxy/v1/messages",
+          print("=== E) STABLE PRODUCTION DOMAIN (candidate for ANTHROPIC_BASE_URL) ===")
+          probe("stable", "https://mentora-mentorasu.vercel.app/api/anthropic-proxy/v1/messages",
                 {**common, "x-vercel-protection-bypass": os.environ["VERCEL_BYPASS_SECRET"]})
           PY
