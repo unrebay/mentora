@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { withAnthropicQueue } from "@/lib/anthropic-queue";
+import { acquireAnthropicSlot } from "@/lib/anthropic-queue";
 import { NextRequest, NextResponse } from "next/server";
 
 const anthropic = new Anthropic({
@@ -91,31 +91,58 @@ export async function POST(req: NextRequest) {
       )
       .slice(-6);
 
-    // Get AI response
-    const response = await withAnthropicQueue(() => anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 800,
-      system: SYSTEM_PROMPT,
-      messages: [
-        ...safeHistory,
-        { role: "user", content: message },
-      ],
-    }));
-
-    const assistantMessage =
-      response.content[0].type === "text" ? response.content[0].text : "";
+    // ── Streamed demo answer ──────────────────────────────────────────────
+    // Same pattern as the main chat: text deltas flow immediately (~1s to first
+    // words instead of ~6s of blank waiting — this is the FIRST thing a guest
+    // tries), then a trailing META event carries {used, remaining, limit}.
+    // Concurrency slot taken before streaming → overload still yields clean 429.
+    const releaseSlot = await acquireAnthropicSlot();
 
     const newCount = usedCount + 1;
     const remaining = DEMO_LIMIT - newCount;
+    const enc = new TextEncoder();
+    const META = "\u001e__MENTORA_META__\u001e";
 
-    const res = NextResponse.json({
-      message: assistantMessage,
-      used: newCount,
-      remaining,
-      limit: DEMO_LIMIT,
+    const streamBody = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        try {
+          controller.enqueue(enc.encode("\u200b")); // immediate first byte
+          const ms = anthropic.messages.stream({
+            model: "claude-haiku-4-5-20251001",
+            max_tokens: 800,
+            system: SYSTEM_PROMPT,
+            messages: [
+              ...safeHistory,
+              { role: "user", content: message },
+            ],
+          }, { timeout: 60_000, maxRetries: 1 });
+          for await (const ev of ms) {
+            if (ev.type === "content_block_delta" && ev.delta.type === "text_delta") {
+              controller.enqueue(enc.encode(ev.delta.text));
+            }
+          }
+          await ms.finalMessage();
+          releaseSlot();
+          controller.enqueue(enc.encode(META + JSON.stringify({ used: newCount, remaining, limit: DEMO_LIMIT })));
+          controller.close();
+        } catch (streamErr) {
+          releaseSlot();
+          console.error("Demo stream error:", streamErr);
+          try { controller.enqueue(enc.encode(META + JSON.stringify({ error: "stream_failed" }))); } catch { /* client gone */ }
+          controller.close();
+        }
+      },
     });
 
-    // Set cookie (session cookie — expires when browser closes)
+    const res = new NextResponse(streamBody, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache, no-transform",
+        "X-Accel-Buffering": "no",
+      },
+    });
+
+    // Set cookie (counted up-front — headers must go out before the stream)
     res.cookies.set(COOKIE_NAME, String(newCount), {
       httpOnly: true,
       sameSite: "lax",

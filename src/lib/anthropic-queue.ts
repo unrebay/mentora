@@ -26,10 +26,12 @@ function next() {
 }
 
 /**
- * Run `fn` under the Anthropic concurrency semaphore.
- * Throws { code: 503 } if the queue is full, or { code: 504 } on queue timeout.
+ * Acquire a concurrency slot and return an idempotent release() function.
+ * Streaming-friendly: hold the slot for the lifetime of the stream and call
+ * release() as soon as generation finishes (or on error).
+ * Throws QUEUE_FULL / QUEUE_TIMEOUT like withAnthropicQueue.
  */
-export async function withAnthropicQueue<T>(fn: () => Promise<T>): Promise<T> {
+export async function acquireAnthropicSlot(): Promise<() => void> {
   if (active < CONCURRENCY) {
     active++;
   } else {
@@ -61,10 +63,24 @@ export async function withAnthropicQueue<T>(fn: () => Promise<T>): Promise<T> {
     });
   }
 
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    active--;
+    next();
+  };
+}
+
+/**
+ * Run `fn` under the Anthropic concurrency semaphore.
+ * Throws QUEUE_FULL if the queue is full, or QUEUE_TIMEOUT on queue timeout.
+ */
+export async function withAnthropicQueue<T>(fn: () => Promise<T>): Promise<T> {
+  const release = await acquireAnthropicSlot();
   try {
     return await fn();
   } finally {
-    active--;
-    next();
+    release();
   }
 }

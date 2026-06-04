@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import Anthropic from "@anthropic-ai/sdk";
-import { withAnthropicQueue } from "@/lib/anthropic-queue";
+import { acquireAnthropicSlot } from "@/lib/anthropic-queue";
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 import { getEffectivePlan, LEVEL_REWARDS, computeNewReward } from "@/lib/plan";
@@ -708,6 +708,11 @@ ${PLATFORM_BLOCK}`;
 
     const __enc = new TextEncoder();
     const __META = "\u001e__MENTORA_META__\u001e";
+    // Restore load smoothing (chat left withAnthropicQueue when it switched to
+    // streaming): take a concurrency slot BEFORE the stream starts — overload
+    // surfaces as a clean 429 via the route catch (QUEUE_FULL/QUEUE_TIMEOUT) —
+    // and release it right after generation; post-processing doesn't hold it.
+    const __releaseSlot = await acquireAnthropicSlot();
     const __streamBody = new ReadableStream<Uint8Array>({
       async start(controller) {
        try {
@@ -722,6 +727,7 @@ ${PLATFORM_BLOCK}`;
           }
         }
         const response = await __ms.finalMessage();
+        __releaseSlot(); // generation done — free the Anthropic concurrency slot
         const firstContent = response.content[0];
         if (firstContent.type !== "text") throw new Error("Unexpected response type: " + firstContent.type);
         let assistantMessage = firstContent.text;
@@ -940,6 +946,7 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
         controller.enqueue(__enc.encode(__META + JSON.stringify(__meta)));
         controller.close();
        } catch (streamErr) {
+        __releaseSlot(); // idempotent — safe even if already released
         const m = streamErr instanceof Error ? streamErr.message : String(streamErr);
         console.error("Chat stream error:", m);
         // Parity with the route-level catch (stream errors never reach it):

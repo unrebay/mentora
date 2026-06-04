@@ -128,15 +128,41 @@ export default function DemoChat({ inModal = false }: { inModal?: boolean } = {}
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userText, history: historyForApi }),
       });
-      const data = await res.json();
-      if (res.status === 429 || data.error === "demo_limit_reached") {
-        setLimitReached(true); setUsed(DEMO_LIMIT); setLoading(false); return;
+      const ct = res.headers.get("content-type") || "";
+      if (!res.ok || !ct.includes("text/plain") || !res.body) {
+        const data = await res.json().catch(() => ({} as { error?: string }));
+        const errCode = (data as { error?: string }).error;
+        if (res.status === 429 || errCode === "demo_limit_reached") {
+          setLimitReached(true); setUsed(DEMO_LIMIT); setLoading(false); return;
+        }
+        throw new Error(errCode);
       }
-      if (!res.ok) throw new Error(data.error);
-      setMessages((prev) => [...prev, { role: "assistant", content: data.message }]);
-      const newUsed = data.used ?? used + 1;
+      // Stream: render text incrementally, then apply trailing META {used, remaining}
+      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+      const updateLast = (content: string) => setMessages((prev) => {
+        const copy = prev.slice();
+        for (let i = copy.length - 1; i >= 0; i--) {
+          if (copy[i].role === "assistant") { copy[i] = { ...copy[i], content }; break; }
+        }
+        return copy;
+      });
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      const META = "\u001e__MENTORA_META__\u001e";
+      let buf = "";
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        updateLast(buf.split("\u001e")[0].replace(/\u200b/g, ""));
+      }
+      const mi = buf.indexOf(META);
+      let meta: { used?: number; remaining?: number; error?: string } = {};
+      if (mi !== -1) { try { meta = JSON.parse(buf.slice(mi + META.length)); } catch { /* keep text */ } }
+      if (meta.error) { updateLast(t("somethingWentWrong")); return; }
+      const newUsed = meta.used ?? used + 1;
       setUsed(newUsed);
-      if (data.remaining === 0 || newUsed >= DEMO_LIMIT) setLimitReached(true);
+      if (meta.remaining === 0 || newUsed >= DEMO_LIMIT) setLimitReached(true);
     } catch {
       setMessages((prev) => [...prev, { role: "assistant", content: t("somethingWentWrong") }]);
     } finally {
