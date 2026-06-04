@@ -9,6 +9,7 @@ import Logo from "@/components/Logo";
 import MeLogo from "@/components/MeLogo";
 import SystemStatusGrid from "@/components/admin/SystemStatusGrid";
 import FunnelWidget from "@/components/admin/FunnelWidget";
+import CohortRetentionWidget from "@/components/admin/CohortRetentionWidget";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import RoadmapV2Tab from "@/components/admin/RoadmapV2";
 import TabErrorBoundary from "@/components/admin/TabErrorBoundary";
@@ -2032,6 +2033,7 @@ export default function AdminPanel() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 16 }}>
               <SystemStatusGrid isDark={isDark} TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} />
               <FunnelWidget isDark={isDark} TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} />
+              <CohortRetentionWidget isDark={isDark} TEXT={TEXT} MUTED={MUTED} CARD={CARD} BOR={BOR} />
             </div>
           )}
           {!loading && stats && tab === "overview" && <>

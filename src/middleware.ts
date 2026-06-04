@@ -141,25 +141,45 @@ export async function middleware(request: NextRequest) {
   const proto = request.headers.get("x-forwarded-proto") ?? "https";
   const origin = baseUrl || (forwardedHost ? `${proto}://${forwardedHost}` : new URL(request.url).origin);
 
-  // Supabase auth check (read-only — no cookie refresh here to keep middleware simple)
+  // Supabase auth check WITH cookie refresh. The access token expires hourly;
+  // the old read-only client (setAll no-op) meant the server "lost" the session
+  // after idle even though the refresh token was valid — users were bounced to
+  // /auth while the client still had a live session. We capture refreshed
+  // tokens here and stamp them onto WHICHEVER response this middleware returns.
+  const refreshedCookies: { name: string; value: string; options: CookieOptions }[] = [];
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll: () => request.cookies.getAll(), setAll: () => {} } }
+    {
+      cookies: {
+        getAll: () => request.cookies.getAll(),
+        setAll: (cs: { name: string; value: string; options: CookieOptions }[]) => {
+          cs.forEach((c) => { request.cookies.set(c.name, c.value); refreshedCookies.push(c); });
+        },
+      },
+    }
   );
   const { data: { user } } = await supabase.auth.getUser();
+  const persistSession = request.cookies.get("mentora-persist")?.value !== "0";
+  const persistOpts = persistSession ? { maxAge: 60 * 60 * 24 * 30 } : {};
+  const applyAuthCookies = (resp: NextResponse): NextResponse => {
+    refreshedCookies.forEach(({ name, value, options }) =>
+      resp.cookies.set(name, value, { ...options, ...persistOpts })
+    );
+    return resp;
+  };
 
   // Locale-aware redirects (/en prefix for English, /ru for explicit Russian paths, "" for default Russian)
   const localePrefix = pathname.startsWith("/en") ? "/en" : (isRuLocalePath ? "/ru" : "");
   if (!user && isProtected) {
-    return applyCsp(NextResponse.redirect(new URL(`${localePrefix}/auth`, origin)), nonce);
+    return applyCsp(applyAuthCookies(NextResponse.redirect(new URL(`${localePrefix}/auth`, origin))), nonce);
   }
   if (user && (isAuthPage || localelessPath === "/")) {
     // Landing redirect moved here from page.tsx so the homepage can be STATICALLY
     // rendered (no per-request getUser() in the page). Logged-in users skip the
     // marketing landing and go straight to the dashboard. Reuses the getUser()
     // call middleware already makes — no extra round-trip.
-    return applyCsp(NextResponse.redirect(new URL(`${localePrefix}/dashboard`, origin)), nonce);
+    return applyCsp(applyAuthCookies(NextResponse.redirect(new URL(`${localePrefix}/dashboard`, origin))), nonce);
   }
 
   // For internally-rewritten /ru/* paths: pass through without calling handleI18nRouting.
@@ -168,7 +188,7 @@ export async function middleware(request: NextRequest) {
   if (isRuLocalePath) {
     const response = NextResponse.next({ request: { headers: request.headers } });
     response.headers.set("x-pathname", pathname);
-    return applyCsp(response, nonce);
+    return applyCsp(applyAuthCookies(response), nonce);
   }
 
   // Let next-intl handle locale routing (prefix, detection, rewrite)
@@ -199,7 +219,7 @@ export async function middleware(request: NextRequest) {
   }
 
   response.headers.set("x-pathname", pathname);
-  return applyCsp(response, nonce);
+  return applyCsp(applyAuthCookies(response), nonce);
 }
 
 export const config = {
