@@ -24,6 +24,13 @@ function ipFromReq(req: NextRequest): string {
 }
 function ipRateLimited(ip: string): boolean {
   const now = Date.now();
+  // Housekeeping: the map accumulates one key per unique IP until pm2 restart.
+  // When it grows large, sweep entries whose hits are all outside the window.
+  if (recentByIp.size > 5000) {
+    for (const [k, v] of recentByIp) {
+      if (!v.some((t) => now - t < RL_WINDOW_MS)) recentByIp.delete(k);
+    }
+  }
   const arr = (recentByIp.get(ip) ?? []).filter((t) => now - t < RL_WINDOW_MS);
   if (arr.length >= RL_MAX) { recentByIp.set(ip, arr); return true; }
   arr.push(now); recentByIp.set(ip, arr); return false;
