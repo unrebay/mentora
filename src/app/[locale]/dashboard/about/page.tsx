@@ -4,6 +4,7 @@ import { AppFooter } from "@/components/SiteFooter";
 import { useState, useEffect } from "react";
 import WhyMentoraWorks from "@/components/WhyMentoraWorks";
 import { useTranslations, useLocale } from "next-intl";
+import { CHANGELOG } from "@/lib/changelog";
 
 /* ── Static non-localizable data ──────────────────────────────── */
 const VALUE_META: { icon: string; color: string; custom?: "handsFlower" }[] = [
@@ -715,6 +716,33 @@ export default function AboutPage() {
               100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
             }
           `}</style>
+        </section>
+
+        {/* ── WHAT'S NEW / CHANGELOG ───────────────────────────── */}
+        <section className="max-w-5xl mx-auto px-5 sm:px-8 pb-14">
+          <Tag color="#4561E8">{t("changelogTag")}</Tag>
+          <h2 style={{ fontSize: 28, fontWeight: 900, color: "var(--text)", margin: "16px 0 6px", letterSpacing: "-0.5px" }}>{t("changelogTitle")}</h2>
+          <p style={{ color: "var(--text-secondary)", fontSize: 15, lineHeight: 1.6, marginBottom: 20 }}>
+            {t("changelogSubtitle")}
+          </p>
+          <div className="space-y-3">
+            {CHANGELOG.map((c) => (
+              <div key={c.version} className="flex items-start gap-4 rounded-2xl p-5"
+                style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
+                <div style={{ fontSize: 24, lineHeight: 1.2 }}>{c.badge}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <span style={{ fontWeight: 800, color: "var(--text)", fontSize: 16 }}>{c.title}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#4561E8", background: "rgba(69,97,232,0.08)", padding: "2px 8px", borderRadius: 999 }}>v{c.version}</span>
+                    <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                      {new Date(c.date).toLocaleDateString(locale === "en" ? "en-US" : "ru-RU", { day: "numeric", month: "long", year: "numeric" })}
+                    </span>
+                  </div>
+                  <p style={{ color: "var(--text-secondary)", fontSize: 14, lineHeight: 1.55, marginTop: 4 }}>{c.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* ── TECH & SECURITY ──────────────────────────────────── */}

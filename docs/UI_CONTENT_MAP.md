@@ -435,3 +435,9 @@
 - [ ] `DashboardStatsPills.tsx` — popup текст
 - [ ] `leaderboard` компоненты — заголовки
 - [ ] `MeLogo.tsx` — если меняется буква «M» в иконке
+
+### «Что нового» (changelog) — добавлено 04.06.2026
+- [ ] `src/lib/changelog.ts` — ЕДИНЫЙ источник истории версий (записи добавлять СВЕРХУ при каждом значимом релизе)
+- [ ] `src/app/[locale]/dashboard/about/page.tsx` — секция «Что нового» (рендерит CHANGELOG между Roadmap и Tech)
+- [ ] `src/components/WhatsNewBanner.tsx` — баннер последнего релиза на дашборде (LATEST = CHANGELOG[0])
+- [ ] `messages/ru.json` / `messages/en.json` — ключи `about.changelogTag/changelogTitle/changelogSubtitle`

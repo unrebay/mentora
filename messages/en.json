@@ -1429,7 +1429,10 @@
         "title": "Adapts to you, message by message",
         "desc": "Mentora remembers how you talked before, what explanation style works, where you are now. No need to re-introduce yourself each session — the mentor knows the context."
       }
-    ]
+    ],
+    "changelogTag": "Updates",
+    "changelogTitle": "What's new",
+    "changelogSubtitle": "Release history — Mentora gets better every week."
   },
   "knowledge": {
     "metaTitle": "Knowledge Galaxy — 17 sciences in Mentora",
