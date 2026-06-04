@@ -45,8 +45,22 @@ jobs:
           probe("direct", "https://api.anthropic.com/v1/messages",
                 {**common, "x-api-key": os.environ["ANTHROPIC_API_KEY"]})
 
-          print("=== B) VIA VERCEL PROXY ===")
+          print("=== B) VIA VERCEL PROXY (ANTHROPIC_BASE_URL secret) ===")
           base = os.environ["ANTHROPIC_BASE_URL"].rstrip("/")
           probe("proxy", base + "/v1/messages",
+                {**common, "x-vercel-protection-bypass": os.environ["VERCEL_BYPASS_SECRET"]})
+
+          print("=== C) BASE_URL shape (booleans only, no secret leak) ===")
+          import re
+          from urllib.parse import urlparse
+          h = (urlparse(base).hostname or "")
+          label = h.split(".")[0]
+          print("is_vercel_app:", h.endswith(".vercel.app"))
+          print("subdomain_hyphen_parts:", len(label.split("-")))
+          print("looks_immutable_deploy_url:", bool(re.search(r"-[a-z0-9]{8,}-", label)))
+          print("matches_current_prod_label:", label == "mentora-ls7a52gn9-mentorasu")
+
+          print("=== D) FRESH DEPLOYMENT URL (edge proxy, 6c07f6e) ===")
+          probe("fresh", "https://mentora-ls7a52gn9-mentorasu.vercel.app/api/anthropic-proxy/v1/messages",
                 {**common, "x-vercel-protection-bypass": os.environ["VERCEL_BYPASS_SECRET"]})
           PY
