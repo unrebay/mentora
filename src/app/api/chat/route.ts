@@ -715,7 +715,7 @@ ${PLATFORM_BLOCK}`;
         // Forces the first byte out so any buffering hop (nginx/proxy) starts flushing
         // and the client paints the assistant bubble instantly. Stripped client-side.
         controller.enqueue(__enc.encode("\u200b"));
-        const __ms = anthropic.messages.stream(__msgParams);
+        const __ms = anthropic.messages.stream(__msgParams, { timeout: 120_000, maxRetries: 1 });
         for await (const ev of __ms) {
           if (ev.type === "content_block_delta" && ev.delta.type === "text_delta") {
             controller.enqueue(__enc.encode(ev.delta.text));
@@ -942,6 +942,18 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
        } catch (streamErr) {
         const m = streamErr instanceof Error ? streamErr.message : String(streamErr);
         console.error("Chat stream error:", m);
+        // Parity with the route-level catch (stream errors never reach it):
+        // notify admin + refund the counted free-tier message — the user got no answer.
+        notifyAdmin(`\u26a0\ufe0f <b>Chat stream error</b>\nmsg: ${m.slice(0, 400).replace(/</g, "&lt;")}\n<i>${mskNow()} \u041c\u0421\u041a</i>`);
+        if (freeMsgToRefund) {
+          try {
+            const { createClient: createSvcClient } = await import("@supabase/supabase-js");
+            const svc = createSvcClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+            await svc.rpc("refund_message_window", { p_user_id: freeMsgToRefund });
+          } catch (refundErr) {
+            console.error("refund_message_window failed:", refundErr);
+          }
+        }
         try { controller.enqueue(__enc.encode(__META + JSON.stringify({ error: "stream_failed" }))); } catch { /* client gone */ }
         controller.close();
        }
