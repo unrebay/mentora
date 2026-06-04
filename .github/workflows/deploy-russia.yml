@@ -148,16 +148,15 @@ jobs:
             ln -sfn "$REL" "$APP_DIR"
             cd "$APP_DIR"
 
-            if pm2 describe mentora >/dev/null 2>&1; then
-              echo "==> pm2 reload (zero-downtime rolling restart)"
-              pm2 reload mentora --update-env
-            else
-              echo "==> pm2 start server.js"
-              pm2 start server.js --name mentora -i max --update-env
-            fi
-
-            echo "==> Prune old releases (keep newest 2)"
-            ls -dt "$RELEASES"/r* 2>/dev/null | tail -n +3 | xargs rm -rf 2>/dev/null || true
+            # HOTFIX 04.06: pm2 pins the RESOLVED realpath of server.js at start,
+            # so `pm2 reload` kept running the OLD release dir — and the prune step
+            # deleted it out from under the workers → MODULE_NOT_FOUND crash loop,
+            # prod 500. Until a verified zero-downtime scheme is in place we do an
+            # explicit delete+start from the new release (brief restart window),
+            # and we prune ONLY after the health check passes (see below).
+            echo "==> pm2 delete + start from new release"
+            pm2 delete mentora 2>/dev/null || true
+            pm2 start server.js --name mentora -i max --update-env
 
             echo "==> pm2 (re)start telegram-poller (long-polling, выходит наружу из VPS)"
             pm2 delete telegram-poller 2>/dev/null || true
@@ -175,6 +174,8 @@ jobs:
             sleep 5
             if curl -sf http://localhost:3000 > /dev/null; then
               echo "✅ App is up"
+              echo "==> Prune old releases (keep newest 3) — only after health check"
+              ls -dt "$RELEASES"/r* 2>/dev/null | tail -n +4 | xargs rm -rf 2>/dev/null || true
             else
               echo "❌ App health check failed"
               pm2 logs mentora --lines 80 --nostream
