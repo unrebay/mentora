@@ -9,6 +9,7 @@ import NavigationProgress from "@/components/NavigationProgress";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import InstallPrompt from "@/components/InstallPrompt";
 import YandexMetrika from "@/components/YandexMetrika";
+import GoogleTagManager, { GTM_ID } from "@/components/GoogleTagManager";
 import { headers } from "next/headers";
 
 const golos = Golos_Text({
@@ -193,6 +194,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className={`${golos.variable} ${playfair.variable} font-sans`}>
+        {/* GTM noscript fallback (для пользователей без JS) */}
+        <noscript><iframe src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`} height="0" width="0" style={{ display: "none", visibility: "hidden" }} /></noscript>
         <ThemeProvider>
           <PostHogProvider>
             <SplashScreen />
@@ -203,6 +206,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </PostHogProvider>
           <YandexMetrika nonce={nonce} />
+          <GoogleTagManager nonce={nonce} />
         </ThemeProvider>
       </body>
     </html>
