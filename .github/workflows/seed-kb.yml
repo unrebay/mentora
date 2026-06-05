@@ -1,0 +1,16 @@
+name: Seed knowledge base (manual)
+# Заливает чанки из scripts/data/*.json в knowledge_chunks (идемпотентно).
+on: workflow_dispatch
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: '20' }
+      - run: npm ci --omit=dev --ignore-scripts
+      - run: node scripts/seed-psychology-kb.mjs
