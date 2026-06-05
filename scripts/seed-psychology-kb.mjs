@@ -1,38 +1,35 @@
-// Seed the psychology knowledge base from scripts/data/psychology-chunks.json.
+// Seed the psychology KB via PostgREST (no supabase-js → avoids ws/realtime in CI).
 // Idempotent: skips chunks whose (subject, topic) already exists.
-// Run via .github/workflows/seed-kb.yml (needs SUPABASE service key + URL).
-import { createClient } from "@supabase/supabase-js";
 import { readFileSync } from "fs";
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!URL || !KEY) { console.error("Missing SUPABASE env"); process.exit(1); }
 
-const sb = createClient(URL, KEY);
+const H = { apikey: KEY, Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" };
 const chunks = JSON.parse(readFileSync(new globalThis.URL("./data/psychology-chunks.json", import.meta.url), "utf8"));
 console.log(`Loaded ${chunks.length} chunks`);
 
-const { data: existing } = await sb.from("knowledge_chunks").select("topic").eq("subject", "psychology");
-const have = new Set((existing ?? []).map((r) => r.topic));
+// existing topics
+const exRes = await fetch(`${URL}/rest/v1/knowledge_chunks?subject=eq.psychology&select=topic`, { headers: H });
+const existing = exRes.ok ? await exRes.json() : [];
+const have = new Set(existing.map((r) => r.topic));
+console.log(`Already in DB: ${have.size} topics`);
 
 let inserted = 0, skipped = 0, errors = 0;
 for (const c of chunks) {
   if (have.has(c.topic)) { skipped++; continue; }
   try {
-    const er = await fetch(`${URL}/functions/v1/embed`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${KEY}` },
-      body: JSON.stringify({ input: c.content }),
-    });
-    if (!er.ok) { console.error(`embed ${er.status} for: ${c.topic}`); errors++; continue; }
+    const er = await fetch(`${URL}/functions/v1/embed`, { method: "POST", headers: H, body: JSON.stringify({ input: c.content }) });
+    if (!er.ok) { console.error(`embed ${er.status}: ${c.topic}`); errors++; continue; }
     const { embedding } = await er.json();
-    const { error } = await sb.from("knowledge_chunks").insert({
-      subject: "psychology", topic: c.topic, content: c.content,
-      source: c.source, embedding, language: "ru",
+    const ins = await fetch(`${URL}/rest/v1/knowledge_chunks`, {
+      method: "POST", headers: { ...H, Prefer: "return=minimal" },
+      body: JSON.stringify({ subject: "psychology", topic: c.topic, content: c.content, source: c.source, embedding, language: "ru" }),
     });
-    if (error) { console.error(`insert: ${c.topic}: ${error.message}`); errors++; }
-    else { inserted++; if (inserted % 10 === 0) console.log(`...${inserted} inserted`); }
+    if (!ins.ok) { console.error(`insert ${ins.status}: ${c.topic}: ${(await ins.text()).slice(0,120)}`); errors++; }
+    else { inserted++; have.add(c.topic); if (inserted % 15 === 0) console.log(`...${inserted} inserted`); }
   } catch (e) { console.error(`${c.topic}: ${e.message}`); errors++; }
 }
 console.log(`DONE: inserted=${inserted} skipped=${skipped} errors=${errors} total=${chunks.length}`);
-if (errors > chunks.length / 10) process.exit(1);
+if (errors > 0) process.exit(1);
