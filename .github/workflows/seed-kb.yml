@@ -1,6 +1,11 @@
 name: Seed knowledge base (manual)
-# Заливает чанки из scripts/data/*.json в knowledge_chunks (идемпотентно).
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      subject:
+        description: "Subject (file scripts/data/<subject>-chunks.json)"
+        required: true
+        default: "psychology"
 
 jobs:
   seed:
@@ -12,4 +17,4 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with: { node-version: '20' }
-      - run: node scripts/seed-psychology-kb.mjs
+      - run: node scripts/seed-kb.mjs "${{ github.event.inputs.subject }}"

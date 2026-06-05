@@ -1,5 +1,11 @@
 name: Fact-check KB (manual)
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "Chunks JSON path"
+        required: true
+        default: "scripts/data/psychology-chunks.json" 
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -12,4 +18,4 @@ jobs:
       - uses: actions/setup-node@v5
         with: { node-version: '20' }
       - run: npm ci --omit=dev --ignore-scripts
-      - run: node scripts/factcheck-kb.mjs
+      - run: node scripts/factcheck-kb.mjs "${{ github.event.inputs.file }}"
