@@ -44,6 +44,11 @@ export default function GoogleTagManager({ nonce }: { nonce?: string }) {
       <Suspense fallback={null}>
         <GtmPageViews />
       </Suspense>
+      {/* noscript fallback — внутри client-компонента, чтобы GTM_ID попал в SSR-HTML
+          (импорт констант из "use client"-модуля в server layout даёт пустую ссылку) */}
+      <noscript>
+        <iframe src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`} height="0" width="0" style={{ display: "none", visibility: "hidden" }} />
+      </noscript>
     </>
   );
 }
