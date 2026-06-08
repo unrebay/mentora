@@ -215,11 +215,28 @@ export async function POST(req: NextRequest) {
     const isPro   = effectivePlan === "pro" || effectivePlan === "ultima";
     const isUltima = effectivePlan === "ultima";
 
-    // Atomic window check-and-increment for free users (prevents race condition)
+    // Perf: run the free-limit window check, user-memory fetch, and RAG embedding
+    // all in parallel. The window RPC is independent of memory/RAG, so overlapping
+    // them removes its round-trip (~50-80ms) from the critical path on every allowed
+    // free message. We await all three together, so the early-return paths below have
+    // no orphaned in-flight promise; on a blocked/errored request the only cost is one
+    // already-issued embed call (rare, ~$0.00002).
+    type Citation = { id: number; topic: string; source: string | null; snippet: string };
+    type WindowOutcome =
+      | { kind: "ok"; messagesRemaining: number | null; windowResetAt: string | null }
+      | { kind: "error" }
+      | { kind: "limit"; resetAt: string };
+
     let messagesRemaining: number | null = null;
     let windowResetAt: string | null = null;
 
-    if (!isPro) {
+    const windowPromise: Promise<WindowOutcome> = (async (): Promise<WindowOutcome> => {
+      if (isPro) {
+        // Pro/Ultra: fire-and-forget last_active_at update
+        void supabase.from("users").update({ last_active_at: new Date().toISOString() }).eq("id", user.id).then(null, (e: unknown) => console.error("last_active_at update failed:", e));
+        return { kind: "ok", messagesRemaining: null, windowResetAt: null };
+      }
+      // Atomic window check-and-increment for free users (prevents race condition)
       const { data: windowRows, error: windowError } = await supabase.rpc("increment_messages_window", {
         p_user_id: user.id,
         p_window_hours: WINDOW_HOURS,
@@ -228,7 +245,7 @@ export async function POST(req: NextRequest) {
       if (windowError || !windowRows?.[0]) {
         // RPC failed — do NOT false-positive 429. Let caller retry.
         console.error("increment_messages_window error:", windowError?.message ?? "empty result");
-        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+        return { kind: "error" };
       }
       const w = windowRows[0];
       // Window resets WINDOW_HOURS after it started — compute from window_start returned by RPC
@@ -242,25 +259,21 @@ export async function POST(req: NextRequest) {
         return new Date(Date.now() + WINDOW_HOURS * 3600_000).toISOString();
       })();
       if (!w.allowed) {
-        return NextResponse.json(
-          { error: "limit_reached", messagesRemaining: 0, resetAt: windowResetISO },
-          { status: 429 }
-        );
+        return { kind: "limit", resetAt: windowResetISO };
       }
-      messagesRemaining = Math.max(0, WINDOW_LIMIT - (w.messages_today ?? 1));
-      windowResetAt = windowResetISO;
       freeMsgToRefund = user.id; // C3: this message was counted — refund if we fail below
       // Free: also update last_active_at so admin "active today" count is accurate
       void supabase.from("users").update({ last_active_at: new Date().toISOString() }).eq("id", user.id).then(null, (e: unknown) => console.error("last_active_at update failed:", e));
-    } else {
-      // Pro/Ultra: fire-and-forget last_active_at update
-      void supabase.from("users").update({ last_active_at: new Date().toISOString() }).eq("id", user.id).then(null, (e: unknown) => console.error("last_active_at update failed:", e));
-    }
+      return {
+        kind: "ok",
+        messagesRemaining: Math.max(0, WINDOW_LIMIT - (w.messages_today ?? 1)),
+        windowResetAt: windowResetISO,
+      };
+    })();
 
-    // Parallel: fetch user memory + RAG embeddings simultaneously
-    type Citation = { id: number; topic: string; source: string | null; snippet: string };
-
-    const [memoryResult, ragData] = await Promise.all([
+    // Parallel: window check + user memory + RAG embeddings simultaneously
+    const [windowOutcome, memoryResult, ragData] = await Promise.all([
+      windowPromise,
       supabase
         .from("user_memory")
         .select("memory_json")
@@ -323,6 +336,19 @@ export async function POST(req: NextRequest) {
         return { contextText: "База знаний пока пуста. Отвечай на основе своих знаний.", citations: [] };
       })(),
     ]);
+
+    // Evaluate the free-limit outcome AFTER the parallel await (no orphaned promise).
+    if (windowOutcome.kind === "error") {
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
+    if (windowOutcome.kind === "limit") {
+      return NextResponse.json(
+        { error: "limit_reached", messagesRemaining: 0, resetAt: windowOutcome.resetAt },
+        { status: 429 }
+      );
+    }
+    messagesRemaining = windowOutcome.messagesRemaining;
+    windowResetAt = windowOutcome.windowResetAt;
 
     const ragContext = ragData.contextText;
     const citations = ragData.citations;
