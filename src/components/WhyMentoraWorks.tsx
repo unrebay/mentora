@@ -293,11 +293,7 @@ export default function WhyMentoraWorks({ locale, variant = "landing" }: Props) 
         </div>
 
         {/* ── Mechanism cards ──────────────────────────────── */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))",
-          gap: 14,
-        }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5" style={{ gap: 14 }}>
           {c.mechanisms.map((m) => (
             <div
               key={m.title}
