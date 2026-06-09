@@ -878,7 +878,9 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
           ...(reward ? { reward } : {}),
         };
 
-        // Grant level reward via admin client (bypass RLS)
+        // Grant level reward via admin client (bypass RLS).
+        // Each level reward is granted ONCE per account (not once per subject):
+        // claimed_level_rewards tracks which level keys were already rewarded.
         if (reward) {
           try {
             const admin = createClient(
@@ -887,11 +889,21 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
             );
             const { data: u } = await admin
               .from("users")
-              .select("reward_plan, reward_expires_at")
+              .select("reward_plan, reward_expires_at, claimed_level_rewards")
               .eq("id", user.id)
               .single();
-            const newReward = computeNewReward(reward, u ?? {});
-            await admin.from("users").update(newReward).eq("id", user.id);
+            const claimed: string[] = (u?.claimed_level_rewards as string[] | null) ?? [];
+            if (claimed.includes(newLevelRu)) {
+              // Already claimed this level's reward on this account — don't re-grant,
+              // and drop it from the level-up payload so no "reward earned" toast shows.
+              if (levelUp) delete levelUp.reward;
+            } else {
+              const newReward = computeNewReward(reward, u ?? {});
+              await admin.from("users").update({
+                ...newReward,
+                claimed_level_rewards: [...claimed, newLevelRu],
+              }).eq("id", user.id);
+            }
           } catch (rewardErr) {
             console.error("Level reward grant failed (non-blocking):", rewardErr);
           }
