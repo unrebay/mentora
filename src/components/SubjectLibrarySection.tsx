@@ -28,13 +28,6 @@ function getLevelData(xp: number) {
   return { key: level.key, idx, next, progress };
 }
 
-function pluralDaysRu(n: number): string {
-  const m10 = n % 10, m100 = n % 100;
-  if (m100 >= 11 && m100 <= 14) return "дней";
-  if (m10 === 1) return "день";
-  if (m10 >= 2 && m10 <= 4) return "дня";
-  return "дней";
-}
 
 function pluralMentyRu(n: number): string {
   const m10 = n % 10, m100 = n % 100;
@@ -76,11 +69,6 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
   function xpLabel(xp: number): string {
     if (locale === "ru") return `${xp} ${pluralMentyRu(xp)}`;
     return `${xp} XP`;
-  }
-
-  function streakLabel(n: number): string {
-    if (locale === "ru") return `${n} ${pluralDaysRu(n)} ${t("inARow")}`;
-    return `${n} ${n === 1 ? "day" : "days"} ${t("inARow")}`;
   }
 
   function askRemove(e: React.MouseEvent, subject: SubjectItem) {
@@ -247,14 +235,6 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                       <div className="h-1.5 rounded-full overflow-hidden mb-2.5" style={{ background: "rgba(255,255,255,0.2)" }}>
                         <div className="h-full rounded-full" style={{ width: `${lvl.progress}%`, background: "rgba(255,255,255,0.65)" }} />
                       </div>
-                      {(progress?.streak_days ?? 0) > 0 && (
-                        <div className="flex items-center gap-1 text-[10px] font-medium text-white/75 mb-2">
-                          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="currentColor" />
-                          </svg>
-                          {streakLabel(progress!.streak_days)}
-                        </div>
-                      )}
                       <Link href={`/learn/${subject.id}`}
                         onClick={e => e.stopPropagation()}
                         className="inline-flex items-center gap-1 text-xs font-semibold text-white/90 hover:text-white transition-colors">
@@ -344,14 +324,6 @@ export default function SubjectLibrarySection({ userSubjects, existingSubjectIds
                       <div className="h-full rounded-full transition-all"
                         style={{ width: `${lvl.progress}%`, background: `linear-gradient(90deg, ${color}cc, ${color})` }} />
                     </div>
-                    {(progress?.streak_days ?? 0) > 0 && (
-                      <div className="flex items-center gap-1 text-[10px] font-medium mb-2" style={{ color: "#FF7A00" }}>
-                        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none">
-                          <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="currentColor" />
-                        </svg>
-                        {streakLabel(progress!.streak_days)}
-                      </div>
-                    )}
                     <Link href={`/learn/${subject.id}`}
                       onClick={e => e.stopPropagation()}
                       className="inline-flex items-center gap-1 text-xs font-semibold transition-colors hover:opacity-80"

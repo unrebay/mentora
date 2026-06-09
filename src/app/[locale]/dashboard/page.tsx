@@ -402,7 +402,6 @@ export default async function DashboardPage() {
         {lastActiveSubject && (() => {
           const accent = subjectColor(lastActiveSubject.id);
           const xp = lastActiveProgress?.xp_total ?? 0;
-          const streak = lastActiveProgress?.streak_days ?? 0;
           // XP progress within current level
           const XP_THRESHOLDS = [
             { minXP: 0,    maxXP: 100  },
@@ -520,15 +519,6 @@ export default async function DashboardPage() {
                   <span>
                     {locale === "en" ? `${xp} XP` : `${xp} ${pluralMenty(xp)}`}
                   </span>
-                  {streak > 0 && (
-                    <>
-                      <span style={{ opacity: 0.4 }}>·</span>
-                      <svg viewBox="0 0 24 24" width="13" height="13" fill="#f97316" style={{ marginTop: 2 }}>
-                        <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z"/>
-                      </svg>
-                      <span>{streak} {t("xpInRow")}</span>
-                    </>
-                  )}
                   {next && (
                     <>
                       <span style={{ opacity: 0.4 }}>·</span>
