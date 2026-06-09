@@ -68,8 +68,8 @@ export const SUBJECTS: Subject[] = [
     description: "История цивилизаций мира",
     emoji: "🌍",
     available: true,
-    beta: true,
-    verified: false,
+    beta: false,
+    verified: true,
   },
   {
     id: "mathematics",
@@ -140,8 +140,8 @@ export const SUBJECTS: Subject[] = [
     description: "Право, экономика, социология",
     emoji: "🏛️",
     available: true,
-    beta: true,
-    verified: false,
+    beta: false,
+    verified: true,
   },
   {
     id: "geography",
@@ -185,8 +185,8 @@ export const SUBJECTS: Subject[] = [
     description: "Разум, поведение, личность",
     emoji: "🧠",
     available: true,
-    beta: true,
-    verified: false,
+    beta: false,
+    verified: true,
   },
   {
     id: "economics",
@@ -194,8 +194,8 @@ export const SUBJECTS: Subject[] = [
     description: "Рынки, финансы, поведение",
     emoji: "📊",
     available: true,
-    beta: true,
-    verified: false,
+    beta: false,
+    verified: true,
   },
   {
     id: "philosophy",
@@ -203,8 +203,8 @@ export const SUBJECTS: Subject[] = [
     description: "Смысл, этика, мышление",
     emoji: "💭",
     available: true,
-    beta: true,
-    verified: false,
+    beta: false,
+    verified: true,
   },
 ];
 
