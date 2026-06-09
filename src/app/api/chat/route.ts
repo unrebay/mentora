@@ -206,7 +206,7 @@ export async function POST(req: NextRequest) {
     // Get user profile (no messages_today/window — handled atomically below)
     const { data: profile } = await supabase
       .from("users")
-      .select("onboarding_style, onboarding_level, onboarding_goal, plan, plan_expires_at, trial_expires_at, streak_reward_claimed, reward_plan, reward_expires_at, display_name")
+      .select("onboarding_style, onboarding_level, onboarding_goal, plan, plan_expires_at, trial_expires_at, streak_reward_claimed, reward_plan, reward_expires_at, display_name, visit_streak")
       .eq("id", user.id)
       .single();
 
@@ -916,12 +916,9 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
     let streakRewardEarned = false;
     try {
       if (!profile?.streak_reward_claimed && !isPro) {
-        // Read updated streak after increment_xp
-        const { data: progressRows } = await supabase
-          .from("user_progress")
-          .select("streak_days")
-          .eq("user_id", user.id);
-        const maxStreak = progressRows?.reduce((m, p) => Math.max(m, p.streak_days ?? 0), 0) ?? 0;
+        // Reward keys off the unified account VISIT streak (touch_login_streak RPC),
+        // updated when the user opens the app — same streak shown in the navbar.
+        const maxStreak = profile?.visit_streak ?? 0;
 
         if (maxStreak >= 7) {
           const admin = createClient(

@@ -101,14 +101,19 @@ export default async function AnalyticsPage() {
 
   const progress = progressRows ?? [];
   const totalXP        = progress.reduce((s, r) => s + (r.xp_total ?? 0), 0);
-  const _todayStr  = new Date().toISOString().slice(0, 10);
-  const _yestStr   = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
-  const _liveStreak = (r: { streak_days?: number | null; last_active_at?: string | null }) => {
-    const d = r.last_active_at?.slice(0, 10);
-    return (d === _todayStr || d === _yestStr) ? (r.streak_days ?? 0) : 0;
-  };
-  const currentStreak  = progress.reduce((m, r) => Math.max(m, _liveStreak(r)), 0);
-  const bestStreak     = progress.reduce((m, r) => Math.max(m, r.best_streak ?? r.streak_days ?? 0), 0);
+  // Unified account-level VISIT streak (see StreakPill / touch_login_streak RPC).
+  // best = max(account best, any historical per-subject best) so existing users
+  // never lose an earned streak achievement when switching to the visit streak.
+  const { data: streakRow } = await supabase
+    .from("users")
+    .select("visit_streak, visit_streak_best")
+    .eq("id", user.id)
+    .single();
+  const currentStreak  = streakRow?.visit_streak ?? 0;
+  const bestStreak     = Math.max(
+    streakRow?.visit_streak_best ?? 0,
+    progress.reduce((m, r) => Math.max(m, r.best_streak ?? r.streak_days ?? 0), 0),
+  );
   const activeSubjectsCount = progress.filter(r => (r.xp_total ?? 0) > 0).length;
   const deepest        = progress.reduce((m, r) => Math.max(m, r.xp_total ?? 0), 0);
 
