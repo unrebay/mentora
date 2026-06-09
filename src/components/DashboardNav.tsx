@@ -10,15 +10,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { TourButtonDesktop } from "@/components/TourButton";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useTheme } from "@/components/ThemeProvider";
-
-function getDaysLabel(n: number, locale: string): string {
-  if (locale === "en") return n === 1 ? "day" : "days";
-  const m10 = n % 10, m100 = n % 100;
-  if (m100 >= 11 && m100 <= 14) return "дней";
-  if (m10 === 1) return "день";
-  if (m10 >= 2 && m10 <= 4) return "дня";
-  return "дней";
-}
+import StreakPill from "@/components/StreakPill";
 
 function getMentyLabel(n: number, locale: string): string {
   if (locale === "en") return "XP";
@@ -242,27 +234,8 @@ export default function DashboardNav({
                 <span style={{ lineHeight: 1 }}>{totalXP}</span>
               </div>
 
-              {/* Streak pill */}
-              {currentStreak > 0 && (
-                <div style={{
-                  display: "flex", alignItems: "center", gap: 5, height: 30,
-                  padding: "0 11px", borderRadius: 9999, fontWeight: 700,
-                  fontSize: "0.8125rem", lineHeight: 1,
-                  background: "linear-gradient(155deg, rgba(255,107,53,0.9) 0%, rgba(198,40,40,0.9) 100%)",
-                  color: "#fff",
-                  backdropFilter: "blur(8px)",
-                  WebkitBackdropFilter: "blur(8px)",
-                  boxShadow: "0 1px 0 rgba(255,255,255,0.2) inset, 0 -2px 0 rgba(0,0,0,0.28) inset, 0 4px 14px rgba(255,80,0,0.4)",
-                  cursor: "default",
-                  userSelect: "none",
-                  flexShrink: 0,
-                }}>
-                  <svg viewBox="0 0 24 24" fill="none" style={{ width: 14, height: 14, flexShrink: 0 }}>
-                    <path d="M12 2C12 2 7 7 7 12c0 2.761 2.239 5 5 5s5-2.239 5-5c0-1.5-.5-2.5-1-3.5 0 0 0 2-2 2.5C15.5 9 14 7 12 2z" fill="rgba(255,255,255,0.95)"/>
-                  </svg>
-                  <span style={{ lineHeight: 1 }}>{currentStreak} {getDaysLabel(currentStreak, locale)}</span>
-                </div>
-              )}
+              {/* Account-level daily visit streak (self-contained client pill) */}
+              <StreakPill locale={locale} />
             </div>
           )}
 
@@ -402,14 +375,7 @@ export default function DashboardNav({
                   />
                   {totalXP} {getMentyLabel(totalXP, locale)}
                 </span>
-                {currentStreak > 0 && (
-                  <span className="flex items-center gap-1 text-orange-500 font-medium text-xs">
-                    <svg viewBox="0 0 14 14" fill="currentColor" className="w-3.5 h-3.5">
-                      <path d="M7 13C4.79 13 3 11.21 3 9c0-1.63.93-3.33 1.86-4.5.31-.39.93-.16.93.31v.15c0 .47.31.85.78.93.31.08.62-.08.78-.31C7.82 4.73 8.07 4.2 8.07 4.2c.23-.39.78-.31.93.08.31.78.47 1.63.23 2.33.7-.62.78-1.63.78-1.63 0-.47.54-.78.93-.54C11.7 5.12 12.4 6.36 12.4 7.77 12.4 10.55 10.44 13 7 13z"/>
-                    </svg>
-                    {currentStreak} {getDaysLabel(currentStreak, locale)}
-                  </span>
-                )}
+                <StreakPill locale={locale} />
               </div>
             )}
 
