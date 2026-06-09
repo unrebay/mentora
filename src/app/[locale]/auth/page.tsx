@@ -15,6 +15,11 @@ declare global {
   interface Window {
     onTelegramAuth?: (user: Record<string, string>) => void;
     Telegram?: { Login?: { auth: (opts: Record<string, unknown>, cb: (u: Record<string, string> | null) => void) => void } };
+    google?: { accounts: { id: {
+      initialize: (config: { client_id: string; callback: (resp: { credential?: string }) => void; auto_select?: boolean }) => void;
+      renderButton: (parent: HTMLElement, options: Record<string, unknown>) => void;
+      prompt: () => void;
+    } } };
   }
 }
 
@@ -493,6 +498,9 @@ function AuthPageContent() {
   const supabase     = createClient();
   const t = useTranslations("auth");
   const locale = useLocale();
+  // Google Identity Services button mounts here when a client id is configured.
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const gisBtnRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const oauthError = searchParams?.get("error");
@@ -509,6 +517,43 @@ function AuthPageContent() {
       try { localStorage.setItem("mentora_ref_pending", refCode); } catch {}
     }
   }, [searchParams]);
+
+  // Google Identity Services — ID-token flow. Avoids signInWithOAuth's redirect to
+  // supabase.co/auth/v1/callback (Cloudflare, RKN-throttled in RU): we get a Google
+  // ID token in the browser and POST it to /auth/v1/token via the RU-reachable
+  // proxy. Active only when NEXT_PUBLIC_GOOGLE_CLIENT_ID is set; otherwise the
+  // classic redirect button is rendered unchanged.
+  useEffect(() => {
+    if (!googleClientId) return;
+    let cancelled = false;
+    const SRC = "https://accounts.google.com/gsi/client";
+    function init() {
+      if (cancelled || !window.google?.accounts?.id || !gisBtnRef.current) return;
+      window.google.accounts.id.initialize({
+        client_id: googleClientId!,
+        callback: async (resp: { credential?: string }) => {
+          if (!resp?.credential) return;
+          setOauthLoading("google"); setError(null);
+          const { error } = await supabase.auth.signInWithIdToken({ provider: "google", token: resp.credential });
+          if (error) { setError(t("errorConnect")); setOauthLoading(null); return; }
+          posthog.capture("user.signed_in", { method: "google", locale });
+          router.push("/dashboard");
+          router.refresh();
+        },
+      });
+      gisBtnRef.current.innerHTML = "";
+      window.google.accounts.id.renderButton(gisBtnRef.current, {
+        type: "standard", theme: "filled_black", size: "large",
+        text: "continue_with", shape: "pill", width: 320, locale,
+      });
+    }
+    if (window.google?.accounts?.id) { init(); return () => { cancelled = true; }; }
+    let s = document.querySelector(`script[src="${SRC}"]`) as HTMLScriptElement | null;
+    if (!s) { s = document.createElement("script"); s.src = SRC; s.async = true; s.defer = true; document.head.appendChild(s); }
+    s.addEventListener("load", init, { once: true });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [googleClientId]);
 
   useEffect(() => {
     window.onTelegramAuth = async (user) => {
@@ -873,19 +918,30 @@ function AuthPageContent() {
                 )}
               </div>
 
-              {/* Google OAuth — hidden in forgot mode */}
-              {!isForgot && <button
-                type="button"
-                onClick={() => handleOAuth("google")}
-                disabled={oauthLoading !== null}
-                className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-60"
-                style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.75)" }}
-              >
-                {oauthLoading === "google"
-                  ? <span className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(255,255,255,0.2)", borderTopColor: "rgba(255,255,255,0.7)" }} />
-                  : <GoogleIcon />}
-                {t("continueGoogle")}
-              </button>}
+              {/* Google sign-in — GIS ID-token button when a client id is configured
+                  (RU-proxy friendly, no supabase.co redirect); else classic redirect
+                  button. Hidden in forgot mode. */}
+              {!isForgot && (googleClientId ? (
+                <div className="w-full flex flex-col items-center gap-2">
+                  <div ref={gisBtnRef} className="flex justify-center min-h-[44px]" />
+                  {oauthLoading === "google" && (
+                    <span className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(255,255,255,0.2)", borderTopColor: "rgba(255,255,255,0.7)" }} />
+                  )}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleOAuth("google")}
+                  disabled={oauthLoading !== null}
+                  className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all disabled:opacity-60"
+                  style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.75)" }}
+                >
+                  {oauthLoading === "google"
+                    ? <span className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(255,255,255,0.2)", borderTopColor: "rgba(255,255,255,0.7)" }} />
+                    : <GoogleIcon />}
+                  {t("continueGoogle")}
+                </button>
+              ))}
 
               {/* Passkey (WebAuthn) sign-in — only in signin mode */}
               {mode === "signin" && <button
