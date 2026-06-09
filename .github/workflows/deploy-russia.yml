@@ -21,6 +21,10 @@ jobs:
       # both sides. Splitting hosts breaks the session/PKCE cookie -> login loop.
       NEXT_PUBLIC_SUPABASE_URL: "https://sb.mentora.su"
       NEXT_PUBLIC_SUPABASE_BROWSER_URL: "https://sb.mentora.su"
+      # Google Identity Services (GIS) client ID — enables the RU-friendly
+      # signInWithIdToken flow (no supabase.co redirect). If unset, the auth page
+      # gracefully falls back to the classic redirect Google button.
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
       NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
