@@ -310,6 +310,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   </Link>
                   <DemoScrollButton />
                 </div>
+                <p className="mt-3.5 text-sm font-medium" style={{ color: "rgba(255,255,255,0.72)" }}>
+                  🎁 {locale === "en" ? "New here? First week of Pro free — no card." : "Новым — первая неделя Pro в подарок. Без карты."}
+                </p>
               </FadeUp>
             </div>
 
@@ -330,6 +333,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <DemoScrollButton />
                 </div>
               </FadeUp>
+              <p className="text-[12px] font-medium -mt-1 text-center px-4" style={{ color: "rgba(255,255,255,0.72)" }}>
+                🎁 {locale === "en" ? "First week of Pro free — no card." : "Новым — неделя Pro в подарок."}
+              </p>
               <div className="text-center flex flex-col items-center gap-1.5 pt-1" aria-hidden>
                 <p className="text-[11px] uppercase tracking-[0.18em] font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>
                   {locale === "en" ? "Try the demo" : "Попробуй демо"}
@@ -583,6 +589,46 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </div>
 
       </div>{/* /DARK UNIVERSE */}
+
+      {/* ── PROBLEM — называем боль ученика его словами ── */}
+      <section className="py-16 md:py-20 overflow-hidden">
+        <FadeUp>
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="text-center mb-10 md:mb-14">
+              <div className="text-xs font-bold tracking-[0.2em] uppercase mb-3" style={{ color: "var(--brand)" }}>
+                {locale === "en" ? "Sound familiar?" : "Знакомо?"}
+              </div>
+              <h2 className="text-3xl md:text-5xl font-black leading-tight tracking-tight">
+                {locale === "en" ? "Learning is hard — and often it's not your fault." : "Учиться тяжело — и часто не из-за тебя."}
+              </h2>
+            </div>
+            <div className="grid sm:grid-cols-3 gap-5 md:gap-6">
+              {(locale === "en"
+                ? [
+                    { t: "\u201cToo shy to ask again\u201d", d: "You didn\u2019t get it in class, but raising your hand twice feels awkward. So the gap just stays." },
+                    { t: "\u201cTutors are expensive\u201d", d: "$20\u201340 an hour, on a fixed schedule, and not always for your exact question." },
+                    { t: "\u201cAlone with the textbook\u201d", d: "Lessons explain to everyone at once. But your gaps and your pace are yours alone." },
+                  ]
+                : [
+                    { t: "\u00abСтыдно переспрашивать\u00bb", d: "На уроке не понял, а поднять руку ещё раз — неловко. Так пробел и остаётся." },
+                    { t: "\u00abРепетитор — дорого\u00bb", d: "1500–3000 ₽ за час, по расписанию, и не всегда на твой вопрос." },
+                    { t: "\u00abОдин на один с учебником\u00bb", d: "Объясняют всем сразу. А твои пробелы и твой темп — только твои." },
+                  ]
+              ).map((p, i) => (
+                <div key={i} className="rounded-2xl p-6 md:p-7" style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", boxShadow: "0 2px 18px rgba(0,0,0,0.05)" }}>
+                  <div className="text-lg font-bold mb-2" style={{ color: "var(--text)" }}>{p.t}</div>
+                  <div className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>{p.d}</div>
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-base md:text-lg mt-10 md:mt-12 max-w-2xl mx-auto" style={{ color: "var(--text-secondary)" }}>
+              {locale === "en"
+                ? <>Mentora removes all of it: ask as much as you want, <b style={{ color: "var(--text)" }}>without judgment</b>, at your own pace — 24/7.</>
+                : <>Mentora убирает всё это: спрашивай сколько угодно, <b style={{ color: "var(--text)" }}>без осуждения</b>, в своём темпе — 24/7.</>}
+            </p>
+          </div>
+        </FadeUp>
+      </section>
 
       <section id="subjects" className="py-16 overflow-hidden">
         <FadeUp>

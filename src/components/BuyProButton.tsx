@@ -91,15 +91,22 @@ export default function BuyProButton({ isLoggedIn, isPro, isUltima = false, plan
       >
         {label}
       </button>
-      <label className="flex items-start gap-2 text-[11px] leading-snug cursor-pointer select-none" style={{ color: isUltimaPlan ? "rgba(255,255,255,0.6)" : "var(--text-muted)" }}>
-        <input
-          type="checkbox"
-          checked={autoRenew}
-          onChange={(e) => setAutoRenew(e.target.checked)}
-          className="mt-0.5 flex-shrink-0 accent-current"
-        />
-        <span>{t("autoRenewConsent")}</span>
-      </label>
+      {/* Recurring-consent checkbox only matters where a payment can actually
+          start — i.e. for a logged-in user. On the public landing (logged-out)
+          the button just routes to /auth, so the consent line is pure clutter
+          there; hide it. The legal auto-renew disclosure + opt-out stays intact
+          on the real purchase path. */}
+      {isLoggedIn && (
+        <label className="flex items-start gap-2 text-[11px] leading-snug cursor-pointer select-none" style={{ color: isUltimaPlan ? "rgba(255,255,255,0.6)" : "var(--text-muted)" }}>
+          <input
+            type="checkbox"
+            checked={autoRenew}
+            onChange={(e) => setAutoRenew(e.target.checked)}
+            className="mt-0.5 flex-shrink-0 accent-current"
+          />
+          <span>{t("autoRenewConsent")}</span>
+        </label>
+      )}
     </div>
   );
 }
