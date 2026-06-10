@@ -23,6 +23,30 @@ declare global {
   }
 }
 
+// ── Network-resilient auth ───────────────────────────────────────────────────
+// Transient fetch failures (Safari "Load failed", flaky RU networks) must NOT
+// look like a login failure. Retry on NETWORK errors only — never on a wrong
+// password / auth error (those come back as a returned `error`, not a throw).
+function isNetworkErr(e: unknown): boolean {
+  if (e instanceof TypeError) return true;
+  const m = (e && typeof e === "object" && "message" in e
+    ? String((e as { message: unknown }).message)
+    : String(e ?? "")).toLowerCase();
+  return /load failed|failed to fetch|networkerror|network error|fetch failed|timeout|timed out|net::|err_/.test(m);
+}
+async function retryNet<T>(fn: () => Promise<T>, tries = 2, base = 600): Promise<T> {
+  let last: unknown;
+  for (let i = 0; i <= tries; i++) {
+    try { return await fn(); }
+    catch (e) {
+      last = e;
+      if (!isNetworkErr(e) || i === tries) throw e;
+      await new Promise((r) => setTimeout(r, base * (i + 1)));
+    }
+  }
+  throw last;
+}
+
 // ── Subject data (same as KnowledgeGraph3D) ──────────────────────────────────
 const SUBS = [
   { id: "russian-history",  label: "История России",    hex: 0xff6030 },
@@ -626,11 +650,11 @@ function AuthPageContent() {
       // one request (via admin.generateLink + verifyOtp). No client-side
       const refCode = searchParams?.get("ref");
       try {
-        const res = await fetch("/api/signup", {
+        const res = await retryNet(() => fetch("/api/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password, refCode }),
-        });
+        }));
         const json = await res.json().catch(() => ({}));
         if (!res.ok) {
           setError(json?.error ?? t("errorEmailExists"));
@@ -643,12 +667,19 @@ function AuthPageContent() {
           router.refresh();
         }
       } catch (e) {
-        setError(String(e));
+        setError(isNetworkErr(e)
+          ? (locale === "en" ? "Network hiccup — please try again." : "Сеть подвела — попробуй ещё раз.")
+          : String(e));
       }
     } else {
       // Persist user preference so server-side cookie setters use correct maxAge
       document.cookie = `mentora-persist=${rememberMe ? "1" : "0"}; path=/; SameSite=Lax; max-age=${60 * 60 * 24 * 365}`;
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      let signInRes = await supabase.auth.signInWithPassword({ email, password });
+      for (let _i = 0; signInRes.error && isNetworkErr(signInRes.error) && _i < 2; _i++) {
+        await new Promise((r) => setTimeout(r, 600 * (_i + 1)));
+        signInRes = await supabase.auth.signInWithPassword({ email, password });
+      }
+      const { error } = signInRes;
       if (error) {
         // Fire-and-forget admin notification — rate-limited server-side (1/5 min per email)
         fetch("/api/auth/report-error", {
@@ -656,6 +687,13 @@ function AuthPageContent() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ type: "login_fail", email, error: error.message }),
         }).catch(() => {});
+        // Transient network failure (e.g. Safari "Load failed") — don't blame credentials.
+        if (isNetworkErr(error)) {
+          setError(locale === "en" ? "Network hiccup — please try again." : "Сеть подвела — попробуй ещё раз.");
+          setLoginFailCount(0);
+          setLoading(false);
+          return;
+        }
         // Ask server which provider this email uses — gives a helpful hint
         // e.g. "use Google" instead of generic "invalid credentials".
         // Fire-and-forget: if it fails, fall back to generic message.
