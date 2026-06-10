@@ -333,6 +333,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   <DemoScrollButton />
                 </div>
               </FadeUp>
+              <p className="text-[12px] font-medium -mt-1 text-center px-4" style={{ color: "rgba(255,255,255,0.72)" }}>
+                🎁 {locale === "en" ? "First week of Pro free — no card." : "Новым — неделя Pro в подарок."}
+              </p>
               <div className="text-center flex flex-col items-center gap-1.5 pt-1" aria-hidden>
                 <p className="text-[11px] uppercase tracking-[0.18em] font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>
                   {locale === "en" ? "Try the demo" : "Попробуй демо"}
