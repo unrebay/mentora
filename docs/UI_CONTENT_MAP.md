@@ -441,3 +441,40 @@
 - [ ] `src/app/[locale]/dashboard/about/page.tsx` — секция «Что нового» (рендерит CHANGELOG между Roadmap и Tech)
 - [ ] `src/components/WhatsNewBanner.tsx` — баннер последнего релиза на дашборде (LATEST = CHANGELOG[0])
 - [ ] `messages/ru.json` / `messages/en.json` — ключи `about.changelogTag/changelogTitle/changelogSubtitle`
+
+
+## abroad — лендинг для диаспоры (/abroad)
+
+| Ключ | RU | EN | Где используется |
+|---|---|---|---|
+| `abroad.metaTitle` | Mentora за рубежом — российская школьная программа и ЕГЭ из  | Mentora abroad — the Russian school curriculum and EGE from  | /abroad |
+| `abroad.metaDesc` | AI-наставник по 17 предметам российской программы для семей  | An AI mentor for all 17 subjects of the Russian school curri | /abroad |
+| `abroad.badge` | Для семей за рубежом | For families abroad | /abroad |
+| `abroad.heroTitle` | Российская школа уехала с вами | The Russian school moved abroad with you | /abroad |
+| `abroad.heroDesc` | Mentora — личный AI-наставник по 17 предметам российской про | Mentora is a personal AI mentor for 17 subjects of the Russi | /abroad |
+| `abroad.point1Title` | Работает там, где вы | Works wherever you are | /abroad |
+| `abroad.point1Desc` | Дубай, Ереван, Белград, Лимасол, Тель-Авив, Алматы — Mentora | Dubai, Yerevan, Belgrade, Limassol, Tel Aviv, Almaty — Mento | /abroad |
+| `abroad.point2Title` | Дополняет любую школу | Complements any school | /abroad |
+| `abroad.point2Desc` | Местная школа, онлайн-школа или семейное обучение — Mentora  | Local school, online school or homeschooling — Mentora fills | /abroad |
+| `abroad.point3Title` | В разы дешевле онлайн-школ | Far cheaper than online schools | /abroad |
+| `abroad.point3Desc` | Онлайн-школы для зарубежья стоят от 60 000 ₽ в год. Личный A | Online schools for families abroad start at 60,000 ₽ per yea | /abroad |
+| `abroad.priceNote` | Планируемая цена раннего доступа — $9.99/мес | Planned early-access price — $9.99/mo | /abroad |
+| `abroad.formTitle` | Ранний доступ с оплатой любой картой | Early access with any card | /abroad |
+| `abroad.formDesc` | Мы запускаем оплату зарубежными картами (Visa, Mastercard, A | We are launching international card payments (Visa, Masterca | /abroad |
+| `abroad.emailPlaceholder` | Ваша почта | Your email | /abroad |
+| `abroad.submitBtn` | Записаться в ранний доступ | Join early access | /abroad |
+| `abroad.submitting` | Отправляем… | Sending… | /abroad |
+| `abroad.successTitle` | Вы в списке! | You're on the list! | /abroad |
+| `abroad.successDesc` | Пришлём письмо, как только откроем оплату зарубежными картам | We'll email you as soon as international card payments open. | /abroad |
+| `abroad.errorInvalid` | Похоже, в адресе опечатка — проверьте почту. | That email looks off — please check it. | /abroad |
+| `abroad.errorGeneric` | Не получилось отправить. Попробуйте ещё раз через минуту. | Couldn't submit. Please try again in a minute. | /abroad |
+| `abroad.faqTitle` | Частые вопросы | Frequent questions | /abroad |
+| `abroad.faq1q` | Можно ли получить российский аттестат, живя за границей? | Can my child get a Russian school certificate while living a | /abroad |
+| `abroad.faq1a` | Да. Школьники за рубежом могут получить аттестат за 9 и 11 к | Yes. Schoolchildren abroad can receive the grade 9 and 11 ce | /abroad |
+| `abroad.faq2q` | А как сдавать ЕГЭ из другой страны? | How do you take the EGE from another country? | /abroad |
+| `abroad.faq2a` | ЕГЭ сдают очно — в пунктах проведения при посольствах России | The EGE is taken in person — at exam centers at Russian emba | /abroad |
+| `abroad.faq3q` | Чем Mentora отличается от онлайн-школ? | How is Mentora different from online schools? | /abroad |
+| `abroad.faq3a` | Онлайн-школы дают расписание, уроки и аттестацию — и стоят о | Online schools provide schedules, lessons and official asses | /abroad |
+| `abroad.tryNowTitle` | Не ждите — начните бесплатно | Don't wait — start for free | /abroad |
+| `abroad.tryNowDesc` | Регистрация и бесплатный тариф уже работают из любой страны. | Sign-up and the free plan already work from any country. Ear | /abroad |
+| `abroad.tryNowBtn` | Попробовать бесплатно | Try for free | /abroad |
