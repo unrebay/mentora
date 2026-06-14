@@ -44,7 +44,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const allPages = [...STATIC_PAGES, ...subjectPages];
 
   return allPages.flatMap((p) => {
-    const ru = `${BASE}${p.path}`;
+    const ru = `${BASE}/ru${p.path}`;
     const en = `${BASE}/en${p.path}`;
     const alternates = {
       languages: {

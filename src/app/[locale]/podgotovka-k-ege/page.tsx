@@ -13,9 +13,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const isEn = locale === "en";
   const url = isEn ? "https://mentora.su/en/podgotovka-k-ege" : "https://mentora.su/ru/podgotovka-k-ege";
   return {
-    title: isEn
+    title: { absolute: isEn
       ? "Russian SAT (ЕГЭ) prep — AI mentor free at Mentora"
-      : "Подготовка к ЕГЭ онлайн — ИИ-ментор Mentora бесплатно",
+      : "Подготовка к ЕГЭ онлайн — ИИ-ментор Mentora бесплатно" },
     description: isEn
       ? "Prep for the Russian ЕГЭ/ОГЭ exams with an AI mentor — math, Russian, history, English, social studies and more. Free, no schedule, 24/7."
       : "Подготовка к ЕГЭ и ОГЭ онлайн с ИИ-ментором Mentora — математика, русский, история, английский, обществознание и др. Бесплатно, без расписания, 24/7.",

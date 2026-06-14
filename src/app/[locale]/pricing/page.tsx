@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const isEn = locale === "en";
   const url = isEn ? "https://mentora.su/en/pricing" : "https://mentora.su/ru/pricing";
   return {
-    title: isEn ? "Mentora pricing — AI tutor from $0" : "Тарифы Mentora — нейросеть для учёбы от 0 ₽",
+    title: { absolute: isEn ? "Mentora pricing — AI tutor from $0" : "Тарифы Mentora — нейросеть для учёбы от 0 ₽" },
     description: isEn
       ? "Free — 10 messages every 8 hours, forever. Pro $5/mo — unlimited across 17 sciences. Ultra $9/mo — photo problems, slides, PDF notes. No hidden fees."
       : "Free — 10 сообщений / 8 часов навсегда. Pro 499 ₽/мес — безлимит на 17 наук. Ultra 799 ₽/мес — фото задач, презентации, PDF. Без скрытых платежей.",
