@@ -46,7 +46,10 @@ interface HistoryEntry {
   action: string;        // human label e.g. "edit:title", "add", "delete", "move:bucket"
   tasksSnapshot: RoadmapTaskV2[];
 }
-const LAUNCH_DATE = "2026-06-01";
+// Текущая цель-гейт (обновляется при смене фазы — см. MENTORA_SOLO_PLAN.md)
+const GATE_DATE  = "2026-12-15";
+const GATE_TITLE = "Гейт 1 — 200 платящих из диаспоры";
+const PHASE_LABEL = "Фаза: РФ-сезон + Волна 1 (диаспора)";
 
 // ── Category & state metadata ────────────────────────────────────────────────
 const CAT_META: Record<Category, { label: string; color: string }> = {
@@ -171,6 +174,72 @@ const SEED: RoadmapTaskV2[] = [
     createdAt: new Date().toISOString() },
   { id: "now_test_email",    title: "Email-доставка: resend.com или smtp.yandex.ru",
     bucket: "now", category: "ops",        state: "planned",
+    createdAt: new Date().toISOString() },
+
+  // ═══ ИЮНЬ 2026: международка (Волна 1 — диаспора) + РФ-бэклог ═══
+  // Добавлено 11.06.2026 по MENTORA_SOLO_PLAN.md / MENTORA_GLOBAL_STRATEGY.md
+  { id: "jun26_ms_pr10",    title: "Лендинг-редизайн: мобильная полировка + мерж PR #10",
+    bucket: "now", category: "design",   state: "in_progress", isMilestone: true, due: "2026-06-20",
+    notes: "Превью: mentora-git-landing-redesign-1. Осталось: мобайл на телефоне, Story выше, Proof, ЕГЭ-блок, убрать мёртвый heroTitle.",
+    createdAt: new Date().toISOString() },
+  { id: "jun26_ms_abroad",  title: "Волна 1: /abroad waitlist — мерж PR #12 + промо в TG-каналах релокантов",
+    bucket: "now", category: "marketing", state: "planned",    isMilestone: true, due: "2026-06-25",
+    notes: "Метрика гейта: 150+ имейлов за 3 недели. Каналы: Дубай, Ереван, Белград, Лимасол, Тель-Авив, Алматы. Миграция abroad_waitlist уже в проде.",
+    createdAt: new Date().toISOString() },
+  { id: "jun26_ms_psp",     title: "Письма в Paddle / Lemon Squeezy: юрисдикции AM/GE/KZ/UAE для РФ-гражданина вне РФ",
+    bucket: "now", category: "ops",      state: "planned",    isMilestone: true, due: "2026-06-20",
+    notes: "Готовые драфты: MENTORA_PSP_INQUIRY_DRAFTS.md в workspace. Если примут Армению/Грузию — юрисдикция за $0.5–1.5K вместо $6–8K UAE.",
+    createdAt: new Date().toISOString() },
+  { id: "jun26_ms_kik",     title: "КИК-консультация: налоги РФ-резидента при зарубежном юрлице",
+    bucket: "now", category: "ops",      state: "planned",    isMilestone: true, due: "2026-06-30",
+    notes: "ДО регистрации любого юрлица. Может изменить порядок: сначала смена налогового резидентства.",
+    createdAt: new Date().toISOString() },
+  { id: "jun26_ms_uae",     title: "UAE free zone: лицензия → виза → банк → Stripe/Paddle",
+    bucket: "soon", category: "ops",     state: "planned",    isMilestone: true, due: "2026-09-15",
+    notes: "IFZA/Meydan ~AED 12–20K. Банк — узкое место для паспорта РФ: закладывать 2 мес (ADCB первый кандидат). Запуск процесса — июль.",
+    createdAt: new Date().toISOString() },
+  { id: "jun26_ms_wave1",   title: "Запуск Волны 1: оплата зарубежной картой, цена $9.99–14.99",
+    bucket: "soon", category: "product", state: "planned",    isMilestone: true, due: "2026-10-01",
+    notes: "Старт когда: waitlist ≥150 ✓ + платёжный аккаунт живой ✓. Состав: цены в конфиг, Paddle/Stripe-чекаут рядом с ЮKassa, межд. домен, /abroad → продающий.",
+    createdAt: new Date().toISOString() },
+  { id: "jun26_ms_esia",    title: "ЕСИА-идентификация mentora.su (Рег.ру)",
+    bucket: "soon", category: "ops",     state: "planned",    isMilestone: true, due: "2026-09-01",
+    notes: "Жёсткий дедлайн 1 сентября 2026. Напоминание — конец июня (#341).",
+    createdAt: new Date().toISOString() },
+  { id: "jun26_ms_gate1",   title: "ГЕЙТ 1: 200 платящих из диаспоры (~$2–3K MRR)",
+    bucket: "soon", category: "product", state: "planned",    isMilestone: true, due: "2026-12-15",
+    notes: "≥200 → зелёный свет Дубай B2C (EN/IGCSE). 50–200 → диаспора фоном, фокус РФ. <50 → международку замораживаем. GESS Dubai (ноябрь) — сходить разведкой в любом случае.",
+    createdAt: new Date().toISOString() },
+
+  { id: "jun26_csp_auth",   title: "CSP: auth.mentora.su в connect-src — фикс клиентских RPC (стрик и др.)",
+    bucket: "now", category: "tech",     state: "done",
+    notes: "Корень бага «не вижу стрик в навбаре»: после ренейма sb.→auth. (PR #9) браузерные запросы к Supabase резались CSP. touch_login_streak ни разу не доходил до сервера (0/29 юзеров со стриком).",
+    createdAt: new Date().toISOString() },
+  { id: "jun26_streak_verify", title: "Проверить StreakPill в навбаре после деплоя CSP-фикса",
+    bucket: "now", category: "product",  state: "planned",
+    notes: "Зайти на dashboard → рядом с ментами должна появиться оранжевая пилюля «1 день».",
+    createdAt: new Date().toISOString() },
+  { id: "jun26_leaked_pw",  title: "Включить Leaked Password Protection в Supabase (руками, 2 минуты)",
+    bucket: "now", category: "ops",      state: "planned",
+    notes: "Auth → Settings → Password protection. Висит в advisors с 01.06.",
+    createdAt: new Date().toISOString() },
+  { id: "jun26_price_config", title: "Цены в единый конфиг (сейчас захардкожены в ~6 файлах)",
+    bucket: "soon", category: "tech",    state: "planned",
+    notes: "payments/create, charge-recurring, admin, лендинг, bot-knowledge, terms. Подготовка к дуал-PSP (₽/ЮKassa + $/Paddle).",
+    createdAt: new Date().toISOString() },
+  { id: "jun26_intl_domain", title: "Купить международный домен (mentora.app / getmentora.com / mentora.school)",
+    bucket: "soon", category: "ops",     state: "planned",
+    createdAt: new Date().toISOString() },
+  { id: "jun26_kb_rest",    title: "KB добор до ~110 чанков: математика, физика, биология, химия, география, информатика, литература, астрономия, английский",
+    bucket: "soon", category: "content", state: "planned",
+    notes: "Конвейер готов: scripts/factcheck-kb.mjs + seed-kb.mjs + workflows. По образцу психологии/философии/экономики/обществознания.",
+    createdAt: new Date().toISOString() },
+  { id: "jun26_subject_streaks", title: "Убрать по-предметные стрики с карточек, best-стрик — в профиль/аналитику",
+    bucket: "soon", category: "design",  state: "planned",
+    notes: "Хвост от перехода на аккаунтовый стрик захода (PR #5).",
+    createdAt: new Date().toISOString() },
+  { id: "jun26_cleanup_sb", title: "Удалить sb.mentora.su алиас + test.mentora.su (после стабилизации auth.)",
+    bucket: "ideas", category: "ops",    state: "planned",
     createdAt: new Date().toISOString() },
 
   // ═══ Заметки ═══
@@ -335,16 +404,45 @@ function useTok() {
   };
 }
 
-// ── Hero: Launch Tracker ─────────────────────────────────────────────────────
+// ── Hero: Gate Tracker («Пульс») ─────────────────────────────────────────────
 export function LaunchTracker({ tasks }: { tasks: RoadmapTaskV2[] }) {
   const { CARD, BOR, TEXT, MUTED, isDark } = useTok();
   const milestones = tasks.filter(t => t.isMilestone);
   const done = milestones.filter(t => t.state === "done").length;
   const total = milestones.length;
   const pct = total ? Math.round((done / total) * 100) : 0;
-  const daysLeft = Math.max(0, Math.ceil((new Date(LAUNCH_DATE).getTime() - Date.now()) / 86400000));
-  const inProgress = milestones.filter(t => t.state === "in_progress").length;
-  const blocked    = milestones.filter(t => t.state === "blocked").length;
+  const daysLeft = Math.max(0, Math.ceil((new Date(GATE_DATE).getTime() - Date.now()) / 86400000));
+
+  const today = new Date().toISOString().slice(0, 10);
+  const inProgress = tasks.filter(t => t.state === "in_progress");
+  const blocked    = tasks.filter(t => t.state === "blocked");
+  const upcoming   = milestones
+    .filter(t => t.state !== "done" && t.due)
+    .sort((a, b) => (a.due! < b.due! ? -1 : 1))
+    .slice(0, 6);
+  const openMilestones = milestones.filter(m => m.state !== "done");
+
+  const sub = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.025)";
+
+  const colTitle = (label: string, color: string, count: number) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+      <span style={{ width: 7, height: 7, borderRadius: 99, background: color, boxShadow: `0 0 8px ${color}80` }} />
+      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: MUTED }}>
+        {label}
+      </span>
+      <span style={{ fontSize: 11, fontWeight: 700, color }}>{count}</span>
+    </div>
+  );
+
+  const taskRow = (t: RoadmapTaskV2, extra?: string) => (
+    <div key={t.id} style={{ display: "flex", alignItems: "baseline", gap: 7, padding: "3px 0", fontSize: 12.5, color: TEXT, lineHeight: 1.35 }}>
+      <span style={{ width: 6, height: 6, borderRadius: 99, flexShrink: 0, background: catMeta(t.category).color, transform: "translateY(-1px)" }} />
+      <span style={{ overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical" as const }}>
+        {t.title}
+      </span>
+      {extra && <span style={{ marginLeft: "auto", flexShrink: 0, fontSize: 11, fontWeight: 700, color: extra.startsWith("!") ? "#ef4444" : MUTED }}>{extra.replace(/^!/, "")}</span>}
+    </div>
+  );
 
   return (
     <div style={{
@@ -354,17 +452,19 @@ export function LaunchTracker({ tasks }: { tasks: RoadmapTaskV2[] }) {
         ? "inset 0 1px 0 rgba(255,255,255,0.04), 0 4px 20px rgba(0,0,0,0.20)"
         : "0 4px 16px rgba(0,0,0,0.04)",
     }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, gap: 16, flexWrap: "wrap" }}>
         <div>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: MUTED }}>
-            Цель запуска
+            {PHASE_LABEL}
           </div>
           <div style={{ fontSize: 22, fontWeight: 800, color: TEXT, marginTop: 2 }}>
-            1 июня 2026 — публичный запуск
+            {GATE_TITLE}
           </div>
           <div style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>
-            {daysLeft > 0 ? `Осталось ${daysLeft} ${dayWord(daysLeft)}` : "Запуск сегодня! 🚀"}
-            {" · "}{done}/{total} milestone задач{inProgress > 0 ? ` · ${inProgress} в работе` : ""}{blocked > 0 ? ` · ${blocked} блок` : ""}
+            {daysLeft > 0 ? `До гейта ${daysLeft} ${dayWord(daysLeft)} (${GATE_DATE})` : "Гейт сегодня — подводим итоги"}
+            {" · "}{done}/{total} вех
+            {inProgress.length > 0 ? ` · ${inProgress.length} в работе` : ""}
+            {blocked.length > 0 ? ` · ${blocked.length} блок` : ""}
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
@@ -375,7 +475,7 @@ export function LaunchTracker({ tasks }: { tasks: RoadmapTaskV2[] }) {
           }}>
             {pct}%
           </div>
-          <div style={{ fontSize: 11, color: MUTED, marginTop: 4 }}>готовность</div>
+          <div style={{ fontSize: 11, color: MUTED, marginTop: 4 }}>вех закрыто</div>
         </div>
       </div>
 
@@ -393,21 +493,51 @@ export function LaunchTracker({ tasks }: { tasks: RoadmapTaskV2[] }) {
         }} />
       </div>
 
-      {/* Milestone chips */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 14 }}>
-        {milestones.map(m => (
+      {/* Пульс: 3 колонки — в работе / блокеры / ближайшие дедлайны */}
+      <div style={{
+        display: "grid", gap: 10, marginTop: 16,
+        gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+      }}>
+        <div style={{ background: sub, borderRadius: 12, padding: "12px 14px", border: `1px solid ${BOR}` }}>
+          {colTitle("В работе", "#FF7A00", inProgress.length)}
+          {inProgress.length === 0
+            ? <div style={{ fontSize: 12, color: MUTED }}>Пусто — возьми задачу из «Сейчас»</div>
+            : inProgress.slice(0, 5).map(t => taskRow(t))}
+        </div>
+        <div style={{ background: sub, borderRadius: 12, padding: "12px 14px", border: `1px solid ${BOR}` }}>
+          {colTitle("Блокеры", "#ef4444", blocked.length)}
+          {blocked.length === 0
+            ? <div style={{ fontSize: 12, color: MUTED }}>Блокеров нет 🎉</div>
+            : blocked.slice(0, 5).map(t => taskRow(t))}
+        </div>
+        <div style={{ background: sub, borderRadius: 12, padding: "12px 14px", border: `1px solid ${BOR}` }}>
+          {colTitle("Дедлайны", "#4561E8", upcoming.length)}
+          {upcoming.length === 0
+            ? <div style={{ fontSize: 12, color: MUTED }}>Открытых вех с датой нет</div>
+            : upcoming.map(t => taskRow(t, (t.due! < today ? "!" : "") + t.due!.slice(5).replace("-", ".")))}
+        </div>
+      </div>
+
+      {/* Открытые вехи — компакт-чипы (закрытые свёрнуты в счётчик) */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 14, alignItems: "center" }}>
+        <div style={{
+          fontSize: 11, padding: "4px 10px", borderRadius: 99, fontWeight: 700,
+          background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)",
+        }}>
+          ✓ {done} закрыто
+        </div>
+        {openMilestones.map(m => (
           <div key={m.id} style={{
             fontSize: 11, padding: "4px 10px", borderRadius: 99,
-            background: m.state === "done"
-              ? "rgba(34,197,94,0.12)" : m.state === "in_progress"
+            background: m.state === "in_progress"
               ? "rgba(255,122,0,0.12)" : m.state === "blocked"
               ? "rgba(239,68,68,0.12)" : (isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"),
-            color: STATE_META[m.state].color,
-            border: `1px solid ${STATE_META[m.state].color}30`,
+            color: stateMeta(m.state).color,
+            border: `1px solid ${stateMeta(m.state).color}30`,
             display: "flex", alignItems: "center", gap: 6,
           }}
-          title={`${STATE_META[m.state].label}${m.due ? ` · до ${m.due}` : ""}`}>
-            <span style={{ fontSize: 9 }}>{STATE_META[m.state].icon}</span>
+          title={`${stateMeta(m.state).label}${m.due ? ` · до ${m.due}` : ""}`}>
+            <span style={{ fontSize: 9 }}>{stateMeta(m.state).icon}</span>
             <span>{m.title.length > 40 ? m.title.slice(0, 38) + "…" : m.title}</span>
           </div>
         ))}
@@ -886,7 +1016,7 @@ function AddTaskModal({ initialBucket, initialCategory, onSubmit, onClose }: {
         {isMilestone && (
           <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED, marginBottom: 6 }}>Дедлайн</div>
-            <input type="date" value={due} onChange={e => setDue(e.target.value)} max={LAUNCH_DATE}
+            <input type="date" value={due} onChange={e => setDue(e.target.value)} max="2027-12-31"
               style={{ width: "100%", padding: "8px 10px", fontSize: 13, borderRadius: 8, background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)", border: `1px solid ${BOR}`, color: TEXT }} />
           </div>
         )}

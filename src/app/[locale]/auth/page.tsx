@@ -525,6 +525,10 @@ function AuthPageContent() {
   // Google Identity Services button mounts here when a client id is configured.
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   const gisBtnRef = useRef<HTMLDivElement>(null);
+  // Fail-open: if the GIS button can't initialize (origin not authorized in
+  // Google Console, script blocked, network), fall back to the classic
+  // signInWithOAuth redirect button so Google login NEVER fully breaks.
+  const [gisFailed, setGisFailed] = useState(false);
 
   useEffect(() => {
     const oauthError = searchParams?.get("error");
@@ -570,11 +574,21 @@ function AuthPageContent() {
         type: "standard", theme: "filled_black", size: "large",
         text: "continue_with", shape: "pill", width: 320, locale,
       });
+      // GIS renders an <iframe> into the container on success. If it is still
+      // missing shortly after (e.g. origin_mismatch — mentora.su not in the
+      // client ID's Authorized JavaScript origins), fall back to classic OAuth.
+      window.setTimeout(() => {
+        if (!cancelled && !gisBtnRef.current?.querySelector("iframe")) {
+          console.warn("[auth] GIS button did not render — falling back to classic Google OAuth");
+          setGisFailed(true);
+        }
+      }, 2500);
     }
     if (window.google?.accounts?.id) { init(); return () => { cancelled = true; }; }
     let s = document.querySelector(`script[src="${SRC}"]`) as HTMLScriptElement | null;
     if (!s) { s = document.createElement("script"); s.src = SRC; s.async = true; s.defer = true; document.head.appendChild(s); }
     s.addEventListener("load", init, { once: true });
+    s.addEventListener("error", () => { if (!cancelled) setGisFailed(true); }, { once: true });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [googleClientId]);
@@ -959,7 +973,7 @@ function AuthPageContent() {
               {/* Google sign-in — GIS ID-token button when a client id is configured
                   (RU-proxy friendly, no supabase.co redirect); else classic redirect
                   button. Hidden in forgot mode. */}
-              {!isForgot && (googleClientId ? (
+              {!isForgot && (googleClientId && !gisFailed ? (
                 <div className="w-full flex flex-col items-center gap-2">
                   <div ref={gisBtnRef} className="flex justify-center min-h-[44px]" />
                   {oauthLoading === "google" && (

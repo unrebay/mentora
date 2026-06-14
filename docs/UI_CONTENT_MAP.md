@@ -441,3 +441,11 @@
 - [ ] `src/app/[locale]/dashboard/about/page.tsx` — секция «Что нового» (рендерит CHANGELOG между Roadmap и Tech)
 - [ ] `src/components/WhatsNewBanner.tsx` — баннер последнего релиза на дашборде (LATEST = CHANGELOG[0])
 - [ ] `messages/ru.json` / `messages/en.json` — ключи `about.changelogTag/changelogTitle/changelogSubtitle`
+
+## admin — Роадмап (панель «Пульс», без i18n — админка только RU)
+
+| Элемент | RU | EN | Где используется |
+|---|---|---|---|
+| Гейт-трекер заголовок | Гейт 1 — 200 платящих из диаспоры | — | RoadmapV2 (GATE_TITLE) |
+| Фаза | Фаза: РФ-сезон + Волна 1 (диаспора) | — | RoadmapV2 (PHASE_LABEL) |
+| Колонки пульса | В работе / Блокеры / Дедлайны | — | RoadmapV2 LaunchTracker |
