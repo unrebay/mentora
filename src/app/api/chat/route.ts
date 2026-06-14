@@ -741,15 +741,21 @@ ${PLATFORM_BLOCK}`;
     const __releaseSlot = await acquireAnthropicSlot();
     const __streamBody = new ReadableStream<Uint8Array>({
       async start(controller) {
+       let __clientGone = false;
+       const __safeEnqueue = (b: Uint8Array) => {
+         if (__clientGone) return;
+         try { controller.enqueue(b); } catch { __clientGone = true; }
+       };
+       const __safeClose = () => { try { controller.close(); } catch { /* already closed */ } };
        try {
         // Immediate flush: send a zero-width space before the (slow) Anthropic call.
         // Forces the first byte out so any buffering hop (nginx/proxy) starts flushing
         // and the client paints the assistant bubble instantly. Stripped client-side.
-        controller.enqueue(__enc.encode("\u200b"));
+        __safeEnqueue(__enc.encode("\u200b"));
         const __ms = anthropic.messages.stream(__msgParams, { timeout: 120_000, maxRetries: 1 });
         for await (const ev of __ms) {
           if (ev.type === "content_block_delta" && ev.delta.type === "text_delta") {
-            controller.enqueue(__enc.encode(ev.delta.text));
+            __safeEnqueue(__enc.encode(ev.delta.text));
           }
         }
         const response = await __ms.finalMessage();
@@ -978,26 +984,32 @@ Rules: mastered_topics=clear understanding shown; difficulty_areas=confusion/err
           ...(streakRewardEarned ? { streakRewardEarned: true } : {}),
           ...(suggestions.length ? { suggestions } : {}),
         };
-        controller.enqueue(__enc.encode(__META + JSON.stringify(__meta)));
-        controller.close();
+        __safeEnqueue(__enc.encode(__META + JSON.stringify(__meta)));
+        __safeClose();
        } catch (streamErr) {
         __releaseSlot(); // idempotent — safe even if already released
         const m = streamErr instanceof Error ? streamErr.message : String(streamErr);
-        console.error("Chat stream error:", m);
-        // Parity with the route-level catch (stream errors never reach it):
-        // notify admin + refund the counted free-tier message — the user got no answer.
-        notifyAdmin(`\u26a0\ufe0f <b>Chat stream error</b>\nmsg: ${m.slice(0, 400).replace(/</g, "&lt;")}\n<i>${mskNow()} \u041c\u0421\u041a</i>`);
-        if (freeMsgToRefund) {
-          try {
-            const { createClient: createSvcClient } = await import("@supabase/supabase-js");
-            const svc = createSvcClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-            await svc.rpc("refund_message_window", { p_user_id: freeMsgToRefund });
-          } catch (refundErr) {
-            console.error("refund_message_window failed:", refundErr);
+        // Client disconnect (closed tab / navigated away) cancels the stream, so the
+        // next enqueue/close throws "Controller is already closed". That is NOT a real
+        // failure — don't spam admin alerts or refund a message that was answered.
+        const __benign = __clientGone || /controller is already closed|invalid state/i.test(m);
+        if (!__benign) {
+          console.error("Chat stream error:", m);
+          // Parity with the route-level catch (stream errors never reach it):
+          // notify admin + refund the counted free-tier message — the user got no answer.
+          notifyAdmin(`\u26a0\ufe0f <b>Chat stream error</b>\nmsg: ${m.slice(0, 400).replace(/</g, "&lt;")}\n<i>${mskNow()} \u041c\u0421\u041a</i>`);
+          if (freeMsgToRefund) {
+            try {
+              const { createClient: createSvcClient } = await import("@supabase/supabase-js");
+              const svc = createSvcClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+              await svc.rpc("refund_message_window", { p_user_id: freeMsgToRefund });
+            } catch (refundErr) {
+              console.error("refund_message_window failed:", refundErr);
+            }
           }
         }
-        try { controller.enqueue(__enc.encode(__META + JSON.stringify({ error: "stream_failed" }))); } catch { /* client gone */ }
-        controller.close();
+        __safeEnqueue(__enc.encode(__META + JSON.stringify({ error: "stream_failed" })));
+        __safeClose();
        }
       },
     });
