@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const m = isEn ? META.en : META.ru;
   const url = isEn ? "https://mentora.su/en" : "https://mentora.su/ru";
   return {
-    title: m.title,
+    title: { absolute: m.title },
     description: m.description,
     keywords: isEn
       ? ["AI mentor", "AI tutor", "personal mentor", "AI education", "learn history with AI", "online math", "online physics", "online chemistry", "online biology", "lifelong learning", "mentora", "mentora.su"]

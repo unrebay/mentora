@@ -13,9 +13,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const isEn = locale === "en";
   const url = isEn ? "https://mentora.su/en/repetitor" : "https://mentora.su/ru/repetitor";
   return {
-    title: isEn
+    title: { absolute: isEn
       ? "AI tutor online — try free at Mentora"
-      : "Репетитор онлайн? Попробуй ИИ-ментора бесплатно — Mentora",
+      : "Репетитор онлайн? Попробуй ИИ-ментора бесплатно — Mentora" },
     description: isEn
       ? "Online tutor — but smarter and free. Mentora answers 24/7 across 17 sciences. No schedule, no card. Try it before paying $30/hour for a tutor."
       : "Репетитор онлайн — но умнее и бесплатно. Mentora отвечает 24/7 по 17 наукам без расписания и привязки карты. Попробуй до того как платить 2000 ₽/час.",

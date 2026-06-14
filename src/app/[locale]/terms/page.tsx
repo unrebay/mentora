@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const isEn = locale === "en";
   const url = isEn ? "https://mentora.su/en/terms" : "https://mentora.su/ru/terms";
   return {
-    title: isEn ? "Terms of service — Mentora" : "Условия использования — Mentora",
+    title: { absolute: isEn ? "Terms of service — Mentora" : "Условия использования — Mentora" },
     description: isEn
       ? "Mentora rules: subscriptions, payments, limits, refunds, cancel in 1 click. Plain language, no legalese."
       : "Правила Mentora: подписки, оплата, лимиты, возврат, отмена в 1 клик. Кратко и по-человечески, без юридического жаргона.",
